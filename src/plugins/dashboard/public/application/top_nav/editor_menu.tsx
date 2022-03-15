@@ -242,7 +242,6 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
         defaultMessage: 'Select type',
       })}
       iconType="arrowDown"
-      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >

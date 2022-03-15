@@ -48,12 +48,12 @@ import {
 import {
   AddFromLibraryButton,
   LazyLabsFlyout,
-  PrimaryActionButton,
   QuickButtonGroup,
   QuickButtonProps,
   SolutionToolbar,
   withSuspense,
 } from '../../../../presentation_util/public';
+import { SolutionToolbarButton as PrimaryActionButton } from '../../../../shared_ux/public';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -590,7 +590,6 @@ export function DashboardTopNav({
             {{
               primaryActionButton: (
                 <PrimaryActionButton
-                  isDarkModeEnabled={IS_DARK_THEME}
                   label={getCreateVisualizationButtonTitle()}
                   onClick={createNewVisType(lensAlias)}
                   iconType="lensApp"
