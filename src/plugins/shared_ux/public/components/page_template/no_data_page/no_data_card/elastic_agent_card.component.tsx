@@ -12,7 +12,7 @@ import { EuiTextColor } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { ElasticAgentCardProps } from './types';
 import { NoDataCard } from './no_data_card';
-import ElasticAgentLogo from './assets/elastic_agent_card.svg';
+import ElasticAgentCardIllustration from './assets/elastic_agent_card.svg';
 import { RedirectAppLinks } from '../../../redirect_app_links';
 
 export type ElasticAgentCardComponentProps = ElasticAgentCardProps & {
@@ -58,7 +58,7 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
 }) => {
   const noAccessCard = (
     <NoDataCard
-      image={ElasticAgentLogo}
+      image={ElasticAgentCardIllustration}
       title={<EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>}
       description={<EuiTextColor color="default">{noPermissionDescription}</EuiTextColor>}
       isDisabled
@@ -67,7 +67,7 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
   );
   const card = (
     <NoDataCard
-      image={ElasticAgentLogo}
+      image={ElasticAgentCardIllustration}
       title={title || elasticAgentCardTitle}
       description={elasticAgentCardDescription}
       {...cardRest}
