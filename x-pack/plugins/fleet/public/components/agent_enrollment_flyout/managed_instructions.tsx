@@ -163,6 +163,8 @@ export const ManagedInstructions = React.memo<InstructionProps>(
       settings?.fleet_server_hosts,
       viewDataStep,
       enrolToken,
+      isK8s,
+      policyId,
     ]);
 
     if (fleetStatus.isReady && settings?.fleet_server_hosts.length === 0) {

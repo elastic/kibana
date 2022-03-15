@@ -72,7 +72,7 @@ export const DownloadStep = (hasFleetServer: boolean, isK8s: string, enrollmentA
       }
     }
     fetchK8sManifest();
-  }, [isK8s, enrollmentAPIKey]);
+  }, [isK8s, enrollmentAPIKey, settings.data?.item.fleet_server_hosts]);
 
   const altTitle =
     isK8s === 'IS_KUBERNETES'

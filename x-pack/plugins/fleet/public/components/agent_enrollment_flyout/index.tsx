@@ -28,7 +28,7 @@ import {
   useFleetStatus,
   useAgentEnrollmentFlyoutData,
 } from '../../hooks';
-import { FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
+import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
 
 import { Loading } from '..';
