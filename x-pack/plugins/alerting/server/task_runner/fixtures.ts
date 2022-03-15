@@ -22,6 +22,7 @@ export const RULE_TYPE_ID = 'test';
 export const DATE_1969 = '1969-12-31T00:00:00.000Z';
 export const DATE_1970 = '1970-01-01T00:00:00.000Z';
 export const DATE_1970_5_MIN = '1969-12-31T23:55:00.000Z';
+export const DATE_9999 = '9999-12-31T12:34:56.789Z';
 export const MOCK_DURATION = 86400000000000;
 
 export const SAVED_OBJECT = {

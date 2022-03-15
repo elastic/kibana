@@ -245,6 +245,18 @@ export class TaskRunner<
     }
   }
 
+  private isRuleSnoozed(rule: SanitizedAlert<Params>): boolean {
+    if (rule.muteAll) {
+      return true;
+    }
+
+    if (rule.snoozeEndTime == null) {
+      return false;
+    }
+
+    return Date.now() < rule.snoozeEndTime.getTime();
+  }
+
   private shouldLogAndScheduleActionsForAlerts() {
     // if execution hasn't been cancelled, return true
     if (!this.cancelled) {
@@ -305,7 +317,6 @@ export class TaskRunner<
       schedule,
       throttle,
       notifyWhen,
-      muteAll,
       mutedInstanceIds,
       name,
       tags,
@@ -476,7 +487,7 @@ export class TaskRunner<
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
-    if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
+    if (!this.isRuleSnoozed(rule) && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
       const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
@@ -527,8 +538,8 @@ export class TaskRunner<
         alertExecutionStore,
       });
     } else {
-      if (muteAll) {
-        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is muted.`);
+      if (this.isRuleSnoozed(rule)) {
+        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
       }
       if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
