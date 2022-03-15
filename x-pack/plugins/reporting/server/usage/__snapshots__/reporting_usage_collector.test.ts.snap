@@ -37,6 +37,92 @@ Object {
           "type": "long",
         },
       },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_pages": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
       "sizes": Object {
         "1.0": Object {
           "type": "long",
@@ -94,6 +180,92 @@ Object {
         },
         "print": Object {
           "type": "long",
+        },
+      },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_pages": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
         },
       },
       "sizes": Object {
@@ -161,6 +333,92 @@ Object {
           "type": "long",
         },
       },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_pages": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
       "sizes": Object {
         "1.0": Object {
           "type": "long",
@@ -218,6 +476,92 @@ Object {
         },
         "print": Object {
           "type": "long",
+        },
+      },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_pages": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
         },
       },
       "sizes": Object {
@@ -283,6 +627,92 @@ Object {
             "type": "long",
           },
         },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_pages": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
         "sizes": Object {
           "1.0": Object {
             "type": "long",
@@ -340,6 +770,92 @@ Object {
           },
           "print": Object {
             "type": "long",
+          },
+        },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_pages": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
           },
         },
         "sizes": Object {
@@ -404,6 +920,92 @@ Object {
             "type": "long",
           },
         },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_pages": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
         "sizes": Object {
           "1.0": Object {
             "type": "long",
@@ -461,6 +1063,92 @@ Object {
           },
           "print": Object {
             "type": "long",
+          },
+        },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_pages": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
           },
         },
         "sizes": Object {
@@ -545,6 +1233,92 @@ Object {
             "type": "long",
           },
         },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_pages": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
         "sizes": Object {
           "1.0": Object {
             "type": "long",
@@ -602,6 +1376,92 @@ Object {
           },
           "print": Object {
             "type": "long",
+          },
+        },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_pages": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
           },
         },
         "sizes": Object {
@@ -1136,6 +1996,92 @@ Object {
           "type": "long",
         },
       },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_pages": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
       "sizes": Object {
         "1.0": Object {
           "type": "long",
@@ -1193,6 +2139,92 @@ Object {
         },
         "print": Object {
           "type": "long",
+        },
+      },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_pages": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
         },
       },
       "sizes": Object {
@@ -1726,6 +2758,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": undefined,
     "sizes": undefined,
     "total": 4,
   },
@@ -1794,6 +2827,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": undefined,
       "sizes": undefined,
       "total": 4,
     },
@@ -2120,6 +3154,288 @@ Object {
 }
 `;
 
+exports[`data modeling with metrics in the data 1`] = `
+Object {
+  "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "_all": 3,
+  "available": true,
+  "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "_all": 0,
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+    },
+    "statuses": undefined,
+  },
+  "output_size": Object {
+    "1.0": 1156282,
+    "25.0": 1156282,
+    "5.0": 1156282,
+    "50.0": 1158078.5,
+    "75.0": 1159875,
+    "95.0": 1159875,
+    "99.0": 1159875,
+  },
+  "printable_pdf": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "metrics": Object {
+      "csv_rows": Object {
+        "values": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "pdf_cpu": Object {
+        "values": Object {
+          "50.0": 0,
+          "75.0": 0,
+          "95.0": 0,
+          "99.0": 0,
+        },
+      },
+      "pdf_memory": Object {
+        "values": Object {
+          "50.0": 164.175,
+          "75.0": 165.3,
+          "95.0": 165.3,
+          "99.0": 165.3,
+        },
+      },
+      "pdf_pages": Object {
+        "values": Object {
+          "50.0": 1,
+          "75.0": 1,
+          "95.0": 1,
+          "99.0": 1,
+        },
+      },
+      "png_cpu": Object {
+        "values": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "png_memory": Object {
+        "values": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+    },
+    "sizes": Object {
+      "1.0": 1156282,
+      "25.0": 1156282,
+      "5.0": 1156282,
+      "50.0": 1158078.5,
+      "75.0": 1159875,
+      "95.0": 1159875,
+      "99.0": 1159875,
+    },
+    "total": 3,
+  },
+  "status": Object {
+    "completed": 2,
+    "failed": 1,
+  },
+  "statuses": Object {},
+}
+`;
+
 exports[`data modeling with sparse data 1`] = `
 Object {
   "PNG": Object {
@@ -2136,6 +3452,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": undefined,
     "sizes": undefined,
     "total": 1,
   },
@@ -2171,6 +3488,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": undefined,
     "sizes": undefined,
     "total": 1,
   },
@@ -2206,6 +3524,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": undefined,
       "sizes": undefined,
       "total": 1,
     },
@@ -2240,6 +3559,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": undefined,
       "sizes": undefined,
       "total": 1,
     },
@@ -2274,6 +3594,7 @@ Object {
         "preserve_layout": 2,
         "print": 0,
       },
+      "metrics": undefined,
       "sizes": undefined,
       "total": 2,
     },
@@ -2325,6 +3646,7 @@ Object {
       "preserve_layout": 2,
       "print": 0,
     },
+    "metrics": undefined,
     "sizes": undefined,
     "total": 2,
   },
@@ -2379,6 +3701,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": undefined,
     "sizes": undefined,
     "total": 1,
   },
@@ -2414,6 +3737,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": undefined,
     "sizes": undefined,
     "total": 1,
   },
@@ -2554,6 +3878,7 @@ Object {
       "preserve_layout": 5,
       "print": 1,
     },
+    "metrics": undefined,
     "sizes": undefined,
     "total": 6,
   },

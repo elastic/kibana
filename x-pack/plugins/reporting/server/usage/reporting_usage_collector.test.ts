@@ -620,6 +620,102 @@ describe('data modeling', () => {
     const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
+
+  test('with metrics in the data', async () => {
+    const collector = getReportingUsageCollector(
+      usageCollectionSetup,
+      getLicenseMock(),
+      exportTypesRegistry,
+      function isReady() {
+        return Promise.resolve(true);
+      }
+    );
+
+    const collectorFetchContext = getMockFetchClients(
+      getResponseMock({
+        aggregations: {
+          ranges: {
+            buckets: {
+              all: {
+                doc_count: 3,
+                layoutTypes: { doc_count: 0 },
+                sizes: {
+                  values: {
+                    '1.0': 1156282.0,
+                    '5.0': 1156282.0,
+                    '25.0': 1156282.0,
+                    '50.0': 1158078.5,
+                    '75.0': 1159875.0,
+                    '95.0': 1159875.0,
+                    '99.0': 1159875.0,
+                  },
+                },
+                objectTypes: { doc_count: 0 },
+                statusTypes: {
+                  buckets: [
+                    { key: 'completed', doc_count: 2 },
+                    { key: 'failed', doc_count: 1 },
+                  ],
+                },
+                jobTypes: {
+                  buckets: [
+                    {
+                      key: 'printable_pdf_v2',
+                      doc_count: 3,
+                      statusByApp: {
+                        buckets: [
+                          {
+                            key: 'completed',
+                            doc_count: 2,
+                            appNames: { buckets: [{ key: 'dashboard', doc_count: 2 }] },
+                          },
+                          {
+                            key: 'failed',
+                            doc_count: 1,
+                            appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] },
+                          },
+                        ],
+                      },
+                      isDeprecated: { doc_count: 0 },
+                      sizes: {
+                        values: {
+                          '1.0': 1156282.0,
+                          '5.0': 1156282.0,
+                          '25.0': 1156282.0,
+                          '50.0': 1158078.5,
+                          '75.0': 1159875.0,
+                          '95.0': 1159875.0,
+                          '99.0': 1159875.0,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          metrics: {
+            buckets: [
+              {
+                key: 'printable_pdf_v2',
+                doc_count: 3,
+                pdf_pages: { values: { '50.0': 1.0, '75.0': 1.0, '95.0': 1.0, '99.0': 1.0 } },
+                png_memory: { values: { '50.0': null, '75.0': null, '95.0': null, '99.0': null } },
+                pdf_cpu: { values: { '50.0': 0.0, '75.0': 0.0, '95.0': 0.0, '99.0': 0.0 } },
+                png_cpu: { values: { '50.0': null, '75.0': null, '95.0': null, '99.0': null } },
+                pdf_memory: {
+                  values: { '50.0': 164.175, '75.0': 165.3, '95.0': 165.3, '99.0': 165.3 },
+                },
+                csv_rows: { values: { '50.0': null, '75.0': null, '95.0': null, '99.0': null } },
+              },
+            ],
+          },
+        },
+      })
+    );
+    const usageStats = await collector.fetch(collectorFetchContext);
+    expect(usageStats).toMatchSnapshot();
+  });
 });
 
 describe('Ready for collection observable', () => {

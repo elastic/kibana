@@ -82,6 +82,7 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
+  metrics?: MetricsStats;
   sizes?: SizePercentiles;
   app?: {
     search?: number;
@@ -124,6 +125,25 @@ export type RangeStats = JobTypes & {
   status: StatusCounts;
   statuses?: StatusByAppCounts;
   output_size?: SizePercentiles;
+};
+
+export type BaseMetricsKeys =
+  | 'csv_rows'
+  | 'pdf_cpu'
+  | 'pdf_memory'
+  | 'pdf_pages'
+  | 'png_cpu'
+  | 'png_memory';
+
+export interface MetricsPercentiles {
+  '50.0': number | null;
+  '75.0': number | null;
+  '95.0': number | null;
+  '99.0': number | null;
+}
+
+export type MetricsStats = {
+  [K in BaseMetricsKeys]: MetricsPercentiles;
 };
 
 export type ReportingUsageType = RangeStats & {

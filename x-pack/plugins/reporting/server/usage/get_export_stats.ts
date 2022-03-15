@@ -34,6 +34,7 @@ function getAvailableTotalForFeature(
     total: jobType.total,
     deprecated,
     sizes: jobType.sizes,
+    metrics: jobType.metrics,
     app: { ...defaultTotalsForFeature.app, ...jobType.app },
     layout: { ...defaultTotalsForFeature.layout, ...jobType.layout },
   };

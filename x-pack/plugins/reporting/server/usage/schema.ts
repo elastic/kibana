@@ -12,6 +12,7 @@ import {
   ByAppCounts,
   JobTypes,
   LayoutCounts,
+  MetricsStats,
   RangeStats,
   ReportingUsageType,
   SizePercentiles,
@@ -49,11 +50,51 @@ const sizesSchema: MakeSchemaFrom<SizePercentiles> = {
   '99.0': { type: 'long' },
 };
 
+const metricsSchema: MakeSchemaFrom<MetricsStats> = {
+  csv_rows: {
+    '50.0': { type: 'long' },
+    '75.0': { type: 'long' },
+    '95.0': { type: 'long' },
+    '99.0': { type: 'long' },
+  },
+  pdf_pages: {
+    '50.0': { type: 'long' },
+    '75.0': { type: 'long' },
+    '95.0': { type: 'long' },
+    '99.0': { type: 'long' },
+  },
+  pdf_cpu: {
+    '50.0': { type: 'long' },
+    '75.0': { type: 'long' },
+    '95.0': { type: 'long' },
+    '99.0': { type: 'long' },
+  },
+  pdf_memory: {
+    '50.0': { type: 'long' },
+    '75.0': { type: 'long' },
+    '95.0': { type: 'long' },
+    '99.0': { type: 'long' },
+  },
+  png_cpu: {
+    '50.0': { type: 'long' },
+    '75.0': { type: 'long' },
+    '95.0': { type: 'long' },
+    '99.0': { type: 'long' },
+  },
+  png_memory: {
+    '50.0': { type: 'long' },
+    '75.0': { type: 'long' },
+    '95.0': { type: 'long' },
+    '99.0': { type: 'long' },
+  },
+};
+
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
   sizes: sizesSchema,
+  metrics: metricsSchema,
   app: appCountsSchema,
   layout: layoutCountsSchema,
 };
