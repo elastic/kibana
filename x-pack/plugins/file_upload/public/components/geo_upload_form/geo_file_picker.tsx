@@ -9,7 +9,6 @@ import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '../../../common/constants';
-import { getMaxBytesFormatted } from '../../importer/get_max_bytes';
 import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
 import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';
 
@@ -29,7 +28,6 @@ interface State {
   isLoadingPreview: boolean;
   importer: GeoFileImporter | null;
   previewSummary: string | null;
-  isNoLimit: boolean;
 }
 
 export class GeoFilePicker extends Component<Props, State> {
@@ -41,7 +39,6 @@ export class GeoFilePicker extends Component<Props, State> {
     isLoadingPreview: false,
     importer: null,
     previewSummary: null,
-    isNoLimit: true,
   };
 
   async componentDidMount() {
@@ -66,7 +63,7 @@ export class GeoFilePicker extends Component<Props, State> {
     if (files && files.length) {
       const file = files[0];
       try {
-        const importer = geoImporterFactory(file, this.state.isNoLimit);
+        const importer = geoImporterFactory(file);
         this.setState(
           {
             defaultIndexName: file.name.split('.')[0].toLowerCase(),
@@ -137,13 +134,6 @@ export class GeoFilePicker extends Component<Props, State> {
           defaultMessage: 'Formats accepted: {fileTypes}',
           values: { fileTypes: GEO_FILE_TYPES.join(', ') },
         })}
-        <br />
-
-        {!this.state.isNoLimit &&
-          i18n.translate('xpack.fileUpload.geoFilePicker.maxSize', {
-            defaultMessage: 'Max size: {maxFileSize}',
-            values: { maxFileSize: getMaxBytesFormatted() },
-          })}
       </span>
     );
   }
