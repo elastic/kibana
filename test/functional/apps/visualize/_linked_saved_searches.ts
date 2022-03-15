@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'timePicker',
     'visChart',
+    'unifiedSearch',
   ]);
 
   describe('saved search visualizations from visualize app', function describeIndexTests() {
@@ -36,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.addFilter('extension.raw', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch(savedSearchName);
+        await PageObjects.unifiedSearch.closeTour();
         discoverSavedSearchUrlPath = (await browser.getCurrentUrl()).split('?')[0];
       });
 

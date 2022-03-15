@@ -14,7 +14,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
-  const PageObjects = getPageObjects(['dashboard', 'common', 'header', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'common',
+    'header',
+    'timePicker',
+    'discover',
+    'unifiedSearch',
+  ]);
   const log = getService('log');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -72,6 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_DISCOVER_URL);
 
       await PageObjects.discover.waitForDiscoverAppOnScreen();
+      await PageObjects.unifiedSearch.closeTour();
       // check that new time range duration was applied
       const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);

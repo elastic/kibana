@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'unifiedSearch']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.unifiedSearch.closeTour();
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.lens.goToTimeRange();
 
