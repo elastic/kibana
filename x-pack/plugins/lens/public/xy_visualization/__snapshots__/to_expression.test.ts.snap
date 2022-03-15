@@ -33,6 +33,12 @@ Object {
         "description": Array [
           "",
         ],
+        "emphasizeFitting": Array [
+          false,
+        ],
+        "endValue": Array [
+          "None",
+        ],
         "fillOpacity": Array [
           0.3,
         ],
