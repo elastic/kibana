@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
    * Specific api integration tests for threat matching rule type
    */
   // Failing: See https://github.com/elastic/kibana/issues/127770
-  describe.skip('create_threat_matching', () => {
+  describe('create_threat_matching', () => {
     describe('creating threat match rule', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -742,11 +742,6 @@ export default ({ getService }: FtrProviderContext) => {
                 type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            // We do not merge matched indicators during enrichment, so in
-            // certain circumstances a given indicator document could appear
-            // multiple times in an enriched alert (albeit with different
-            // threat.indicator.matched data). That's the case with the
-            // first and third indicators matched, here.
             {
               feed: {},
               indicator: {
@@ -757,29 +752,11 @@ export default ({ getService }: FtrProviderContext) => {
                 provider: 'geenensp',
                 type: 'url',
               },
-
               matched: {
                 atomic: 57324,
+                field: 'source.port',
                 id: '978785',
                 index: 'filebeat-8.0.0-2021.01.26-000001',
-                field: 'source.port',
-                type: ENRICHMENT_TYPES.IndicatorMatchRule,
-              },
-            },
-            {
-              feed: {},
-              indicator: {
-                description: 'this should match auditbeat/hosts on ip',
-                first_seen: '2021-01-26T11:06:03.000Z',
-                ip: '45.115.45.3',
-                provider: 'other_provider',
-                type: 'ip',
-              },
-              matched: {
-                atomic: '45.115.45.3',
-                id: '978787',
-                index: 'filebeat-8.0.0-2021.01.26-000001',
-                field: 'source.ip',
                 type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
