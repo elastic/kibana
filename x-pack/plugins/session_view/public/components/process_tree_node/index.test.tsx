@@ -133,12 +133,45 @@ describe('ProcessTreeNode component', () => {
       windowGetSelectionSpy.mockRestore();
     });
     describe('Alerts', () => {
-      it('renders Alert button when process has alerts', async () => {
+      it('renders Alert button when process has one alert', async () => {
+        const processMockWithOneAlert = {
+          ...sessionViewAlertProcessMock,
+          events: sessionViewAlertProcessMock.events.slice(
+            0,
+            sessionViewAlertProcessMock.events.length - 1
+          ),
+          getAlerts: () => [sessionViewAlertProcessMock.getAlerts()[0]],
+        };
+        renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithOneAlert} />);
+
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe('Alert');
+      });
+      it('renders Alerts button when process has more than one alerts', async () => {
         renderResult = mockedContext.render(
           <ProcessTreeNode process={sessionViewAlertProcessMock} />
         );
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
+          `Alerts(${sessionViewAlertProcessMock.getAlerts().length})`
+        );
+      });
+      it('renders Alerts button with 99+ when process has more than 99 alerts', async () => {
+        const processMockWithOneAlert = {
+          ...sessionViewAlertProcessMock,
+          getAlerts: () =>
+            Array.from(
+              new Array(100),
+              (item) => (item = sessionViewAlertProcessMock.getAlerts()[0])
+            ),
+        };
+        renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithOneAlert} />);
+
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
+          'Alerts(99+)'
+        );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
         renderResult = mockedContext.render(
