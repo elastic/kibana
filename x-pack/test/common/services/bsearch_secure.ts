@@ -14,6 +14,7 @@ import type SuperTest from 'supertest';
 import { IEsSearchResponse } from 'src/plugins/data/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { RetryService } from '../../../../test/common/services/retry/retry';
+import { version } from '../../../package.json';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
   return resp.text
@@ -29,6 +30,7 @@ const getSpaceUrlPrefix = (spaceId?: string): string => {
 interface SendOptions {
   supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>;
   auth: { username: string; password: string };
+  referer?: string;
   options: object;
   strategy: string;
   space?: string;
@@ -38,6 +40,7 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
   send: async <T extends IEsSearchResponse>({
     supertestWithoutAuth,
     auth,
+    referer,
     options,
     strategy,
     space,
@@ -47,6 +50,8 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
       const result = await supertestWithoutAuth
         .post(`${spaceUrl}/internal/search/${strategy}`)
         .auth(auth.username, auth.password)
+        .set('referer', referer ?? '')
+        .set('kbn-version', version)
         .set('kbn-xsrf', 'true')
         .send(options);
       if (result.status === 500 || result.status === 200) {
