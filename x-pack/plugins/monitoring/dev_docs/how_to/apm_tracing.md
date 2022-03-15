@@ -11,7 +11,7 @@ export ELASTIC_APM_ACTIVE=true
 export ELASTIC_APM_ENVIRONMENT="dev-${USER}"
 ```
 
-And data will be available on the shared APM cluster at (internal) - to be added to https://github.com/elastic/observability-dev/tree/main/docs
+All data will be available on the shared APM cluster. See (internal) https://docs.elastic.dev/kibana-team/data-and-dashboards#kibana-cloud-apm for access information.
 
 ## For ESS
 
@@ -23,7 +23,7 @@ Add the settings into the `user_settings_override_yaml` deployment configuration
 }
 ```
 
-This is an administrative-only API initially, so you'll need admin access or open a support case to have it configured.
+This is an administrative-only API currently, so you'll need admin access or open a support case to have it configured.
 
 ## For ECE or other deployments
 
