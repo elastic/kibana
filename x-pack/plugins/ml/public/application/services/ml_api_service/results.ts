@@ -21,12 +21,13 @@ import type {
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
 import type { MLAnomalyDoc } from '../../../../common/types/anomalies';
+import type { EntityField } from '../../../../common/util/anomaly_utils';
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],
     criteriaFields: string[],
-    influencers: string[],
+    influencers: EntityField[],
     aggregationInterval: string,
     threshold: number,
     earliestMs: number,
