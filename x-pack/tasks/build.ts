@@ -83,7 +83,7 @@ async function copySourceAndBabelify() {
           'plugins/screenshotting/chromium/**',
           'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
           'plugins/apm/ftr_e2e/**',
-          'x-pack/plugins/lists/server/scripts/**',
+          'plugins/lists/server/scripts/**',
         ],
         allowEmpty: true,
       }
