@@ -11,7 +11,6 @@ import {
   AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
@@ -119,11 +118,10 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setupKibanaPage = async (
-  httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
 ): Promise<KibanaTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(KibanaDeprecations, httpSetup, overrides),
+    WithAppDependencies(KibanaDeprecations, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();
