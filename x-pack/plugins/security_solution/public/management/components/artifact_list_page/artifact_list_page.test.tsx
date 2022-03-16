@@ -18,7 +18,7 @@ import {
 
 jest.mock('../../../common/components/user_privileges');
 
-describe('When using the ArtifactListPage component', () => {
+describe.skip('When using the ArtifactListPage component', () => {
   let render: (
     props?: Partial<ArtifactListPageProps>
   ) => ReturnType<AppContextTestRender['render']>;
