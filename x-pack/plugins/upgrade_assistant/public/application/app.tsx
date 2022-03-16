@@ -14,7 +14,12 @@ import { ScopedHistory } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { API_BASE_PATH } from '../../common/constants';
 import { ClusterUpgradeState } from '../../common/types';
-import { APP_WRAPPER_CLASS, GlobalFlyout, AuthorizationProvider } from '../shared_imports';
+import {
+  APP_WRAPPER_CLASS,
+  GlobalFlyout,
+  AuthorizationProvider,
+  NotAuthorizedSection,
+} from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
 import {
@@ -30,8 +35,10 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   const {
     isReadOnlyMode,
-    services: { api },
+    services: { api, core },
   } = useAppContext();
+
+  const missingManageSpacesPrivilege = core.application.capabilities.spaces.manage !== true;
 
   const [clusterUpgradeState, setClusterUpradeState] =
     useState<ClusterUpgradeState>('isPreparingForUpgrade');
@@ -41,6 +48,27 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
       setClusterUpradeState(newClusterUpgradeState);
     });
   }, [api]);
+
+  if (missingManageSpacesPrivilege) {
+    return (
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <NotAuthorizedSection
+          title={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.app.deniedPrivilegeTitle"
+              defaultMessage="You're missing Kibana privileges"
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.app.deniedPrivilegeDescription"
+              defaultMessage="To use Upgrade Assistant, you must have Kibana admin privileges."
+            />
+          }
+        />
+      </EuiPageContent>
+    );
+  }
 
   // Read-only mode will be enabled up until the last minor before the next major release
   if (isReadOnlyMode) {
