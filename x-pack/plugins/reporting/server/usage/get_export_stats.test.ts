@@ -112,11 +112,7 @@ test('Model of jobTypes', () => {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
+      "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
         "png_memory": Object {},
@@ -143,11 +139,7 @@ test('Model of jobTypes', () => {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
+      "layout": undefined,
       "metrics": Object {
         "csv_rows": Object {},
       },
@@ -222,11 +214,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       },
       "available": true,
       "deprecated": 5,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
+      "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
         "png_memory": Object {},
@@ -284,11 +272,7 @@ test('Incorporate metric stats', () => {
       },
       "available": false,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
+      "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {
           "50.0": 0.01,

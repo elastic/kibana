@@ -10,41 +10,75 @@ import { ExportTypesHandler } from './get_export_type_handler';
 import {
   AvailableTotal,
   FeatureAvailabilityMap,
+  JobTypes,
+  MetricsPercentiles,
   MetricsStats,
   RangeStats,
   ScreenshotJobType,
 } from './types';
 
-const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(jobType);
-const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & ScreenshotJobType = {
-  total: 0,
-  deprecated: 0,
-  app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
-  layout: { canvas: 0, print: 0, preserve_layout: 0 },
+const jobTypeIsDeprecated = (jobType: keyof JobTypes) => DEPRECATED_JOB_TYPES.includes(jobType);
+const jobTypeIsPdf = (jobType: keyof JobTypes) => {
+  return jobType === 'printable_pdf' || jobType === 'printable_pdf_v2';
 };
 
-type CombinedJobTypeStats = AvailableTotal & ScreenshotJobType & { metrics: MetricsStats };
+const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> &
+  ScreenshotJobType & { metrics: unknown } = {
+  total: 0,
+  deprecated: 0,
+  metrics: {},
+  app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
+};
+
+const metricsPercentiles = ['50.0', '75.0', '95.0', '99.0'].reduce(
+  (mps, p) => ({ ...mps, [p]: null }),
+  {} as MetricsPercentiles
+);
+
+const metricsSets = {
+  csv: { csv_rows: metricsPercentiles },
+  png: { png_cpu: metricsPercentiles, png_memory: metricsPercentiles },
+  pdf: {
+    pdf_cpu: metricsPercentiles,
+    pdf_memory: metricsPercentiles,
+    pdf_pages: metricsPercentiles,
+  },
+};
+
+const metricsForFeature: { [K in keyof JobTypes]: JobTypes[K]['metrics'] } = {
+  csv_searchsource: metricsSets.csv,
+  csv_searchsource_immediate: metricsSets.csv,
+  PNG: metricsSets.png,
+  PNGV2: metricsSets.png,
+  printable_pdf: metricsSets.pdf,
+  printable_pdf_v2: metricsSets.pdf,
+};
+
+type CombinedJobTypeStats = AvailableTotal & ScreenshotJobType & { metrics: Partial<MetricsStats> };
 
 const isAvailable = (featureAvailability: FeatureAvailabilityMap, feature: string) =>
   !!featureAvailability[feature];
 
 function getAvailableTotalForFeature(
-  jobType: CombinedJobTypeStats,
-  typeKey: string,
+  jobType: CombinedJobTypeStats | undefined,
+  exportType: keyof JobTypes,
   featureAvailability: FeatureAvailabilityMap
 ): AvailableTotal {
   // if the type itself is deprecated, all jobs are deprecated, otherwise only some of them might be
-  const deprecated = jobTypeIsDeprecated(typeKey) ? jobType.total : jobType.deprecated || 0;
+  const deprecated = jobTypeIsDeprecated(exportType) ? jobType?.total : jobType?.deprecated || 0;
+  const needsLayout = jobTypeIsPdf(exportType);
 
   // merge the additional stats for the jobType
   const availableTotal: CombinedJobTypeStats = {
-    available: isAvailable(featureAvailability, typeKey),
-    total: jobType.total,
+    available: isAvailable(featureAvailability, exportType),
+    total: jobType?.total || 0,
     deprecated,
-    sizes: jobType.sizes,
-    metrics: jobType.metrics,
-    app: { ...defaultTotalsForFeature.app, ...jobType.app },
-    layout: { ...defaultTotalsForFeature.layout, ...jobType.layout },
+    sizes: jobType?.sizes,
+    metrics: { ...metricsForFeature[exportType]!, ...jobType?.metrics },
+    app: { ...defaultTotalsForFeature.app, ...jobType?.app },
+    layout: needsLayout
+      ? { canvas: 0, print: 0, preserve_layout: 0, ...jobType?.layout }
+      : undefined,
   };
 
   return availableTotal;
@@ -75,16 +109,6 @@ export const getExportStats = (
     const availableTotal = rangeStats[exportType as keyof typeof rangeStats] as
       | CombinedJobTypeStats
       | undefined;
-
-    if (!availableTotal) {
-      return {
-        ...accum,
-        [exportType]: {
-          available: isAvailable(featureAvailability, exportType),
-          ...defaultTotalsForFeature,
-        },
-      };
-    }
 
     return {
       ...accum,
