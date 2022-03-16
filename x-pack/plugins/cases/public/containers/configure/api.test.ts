@@ -19,7 +19,8 @@ import {
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 
 const abortCtrl = new AbortController();

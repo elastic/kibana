@@ -7,7 +7,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
-import type { ReportingConfig } from '../';
 import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import type { GetLicense } from './';
@@ -140,7 +139,6 @@ async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSe
 }
 
 export async function getReportingUsage(
-  config: ReportingConfig,
   getLicense: GetLicense,
   esClient: ElasticsearchClient,
   exportTypesRegistry: ExportTypesRegistry
@@ -204,12 +202,8 @@ export async function getReportingUsage(
   const featureAvailability = await getLicense();
   return esClient
     .search(params)
-    .then(({ body: response }) => handleResponse(response))
+    .then((response) => handleResponse(response))
     .then((usage: Partial<RangeStatSets>): ReportingUsageType => {
-      // Allow this to explicitly throw an exception if/when this config is deprecated,
-      // because we shouldn't collect browserType in that case!
-      const browserType = config.get('capture', 'browser', 'type');
-
       const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
       const availability = exportTypesHandler.getAvailability(
         featureAvailability
@@ -219,7 +213,6 @@ export async function getReportingUsage(
 
       return {
         available: true,
-        browser_type: browserType,
         enabled: true,
         last7Days: getExportStats(last7Days, availability, exportTypesHandler),
         ...getExportStats(all, availability, exportTypesHandler),

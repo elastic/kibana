@@ -32,6 +32,7 @@ import {
   DefaultTableRow,
   IndexSettingsTableRow,
   ReindexTableRow,
+  ClusterSettingsTableRow,
 } from './deprecation_types';
 import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
@@ -118,6 +119,9 @@ const renderTableRowCells = (
 
     case 'indexSetting':
       return <IndexSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+
+    case 'clusterSetting':
+      return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'reindex':
       return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
@@ -298,7 +302,11 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
         {filteredDeprecations.length === 0 ? (
           <EuiTableBody>
             <EuiTableRow data-test-subj="noDeprecationsRow">
-              <EuiTableRowCell align="center" colSpan={cellTypes.length} isMobileFullWidth={true}>
+              <EuiTableRowCell
+                align="center"
+                colSpan={cellTypes.length}
+                mobileOptions={{ width: '100%' }}
+              >
                 {i18nTexts.noDeprecationsMessage}
               </EuiTableRowCell>
             </EuiTableRow>

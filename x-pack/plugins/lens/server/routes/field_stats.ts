@@ -80,16 +80,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           },
         };
 
-        const runtimeMappings = indexPattern.fields
-          .filter((f) => f.runtimeField)
-          .reduce((acc, f) => {
-            if (!f.runtimeField) return acc;
-            acc[f.name] = f.runtimeField;
-            return acc;
-          }, {} as Record<string, estypes.MappingRuntimeField>);
+        const runtimeMappings = indexPattern.getRuntimeMappings();
 
         const search = async (aggs: Record<string, estypes.AggregationsAggregationContainer>) => {
-          const { body: result } = await requestClient.search({
+          const result = await requestClient.search({
             index: indexPattern.title,
             track_total_hits: true,
             body: {

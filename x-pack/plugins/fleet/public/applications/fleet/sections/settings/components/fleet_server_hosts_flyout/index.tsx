@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -19,14 +20,14 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 
-import { HostsInput } from '../hosts_input';
+import { MultiRowInput } from '../multi_row_input';
 import { useStartServices } from '../../../../hooks';
+import { FLYOUT_MAX_WIDTH } from '../../constants';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
-
-const FLYOUT_MAX_WIDTH = 800;
 
 export interface FleetServerHostsFlyoutProps {
   onClose: () => void;
@@ -74,7 +75,17 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             }}
           />
         </EuiText>
-        <HostsInput {...form.fleetServerHostsInput.props} id="fleet-server-inputs" />
+        <EuiSpacer size="m" />
+        <MultiRowInput
+          {...form.fleetServerHostsInput.props}
+          id="fleet-server-inputs"
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.fleetServerHostsFlyout.fleetServerHostsInputPlaceholder',
+            {
+              defaultMessage: 'Specify host URL',
+            }
+          )}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -90,8 +101,9 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             <EuiButton
               fill
               isLoading={form.isLoading}
-              isDisabled={form.isLoading}
+              isDisabled={form.isDisabled}
               onClick={form.submit}
+              data-test-subj="saveApplySettingsBtn"
             >
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.saveButton"

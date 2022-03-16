@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PainlessContext } from '@kbn/monaco';
 
@@ -69,6 +69,7 @@ export const ContextTab: FunctionComponent = () => {
           itemLayoutAlign="top"
           hasDividers
           fullWidth
+          data-test-subj="painlessContextDropDown"
         />
       </EuiFormRow>
 

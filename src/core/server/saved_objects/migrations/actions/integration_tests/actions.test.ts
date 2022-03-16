@@ -14,7 +14,6 @@ import {
   cloneIndex,
   closePit,
   createIndex,
-  fetchIndices,
   openPit,
   OpenPitResponse,
   reindex,
@@ -35,6 +34,7 @@ import {
   removeWriteBlock,
   transformDocs,
   waitForIndexStatusYellow,
+  initAction,
 } from '../../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -48,7 +48,10 @@ const { startES } = kbnTestServer.createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(__dirname, './archives', '7.7.2_xpack_100k_obj.zip'),
+      dataArchive: Path.resolve(
+        __dirname,
+        '../../integration_tests/archives/7.7.2_xpack_100k_obj.zip'
+      ),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
@@ -60,7 +63,7 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getKibanaEsClient();
+    client = esServer.es.getClient();
 
     // Create test fixture data:
     await createIndex({
@@ -108,10 +111,20 @@ describe('migration actions', () => {
     await esServer.stop();
   });
 
-  describe('fetchIndices', () => {
+  describe('initAction', () => {
+    afterAll(async () => {
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Remove persistent test settings
+            cluster: { routing: { allocation: { enable: null } } },
+          },
+        },
+      });
+    });
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = fetchIndices({ client, indices: ['no_such_index'] });
+      const task = initAction({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
                 Object {
                   "_tag": "Right",
@@ -121,7 +134,7 @@ describe('migration actions', () => {
     });
     it('resolves right record with found indices', async () => {
       expect.assertions(1);
-      const res = (await fetchIndices({
+      const res = (await initAction({
         client,
         indices: ['no_such_index', 'existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -135,6 +148,69 @@ describe('migration actions', () => {
           },
         })
       );
+    });
+    it('resolves left with cluster routing allocation disabled', async () => {
+      expect.assertions(3);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Disable all routing allocation
+            cluster: { routing: { allocation: { enable: 'none' } } },
+          },
+        },
+      });
+      const task = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Allow routing to existing primaries only
+            cluster: { routing: { allocation: { enable: 'primaries' } } },
+          },
+        },
+      });
+      const task2 = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task2()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Allow routing to new primaries only
+            cluster: { routing: { allocation: { enable: 'new_primaries' } } },
+          },
+        },
+      });
+      const task3 = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task3()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
     });
   });
 
@@ -274,7 +350,7 @@ describe('migration actions', () => {
       })();
 
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(redStatusResponse.body.status).toBe('red');
+      expect(redStatusResponse.status).toBe('red');
 
       client.indices.putSettings({
         index: 'red_then_yellow_index',
@@ -288,12 +364,11 @@ describe('migration actions', () => {
       // Assert that the promise didn't resolve before the index became yellow
 
       const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(yellowStatusResponse.body.status).toBe('yellow');
+      expect(yellowStatusResponse.status).toBe('yellow');
     });
   });
 
-  // FAILED ES PROMOTION: https://github.com/elastic/kibana/issues/117856
-  describe.skip('cloneIndex', () => {
+  describe('cloneIndex', () => {
     afterAll(async () => {
       try {
         await client.indices.delete({ index: 'clone_*' });
@@ -332,7 +407,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -375,14 +450,14 @@ describe('migration actions', () => {
       expect.assertions(1);
       const task = cloneIndex({ client, source: 'no_such_index', target: 'clone_target_3' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Left",
-                        "left": Object {
-                          "index": "no_such_index",
-                          "type": "index_not_found_exception",
-                        },
-                      }
-                  `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "index": "no_such_index",
+              "type": "index_not_found_exception",
+            },
+          }
+      `);
     });
     it('resolves left with a retryable_es_client_error if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
       // Create a red index
@@ -396,7 +471,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -407,7 +482,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
-        timeout: '0s',
+        timeout: '1s',
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -416,6 +491,34 @@ describe('migration actions', () => {
           "left": Object {
             "message": "Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
             "type": "retryable_es_client_error",
+          },
+        }
+      `);
+
+      // Now that we know timeouts work, make the index yellow again and call cloneIndex a second time to verify that it completes
+
+      await client.indices.putSettings({
+        index: 'clone_red_index',
+        body: {
+          // Enable all shard allocation so that the index status goes yellow
+          routing: { allocation: { enable: 'all' } },
+        },
+      });
+
+      // Call clone even though the index already exists with yellow state
+      const cloneIndexPromise2 = cloneIndex({
+        client,
+        source: 'existing_index_with_write_block',
+        target: 'clone_red_index',
+        timeout: '30s',
+      })();
+
+      await expect(cloneIndexPromise2).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Right",
+          "right": Object {
+            "acknowledged": true,
+            "shardsAcknowledged": true,
           },
         }
       `);
@@ -436,11 +539,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Right",
-                  "right": "reindex_succeeded",
-                }
-              `);
+        Object {
+          "_tag": "Right",
+          "right": "reindex_succeeded",
+        }
+      `);
 
       const results = (
         (await searchForOutdatedDocuments(client, {
@@ -476,11 +579,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": "reindex_succeeded",
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": "reindex_succeeded",
+          }
+      `);
 
       const results = (
         (await searchForOutdatedDocuments(client, {
@@ -509,11 +612,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Right",
-                  "right": "reindex_succeeded",
-                }
-              `);
+        Object {
+          "_tag": "Right",
+          "right": "reindex_succeeded",
+        }
+      `);
       const results = (
         (await searchForOutdatedDocuments(client, {
           batchSize: 1000,
@@ -544,11 +647,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": "reindex_succeeded",
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": "reindex_succeeded",
+          }
+      `);
 
       // reindex without a script
       res = (await reindex({
@@ -561,11 +664,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": "reindex_succeeded",
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": "reindex_succeeded",
+          }
+      `);
 
       // Assert that documents weren't overridden by the second, unscripted reindex
       const results = (
@@ -620,11 +723,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                        Object {
-                          "_tag": "Right",
-                          "right": "reindex_succeeded",
-                        }
-                  `);
+        Object {
+          "_tag": "Right",
+          "right": "reindex_succeeded",
+        }
+      `);
       // Assert that existing documents weren't overridden, but that missing
       // documents were added by the reindex
       const results = (
@@ -677,13 +780,13 @@ describe('migration actions', () => {
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Left",
-                        "left": Object {
-                          "type": "incompatible_mapping_exception",
-                        },
-                      }
-                  `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "type": "incompatible_mapping_exception",
+            },
+          }
+      `);
     });
     it('resolves left incompatible_mapping_exception if all reindex failures are due to a mapper_parsing_exception', async () => {
       expect.assertions(1);
@@ -716,13 +819,13 @@ describe('migration actions', () => {
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                        Object {
-                          "_tag": "Left",
-                          "left": Object {
-                            "type": "incompatible_mapping_exception",
-                          },
-                        }
-                  `);
+            Object {
+              "_tag": "Left",
+              "left": Object {
+                "type": "incompatible_mapping_exception",
+              },
+            }
+      `);
     });
     it('resolves left index_not_found_exception if source index does not exist', async () => {
       expect.assertions(1);
@@ -738,14 +841,14 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                            Object {
-                              "_tag": "Left",
-                              "left": Object {
-                                "index": "no_such_index",
-                                "type": "index_not_found_exception",
-                              },
-                            }
-                    `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "index": "no_such_index",
+            "type": "index_not_found_exception",
+          },
+        }
+      `);
     });
     it('resolves left target_index_had_write_block if all failures are due to a write block', async () => {
       expect.assertions(1);
@@ -761,13 +864,13 @@ describe('migration actions', () => {
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                          Object {
-                            "_tag": "Left",
-                            "left": Object {
-                              "type": "target_index_had_write_block",
-                            },
-                          }
-                    `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "target_index_had_write_block",
+          },
+        }
+      `);
     });
     it('resolves left if requireAlias=true and the target is not an alias', async () => {
       expect.assertions(1);
@@ -783,16 +886,18 @@ describe('migration actions', () => {
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Left",
-                  "left": Object {
-                    "index": "existing_index_with_write_block",
-                    "type": "index_not_found_exception",
-                  },
-                }
-              `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "index": "existing_index_with_write_block",
+            "type": "index_not_found_exception",
+          },
+        }
+      `);
     });
-    it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+
+    // Failing ES Promotion: https://github.com/elastic/kibana/issues/127654
+    it.skip('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatusYellow({
         client,
         index: '.kibana_1',
@@ -841,11 +946,11 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_7',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-              Object {
-                "_tag": "Right",
-                "right": "verify_reindex_succeeded",
-              }
-            `);
+        Object {
+          "_tag": "Right",
+          "right": "verify_reindex_succeeded",
+        }
+      `);
     });
     it('resolves left if source and target indices have different amount of documents', async () => {
       expect.assertions(1);
@@ -855,13 +960,13 @@ describe('migration actions', () => {
         targetIndex: 'existing_index_2',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Left",
-                  "left": Object {
-                    "type": "verify_reindex_failed",
-                  },
-                }
-              `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "verify_reindex_failed",
+          },
+        }
+      `);
     });
     it('rejects if source or target index does not exist', async () => {
       expect.assertions(2);
@@ -894,7 +999,7 @@ describe('migration actions', () => {
         },
       });
 
-      await expect(searchResponse.body.hits.hits.length).toBeGreaterThan(0);
+      await expect(searchResponse.hits.hits.length).toBeGreaterThan(0);
     });
     it('rejects if index does not exist', async () => {
       const openPitTask = openPit({ client, index: 'no_such_index' });
@@ -1156,7 +1261,9 @@ describe('migration actions', () => {
 
       await expect(task()).rejects.toThrow('index_not_found_exception');
     });
-    it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
+
+    // Failing ES Promotion: https://github.com/elastic/kibana/issues/127654
+    it.skip('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
         '.kibana_1'
@@ -1423,7 +1530,7 @@ describe('migration actions', () => {
                 // Allocate 1 replica so that this index stays yellow
                 number_of_replicas: '1',
                 // Disable all shard allocation so that the index status is red
-                'index.routing.allocation.enable': 'none',
+                index: { routing: { allocation: { enable: 'none' } } },
               },
             },
           },
@@ -1540,8 +1647,8 @@ describe('migration actions', () => {
         }
       `);
     });
-    // TODO: unskip after https://github.com/elastic/kibana/issues/116111
-    it.skip('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+
+    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
       const newDocs = new Array(10000).fill({
         _source: {
           title:

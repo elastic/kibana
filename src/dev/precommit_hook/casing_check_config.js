@@ -26,6 +26,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/__mocks__/**/*',
@@ -38,9 +39,12 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
-  'packages/kbn-test/jest_integration/jest-preset.js',
+  'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
+
+  // Required to match the name in the docs.elastic.dev repo.
+  'nav-kibana-dev.docnav.json',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -55,9 +59,6 @@ export const IGNORE_FILE_GLOBS = [
   // filename must match upstream filenames from lodash
   'packages/elastic-safer-lodash-set/**/*',
 
-  // TODO fix file names in APM to remove these
-  'x-pack/plugins/apm/public/**/*',
-
   'x-pack/plugins/maps/server/fonts/**/*',
 
   // Bazel default files
@@ -66,6 +67,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // Buildkite
   '.buildkite/**/*',
+
+  // generator templates use weird filenames based on the requirements for the files they're generating
+  'packages/kbn-generate/templates/**/*',
 ];
 
 /**
@@ -97,6 +101,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'typings/*',
 ];
 
 /**

@@ -64,14 +64,9 @@ import {
   updated_by,
   created_at,
   created_by,
-  ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
   namespace,
-} from '../common/schemas';
+  ruleExecutionSummary,
+} from '../common';
 
 export const createSchema = <
   Required extends t.Props,
@@ -367,6 +362,7 @@ export const previewRulesSchema = t.intersection([
   createTypeSpecific,
   t.type({ invocationCount: t.number }),
 ]);
+export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
@@ -415,13 +411,9 @@ const responseRequiredFields = {
   created_at,
   created_by,
 };
+
 const responseOptionalFields = {
-  status: ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
+  execution_summary: ruleExecutionSummary,
 };
 
 export const fullResponseSchema = t.intersection([
@@ -432,8 +424,15 @@ export const fullResponseSchema = t.intersection([
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
 
+export interface RulePreviewLogs {
+  errors: string[];
+  warnings: string[];
+  startedAt?: string;
+  duration: number;
+}
+
 export interface PreviewResponse {
   previewId: string | undefined;
-  errors: string[] | undefined;
-  warnings: string[] | undefined;
+  logs: RulePreviewLogs[] | undefined;
+  isAborted: boolean | undefined;
 }

@@ -13,7 +13,12 @@ import { Subscription } from 'rxjs';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESQuery } from '../../../common/typed_json';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
+import {
+  DataView,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../src/plugins/data/common';
+
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
@@ -74,6 +79,7 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   : TimelineEventsAllStrategyResponse;
 
 export interface UseTimelineEventsProps {
+  dataViewId: string | null;
   docValueFields?: DocValueFields[];
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
@@ -126,6 +132,7 @@ const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
 });
 
 export const useTimelineEvents = ({
+  dataViewId,
   docValueFields,
   endDate,
   eqlOptions = undefined,
@@ -206,7 +213,7 @@ export const useTimelineEvents = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addError, addWarning } = useAppToasts();
+  const { addWarning } = useAppToasts();
 
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
@@ -226,6 +233,8 @@ export const useTimelineEvents = ({
             strategy:
               request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
+            // we only need the id to throw better errors
+            indexPattern: { id: dataViewId } as unknown as DataView,
           })
           .subscribe({
             next: (response) => {
@@ -264,9 +273,7 @@ export const useTimelineEvents = ({
             },
             error: (msg) => {
               setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_TIMELINE_EVENTS,
-              });
+              data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -320,9 +327,9 @@ export const useTimelineEvents = ({
       skip,
       id,
       data.search,
+      dataViewId,
       setUpdated,
       addWarning,
-      addError,
       refetchGrid,
       wrappedLoadPage,
     ]

@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getDataStart } from '../../services';
 import { KBN_FIELD_TYPES, Query } from '../../../../../../plugins/data/public';
@@ -80,7 +80,9 @@ export const AnnotationRow = ({
 
       try {
         fetchedIndexPattern = index
-          ? await fetchIndexPattern(index, indexPatterns)
+          ? await fetchIndexPattern(index, indexPatterns, {
+              fetchKibanaIndexForStringIndexes: true,
+            })
           : {
               ...fetchedIndexPattern,
               defaultIndex: await indexPatterns.getDefault(),
@@ -146,8 +148,12 @@ export const AnnotationRow = ({
                   />
                 }
                 restrict={RESTRICT_FIELDS}
-                value={model.time_field}
-                onChange={handleChange(TIME_FIELD_KEY)}
+                value={model[TIME_FIELD_KEY]}
+                onChange={(value) =>
+                  onChange({
+                    [TIME_FIELD_KEY]: value?.[0] ?? undefined,
+                  })
+                }
                 indexPattern={model.index_pattern}
                 fields={fields}
               />

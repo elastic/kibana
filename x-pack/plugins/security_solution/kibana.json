@@ -18,6 +18,7 @@
     "eventLog",
     "features",
     "inspector",
+    "lens",
     "licensing",
     "maps",
     "ruleRegistry",
@@ -35,11 +36,10 @@
     "security",
     "spaces",
     "usageCollection",
-    "lens",
     "lists",
     "home",
     "telemetry",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor"
   ],
   "server": true,
   "ui": true,

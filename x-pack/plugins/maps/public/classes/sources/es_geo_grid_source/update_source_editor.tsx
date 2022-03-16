@@ -8,7 +8,7 @@
 import React, { Fragment, Component } from 'react';
 
 import uuid from 'uuid/v4';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
@@ -20,6 +20,7 @@ import { IndexPatternField, indexPatterns } from '../../../../../../../src/plugi
 import { RenderAsSelect } from './render_as_select';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../source';
+import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 
 interface Props {
   currentLayerType?: string;
@@ -81,19 +82,13 @@ export class UpdateSourceEditor extends Component<Props, State> {
   _onResolutionChange = async (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => {
     let newLayerType;
     if (
-      this.props.currentLayerType === LAYER_TYPE.VECTOR ||
-      this.props.currentLayerType === LAYER_TYPE.TILED_VECTOR
+      this.props.currentLayerType === LAYER_TYPE.GEOJSON_VECTOR ||
+      this.props.currentLayerType === LAYER_TYPE.MVT_VECTOR
     ) {
       newLayerType =
-        resolution === GRID_RESOLUTION.SUPER_FINE ? LAYER_TYPE.TILED_VECTOR : LAYER_TYPE.VECTOR;
-    } else if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
-      if (resolution === GRID_RESOLUTION.SUPER_FINE) {
-        throw new Error('Heatmap does not support SUPER_FINE resolution');
-      } else {
-        newLayerType = LAYER_TYPE.HEATMAP;
-      }
-    } else {
-      throw new Error('Unexpected layer-type');
+        resolution === GRID_RESOLUTION.SUPER_FINE
+          ? LAYER_TYPE.MVT_VECTOR
+          : LAYER_TYPE.GEOJSON_VECTOR;
     }
 
     await this.props.onChange(
@@ -111,18 +106,18 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _getMetricsFilter() {
-    if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
-      return (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
-        // these are countable metrics, where blending heatmap color blobs make sense
-        return metric.value ? isMetricCountable(metric.value) : false;
-      };
-    }
-
-    if (this.props.resolution === GRID_RESOLUTION.SUPER_FINE) {
-      return (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
-        return metric.value !== AGG_TYPE.TERMS;
-      };
-    }
+    return this.props.currentLayerType === LAYER_TYPE.HEATMAP
+      ? (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
+          // these are countable metrics, where blending heatmap color blobs make sense
+          return metric.value ? isMetricCountable(metric.value) : false;
+        }
+      : (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
+          // terms aggregation is not supported with Elasticsearch _mvt endpoint
+          // The goal is to remove GeoJSON ESGeoGridSource implemenation and only have MVT ESGeoGridSource implemenation
+          // First step is to deprecate terms aggregation for ESGeoGridSource
+          // and prevent new uses of terms aggregation for ESGeoGridSource
+          return metric.value !== AGG_TYPE.TERMS;
+        };
   }
 
   _renderMetricsPanel() {
@@ -155,15 +150,12 @@ export class UpdateSourceEditor extends Component<Props, State> {
         <EuiPanel>
           <EuiTitle size="xs">
             <h6>
-              <FormattedMessage
-                id="xpack.maps.source.esGrid.geoTileGridLabel"
-                defaultMessage="Grid parameters"
-              />
+              {this.props.currentLayerType === LAYER_TYPE.HEATMAP ? heatmapTitle : clustersTitle}
             </h6>
           </EuiTitle>
           <EuiSpacer size="m" />
           <ResolutionEditor
-            includeSuperFine={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
+            isHeatmap={this.props.currentLayerType === LAYER_TYPE.HEATMAP}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
             metrics={this.props.metrics}

@@ -11,7 +11,6 @@ import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../../../common/constants';
-import { createUninitialisedResourceState } from '../../../../../state';
 
 /**
  * Return a fresh copy of initial state, since we mutate state in the reducer.
@@ -34,12 +33,5 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
       show: undefined,
       filter: '',
     },
-    assignableList: createUninitialisedResourceState(),
-    trustedAppsToUpdate: createUninitialisedResourceState(),
-    assignableListEntriesExist: createUninitialisedResourceState(),
-    doesAnyTrustedAppExists: createUninitialisedResourceState(),
-    assignedList: createUninitialisedResourceState(),
-    policies: createUninitialisedResourceState(),
-    removeList: createUninitialisedResourceState(),
   },
 });

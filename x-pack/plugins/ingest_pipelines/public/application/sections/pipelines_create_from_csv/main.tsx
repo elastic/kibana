@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
@@ -171,14 +171,14 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={services.documentation.getPutPipelineApiUrl()}
+            href={services.documentation.getCreatePipelineCSVUrl()}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"
           >
             <FormattedMessage
-              id="xpack.ingestPipelines.create.docsButtonLabel"
-              defaultMessage="Create pipeline docs"
+              id="xpack.ingestPipelines.createFromCSV.docsButtonLabel"
+              defaultMessage="CSV to pipeline docs"
             />
           </EuiButtonEmpty>,
         ]}

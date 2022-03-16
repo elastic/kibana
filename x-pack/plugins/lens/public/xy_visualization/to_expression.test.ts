@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getXyVisualization } from './xy_visualization';
-import { Operation } from '../types';
+import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
     paletteService: chartPluginMock.createPaletteRegistry(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    kibanaTheme: themeServiceMock.createStartContract(),
     useLegacyTimeAxis: false,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
@@ -29,14 +31,14 @@ describe('#toExpression', () => {
     mockDatasource = createMockDatasource('testDatasource');
 
     mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-      { columnId: 'd' },
-      { columnId: 'a' },
-      { columnId: 'b' },
-      { columnId: 'c' },
+      { columnId: 'd', fields: [] },
+      { columnId: 'a', fields: [] },
+      { columnId: 'b', fields: [] },
+      { columnId: 'c', fields: [] },
     ]);
 
     mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((col) => {
-      return { label: `col_${col}`, dataType: 'number' } as Operation;
+      return { label: `col_${col}`, dataType: 'number' } as OperationDescriptor;
     });
 
     frame.datasourceLayers = {
@@ -341,9 +343,6 @@ describe('#toExpression', () => {
           {
             layerId: 'referenceLine',
             layerType: layerTypes.REFERENCELINE,
-            seriesType: 'area',
-            splitAccessor: 'd',
-            xAccessor: 'a',
             accessors: ['b', 'c'],
             yConfig: [{ forAccessor: 'a' }],
           },

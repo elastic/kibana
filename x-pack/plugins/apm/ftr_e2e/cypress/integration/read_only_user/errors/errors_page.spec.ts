@@ -7,6 +7,7 @@
 
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
+import { checkA11y } from '../../../support/commands';
 import { generateData } from './generate_data';
 
 const start = '2021-10-10T00:00:00.000Z';
@@ -39,6 +40,13 @@ describe('Errors page', () => {
 
     after(async () => {
       await synthtrace.clean();
+    });
+
+    it('has no detectable a11y violations on load', () => {
+      cy.visit(javaServiceErrorsPageHref);
+      cy.contains('Error occurrences');
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y({ skipFailures: true });
     });
 
     describe('when service has no errors', () => {
@@ -91,19 +99,13 @@ describe('Errors page', () => {
       it('sorts by ocurrences', () => {
         cy.visit(javaServiceErrorsPageHref);
         cy.contains('span', 'Occurrences').click();
-        cy.url().should(
-          'include',
-          '&sortField=occurrenceCount&sortDirection=asc'
-        );
+        cy.url().should('include', '&sortField=occurrences&sortDirection=asc');
       });
 
       it('sorts by latest occurrences', () => {
         cy.visit(javaServiceErrorsPageHref);
-        cy.contains('span', 'Latest occurrence').click();
-        cy.url().should(
-          'include',
-          '&sortField=latestOccurrenceAt&sortDirection=asc'
-        );
+        cy.contains('span', 'Last seen').click();
+        cy.url().should('include', '&sortField=lastSeen&sortDirection=asc');
       });
     });
   });

@@ -8,10 +8,11 @@
 import React, { FC, useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,
+  EuiComboBox,
   EuiLink,
   EuiSwitch,
   EuiFieldText,
@@ -28,6 +29,7 @@ import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_reac
 
 import {
   isEsIndices,
+  isEsIngestPipelines,
   isPostTransformsPreviewResponseSchema,
 } from '../../../../../../common/api_schemas/type_guards';
 import { TransformId } from '../../../../../../common/types/transform';
@@ -82,8 +84,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(
       defaults.destinationIndex
     );
+    const [destinationIngestPipeline, setDestinationIngestPipeline] = useState<string>(
+      defaults.destinationIngestPipeline
+    );
     const [transformIds, setTransformIds] = useState<TransformId[]>([]);
     const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
+    const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
 
     const canCreateDataView = useMemo(
       () =>
@@ -118,6 +124,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       [setIndexPatternTimeField, indexPatternAvailableTimeFields]
     );
 
+    const { overlays, theme } = useAppDependencies();
     const api = useApi();
 
     // fetch existing transform IDs and indices once for form validation
@@ -150,9 +157,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             }),
             text: toMountPoint(
               <ToastNotificationText
-                overlays={deps.overlays}
+                overlays={overlays}
+                theme={theme}
                 text={getErrorMessage(transformPreview)}
-              />
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -165,14 +174,22 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(resp)} />
+              <ToastNotificationText
+                overlays={overlays}
+                theme={theme}
+                text={getErrorMessage(resp)}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         } else {
           setTransformIds(resp.transforms.map((transform) => transform.id));
         }
 
-        const indices = await api.getEsIndices();
+        const [indices, ingestPipelines] = await Promise.all([
+          api.getEsIndices(),
+          api.getEsIngestPipelines(),
+        ]);
 
         if (isEsIndices(indices)) {
           setIndexNames(indices.map((index) => index.name));
@@ -182,7 +199,30 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(indices)} />
+              <ToastNotificationText
+                overlays={overlays}
+                theme={theme}
+                text={getErrorMessage(indices)}
+              />,
+              { theme$: theme.theme$ }
+            ),
+          });
+        }
+
+        if (isEsIngestPipelines(ingestPipelines)) {
+          setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
+        } else {
+          toastNotifications.addDanger({
+            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIngestPipelines', {
+              defaultMessage: 'An error occurred getting the existing ingest pipeline names:',
+            }),
+            text: toMountPoint(
+              <ToastNotificationText
+                overlays={overlays}
+                theme={theme}
+                text={getErrorMessage(ingestPipelines)}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -195,7 +235,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing data view titles:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -226,7 +267,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       defaults.isRetentionPolicyEnabled
     );
     const [retentionPolicyDateField, setRetentionPolicyDateField] = useState(
-      isRetentionPolicyAvailable ? dateFieldNames[0] : ''
+      isRetentionPolicyAvailable ? defaults.retentionPolicyDateField : ''
     );
     const [retentionPolicyMaxAge, setRetentionPolicyMaxAge] = useState(
       defaults.retentionPolicyMaxAge
@@ -297,6 +338,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         transformSettingsMaxPageSearchSize,
         transformSettingsDocsPerSecond,
         destinationIndex,
+        destinationIngestPipeline,
         touched: true,
         valid,
         indexPatternTimeField,
@@ -317,6 +359,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       transformFrequency,
       transformSettingsMaxPageSearchSize,
       destinationIndex,
+      destinationIngestPipeline,
       valid,
       indexPatternTimeField,
       /* eslint-enable react-hooks/exhaustive-deps */
@@ -428,6 +471,39 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               data-test-subj="transformDestinationIndexInput"
             />
           </EuiFormRow>
+
+          {ingestPipelineNames.length > 0 && (
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.transform.stepDetailsForm.destinationIngestPipelineLabel',
+                {
+                  defaultMessage: 'Destination ingest pipeline',
+                }
+              )}
+            >
+              <EuiComboBox
+                data-test-subj="transformDestinationPipelineSelect"
+                aria-label={i18n.translate(
+                  'xpack.transform.stepDetailsForm.destinationIngestPipelineAriaLabel',
+                  {
+                    defaultMessage: 'Select an ingest pipeline (optional)',
+                  }
+                )}
+                placeholder={i18n.translate(
+                  'xpack.transform.stepDetailsForm.destinationIngestPipelineComboBoxPlaceholder',
+                  {
+                    defaultMessage: 'Select an ingest pipeline (optional)',
+                  }
+                )}
+                singleSelection={{ asPlainText: true }}
+                options={ingestPipelineNames.map((label: string) => ({ label }))}
+                selectedOptions={
+                  destinationIngestPipeline !== '' ? [{ label: destinationIngestPipeline }] : []
+                }
+                onChange={(options) => setDestinationIngestPipeline(options[0]?.label ?? '')}
+              />
+            </EuiFormRow>
+          )}
 
           {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
             <>

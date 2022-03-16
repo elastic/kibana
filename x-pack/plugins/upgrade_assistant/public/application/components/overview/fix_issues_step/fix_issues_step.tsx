@@ -9,7 +9,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import type { OverviewStepProps } from '../../types';
@@ -65,7 +65,7 @@ export const getFixIssuesStep = ({
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.fixIssuesStepDescription"
-              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with Elastic 8.x. Critical issues must be resolved before you upgrade. Warning issues can be ignored at your discretion."
+              defaultMessage="You must resolve any critical Elasticsearch and Kibana configuration issues before upgrading to Elastic 8.x. Ignoring warnings might result in differences in behavior after you upgrade."
             />
           </p>
         </EuiText>

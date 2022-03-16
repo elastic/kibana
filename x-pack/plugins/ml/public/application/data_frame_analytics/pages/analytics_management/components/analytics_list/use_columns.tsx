@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -293,7 +293,7 @@ export const useColumns = (
             <JobSpacesList
               spacesApi={spacesApi}
               spaceIds={item.spaceIds ?? []}
-              jobId={item.id}
+              id={item.id}
               jobType="data-frame-analytics"
               refresh={refresh}
             />

@@ -8,9 +8,9 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { euiLightVars as euiThemeLight } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { ScatterplotMatrix } from './scatterplot_matrix';
 

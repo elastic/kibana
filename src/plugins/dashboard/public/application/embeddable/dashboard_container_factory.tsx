@@ -28,8 +28,9 @@ import {
   ControlGroupInput,
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
-} from '../../../../presentation_util/public';
-import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
+} from '../../../../controls/public';
+
+import { getDefaultDashboardControlGroupInput } from '../../../common/embeddable/dashboard_control_group';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -43,10 +44,16 @@ export class DashboardContainerFactoryDefinition
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
+  public inject: EmbeddablePersistableStateService['inject'];
+  public extract: EmbeddablePersistableStateService['extract'];
+
   constructor(
     private readonly getStartServices: () => Promise<DashboardContainerServices>,
     private readonly persistableStateService: EmbeddablePersistableStateService
-  ) {}
+  ) {
+    this.inject = createInject(this.persistableStateService);
+    this.extract = createExtract(this.persistableStateService);
+  }
 
   public isEditable = async () => {
     // Currently unused for dashboards
@@ -79,11 +86,15 @@ export class DashboardContainerFactoryDefinition
       ControlGroupOutput,
       ControlGroupContainer
     >(CONTROL_GROUP_TYPE);
+    const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
     const controlGroup = await controlsGroupFactory?.create({
+      id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultDashboardControlGroupInput(),
-      ...(initialInput.controlGroupInput ?? {}),
-      viewMode: initialInput.viewMode,
-      id: `control_group_${initialInput.id ?? 'new_dashboard'}`,
+      ...(controlGroupInput ?? {}),
+      timeRange,
+      viewMode,
+      filters,
+      query,
     });
     const { DashboardContainer: DashboardContainerEmbeddable } = await import(
       './dashboard_container'
@@ -91,8 +102,4 @@ export class DashboardContainerFactoryDefinition
 
     return new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup);
   };
-
-  public inject = createInject(this.persistableStateService);
-
-  public extract = createExtract(this.persistableStateService);
 }

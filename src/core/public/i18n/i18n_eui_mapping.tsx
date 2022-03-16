@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
@@ -20,6 +20,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
       defaultMessage: 'Loading',
     }),
+    'euiAutoRefresh.autoRefreshLabel': i18n.translate('core.euiAutoRefresh.autoRefreshLabel', {
+      defaultMessage: 'Auto refresh',
+    }),
+    'euiAutoRefresh.buttonLabelOff': i18n.translate('core.euiAutoRefresh.buttonLabelOff', {
+      defaultMessage: 'Auto refresh is off',
+    }),
+    'euiAutoRefresh.buttonLabelOn': ({ prettyInterval }: EuiValues) =>
+      i18n.translate('core.euiAutoRefresh.buttonLabelOn', {
+        defaultMessage: 'Auto refresh is on and set to {prettyInterval}',
+        values: { prettyInterval },
+      }),
     'euiBasicTable.selectAllRows': i18n.translate('core.euiBasicTable.selectAllRows', {
       defaultMessage: 'Select all rows',
       description: 'ARIA and displayed label on a checkbox to select all table rows',
@@ -126,22 +137,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCodeBlock.fullscreenExpand': i18n.translate('core.euiCodeBlock.fullscreenExpand', {
       defaultMessage: 'Expand',
       description: 'ARIA label for a button that enters fullscreen view',
-    }),
-    'euiCodeEditor.startEditing': i18n.translate('core.euiCodeEditor.startEditing', {
-      defaultMessage: 'Press Enter to start editing.',
-      description: 'Screen reader text to prompt editing',
-    }),
-    'euiCodeEditor.startInteracting': i18n.translate('core.euiCodeEditor.startInteracting', {
-      defaultMessage: 'Press Enter to start interacting with the code.',
-      description: 'Screen reader text to prompt interaction',
-    }),
-    'euiCodeEditor.stopEditing': i18n.translate('core.euiCodeEditor.stopEditing', {
-      defaultMessage: "When you're done, press Escape to stop editing.",
-      description: 'Screen reader text to describe ending editing',
-    }),
-    'euiCodeEditor.stopInteracting': i18n.translate('core.euiCodeEditor.stopInteracting', {
-      defaultMessage: "When you're done, press Escape to stop interacting with the code.",
-      description: 'Screen reader text to describe ending interactions',
     }),
     'euiCollapsedItemActions.allActions': i18n.translate(
       'core.euiCollapsedItemActions.allActions',
@@ -402,8 +397,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Row: {row}; Column: {col}',
         values: { row, col },
       }),
-    'euiDataGridCellButtons.expandButtonTitle': i18n.translate(
-      'core.euiDataGridCellButtons.expandButtonTitle',
+    'euiDataGridCellActions.expandButtonTitle': i18n.translate(
+      'core.euiDataGridCellActions.expandButtonTitle',
       {
         defaultMessage: 'Click or hit enter to interact with cell content',
       }
@@ -511,6 +506,42 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Update needed: {title}',
         values: { title },
       }),
+    'euiDisplaySelector.buttonText': i18n.translate('core.euiDisplaySelector.buttonText', {
+      defaultMessage: 'Display options',
+    }),
+    'euiDisplaySelector.resetButtonText': i18n.translate(
+      'core.euiDisplaySelector.resetButtonText',
+      {
+        defaultMessage: 'Reset to default',
+      }
+    ),
+    'euiDisplaySelector.densityLabel': i18n.translate('core.euiDisplaySelector.densityLabel', {
+      defaultMessage: 'Density',
+    }),
+    'euiDisplaySelector.labelCompact': i18n.translate('core.euiDisplaySelector.labelCompact', {
+      defaultMessage: 'Compact',
+    }),
+    'euiDisplaySelector.labelNormal': i18n.translate('core.euiDisplaySelector.labelNormal', {
+      defaultMessage: 'Normal',
+    }),
+    'euiDisplaySelector.labelExpanded': i18n.translate('core.euiDisplaySelector.labelExpanded', {
+      defaultMessage: 'Expanded',
+    }),
+    'euiDisplaySelector.labelSingle': i18n.translate('core.euiDisplaySelector.labelSingle', {
+      defaultMessage: 'Single',
+    }),
+    'euiDisplaySelector.labelAuto': i18n.translate('core.euiDisplaySelector.labelAuto', {
+      defaultMessage: 'Auto fit',
+    }),
+    'euiDisplaySelector.labelCustom': i18n.translate('core.euiDisplaySelector.labelCustom', {
+      defaultMessage: 'Custom',
+    }),
+    'euiDisplaySelector.rowHeightLabel': i18n.translate('core.euiDisplaySelector.rowHeightLabel', {
+      defaultMessage: 'Row height',
+    }),
+    'euiDisplaySelector.lineCountLabel': i18n.translate('core.euiDisplaySelector.lineCountLabel', {
+      defaultMessage: 'Lines per row',
+    }),
     'euiFieldPassword.showPassword': i18n.translate('core.euiFieldPassword.showPassword', {
       defaultMessage:
         'Show password as plain text. Note: this will visually expose your password on the screen.',
@@ -679,6 +710,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '+ {messagesLength} more',
         values: { messagesLength },
       }),
+    'euiErrorBoundary.error': i18n.translate('core.euiErrorBoundary.error', {
+      defaultMessage: 'Error',
+      description: 'Error boundary for uncaught exceptions when rendering part of the application',
+    }),
     'euiNotificationEventMessages.accordionAriaLabelButtonText': ({
       messagesLength,
       eventName,
@@ -720,11 +755,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'hide',
       }
     ),
-    'euiPagination.nextPage': ({ page }: EuiValues) =>
-      i18n.translate('core.euiPagination.nextPage', {
-        defaultMessage: 'Next page, {page}',
-        values: { page },
-      }),
     'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
       <FormattedMessage
         id="core.euiPagination.pageOfTotalCompressed"
@@ -732,20 +762,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ page, total }}
       />
     ),
-    'euiPagination.previousPage': ({ page }: EuiValues) =>
-      i18n.translate('core.euiPagination.previousPage', {
-        defaultMessage: 'Previous page, {page}',
-        values: { page },
-      }),
-    'euiPagination.disabledPreviousPage': i18n.translate(
-      'core.euiPagination.disabledPreviousPage',
-      {
-        defaultMessage: 'Previous page',
-      }
-    ),
-    'euiPagination.disabledNextPage': i18n.translate('core.euiPagination.disabledNextPage', {
-      defaultMessage: 'Next page',
-    }),
     'euiPagination.firstRangeAriaLabel': ({ lastPage }: EuiValues) =>
       i18n.translate('core.euiPagination.firstRangeAriaLabel', {
         defaultMessage: 'Skipping pages 2 to {lastPage}',
@@ -756,6 +772,21 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Skipping pages {firstPage} to {lastPage}',
         values: { firstPage, lastPage },
       }),
+    'euiPagination.last': i18n.translate('core.euiPagination.last', {
+      defaultMessage: 'Last',
+    }),
+    'euiPagination.page': i18n.translate('core.euiPagination.page', {
+      defaultMessage: 'Page',
+    }),
+    'euiPagination.of': i18n.translate('core.euiPagination.of', {
+      defaultMessage: 'of',
+    }),
+    'euiPagination.collection': i18n.translate('core.euiPagination.collection', {
+      defaultMessage: 'collection',
+    }),
+    'euiPagination.fromEndLabel': i18n.translate('core.euiPagination.fromEndLabel', {
+      defaultMessage: 'from end',
+    }),
     'euiPaginationButton.longPageString': ({ page, totalPages }: EuiValues) =>
       i18n.translate('core.euiPaginationButton.longPageString', {
         defaultMessage: 'Page {page} of {totalPages}',
@@ -768,6 +799,24 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page },
         description: 'Text to describe the current page of a paginated section',
       }),
+    'euiPaginationButtonArrow.nextPage': i18n.translate('core.euiPaginationButtonArrow.nextPage', {
+      defaultMessage: 'Next page',
+    }),
+    'euiPaginationButtonArrow.previousPage': i18n.translate(
+      'core.euiPaginationButtonArrow.previousPage',
+      {
+        defaultMessage: 'Previous page',
+      }
+    ),
+    'euiPaginationButtonArrow.firstPage': i18n.translate(
+      'core.euiPaginationButtonArrow.firstPage',
+      {
+        defaultMessage: 'First page',
+      }
+    ),
+    'euiPaginationButtonArrow.lastPage': i18n.translate('core.euiPaginationButtonArrow.lastPage', {
+      defaultMessage: 'Last page',
+    }),
     'euiPinnableListGroup.pinExtraActionLabel': i18n.translate(
       'core.euiPinnableListGroup.pinExtraActionLabel',
       {
@@ -823,20 +872,19 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiRecentlyUsed.legend': i18n.translate('core.euiRecentlyUsed.legend', {
       defaultMessage: 'Recently used date ranges',
     }),
-    'euiRefreshInterval.fullDescription': ({ optionValue, optionText }: EuiValues) =>
-      i18n.translate('core.euiRefreshInterval.fullDescription', {
-        defaultMessage: 'Refresh interval currently set to {optionValue} {optionText}.',
-        values: { optionValue, optionText },
-      }),
     'euiRefreshInterval.legend': i18n.translate('core.euiRefreshInterval.legend', {
       defaultMessage: 'Refresh every',
     }),
-    'euiRefreshInterval.start': i18n.translate('core.euiRefreshInterval.start', {
-      defaultMessage: 'Start',
-    }),
-    'euiRefreshInterval.stop': i18n.translate('core.euiRefreshInterval.stop', {
-      defaultMessage: 'Stop',
-    }),
+    'euiRefreshInterval.fullDescriptionOff': ({ optionValue, optionText }: EuiValues) =>
+      i18n.translate('core.euiRefreshInterval.fullDescriptionOff', {
+        defaultMessage: 'Refresh is off, interval set to {optionValue} {optionText}.',
+        values: { optionValue, optionText },
+      }),
+    'euiRefreshInterval.fullDescriptionOn': ({ optionValue, optionText }: EuiValues) =>
+      i18n.translate('core.euiRefreshInterval.fullDescriptionOn', {
+        defaultMessage: 'Refresh is on, interval set to {optionValue} {optionText}.',
+        values: { optionValue, optionText },
+      }),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
       i18n.translate('core.euiRelativeTab.fullDescription', {
         defaultMessage: 'The unit is changeable. Currently set to {unit}.',
@@ -906,13 +954,37 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ searchValue }}
       />
     ),
+    'euiSelectable.screenReaderInstructions': i18n.translate(
+      'core.euiSelectable.screenReaderInstructions',
+      {
+        defaultMessage:
+          'Use up and down arrows to move focus over options. Enter to select. Escape to collapse options.',
+      }
+    ),
+    'euiSelectable.searchResults': ({ resultsLength }: EuiValues) =>
+      i18n.translate('core.euiSelectable.searchResults', {
+        defaultMessage: '{resultsLength, plural, one {# result} other {# results}}',
+        values: { resultsLength },
+      }),
     'euiSelectable.placeholderName': i18n.translate('core.euiSelectable.placeholderName', {
       defaultMessage: 'Filter options',
     }),
+    'euiSelectableListItem.checkedOption': i18n.translate(
+      'core.euiSelectableListItem.checkedOption',
+      {
+        defaultMessage: 'Checked option.',
+      }
+    ),
+    'euiSelectableListItem.checkedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.checkedOptionInstructions',
+      {
+        defaultMessage: 'To uncheck this option, press enter.',
+      }
+    ),
     'euiSelectableListItem.includedOption': i18n.translate(
       'core.euiSelectableListItem.includedOption',
       {
-        defaultMessage: 'Included option.',
+        defaultMessage: 'Selected option.',
       }
     ),
     'euiSelectableListItem.includedOptionInstructions': i18n.translate(
@@ -930,7 +1002,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
       'core.euiSelectableListItem.excludedOptionInstructions',
       {
-        defaultMessage: 'To deselect this option, press enter.',
+        defaultMessage: 'To uncheck this option, press enter.',
+      }
+    ),
+    'euiSelectableListItem.unckeckedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.unckeckedOptionInstructions',
+      {
+        defaultMessage: 'To select this option, press enter.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
@@ -1040,34 +1118,35 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} is loading',
         values: { number },
       }),
-    'euiStyleSelector.buttonText': i18n.translate('core.euiStyleSelector.buttonText', {
-      defaultMessage: 'Density',
+    'euiSuggest.stateSavedTooltip': i18n.translate('core.euiSuggest.stateSavedTooltip', {
+      defaultMessage: 'Saved.',
     }),
-    'euiStyleSelector.buttonLegend': i18n.translate('core.euiStyleSelector.buttonLegend', {
-      defaultMessage: 'Select the display density for the data grid',
+
+    'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
+      defaultMessage: 'Changes have not been saved.',
     }),
-    'euiStyleSelector.labelExpanded': i18n.translate('core.euiStyleSelector.labelExpanded', {
-      defaultMessage: 'Expanded density',
+
+    'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {
+      defaultMessage: 'State: loading.',
     }),
-    'euiStyleSelector.labelNormal': i18n.translate('core.euiStyleSelector.labelNormal', {
-      defaultMessage: 'Normal density',
+
+    'euiSuggest.stateSaved': i18n.translate('core.euiSuggest.stateSaved', {
+      defaultMessage: 'State: saved.',
     }),
-    'euiStyleSelector.labelCompact': i18n.translate('core.euiStyleSelector.labelCompact', {
-      defaultMessage: 'Compact density',
+
+    'euiSuggest.stateUnsaved': i18n.translate('core.euiSuggest.stateUnsaved', {
+      defaultMessage: 'State: unsaved.',
     }),
-    'euiSuperDatePicker.showDatesButtonLabel': i18n.translate(
-      'core.euiSuperDatePicker.showDatesButtonLabel',
+    'euiSuggest.stateUnchanged': i18n.translate('core.euiSuggest.stateUnchanged', {
+      defaultMessage: 'State: unchanged.',
+    }),
+    'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
+      'core.euiSuperSelect.screenReaderAnnouncement',
       {
-        defaultMessage: 'Show dates',
-        description: 'Displayed in a button that shows date picker',
+        defaultMessage:
+          'You are in a form selector and must select a single option. Use the up and down keys to navigate or escape to close.',
       }
     ),
-    'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
-      i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
-        defaultMessage:
-          'You are in a form selector of {optionsCount} items and must select a single option. Use the up and down keys to navigate or escape to close.',
-        values: { optionsCount },
-      }),
     'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
       i18n.translate('core.euiSuperSelectControl.selectAnOption', {
         defaultMessage: 'Select an option: {selectedValue}, is selected',

@@ -5,15 +5,16 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+} from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-type ErrorGroups = APIReturnType<'GET /internal/apm/services/{serviceName}/errors'>['errorGroups'];
+type ErrorGroups =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['errorGroups'];
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -26,11 +27,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['params']
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/errors`,
+      endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
       params: {
         path: { serviceName, ...overrides?.path },
         query: {
@@ -70,13 +71,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         before(async () => {
-          const serviceInstance = service(serviceName, 'production', 'go').instance('instance-a');
+          const serviceInstance = apm
+            .service(serviceName, 'production', 'go')
+            .instance('instance-a');
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.successRate)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceInstance
                   .transaction(appleTransaction.name)
                   .timestamp(timestamp)
@@ -84,10 +87,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .success()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.failureRate)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceInstance
                   .transaction(appleTransaction.name)
                   .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
@@ -96,10 +99,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .failure()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(bananaTransaction.successRate)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceInstance
                   .transaction(bananaTransaction.name)
                   .timestamp(timestamp)
@@ -107,10 +110,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .success()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(bananaTransaction.failureRate)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceInstance
                   .transaction(bananaTransaction.name)
                   .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
@@ -133,12 +136,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns correct number of errors', () => {
             expect(errorGroups.length).to.equal(2);
-            expect(errorGroups.map((error) => error.message).sort()).to.eql(['error 1', 'error 2']);
+            expect(errorGroups.map((error) => error.name).sort()).to.eql(['error 1', 'error 2']);
           });
 
           it('returns correct occurences', () => {
             const numberOfBuckets = 15;
-            expect(errorGroups.map((error) => error.occurrenceCount).sort()).to.eql([
+            expect(errorGroups.map((error) => error.occurrences).sort()).to.eql([
               appleTransaction.failureRate * numberOfBuckets,
               bananaTransaction.failureRate * numberOfBuckets,
             ]);

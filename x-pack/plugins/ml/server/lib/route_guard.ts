@@ -101,6 +101,7 @@ export class RouteGuard {
         internalSavedObjectsClient,
         this._spacesPlugin !== undefined,
         this._authorization,
+        client,
         this._isMlReady
       );
 
@@ -114,7 +115,8 @@ export class RouteGuard {
         getDataViewsService: getDataViewsServiceFactory(
           this._getDataViews,
           context.core.savedObjects.client,
-          client
+          client,
+          request
         ),
       });
     };

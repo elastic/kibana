@@ -8,7 +8,7 @@
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LiveQuery } from '../../live_queries';
 import { useFormData } from '../../shared_imports';
@@ -27,7 +27,7 @@ interface PlaygroundFlyoutProps {
 
 const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, onClose }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const [{ query, ecs_mapping, savedQueryId }] = useFormData({
+  const [{ query, ecs_mapping, id }] = useFormData({
     watch: ['query', 'ecs_mapping', 'savedQueryId'],
   });
 
@@ -45,11 +45,11 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
       </StyledEuiFlyoutHeader>
       <EuiFlyoutBody>
         <LiveQuery
-          enabled={enabled}
+          enabled={enabled && query !== ''}
           formType="simple"
           query={query}
           ecs_mapping={ecs_mapping}
-          savedQueryId={savedQueryId}
+          savedQueryId={id}
           queryField={false}
           ecsMappingField={false}
         />

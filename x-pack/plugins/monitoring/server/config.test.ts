@@ -31,9 +31,6 @@ describe('config schema', () => {
           "interval": "10s",
         },
         "cluster_alerts": Object {
-          "allowedSpaces": Array [
-            "default",
-          ],
           "email_notifications": Object {
             "email_address": "",
             "enabled": true,
@@ -73,6 +70,7 @@ describe('config schema', () => {
           "debug_mode": false,
           "elasticsearch": Object {
             "apiVersion": "master",
+            "compression": false,
             "customHeaders": Object {},
             "healthCheck": Object {
               "delay": "PT2.5S",
@@ -80,6 +78,7 @@ describe('config schema', () => {
             "ignoreVersionMismatch": false,
             "logFetchCount": 10,
             "logQueries": false,
+            "maxSockets": Infinity,
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
               "authorization",

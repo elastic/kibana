@@ -39,15 +39,13 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
-      const soClient = context.core.savedObjects.client;
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
 
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
       const selectedAgents = await parseAgentSelection(
-        esClient,
-        soClient,
+        internalSavedObjectsClient,
         osqueryContext,
         agentSelection
       );
@@ -79,7 +77,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             (value) => !isEmpty(value)
           ),
         };
-        const actionResponse = await esClient.index<{}, {}>({
+        const actionResponse = await esClient.index({
           index: '.fleet-actions',
           body: action,
         });

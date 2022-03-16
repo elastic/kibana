@@ -6,15 +6,15 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { ScopedHistory } from 'kibana/public';
+import { Observable } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { CoreSetup, CoreStart, CoreTheme, ScopedHistory } from 'src/core/public';
+import { SharePluginStart } from 'src/plugins/share/public';
 
-import { CoreSetup, CoreStart } from '../../../../../src/core/public';
-import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
-import { SharePluginStart } from '../../../../../src/plugins/share/public';
+import { UiMetricService, NotificationService, HttpService } from './services';
 
 const AppContext = createContext<AppDependencies | undefined>(undefined);
 
@@ -39,6 +39,7 @@ export interface AppDependencies {
   url: SharePluginStart['url'];
   docLinks: CoreStart['docLinks'];
   kibanaVersion: SemVer;
+  theme$: Observable<CoreTheme>;
 }
 
 export const AppContextProvider = ({

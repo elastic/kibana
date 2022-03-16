@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Loading } from '../../../components';
 import { useLocalSearch, searchIdField } from '../../../hooks';
@@ -205,7 +205,7 @@ function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnP
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                  defaultMessage="No packages found"
+                  defaultMessage="No integrations found"
                 />
               )}
             </p>

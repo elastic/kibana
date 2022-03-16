@@ -13,7 +13,7 @@ import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 

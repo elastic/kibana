@@ -16,6 +16,7 @@ import {
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
 import { NewJobCapsResponse } from '../../../../common/types/fields';
+import { JobMessage } from '../../../../common/types/audit_message';
 import {
   DeleteDataFrameAnalyticsWithIndexStatus,
   AnalyticsMapReturnType,
@@ -161,7 +162,7 @@ export const dataFrameAnalytics = {
     });
   },
   getAnalyticsAuditMessages(analyticsId: string) {
-    return http<any>({
+    return http<JobMessage[]>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
     });

@@ -28,10 +28,16 @@ import {
   DispatchSetState,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
+import {
+  combineQueryAndFilters,
+  getLayerMetaInfo,
+  getShowUnderlyingDataLabel,
+} from './show_underlying_data';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
   enableExportToCSV: boolean;
+  showOpenInDiscover?: boolean;
   showCancel: boolean;
   isByValueMode: boolean;
   allowByValue: boolean;
@@ -39,16 +45,19 @@ function getLensTopNavConfig(options: {
   tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
+  contextOriginatingApp?: string;
 }): TopNavMenuData[] {
   const {
     actions,
     showCancel,
     allowByValue,
     enableExportToCSV,
+    showOpenInDiscover,
     showSaveAndReturn,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     tooltips,
+    contextOriginatingApp,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -70,6 +79,38 @@ function getLensTopNavConfig(options: {
     : i18n.translate('xpack.lens.app.save', {
         defaultMessage: 'Save',
       });
+
+  if (contextOriginatingApp) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to {contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
+      run: actions.goBack,
+      className: 'lnsNavItem__goBack',
+      testId: 'lnsApp_goBackToAppButton',
+      description: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to {contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
+      disableButton: false,
+    });
+  }
+
+  if (showOpenInDiscover) {
+    topNavMenu.push({
+      label: getShowUnderlyingDataLabel(),
+      run: () => {},
+      testId: 'lnsApp_openInDiscover',
+      description: i18n.translate('xpack.lens.app.openInDiscoverAriaLabel', {
+        defaultMessage: 'Open underlying data in Discover',
+      }),
+      disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
+      tooltip: tooltips.showUnderlyingDataWarning,
+      target: '_blank',
+      href: actions.getUnderlyingDataUrl(),
+    });
+  }
 
   topNavMenu.push({
     label: i18n.translate('xpack.lens.app.inspect', {
@@ -151,6 +192,11 @@ export const LensTopNavMenu = ({
   redirectToOrigin,
   datasourceMap,
   title,
+  goBackToOriginatingApp,
+  contextOriginatingApp,
+  initialContextIsEmbedded,
+  topNavMenuEntryGenerators,
+  initialContext,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -159,6 +205,7 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     attributeService,
+    discover,
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
@@ -179,6 +226,8 @@ export const LensTopNavMenu = ({
     savedQuery,
     activeDatasourceId,
     datasourceStates,
+    visualization,
+    filters,
   } = useLensSelector((state) => state.lens);
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
@@ -238,121 +287,212 @@ export const LensTopNavMenu = ({
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
-  const topNavConfig = useMemo(
-    () =>
-      getLensTopNavConfig({
-        showSaveAndReturn: Boolean(
+  const additionalMenuEntries = useMemo(() => {
+    if (!visualization.activeId) return undefined;
+    const visualizationId = visualization.activeId;
+    const entries = topNavMenuEntryGenerators.flatMap((menuEntryGenerator) => {
+      const menuEntry = menuEntryGenerator({
+        datasourceStates,
+        visualizationId,
+        visualizationState: visualization.state,
+        query,
+        filters,
+        initialContext,
+      });
+      return menuEntry ? [menuEntry] : [];
+    });
+    if (entries.length > 0) {
+      return entries;
+    }
+  }, [
+    datasourceStates,
+    topNavMenuEntryGenerators,
+    visualization.activeId,
+    visualization.state,
+    query,
+    filters,
+    initialContext,
+  ]);
+
+  const layerMetaInfo = useMemo(() => {
+    if (!activeDatasourceId || !discover) {
+      return;
+    }
+    return getLayerMetaInfo(
+      datasourceMap[activeDatasourceId],
+      datasourceStates[activeDatasourceId].state,
+      activeData,
+      application.capabilities
+    );
+  }, [
+    activeData,
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    discover,
+    application.capabilities,
+  ]);
+
+  const topNavConfig = useMemo(() => {
+    const baseMenuEntries = getLensTopNavConfig({
+      showSaveAndReturn:
+        Boolean(
           isLinkedToOriginatingApp &&
             // Temporarily required until the 'by value' paradigm is default.
             (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-        ),
-        enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
-        isByValueMode: getIsByValueMode(),
-        allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
-        showCancel: Boolean(isLinkedToOriginatingApp),
-        savingToLibraryPermitted,
-        savingToDashboardPermitted,
-        tooltips: {
-          showExportWarning: () => {
-            if (activeData) {
-              const datatables = Object.values(activeData);
-              const formulaDetected = datatables.some((datatable) => {
-                return tableHasFormulas(datatable.columns, datatable.rows);
-              });
-              if (formulaDetected) {
-                return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
-                  defaultMessage:
-                    'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
-                });
-              }
-            }
-            return undefined;
-          },
-        },
-        actions: {
-          inspect: () => lensInspector.inspect({ title }),
-          exportToCSV: () => {
-            if (!activeData) {
-              return;
-            }
-            const datatables = Object.values(activeData);
-            const content = datatables.reduce<Record<string, { content: string; type: string }>>(
-              (memo, datatable, i) => {
-                // skip empty datatables
-                if (datatable) {
-                  const postFix = datatables.length > 1 ? `-${i + 1}` : '';
-
-                  memo[`${title || unsavedTitle}${postFix}.csv`] = {
-                    content: exporters.datatableToCSV(datatable, {
-                      csvSeparator: uiSettings.get('csv:separator', ','),
-                      quoteValues: uiSettings.get('csv:quoteValues', true),
-                      formatFactory: fieldFormats.deserialize,
-                      escapeFormulaValues: false,
-                    }),
-                    type: exporters.CSV_MIME_TYPE,
-                  };
-                }
-                return memo;
-              },
-              {}
-            );
-            if (content) {
-              downloadMultipleAs(content);
-            }
-          },
-          saveAndReturn: () => {
-            if (savingToDashboardPermitted) {
-              // disabling the validation on app leave because the document has been saved.
-              onAppLeave((actions) => {
-                return actions.default();
-              });
-              runSave(
-                {
-                  newTitle: title || '',
-                  newCopyOnSave: false,
-                  isTitleDuplicateConfirmed: false,
-                  returnToOrigin: true,
-                },
-                {
-                  saveToLibrary:
-                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
-                }
-              );
-            }
-          },
-          showSaveModal: () => {
-            if (savingToDashboardPermitted || savingToLibraryPermitted) {
-              setIsSaveModalVisible(true);
-            }
-          },
-          cancel: () => {
-            if (redirectToOrigin) {
-              redirectToOrigin();
-            }
-          },
-        },
-      }),
-    [
-      activeData,
-      attributeService,
-      dashboardFeatureFlag.allowByValueEmbeddables,
-      fieldFormats.deserialize,
-      getIsByValueMode,
-      initialInput,
-      isLinkedToOriginatingApp,
-      isSaveable,
-      title,
-      onAppLeave,
-      redirectToOrigin,
-      runSave,
-      savingToDashboardPermitted,
+        ) || Boolean(initialContextIsEmbedded),
+      enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
+      showOpenInDiscover: Boolean(layerMetaInfo?.isVisible),
+      isByValueMode: getIsByValueMode(),
+      allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
+      showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
-      setIsSaveModalVisible,
-      uiSettings,
-      unsavedTitle,
-      lensInspector,
-    ]
-  );
+      savingToDashboardPermitted,
+      contextOriginatingApp,
+      tooltips: {
+        showExportWarning: () => {
+          if (activeData) {
+            const datatables = Object.values(activeData);
+            const formulaDetected = datatables.some((datatable) => {
+              return tableHasFormulas(datatable.columns, datatable.rows);
+            });
+            if (formulaDetected) {
+              return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
+                defaultMessage:
+                  'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
+              });
+            }
+          }
+          return undefined;
+        },
+        showUnderlyingDataWarning: () => {
+          return layerMetaInfo?.error;
+        },
+      },
+      actions: {
+        inspect: () => lensInspector.inspect({ title }),
+        exportToCSV: () => {
+          if (!activeData) {
+            return;
+          }
+          const datatables = Object.values(activeData);
+          const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+            (memo, datatable, i) => {
+              // skip empty datatables
+              if (datatable) {
+                const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+
+                memo[`${title || unsavedTitle}${postFix}.csv`] = {
+                  content: exporters.datatableToCSV(datatable, {
+                    csvSeparator: uiSettings.get('csv:separator', ','),
+                    quoteValues: uiSettings.get('csv:quoteValues', true),
+                    formatFactory: fieldFormats.deserialize,
+                    escapeFormulaValues: false,
+                  }),
+                  type: exporters.CSV_MIME_TYPE,
+                };
+              }
+              return memo;
+            },
+            {}
+          );
+          if (content) {
+            downloadMultipleAs(content);
+          }
+        },
+        saveAndReturn: () => {
+          if (savingToDashboardPermitted) {
+            // disabling the validation on app leave because the document has been saved.
+            onAppLeave((actions) => {
+              return actions.default();
+            });
+            runSave(
+              {
+                newTitle: title || '',
+                newCopyOnSave: false,
+                isTitleDuplicateConfirmed: false,
+                returnToOrigin: true,
+              },
+              {
+                saveToLibrary:
+                  (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+              }
+            );
+          }
+        },
+        showSaveModal: () => {
+          if (savingToDashboardPermitted || savingToLibraryPermitted) {
+            setIsSaveModalVisible(true);
+          }
+        },
+        goBack: () => {
+          if (contextOriginatingApp) {
+            goBackToOriginatingApp?.();
+          }
+        },
+        cancel: () => {
+          if (redirectToOrigin) {
+            redirectToOrigin();
+          }
+        },
+        getUnderlyingDataUrl: () => {
+          if (!layerMetaInfo) {
+            return;
+          }
+          const { error, meta } = layerMetaInfo;
+          // If Discover is not available, return
+          // If there's no data, return
+          if (error || !discover || !meta) {
+            return;
+          }
+          const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+            query,
+            filters,
+            meta,
+            indexPatterns
+          );
+
+          return discover.locator!.getRedirectUrl({
+            indexPatternId: meta.id,
+            timeRange: data.query.timefilter.timefilter.getTime(),
+            filters: newFilters,
+            query: newQuery,
+            columns: meta.columns,
+          });
+        },
+      },
+    });
+    return [...(additionalMenuEntries || []), ...baseMenuEntries];
+  }, [
+    isLinkedToOriginatingApp,
+    dashboardFeatureFlag.allowByValueEmbeddables,
+    initialInput,
+    initialContextIsEmbedded,
+    isSaveable,
+    activeData,
+    layerMetaInfo,
+    getIsByValueMode,
+    savingToLibraryPermitted,
+    savingToDashboardPermitted,
+    contextOriginatingApp,
+    additionalMenuEntries,
+    lensInspector,
+    title,
+    unsavedTitle,
+    uiSettings,
+    fieldFormats.deserialize,
+    onAppLeave,
+    runSave,
+    attributeService,
+    setIsSaveModalVisible,
+    goBackToOriginatingApp,
+    redirectToOrigin,
+    discover,
+    query,
+    filters,
+    indexPatterns,
+    data.query.timefilter.timefilter,
+  ]);
 
   const onQuerySubmitWrapped = useCallback(
     (payload) => {
