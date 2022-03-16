@@ -15,6 +15,8 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
+import { RESULTS_TABLE_CELL_WRRAPER } from '../../screens/live_query';
+import { getAdvancedButton } from '../../screens/integrations';
 
 describe('ALL - Live Query', () => {
   beforeEach(() => {
@@ -31,23 +33,23 @@ describe('ALL - Live Query', () => {
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
-    cy.react('EuiDataGridHeaderCellWrapper', {
+    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.days.number', index: 1 },
     });
-    cy.react('EuiDataGridHeaderCellWrapper', {
+    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.hours.number', index: 2 },
     });
 
-    cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } }).click();
+    getAdvancedButton().click();
     typeInECSFieldInput('message{downArrow}{enter}');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
 
     checkResults();
-    cy.react('EuiDataGridHeaderCellWrapper', {
+    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'message', index: 1 },
     });
-    cy.react('EuiDataGridHeaderCellWrapper', {
+    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.days.number', index: 2 },
     }).react('EuiIconIndexMapping');
   });

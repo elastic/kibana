@@ -10,7 +10,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { ROLES } from '../../test';
 import { checkResults, selectAllAgents, submitQuery } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { getSavedQueriesDropdown, LIVE_QUERY_EDITOR } from '../../screens/live_query';
 
 describe('T1 Analyst - READ + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
@@ -58,9 +58,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.waitForReact(1000);
     cy.contains('New live query').should('not.be.disabled').click();
     selectAllAgents();
-    cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
-      .click()
-      .type(SAVED_QUERY_ID);
+    getSavedQueriesDropdown().click().type(SAVED_QUERY_ID);
     cy.react('List').first().click();
     cy.contains('select * from uptime');
     submitQuery();

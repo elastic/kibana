@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RESULTS_TABLE_BUTTON } from '../screens/live_query';
 import {
   checkResults,
   DEFAULT_QUERY,
@@ -30,12 +31,12 @@ export const getSavedQueriesComplexTest = () =>
       submitQuery();
       checkResults();
       // enter fullscreen
-      cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
       cy.contains(/Full screen$/).should('exist');
       cy.contains('Exit full screen').should('not.exist');
-      cy.getBySel('dataGridFullScreenButton').click();
+      cy.getBySel(RESULTS_TABLE_BUTTON).click();
 
-      cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
       cy.contains(/Full screen$/).should('not.exist');
       cy.contains('Exit full screen').should('exist');
 
@@ -51,10 +52,10 @@ export const getSavedQueriesComplexTest = () =>
       cy.getBySel('pagination-button-next').click().wait(500).click();
       cy.contains('2 columns hidden').should('exist');
 
-      cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
       cy.contains(/Full screen$/).should('not.exist');
       cy.contains('Exit full screen').should('exist');
-      cy.getBySel('dataGridFullScreenButton').click();
+      cy.getBySel(RESULTS_TABLE_BUTTON).click();
 
       // sorting
       cy.react('EuiDataGridHeaderCellWrapper', {
@@ -62,7 +63,7 @@ export const getSavedQueriesComplexTest = () =>
       }).click();
       cy.contains(/Sort A-Z$/).click();
       cy.contains('2 columns hidden').should('exist');
-      cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
       cy.contains(/Full screen$/).should('exist');
 
       // save new query

@@ -17,7 +17,7 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { getSavedQueriesComplexTest } from '../saved_queries';
+import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';

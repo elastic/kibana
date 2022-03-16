@@ -16,8 +16,10 @@ import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { preparePack } from '../../tasks/packs';
 import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
+import { DEFAULT_POLICY } from '../../screens/fleet';
+import { getSavedQueriesDropdown } from '../../screens/live_query';
 
-describe('ALL - Packs', () => {
+describe.only('ALL - Packs', () => {
   const integration = 'Osquery Manager';
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const PACK_NAME = 'Pack-name';
@@ -47,16 +49,11 @@ describe('ALL - Packs', () => {
       findAndClickButton('Add pack');
       findFormFieldByRowsLabelAndType('Name', PACK_NAME);
       findFormFieldByRowsLabelAndType('Description (optional)', 'Pack description');
-      findFormFieldByRowsLabelAndType(
-        'Scheduled agent policies (optional)',
-        'Default Fleet Server policy'
-      );
+      findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', DEFAULT_POLICY);
       cy.react('List').first().click();
       findAndClickButton('Add query');
       cy.contains('Attach next query');
-      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
-        .click()
-        .type(SAVED_QUERY_ID);
+      getSavedQueriesDropdown().click().type(SAVED_QUERY_ID);
       cy.react('List').first().click();
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
@@ -94,9 +91,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Add query');
       cy.contains('Attach next query');
       cy.contains('ID must be unique').should('not.exist');
-      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
-        .click()
-        .type(SAVED_QUERY_ID);
+      getSavedQueriesDropdown().click().type(SAVED_QUERY_ID);
       cy.react('List').first().click();
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
@@ -175,9 +170,7 @@ describe('ALL - Packs', () => {
 
       findAndClickButton('Add query');
 
-      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
-        .click()
-        .type('Multiple {downArrow} {enter}');
+      getSavedQueriesDropdown().click().type('Multiple {downArrow} {enter}');
       cy.contains('Custom key/value pairs');
       cy.contains('Days of uptime');
       cy.contains('List of keywords used to tag each');
@@ -185,9 +178,7 @@ describe('ALL - Packs', () => {
       cy.contains('Client network address.');
       cy.contains('Total uptime seconds');
 
-      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
-        .click()
-        .type('NOMAPPING {downArrow} {enter}');
+      getSavedQueriesDropdown().click().type('NOMAPPING {downArrow} {enter}');
       cy.contains('Custom key/value pairs').should('not.exist');
       cy.contains('Days of uptime').should('not.exist');
       cy.contains('List of keywords used to tag each').should('not.exist');
@@ -195,9 +186,7 @@ describe('ALL - Packs', () => {
       cy.contains('Client network address.').should('not.exist');
       cy.contains('Total uptime seconds').should('not.exist');
 
-      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
-        .click()
-        .type('ONE_MAPPING {downArrow} {enter}');
+      getSavedQueriesDropdown().click().type('ONE_MAPPING {downArrow} {enter}');
       cy.contains('Name of the continent');
       cy.contains('Seconds of uptime');
 

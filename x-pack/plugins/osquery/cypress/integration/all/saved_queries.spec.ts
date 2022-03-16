@@ -8,7 +8,7 @@
 import { navigateTo } from '../../tasks/navigation';
 
 import { login } from '../../tasks/login';
-import { getSavedQueriesComplexTest } from '../saved_queries';
+import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
 describe('ALL - Saved queries', () => {
   beforeEach(() => {
