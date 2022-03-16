@@ -6,11 +6,11 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { usePluginContext } from './use_plugin_context';
 import { loadRules, Rule } from '../../../triggers_actions_ui/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
 import { FetchRulesProps } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
+import { useKibana } from '../utils/kibana_react';
 
 interface RuleState {
   isLoading: boolean;
@@ -20,8 +20,7 @@ interface RuleState {
 }
 
 export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRulesProps) {
-  const { core } = usePluginContext();
-  const { http } = core;
+  const { http } = useKibana().services;
 
   const [rulesState, setRulesState] = useState<RuleState>({
     isLoading: false,

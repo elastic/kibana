@@ -62,12 +62,13 @@ import {
 } from './translations';
 
 export function RulesPage() {
-  const { core, ObservabilityPageTemplate } = usePluginContext();
-  const { docLinks, triggersActionsUi } = useKibana().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
   const {
     http,
+    docLinks,
+    triggersActionsUi,
     notifications: { toasts },
-  } = core;
+  } = useKibana().services;
 
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [sort, setSort] = useState<EuiTableSortingType<RuleTableItem>['sort']>({

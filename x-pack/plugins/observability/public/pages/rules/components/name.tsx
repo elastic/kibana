@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleNameProps } from '../types';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useKibana } from '../../../utils/kibana_react';
 
 export function Name({ name, rule }: RuleNameProps) {
-  const { core } = usePluginContext();
-  const detailsLink = core.http.basePath.prepend(
+  const { http } = useKibana().services;
+  const detailsLink = http.basePath.prepend(
     `/app/management/insightsAndAlerting/triggersActions/rule/${rule.id}`
   );
   const link = (
