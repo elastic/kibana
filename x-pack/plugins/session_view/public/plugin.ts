@@ -8,6 +8,7 @@
 import { CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
 import { SessionViewServices, SessionViewDeps } from './types';
 import { getSessionViewLazy } from './methods';
+
 export class SessionViewPlugin implements Plugin {
   public setup(core: CoreSetup<SessionViewServices, void>) {}
 
