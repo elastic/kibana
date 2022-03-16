@@ -36,7 +36,7 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
-  compression: schema.boolean({ defaultValue: false }),
+  compression: schema.boolean({ defaultValue: true }),
   username: schema.maybe(
     schema.string({
       validate: (rawConfig) => {
