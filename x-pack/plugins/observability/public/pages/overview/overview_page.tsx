@@ -12,7 +12,7 @@ import { DatePicker } from '../../components/shared/date_picker';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useTimeRange } from '../../hooks/use_time_range';
+import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
@@ -36,7 +36,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
-  const { relativeStart, relativeEnd } = useTimeRange();
+  const { relativeStart, relativeEnd } = useDatePickerContext();
 
   const relativeTime = { start: relativeStart, end: relativeEnd };
 
