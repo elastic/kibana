@@ -90,6 +90,8 @@ We also maintain an internal docker-compose setup for running a full stack with 
 
 See (internal) https://github.com/elastic/observability-dev/tree/main/tools/docker-testing-cluster for more details.
 
-# Running more stack components from source
+# Complete source setup
 
-See (internal) https://github.com/elastic/observability-dev/blob/main/docs/monitoring/monitoring-simulation-notes.md for details.
+For some types of changes (for example, new fields, templates, endpoints or data processing logic), you may want to run stack components from source.
+
+See [Running Components from Source](running_components_from_source.md) for details on how to do this for each component.
