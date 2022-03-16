@@ -143,13 +143,7 @@ const registerHttpRequestMockHelpers = (
     mockResponse('GET', `${API_BASE_PATH}/remote_clusters`, response, error);
 
   const setClusterSettingsResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-    server.respondWith('POST', `${API_BASE_PATH}/cluster_settings`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
+    mockResponse('POST', `${API_BASE_PATH}/cluster_settings`, response, error);
   };
 
   return {
