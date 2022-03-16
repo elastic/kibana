@@ -24,7 +24,6 @@ import { defaultAnnotationColor } from '../../../../../../src/plugins/event_anno
 const MAX_DATE = Number(new Date(8640000000000000));
 const MIN_DATE = Number(new Date(-8640000000000000));
 
-// TODO with date
 export function getStaticDate(
   dataLayers: XYDataLayerConfig[],
   activeData: FramePublicAPI['activeData']
@@ -66,7 +65,7 @@ export const getAnnotationsSupportedLayer = (
 
   const hasDateHistogram = dataLayers.every(
     (dataLayer) =>
-      dataLayer.xAccessor ||
+      dataLayer.xAccessor &&
       checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
   );
 

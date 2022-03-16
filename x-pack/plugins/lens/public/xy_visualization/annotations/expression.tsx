@@ -167,10 +167,10 @@ const createCustomTooltipDetails =
   () => {
     return (
       <div>
-        {config.map(({ icon, label, key }) => (
+        {config.map(({ icon, label, key, color }) => (
           <div className="echTooltip__item--container">
             <span className="echTooltip__label">
-              {hasIcon(icon) ? <EuiIcon type={icon} /> : null}
+              {hasIcon(icon) ? <EuiIcon type={icon} color={color} /> : null}
               {label}
             </span>
             <span className="echTooltip__value">
