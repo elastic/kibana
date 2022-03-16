@@ -2,9 +2,7 @@ This document provides a general overview of the indices used by the Stack Monit
 
 ## Index Patterns
 
-Stack Monitoring indices will generally fall into to `.monitoring-*` index pattern.
-
-Though there are certain additional cases to be aware of.
+Stack Monitoring indices will generally fall into to `.monitoring-*` index pattern with some variation depending on collection mode.
 
 When using [internal collection](data_collection_modes.md#internal-collection), or standalone metricbeat collection prior to 8.0, data will be stored in dated raw indices following the pattern:
 
@@ -19,6 +17,8 @@ When using [standalone metricbeat collection](data_collection_modes.md#standalon
 With the change to [package-driven collection](data_collection_modes.md#package-driven-collection), data will be stored in data streams under the `metrics-*` index pattern.
 
 Additionally, in version 8.0 only, Enterprise Search metrics are published to the `metricbeat-*` index pattern. This was a bug and corrected in 8.1 ([kibana-pr2981](https://github.com/elastic/beats/pull/29871)).
+
+And finally if using the standalone metricbeat modules with `xpack.enabled: false`, they will write data into the `metricbeat-*` index pattern. Stack Monitoring UI was never adapted to read this data, so it would only be available for custom dashboards. 
 
 ## Mapping sources
 
