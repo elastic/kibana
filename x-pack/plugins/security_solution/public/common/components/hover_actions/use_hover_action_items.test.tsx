@@ -275,4 +275,21 @@ describe('useHoverActionItems', () => {
       );
     });
   });
+
+  test('when timeline button is disabled, it should not show', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          hideAddToTimeline: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      result.current.allActionItems.forEach((actionItem) => {
+        expect(actionItem.props['data-test-subj']).not.toEqual('hover-actions-add-timeline');
+      });
+    });
+  });
 });
