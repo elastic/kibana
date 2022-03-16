@@ -53,6 +53,7 @@ export type GaugeArguments = GaugeState & {
   shape: GaugeShape;
   colorMode: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteState>;
+  commonLabel?: string;
   ariaLabel?: string;
 };
 
