@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiSelectable, EuiPanel, EuiFormFieldset, EuiTitle } from '@elastic/eui';
+import { EuiSelectable, EuiPanel, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const SearchIndexSelectable: React.FC = () => {
@@ -20,24 +20,23 @@ export const SearchIndexSelectable: React.FC = () => {
     { label: 'enterprise-search-index5' },
   ];
   return (
-    <EuiPanel color="subdued">
-      <EuiFormFieldset
-        legend={{
-          children: (
-            <EuiTitle size="xxs">
-              <span>
-                {i18n.translate('xpack.enterpriseSearch.elasticsearchIndexSelectionLabel', {
-                  defaultMessage: 'Select an Elasticsearch index to use',
-                })}
-              </span>
-            </EuiTitle>
-          ),
-        }}
+    <EuiPanel hasBorder>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engineCreation.searchIndexSelectable.label',
+          { defaultMessage: 'Select an Elasticsearch index to use' }
+        )}
+        helpText={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engineCreation.searchIndexSelectable.helpText',
+          { defaultMessage: "Only indices aliased with 'search-' can be selected" }
+        )}
+        fullWidth
       >
         <EuiSelectable
           aria-label="Select an Elasticsearch index"
           searchable
           options={options}
+          listProps={{ bordered: true }}
           singleSelection
         >
           {(list, search) => (
@@ -47,7 +46,7 @@ export const SearchIndexSelectable: React.FC = () => {
             </>
           )}
         </EuiSelectable>
-      </EuiFormFieldset>
+      </EuiFormRow>
     </EuiPanel>
   );
 };
