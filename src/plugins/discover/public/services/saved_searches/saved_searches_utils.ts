@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SavedSearchAttributes, SavedSearch, SortOrder } from '../../../common/types';
 import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
+import { SavedSearchGridAttributes } from '../../../common/types';
 
 export const getSavedSearchUrl = (id?: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
 
@@ -56,7 +57,7 @@ export const toSavedSearchAttributes = (
   sort: (savedSearch.sort as unknown as string[]) ?? [],
   columns: savedSearch.columns ?? [],
   description: savedSearch.description ?? '',
-  grid: (savedSearch.grid as unknown as string) ?? {},
+  grid: (savedSearch.grid as SavedSearchGridAttributes) ?? {},
   hideChart: savedSearch.hideChart ?? false,
   viewMode: savedSearch.viewMode,
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,

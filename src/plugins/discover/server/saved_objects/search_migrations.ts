@@ -12,9 +12,10 @@
 import { flow, get, mapValues } from 'lodash';
 import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
 import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
-import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '../../../data/server';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../data/server';
 import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
 import type { SavedSearchAttributes } from '../../common/types';
+import type { SerializedSearchSourceFields } from '../../../data/common';
 
 /**
  * This migration script is related to:
@@ -159,8 +160,9 @@ export const searchMigrations = {
 
 export const getAllMigrations = (
   searchSourceMigrations: MigrateFunctionsObject
-): SavedObjectMigrationMap =>
-  mergeSavedObjectMigrationMaps(
+): SavedObjectMigrationMap => {
+  return mergeSavedObjectMigrationMaps(
     searchMigrations,
     getSearchSourceMigrations(searchSourceMigrations) as unknown as SavedObjectMigrationMap
   );
+};

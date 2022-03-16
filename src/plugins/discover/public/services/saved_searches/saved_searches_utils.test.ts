@@ -16,7 +16,11 @@ import {
 
 import { createSearchSourceMock } from '../../../../data/public/mocks';
 
-import type { SavedSearchAttributes, SavedSearch } from '../../../common/types';
+import type {
+  SavedSearchAttributes,
+  SavedSearch,
+  SavedSearchGridAttributes,
+} from '../../../common/types';
 
 describe('saved_searches_utils', () => {
   describe('getSavedSearchUrl', () => {
@@ -41,7 +45,7 @@ describe('saved_searches_utils', () => {
         sort: [] as string[],
         columns: ['a', 'b'],
         description: 'foo',
-        grid: {} as unknown as string,
+        grid: {} as SavedSearchGridAttributes,
         hideChart: true,
       };
 

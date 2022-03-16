@@ -14,13 +14,27 @@ export interface DiscoverGridSettingsColumn {
   width?: number;
 }
 
+export interface DiscoverGridSavedSearch {
+  columns?: {
+    [key: string]: DiscoverGridSettingsColumn;
+  };
+}
+
+export interface SavedSearchGridAttributes extends SavedObjectAttributes {
+  columns: {
+    [key: string]: {
+      width?: number;
+    };
+  };
+}
+
 /** @internal **/
 export interface SavedSearchAttributes extends SavedObjectAttributes {
   title: string;
   sort: string[];
   columns: string[];
   description: string;
-  grid: string;
+  grid?: SavedSearchGridAttributes;
   hideChart: boolean;
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
