@@ -26,23 +26,24 @@ const log = getService('log');
 
   describe('Search sessions a11y tests', () => {
     before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/data/search_sessions');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/async_search');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
-      await PageObjects.common.navigateToApp('dashboard');
-      log.debug('wait for dashboard landing page');
-      await retry.tryForTime(10000, async () => {
-        testSubjects.existOrFail('dashboardLandingPage');
-      });
-      await searchSessions.markTourDone();
-      log.debug('loading the "Not Delayed" dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-      await PageObjects.dashboard.waitForRenderComplete();
-      await searchSessions.expectState('completed');
-      const searchSessionName = `Session - ${uuid()}`;
-      await searchSessions.save({ searchSessionName });
-      await searchSessions.expectState('backgroundCompleted');
+      // await esArchiver.load('x-pack/test/functional/es_archives/dashboard/async_search');
+      // await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      // await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
+      // await PageObjects.common.navigateToApp('dashboard');
+      // log.debug('wait for dashboard landing page');
+      // await retry.tryForTime(10000, async () => {
+      //   testSubjects.existOrFail('dashboardLandingPage');
+      // });
+      // await searchSessions.markTourDone();
+      // log.debug('loading the "Not Delayed" dashboard');
+      // await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+      // await PageObjects.dashboard.waitForRenderComplete();
+      // await searchSessions.expectState('completed');
+      // const searchSessionName = `Session - ${uuid()}`;
+      // await searchSessions.save({ searchSessionName });
+      // await searchSessions.expectState('backgroundCompleted');
       await PageObjects.searchSessionsManagement.goTo();
     });
 
@@ -53,6 +54,8 @@ const log = getService('log');
     it('Search sessions page meets a11y requirements', async () => {
       await a11y.testAppSnapshot();
     });
+
+
 
 
   });
