@@ -118,27 +118,24 @@ export function APMSection({ bucketSize }: Props) {
           <StyledStat
             title={`${formatTpmStat(stats?.transactions.value)} tpm`}
             description={
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.observability.overview.apm.throughputTip',
-                {
+              <EuiToolTip
+                content={i18n.translate('xpack.observability.overview.apm.throughputTip', {
                   defaultMessage:
                     'Values are calculated for transactions with type "Request" or "page-load". If neither are available, values reflect the top transaction type.',
-                }
-              )}
-            >
-              <>
-                {i18n.translate('xpack.observability.overview.apm.throughput', {
-                  defaultMessage: 'Throughput',
-                })}{' '}
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="questionInCircle"
-                  className="eui-alignCenter"
-                />
-              </>
-            </EuiToolTip>
+                })}
+              >
+                <>
+                  {i18n.translate('xpack.observability.overview.apm.throughput', {
+                    defaultMessage: 'Throughput',
+                  })}{' '}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignCenter"
+                  />
+                </>
+              </EuiToolTip>
             }
             isLoading={isLoading}
             color={transactionsColor}
