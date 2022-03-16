@@ -43,6 +43,7 @@ import {
 } from '../../../../common/alerting/logs/log_threshold';
 import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { getAlertLink } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
@@ -93,11 +94,14 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     LogThresholdAlertState,
     LogThresholdAlertContext,
     LogThresholdActionGroups
-  >(async ({ services, params }) => {
-    const { alertWithLifecycle, savedObjectsClient, scopedClusterClient } = services;
+  >(async ({ services, params, startedAt }) => {
+    const { alertWithLifecycle, savedObjectsClient, scopedClusterClient, getAlertStartedDate } =
+      services;
     const { sources } = libs;
-    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold) =>
-      alertWithLifecycle({
+    let indexedStartedAt: string | null = startedAt.toISOString();
+    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold) => {
+      indexedStartedAt = getAlertStartedDate(id) ?? indexedStartedAt;
+      return alertWithLifecycle({
         id,
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
@@ -105,6 +109,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           [ALERT_REASON]: reason,
         },
       });
+    };
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
@@ -125,7 +130,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           indices,
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
-          alertFactory
+          alertFactory,
+          indexedStartedAt
         );
       } else {
         await executeRatioAlert(
@@ -134,7 +140,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           indices,
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
-          alertFactory
+          alertFactory,
+          indexedStartedAt
         );
       }
     } catch (e) {
@@ -148,7 +155,8 @@ async function executeAlert(
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  indexedStartedAt: string
 ) {
   const query = getESQuery(ruleParams, timestampField, indexPattern, runtimeMappings);
 
@@ -161,14 +169,16 @@ async function executeAlert(
       await getGroupedResults(query, esClient),
       ruleParams,
       alertFactory,
-      updateAlert
+      updateAlert,
+      indexedStartedAt
     );
   } else {
     processUngroupedResults(
       await getUngroupedResults(query, esClient),
       ruleParams,
       alertFactory,
-      updateAlert
+      updateAlert,
+      indexedStartedAt
     );
   }
 }
@@ -179,7 +189,8 @@ async function executeRatioAlert(
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  indexedStartedAt: string
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: RuleParams = {
@@ -214,7 +225,8 @@ async function executeRatioAlert(
       denominatorGroupedResults,
       ruleParams,
       alertFactory,
-      updateAlert
+      updateAlert,
+      indexedStartedAt
     );
   } else {
     const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
@@ -226,7 +238,8 @@ async function executeRatioAlert(
       denominatorUngroupedResults,
       ruleParams,
       alertFactory,
-      updateAlert
+      updateAlert,
+      indexedStartedAt
     );
   }
 }
@@ -246,7 +259,8 @@ export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: CountRuleParams,
   alertFactory: LogThresholdAlertFactory,
-  alertUpdater: AlertUpdater
+  alertUpdater: AlertUpdater,
+  indexedStartedAt: string
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
@@ -268,6 +282,7 @@ export const processUngroupedResults = (
           group: null,
           isRatio: false,
           reason: reasonMessage,
+          viewInAppUrl: getAlertLink(new Date(indexedStartedAt).getTime()),
         },
       },
     ]);
@@ -279,7 +294,8 @@ export const processUngroupedRatioResults = (
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioRuleParams,
   alertFactory: LogThresholdAlertFactory,
-  alertUpdater: AlertUpdater
+  alertUpdater: AlertUpdater,
+  indexedStartedAt: string
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -306,6 +322,7 @@ export const processUngroupedRatioResults = (
           group: null,
           isRatio: true,
           reason: reasonMessage,
+          viewInAppUrl: getAlertLink(new Date(indexedStartedAt).getTime()),
         },
       },
     ]);
@@ -355,7 +372,8 @@ export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: CountRuleParams,
   alertFactory: LogThresholdAlertFactory,
-  alertUpdater: AlertUpdater
+  alertUpdater: AlertUpdater,
+  indexedStartedAt: string
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -383,6 +401,7 @@ export const processGroupByResults = (
             group: group.name,
             isRatio: false,
             reason: reasonMessage,
+            viewInAppUrl: getAlertLink(new Date(indexedStartedAt).getTime()),
           },
         },
       ]);
@@ -395,7 +414,8 @@ export const processGroupByRatioResults = (
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: RatioRuleParams,
   alertFactory: LogThresholdAlertFactory,
-  alertUpdater: AlertUpdater
+  alertUpdater: AlertUpdater,
+  indexedStartedAt: string
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -434,6 +454,7 @@ export const processGroupByRatioResults = (
             group: numeratorGroup.name,
             isRatio: true,
             reason: reasonMessage,
+            viewInAppUrl: getAlertLink(new Date(indexedStartedAt).getTime()),
           },
         },
       ]);
@@ -451,6 +472,7 @@ export const updateAlert: AlertUpdater = (alert, state, actions) => {
   if (actions && actions.length > 0) {
     const sharedContext = {
       timestamp: new Date().toISOString(),
+      viewInAppUrl: '',
     };
     actions.forEach((actionSet) => {
       const { actionGroup, context } = actionSet;
