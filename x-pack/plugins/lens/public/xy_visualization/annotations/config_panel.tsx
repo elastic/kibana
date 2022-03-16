@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import moment from 'moment';
-import { AnnotationState } from 'src/plugins/event_annotation/common/types';
+import { AnnotationConfig } from 'src/plugins/event_annotation/common/types';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
@@ -48,7 +48,7 @@ export const AnnotationsPanel = (
   const currentConfig = localLayer.config?.find((c) => c.id === accessor);
 
   const setConfig = useCallback(
-    (config: Partial<AnnotationState> | undefined) => {
+    (config: Partial<AnnotationConfig> | undefined) => {
       if (config == null) {
         return;
       }
@@ -75,11 +75,15 @@ export const AnnotationsPanel = (
       >
         <EuiDatePicker
           showTimeSelect
-          selected={moment(currentConfig?.timestamp)}
+          selected={moment(currentConfig?.key.timestamp)}
           onChange={(date) => {
             if (date) {
               setConfig({
-                timestamp: date?.valueOf(),
+                key: {
+                  ...(currentConfig?.key || { keyType: 'point_in_time' }),
+                  type: 'annotation_key',
+                  timestamp: date?.valueOf(),
+                },
               });
             }
           }}

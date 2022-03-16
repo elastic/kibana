@@ -18,28 +18,14 @@ export interface AnnotationConfig {
   annotationType: AnnotationType;
   label: string;
   message?: string;
+  color?: string;
+  icon?: string;
+  lineWidth?: number;
+  lineStyle?: LineStyle;
+  iconPosition?: IconPosition;
+  textVisibility?: boolean;
+  isHidden?: boolean;
   axisMode: YAxisMode;
-  color?: string;
-  icon?: string;
-  lineWidth?: number;
-  lineStyle?: LineStyle;
-  iconPosition?: IconPosition;
-  textVisibility?: boolean;
-  isHidden?: boolean;
-}
-
-export interface AnnotationState {
-  id: string;
-  timestamp: number;
-  label: string;
-  message?: string;
-  textVisibility?: boolean;
-  icon?: string;
-  iconPosition?: IconPosition;
-  lineStyle?: LineStyle;
-  lineWidth?: number;
-  color?: string;
-  isHidden?: boolean;
 }
 
 export type AnnotationResult = AnnotationConfig & { type: 'annotation_config' };

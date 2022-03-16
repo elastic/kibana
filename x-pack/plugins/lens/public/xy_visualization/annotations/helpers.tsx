@@ -121,7 +121,13 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
         label: i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
           defaultMessage: 'Static Annotation',
         }),
-        timestamp: newTimestamp,
+        annotationType: 'manual',
+        axisMode: 'bottom',
+        key: {
+          keyType: 'point_in_time',
+          type: 'annotation_key',
+          timestamp: newTimestamp,
+        },
         ...previousConfig,
         id: columnId,
       },

@@ -405,7 +405,9 @@ const annotationLayerToExpression = (
                 (config): Ast =>
                   eventAnnotationService.toExpression({
                     id: config.id,
-                    timestamp: config.timestamp,
+                    annotationType: config.annotationType,
+                    key: config.key,
+                    axisMode: 'bottom',
                     label: config.label || defaultAnnotationLabel,
                     textVisibility: config.textVisibility,
                     icon: config.icon,

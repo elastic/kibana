@@ -7,4 +7,4 @@
  */
 
 export { annotationConfig, annotationKeyConfig } from './annotation_expression';
-export type { AnnotationConfig, AnnotationState } from './types';
+export type { AnnotationConfig } from './types';

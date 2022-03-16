@@ -28,7 +28,7 @@ export function getAnnotationService(): EventAnnotationServiceType {
       icon,
       iconPosition,
       textVisibility,
-      timestamp,
+      key,
     }) => {
       return {
         type: 'expression',
@@ -47,7 +47,7 @@ export function getAnnotationService(): EventAnnotationServiceType {
                       function: 'annotation_key',
                       arguments: {
                         keyType: ['point_in_time'],
-                        timestamp: [timestamp],
+                        timestamp: [key.timestamp],
                       },
                     },
                   ],
