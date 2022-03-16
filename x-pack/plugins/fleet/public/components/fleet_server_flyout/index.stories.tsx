@@ -23,6 +23,10 @@ export const FleetServerFlyout = () => {
   );
 };
 
+FleetServerFlyout.args = {
+  isCloudEnabled: false,
+};
+
 export default {
   component: FleetServerFlyout,
   title: 'Sections/Fleet/Agents/FleetServerFlyout',

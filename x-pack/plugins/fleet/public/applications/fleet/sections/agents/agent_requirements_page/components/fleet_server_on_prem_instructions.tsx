@@ -28,7 +28,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DownloadStep, SelectCreateAgentPolicy } from '../../../../components';
+import { SelectCreateAgentPolicy } from '../../../../components';
 import {
   useStartServices,
   useDefaultOutput,
@@ -44,7 +44,6 @@ import {
 } from '../../../../hooks';
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { AgentPolicy } from '../../../../types';
-import { FleetServerOnPremRequiredCallout } from '../../components';
 
 import { policyHasFleetServer } from '../../../../services';
 
@@ -170,7 +169,7 @@ export const FleetServerCommandStep = ({
 
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.stepInstallAgentTitle', {
-      defaultMessage: 'Start Fleet Server',
+      defaultMessage: 'Install Fleet Server to a centralized host',
     }),
     status: !serviceToken ? 'disabled' : undefined,
     children: serviceToken ? (
@@ -352,12 +351,12 @@ const AgentPolicySelectionStep = ({
     title:
       agentPolicies.length === 0
         ? i18n.translate('xpack.fleet.fleetServerSetup.stepCreateAgentPolicyTitle', {
-            defaultMessage: 'Create an agent policy to host Fleet Server',
+            defaultMessage: 'Create a policy for Fleet Server',
           })
         : i18n.translate('xpack.fleet.fleetServerSetup.stepSelectAgentPolicyTitle', {
-            defaultMessage: 'Select an agent policy to host Fleet Server',
+            defaultMessage: 'Select a policy for Fleet Server',
           }),
-    status: undefined,
+    status: policyId ? 'complete' : undefined,
     children: (
       <>
         <SelectCreateAgentPolicy
@@ -374,21 +373,26 @@ const AgentPolicySelectionStep = ({
 
 export const addFleetServerHostStep = ({
   addFleetServerHost,
+  disabled,
 }: {
   addFleetServerHost: (v: string) => Promise<void>;
+  disabled: boolean;
 }): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle', {
-      defaultMessage: 'Get started with Fleet Server',
+      defaultMessage: 'Add your Fleet Server host',
     }),
-    status: undefined,
-    children: <AddFleetServerHostStepContent addFleetServerHost={addFleetServerHost} />,
+    status: disabled ? 'disabled' : undefined,
+    children: disabled ? null : (
+      <AddFleetServerHostStepContent addFleetServerHost={addFleetServerHost} />
+    ),
   };
 };
 
 export const AddFleetServerHostStepContent = ({
   addFleetServerHost,
 }: {
+  fleetServerHost?: string;
   addFleetServerHost: (v: string) => Promise<void>;
 }) => {
   const [calloutHost, setCalloutHost] = useState<string | undefined>();
@@ -435,16 +439,17 @@ export const AddFleetServerHostStepContent = ({
     } finally {
       setIsLoading(false);
     }
-  }, [fleetServerHost, addFleetServerHost, validate, notifications.toasts]);
+  }, [validate, fleetServerHost, addFleetServerHost, notifications.toasts]);
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setFleetServerHost(e.target.value);
+
       if (error) {
         validate(e.target.value);
       }
     },
-    [error, validate, setFleetServerHost]
+    [error, validate]
   );
 
   return (
@@ -530,16 +535,18 @@ export const AddFleetServerHostStepContent = ({
 export const deploymentModeStep = ({
   deploymentMode,
   setDeploymentMode,
+  disabled,
 }: {
   deploymentMode: DeploymentMode;
   setDeploymentMode: (v: DeploymentMode) => void;
+  disabled: boolean;
 }): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.stepDeploymentModeTitle', {
       defaultMessage: 'Choose a deployment mode for security',
     }),
-    status: undefined,
-    children: (
+    status: disabled ? 'disabled' : undefined,
+    children: disabled ? null : (
       <DeploymentModeStepContent
         deploymentMode={deploymentMode}
         setDeploymentMode={setDeploymentMode}
@@ -633,7 +640,7 @@ const WaitingForFleetServerStep = ({
 }): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.stepWaitingForFleetServerTitle', {
-      defaultMessage: 'Waiting for Fleet Server to connect...',
+      defaultMessage: 'Confirm connection',
     }),
     status,
     children: undefined,
@@ -687,8 +694,6 @@ export const OnPremInstructions: React.FC = () => {
     addFleetServerHost,
   } = useFleetServerInstructions(policyId);
 
-  const { docLinks } = useStartServices();
-
   const [isWaitingForFleetServer, setIsWaitingForFleetServer] = useState(true);
 
   useEffect(() => {
@@ -714,52 +719,40 @@ export const OnPremInstructions: React.FC = () => {
   }, [notifications.toasts]);
 
   return (
-    <>
-      <FleetServerOnPremRequiredCallout />
-      <EuiSpacer size="xl" />
-      <EuiText>
-        <EuiSpacer size="m" />
-        <FormattedMessage
-          id="xpack.fleet.fleetServerSetup.setupText"
-          defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. Follow the instructions below to set up a Fleet Server. For more information, see the {userGuideLink}."
-          values={{
-            userGuideLink: (
-              <EuiLink
-                href={docLinks.links.fleet.fleetServerAddFleetServer}
-                external
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                  defaultMessage="Fleet and Elastic Agent Guide"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="l" />
-      <EuiSteps
-        className="eui-textLeft"
-        steps={[
-          addFleetServerHostStep({ addFleetServerHost }),
-          AgentPolicySelectionStep({ policyId, setPolicyId }),
-          DownloadStep(true),
-          deploymentModeStep({ deploymentMode, setDeploymentMode }),
-          ServiceTokenStep({
-            disabled: deploymentMode === 'production' && !fleetServerHost,
-            serviceToken,
-            getServiceToken,
-            isLoadingServiceToken,
-          }),
-          FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
-          isWaitingForFleetServer
-            ? WaitingForFleetServerStep({
-                status: !serviceToken ? 'disabled' : 'loading',
-              })
-            : CompleteStep(),
-        ]}
-      />
-    </>
+    <EuiSteps
+      className="eui-textLeft"
+      steps={[
+        AgentPolicySelectionStep({
+          policyId,
+          setPolicyId,
+        }),
+        deploymentModeStep({
+          deploymentMode,
+          setDeploymentMode,
+          disabled: !policyId,
+        }),
+        addFleetServerHostStep({
+          addFleetServerHost,
+          disabled: !policyId,
+        }),
+        ServiceTokenStep({
+          disabled: deploymentMode === 'production' && !fleetServerHost,
+          serviceToken,
+          getServiceToken,
+          isLoadingServiceToken,
+        }),
+        FleetServerCommandStep({
+          serviceToken,
+          installCommand,
+          platform,
+          setPlatform,
+        }),
+        isWaitingForFleetServer
+          ? WaitingForFleetServerStep({
+              status: !serviceToken ? 'disabled' : 'loading',
+            })
+          : CompleteStep(),
+      ]}
+    />
   );
 };

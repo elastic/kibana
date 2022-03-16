@@ -84,6 +84,10 @@ export const getHttp = (basepath = BASE_PATH) => {
       }
 
       if (path.match('/api/fleet/settings')) {
+        return { item: { fleet_server_hosts: [] } };
+      }
+
+      if (path.match('/api/fleet/outputs')) {
         return { items: [] };
       }
 
@@ -101,6 +105,26 @@ export const getHttp = (basepath = BASE_PATH) => {
         return {
           name: 'test-token',
           value: 'test-token-value',
+        };
+      }
+
+      if (path.match('/api/fleet/agent_policies')) {
+        return {
+          item: {
+            id: 'test-policy',
+            name: 'Test Policy',
+            namespace: 'default',
+            description: 'Test Policy',
+            monitoring_enabled: ['metrics'],
+            data_output_id: 'test-output',
+            monitoring_output_id: 'test-output',
+            status: 'active',
+            packagePolicies: ['test-package-policy'],
+            updated_on: new Date(),
+            updated_by: 'elastic',
+            revision: 0,
+            agents: 0,
+          },
         };
       }
 

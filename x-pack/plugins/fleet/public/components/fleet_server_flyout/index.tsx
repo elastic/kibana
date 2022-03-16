@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useStartServices } from '../../hooks';
 
-import { QuickStartTab } from './tabs';
+import { AdvancedTab, QuickStartTab } from './tabs';
 
 export interface Props {
   onClose: () => void;
@@ -40,7 +40,7 @@ export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) =
   const advancedTab = {
     id: 'advanced',
     name: 'Advanced',
-    content: <>Advanced!</>,
+    content: <AdvancedTab />,
   };
 
   const currentTabContent =

@@ -6,6 +6,8 @@
  */
 import React from 'react';
 
+import { FleetServerRequirementPage } from '../../../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page';
+
 export const AdvancedTab: React.FunctionComponent = () => {
-  return <>Advanced!</>;
+  return <FleetServerRequirementPage />;
 };
