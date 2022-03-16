@@ -8495,8 +8495,6 @@
     "xpack.dataVisualizer.index.fieldNameSelect": "Nom du champ",
     "xpack.dataVisualizer.index.fieldTypeSelect": "Type du champ",
     "xpack.dataVisualizer.index.fullTimeRangeSelector.errorSettingTimeRangeNotification": "Une erreur s'est produite lors de la définition de la plage temporelle.",
-    "xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationDescription": "La détection des anomalies ne s'exécute que sur des index temporels",
-    "xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle": "Le modèle d'indexation {indexPatternTitle} n'est pas basé sur une série temporelle",
     "xpack.dataVisualizer.index.lensChart.averageOfLabel": "Moyenne de {fieldName}",
     "xpack.dataVisualizer.index.lensChart.chartTitle": "Lens pour {fieldName}",
     "xpack.dataVisualizer.index.lensChart.countLabel": "Compte",

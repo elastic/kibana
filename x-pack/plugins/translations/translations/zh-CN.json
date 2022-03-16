@@ -10014,8 +10014,6 @@
     "xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataButtonLabel": "使用完整的数据",
     "xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel": "排除冻结的数据层",
     "xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel": "包括冻结的数据层",
-    "xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationDescription": "仅针对基于时间的索引运行异常检测",
-    "xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle": "索引模式 {indexPatternTitle} 不基于时间序列",
     "xpack.dataVisualizer.index.lensChart.averageOfLabel": "{fieldName} 的平均值",
     "xpack.dataVisualizer.index.lensChart.chartTitle": "{fieldName} 的 Lens",
     "xpack.dataVisualizer.index.lensChart.countLabel": "计数",
