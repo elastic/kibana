@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Capabilities } from 'kibana/public';
+import { partition } from 'lodash';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource } from '../types';
 
@@ -24,10 +25,12 @@ export const getShowUnderlyingDataLabel = () =>
     defaultMessage: 'Open in Discover',
   });
 
-function joinQueries(queries: Query[][] | undefined) {
-  if (!queries) {
-    return '';
-  }
+/**
+ * Joins a series of queries.
+ *
+ * Uses "AND" along dimension 1 and "OR" along dimension 2
+ */
+function joinQueries(queries: Query[][]) {
   const expression = queries
     .filter((subQueries) => subQueries.length)
     .map((subQueries) =>
@@ -123,38 +126,57 @@ export function getLayerMetaInfo(
 }
 
 // This enforces on assignment time that the two props are not the same
-type LanguageAssignments =
-  | { queryLanguage: 'lucene'; filtersLanguage: 'kuery' }
-  | { queryLanguage: 'kuery'; filtersLanguage: 'lucene' };
+type QueryLanguage = 'lucene' | 'kuery';
 
 export function combineQueryAndFilters(
-  query: Query | undefined,
+  query: Query | Query[] | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
   dataViews: DataViewBase[] | undefined
 ) {
-  // Unless a lucene query is already defined, kuery is assigned to it
-  const { queryLanguage, filtersLanguage }: LanguageAssignments =
-    query?.language === 'lucene'
-      ? { queryLanguage: 'lucene', filtersLanguage: 'kuery' }
-      : { queryLanguage: 'kuery', filtersLanguage: 'lucene' };
+  const queries: {
+    kuery: Query[];
+    lucene: Query[];
+  } = {
+    kuery: [],
+    lucene: [],
+  };
 
-  let newQuery = query;
-  if (meta.filters[queryLanguage]?.length) {
-    const filtersQuery = joinQueries(meta.filters[queryLanguage]);
-    newQuery = {
-      language: queryLanguage,
-      query: query?.query.trim()
-        ? `( ${query.query} ) ${filtersQuery ? `AND ${filtersQuery}` : ''}`
-        : filtersQuery,
-    };
-  }
+  const nonEmptyQueries = Array.isArray(query)
+    ? query.filter((q) => Boolean(q.query.trim()))
+    : query
+    ? [query]
+    : [];
+
+  [queries.lucene, queries.kuery] = partition(nonEmptyQueries, (q) => q.language === 'lucene');
+
+  const queryLanguage: QueryLanguage =
+    (nonEmptyQueries[0]?.language as QueryLanguage | undefined) || 'kuery';
+
+  const newQuery = {
+    language: queryLanguage,
+    query: joinQueries([
+      ...queries[queryLanguage].map((q) => [q]),
+      ...(meta.filters[queryLanguage] || []),
+    ]),
+  };
+
+  const filtersLanguage = queryLanguage === 'lucene' ? 'kuery' : 'lucene';
 
   // make a copy as the original filters are readonly
   const newFilters = [...filters];
-  if (meta.filters[filtersLanguage]?.length) {
-    const queryExpression = joinQueries(meta.filters[filtersLanguage]);
-    // Append the new filter based on the queryExpression to the existing ones
+
+  const hasQueriesInFiltersLanguage = Boolean(
+    meta.filters[filtersLanguage]?.length || queries[filtersLanguage].length
+  );
+
+  if (hasQueriesInFiltersLanguage) {
+    const queryExpression = joinQueries([
+      ...queries[filtersLanguage].map((q) => [q]),
+      ...(meta.filters[filtersLanguage] || []),
+    ]);
+
+    // Create new filter to encode the rest of the query information
     newFilters.push(
       buildCustomFilter(
         meta.id!,

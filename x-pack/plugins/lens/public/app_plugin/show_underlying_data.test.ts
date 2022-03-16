@@ -177,7 +177,7 @@ describe('combineQueryAndFilters', () => {
         },
         undefined
       )
-    ).toEqual({ query: { language: 'kuery', query: 'myfield: *' }, filters: [] });
+    ).toEqual({ query: { language: 'kuery', query: '( myfield: * )' }, filters: [] });
   });
 
   it('should concatenate filters with existing query if languages match (AND it)', () => {
@@ -193,7 +193,7 @@ describe('combineQueryAndFilters', () => {
         undefined
       )
     ).toEqual({
-      query: { language: 'kuery', query: '( myfield: * ) AND ( otherField: * )' },
+      query: { language: 'kuery', query: '( ( myfield: * ) AND ( otherField: * ) )' },
       filters: [],
     });
   });
@@ -263,7 +263,7 @@ describe('combineQueryAndFilters', () => {
         undefined
       )
     ).toEqual({
-      query: { language: 'lucene', query: 'myField' },
+      query: { language: 'lucene', query: '( myField )' },
       filters: [
         {
           $state: {
@@ -406,7 +406,7 @@ describe('combineQueryAndFilters', () => {
       ],
       query: {
         language: 'kuery',
-        query: 'myField: *',
+        query: '( myField: * )',
       },
     });
   });
@@ -461,7 +461,7 @@ describe('combineQueryAndFilters', () => {
       ],
       query: {
         language: 'lucene',
-        query: '( myField ) AND ( anotherField )',
+        query: '( ( myField ) AND ( anotherField ) )',
       },
     });
   });
@@ -593,7 +593,7 @@ describe('combineQueryAndFilters', () => {
       query: {
         language: 'kuery',
         query:
-          '( myField: * ) AND ( ( bytes > 4000 ) AND ( ( memory > 5000 ) OR ( memory >= 15000 ) ) AND ( myField: * ) AND ( otherField >= 15 ) )',
+          '( ( myField: * ) AND ( bytes > 4000 ) AND ( ( memory > 5000 ) OR ( memory >= 15000 ) ) AND ( myField: * ) AND ( otherField >= 15 ) )',
       },
     });
   });
