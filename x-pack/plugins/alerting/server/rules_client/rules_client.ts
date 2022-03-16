@@ -1524,6 +1524,10 @@ export class RulesClient {
       if (currentRule.muteAll) {
         throw new RuleMutedError('Cannot snooze a rule that is already muted');
       }
+
+      if (snoozeEndTime !== -1 && isNaN(Date.parse(snoozeEndTime))) {
+        throw new Error('snoozeEndTime must be a valid date or -1');
+      }
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
