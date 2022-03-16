@@ -31,7 +31,6 @@ import {
   initLogEntriesSummaryHighlightsRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
-import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
 import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initOverviewRoute } from './routes/overview';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
@@ -60,8 +59,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
-  initLogSourceConfigurationRoutes(libs);
-  initLogSourceStatusRoutes(libs);
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
   initOverviewRoute(libs);
