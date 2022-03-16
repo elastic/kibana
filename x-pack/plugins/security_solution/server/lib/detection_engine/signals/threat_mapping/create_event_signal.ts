@@ -54,7 +54,7 @@ export const createEventSignal = async ({
   });
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
-    // empty threat list and we do not want to return everything as being
+    // empty event list and we do not want to return everything as being
     // a hit so opt to return the existing result.
     logger.debug(
       buildRuleMessage(
@@ -102,7 +102,7 @@ export const createEventSignal = async ({
 
     logger.debug(
       buildRuleMessage(
-        `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
+        `${ids?.length} matched signals found from ${threatListHits.length} indicators`
       )
     );
 

@@ -100,7 +100,7 @@ export interface CreateEventSignalOptions {
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
-  currentEventList: ThreatListItem[];
+  currentEventList: EventItem[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
@@ -255,6 +255,8 @@ export interface EventsOptions {
 export interface EventDoc {
   [key: string]: unknown;
 }
+
+export type EventItem = estypes.SearchHit<EventDoc>;
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -270,3 +272,11 @@ export interface SignalMatch {
   signalId: string;
   queries: ThreatMatchNamedQuery[];
 }
+
+export type GetDocumentListInterface = (params: {
+  searchAfter: estypes.SortResults | undefined;
+}) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc>>;
+
+export type CreateSignalInterface = (
+  params: EventItem[] | ThreatListItem[]
+) => Promise<SearchAfterAndBulkCreateReturnType>;
