@@ -11,7 +11,6 @@ import { ProcessEvent } from '../common/types/process_tree';
 export type SessionViewServices = CoreStart;
 
 export interface SessionViewUIStart {
-  getSessionViewTableProcessTree: (props: any) => ReactElement;
   getSessionView: (sessionEntityId: string) => ReactElement;
 }
 
