@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 SCRIPT=$0
 
 # SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
@@ -26,4 +26,6 @@ if [ -f "${CONFIG_DIR}/node.options" ]; then
   KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 
-NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" ${@}
+NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" ${@} --port=9999 --path.data=$(mktemp -d) &
+NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" ${@} --xpack.task_manager.unsafe.exclude_task_types='["*"]' &
+wait -n
