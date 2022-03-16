@@ -304,11 +304,11 @@ export async function resolveSavedObjects(
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log(
-        '🚨 resolveSavedObjects(...)',
-        `import error: ${error.constructor.name} - ${error.savedObjectType}`
-      );
-      if (error.constructor.name === 'SavedObjectNotFound') {
+      if (error.isSavedObjectNotFoundError) console.log('🚨 resolveSavedObjects(...) YES');
+      // eslint-disable-next-line no-console
+      else console.log('🚨 resolveSavedObjects(...) NO');
+
+      if (error.isSavedObjectNotFoundError) {
         if (error.savedObjectType === 'index-pattern') {
           conflictedIndexPatterns.push({ obj, doc: searchDoc });
         } else {
@@ -329,13 +329,12 @@ export async function resolveSavedObjects(
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log(
-        '🚨 resolveSavedObjects(...)',
-        `import error: ${error.constructor.name} - ${error.savedObjectType}`
-      );
+      if (error.isSavedObjectNotFoundError) console.log('🚨 resolveSavedObjects(...) YES');
+      // eslint-disable-next-line no-console
+      else console.log('🚨 resolveSavedObjects(...) NO');
+
       const isIndexPatternNotFound =
-        error.constructor.name === 'SavedObjectNotFound' &&
-        error.savedObjectType === 'index-pattern';
+        error.isSavedObjectNotFoundError && error.savedObjectType === 'index-pattern';
       if (isIndexPatternNotFound && obj.savedSearchId) {
         conflictedSavedObjectsLinkedToSavedSearches.push(obj);
       } else if (isIndexPatternNotFound) {

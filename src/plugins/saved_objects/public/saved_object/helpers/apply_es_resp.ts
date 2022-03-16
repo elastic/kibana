@@ -73,10 +73,7 @@ export async function applyESResp(
         savedObject.searchSourceFields = searchSourceValues;
       }
     } catch (error) {
-      if (
-        error.constructor.name === 'SavedObjectNotFound' &&
-        error.savedObjectType === 'index-pattern'
-      ) {
+      if (error.isSavedObjectNotFoundError && error.savedObjectType === 'index-pattern') {
         // if parsing the search source fails because the index pattern wasn't found,
         // remember the reference - this is required for error handling on legacy imports
         savedObject.unresolvedIndexPatternReference = {

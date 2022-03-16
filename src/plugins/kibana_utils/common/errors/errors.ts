@@ -32,6 +32,8 @@ export class DuplicateField extends KbnError {
 export class SavedObjectNotFound extends KbnError {
   public savedObjectType: string;
   public savedObjectId?: string;
+  public isSavedObjectNotFoundError: boolean;
+
   constructor(type: string, id?: string, link?: string, customMessage?: string) {
     const idMsg = id ? ` (id: ${id})` : '';
     let message = `Could not locate that ${type}${idMsg}`;
@@ -44,6 +46,7 @@ export class SavedObjectNotFound extends KbnError {
 
     this.savedObjectType = type;
     this.savedObjectId = id;
+    this.isSavedObjectNotFoundError = true;
   }
 }
 
