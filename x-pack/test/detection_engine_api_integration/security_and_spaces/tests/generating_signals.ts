@@ -71,8 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('Generating signals from source indexes', () => {
+  describe('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await createSignalsIndex(supertest, log);
@@ -1160,7 +1159,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Signal deduplication', async () => {
+    describe('Signal deduplication', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
