@@ -18,11 +18,7 @@ import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constan
 import { DataFrameTaskStateType } from '../../../../plugins/ml/common/types/data_frame_analytics';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/common/constants/data_frame_analytics';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import {
-  JobType,
-  ML_JOB_SAVED_OBJECT_TYPE,
-  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-} from '../../../../plugins/ml/common/types/saved_objects';
+import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -1006,7 +1002,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove })
         .expect(200);
 
-      expect(body).to.eql({ [jobId]: { success: true, type: ML_JOB_SAVED_OBJECT_TYPE } });
+      expect(body).to.eql({ [jobId]: { success: true, type: jobType } });
     },
 
     async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
@@ -1042,7 +1038,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(body).to.eql({
-        [modelId]: { success: true, type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE },
+        [modelId]: { success: true, type: 'trained-model' },
       });
     },
 
