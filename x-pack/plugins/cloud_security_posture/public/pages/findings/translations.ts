@@ -9,6 +9,15 @@ import { i18n } from '@kbn/i18n';
 export const NAME = i18n.translate('xpack.csp.name', {
   defaultMessage: 'Name',
 });
+export const IMPACT = i18n.translate('xpack.csp.findings.impactLabel', {
+  defaultMessage: 'Impact',
+});
+export const DEFAULT_VALUE = i18n.translate('xpack.csp.findings.defaultValueLabel', {
+  defaultMessage: 'Default Value',
+});
+export const RATIONALE = i18n.translate('xpack.csp.findings.rationaleLabel', {
+  defaultMessage: 'Rationale',
+});
 
 export const SEARCH_FAILED = i18n.translate('xpack.csp.search_failed', {
   defaultMessage: 'Search failed',
@@ -75,7 +84,7 @@ export const BENCHMARK = i18n.translate('xpack.csp.benchmark', {
 });
 
 export const RESULT = i18n.translate('xpack.csp.result', {
-  defaultMessage: 'Result',
+  defaultMessage: 'Result Details',
 });
 
 export const EVALUATION = i18n.translate('xpack.csp.evaluation', {
