@@ -15,18 +15,22 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface ObservabilityStatusBoxProps {
   id: string;
-  dataSourceName: string;
+  title: string;
   hasData: boolean;
   description: string;
   modules: Array<{ name: string; hasData: boolean }>;
+  integrationTitle: string;
   integrationLink: string;
   learnMoreLink: string;
+  goToAppTitle: string;
+  goToAppLink: string;
 }
 
 export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
@@ -38,12 +42,15 @@ export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
 }
 
 export function CompletedStatusBox({
-  dataSourceName,
+  title,
   modules,
   integrationLink,
+  integrationTitle,
+  goToAppTitle,
+  goToAppLink,
 }: ObservabilityStatusBoxProps) {
   return (
-    <EuiPanel color="subdued">
+    <EuiPanel color="plain" hasBorder={true}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <div>
@@ -54,17 +61,23 @@ export function CompletedStatusBox({
               style={{ marginRight: 8 }}
             />
             <EuiTitle size="xs" className="eui-displayInline eui-alignMiddle">
-              <h2>{dataSourceName}</h2>
+              <h2>{title}</h2>
             </EuiTitle>
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" iconType="plusInCircle" flush="right" href={integrationLink}>
-            <FormattedMessage
-              id="xpack.observability.status.addIntegrationLink"
-              defaultMessage="Add"
-            />
+          <EuiButtonEmpty size="s" iconType="plusInCircle" flush="right" href={integrationLink}>
+            {integrationTitle}
           </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.observability.status.dataAvailable"
+            defaultMessage="Data is available."
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -81,33 +94,40 @@ export function CompletedStatusBox({
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiButton color="primary" size="s" href={goToAppLink}>
+            {goToAppTitle}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }
 
 export function EmptyStatusBox({
-  dataSourceName,
+  title,
   description,
   learnMoreLink,
+  integrationTitle,
+  integrationLink,
 }: ObservabilityStatusBoxProps) {
   return (
-    <EuiPanel color="subdued" style={{ marginBottom: 20 }}>
+    <EuiPanel color="warning" hasBorder={true} style={{ marginBottom: 20 }}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <div>
             <EuiIcon
-              type="dot"
+              type="minusInCircleFilled"
               color="warning"
               className="eui-displayInline eui-alignMiddle"
               style={{ marginRight: 8 }}
             />
             <EuiTitle size="xs" className="eui-displayInline eui-alignMiddle">
-              <h2>{dataSourceName}</h2>
+              <h2>{title}</h2>
             </EuiTitle>
           </div>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="cross" color="text" />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -117,14 +137,19 @@ export function EmptyStatusBox({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiButton color="primary" size="s" href={learnMoreLink}>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton color="primary" size="s" href={integrationLink} target="_blank">
+            {integrationTitle}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink external color="primary" href={learnMoreLink}>
             <FormattedMessage
               id="xpack.observability.status.learnMoreButton"
               defaultMessage="Learn more"
             />
-          </EuiButton>
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
