@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePluginContext } from './use_plugin_context';
 import { loadRules, Rule } from '../../../triggers_actions_ui/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
@@ -20,6 +20,7 @@ interface RuleState {
 }
 
 export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRulesProps) {
+  console.log(ruleLastResponseFilter, '!!ruleLastResponseFilter');
   const { core } = usePluginContext();
   const { http } = core;
 
@@ -30,8 +31,8 @@ export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRules
     totalItemCount: 0,
   });
 
-  async function fetchRules() {
-    setRulesState({ ...rulesState, isLoading: true });
+  const fetchRules = useCallback(async () => {
+    setRulesState((oldState) => ({ ...oldState, isLoading: true }));
 
     try {
       const response = await loadRules({
@@ -41,20 +42,19 @@ export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRules
         ruleStatusesFilter: ruleLastResponseFilter,
         sort,
       });
-      setRulesState({
-        ...rulesState,
+      setRulesState((oldState) => ({
+        ...oldState,
         isLoading: false,
         data: response.data,
         totalItemCount: response.total,
-      });
+      }));
     } catch (_e) {
-      setRulesState({ ...rulesState, isLoading: false, error: RULES_LOAD_ERROR });
+      setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
-  }
+  }, [http, page, ruleLastResponseFilter, sort]);
   useEffect(() => {
     fetchRules();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(ruleLastResponseFilter), page, sort]);
+  }, [fetchRules]);
 
   return {
     rulesState,
