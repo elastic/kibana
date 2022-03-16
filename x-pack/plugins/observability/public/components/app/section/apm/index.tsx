@@ -14,7 +14,7 @@ import {
   Settings,
   XYBrushEvent,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -122,6 +122,13 @@ export function APMSection({ bucketSize }: Props) {
             })}
             isLoading={isLoading}
             color={transactionsColor}
+          />
+          <EuiIconTip
+            content={i18n.translate('xpack.observability.overview.apm.throughputTip', {
+              defaultMessage:
+                'Throughput values are calculated for transactions with type "Request" or "page-load". If neither are available, values reflect the top transaction type.',
+            })}
+            position="right"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
