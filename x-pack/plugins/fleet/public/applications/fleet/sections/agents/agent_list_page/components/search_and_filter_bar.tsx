@@ -136,6 +136,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       isSelected={isStatusFilterOpen}
                       hasActiveFilters={selectedStatus.length > 0}
                       disabled={agentPolicies.length === 0}
+                      data-test-subj="agentList.statusFilter"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentList.statusFilterText"
