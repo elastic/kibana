@@ -631,6 +631,11 @@ export class RulesClient {
     });
   }
 
+  public async getEventLogsFieldCaps(id: string) {
+    const eventLogClient = await this.getEventLogClient();
+    return await eventLogClient.getEventLogsFieldCaps('alert', [id]);
+  }
+
   public async find<Params extends RuleTypeParams = never>({
     options: { fields, ...options } = {},
     excludeFromPublicApi = false,

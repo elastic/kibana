@@ -29,6 +29,7 @@ import { muteAlertRoute } from './mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
+import { getInternalGetEventLogsFieldCapsRoute } from './get_event_logs_field_caps';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -52,6 +53,7 @@ export function defineRoutes(opts: RouteOptions) {
   enableRuleRoute(router, licenseState);
   findRulesRoute(router, licenseState, usageCounter);
   findInternalRulesRoute(router, licenseState, usageCounter);
+  getInternalGetEventLogsFieldCapsRoute(router, licenseState);
   getRuleAlertSummaryRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);

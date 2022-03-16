@@ -16,6 +16,7 @@ import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
+import { FieldDescriptor } from '../../../../src/plugins/data_views/server';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -88,6 +89,9 @@ export class EventLogClient implements IEventLogClient {
     this.spacesService = spacesService;
     this.request = request;
   }
+  getEventsFieldCaps(type: string, ids: string[]): Promise<FieldDescriptor[]> {
+    throw new Error('Method not implemented.');
+  }
 
   public async findEventsBySavedObjectIds(
     type: string,
@@ -135,6 +139,14 @@ export class EventLogClient implements IEventLogClient {
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
       legacyIds,
     });
+  }
+
+  public async getEventLogsFieldCaps(type: string, ids: string[]) {
+    // verify the user has the required permissions to view this saved object
+    await this.savedObjectGetter(type, ids);
+    return await this.esContext.esAdapter.getEventLogsFieldCaps(
+      this.esContext.esNames.indexPattern
+    );
   }
 
   private async getNamespace() {
