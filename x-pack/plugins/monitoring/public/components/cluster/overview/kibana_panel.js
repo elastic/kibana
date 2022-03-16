@@ -144,8 +144,8 @@ export function KibanaPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="kbnRuleFailures">
                 {formatPercentageUsage(
-                  props.ruleData.executions - props.ruleData.failures,
-                  props.ruleData.executions
+                  props.rules.instance.executions - props.rules.instance.failures,
+                  props.rules.instance.executions
                 )}
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -155,7 +155,7 @@ export function KibanaPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="kbnOverdueRules">
-                {props.ruleData.overdueCount}
+                {props.rules.cluster.overdue.count}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>

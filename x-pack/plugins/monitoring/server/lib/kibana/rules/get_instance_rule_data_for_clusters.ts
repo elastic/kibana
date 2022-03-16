@@ -22,7 +22,7 @@ export async function getInstanceRuleDataForClusters(
 
   const moduleType = 'kibana';
   const type = 'kibana_node_rules';
-  const dataset = 'rules';
+  const dataset = 'node_rules';
   const indexPatterns = getNewIndexPatterns({
     config: Globals.app.config,
     moduleType,

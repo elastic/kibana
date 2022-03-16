@@ -22,7 +22,7 @@ export async function getClusterRuleDataForClusters(
 
   const moduleType = 'kibana';
   const type = 'kibana_cluster_rules';
-  const dataset = 'rules';
+  const dataset = 'cluster_rules';
   const indexPatterns = getNewIndexPatterns({
     config: Globals.app.config,
     moduleType,
@@ -71,9 +71,11 @@ export async function getClusterRuleDataForClusters(
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
       const response = await callWithRequest(req, 'search', params);
       return {
-        overdueCount: response.aggregations?.overdue_count?.value,
-        overdueDurationP50: response.aggregations?.overdue_duration_p50?.value,
-        overdueDurationP99: response.aggregations?.overdue_duration_p99?.value,
+        overdue: {
+          count: response.aggregations?.overdue_count?.value,
+          durationP50: response.aggregations?.overdue_duration_p50?.value,
+          durationP99: response.aggregations?.overdue_duration_p99?.value,
+        },
         clusterUuid,
       };
     })

@@ -45,7 +45,7 @@ export function kibanaInstanceRoute(server: LegacyServer) {
       const kibanaUuid = req.params.kibanaUuid;
 
       const moduleType = 'kibana';
-      const dsDatasets = ['stats', 'rules'];
+      const dsDatasets = ['stats', 'node_rules'];
       const bools = dsDatasets.reduce(
         (accum: Array<{ term: { [key: string]: string } }>, dsDataset) => {
           accum.push(

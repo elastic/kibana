@@ -60,14 +60,14 @@ const KibanaOverview = ({ data }: { data: any }) => {
           <EuiFlexGroup>
             <EuiFlexItem grow={true}>
               <MonitoringTimeseriesContainer
-                series={data.metrics.kibana_cluster_rule_failures}
+                series={data.metrics.kibana_cluster_rule_overdue_count}
                 onBrush={onBrush}
                 zoomInfo={zoomInfo}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <MonitoringTimeseriesContainer
-                series={data.metrics.kibana_cluster_rule_executions}
+                series={data.metrics.kibana_cluster_rule_overdue_duration}
                 onBrush={onBrush}
                 zoomInfo={zoomInfo}
               />

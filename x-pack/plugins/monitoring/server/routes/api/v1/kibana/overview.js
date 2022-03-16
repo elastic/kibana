@@ -37,7 +37,7 @@ export function kibanaOverviewRoute(server) {
 
       try {
         const moduleType = 'kibana';
-        const dsDatasets = ['stats', 'rules'];
+        const dsDatasets = ['stats', 'cluster_rules'];
         const bools = dsDatasets.reduce((accum, dsDataset) => {
           accum.push(
             ...[

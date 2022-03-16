@@ -61,7 +61,7 @@ export class KibanaInstanceRuleMetric extends Metric {
 
   static getMetricFields() {
     return {
-      uuidField: 'kibana_rules.kibana.uuid',
+      uuidField: 'kibana_node_rules.kibana.uuid',
       timestampField: 'kibana_node_rules.timestamp',
     };
   }
@@ -95,7 +95,7 @@ export class KibanaInstanceActionMetric extends Metric {
 
   static getMetricFields() {
     return {
-      uuidField: 'kibana_actions.kibana.uuid',
+      uuidField: 'kibana_node_action.kibana.uuid',
       timestampField: 'kibana_node_action.timestamp',
     };
   }

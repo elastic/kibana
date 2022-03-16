@@ -6,7 +6,7 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import { i18n } from '@kbn/i18n';
 import { getClustersStats } from './get_clusters_stats';
@@ -190,8 +190,16 @@ export async function getClustersFromRequest(
     const instanceKibanaRules = kibanaInstanceRules?.find(
       (rule) => rule.clusterUuid === kibana.clusterUuid
     );
-    set(clusters[clusterIndex], 'kibana.clusterRuleData', clusterKibanaRules ?? {});
-    set(clusters[clusterIndex], 'kibana.instanceRuleData', instanceKibanaRules ?? {});
+    set(
+      clusters[clusterIndex],
+      'kibana.rules.cluster',
+      omit(clusterKibanaRules ?? {}, 'clusterUuid')
+    );
+    set(
+      clusters[clusterIndex],
+      'kibana.rules.instance',
+      omit(instanceKibanaRules ?? {}, 'clusterUuid')
+    );
   });
 
   // add logstash data
