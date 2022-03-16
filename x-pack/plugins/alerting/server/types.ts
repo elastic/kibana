@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import type {
   IRouter,
   RequestHandlerContext,
   SavedObjectReference,
-  ElasticsearchClient,
   IUiSettingsClient,
 } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -43,14 +41,9 @@ import {
   MappedParams,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
-export interface ElasticsearchClientWithChild extends ElasticsearchClient {
-  child: Client['child'];
-}
 
 /**
  * @public
@@ -88,7 +81,6 @@ export interface AlertServices<
   };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
-  search: IAbortableClusterClient;
 }
 
 export interface AlertExecutorOptions<
