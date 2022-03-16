@@ -54,6 +54,8 @@ export function MachineLearningDataFrameAnalyticsProvider(
       await retry.tryForTime(30 * 1000, async () => {
         if (await testSubjects.exists('mlAnalyticsCreateFirstButton', { timeout: 1000 })) {
           await testSubjects.click('mlAnalyticsCreateFirstButton');
+        } else if (await testSubjects.exists('mlAnalyticsButtonCreate', { timeout: 1000 })) {
+          await testSubjects.click('mlAnalyticsButtonCreate');
         } else {
           throw new Error('No Analytics create button found');
         }
