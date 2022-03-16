@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
 import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
@@ -76,8 +76,6 @@ export interface UserProfileFormValues {
     };
   };
   avatarType: 'initials' | 'image';
-  customAvatarInitials: boolean;
-  customAvatarColor: boolean;
 }
 
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
@@ -91,13 +89,10 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
       avatar: {
         initials: data.avatar?.initials || getUserAvatarInitials(user),
         color: data.avatar?.color || getUserAvatarColor(user),
-        imageUrl: data.avatar?.imageUrl ?? '',
+        imageUrl: data.avatar?.imageUrl || '',
       },
     },
     avatarType: data.avatar?.imageUrl ? 'image' : 'initials',
-    customAvatarInitials:
-      !!data.avatar?.initials && data.avatar?.initials !== getUserAvatarInitials(user),
-    customAvatarColor: !!data.avatar?.color && data.avatar?.color !== getUserAvatarColor(user),
   });
 
   const formik = useFormik<UserProfileFormValues>({
@@ -137,35 +132,27 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const formChanges = useFormChanges();
 
-  useUpdateEffect(() => {
-    if (!formik.values.customAvatarInitials) {
-      formik.setFieldValue(
-        'data.avatar.initials',
-        getUserAvatarInitials({ username: user.username, full_name: formik.values.user.full_name })
-      );
-    }
+  const customAvatarInitials = useRef(
+    !!data.avatar?.initials && data.avatar?.initials !== getUserAvatarInitials(user)
+  );
 
-    if (!formik.values.customAvatarColor) {
-      formik.setFieldValue(
-        'data.avatar.color',
-        getUserAvatarColor({ username: user.username, full_name: formik.values.user.full_name })
-      );
+  useUpdateEffect(() => {
+    if (!customAvatarInitials.current) {
+      const defaultInitials = getUserAvatarInitials({
+        username: user.username,
+        full_name: formik.values.user.full_name,
+      });
+      formik.setFieldValue('data.avatar.initials', defaultInitials);
     }
   }, [formik.values.user.full_name]);
 
   useUpdateEffect(() => {
-    formik.setFieldValue(
-      'customAvatarInitials',
-      formik.values.data.avatar.initials !== getUserAvatarInitials(user)
-    );
+    const defaultInitials = getUserAvatarInitials({
+      username: user.username,
+      full_name: formik.values.user.full_name,
+    });
+    customAvatarInitials.current = formik.values.data.avatar.initials !== defaultInitials;
   }, [formik.values.data.avatar.initials]);
-
-  useUpdateEffect(() => {
-    formik.setFieldValue(
-      'customAvatarColor',
-      formik.values.data.avatar.color !== getUserAvatarColor(user)
-    );
-  }, [formik.values.data.avatar.color]);
 
   const [showDeleteFlyout, setShowDeleteFlyout] = useState(false);
 
