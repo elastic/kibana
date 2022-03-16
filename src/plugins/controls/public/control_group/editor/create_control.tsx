@@ -26,7 +26,7 @@ export interface CreateControlButtonProps {
   closePopover?: () => void;
 }
 
-interface PromiseType {
+interface CreateControlPromise {
   type: string;
   controlInput: Omit<ControlInput, 'id'>;
 }
@@ -46,7 +46,7 @@ export const CreateControlButton = ({
   const createNewControl = async () => {
     const PresentationUtilProvider = pluginServices.getContextProvider();
 
-    const initialInputPromise = new Promise<PromiseType>((resolve, reject) => {
+    const initialInputPromise = new Promise<CreateControlPromise>((resolve, reject) => {
       let inputToReturn: Partial<ControlInput> = {};
 
       const onCancel = (ref: OverlayRef) => {
@@ -76,8 +76,9 @@ export const CreateControlButton = ({
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
-              onSave={(type) => {
-                const factory = getControlFactory(type) as IEditableControlFactory;
+              onSave={(type, factory) => {
+                // const factory = getControlFactory(type) as IEditableControlFactory;
+
                 if (factory.presaveTransformFunction) {
                   inputToReturn = factory.presaveTransformFunction(inputToReturn);
                 }
