@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { SolutionToolbarButton } from '../primary/primary';
+import { ToolbarButton } from '../primary/primary';
 import mdx from './add_from_library.mdx';
 
 export default {
@@ -21,5 +21,5 @@ export default {
 };
 
 export const Component = () => {
-  return <SolutionToolbarButton label="Add from library" iconType="folderOpen" />;
+  return <ToolbarButton label="Add from library" iconType="folderOpen" />;
 };
