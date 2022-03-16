@@ -76,9 +76,8 @@ export const CreateControlButton = ({
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
-              onSave={(type, factory) => {
-                // const factory = getControlFactory(type) as IEditableControlFactory;
-
+              onSave={(type: string) => {
+                const factory = getControlFactory(type) as IEditableControlFactory;
                 if (factory.presaveTransformFunction) {
                   inputToReturn = factory.presaveTransformFunction(inputToReturn);
                 }

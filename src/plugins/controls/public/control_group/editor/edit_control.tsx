@@ -51,7 +51,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
   const editControl = async () => {
     const panel = panels[embeddableId];
-    let factory = getControlFactory(panel.type);
+    const factory = getControlFactory(panel.type);
     const embeddable = await untilEmbeddableLoaded(embeddableId);
 
     let inputToReturn: Partial<ControlInput> = {};
@@ -97,8 +97,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           onTypeEditorChange={(partialInput) =>
             (inputToReturn = { ...inputToReturn, ...partialInput })
           }
-          onSave={(type) => {
-            if (panel.type !== type) factory = getControlFactory(type);
+          onSave={() => {
             const editableFactory = factory as IEditableControlFactory;
             if (editableFactory.presaveTransformFunction) {
               inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
