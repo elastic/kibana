@@ -82,7 +82,6 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  metrics?: MetricsStats;
   sizes?: SizePercentiles;
   app?: {
     search?: number;
@@ -107,7 +106,14 @@ export type AppCounts = {
   [A in 'canvas workpad' | 'dashboard' | 'visualization' | 'search']?: number;
 };
 
-export type JobTypes = { [K in BaseJobTypes]: AvailableTotal };
+export interface JobTypes {
+  csv_searchsource: AvailableTotal & { metrics: MetricsStatsCsv };
+  csv_searchsource_immediate: AvailableTotal & { metrics: MetricsStatsCsv };
+  PNG: AvailableTotal & { metrics: MetricsStatsPng };
+  PNGV2: AvailableTotal & { metrics: MetricsStatsPng };
+  printable_pdf: AvailableTotal & { metrics: MetricsStatsPdf };
+  printable_pdf_v2: AvailableTotal & { metrics: MetricsStatsPdf };
+}
 
 export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
 
@@ -126,6 +132,21 @@ export type RangeStats = JobTypes & {
   statuses?: StatusByAppCounts;
   output_size?: SizePercentiles;
 };
+
+export interface MetricsStatsCsv {
+  csv_rows: MetricsPercentiles;
+}
+
+export interface MetricsStatsPng {
+  png_cpu: MetricsPercentiles;
+  png_memory: MetricsPercentiles;
+}
+
+export interface MetricsStatsPdf {
+  pdf_cpu: MetricsPercentiles;
+  pdf_memory: MetricsPercentiles;
+  pdf_pages: MetricsPercentiles;
+}
 
 export type BaseMetricsKeys =
   | 'csv_rows'

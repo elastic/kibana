@@ -3714,16 +3714,16 @@
                 "description": "Number of times the user opened the in-product formula help popover."
               }
             },
-            "toggle_fullscreen_formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user toggled fullscreen mode on formula."
-              }
-            },
             "toggle_autoapply": {
               "type": "long",
               "_meta": {
                 "description": "Number of times the user toggled auto-apply."
+              }
+            },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
               }
             },
             "indexpattern_field_info_click": {
@@ -3967,16 +3967,16 @@
                 "description": "Number of times the user opened the in-product formula help popover."
               }
             },
-            "toggle_fullscreen_formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user toggled fullscreen mode on formula."
-              }
-            },
             "toggle_autoapply": {
               "type": "long",
               "_meta": {
                 "description": "Number of times the user toggled auto-apply."
+              }
+            },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
               }
             },
             "indexpattern_field_info_click": {
@@ -5570,106 +5570,6 @@
                 }
               }
             },
-            "metrics": {
-              "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_pages": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "png_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "png_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "app": {
               "properties": {
                 "search": {
@@ -5696,6 +5596,26 @@
                 },
                 "preserve_layout": {
                   "type": "long"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -5737,106 +5657,6 @@
                 }
               }
             },
-            "metrics": {
-              "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_pages": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "png_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "png_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "app": {
               "properties": {
                 "search": {
@@ -5863,6 +5683,26 @@
                 },
                 "preserve_layout": {
                   "type": "long"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -5904,72 +5744,37 @@
                 }
               }
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            },
             "metrics": {
               "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_pages": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "png_cpu": {
                   "properties": {
                     "50.0": {
@@ -6001,35 +5806,6 @@
                       "type": "long"
                     }
                   }
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
                 }
               }
             }
@@ -6071,72 +5847,37 @@
                 }
               }
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            },
             "metrics": {
               "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_pages": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "png_cpu": {
                   "properties": {
                     "50.0": {
@@ -6168,35 +5909,6 @@
                       "type": "long"
                     }
                   }
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
                 }
               }
             }
@@ -6238,40 +5950,37 @@
                 }
               }
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            },
             "metrics": {
               "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_pages": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "pdf_cpu": {
                   "properties": {
                     "50.0": {
@@ -6304,7 +6013,7 @@
                     }
                   }
                 },
-                "png_cpu": {
+                "pdf_pages": {
                   "properties": {
                     "50.0": {
                       "type": "long"
@@ -6319,51 +6028,6 @@
                       "type": "long"
                     }
                   }
-                },
-                "png_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
                 }
               }
             }
@@ -6405,40 +6069,37 @@
                 }
               }
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            },
             "metrics": {
               "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_pages": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "pdf_cpu": {
                   "properties": {
                     "50.0": {
@@ -6471,7 +6132,7 @@
                     }
                   }
                 },
-                "png_cpu": {
+                "pdf_pages": {
                   "properties": {
                     "50.0": {
                       "type": "long"
@@ -6486,51 +6147,6 @@
                       "type": "long"
                     }
                   }
-                },
-                "png_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
                 }
               }
             }
@@ -7131,106 +6747,6 @@
                     }
                   }
                 },
-                "metrics": {
-                  "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_pages": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "png_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "png_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
                 "app": {
                   "properties": {
                     "search": {
@@ -7257,6 +6773,26 @@
                     },
                     "preserve_layout": {
                       "type": "long"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -7298,106 +6834,6 @@
                     }
                   }
                 },
-                "metrics": {
-                  "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_pages": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "png_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "png_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
                 "app": {
                   "properties": {
                     "search": {
@@ -7424,6 +6860,26 @@
                     },
                     "preserve_layout": {
                       "type": "long"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -7465,72 +6921,37 @@
                     }
                   }
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_pages": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "png_cpu": {
                       "properties": {
                         "50.0": {
@@ -7562,35 +6983,6 @@
                           "type": "long"
                         }
                       }
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
                     }
                   }
                 }
@@ -7632,72 +7024,37 @@
                     }
                   }
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_pages": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "png_cpu": {
                       "properties": {
                         "50.0": {
@@ -7729,35 +7086,6 @@
                           "type": "long"
                         }
                       }
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
                     }
                   }
                 }
@@ -7799,40 +7127,37 @@
                     }
                   }
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_pages": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "pdf_cpu": {
                       "properties": {
                         "50.0": {
@@ -7865,7 +7190,7 @@
                         }
                       }
                     },
-                    "png_cpu": {
+                    "pdf_pages": {
                       "properties": {
                         "50.0": {
                           "type": "long"
@@ -7880,51 +7205,6 @@
                           "type": "long"
                         }
                       }
-                    },
-                    "png_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
                     }
                   }
                 }
@@ -7966,40 +7246,37 @@
                     }
                   }
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_pages": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "pdf_cpu": {
                       "properties": {
                         "50.0": {
@@ -8032,7 +7309,7 @@
                         }
                       }
                     },
-                    "png_cpu": {
+                    "pdf_pages": {
                       "properties": {
                         "50.0": {
                           "type": "long"
@@ -8047,51 +7324,6 @@
                           "type": "long"
                         }
                       }
-                    },
-                    "png_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
                     }
                   }
                 }

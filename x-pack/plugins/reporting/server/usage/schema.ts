@@ -12,6 +12,7 @@ import {
   ByAppCounts,
   JobTypes,
   LayoutCounts,
+  MetricsPercentiles,
   MetricsStats,
   RangeStats,
   ReportingUsageType,
@@ -50,62 +51,45 @@ const sizesSchema: MakeSchemaFrom<SizePercentiles> = {
   '99.0': { type: 'long' },
 };
 
-const metricsSchema: MakeSchemaFrom<MetricsStats> = {
-  csv_rows: {
-    '50.0': { type: 'long' },
-    '75.0': { type: 'long' },
-    '95.0': { type: 'long' },
-    '99.0': { type: 'long' },
-  },
-  pdf_pages: {
-    '50.0': { type: 'long' },
-    '75.0': { type: 'long' },
-    '95.0': { type: 'long' },
-    '99.0': { type: 'long' },
-  },
-  pdf_cpu: {
-    '50.0': { type: 'long' },
-    '75.0': { type: 'long' },
-    '95.0': { type: 'long' },
-    '99.0': { type: 'long' },
-  },
-  pdf_memory: {
-    '50.0': { type: 'long' },
-    '75.0': { type: 'long' },
-    '95.0': { type: 'long' },
-    '99.0': { type: 'long' },
-  },
-  png_cpu: {
-    '50.0': { type: 'long' },
-    '75.0': { type: 'long' },
-    '95.0': { type: 'long' },
-    '99.0': { type: 'long' },
-  },
-  png_memory: {
-    '50.0': { type: 'long' },
-    '75.0': { type: 'long' },
-    '95.0': { type: 'long' },
-    '99.0': { type: 'long' },
-  },
+const metricsPercentilesSchema: MakeSchemaFrom<MetricsPercentiles> = {
+  '50.0': { type: 'long' },
+  '75.0': { type: 'long' },
+  '95.0': { type: 'long' },
+  '99.0': { type: 'long' },
 };
+
+const metricsSchemaCsv: MakeSchemaFrom<Pick<MetricsStats, 'csv_rows'>> = {
+  csv_rows: metricsPercentilesSchema,
+};
+
+const metricsSchemaPng: MakeSchemaFrom<Pick<MetricsStats, 'png_cpu' | 'png_memory'>> = {
+  png_cpu: metricsPercentilesSchema,
+  png_memory: metricsPercentilesSchema,
+};
+
+const metricsSchemaPdf: MakeSchemaFrom<Pick<MetricsStats, 'pdf_cpu' | 'pdf_memory' | 'pdf_pages'>> =
+  {
+    pdf_cpu: metricsPercentilesSchema,
+    pdf_memory: metricsPercentilesSchema,
+    pdf_pages: metricsPercentilesSchema,
+  };
 
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
   sizes: sizesSchema,
-  metrics: metricsSchema,
   app: appCountsSchema,
   layout: layoutCountsSchema,
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
-  csv_searchsource: availableTotalSchema,
-  csv_searchsource_immediate: availableTotalSchema,
-  PNG: availableTotalSchema,
-  PNGV2: availableTotalSchema,
-  printable_pdf: availableTotalSchema,
-  printable_pdf_v2: availableTotalSchema,
+  csv_searchsource: { ...availableTotalSchema, metrics: metricsSchemaCsv },
+  csv_searchsource_immediate: { ...availableTotalSchema, metrics: metricsSchemaCsv },
+  PNG: { ...availableTotalSchema, metrics: metricsSchemaPng },
+  PNGV2: { ...availableTotalSchema, metrics: metricsSchemaPng },
+  printable_pdf: { ...availableTotalSchema, metrics: metricsSchemaPdf },
+  printable_pdf_v2: { ...availableTotalSchema, metrics: metricsSchemaPdf },
 };
 
 const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
