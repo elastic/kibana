@@ -136,3 +136,7 @@ export const checkIfAllValuesAreZero = (data: ChartSeriesData[] | null | undefin
   data.every((series) => {
     return Array.isArray(series.value) && (series.value as ChartData[]).every(({ y }) => y === 0);
   });
+
+export const Wrapper = styled.div`
+  position: relative;
+`;
