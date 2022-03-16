@@ -135,7 +135,6 @@ describe('View agents', () => {
       cy.visit('/app/fleet/agents');
       cy.getBySel('agentList.queryInput').type('agent.id: agent-1{enter}');
       cy.getBySel('fleetAgentListTable');
-      // 2 trs = header row + 1 row
       cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
     });
@@ -146,7 +145,6 @@ describe('View agents', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel('agentList.showUpgradeable').click();
-      // 2 trs = header row + 1 row
       cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
     });
@@ -156,7 +154,6 @@ describe('View agents', () => {
 
       cy.getBySel('agentList.showUpgradeable').click();
       cy.getBySel('agentList.showUpgradeable').click();
-      // 2 trs = header row + 1 row
       cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 3);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
       cy.getBySel('fleetAgentListTable').contains('agent-2');
