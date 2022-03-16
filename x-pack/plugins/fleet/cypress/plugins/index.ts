@@ -17,8 +17,16 @@ const plugin: Cypress.PluginConfig = (on, config) => {
 
       return client.bulk({ operations });
     },
-    async deleteDocsByQuery({ index, query }: { index: string; query: any }) {
-      return client.deleteByQuery({ index, query });
+    async deleteDocsByQuery({
+      index,
+      query,
+      ignoreUnavailable = false,
+    }: {
+      index: string;
+      query: any;
+      ignoreUnavailable?: boolean;
+    }) {
+      return client.deleteByQuery({ index, query, ignore_unavailable: ignoreUnavailable });
     },
   });
 };

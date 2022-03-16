@@ -84,6 +84,7 @@ describe('View agents', () => {
     cy.task('deleteDocsByQuery', {
       index: '.fleet-agents',
       query: { match_all: {} },
+      ignoreUnavailable: true,
     });
     cy.getKibanaVersion().then((version) => {
       docs = createAgentDocs(version);
