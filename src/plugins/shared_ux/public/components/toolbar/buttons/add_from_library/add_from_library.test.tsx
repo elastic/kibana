@@ -11,9 +11,9 @@ import React from 'react';
 import { ServicesProvider, SharedUXServices } from '../../../../services';
 import { servicesFactory } from '../../../../services/mocks';
 
-import { SolutionToolbarButton } from '../primary/primary';
+import { ToolbarButton } from '../primary/primary';
 
-describe('<SolutionToolbarButton />', () => {
+describe('<ToolbarButton />', () => {
   let services: SharedUXServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
@@ -24,9 +24,7 @@ describe('<SolutionToolbarButton />', () => {
   });
 
   test('is rendered', () => {
-    const component = mount(
-      <SolutionToolbarButton iconType="folderOpen" label="Add from library" />
-    );
+    const component = mount(<ToolbarButton iconType="folderOpen" label="Add from library" />);
 
     expect(component).toMatchSnapshot();
   });

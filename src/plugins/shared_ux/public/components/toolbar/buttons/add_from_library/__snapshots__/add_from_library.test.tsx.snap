@@ -1,7 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<SolutionToolbarButton /> is rendered 1`] = `
+exports[`<ToolbarButton /> is rendered 1`] = `
 <ServicesProvider
+  application={
+    Object {
+      "currentAppId$": Observable {
+        "_isScalar": false,
+      },
+      "navigateToUrl": [Function],
+    }
+  }
   docLinks={
     Object {
       "dataViewsDocsLink": "dummy link",
@@ -12,8 +20,14 @@ exports[`<SolutionToolbarButton /> is rendered 1`] = `
       "openDataViewEditor": [MockFunction],
     }
   }
+  http={
+    Object {
+      "addBasePath": [MockFunction],
+    }
+  }
   permissions={
     Object {
+      "canAccessFleet": true,
       "canCreateNewDataView": true,
     }
   }
@@ -23,7 +37,7 @@ exports[`<SolutionToolbarButton /> is rendered 1`] = `
     }
   }
 >
-  <SolutionToolbarButton
+  <ToolbarButton
     iconType="folderOpen"
     label="Add from library"
   >
@@ -90,6 +104,6 @@ exports[`<SolutionToolbarButton /> is rendered 1`] = `
         </button>
       </EuiButtonDisplay>
     </EuiButton>
-  </SolutionToolbarButton>
+  </ToolbarButton>
 </ServicesProvider>
 `;
