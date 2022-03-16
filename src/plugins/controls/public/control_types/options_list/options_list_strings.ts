@@ -15,7 +15,7 @@ export const OptionsListStrings = {
     }),
   getDescription: () =>
     i18n.translate('controls.optionsList.description', {
-      defaultMessage: 'Add control that allows options to be selected from a dropdown.',
+      defaultMessage: 'Allows options to be selected from a dropdown.',
     }),
   summary: {
     getSeparator: () =>

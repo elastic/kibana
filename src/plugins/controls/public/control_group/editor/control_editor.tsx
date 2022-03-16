@@ -32,6 +32,7 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { ControlGroupStrings } from '../control_group_strings';
@@ -104,7 +105,8 @@ export const ControlEditor = ({
     return controlTypes.map((type) => {
       const factory = getControlFactory(type);
       const icon = (factory as EmbeddableFactoryDefinition).getIconType?.();
-      return (
+      const tooltip = (factory as EmbeddableFactoryDefinition).getDescription?.();
+      const menuPadItem = (
         <EuiKeyPadMenuItem
           id={`createControlButton_${type}`}
           data-test-subj={`create-${type}-control`}
@@ -116,6 +118,14 @@ export const ControlEditor = ({
         >
           <EuiIcon type={!icon || icon === 'empty' ? 'controlsHorizontal' : icon} size="l" />
         </EuiKeyPadMenuItem>
+      );
+
+      return tooltip ? (
+        <EuiToolTip content={tooltip} position="bottom">
+          {menuPadItem}
+        </EuiToolTip>
+      ) : (
+        menuPadItem
       );
     });
   };
