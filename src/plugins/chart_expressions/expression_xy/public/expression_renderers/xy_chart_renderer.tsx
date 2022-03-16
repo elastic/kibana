@@ -9,13 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeServiceStart } from 'kibana/public';
-import React, { lazy } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { ChartsPluginStart, PaletteRegistry } from '../../../../charts/public';
 import { ExpressionRenderDefinition } from '../../../../expressions';
 import { FormatFactory } from '../../../../field_formats/common';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
-import { withSuspense } from '../../../../presentation_util/public';
 import { XYChartProps } from '../../common';
 import { calculateMinInterval } from '../helpers';
 import { BrushEvent, FilterEvent } from '../types';
@@ -33,9 +32,6 @@ export type GetStartDepsFn = () => Promise<{
 interface XyChartRendererDeps {
   getStartDeps: GetStartDepsFn;
 }
-
-const LazyXYChart = lazy(() => import('../components/xy_chart'));
-const XYChartComponent = withSuspense(LazyXYChart);
 
 export const getXyChartRenderer = ({
   getStartDeps,
@@ -56,10 +52,13 @@ export const getXyChartRenderer = ({
       handlers.event({ name: 'brush', data });
     };
     const deps = await getStartDeps();
+
+    const { XYChartReportable } = await import('../components/xy_chart');
+
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
         <I18nProvider>
-          <XYChartComponent
+          <XYChartReportable
             {...config}
             formatFactory={deps.formatFactory}
             chartsActiveCursorService={deps.activeCursor}

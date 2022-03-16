@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useRef } from 'react';
+import React, { useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -521,7 +521,7 @@ export function XYChart({
       };
 
   return (
-    <div data-test-subj="xyVisChart">
+    <div style={{ width: '100%', height: '100%' }} data-test-subj="xyVisChart">
       <Chart ref={chartRef}>
         <Settings
           onPointerUpdate={handleCursorUpdate}
@@ -909,6 +909,3 @@ export function XYChart({
 function assertNever(x: never): never {
   throw new Error('Unexpected series type: ' + x);
 }
-
-// eslint-disable-next-line import/no-default-export
-export default memo(XYChart);
