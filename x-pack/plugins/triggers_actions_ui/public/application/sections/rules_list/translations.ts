@@ -117,7 +117,7 @@ export const ALERT_ERROR_DISABLED_REASON = i18n.translate(
 export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxExecutableActions',
   {
-    defaultMessage: 'Max. Executable Actions',
+    defaultMessage: 'Action limit exceeded',
   }
 );
 
