@@ -15,7 +15,7 @@ import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '../../../../field_formats/common';
 import type { PaletteRegistry } from '../../../../charts/public';
-import type { ReferenceLineLayerConfigResult, YConfig } from '../../common';
+import type { ReferenceLineLayerConfigResult, IconPosition, YAxisMode } from '../../common';
 import type { LensMultiTable } from '../../common/types';
 import { hasIcon } from '../helpers';
 
@@ -103,8 +103,8 @@ function mapVerticalToHorizontalPlacement(placement: Position) {
 // otherwise use the same axis
 // this function assume the chart is vertical
 function getBaseIconPlacement(
-  iconPosition: YConfig['iconPosition'],
-  axisMode: YConfig['axisMode'],
+  iconPosition: IconPosition | undefined,
+  axisMode: YAxisMode | undefined,
   axesMap: Record<string, unknown>
 ) {
   if (iconPosition === 'auto') {
@@ -159,23 +159,29 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
   );
 }
 
+interface MarkerConfig {
+  axisMode?: YAxisMode;
+  icon?: string;
+  textVisibility?: boolean;
+}
+
 function getMarkerToShow(
-  yConfig: YConfig,
+  markerConfig: MarkerConfig,
   label: string | undefined,
   isHorizontal: boolean,
   hasReducedPadding: boolean
 ) {
   // show an icon if present
-  if (hasIcon(yConfig.icon)) {
-    return <EuiIcon type={yConfig.icon} />;
+  if (hasIcon(markerConfig.icon)) {
+    return <EuiIcon type={markerConfig.icon} />;
   }
   // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (yConfig.textVisibility) {
+  if (markerConfig.textVisibility) {
     if (hasReducedPadding) {
       return getMarkerBody(
         label,
-        (!isHorizontal && yConfig.axisMode === 'bottom') ||
-          (isHorizontal && yConfig.axisMode !== 'bottom')
+        (!isHorizontal && markerConfig.axisMode === 'bottom') ||
+          (isHorizontal && markerConfig.axisMode !== 'bottom')
       );
     }
     return <EuiIcon type="empty" />;

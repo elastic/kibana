@@ -16,12 +16,13 @@ import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type { AccessorConfig, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
-import type { XYState, XYLayerConfig, XYDataLayerConfig } from './types';
+import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
 import {
   checkScaleOperation,
   getAxisName,
   getDataLayers,
   isNumericMetric,
+  isReferenceLayer,
 } from './visualization_helpers';
 import { generateId } from '../id_generator';
 import { LensIconChartBarReferenceLine } from '../assets/chart_bar_reference_line';
@@ -326,7 +327,7 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   previousColumn,
 }) => {
   const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
-  if (!foundLayer) {
+  if (!foundLayer || !isReferenceLayer(foundLayer)) {
     return prevState;
   }
   const newLayer = { ...foundLayer };
@@ -371,7 +372,7 @@ export const getReferenceConfiguration = ({
 }: {
   state: XYState;
   frame: FramePublicAPI;
-  layer: XYLayerConfig;
+  layer: XYReferenceLineLayerConfig;
   sortedAccessors: string[];
   mappedAccessors: AccessorConfig[];
 }) => {

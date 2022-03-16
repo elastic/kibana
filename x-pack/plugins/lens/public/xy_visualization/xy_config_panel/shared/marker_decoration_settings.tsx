@@ -11,6 +11,7 @@ import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import {
   IconPosition,
   YConfig,
+  YAxisMode,
 } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 import { TooltipWrapper } from '../../../shared_components';
@@ -19,7 +20,7 @@ import { idPrefix } from '../dimension_editor';
 
 interface LabelConfigurationOptions {
   isHorizontal: boolean;
-  axisMode: YConfig['axisMode'];
+  axisMode?: YAxisMode;
 }
 
 function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
@@ -73,15 +74,20 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
   ];
 }
 
+interface MarkerDecorationConfig {
+  axisMode?: YAxisMode;
+  icon?: string;
+  iconPosition?: IconPosition;
+  textVisibility?: boolean;
+}
+
 export const MarkerDecorationSettings = ({
   currentConfig,
   setConfig,
-  accessor,
   isHorizontal,
 }: {
-  currentConfig?: Pick<YConfig, 'textVisibility' | 'icon' | 'iconPosition' | 'axisMode'>;
-  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
-  accessor: string;
+  currentConfig?: MarkerDecorationConfig;
+  setConfig: (config: MarkerDecorationConfig) => void;
   isHorizontal: boolean;
 }) => {
   return (
@@ -118,7 +124,7 @@ export const MarkerDecorationSettings = ({
           ]}
           idSelected={`${idPrefix}${Boolean(currentConfig?.textVisibility) ? 'name' : 'none'}`}
           onChange={(id) => {
-            setConfig({ forAccessor: accessor, textVisibility: id === `${idPrefix}name` });
+            setConfig({ textVisibility: id === `${idPrefix}name` });
           }}
           isFullWidth
         />
@@ -133,7 +139,7 @@ export const MarkerDecorationSettings = ({
         <IconSelect
           value={currentConfig?.icon}
           onChange={(newIcon) => {
-            setConfig({ forAccessor: accessor, icon: newIcon });
+            setConfig({ icon: newIcon });
           }}
         />
       </EuiFormRow>
@@ -172,7 +178,7 @@ export const MarkerDecorationSettings = ({
               idSelected={`${idPrefix}${currentConfig?.iconPosition || 'auto'}`}
               onChange={(id) => {
                 const newMode = id.replace(idPrefix, '') as IconPosition;
-                setConfig({ forAccessor: accessor, iconPosition: newMode });
+                setConfig({ iconPosition: newMode });
               }}
             />
           </TooltipWrapper>

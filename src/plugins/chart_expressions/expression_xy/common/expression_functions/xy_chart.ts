@@ -160,6 +160,9 @@ export const xyChartFunction: ExpressionFunctionDefinition<
     },
   },
   fn(data, args, handlers) {
+    if (handlers?.inspectorAdapters?.tables) {
+      logDataTable(handlers.inspectorAdapters.tables, data.tables);
+    }
     return {
       type: 'render',
       as: XY_CHART_RENDERER,

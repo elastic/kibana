@@ -12,7 +12,12 @@ import type {
   YConfig,
   ValidLayer,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { visualizationTypes, XYLayerConfig } from './types';
+import {
+  visualizationTypes,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+} from './types';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -58,7 +63,10 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   );
 };
 
-export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: DatasourcePublicAPI) => {
+export const getColumnToLabelMap = (
+  layer: XYDataLayerConfig | XYReferenceLineLayerConfig,
+  datasource: DatasourcePublicAPI
+) => {
   const columnToLabel: Record<string, string> = {};
   layer.accessors
     .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])

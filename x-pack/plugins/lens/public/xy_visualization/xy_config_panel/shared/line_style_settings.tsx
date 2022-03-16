@@ -14,22 +14,22 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import {
-  LineStyle,
-  YConfig,
-} from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { LineStyle } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 import { idPrefix } from '../dimension_editor';
+
+interface LineStyleConfig {
+  lineStyle?: LineStyle;
+  lineWidth?: number;
+}
 
 export const LineStyleSettings = ({
   currentConfig,
   setConfig,
-  accessor,
   isHorizontal,
 }: {
-  currentConfig?: Pick<YConfig, 'lineStyle' | 'lineWidth'>;
-  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
-  accessor: string;
+  currentConfig?: LineStyleConfig;
+  setConfig: (config: LineStyleConfig) => void;
   isHorizontal: boolean;
 }) => {
   return (
@@ -46,7 +46,7 @@ export const LineStyleSettings = ({
             <LineThicknessSlider
               value={currentConfig?.lineWidth || 1}
               onChange={(value) => {
-                setConfig({ forAccessor: accessor, lineWidth: value });
+                setConfig({ lineWidth: value });
               }}
             />
           </EuiFlexItem>
@@ -88,7 +88,7 @@ export const LineStyleSettings = ({
               idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}
               onChange={(id) => {
                 const newMode = id.replace(idPrefix, '') as LineStyle;
-                setConfig({ forAccessor: accessor, lineStyle: newMode });
+                setConfig({ lineStyle: newMode });
               }}
               isIconOnly
             />

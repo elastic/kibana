@@ -8,13 +8,12 @@
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import type { State, XYLayerConfig } from './types';
+import type { State, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type {
   ReferenceLineLayerConfigResult,
   ValidLayer,
-  XYReferenceLineLayerConfig,
   YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
@@ -22,7 +21,10 @@ import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 import { isDataLayer } from './visualization_helpers';
 
-export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
+export const getSortedAccessors = (
+  datasource: DatasourcePublicAPI,
+  layer: XYDataLayerConfig | XYReferenceLineLayerConfig
+) => {
   const originalOrder = datasource
     .getTableSpec()
     .map(({ columnId }: { columnId: string }) => columnId)

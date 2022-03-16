@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYDataLayerConfig } from '../types';
+import { State, XYState, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
-import { YAxisMode } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import {
+  YAxisMode,
+  YConfig,
+} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
-import { ReferenceLinePanel } from './reference_line_panel';
-import { PalettePicker } from '../../shared_components';
+import { PalettePicker, useDebouncedValue } from '../../shared_components';
 import { isReferenceLayer } from '../visualization_helpers';
+import { ReferenceLinePanel } from './reference_line_panel';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -47,24 +50,52 @@ export function DimensionEditor(
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
 
+  const localLayer: XYDataLayerConfig = layer;
+
+  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
+    value: props.state,
+    onChange: props.setState,
+  });
+
+  const localYConfig = localLayer?.yConfig?.find(
+    (yAxisConfig) => yAxisConfig.forAccessor === accessor
+  );
+  const axisMode = localYConfig?.axisMode || 'auto';
+
+  const setConfig = useCallback(
+    (yConfig: Partial<YConfig> | undefined) => {
+      if (yConfig == null) {
+        return;
+      }
+      const newYConfigs = [...(localLayer.yConfig || [])];
+      const existingIndex = newYConfigs.findIndex(
+        (yAxisConfig) => yAxisConfig.forAccessor === accessor
+      );
+      if (existingIndex !== -1) {
+        newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
+      } else {
+        newYConfigs.push({
+          forAccessor: accessor,
+          ...yConfig,
+        });
+      }
+      setLocalState(updateLayer(localState, { ...localLayer, yConfig: newYConfigs }, index));
+    },
+    [accessor, index, localState, localLayer, setLocalState]
+  );
+
   if (isReferenceLayer(layer)) {
     return <ReferenceLinePanel {...props} />;
   }
-  const dataLayer: XYDataLayerConfig = layer;
-
-  const axisMode =
-    (dataLayer.yConfig &&
-      dataLayer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
-    'auto';
 
   if (props.groupId === 'breakdown') {
     return (
       <>
         <PalettePicker
           palettes={props.paletteService}
-          activePalette={dataLayer.palette}
+          activePalette={localLayer?.palette}
           setPalette={(newPalette) => {
-            setState(updateLayer(state, { ...dataLayer, palette: newPalette }, index));
+            setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
           }}
         />
       </>
@@ -75,7 +106,7 @@ export function DimensionEditor(
 
   return (
     <>
-      <ColorPicker {...props} />
+      <ColorPicker {...props} disabled={Boolean(localLayer.splitAccessor)} setConfig={setConfig} />
 
       <EuiFormRow
         display="columnCompressed"
@@ -126,22 +157,7 @@ export function DimensionEditor(
           idSelected={`${idPrefix}${axisMode}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as YAxisMode;
-            const newYAxisConfigs = [...(dataLayer.yConfig || [])];
-            const existingIndex = newYAxisConfigs.findIndex(
-              (yAxisConfig) => yAxisConfig.forAccessor === accessor
-            );
-            if (existingIndex !== -1) {
-              newYAxisConfigs[existingIndex] = {
-                ...newYAxisConfigs[existingIndex],
-                axisMode: newMode,
-              };
-            } else {
-              newYAxisConfigs.push({
-                forAccessor: accessor,
-                axisMode: newMode,
-              });
-            }
-            setState(updateLayer(state, { ...dataLayer, yConfig: newYAxisConfigs }, index));
+            setConfig({ axisMode: newMode });
           }}
         />
       </EuiFormRow>
