@@ -8,12 +8,13 @@
 import moment from 'moment';
 import { TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import type { ToastsStart } from 'kibana/public';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { getTimeFieldRange } from '../../services/time_field_range';
-import { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
+import type { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
 import { addExcludeFrozenToQuery } from '../../utils/query_utils';
 
 export interface TimeRange {
@@ -25,7 +26,8 @@ export async function setFullTimeRange(
   timefilter: TimefilterContract,
   indexPattern: IndexPattern,
   query?: QueryDslQueryContainer,
-  excludeFrozenData?: boolean
+  excludeFrozenData?: boolean,
+  toasts?: ToastsStart
 ): Promise<GetTimeFieldRangeResponse> {
   const runtimeMappings = indexPattern.getRuntimeMappings();
 
@@ -42,12 +44,12 @@ export async function setFullTimeRange(
       to: moment(resp.end.epoch).toISOString(),
     });
   } else {
-    throw Error(
-      i18n.translate('xpack.dataVisualizer.index.fullTimeRangeSelector.unpopulatedTimeField', {
-        defaultMessage: `No data found for time field {timeFieldName}`,
+    toasts?.addWarning({
+      title: i18n.translate('xpack.dataVisualizer.index.fullTimeRangeSelector.noResults', {
+        defaultMessage: 'No results match your search criteria',
         values: { timeFieldName: indexPattern.timeFieldName },
-      })
-    );
+      }),
+    });
   }
   return resp;
 }

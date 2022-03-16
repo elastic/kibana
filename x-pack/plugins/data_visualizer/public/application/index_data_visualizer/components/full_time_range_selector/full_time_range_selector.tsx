@@ -67,7 +67,8 @@ export const FullTimeRangeSelector: FC<Props> = ({
           timefilter,
           indexPattern,
           q,
-          excludeFrozenData
+          excludeFrozenData,
+          toasts
         );
         if (typeof callback === 'function') {
           callback(fullTimeRange);
