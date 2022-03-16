@@ -251,7 +251,7 @@ describe('Reindex deprecation flyout', () => {
       ]);
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
       });
 
       testBed.component.update();
