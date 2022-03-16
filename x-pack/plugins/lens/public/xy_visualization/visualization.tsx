@@ -39,6 +39,7 @@ import {
   getAnnotationsConfiguration,
   getAnnotationsSupportedLayer,
   setAnnotationsDimension,
+  getUniqueLabels,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -627,14 +628,13 @@ export const getXyVisualization = ({
   }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (layer && isAnnotationsLayer(layer)) {
-      const config = layer?.config.find((l) => l.id === columnId);
       return (
         <DimensionTrigger
           id={columnId}
           hideTooltip={hideTooltip}
           isInvalid={invalid}
           invalidMessage={invalidMessage}
-          label={config?.label || defaultAnnotationLabel}
+          label={getUniqueLabels(state.layers)?.[columnId] || defaultAnnotationLabel}
         />
       );
     }

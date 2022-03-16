@@ -7,12 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { layerTypes } from '../../../common';
-import type { XYDataLayerConfig, XYAnnotationLayerConfig } from '../../../common/expressions';
+import type {
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+  XYLayerConfig,
+} from '../../../common/expressions';
 import type { FramePublicAPI, Visualization } from '../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState } from '../types';
 import {
   checkScaleOperation,
+  getAnnotationsLayer,
   getAxisName,
   getDataLayers,
   isAnnotationsLayer,
@@ -20,6 +25,7 @@ import {
 import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { generateId } from '../../id_generator';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
+import { defaultAnnotationLabel } from './config_panel';
 
 const MAX_DATE = Number(new Date(8640000000000000));
 const MIN_DATE = Number(new Date(-8640000000000000));
@@ -116,9 +122,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
     newLayer.config = [
       ...(newLayer.config || []),
       {
-        label: i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
-          defaultMessage: 'Static Annotation',
-        }),
+        label: defaultAnnotationLabel,
         annotationType: 'manual',
         axisMode: 'bottom',
         key: {
@@ -185,4 +189,35 @@ export const getAnnotationsConfiguration = ({
       },
     ],
   };
+};
+
+export const getUniqueLabels = (layers: XYLayerConfig[]) => {
+  const annotationLayers = getAnnotationsLayer(layers);
+  const columnLabelMap = {} as Record<string, string>;
+  const counts = {} as Record<string, number>;
+
+  const makeUnique = (label: string) => {
+    let uniqueLabel = label;
+
+    while (counts[uniqueLabel] >= 0) {
+      const num = ++counts[uniqueLabel];
+      uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
+        defaultMessage: '{label} [{num}]',
+        values: { label, num },
+      });
+    }
+
+    counts[uniqueLabel] = 0;
+    return uniqueLabel;
+  };
+
+  annotationLayers.forEach((layer) => {
+    if (!layer.config) {
+      return;
+    }
+    layer.config.forEach((l) => {
+      columnLabelMap[l.id] = makeUnique(l.label);
+    });
+  });
+  return columnLabelMap;
 };

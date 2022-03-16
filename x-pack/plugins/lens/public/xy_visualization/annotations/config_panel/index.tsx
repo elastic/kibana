@@ -24,7 +24,7 @@ import { updateLayer } from '../../xy_config_panel';
 import { annotationsIconSet } from './icon_set';
 
 export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
-  defaultMessage: 'Static Annotation',
+  defaultMessage: 'Event',
 });
 
 export const AnnotationsPanel = (
@@ -84,7 +84,6 @@ export const AnnotationsPanel = (
           defaultMessage: 'Annotation date',
         })}
       />
-      ;
       <NameInput
         value={currentConfig?.label || defaultAnnotationLabel}
         defaultValue={defaultAnnotationLabel}

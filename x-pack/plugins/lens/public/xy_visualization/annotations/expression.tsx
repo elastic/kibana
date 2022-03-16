@@ -26,6 +26,7 @@ import {
   Marker,
   AnnotationIcon,
 } from '../annotations_helpers';
+import { getUniqueLabels } from './helpers';
 
 const getRoundedTimestamp = (
   timestamp: number,
@@ -55,22 +56,28 @@ interface CollectiveConfig extends AnnotationConfig {
 
 const groupVisibleConfigsByInterval = (
   layers: XYAnnotationLayerConfig[],
+  uniqueLabels: Record<string, string>,
   minInterval?: number,
   firstTimestamp?: number,
-  isBarChart?: boolean
+  isBarChart?: boolean,
 ) => {
   return layers
     .flatMap(({ config: configs }) => configs.filter((config) => !config.isHidden))
     .reduce<Record<string, AnnotationConfig[]>>((acc, current) => {
+      const label = uniqueLabels[current.id]
       const roundedTimestamp = getRoundedTimestamp(
         Number(current.key.timestamp),
         firstTimestamp,
         minInterval,
         isBarChart
       );
+        const currentWithUniqueLabel = {
+          ...current, 
+          label
+        }
       return {
         ...acc,
-        [roundedTimestamp]: acc[roundedTimestamp] ? [...acc[roundedTimestamp], current] : [current],
+        [roundedTimestamp]: acc[roundedTimestamp] ? [...acc[roundedTimestamp], currentWithUniqueLabel] : [currentWithUniqueLabel],
       };
     }, {});
 };
@@ -129,11 +136,13 @@ export const getCollectiveConfigsByInterval = (
   isBarChart?: boolean,
   formatter?: FieldFormat
 ) => {
+  const uniqueLabels = getUniqueLabels(layers)
   const visibleGroupedConfigs = groupVisibleConfigsByInterval(
     layers,
+    uniqueLabels,
     minInterval,
     firstTimestamp,
-    isBarChart
+    isBarChart,
   );
   let collectiveConfig: CollectiveConfig;
   return Object.entries(visibleGroupedConfigs).map(([roundedTimestamp, configArr]) => {
