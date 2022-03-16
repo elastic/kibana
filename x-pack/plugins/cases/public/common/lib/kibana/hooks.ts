@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -180,16 +180,28 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
   const casesCapabilities = capabilities[FEATURE_ID];
 
-  return {
-    actions: { crud: !!capabilities.actions?.execute, read: !!capabilities.actions?.show },
-    generalCases: {
-      crud: !!casesCapabilities?.crud_cases,
-      read: !!casesCapabilities?.read_cases,
-    },
-    visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
-    dashboard: {
-      crud: !!capabilities.dashboard?.show,
-      read: !!capabilities.dashboard?.createNew,
-    },
-  };
+  return useMemo(
+    () => ({
+      actions: { crud: !!capabilities.actions?.execute, read: !!capabilities.actions?.show },
+      generalCases: {
+        crud: !!casesCapabilities?.crud_cases,
+        read: !!casesCapabilities?.read_cases,
+      },
+      visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
+      dashboard: {
+        crud: !!capabilities.dashboard?.show,
+        read: !!capabilities.dashboard?.createNew,
+      },
+    }),
+    [
+      capabilities.actions?.execute,
+      capabilities.actions?.show,
+      capabilities.dashboard?.createNew,
+      capabilities.dashboard?.show,
+      capabilities.visualize?.save,
+      capabilities.visualize?.show,
+      casesCapabilities?.crud_cases,
+      casesCapabilities?.read_cases,
+    ]
+  );
 };
