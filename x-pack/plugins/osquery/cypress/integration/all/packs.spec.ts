@@ -19,7 +19,7 @@ import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
 import { getSavedQueriesDropdown } from '../../screens/live_query';
 
-describe.only('ALL - Packs', () => {
+describe('ALL - Packs', () => {
   const integration = 'Osquery Manager';
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const PACK_NAME = 'Pack-name';

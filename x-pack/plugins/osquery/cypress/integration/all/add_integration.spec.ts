@@ -13,7 +13,7 @@ import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { DEFAULT_POLICY } from '../../screens/fleet';
 
-describe.skip('ALL - Add Integration', () => {
+describe('ALL - Add Integration', () => {
   const integration = 'Osquery Manager';
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
