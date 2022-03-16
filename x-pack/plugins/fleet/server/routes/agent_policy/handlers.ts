@@ -219,12 +219,11 @@ export const getFullAgentPolicy: FleetRequestHandler<
   const soClient = context.fleet.epm.internalSoClient;
 
   if (request.query.kubernetes === true) {
-    if (request.query.standalone === true) {
       try {
         const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
           soClient,
           request.params.agentPolicyId,
-          { standalone: request.query.standalone }
+          { standalone: request.query.standalone === true }
         );
         if (fullAgentConfigMap) {
           const body: GetFullAgentConfigMapResponse = {
@@ -242,26 +241,6 @@ export const getFullAgentPolicy: FleetRequestHandler<
       } catch (error) {
         return defaultIngestErrorHandler({ error, response });
       }
-    } else {
-      try {
-        const fullAgentManifest = await agentPolicyService.getFullAgentManifest('', '');
-        if (fullAgentManifest) {
-          const body: GetFullAgentManifestResponse = {
-            item: fullAgentManifest,
-          };
-          return response.ok({
-            body,
-          });
-        } else {
-          return response.customError({
-            statusCode: 404,
-            body: { message: 'Agent manifest not found' },
-          });
-        }
-      } catch (error) {
-        return defaultIngestErrorHandler({ error, response });
-      }
-    }
   } else {
     try {
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
@@ -298,31 +277,31 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } = request;
 
   if (request.query.kubernetes === true) {
-      try {
-        const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
-          soClient,
-          request.params.agentPolicyId,
-          { standalone: request.query.standalone === true }
-        );
-        if (fullAgentConfigMap) {
-          const body = fullAgentConfigMap;
-          const headers: ResponseHeaders = {
-            'content-type': 'text/x-yaml',
-            'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
-          };
-          return response.ok({
-            body,
-            headers,
-          });
-        } else {
-          return response.customError({
-            statusCode: 404,
-            body: { message: 'Agent config map not found' },
-          });
-        }
-      } catch (error) {
-        return defaultIngestErrorHandler({ error, response });
+    try {
+      const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
+        soClient,
+        request.params.agentPolicyId,
+        { standalone: request.query.standalone === true }
+      );
+      if (fullAgentConfigMap) {
+        const body = fullAgentConfigMap;
+        const headers: ResponseHeaders = {
+          'content-type': 'text/x-yaml',
+          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
+        };
+        return response.ok({
+          body,
+          headers,
+        });
+      } else {
+        return response.customError({
+          statusCode: 404,
+          body: { message: 'Agent config map not found' },
+        });
       }
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
+    }
   } else {
     try {
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
