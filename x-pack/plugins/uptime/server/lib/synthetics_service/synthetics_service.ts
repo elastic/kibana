@@ -112,7 +112,6 @@ export class SyntheticsService {
   public registerServiceLocations() {
     const service = this;
     getServiceLocations(service.server).then((result) => {
-      console.warn('got service locations');
       service.locations = result.locations;
       service.apiClient.locations = result.locations;
     });
