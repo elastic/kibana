@@ -65,16 +65,8 @@ describe('Console Proxy Route', () => {
           let path = '_search?q=create_date:[2022-03-10T08:00:00.000+08:00 TO *]';
 
           const [p, query] = path.split('?');
-          if (/\+/g.test(query)) {
-            path = `${p}?${query.replace(/\+/g, '%2b')}`;
-          }
-          const { status } = await request('GET', path);
-          expect(status).toBe(200);
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
-        });
+          path = `${p}?${query.replace(/\+/g, '%2b')}`;
 
-        it('correctly encodes other characters', async () => {
-          const path = `_search?q="(new york city) OR (big apple)"`;
           const { status } = await request('GET', path);
           expect(status).toBe(200);
           expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
