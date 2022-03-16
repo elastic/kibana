@@ -20,7 +20,6 @@ interface RuleState {
 }
 
 export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRulesProps) {
-  console.log(ruleLastResponseFilter, '!!ruleLastResponseFilter');
   const { core } = usePluginContext();
   const { http } = core;
 
