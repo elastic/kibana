@@ -66,7 +66,7 @@ export const performBulkEditPOCRoute = (
 
         let results;
         if (body.action === BulkAction.edit) {
-          results = await rulesClient.bulkUpdate({
+          results = await rulesClient.bulkEdit({
             filter: body.query !== '' ? body.query : undefined,
             ...preparePayload(body.edit),
           });

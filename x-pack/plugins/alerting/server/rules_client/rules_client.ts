@@ -43,7 +43,12 @@ import {
   PartialAlertWithLegacyId as PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
 } from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
+import {
+  validateRuleTypeParams,
+  ruleExecutionStatusFromRaw,
+  getAlertNotifyWhenType,
+  validateMutatedRuleTypeParams,
+} from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -124,7 +129,7 @@ export interface RuleAggregation {
   };
 }
 
-export interface RuleBulkUpdateAggregation {
+export interface RuleBulkEditAggregation {
   alertTypeId: {
     buckets: Array<{
       key: string[];
@@ -174,7 +179,7 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-export type BulkUpdateAction =
+export type BulkEditAction =
   | {
       action: 'add' | 'delete' | 'set';
       field: 'tags';
@@ -191,10 +196,10 @@ export type BulkUpdateAction =
       value: NormalizedAlertAction[];
     };
 
-export interface BulkUpdateOptions {
+export interface BulkEditOptions {
   filter?: string;
   // modifier: (p: RawRule) => RawRule;
-  actions: BulkUpdateAction[];
+  actions: BulkEditAction[];
   data: {
     name?: string;
     schedule?: IntervalSchedule;
@@ -204,7 +209,7 @@ export interface BulkUpdateOptions {
   };
 }
 
-export interface BulkUpdateError {
+export interface BulkEditError {
   message: string;
   rule: {
     id: string;
@@ -1156,7 +1161,7 @@ export class RulesClient {
     );
   }
 
-  public async bulkUpdate({ filter, actions, data = {} }: BulkUpdateOptions) {
+  public async bulkEdit({ filter, actions, data = {} }: BulkEditOptions) {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -1180,7 +1185,7 @@ export class RulesClient {
 
     const { aggregations } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
-      RuleBulkUpdateAggregation
+      RuleBulkEditAggregation
     >({
       filter: qNodeFilter,
       page: 1,
@@ -1223,7 +1228,7 @@ export class RulesClient {
       );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-    const errors: BulkUpdateError[] = [];
+    const errors: BulkEditError[] = [];
     const apiKeysToInvalidate: string[] = [];
 
     for await (const response of rulesFinder.find()) {
@@ -1248,10 +1253,10 @@ export class RulesClient {
             for (const action of actions) {
               if (action.field === 'actions') {
                 await this.validateActions(ruleType, action.value);
-                ruleActions = this.applyBulkUpdateAction(action, ruleActions);
+                ruleActions = this.applyBulkEditAction(action, ruleActions);
               }
 
-              attributes = this.applyBulkUpdateAction(action, attributes);
+              attributes = this.applyBulkEditAction(action, attributes);
             }
 
             // validate rule params
@@ -1259,6 +1264,7 @@ export class RulesClient {
               { ...attributes.params, ...data.params },
               ruleType.validate?.params
             );
+            validateMutatedRuleTypeParams(validatedAlertTypeParams, ruleType.validate?.params);
 
             // validate schedule interval
             if (data.schedule) {
@@ -2294,7 +2300,7 @@ export class RulesClient {
     return alertAttributes;
   }
 
-  private applyBulkUpdateAction<R extends object>(action: BulkUpdateAction, rule: R) {
+  private applyBulkEditAction<R extends object>(action: BulkEditAction, rule: R) {
     const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
       Array.from(new Set([...arr, ...items]));
 
@@ -2309,20 +2315,18 @@ export class RulesClient {
         break;
 
       case 'add':
-        if (get(rule, action.field)) {
-          // typescript complains on set value typings
-          if (action.field === 'actions') {
-            set(rule, action.field, addItemsToArray(get(rule, action.field), action.value));
-          } else {
-            set(rule, action.field, addItemsToArray(get(rule, action.field), action.value));
-          }
+        // typescript complains on set value typings
+        if (action.field === 'actions') {
+          set(rule, action.field, addItemsToArray(get(rule, action.field) ?? [], action.value));
+        } else {
+          set(rule, action.field, addItemsToArray(get(rule, action.field) ?? [], action.value));
         }
+
         break;
 
       case 'delete':
-        if (get(rule, action.field)) {
-          set(rule, action.field, deleteItemsFromArray(get(rule, action.field), action.value));
-        }
+        set(rule, action.field, deleteItemsFromArray(get(rule, action.field) ?? [], action.value));
+
         break;
     }
 

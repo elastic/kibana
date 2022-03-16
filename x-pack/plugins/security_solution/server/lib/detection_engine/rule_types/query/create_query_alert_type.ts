@@ -33,6 +33,14 @@ export const createQueryAlertType = (
           }
           return validated;
         },
+        validateMutatedParams: (mutatedOject: unknown) => {
+          const mutatedRuleParams = mutatedOject as QueryRuleParams;
+
+          if (mutatedRuleParams.immutable === true) {
+            throw new Error("Elastic rule can't be edited");
+          }
+          return mutatedRuleParams;
+        },
       },
     },
     actionGroups: [

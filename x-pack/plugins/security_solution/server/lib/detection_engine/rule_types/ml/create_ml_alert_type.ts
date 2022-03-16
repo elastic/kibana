@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { validateNonExact, validate } from '@kbn/securitysolution-io-ts-utils';
 import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
@@ -24,7 +24,7 @@ export const createMlAlertType = (
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, machineLearningRuleParams);
+          const [validated, errors] = validate(object as object, machineLearningRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
@@ -32,6 +32,18 @@ export const createMlAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        validateMutatedParams: (mutatedOject: unknown) => {
+          const mutatedRuleParams = mutatedOject as MachineLearningRuleParams;
+
+          if (mutatedRuleParams.immutable === true) {
+            throw new Error("Elastic rule can't be edited");
+          }
+
+          if ((mutatedOject as Record<string, unknown>).index) {
+            throw new Error('Machine learning rule does not have index pattern property');
+          }
+          return mutatedRuleParams;
         },
       },
     },
