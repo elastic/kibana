@@ -262,21 +262,4 @@ describe('SuperUser - Packs', () => {
       cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');
     });
   });
-  describe.skip('Remove queries from pack', () => {
-    const TEST_PACK = 'Test-pack';
-    before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'hardware_monitoring');
-    });
-    beforeEach(() => {
-      login();
-      navigateTo('/app/osquery');
-    });
-    after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'hardware_monitoring');
-    });
-
-    it('should remove ALL queries', () => {
-      preparePack(TEST_PACK);
-    });
-  });
 });
