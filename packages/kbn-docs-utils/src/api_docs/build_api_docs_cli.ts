@@ -24,6 +24,7 @@ import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
 import { countEslintDisableLine, EslintDisableCounts } from './count_eslint_disable';
 import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
+import { getFileName } from './utils';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -61,11 +62,18 @@ export function runBuildApiDocsCli() {
 
         // Don't delete all the files if a plugin filter is being used.
       } else if (!pluginFilter) {
-        // Delete all files except the README that warns about the auto-generated nature of
-        // the folder.
+        // Delete all auto-generated files that should no longer exist (e.g. a plugin has been renamed or removed)
         const files = Fs.readdirSync(outputFolder);
+        const pluginIds = plugins.map((plugin) => plugin.manifest.id);
+        const filesThatShouldExist = pluginIds.map((pluginId) => getFileName(pluginId));
+
         files.forEach((file) => {
-          if (file.indexOf('README.md') < 0) {
+          if (
+            !file.endsWith('README.md') &&
+            !file.endsWith('plugin_directory.mdx') &&
+            !filesThatShouldExist.filter((f) => file.endsWith(f + '.mdx')) &&
+            !filesThatShouldExist.filter((f) => file.endsWith(f + '.devdocs.json'))
+          ) {
             Fs.rmSync(Path.resolve(outputFolder, file));
           }
         });

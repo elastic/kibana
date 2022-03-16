@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import fs from 'fs';
 import Path from 'path';
 import dedent from 'dedent';
 import { ToolingLog } from '@kbn/dev-utils';
 import { PluginApi, PluginMetaInfo } from '../types';
-import { getPluginApiDocId } from '../utils';
+import { getPluginApiDocId, writeFileIfChanged } from '../utils';
 
 function hasPublicApi(doc: PluginApi): boolean {
   return doc.client.length > 0 || doc.server.length > 0 || doc.common.length > 0;
@@ -111,7 +110,8 @@ ${getDirectoryTable(pluginApiMap, pluginStatsMap, false)}
 
 `) + '\n\n';
 
-  fs.writeFileSync(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
+  const mdxPath = Path.resolve(folder, 'plugin_directory.mdx');
+  writeFileIfChanged(mdxPath, mdx, log);
 }
 
 function getDirectoryTable(
