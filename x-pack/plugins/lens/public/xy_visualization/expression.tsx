@@ -586,8 +586,14 @@ export function XYChart({
         !chartHasMoreThanOneBarSeries)
   );
 
+  const bottomAnnotationsExist = collectiveAnnotationConfigs.length && linesPaddings.bottom;
+
   const shouldUseNewTimeAxis =
-    isTimeViz && isHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate;
+    isTimeViz &&
+    isHistogramModeEnabled &&
+    !useLegacyTimeAxis &&
+    !shouldRotate &&
+    !bottomAnnotationsExist;
 
   const gridLineStyle = {
     visible: gridlinesVisibilitySettings?.x,
