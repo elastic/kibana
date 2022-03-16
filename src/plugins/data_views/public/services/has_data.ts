@@ -7,7 +7,7 @@
  */
 
 import { CoreStart, HttpStart } from 'kibana/public';
-import { FLEET_ASSETS_TO_IGNORE } from '../../common';
+import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
 import { HasDataViewsResponse, IndicesResponse, IndicesResponseModified } from '../';
 
 export class HasData {
@@ -17,13 +17,13 @@ export class HasData {
     // filter out indices that start with `.`
     if (source.name.startsWith('.')) return false;
 
-    // filter out sources from FLEET_ASSETS_TO_IGNORE
-    for (const key in FLEET_ASSETS_TO_IGNORE) {
-      if (source.name === (FLEET_ASSETS_TO_IGNORE as any)[key]) return false;
-    }
-
     // filter out empty sources created by apm server
     if (source.name.startsWith('apm-')) return false;
+
+    // filter out sources from FLEET_ASSETS_TO_IGNORE
+    for (const key in DEFAULT_ASSETS_TO_IGNORE) {
+      if (source.name === (DEFAULT_ASSETS_TO_IGNORE as any)[key]) return false;
+    }
 
     return true;
   };
@@ -94,7 +94,8 @@ export class HasData {
         } else {
           return this.responseToItemArray(response);
         }
-      });
+      })
+      .catch(() => []);
 
   private checkLocalESData = (http: HttpStart): Promise<boolean> =>
     this.getIndices({
@@ -120,17 +121,21 @@ export class HasData {
     http.get<HasDataViewsResponse>(`/internal/index_patterns/has_data_views`);
 
   private findDataViews = (http: HttpStart): Promise<boolean> => {
-    return this.getHasDataViews({ http }).then((response: HasDataViewsResponse) => {
-      const { hasDataView } = response;
-      return hasDataView;
-    });
+    return this.getHasDataViews({ http })
+      .then((response: HasDataViewsResponse) => {
+        const { hasDataView } = response;
+        return hasDataView;
+      })
+      .catch(() => false);
   };
 
   private findUserDataViews = (http: HttpStart): Promise<boolean> => {
-    return this.getHasDataViews({ http }).then((response: HasDataViewsResponse) => {
-      const { hasUserDataView } = response;
-      return hasUserDataView;
-    });
+    return this.getHasDataViews({ http })
+      .then((response: HasDataViewsResponse) => {
+        const { hasUserDataView } = response;
+        return hasUserDataView;
+      })
+      .catch(() => false);
   };
 }
 

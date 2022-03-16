@@ -8,8 +8,7 @@
 
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { DataViewsService } from './data_views';
+import { DataViewsServicePublicMethods } from './data_views';
 import { HasDataService } from '../common';
 
 export enum IndicesResponseItemIndexAttrs {
@@ -77,7 +76,7 @@ export interface DataViewsPublicStartDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataViewsPublicPluginSetup {}
 
-export interface DataViewsServicePublic extends PublicMethodsOf<DataViewsService> {
+export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
   getCanSaveSync: () => boolean;
   hasData: HasDataService;
 }
