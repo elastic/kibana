@@ -41,8 +41,8 @@ subgraph Kibana
   click BulkUploader "https://github.com/elastic/kibana/blob/main/x-pack/plugins/monitoring/server/kibana_monitoring/bulk_uploader.ts"
 end 
 
-BulkUploader-->|_monitoring_bulk|ProdElasticsearch
-ProdElasticsearch-->|_bulk|MonElasticsearch
+BulkUploader-->|/_monitoring/bulk|ProdElasticsearch
+ProdElasticsearch-->|/_bulk|MonElasticsearch
 ```
 
 The production cluster receives these metrics on the `/_monitoring/bulk` endpoint in elasticsearch, then forwards them to the [monitoring deployment](../reference/terminology.md#monitoring-deployment) along with its own metrics. Or writes them directly to disk if only using a single deployment.
@@ -97,7 +97,7 @@ end
 
 ElasticsearchModule-.->|poll|ClusterStats
 ElasticsearchModule-.->|poll|NodeStats
-ElasticsearchModule-->|_bulk|MonElasticsearch
+ElasticsearchModule-->|/_bulk|MonElasticsearch
 ```
 
 You can monitor many components from a single metricbeat process as is typically done during local development. You can also have a dedicated metricbeat process for each instance in a deployment as is done on ESS.
@@ -134,7 +134,7 @@ Disk[(Disk)]
 SlowQueryLogs-.->|write|Disk
 
 ElasticsearchModule-.->|read|Disk
-ElasticsearchModule-->|_bulk|Pipeline
+ElasticsearchModule-->|/_bulk|Pipeline
 ```
 
 Beats and Enterprise Search don't have filebeat modules, but the logs can be ingested using basic JSON filebeat configurations.
@@ -195,5 +195,5 @@ FleetServer-.->configuration
 metrics-.->|poll|ClusterStats
 logs-.->|read|Disk
 
-publisher-->|_bulk|Elasticsearch
+publisher-->|/_bulk|Elasticsearch
 ```
