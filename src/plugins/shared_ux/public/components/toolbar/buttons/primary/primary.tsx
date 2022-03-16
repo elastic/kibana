@@ -14,7 +14,7 @@ export interface Props extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconTy
   label: string;
 }
 
-export const SolutionToolbarButton = ({ label, ...rest }: Props) => {
+export const ToolbarButton = ({ label, ...rest }: Props) => {
   return (
     <EuiButton size="m" color="primary" fill={true} {...rest}>
       {label}
