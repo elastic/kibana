@@ -60,7 +60,12 @@ const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLa
   defaultMessage: 'Missing field',
 });
 
-function ofName(name?: string, secondaryFieldsCount: number = 0, rare: boolean = false, termsSize: number = 0) {
+function ofName(
+  name?: string,
+  secondaryFieldsCount: number = 0,
+  rare: boolean = false,
+  termsSize: number = 0
+) {
   if (rare) {
     return i18n.translate('xpack.lens.indexPattern.rareTermsOf', {
       defaultMessage: 'Rare values of {name}',
@@ -71,11 +76,10 @@ function ofName(name?: string, secondaryFieldsCount: number = 0, rare: boolean =
   }
   if (secondaryFieldsCount) {
     return i18n.translate('xpack.lens.indexPattern.multipleTermsOf', {
-      defaultMessage: 'Top {termsSize} values of {name} + {count} {count, plural, one {other} other {others}}',
+      defaultMessage: 'Top values of {name} + {count} {count, plural, one {other} other {others}}',
       values: {
         name: name ?? missingFieldLabel,
         count: secondaryFieldsCount,
-        termsSize: termsSize > 0 ? termsSize : '',
       },
     });
   }
@@ -298,7 +302,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             field.displayName,
             newParams.secondaryFields?.length,
             newParams.orderBy.type === 'rare',
-            newParams.size,
+            newParams.size
           ),
       sourceField: field.name,
       params: newParams,
@@ -495,7 +499,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       });
     }
 
-    const secondaryFieldsCount = currentColumn.params.secondaryFields ? currentColumn.params.secondaryFields.length : 0;
+    const secondaryFieldsCount = currentColumn.params.secondaryFields
+      ? currentColumn.params.secondaryFields.length
+      : 0;
 
     return (
       <>
