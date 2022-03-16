@@ -26,8 +26,8 @@ export interface ObservabilityStatusBoxProps {
   hasData: boolean;
   description: string;
   modules: Array<{ name: string; hasData: boolean }>;
-  integrationTitle: string;
-  integrationLink: string;
+  addTitle: string;
+  addLink: string;
   learnMoreLink: string;
   goToAppTitle: string;
   goToAppLink: string;
@@ -44,8 +44,8 @@ export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
 export function CompletedStatusBox({
   title,
   modules,
-  integrationLink,
-  integrationTitle,
+  addLink,
+  addTitle,
   goToAppTitle,
   goToAppLink,
 }: ObservabilityStatusBoxProps) {
@@ -66,8 +66,8 @@ export function CompletedStatusBox({
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" iconType="plusInCircle" flush="right" href={integrationLink}>
-            {integrationTitle}
+          <EuiButtonEmpty size="s" iconType="plusInCircle" flush="right" href={addLink}>
+            {addTitle}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -110,8 +110,8 @@ export function EmptyStatusBox({
   title,
   description,
   learnMoreLink,
-  integrationTitle,
-  integrationLink,
+  addTitle,
+  addLink,
 }: ObservabilityStatusBoxProps) {
   return (
     <EuiPanel color="warning" hasBorder={true} style={{ marginBottom: 20 }}>
@@ -139,8 +139,8 @@ export function EmptyStatusBox({
 
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" size="s" href={integrationLink} target="_blank">
-            {integrationTitle}
+          <EuiButton color="primary" size="s" href={addLink} target="_blank">
+            {addTitle}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
