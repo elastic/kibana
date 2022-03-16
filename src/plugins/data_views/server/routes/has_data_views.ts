@@ -7,7 +7,7 @@
  */
 
 import { IRouter } from '../../../../core/server';
-import { hasIndexPattern, hasUserIndexPattern } from '../has_user_index_pattern';
+import { getIndexPattern, hasUserIndexPattern } from '../has_user_index_pattern';
 
 export const registerHasDataViewsRoute = (router: IRouter): void => {
   router.get(
@@ -18,7 +18,7 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
     async (ctx, req, res) => {
       const savedObjectsClient = ctx.core.savedObjects.client;
       const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-      const dataViews = await hasIndexPattern({
+      const dataViews = await getIndexPattern({
         esClient: elasticsearchClient,
         soClient: savedObjectsClient,
       });

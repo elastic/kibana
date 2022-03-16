@@ -19,7 +19,7 @@ interface Deps {
   soClient: SavedObjectsClientContract;
 }
 
-export const hasIndexPattern = async ({
+export const getIndexPattern = async ({
   esClient,
   soClient,
 }: Deps): Promise<SavedObjectsFindResponse<IndexPatternSavedObjectAttrs, unknown>> =>
@@ -33,12 +33,10 @@ export const hasIndexPattern = async ({
 
 export const hasUserIndexPattern = async (
   { esClient, soClient }: Deps,
-  iPatterns?: SavedObjectsFindResponse<IndexPatternSavedObjectAttrs, unknown>
+  indexPatterns?: SavedObjectsFindResponse<IndexPatternSavedObjectAttrs, unknown>
 ): Promise<boolean> => {
-  let indexPatterns = iPatterns;
-
   if (!indexPatterns) {
-    indexPatterns = await hasIndexPattern({ esClient, soClient });
+    indexPatterns = await getIndexPattern({ esClient, soClient });
   }
 
   if (indexPatterns.total === 0) {
