@@ -7,6 +7,9 @@ exports[`delete modal content render 1`] = `
     iconType="alert"
     title="Data views are deleted from every space they are shared in."
   />
+  <EuiSpacer
+    size="m"
+  />
   <div>
     <FormattedMessage
       defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
@@ -19,6 +22,9 @@ exports[`delete modal content render 1`] = `
       }
     />
   </div>
+  <EuiSpacer
+    size="m"
+  />
   <EuiBasicTable
     columns={
       Array [
@@ -70,6 +76,9 @@ exports[`delete modal content render 2`] = `
     iconType="alert"
     title="Data views are deleted from every space they are shared in."
   />
+  <EuiSpacer
+    size="m"
+  />
   <div>
     <FormattedMessage
       defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
@@ -82,6 +91,9 @@ exports[`delete modal content render 2`] = `
       }
     />
   </div>
+  <EuiSpacer
+    size="m"
+  />
   <EuiBasicTable
     columns={
       Array [
@@ -125,6 +137,9 @@ exports[`delete modal content render 3`] = `
     iconType="alert"
     title="Data views are deleted from every space they are shared in."
   />
+  <EuiSpacer
+    size="m"
+  />
   <div>
     <FormattedMessage
       defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
@@ -137,6 +152,9 @@ exports[`delete modal content render 3`] = `
       }
     />
   </div>
+  <EuiSpacer
+    size="m"
+  />
   <EuiBasicTable
     columns={
       Array [
@@ -186,6 +204,9 @@ exports[`delete modal content render 4`] = `
     iconType="alert"
     title="Data views are deleted from every space they are shared in."
   />
+  <EuiSpacer
+    size="m"
+  />
   <div>
     <FormattedMessage
       defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
@@ -198,6 +219,9 @@ exports[`delete modal content render 4`] = `
       }
     />
   </div>
+  <EuiSpacer
+    size="m"
+  />
   <EuiBasicTable
     columns={
       Array [
