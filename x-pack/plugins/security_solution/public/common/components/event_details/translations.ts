@@ -54,7 +54,7 @@ export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip',
   {
     defaultMessage:
-      'The total count of alerts with the same value within the currently selected timerange. This value is is not affected by additional filters.',
+      'The total count of alerts with the same value within the currently selected timerange. This value is not affected by additional filters.',
   }
 );
 
