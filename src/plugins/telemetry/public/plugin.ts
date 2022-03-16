@@ -124,6 +124,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
   private canUserChangeSettings: boolean = true;
+  private savedObjectsClient?: SavedObjectsClientContract;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
@@ -150,7 +151,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryConstants = getTelemetryConstants(docLinks);
     });
 
-    this.telemetrySender = new TelemetrySender(this.telemetryService);
+    this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
+      await this.refreshConfig();
+    });
 
     if (home) {
       home.welcomeScreen.registerOnRendered(() => {
@@ -196,18 +199,17 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
     this.telemetryNotifications = telemetryNotifications;
 
+    this.savedObjectsClient = savedObjects.client;
+
     application.currentAppId$.subscribe(async () => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
       if (isUnauthenticated) {
         return;
       }
 
-      // Update the telemetry config based as a mix of the config files and saved objects
-      const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
-      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
-      this.telemetryService!.config = updatedConfig;
-
-      const telemetryBanner = updatedConfig.banner;
+      // Refresh and get telemetry config
+      const updatedConfig = await this.refreshConfig();
+      const telemetryBanner = updatedConfig?.banner;
 
       this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
@@ -239,6 +241,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       getCanChangeOptInStatus: () => telemetryService.getCanChangeOptInStatus(),
       fetchExample: () => telemetryService.fetchExample(),
     };
+  }
+
+  private async refreshConfig(): Promise<TelemetryPluginConfig | undefined> {
+    if (this.savedObjectsClient && this.telemetryService) {
+      // Update the telemetry config based as a mix of the config files and saved objects
+      const telemetrySavedObject = await this.getTelemetrySavedObject(this.savedObjectsClient);
+      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
+      this.telemetryService.config = updatedConfig;
+      return updatedConfig;
+    }
   }
 
   /**

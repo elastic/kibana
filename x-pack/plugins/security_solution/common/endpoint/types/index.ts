@@ -920,7 +920,7 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     memory_protection: ProtectionFields & SupportedFields;
     behavior_protection: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
@@ -956,7 +956,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -984,7 +984,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -1049,6 +1049,10 @@ export interface ProtectionFields {
 /** Policy:  Supported fields */
 export interface SupportedFields {
   supported: boolean;
+}
+
+export interface BlocklistFields {
+  blocklist: boolean;
 }
 
 /** Policy protection mode options */
@@ -1256,6 +1260,12 @@ interface BaseListResponse<D = unknown> {
   page: number;
   pageSize: number;
   total: number;
+}
+
+export interface AdditionalOnSwitchChangeParams {
+  value: boolean;
+  policyConfigData: UIPolicyConfig;
+  protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 }
 
 /**
