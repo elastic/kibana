@@ -136,6 +136,10 @@ export class ApmConfiguration {
       config.serverUrl = process.env.ELASTIC_APM_SERVER_URL;
     }
 
+    if (process.env.ELASTIC_APM_SERVER_URL) {
+      config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
+    }
+
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
       config.globalLabels = Object.fromEntries(
         process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
@@ -154,23 +158,6 @@ export class ApmConfiguration {
    */
   private getConfigFromKibanaConfig(): AgentConfigOptions {
     return this.rawKibanaConfig?.elastic?.apm ?? {};
-  }
-
-  /**
-   * Get the configuration from the apm.dev.js file, supersedes config
-   * from the --config file, disabled when running the distributable
-   */
-  private getDevConfig(): AgentConfigOptions {
-    if (this.isDistributable) {
-      return {};
-    }
-
-    try {
-      const apmDevConfigPath = join(this.rootDir, 'config', 'apm.dev.js');
-      return require(apmDevConfigPath);
-    } catch (e) {
-      return {};
-    }
   }
 
   /**
@@ -269,7 +256,6 @@ export class ApmConfiguration {
     const config = merge(
       {},
       this.getConfigFromKibanaConfig(),
-      this.getDevConfig(),
       this.getConfigFromEnv()
     );
 

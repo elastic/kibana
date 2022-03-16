@@ -10,7 +10,6 @@ import {
   packageMock,
   mockedRootDir,
   gitRevExecMock,
-  devConfigMock,
   readUuidFileMock,
   resetAllMocks,
 } from './config.test.mocks';
@@ -21,7 +20,6 @@ describe('ApmConfiguration', () => {
   beforeEach(() => {
     // start with an empty env to avoid CI from spoiling snapshots, env is unique for each jest file
     process.env = {};
-    devConfigMock.raw = {};
     packageMock.raw = {
       version: '8.0.0',
       build: {
@@ -145,56 +143,6 @@ describe('ApmConfiguration', () => {
       expect.objectContaining({
         active: true,
         serverUrl: 'https://url',
-        secretToken: 'secret',
-      })
-    );
-  });
-
-  it('loads the configuration from the dev config is present', () => {
-    devConfigMock.raw = {
-      active: true,
-      serverUrl: 'https://dev-url.co',
-    };
-    const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: true,
-        serverUrl: 'https://dev-url.co',
-      })
-    );
-  });
-
-  it('does not load the configuration from the dev config in distributable', () => {
-    devConfigMock.raw = {
-      active: false,
-    };
-    const config = new ApmConfiguration(mockedRootDir, {}, true);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: true,
-      })
-    );
-  });
-
-  it('overwrites the standard config file with the dev config', () => {
-    const kibanaConfig = {
-      elastic: {
-        apm: {
-          active: true,
-          serverUrl: 'https://url',
-          secretToken: 'secret',
-        },
-      },
-    };
-    devConfigMock.raw = {
-      active: true,
-      serverUrl: 'https://dev-url.co',
-    };
-    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: true,
-        serverUrl: 'https://dev-url.co',
         secretToken: 'secret',
       })
     );
