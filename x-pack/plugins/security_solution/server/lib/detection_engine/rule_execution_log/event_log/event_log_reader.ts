@@ -78,7 +78,6 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
               terms: {
                 field: 'kibana.alert.rule.execution.uuid',
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
-                order: { '@timestamp': 'desc' },
               },
             },
           },
@@ -110,7 +109,6 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
               terms: {
                 field: 'kibana.alert.rule.execution.uuid',
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
-                order: { '@timestamp': 'desc' },
               },
             },
           },

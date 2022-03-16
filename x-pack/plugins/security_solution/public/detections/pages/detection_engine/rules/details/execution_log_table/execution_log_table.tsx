@@ -273,7 +273,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         <UtilityBarSection>
           <UtilityBarGroup>
             <UtilityBarText dataTestSubj="executionsShowing">
-              {i18n.SHOWING_EXECUTIONS(items.length)}
+              {i18n.SHOWING_EXECUTIONS(maxEvents)}
             </UtilityBarText>
           </UtilityBarGroup>
           {maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED && (
