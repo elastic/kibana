@@ -8,12 +8,12 @@
 
 import { Story } from '@storybook/react';
 import React from 'react';
-import { SolutionToolbarButton } from './primary';
+import { ToolbarButton } from './primary';
 import mdx from './primary.mdx';
 
 export default {
-  title: 'Solution Toolbar Button',
-  description: 'A button that is a part of the solution toolbar.',
+  title: 'Toolbar/Primary button',
+  description: 'A primary button that is a part of a toolbar.',
   parameters: {
     docs: {
       page: mdx,
@@ -33,7 +33,7 @@ export default {
 export const Component: Story<{
   iconType: any;
 }> = ({ iconType }) => {
-  return <SolutionToolbarButton label={'Primary Action'} iconType={iconType} />;
+  return <ToolbarButton label={'Primary Action'} iconType={iconType} />;
 };
 
 Component.args = {
