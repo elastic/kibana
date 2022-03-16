@@ -495,12 +495,11 @@ export const VisualizationWrapper = ({
   const searchSessionId = useLensSelector(selectSearchSessionId);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
   const dispatchLens = useLensDispatch();
+  const [defaultLayerId] = Object.keys(datasourceLayers);
 
   const onData$ = useCallback(
     (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (adapters && adapters.tables) {
-        const [defaultLayerId] = Object.keys(datasourceLayers);
-
         dispatchLens(
           onActiveDataChange(
             Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
@@ -513,7 +512,7 @@ export const VisualizationWrapper = ({
         );
       }
     },
-    [datasourceLayers, dispatchLens]
+    [defaultLayerId, dispatchLens]
   );
 
   function renderFixAction(
