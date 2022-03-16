@@ -410,7 +410,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
     mockDatasource.toExpression.mockReturnValue('datasource');
-    mockDatasource.getLayers.mockReturnValue(['first']);
+    mockDatasource.getLayers.mockReturnValue(['table1']);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
