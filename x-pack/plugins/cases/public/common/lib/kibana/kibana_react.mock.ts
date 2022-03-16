@@ -38,6 +38,11 @@ export const createStartServicesMock = (): StartServices => {
     new Map([['testAppId', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
   );
 
+  services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+    actionTypeTitle: '.servicenow',
+    iconClass: 'logoSecurity',
+  });
+
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: { save: true, show: true },
