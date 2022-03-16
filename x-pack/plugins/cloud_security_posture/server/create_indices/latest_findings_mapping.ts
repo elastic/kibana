@@ -8,22 +8,37 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export const latestFindingsMapping: MappingTypeMapping = {
   properties: {
+    result: {
+      properties: {
+        evaluation: {
+          type: 'text',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+
+    agent: {
+      properties: {
+        id: {
+          type: 'text',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
     '@timestamp': {
       type: 'date',
     },
-    score: {
-      type: 'float',
-    },
-    total_findings: {
-      type: 'long',
-    },
-    'passed.passed_counter': {
-      type: 'long',
-    },
-    'failed.failed_counter': {
-      type: 'long',
-    },
-    'agent.id': {
+    cycle_id: {
       type: 'text',
       fields: {
         keyword: {
@@ -32,7 +47,29 @@ export const latestFindingsMapping: MappingTypeMapping = {
         },
       },
     },
-    cluster_id: {
+    resource: {
+      properties: {
+        filename: {
+          type: 'text',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+        type: {
+          type: 'text',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    resource_id: {
       type: 'text',
       fields: {
         keyword: {
@@ -41,12 +78,30 @@ export const latestFindingsMapping: MappingTypeMapping = {
         },
       },
     },
-    'rule.benchmark.name': {
-      type: 'text',
-      fields: {
-        keyword: {
+    rule: {
+      properties: {
+        name: {
           ignore_above: 1024,
           type: 'keyword',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+        benchmark: {
+          properties: {
+            name: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+          },
         },
       },
     },

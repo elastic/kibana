@@ -8,18 +8,20 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export const benchmarkScoreMapping: MappingTypeMapping = {
   properties: {
-    result: {
-      properties: {
-        evaluation: {
-          type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-          },
-        },
-      },
+    '@timestamp': {
+      type: 'date',
+    },
+    score: {
+      type: 'float',
+    },
+    total_findings: {
+      type: 'integer',
+    },
+    'passed.passed_counter': {
+      type: 'integer',
+    },
+    'failed.failed_counter': {
+      type: 'integer',
     },
     cluster_id: {
       type: 'text',
@@ -30,86 +32,12 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
         },
       },
     },
-    agent: {
-      properties: {
-        id: {
-          type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-          },
-        },
-      },
-    },
-    '@timestamp': {
-      type: 'date',
-    },
-    cycle_id: {
+    'rule.benchmark.name': {
       type: 'text',
       fields: {
         keyword: {
           ignore_above: 1024,
           type: 'keyword',
-        },
-      },
-    },
-    resource: {
-      properties: {
-        filename: {
-          type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-          },
-        },
-        type: {
-          type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-          },
-        },
-      },
-    },
-    resource_id: {
-      type: 'text',
-      fields: {
-        keyword: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-      },
-    },
-    rule: {
-      properties: {
-        name: {
-          ignore_above: 1024,
-          type: 'keyword',
-          fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-          },
-        },
-        benchmark: {
-          properties: {
-            name: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  ignore_above: 1024,
-                  type: 'keyword',
-                },
-              },
-            },
-          },
         },
       },
     },

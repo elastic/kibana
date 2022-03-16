@@ -7,8 +7,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
-import { latestFindingsMapping } from './latest_findings_mapping';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
+import { latestFindingsMapping } from './latest_findings_mapping';
 import {
   LATEST_FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_PATTERN,
