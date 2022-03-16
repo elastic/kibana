@@ -10748,7 +10748,6 @@
     "xpack.enterpriseSearch.appSearch.metaEngineCreation.successMessage": "メタエンジン'{name}'が作成されました",
     "xpack.enterpriseSearch.appSearch.metaEngineCreation.title": "メタエンジンを作成",
     "xpack.enterpriseSearch.appSearch.metaEngines.title": "メタエンジン",
-    "xpack.enterpriseSearch.appSearch.metaEngines.upgradeDescription": "詳細またはPlatinumライセンスにアップグレードして開始するには、{readDocumentationLink}。",
     "xpack.enterpriseSearch.appSearch.multiInputRows.addValueButtonLabel": "値を追加",
     "xpack.enterpriseSearch.appSearch.multiInputRows.inputRowPlaceholder": "値を入力",
     "xpack.enterpriseSearch.appSearch.multiInputRows.removeValueButtonLabel": "値を削除",

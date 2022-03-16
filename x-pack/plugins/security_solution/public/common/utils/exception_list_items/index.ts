@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { memoryOverviewServiceProvider } from './memory_overview_service';
+export {
+  conditionEntriesToEntries,
+  entriesToConditionEntriesMap,
+  entriesToConditionEntries,
+} from './mappers';

@@ -10769,7 +10769,6 @@
     "xpack.enterpriseSearch.appSearch.metaEngineCreation.successMessage": "元引擎“{name}”已创建",
     "xpack.enterpriseSearch.appSearch.metaEngineCreation.title": "创建元引擎",
     "xpack.enterpriseSearch.appSearch.metaEngines.title": "元引擎",
-    "xpack.enterpriseSearch.appSearch.metaEngines.upgradeDescription": "{readDocumentationLink}以了解更多信息，或升级到白金级许可证以开始。",
     "xpack.enterpriseSearch.appSearch.multiInputRows.addValueButtonLabel": "添加值",
     "xpack.enterpriseSearch.appSearch.multiInputRows.inputRowPlaceholder": "输入值",
     "xpack.enterpriseSearch.appSearch.multiInputRows.removeValueButtonLabel": "删除值",
