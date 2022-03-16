@@ -5545,6 +5545,22 @@
             "deprecated": {
               "type": "long"
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -5566,35 +5582,6 @@
                   "type": "long"
                 },
                 "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
                   "type": "long"
                 }
               }
@@ -5632,6 +5619,22 @@
             "deprecated": {
               "type": "long"
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -5653,35 +5656,6 @@
                   "type": "long"
                 },
                 "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
                   "type": "long"
                 }
               }
@@ -5719,6 +5693,22 @@
             "deprecated": {
               "type": "long"
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -5740,35 +5730,6 @@
                   "type": "long"
                 },
                 "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
                   "type": "long"
                 }
               }
@@ -5822,6 +5783,22 @@
             "deprecated": {
               "type": "long"
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -5843,35 +5820,6 @@
                   "type": "long"
                 },
                 "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
                   "type": "long"
                 }
               }
@@ -5925,6 +5873,22 @@
             "deprecated": {
               "type": "long"
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -5946,22 +5910,6 @@
                   "type": "long"
                 },
                 "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
                   "type": "long"
                 }
               }
@@ -6044,6 +5992,22 @@
             "deprecated": {
               "type": "long"
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -6065,22 +6029,6 @@
                   "type": "long"
                 },
                 "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
                   "type": "long"
                 }
               }
@@ -6703,12 +6651,6 @@
             }
           }
         },
-        "available": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
         "last7Days": {
           "properties": {
             "csv_searchsource": {
@@ -6721,6 +6663,22 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "sizes": {
                   "properties": {
@@ -6743,35 +6701,6 @@
                       "type": "long"
                     },
                     "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
                       "type": "long"
                     }
                   }
@@ -6809,6 +6738,22 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "sizes": {
                   "properties": {
                     "1.0": {
@@ -6830,35 +6775,6 @@
                       "type": "long"
                     },
                     "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
                       "type": "long"
                     }
                   }
@@ -6896,6 +6812,22 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "sizes": {
                   "properties": {
                     "1.0": {
@@ -6917,35 +6849,6 @@
                       "type": "long"
                     },
                     "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
                       "type": "long"
                     }
                   }
@@ -6999,6 +6902,22 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "sizes": {
                   "properties": {
                     "1.0": {
@@ -7020,35 +6939,6 @@
                       "type": "long"
                     },
                     "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
                       "type": "long"
                     }
                   }
@@ -7102,6 +6992,22 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "sizes": {
                   "properties": {
                     "1.0": {
@@ -7123,22 +7029,6 @@
                       "type": "long"
                     },
                     "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7221,6 +7111,22 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "sizes": {
                   "properties": {
                     "1.0": {
@@ -7242,22 +7148,6 @@
                       "type": "long"
                     },
                     "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7881,6 +7771,12 @@
               }
             }
           }
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
         }
       }
     },

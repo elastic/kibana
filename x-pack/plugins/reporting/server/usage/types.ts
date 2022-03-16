@@ -89,6 +89,9 @@ export interface AvailableTotal {
     visualization?: number;
     'canvas workpad'?: number;
   };
+}
+
+export interface ScreenshotJobType {
   layout?: {
     print?: number;
     preserve_layout?: number;
@@ -111,8 +114,8 @@ export interface JobTypes {
   csv_searchsource_immediate: AvailableTotal & { metrics: MetricsStatsCsv };
   PNG: AvailableTotal & { metrics: MetricsStatsPng };
   PNGV2: AvailableTotal & { metrics: MetricsStatsPng };
-  printable_pdf: AvailableTotal & { metrics: MetricsStatsPdf };
-  printable_pdf_v2: AvailableTotal & { metrics: MetricsStatsPdf };
+  printable_pdf: AvailableTotal & ScreenshotJobType & { metrics: MetricsStatsPdf };
+  printable_pdf_v2: AvailableTotal & ScreenshotJobType & { metrics: MetricsStatsPdf };
 }
 
 export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
