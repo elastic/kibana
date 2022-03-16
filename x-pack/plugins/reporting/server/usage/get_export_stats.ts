@@ -7,21 +7,21 @@
 
 import { DEPRECATED_JOB_TYPES } from '../../common/constants';
 import { ExportTypesHandler } from './get_export_type_handler';
-import { AvailableTotal, FeatureAvailabilityMap, ScreenshotJobType, RangeStats } from './types';
+import { AvailableTotal, FeatureAvailabilityMap, RangeStats } from './types';
 
 const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(jobType);
-const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & ScreenshotJobType = {
+const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> = {
   total: 0,
   deprecated: 0,
-  app: { 'canvas workpad': 0, visualization: 0, dashboard: 0 },
+  app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
   layout: { canvas: 0, print: 0, preserve_layout: 0 },
 };
 
 const isAvailable = (featureAvailability: FeatureAvailabilityMap, feature: string) =>
   !!featureAvailability[feature];
 
-function getJobTypeSummaryForFeature(
-  jobType: AvailableTotal & ScreenshotJobType,
+function getAvailableTotalForFeature(
+  jobType: AvailableTotal,
   typeKey: string,
   featureAvailability: FeatureAvailabilityMap
 ): AvailableTotal {
@@ -29,11 +29,12 @@ function getJobTypeSummaryForFeature(
   const deprecated = jobTypeIsDeprecated(typeKey) ? jobType.total : jobType.deprecated || 0;
 
   // merge the additional stats for the jobType
-  const availableTotal: AvailableTotal & ScreenshotJobType = {
+  const availableTotal: AvailableTotal = {
     available: isAvailable(featureAvailability, typeKey),
     total: jobType.total,
     deprecated,
     sizes: jobType.sizes,
+    metrics: jobType.metrics,
     app: { ...defaultTotalsForFeature.app, ...jobType.app },
     layout: { ...defaultTotalsForFeature.layout, ...jobType.layout },
   };
@@ -63,9 +64,7 @@ export const getExportStats = (
 
   // combine the known types with any unknown type found in reporting data
   const statsForExportType = exportTypesHandler.getJobTypes().reduce((accum, exportType) => {
-    const availableTotal = rangeStats[exportType as keyof typeof rangeStats] as
-      | (AvailableTotal & ScreenshotJobType)
-      | undefined;
+    const availableTotal = rangeStats[exportType as keyof typeof rangeStats];
 
     if (!availableTotal) {
       return {
@@ -79,7 +78,7 @@ export const getExportStats = (
 
     return {
       ...accum,
-      [exportType]: getJobTypeSummaryForFeature(availableTotal, exportType, featureAvailability),
+      [exportType]: getAvailableTotalForFeature(availableTotal, exportType, featureAvailability),
     };
   }, {});
 

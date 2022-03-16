@@ -23,8 +23,17 @@ interface SizeStats {
   sizes?: { values: SizePercentiles };
 }
 
+// FIXME: find a way to get this from exportTypesHandler or common/constants
+export type BaseJobTypes =
+  | 'csv_searchsource'
+  | 'csv_searchsource_immediate'
+  | 'PNG'
+  | 'PNGV2'
+  | 'printable_pdf'
+  | 'printable_pdf_v2';
+
 export interface KeyCountBucket extends DocCount, SizeStats {
-  key: JobType;
+  key: BaseJobTypes;
   isDeprecated?: DocCount;
 }
 
@@ -73,11 +82,10 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
+  metrics?: MetricsStats;
   sizes?: SizePercentiles;
-}
-
-export interface ScreenshotJobType {
-  app: {
+  app?: {
+    search?: number;
     dashboard?: number;
     visualization?: number;
     'canvas workpad'?: number;
@@ -99,18 +107,9 @@ export type AppCounts = {
   [A in 'canvas workpad' | 'dashboard' | 'visualization' | 'search']?: number;
 };
 
-export interface JobTypes {
-  csv_searchsource: AvailableTotal & { metrics: MetricsStatsCsv };
-  csv_searchsource_immediate: AvailableTotal & { metrics: MetricsStatsCsv };
-  PNG: AvailableTotal & { metrics: MetricsStatsPng };
-  PNGV2: AvailableTotal & { metrics: MetricsStatsPng };
-  printable_pdf: AvailableTotal & ScreenshotJobType & { metrics: MetricsStatsPdf };
-  printable_pdf_v2: AvailableTotal & ScreenshotJobType & { metrics: MetricsStatsPdf };
-}
+export type JobTypes = { [K in BaseJobTypes]: AvailableTotal };
 
-export type JobType = keyof JobTypes;
-
-export type ByAppCounts = { [J in JobType]?: AppCounts };
+export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
 
 type Statuses = 'completed' | 'completed_with_warnings' | 'failed' | 'pending' | 'processing';
 
@@ -128,24 +127,13 @@ export type RangeStats = JobTypes & {
   output_size?: SizePercentiles;
 };
 
-export interface MetricsStatsCsv {
-  csv_rows: MetricsPercentiles;
-}
-
-export interface MetricsStatsPng {
-  png_cpu: MetricsPercentiles;
-  png_memory: MetricsPercentiles;
-}
-
-export interface MetricsStatsPdf {
-  pdf_cpu: MetricsPercentiles;
-  pdf_memory: MetricsPercentiles;
-  pdf_pages: MetricsPercentiles;
-}
-
-export type MetricsStats = MetricsStatsCsv & MetricsStatsPdf & MetricsStatsPng;
-
-export type MetricsStatsKey = keyof MetricsStats;
+export type BaseMetricsKeys =
+  | 'csv_rows'
+  | 'pdf_cpu'
+  | 'pdf_memory'
+  | 'pdf_pages'
+  | 'png_cpu'
+  | 'png_memory';
 
 export interface MetricsPercentiles {
   '50.0': number | null;
@@ -153,6 +141,10 @@ export interface MetricsPercentiles {
   '95.0': number | null;
   '99.0': number | null;
 }
+
+export type MetricsStats = {
+  [K in BaseMetricsKeys]: MetricsPercentiles;
+};
 
 export type ReportingUsageType = RangeStats & {
   available: boolean;

@@ -8,7 +8,7 @@
 import { getExportTypesRegistry } from '../lib';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
-import { FeatureAvailabilityMap, MetricsStats } from './types';
+import { FeatureAvailabilityMap, RangeStats } from './types';
 
 let featureMap: FeatureAvailabilityMap;
 const sizesAggResponse = {
@@ -76,26 +76,18 @@ test('Model of job status and status-by-pdf-app', () => {
 test('Model of jobTypes', () => {
   const result = getExportStats(
     {
-      PNG: {
-        available: true,
-        total: 0,
-        sizes: sizesAggResponse,
-        app: { dashboard: 0, visualization: 0, 'canvas workpad': 0 },
-        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
-      },
+      PNG: { available: true, total: 3, sizes: sizesAggResponse },
       printable_pdf: {
         available: true,
         total: 3,
         sizes: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
-        layout: { preserve_layout: 3, print: 0, canvas: 0 },
-        metrics: { pdf_cpu: {}, pdf_memory: {}, pdf_pages: {} } as MetricsStats,
+        layout: { preserve_layout: 3, print: 0 },
       },
       csv_searchsource: {
         available: true,
         total: 3,
         sizes: sizesAggResponse,
-        metrics: { csv_rows: {} } as MetricsStats,
       },
     },
     featureMap,
@@ -107,6 +99,7 @@ test('Model of jobTypes', () => {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -116,6 +109,7 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": undefined,
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -125,7 +119,7 @@ test('Model of jobTypes', () => {
         "95.0": 11935594,
         "99.0": 11935594,
       },
-      "total": 0,
+      "total": 3,
     }
   `);
   expect(result.csv_searchsource).toMatchInlineSnapshot(`
@@ -133,6 +127,7 @@ test('Model of jobTypes', () => {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -142,6 +137,7 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": undefined,
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -159,6 +155,7 @@ test('Model of jobTypes', () => {
       "app": Object {
         "canvas workpad": 3,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -168,6 +165,7 @@ test('Model of jobTypes', () => {
         "preserve_layout": 3,
         "print": 0,
       },
+      "metrics": undefined,
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -190,8 +188,6 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         total: 15,
         deprecated: 5,
         sizes: sizesAggResponse,
-        app: { dashboard: 0, visualization: 0, 'canvas workpad': 0 },
-        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
       },
     },
     featureMap,
@@ -202,6 +198,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -211,6 +208,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": undefined,
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -226,39 +224,43 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
 });
 
 test('Incorporate metric stats', () => {
-  const result = getExportStats(
-    {
-      PNGV2: {
-        available: true,
-        total: 3,
-        sizes: sizesAggResponse,
-        app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
-        metrics: {
-          png_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
-          png_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
-        },
-      },
-      printable_pdf_v2: {
-        available: true,
-        total: 3,
-        sizes: sizesAggResponse,
-        metrics: {
-          pdf_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
-          pdf_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
-          pdf_pages: { '50.0': 4, '75.0': 4, '95.0': 4, '99.0': 4 },
-        },
-        app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
-        layout: { preserve_layout: 3, print: 0, canvas: 0 },
+  const rangeStats: Pick<RangeStats, 'PNGV2' | 'printable_pdf_v2'> = {
+    PNGV2: {
+      available: true,
+      total: 3,
+      sizes: sizesAggResponse,
+      metrics: {
+        csv_rows: { '50.0': null, '75.0': null, '95.0': null, '99.0': null },
+        pdf_cpu: { '50.0': null, '75.0': null, '95.0': null, '99.0': null },
+        pdf_memory: { '50.0': null, '75.0': null, '95.0': null, '99.0': null },
+        pdf_pages: { '50.0': null, '75.0': null, '95.0': null, '99.0': null },
+        png_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
+        png_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
       },
     },
-    featureMap,
-    exportTypesHandler
-  );
+    printable_pdf_v2: {
+      available: true,
+      total: 3,
+      sizes: sizesAggResponse,
+      metrics: {
+        csv_rows: { '50.0': null, '75.0': null, '95.0': null, '99.0': null },
+        pdf_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
+        pdf_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
+        pdf_pages: { '50.0': 4, '75.0': 4, '95.0': 4, '99.0': 4 },
+        png_cpu: { '50.0': null, '75.0': null, '95.0': null, '99.0': null },
+        png_memory: { '50.0': null, '75.0': null, '95.0': null, '99.0': null },
+      },
+      app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
+      layout: { preserve_layout: 3, print: 0 },
+    },
+  };
+  const result = getExportStats(rangeStats, featureMap, exportTypesHandler);
   expect(result.PNGV2).toMatchInlineSnapshot(`
     Object {
       "app": Object {
-        "canvas workpad": 3,
+        "canvas workpad": 0,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": false,
@@ -267,6 +269,44 @@ test('Incorporate metric stats', () => {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
+      },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_cpu": Object {
+          "50.0": 0.01,
+          "75.0": 0.01,
+          "95.0": 0.01,
+          "99.0": 0.01,
+        },
+        "png_memory": Object {
+          "50.0": 3485,
+          "75.0": 3496,
+          "95.0": 3678,
+          "99.0": 3782,
+        },
       },
       "sizes": Object {
         "1.0": 5093470,
@@ -283,8 +323,9 @@ test('Incorporate metric stats', () => {
   expect(result.printable_pdf_v2).toMatchInlineSnapshot(`
     Object {
       "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 3,
+        "canvas workpad": 3,
+        "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": false,
@@ -293,6 +334,44 @@ test('Incorporate metric stats', () => {
         "canvas": 0,
         "preserve_layout": 3,
         "print": 0,
+      },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_cpu": Object {
+          "50.0": 0.01,
+          "75.0": 0.01,
+          "95.0": 0.01,
+          "99.0": 0.01,
+        },
+        "pdf_memory": Object {
+          "50.0": 3485,
+          "75.0": 3496,
+          "95.0": 3678,
+          "99.0": 3782,
+        },
+        "pdf_pages": Object {
+          "50.0": 4,
+          "75.0": 4,
+          "95.0": 4,
+          "99.0": 4,
+        },
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
       },
       "sizes": Object {
         "1.0": 5093470,

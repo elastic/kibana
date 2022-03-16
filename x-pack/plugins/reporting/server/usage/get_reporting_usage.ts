@@ -15,12 +15,12 @@ import { getExportTypesHandler } from './get_export_type_handler';
 import type {
   AggregationBuckets,
   AggregationResultBuckets,
+  AvailableTotal,
+  BaseJobTypes,
   FeatureAvailabilityMap,
-  JobType,
   JobTypes,
   KeyCountBucket,
   MetricsStats,
-  MetricsStatsKey,
   RangeStats,
   ReportingUsageType,
   StatusByAppBucket,
@@ -89,21 +89,19 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
 
 function getAggStats(
   aggs: AggregationResultBuckets,
-  metrics?: Record<keyof JobTypes, keyof MetricsStats>
+  metrics?: { [K in BaseJobTypes]: MetricsStats }
 ): Partial<RangeStats> {
   const { buckets: jobBuckets } = aggs[keys.JOB_TYPE] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
     const { key, doc_count: count, isDeprecated, sizes } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
-    return {
-      ...accum,
-      [key]: {
-        total: count,
-        deprecated: deprecatedCount,
-        sizes: sizes?.values,
-        metrics: (metrics && metrics[key]) || undefined,
-      },
+    const total: Omit<AvailableTotal, 'available'> = {
+      total: count,
+      deprecated: deprecatedCount,
+      sizes: sizes?.values,
+      metrics: (metrics && metrics[key]) || undefined,
     };
+    return { ...accum, [key]: total };
   }, {} as JobTypes);
 
   // merge pdf stats into pdf jobtype key
@@ -157,7 +155,7 @@ function normalizeMetrics(metrics: estypes.AggregationsStringTermsAggregate | un
         csv_rows: next.csv_rows,
       },
     };
-  }, {} as Record<JobType, MetricsStatsKey>);
+  }, {} as { [K in BaseJobTypes]: MetricsStats });
 }
 
 type RangeStatSets = Partial<RangeStats> & {
