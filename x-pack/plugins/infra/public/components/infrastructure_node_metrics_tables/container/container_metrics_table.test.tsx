@@ -50,6 +50,7 @@ describe('ContainerMetricsTable', () => {
       expect(screen.queryByTestId('containerMetricsTable')).not.toBeInTheDocument();
 
       // Using longer time out since resolving dynamic import can be slow
+      // https://github.com/facebook/jest/issues/10933
       await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2), {
         timeout: 10000,
       });
