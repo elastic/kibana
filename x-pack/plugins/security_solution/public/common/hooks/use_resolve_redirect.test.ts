@@ -88,12 +88,13 @@ describe('useResolveRedirect', () => {
         resolveTimelineConfig: {
           outcome: 'aliasMatch',
           alias_target_id: 'new-id',
+          alias_purpose: 'savedObjectConversion',
         },
       }));
       renderHook(() => useResolveRedirect());
       expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
         path: 'my/cool/path?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
-        suppressRedirectToast: false,
+        aliasPurpose: 'savedObjectConversion',
         objectNoun: 'timeline',
       });
     });
@@ -111,6 +112,7 @@ describe('useResolveRedirect', () => {
           resolveTimelineConfig: {
             outcome: 'aliasMatch',
             alias_target_id: 'new-id',
+            alias_purpose: 'savedObjectConversion',
           },
           savedObjectId: 'current-saved-object-id',
           activeTab: 'some-tab',
@@ -120,7 +122,7 @@ describe('useResolveRedirect', () => {
         renderHook(() => useResolveRedirect());
         expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
           path: 'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
-          suppressRedirectToast: false,
+          aliasPurpose: 'savedObjectConversion',
           objectNoun: 'timeline',
         });
       });

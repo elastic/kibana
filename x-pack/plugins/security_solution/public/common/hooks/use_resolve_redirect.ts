@@ -69,7 +69,7 @@ export const useResolveRedirect = () => {
     const newPath = `${pathname}?${searchQuery.toString()}`;
     spaces.ui.redirectLegacyUrl({
       path: newPath,
-      suppressRedirectToast: !!resolveTimelineConfig.suppress_redirect_toast,
+      aliasPurpose: resolveTimelineConfig.alias_purpose,
       objectNoun: CONSTANTS.timeline,
     });
     // Prevent the effect from being called again as the url change takes place in location rather than a true redirect
