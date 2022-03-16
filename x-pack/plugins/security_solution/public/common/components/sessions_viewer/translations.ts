@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SESSIONS_DOCUMENT_TYPE = i18n.translate(
-  'xpack.securitySolution.sessionsView.sessionsDocumentType',
-  {
-    defaultMessage: 'sessions',
-  }
-);
-
 export const TOTAL_COUNT_OF_SESSIONS = i18n.translate(
   'xpack.securitySolution.sessionsView.totalCountOfSessions',
   {
@@ -21,16 +14,9 @@ export const TOTAL_COUNT_OF_SESSIONS = i18n.translate(
   }
 );
 
-export const SESSIONS_TABLE_TITLE = i18n.translate(
-  'xpack.securitySolution.sessionsView.sessionsTableTitle',
+export const SINGLE_COUNT_OF_SESSIONS = i18n.translate(
+  'xpack.securitySolution.sessionsView.singleCountOfSessions',
   {
-    defaultMessage: 'Sessions',
-  }
-);
-
-export const ERROR_FETCHING_SESSIONS_DATA = i18n.translate(
-  'xpack.securitySolution.sessionsView.errorFetchingSessionsData',
-  {
-    defaultMessage: 'Failed to query sessions data',
+    defaultMessage: 'session',
   }
 );

@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { timelineActions } from '../../../timelines/store/timeline';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { sessionsDefaultModel } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
-import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
-import { useKibana } from '../../lib/kibana';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { EntityType } from '../../../../../timelines/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 
@@ -29,18 +23,8 @@ export interface OwnProps {
   start: string;
 }
 
-const defaultAlertsFilters: Filter[] = [
+const defaultSessionsFilters: Filter[] = [
   {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'event.kind',
-      params: {
-        query: 'alert',
-      },
-    },
     query: {
       bool: {
         filter: [
@@ -49,7 +33,7 @@ const defaultAlertsFilters: Filter[] = [
               should: [
                 {
                   match: {
-                    'event.kind': 'alert',
+                    'process.is_entry_leader': true,
                   },
                 },
               ],
@@ -58,6 +42,14 @@ const defaultAlertsFilters: Filter[] = [
           },
         ],
       },
+    },
+    meta: {
+      alias: null,
+      disabled: false,
+      key: 'process.is_entry_leader',
+      negate: false,
+      params: {},
+      type: 'boolean',
     },
   },
 ];
@@ -77,39 +69,18 @@ const SessionsTableComponent: React.FC<Props> = ({
   startDate,
   pageFilters = [],
 }) => {
-  const dispatch = useDispatch();
-  const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
-  const { filterManager } = useKibana().services.data.query;
+  const sessionsFilter = useMemo(() => [...defaultSessionsFilters, ...pageFilters], [pageFilters]);
   const ACTION_BUTTON_COUNT = 4;
-
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
-
-  useEffect(() => {
-    dispatch(
-      timelineActions.initializeTGridSettings({
-        id: timelineId,
-        documentType: i18n.SESSIONS_DOCUMENT_TYPE,
-        filterManager,
-        defaultColumns: sessionsDefaultModel.columns.map((c) =>
-          !tGridEnabled && c.initialWidth == null
-            ? { ...c, initialWidth: DEFAULT_COLUMN_MIN_WIDTH }
-            : c
-        ),
-        excludedRowRendererIds: sessionsDefaultModel.excludedRowRendererIds,
-        footerText: i18n.TOTAL_COUNT_OF_SESSIONS,
-        title: i18n.SESSIONS_TABLE_TITLE,
-        // TODO: avoid passing this through the store
-      })
-    );
-  }, [dispatch, filterManager, tGridEnabled, timelineId]);
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
+  const unit = (c: number) =>
+    c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
+
   return (
     <StatefulEventsViewer
-      pageFilters={alertsFilter}
+      pageFilters={sessionsFilter}
       defaultModel={sessionsDefaultModel}
-      defaultCellActions={defaultCellActions}
       end={endDate}
       entityType={entityType}
       id={timelineId}
@@ -118,6 +89,7 @@ const SessionsTableComponent: React.FC<Props> = ({
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.default}
       start={startDate}
+      unit={unit}
     />
   );
 };
