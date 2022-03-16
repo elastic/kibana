@@ -13,11 +13,8 @@ import { useDispatch } from 'react-redux';
 import {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
-  pagePathGetters,
 } from '../../../../../../../fleet/public';
-import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../fleet/common';
-import { useAppUrl, useHttp } from '../../../../../common/lib/kibana/hooks';
-import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { useHttp } from '../../../../../common/lib/kibana/hooks';
 import {
   getPolicyDetailPath,
   getPolicyTrustedAppsPath,
@@ -34,7 +31,6 @@ import {
   policyDetailsForUpdate,
 } from '../../store/policy_details/selectors';
 
-import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
 import { ReactQueryClientProvider } from '../../../../../common/containers/query_client/query_client_provider';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
@@ -70,7 +66,6 @@ const WrappedPolicyDetailsForm = memo<{
   const updatedPolicy = usePolicyDetailsSelector(policyDetailsForUpdate);
   const endpointPolicyDetails = usePolicyDetailsSelector(policyDetails);
   const endpointDetailsLoadingError = usePolicyDetailsSelector(apiError);
-  const { getAppUrl } = useAppUrl();
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
   const privileges = useUserPrivileges().endpointPrivileges;
 
