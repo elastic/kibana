@@ -81,7 +81,7 @@ docker run --name logstash \
   --hostname=logstash \
   --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/logstash.yml:/usr/share/logstash/config/logstash.yml:ro" \
   docker.elastic.co/logstash/logstash:master-SNAPSHOT \
-  -e 'input { java_generator { eps => 1 } } output { stdout {} }'
+  -e 'input { java_generator { eps => 1 } } output { file { path => "/dev/null" } }'
 ```
 
 # Complete docker setup
