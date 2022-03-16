@@ -62,9 +62,8 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
-import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 import { incrementInMemoryMetric, IN_MEMORY_METRICS } from '../monitoring';
-import { getRecoveredAlerts } from '../lib';
+import { getRecoveredAlerts, createWrappedScopedClusterClientFactory } from '../lib';
 import {
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,

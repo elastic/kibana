@@ -12,7 +12,7 @@ import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 type KibanaClusterMetricOptions = Pick<
   MetricOptions,
-  'field' | 'label' | 'description' | 'format' | 'units' | 'metricAgg'
+  'field' | 'label' | 'description' | 'format' | 'units' | 'metricAgg' | 'derivative'
 > &
   Partial<Pick<MetricOptions, 'title'>>;
 
@@ -34,7 +34,7 @@ export class KibanaClusterMetric extends ClusterMetric {
 }
 
 export class KibanaClusterRuleMetric extends ClusterMetric {
-  constructor(opts) {
+  constructor(opts: KibanaClusterMetricOptions) {
     super({
       ...opts,
       app: 'kibana',
@@ -45,13 +45,13 @@ export class KibanaClusterRuleMetric extends ClusterMetric {
   static getMetricFields() {
     return {
       uuidField: 'cluster_uuid',
-      timestampField: 'kibana_rules.timestamp',
+      timestampField: 'kibana_cluster_rules.timestamp',
     };
   }
 }
 
 export class KibanaInstanceRuleMetric extends Metric {
-  constructor(opts) {
+  constructor(opts: KibanaClusterMetricOptions) {
     super({
       ...opts,
       app: 'kibana',
@@ -62,13 +62,13 @@ export class KibanaInstanceRuleMetric extends Metric {
   static getMetricFields() {
     return {
       uuidField: 'kibana_rules.kibana.uuid',
-      timestampField: 'kibana_rules.timestamp',
+      timestampField: 'kibana_node_rules.timestamp',
     };
   }
 }
 
 export class KibanaClusterActionMetric extends ClusterMetric {
-  constructor(opts) {
+  constructor(opts: KibanaClusterMetricOptions) {
     super({
       ...opts,
       app: 'kibana',
@@ -79,13 +79,13 @@ export class KibanaClusterActionMetric extends ClusterMetric {
   static getMetricFields() {
     return {
       uuidField: 'cluster_uuid',
-      timestampField: 'kibana_actions.timestamp',
+      timestampField: 'kibana_cluster_actions.timestamp',
     };
   }
 }
 
 export class KibanaInstanceActionMetric extends Metric {
-  constructor(opts) {
+  constructor(opts: KibanaClusterMetricOptions) {
     super({
       ...opts,
       app: 'kibana',
@@ -96,7 +96,7 @@ export class KibanaInstanceActionMetric extends Metric {
   static getMetricFields() {
     return {
       uuidField: 'kibana_actions.kibana.uuid',
-      timestampField: 'kibana_action.timestamp',
+      timestampField: 'kibana_node_action.timestamp',
     };
   }
 }
