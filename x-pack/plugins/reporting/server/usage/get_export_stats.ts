@@ -11,15 +11,15 @@ import {
   AvailableTotal,
   FeatureAvailabilityMap,
   JobTypes,
+  LayoutCounts,
   MetricsPercentiles,
   MetricsStats,
   RangeStats,
-  ScreenshotJobType,
   SizePercentiles,
 } from './types';
 
 const jobTypeIsDeprecated = (jobType: keyof JobTypes) => DEPRECATED_JOB_TYPES.includes(jobType);
-const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & ScreenshotJobType = {
+const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & { layout: LayoutCounts } = {
   total: 0,
   deprecated: 0,
   app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
@@ -58,7 +58,10 @@ const metricsForFeature: { [K in keyof JobTypes]: JobTypes[K]['metrics'] } = {
   printable_pdf_v2: metricsSets.pdf,
 };
 
-type CombinedJobTypeStats = AvailableTotal & ScreenshotJobType & { metrics: Partial<MetricsStats> };
+type CombinedJobTypeStats = AvailableTotal & {
+  layout?: LayoutCounts;
+  metrics: Partial<MetricsStats>;
+};
 
 const isAvailable = (featureAvailability: FeatureAvailabilityMap, feature: string) =>
   !!featureAvailability[feature];

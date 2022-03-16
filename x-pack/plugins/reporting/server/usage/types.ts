@@ -66,9 +66,6 @@ export interface StatusByAppBucket extends DocCount {
 
 export interface AggregationResultBuckets extends DocCount, SizeStats {
   jobTypes?: AggregationBuckets;
-  layoutTypes: {
-    pdf?: AggregationBuckets;
-  } & DocCount;
   statusTypes: AggregationBuckets;
   statusByApp: {
     buckets: StatusByAppBucket[];
@@ -91,19 +88,11 @@ export interface AvailableTotal {
   total: number;
   deprecated?: number;
   sizes: SizePercentiles;
-  app?: {
+  app: {
     search?: number;
     dashboard?: number;
     visualization?: number;
     'canvas workpad'?: number;
-  };
-}
-
-export interface ScreenshotJobType {
-  layout?: {
-    print?: number;
-    preserve_layout?: number;
-    canvas?: number;
   };
 }
 
@@ -122,8 +111,8 @@ export interface JobTypes {
   csv_searchsource_immediate: AvailableTotal & { metrics: MetricsStatsCsv };
   PNG: AvailableTotal & { metrics: MetricsStatsPng };
   PNGV2: AvailableTotal & { metrics: MetricsStatsPng };
-  printable_pdf: AvailableTotal & ScreenshotJobType & { metrics: MetricsStatsPdf };
-  printable_pdf_v2: AvailableTotal & ScreenshotJobType & { metrics: MetricsStatsPdf };
+  printable_pdf: AvailableTotal & { layout: LayoutCounts; metrics: MetricsStatsPdf };
+  printable_pdf_v2: AvailableTotal & { layout: LayoutCounts; metrics: MetricsStatsPdf };
 }
 
 export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };

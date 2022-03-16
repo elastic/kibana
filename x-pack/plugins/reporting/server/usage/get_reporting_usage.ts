@@ -18,10 +18,10 @@ import type {
   AvailableTotal,
   JobTypes,
   KeyCountBucket,
+  LayoutCounts,
   MetricsStats,
   RangeStats,
   ReportingUsageType,
-  ScreenshotJobType,
   SizePercentiles,
   StatusByAppBucket,
 } from './types';
@@ -85,8 +85,10 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
     };
   }, {});
 
-type CombinedTotals = Omit<AvailableTotal, 'available'> &
-  ScreenshotJobType & { metrics?: MetricsStats };
+type CombinedTotals = Omit<AvailableTotal, 'available'> & {
+  layout: LayoutCounts;
+  metrics?: MetricsStats;
+};
 
 function getAggStats(
   aggs: AggregationResultBuckets,
