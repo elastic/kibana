@@ -18,16 +18,15 @@ import {
 } from './types';
 
 const jobTypeIsDeprecated = (jobType: keyof JobTypes) => DEPRECATED_JOB_TYPES.includes(jobType);
-const jobTypeIsPdf = (jobType: keyof JobTypes) => {
-  return jobType === 'printable_pdf' || jobType === 'printable_pdf_v2';
-};
-
-const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> &
-  ScreenshotJobType & { metrics: unknown } = {
+const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & ScreenshotJobType = {
   total: 0,
   deprecated: 0,
-  metrics: {},
   app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
+  layout: { canvas: 0, print: 0, preserve_layout: 0 },
+};
+
+const jobTypeIsPdf = (jobType: keyof JobTypes) => {
+  return jobType === 'printable_pdf' || jobType === 'printable_pdf_v2';
 };
 
 const metricsPercentiles = ['50.0', '75.0', '95.0', '99.0'].reduce(
@@ -60,7 +59,7 @@ const isAvailable = (featureAvailability: FeatureAvailabilityMap, feature: strin
   !!featureAvailability[feature];
 
 function getAvailableTotalForFeature(
-  jobType: CombinedJobTypeStats | undefined,
+  jobType: CombinedJobTypeStats,
   exportType: keyof JobTypes,
   featureAvailability: FeatureAvailabilityMap
 ): AvailableTotal {
@@ -71,14 +70,12 @@ function getAvailableTotalForFeature(
   // merge the additional stats for the jobType
   const availableTotal: CombinedJobTypeStats = {
     available: isAvailable(featureAvailability, exportType),
-    total: jobType?.total || 0,
+    total: jobType.total || 0,
     deprecated,
-    sizes: jobType?.sizes,
-    metrics: { ...metricsForFeature[exportType]!, ...jobType?.metrics },
-    app: { ...defaultTotalsForFeature.app, ...jobType?.app },
-    layout: needsLayout
-      ? { canvas: 0, print: 0, preserve_layout: 0, ...jobType?.layout }
-      : undefined,
+    sizes: jobType.sizes,
+    metrics: { ...metricsForFeature[exportType], ...jobType.metrics },
+    app: { ...defaultTotalsForFeature.app, ...jobType.app },
+    layout: needsLayout ? { ...defaultTotalsForFeature.layout, ...jobType.layout } : undefined,
   };
 
   return availableTotal;
@@ -92,7 +89,7 @@ function getAvailableTotalForFeature(
  * Reporting data, even if the type is unknown to this Kibana instance.
  */
 export const getExportStats = (
-  rangeStatsInput: Partial<RangeStats> = {},
+  rangeStatsInput: RangeStats,
   featureAvailability: FeatureAvailabilityMap,
   exportTypesHandler: ExportTypesHandler
 ) => {
@@ -101,14 +98,23 @@ export const getExportStats = (
     status: rangeStatus,
     statuses: rangeStatusByApp,
     output_size: outputSize,
-    ...rangeStats
+    ...rangeStatsRest
   } = rangeStatsInput;
+
+  const rangeStats: Record<keyof JobTypes, CombinedJobTypeStats> = rangeStatsRest;
 
   // combine the known types with any unknown type found in reporting data
   const statsForExportType = exportTypesHandler.getJobTypes().reduce((accum, exportType) => {
-    const availableTotal = rangeStats[exportType as keyof typeof rangeStats] as
-      | CombinedJobTypeStats
-      | undefined;
+    const availableTotal = rangeStats[exportType];
+
+    if (!availableTotal) {
+      return {
+        ...accum,
+        [exportType]: {
+          available: isAvailable(featureAvailability, exportType),
+        },
+      };
+    }
 
     return {
       ...accum,

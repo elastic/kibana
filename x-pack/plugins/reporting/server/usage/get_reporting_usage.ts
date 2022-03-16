@@ -16,12 +16,12 @@ import type {
   AggregationBuckets,
   AggregationResultBuckets,
   AvailableTotal,
-  FeatureAvailabilityMap,
   JobTypes,
   KeyCountBucket,
   MetricsStats,
   RangeStats,
   ReportingUsageType,
+  ScreenshotJobType,
   StatusByAppBucket,
 } from './types';
 
@@ -54,8 +54,6 @@ enum fields {
   STATUS = 'status',
 }
 
-const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
-
 const DEFAULT_TERMS_SIZE = 10;
 const SIZE_PERCENTILES = [1, 5, 25, 50, 75, 95, 99];
 const METRIC_PERCENTILES = [50, 75, 95, 99];
@@ -86,20 +84,23 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
     };
   }, {});
 
-type CombinedTotals = Omit<AvailableTotal, 'available'> & { metrics?: MetricsStats };
+type CombinedTotals = Omit<AvailableTotal, 'available'> &
+  ScreenshotJobType & { metrics?: MetricsStats };
 
 function getAggStats(
   aggs: AggregationResultBuckets,
   metrics?: { [K in keyof JobTypes]: MetricsStats }
-): Partial<RangeStats> {
+): RangeStats {
   const { buckets: jobBuckets } = aggs[keys.JOB_TYPE] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
-    const { key, doc_count: count, isDeprecated, sizes } = bucket;
+    const { key, doc_count: count, isDeprecated, sizes, layoutTypes, objectTypes } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
     const total: CombinedTotals = {
       total: count,
       deprecated: deprecatedCount,
       sizes: sizes?.values,
+      app: getKeyCount(objectTypes.buckets),
+      layout: getKeyCount(layoutTypes.buckets),
       metrics: (metrics && metrics[key]) || undefined,
     };
     return { ...accum, [key]: total };
@@ -150,30 +151,27 @@ function normalizeMetrics(metrics: estypes.AggregationsStringTermsAggregate | un
   }, {} as { [K in keyof JobTypes]: MetricsStats });
 }
 
-type RangeStatSets = Partial<RangeStats> & {
-  last7Days: Partial<RangeStats>;
-};
+type RangeStatSets = RangeStats & { last7Days: RangeStats };
 
 type ESResponse = Partial<estypes.SearchResponse>;
 
-async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSets>> {
+async function handleResponse(response: ESResponse): Promise<RangeStatSets> {
   const ranges = (response.aggregations?.ranges as estypes.AggregationsFilterAggregate) || {};
 
-  let last7DaysUsage: Partial<RangeStats> = {};
-  let allUsage: Partial<RangeStats> = {};
+  let last7DaysUsage = {} as RangeStats;
+  let allUsage = {} as RangeStats;
   const rangesBuckets = ranges.buckets as Record<string, AggregationResultBuckets>;
   if (rangesBuckets) {
     const { all, last7Days } = rangesBuckets;
 
-    last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
+    last7DaysUsage = last7Days ? getAggStats(last7Days) : ({} as RangeStats);
 
     // calculate metrics per job type for the stats covering all-time
     const metrics = normalizeMetrics(
       response.aggregations?.metrics as estypes.AggregationsStringTermsAggregate
     );
-    allUsage = all ? getAggStats(all, metrics) : {};
+    allUsage = all ? getAggStats(all, metrics) : ({} as RangeStats);
   }
-
   return { last7Days: last7DaysUsage, ...allUsage };
 }
 
@@ -204,6 +202,10 @@ export async function getReportingUsage(
                 [keys.OUTPUT_SIZE]: {
                   percentiles: { field: fields.OUTPUT_SIZE, percents: SIZE_PERCENTILES },
                 },
+                [keys.OBJECT_TYPE]: {
+                  terms: { field: fields.OBJECT_TYPE, size: DEFAULT_TERMS_SIZE },
+                },
+                [keys.LAYOUT]: { terms: { field: fields.LAYOUT, size: DEFAULT_TERMS_SIZE } },
                 [keys.STATUS_BY_APP]: {
                   terms: { field: fields.STATUS, size: DEFAULT_TERMS_SIZE },
                   aggs: {
@@ -213,14 +215,6 @@ export async function getReportingUsage(
               },
             },
             [keys.STATUS]: { terms: { field: fields.STATUS, size: DEFAULT_TERMS_SIZE } },
-            [keys.OBJECT_TYPE]: {
-              filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
-              aggs: { pdf: { terms: { field: fields.OBJECT_TYPE, size: DEFAULT_TERMS_SIZE } } },
-            },
-            [keys.LAYOUT]: {
-              filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
-              aggs: { pdf: { terms: { field: fields.LAYOUT, size: DEFAULT_TERMS_SIZE } } },
-            },
             [keys.OUTPUT_SIZE]: { percentiles: { field: fields.OUTPUT_SIZE } },
           },
         },
@@ -257,17 +251,16 @@ export async function getReportingUsage(
     .then((response) => handleResponse(response))
     .then((usage): ReportingUsageType => {
       const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-      const availability = exportTypesHandler.getAvailability(
-        featureAvailability
-      ) as FeatureAvailabilityMap;
-
+      const availability = exportTypesHandler.getAvailability(featureAvailability);
       const { last7Days, ...all } = usage;
+      const rangeStatsLast7Days = last7Days as RangeStats;
+      const rangeStatsAll = all as RangeStats;
 
       return {
         available: true,
         enabled: true,
-        last7Days: getExportStats(last7Days, availability, exportTypesHandler),
-        ...getExportStats(all, availability, exportTypesHandler),
+        last7Days: getExportStats(rangeStatsLast7Days, availability, exportTypesHandler),
+        ...getExportStats(rangeStatsAll, availability, exportTypesHandler),
       };
     });
 }

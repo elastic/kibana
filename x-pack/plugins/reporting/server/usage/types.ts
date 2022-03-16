@@ -23,6 +23,14 @@ interface SizeStats {
   sizes?: { values: SizePercentiles };
 }
 
+interface ObjectTypeStats {
+  objectTypes: AggregationBuckets;
+}
+
+interface LayoutTypeStats {
+  layoutTypes: AggregationBuckets;
+}
+
 /*
  * NOTE: This list needs to be explicit in order for the telemetry schema check script to resolve the types.
  * However, using `keyof JobTypes` is functionally the same thing
@@ -35,7 +43,7 @@ type BaseJobTypes =
   | 'printable_pdf'
   | 'printable_pdf_v2';
 
-export interface KeyCountBucket extends DocCount, SizeStats {
+export interface KeyCountBucket extends DocCount, SizeStats, ObjectTypeStats, LayoutTypeStats {
   key: BaseJobTypes;
   isDeprecated?: DocCount;
 }
@@ -59,9 +67,6 @@ export interface StatusByAppBucket extends DocCount {
 export interface AggregationResultBuckets extends DocCount, SizeStats {
   jobTypes?: AggregationBuckets;
   layoutTypes: {
-    pdf?: AggregationBuckets;
-  } & DocCount;
-  objectTypes: {
     pdf?: AggregationBuckets;
   } & DocCount;
   statusTypes: AggregationBuckets;
