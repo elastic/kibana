@@ -266,39 +266,41 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   >
                     <EuiFieldText icon="user" value={user.username} fullWidth />
                   </EuiFormRow>
-                ) : null}
+                ) : (
+                  <>
+                    <FormRow
+                      label={
+                        <FormLabel for="user.full_name">
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.userProfile.fullNameLabel"
+                            defaultMessage="Full name"
+                          />
+                        </FormLabel>
+                      }
+                      labelAppend={<OptionalText />}
+                      isDisabled={isReservedUser}
+                      fullWidth
+                    >
+                      <FormField name="user.full_name" fullWidth />
+                    </FormRow>
 
-                <FormRow
-                  label={
-                    <FormLabel for="user.full_name">
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.fullNameLabel"
-                        defaultMessage="Full name"
-                      />
-                    </FormLabel>
-                  }
-                  labelAppend={<OptionalText />}
-                  isDisabled={isReservedUser}
-                  fullWidth
-                >
-                  <FormField name="user.full_name" fullWidth />
-                </FormRow>
-
-                <FormRow
-                  label={
-                    <FormLabel for="user.email">
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.emailLabel"
-                        defaultMessage="Email address"
-                      />
-                    </FormLabel>
-                  }
-                  labelAppend={<OptionalText />}
-                  isDisabled={isReservedUser}
-                  fullWidth
-                >
-                  <FormField type="email" name="user.email" fullWidth />
-                </FormRow>
+                    <FormRow
+                      label={
+                        <FormLabel for="user.email">
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.userProfile.emailLabel"
+                            defaultMessage="Email address"
+                          />
+                        </FormLabel>
+                      }
+                      labelAppend={<OptionalText />}
+                      isDisabled={isReservedUser}
+                      fullWidth
+                    >
+                      <FormField type="email" name="user.email" fullWidth />
+                    </FormRow>
+                  </>
+                )}
               </EuiDescribedFormGroup>
 
               <EuiDescribedFormGroup
@@ -370,10 +372,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 )}
 
                 <EuiSplitPanel.Outer direction="row" hasBorder>
-                  <EuiSplitPanel.Inner
-                    grow={false}
-                    color={isReservedUser ? 'transparent' : 'subdued'}
-                  >
+                  <EuiSplitPanel.Inner grow={false} color="subdued">
                     {formik.values.avatarType === 'image' && !formik.values.data.avatar.imageUrl ? (
                       <UserAvatar size="xl" />
                     ) : (
@@ -393,7 +392,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       />
                     )}
                   </EuiSplitPanel.Inner>
-                  <EuiSplitPanel.Inner color={isReservedUser ? 'transparent' : 'plain'}>
+                  <EuiSplitPanel.Inner color="plain">
                     {formik.values.avatarType === 'image' ? (
                       <FormRow
                         label={

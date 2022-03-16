@@ -6,7 +6,7 @@
  */
 
 import type { EuiAvatarProps } from '@elastic/eui';
-import { EuiAvatar, useEuiTheme } from '@elastic/eui';
+import { EuiAvatar, shade, useEuiTheme } from '@elastic/eui';
 import type { FunctionComponent, HTMLAttributes } from 'react';
 import React from 'react';
 
@@ -25,15 +25,16 @@ export interface UserAvatarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
 }
 
 export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, ...rest }) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
 
   if (!user) {
+    const color = colorMode === 'LIGHT' ? euiTheme.colors.lightShade : euiTheme.colors.mediumShade;
     return (
       <EuiAvatar
         name=""
+        color={color}
         iconType="user"
-        iconColor={euiTheme.colors.emptyShade}
-        color={euiTheme.colors.disabled}
+        iconColor={shade(color, colorMode === 'LIGHT' ? 0.5 : 0.67)}
         {...rest}
       />
     );
