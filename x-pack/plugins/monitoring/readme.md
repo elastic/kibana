@@ -8,7 +8,7 @@ This plugin provides the Stack Monitoring kibana application.
 - [Testing](dev_docs/how_to/testing.md)
 
 ## Concepts
-- [Architectural Overview](dev_docs/reference/architectural_overview.md) (WIP)
+- [Architectural Overview](dev_docs/reference/architectural_overview.md)
 - [Terminology](dev_docs/reference/terminology.md) (WIP)
 - [Data Collection modes](dev_docs/reference/data_collection_modes.md) (WIP)
 - [Rules and Alerts](dev_docs/reference/rules_alerts.md)
@@ -18,5 +18,5 @@ This plugin provides the Stack Monitoring kibana application.
 - [APM tracing](dev_docs/how_to/apm_tracing.md) (WIP)
 
 ## Troubleshooting
-- [Diagnostic queries](dev_docs/runbook/diagnostic_queries.md) (WIP)
-- [CPU metrics](dev_docs/runbook/cpu_metrics.md) (WIP)
+- [Diagnostic queries](dev_docs/runbook/diagnostic_queries.md)
+- [CPU metrics](dev_docs/runbook/cpu_metrics.md)
