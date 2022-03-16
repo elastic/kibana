@@ -143,14 +143,7 @@ const registerHttpRequestMockHelpers = (
     mockResponse('GET', `${API_BASE_PATH}/remote_clusters`, response, error);
 
   const setLoadNodeDiskSpaceResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/node_disk_space`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
+    mockResponse('GET', `${API_BASE_PATH}/node_disk_space`, response, error);
   };
 
   return {
