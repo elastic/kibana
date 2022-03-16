@@ -90,7 +90,7 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  sizes?: SizePercentiles;
+  sizes: SizePercentiles;
   app?: {
     search?: number;
     dashboard?: number;

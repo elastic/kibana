@@ -22,6 +22,7 @@ import type {
   RangeStats,
   ReportingUsageType,
   ScreenshotJobType,
+  SizePercentiles,
   StatusByAppBucket,
 } from './types';
 
@@ -90,7 +91,7 @@ type CombinedTotals = Omit<AvailableTotal, 'available'> &
 function getAggStats(
   aggs: AggregationResultBuckets,
   metrics?: { [K in keyof JobTypes]: MetricsStats }
-): RangeStats {
+): Partial<RangeStats> {
   const { buckets: jobBuckets } = aggs[keys.JOB_TYPE] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
     const { key, doc_count: count, isDeprecated, sizes, layoutTypes, objectTypes } = bucket;
@@ -98,7 +99,7 @@ function getAggStats(
     const total: CombinedTotals = {
       total: count,
       deprecated: deprecatedCount,
-      sizes: sizes?.values,
+      sizes: get(sizes, 'values', {} as SizePercentiles),
       app: getKeyCount(get(objectTypes, 'buckets', [])),
       layout: getKeyCount(get(layoutTypes, 'buckets', [])),
       metrics: (metrics && metrics[key]) || undefined,
@@ -158,19 +159,19 @@ type ESResponse = Partial<estypes.SearchResponse>;
 async function handleResponse(response: ESResponse): Promise<RangeStatSets> {
   const ranges = (response.aggregations?.ranges as estypes.AggregationsFilterAggregate) || {};
 
-  let last7DaysUsage = {} as RangeStats;
-  let allUsage = {} as RangeStats;
+  let last7DaysUsage: Partial<RangeStats> = {};
+  let allUsage: Partial<RangeStats> = {};
   const rangesBuckets = ranges.buckets as Record<string, AggregationResultBuckets>;
   if (rangesBuckets) {
     const { all, last7Days } = rangesBuckets;
 
-    last7DaysUsage = last7Days ? getAggStats(last7Days) : ({} as RangeStats);
+    last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
 
     // calculate metrics per job type for the stats covering all-time
     const metrics = normalizeMetrics(
       response.aggregations?.metrics as estypes.AggregationsStringTermsAggregate
     );
-    allUsage = all ? getAggStats(all, metrics) : ({} as RangeStats);
+    allUsage = all ? getAggStats(all, metrics) : {};
   }
   return { last7Days: last7DaysUsage, ...allUsage };
 }
@@ -252,7 +253,7 @@ export async function getReportingUsage(
   return esClient
     .search(params)
     .then((response) => handleResponse(response))
-    .then((usage): ReportingUsageType => {
+    .then((usage: Partial<RangeStatSets>): ReportingUsageType => {
       const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
       const availability = exportTypesHandler.getAvailability(featureAvailability);
       const { last7Days, ...all } = usage;

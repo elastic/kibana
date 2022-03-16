@@ -15,6 +15,7 @@ import {
   MetricsStats,
   RangeStats,
   ScreenshotJobType,
+  SizePercentiles,
 } from './types';
 
 const jobTypeIsDeprecated = (jobType: keyof JobTypes) => DEPRECATED_JOB_TYPES.includes(jobType);
@@ -22,6 +23,10 @@ const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & ScreenshotJob
   total: 0,
   deprecated: 0,
   app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
+  sizes: ['1.0', '5.0', '25.0', '50.0', '75.0', '95.0', '99.0'].reduce(
+    (sps, p) => ({ ...sps, [p]: null }),
+    {} as SizePercentiles
+  ),
   layout: { canvas: 0, print: 0, preserve_layout: 0 },
 };
 
@@ -72,7 +77,7 @@ function getAvailableTotalForFeature(
     available: isAvailable(featureAvailability, exportType),
     total: jobType?.total || 0,
     deprecated,
-    sizes: jobType?.sizes,
+    sizes: { ...defaultTotalsForFeature.sizes, ...jobType?.sizes },
     metrics: { ...metricsForFeature[exportType], ...jobType?.metrics },
     app: { ...defaultTotalsForFeature.app, ...jobType?.app },
     layout: needsLayout ? { ...defaultTotalsForFeature.layout, ...jobType?.layout } : undefined,
@@ -89,10 +94,14 @@ function getAvailableTotalForFeature(
  * Reporting data, even if the type is unknown to this Kibana instance.
  */
 export const getExportStats = (
-  rangeStatsInput: Partial<RangeStats>,
+  rangeStatsInput: Partial<RangeStats> | undefined,
   featureAvailability: FeatureAvailabilityMap,
   exportTypesHandler: ExportTypesHandler
 ): RangeStats => {
+  if (!rangeStatsInput) {
+    return {} as RangeStats;
+  }
+
   const {
     _all: rangeAll,
     status: rangeStatus,
