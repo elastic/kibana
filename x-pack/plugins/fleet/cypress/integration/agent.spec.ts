@@ -68,16 +68,6 @@ const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-2', 'policy-2', 'error', kibanaVersion),
 ];
 
-// getAgents can be called many times on load, wait() was grabbing the wrong call
-// .all returns all requests performed so far, allowing us to reliably grab the most recent call
-const getLatestRequestUrl = (selector: string) =>
-  cy.get(selector + '.all').then((requests) => {
-    if (!requests.length) return undefined;
-    const latestRequest = requests[requests.length - 1];
-    // @ts-ignore no property url, typing is wrong for return type of .all
-    return new URL(latestRequest?.request?.url);
-  });
-
 let docs: any[] = [];
 describe('View agents', () => {
   before(() => {
