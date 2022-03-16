@@ -25,7 +25,7 @@ export function generatePdfObservable(
   const tracker = getTracker();
   tracker.startScreenshots();
 
-  return reporting.getScreenshotsPdf(options).pipe(
+  return reporting.getScreenshots(options).pipe(
     tap(({ metrics }) => {
       if (metrics) {
         tracker.setCpuUsage(metrics.cpu);

@@ -28,6 +28,8 @@ import type {
   ScreenshottingStart,
   PngScreenshotOptions as BasePngScreenshotOptions,
   PdfScreenshotOptions as BasePdfScreenshotOptions,
+  PngScreenshotResult,
+  PdfScreenshotResult,
   UrlOrUrlWithContext,
 } from '../../screenshotting/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
@@ -362,45 +364,34 @@ export class ReportingCore {
     return startDeps.esClient;
   }
 
-  private mapToScreenshotConfigOptions(options: PdfScreenshotOptions | PngScreenshotOptions) {
-    const config = this.getConfig();
-    return {
-      timeouts: {
-        loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
-        openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
-        waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
-        renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
-      },
-
-      layout: {
-        zoom: config.get('capture', 'zoom'),
-        ...options.layout,
-      },
-
-      urls: options.urls.map((url) =>
-        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-      ) as UrlOrUrlWithContext[],
-    };
-  }
-
-  public getScreenshotsPdf(options: PdfScreenshotOptions) {
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  public getScreenshots(
+    options: PngScreenshotOptions | PdfScreenshotOptions
+  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
+        const config = this.getConfig();
         return screenshotting.getScreenshots({
           ...options,
-          ...(this.mapToScreenshotConfigOptions(options) as BasePdfScreenshotOptions),
-        });
-      })
-    );
-  }
+          timeouts: {
+            loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
+            openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
+            waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
+            renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
+          },
 
-  public getScreenshotsPng(options: PngScreenshotOptions) {
-    return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshots({
-          ...options,
-          ...(this.mapToScreenshotConfigOptions(options) as BasePngScreenshotOptions),
-        });
+          layout: {
+            zoom: config.get('capture', 'zoom'),
+            ...options.layout,
+          },
+
+          urls: options.urls.map((url) =>
+            typeof url === 'string'
+              ? url
+              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+          ) as UrlOrUrlWithContext[],
+        } as BasePngScreenshotOptions);
       })
     );
   }

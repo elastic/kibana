@@ -36,7 +36,7 @@ export function generatePdfObservable(
     getFullRedirectAppUrl(reporting.getConfig(), job.spaceId, job.forceNow),
     locator,
   ]) as UrlOrUrlLocatorTuple[];
-  const screenshots$ = reporting.getScreenshotsPdf({ ...options, urls }).pipe(
+  const screenshots$ = reporting.getScreenshots({ ...options, urls }).pipe(
     tap(({ metrics }) => {
       if (metrics) {
         tracker.setCpuUsage(metrics.cpu);

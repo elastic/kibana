@@ -41,7 +41,7 @@ export function generatePngObservable(
   const apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', 'setup');
   let apmBuffer: typeof apm.currentSpan;
 
-  return reporting.getScreenshotsPng({ ...options, layout, format: 'png' }).pipe(
+  return reporting.getScreenshots({ ...options, layout, format: 'png' }).pipe(
     tap(({ metrics }) => {
       if (metrics) {
         apmTrans?.setLabel('cpu', metrics.cpu, false);
