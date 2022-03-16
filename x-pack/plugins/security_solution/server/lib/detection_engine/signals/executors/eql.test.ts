@@ -14,8 +14,6 @@ import { getEntryListMock } from '../../../../../../lists/common/schemas/types/e
 import { getEqlRuleParams } from '../../schemas/rule_schemas.mock';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 jest.mock('../../routes/index/get_index_version');
@@ -58,14 +56,12 @@ describe('eql_executor', () => {
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
     logger = loggingSystemMock.createLogger();
-    alertServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          total: { value: 10 },
-          events: [],
-        },
-      })
-    );
+    alertServices.scopedClusterClient.asCurrentUser.eql.search.mockResolvedValue({
+      hits: {
+        total: { relation: 'eq', value: 10 },
+        events: [],
+      },
+    });
   });
 
   describe('eqlExecutor', () => {
