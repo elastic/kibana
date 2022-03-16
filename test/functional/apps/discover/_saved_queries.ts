@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await queryBar.setQuery('response:200');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/124990
-  describe.skip('saved queries saved objects', function describeIndexTests() {
+  describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
@@ -99,8 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/124986
-    describe.skip('saved query management component functionality', function () {
+    describe('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
       it('should show the saved query management component when there are no saved queries', async () => {
@@ -138,9 +136,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
         expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
-        await retry.waitFor(
+        await retry.waitForWithTimeout(
           'the right hit count',
-          async () => (await PageObjects.discover.getHitCount()) === '2,792'
+          15000,
+          async () => (await PageObjects.discover.getHitCount()) === '2,766'
         );
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });

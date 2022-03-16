@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
         await retry.waitFor(
           'the right hit count',
-          async () => (await PageObjects.discover.getHitCount()) === '2,792'
+          async () => (await PageObjects.discover.getHitCount()) === '2,766'
         );
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
