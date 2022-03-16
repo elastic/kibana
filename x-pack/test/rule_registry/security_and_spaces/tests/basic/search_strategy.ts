@@ -38,18 +38,14 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const secureBsearch = getService('secureBsearch');
   const log = getService('log');
+  const kbnClient = getService('kibanaServer');
 
   const SPACE1 = 'space1';
 
   describe('ruleRegistryAlertsSearchStrategy', () => {
-    let kibanaVersion;
+    let kibanaVersion: string;
     before(async () => {
-      const {
-        body: {
-          kibana: { version },
-        },
-      } = await supertest.get(`/api/stats`).set('kbn-xsrf', 'true').expect(200);
-      kibanaVersion = version;
+      kibanaVersion = await kbnClient.version.get();
     });
 
     describe('logs', () => {
