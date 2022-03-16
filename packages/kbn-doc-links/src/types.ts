@@ -99,6 +99,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly licenseManagement: string;
     readonly mailService: string;
+    readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
   readonly workplaceSearch: {
