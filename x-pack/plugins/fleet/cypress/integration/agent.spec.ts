@@ -144,7 +144,6 @@ describe('View agents', () => {
   describe('Upgrade available filter', () => {
     it('should only show agents with upgrade available after click', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.showUpgradeable').click();
       // 2 trs = header row + 1 row
@@ -154,7 +153,6 @@ describe('View agents', () => {
 
     it('should clear filter on second click', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.showUpgradeable').click();
       cy.getBySel('agentList.showUpgradeable').click();
@@ -168,7 +166,6 @@ describe('View agents', () => {
   describe('Agent policy filter', () => {
     it('should should show all policies as options', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.policyFilter').click();
 
@@ -178,7 +175,6 @@ describe('View agents', () => {
     });
     it('should filter on single policy (no results)', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.policyFilter').click();
 
@@ -188,7 +184,6 @@ describe('View agents', () => {
     });
     it('should filter on single policy', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.policyFilter').click();
 
@@ -199,7 +194,6 @@ describe('View agents', () => {
     });
     it('should filter on multiple policies', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.policyFilter').click();
 
@@ -214,7 +208,6 @@ describe('View agents', () => {
   describe('Agent status filter', () => {
     it('should filter on healthy (1 result)', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.statusFilter').click();
 
@@ -225,7 +218,6 @@ describe('View agents', () => {
     });
     it('should filter on unhealthy (1 result)', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.statusFilter').click();
 
@@ -236,7 +228,6 @@ describe('View agents', () => {
     });
     it('should filter on inactive (0 result)', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.statusFilter').click();
 
@@ -246,7 +237,6 @@ describe('View agents', () => {
     });
     it('should filter on healthy and unhealthy', () => {
       cy.visit('/app/fleet/agents');
-      cy.contains('agent-1');
 
       cy.getBySel('agentList.statusFilter').click();
 
