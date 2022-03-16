@@ -10,6 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../helpers';
 import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse } from './mocked_responses';
+import { MOCK_REINDEX_DEPRECATION } from './mocked_responses';
 
 describe('Cluster settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
@@ -17,17 +18,13 @@ describe('Cluster settings deprecation flyout', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   const clusterSettingDeprecation = esDeprecationsMockResponse.deprecations[4];
 
-  afterAll(() => {
-    server.restore();
-  });
-
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
 
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
-    httpRequestsMockHelpers.setReindexStatusResponse({
+    httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
@@ -73,11 +70,10 @@ describe('Cluster settings deprecation flyout', () => {
 
     await actions.clusterSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    const request = server.requests[server.requests.length - 1];
-
-    expect(request.method).toBe('POST');
-    expect(request.url).toBe(`/api/upgrade_assistant/cluster_settings`);
-    expect(request.status).toEqual(200);
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      `/api/upgrade_assistant/cluster_settings`,
+      expect.anything()
+    );
 
     // Verify the "Resolution" column of the table is updated
     expect(find('clusterSettingsResolutionStatusCell').at(0).text()).toEqual(
@@ -107,11 +103,10 @@ describe('Cluster settings deprecation flyout', () => {
 
     await actions.clusterSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    const request = server.requests[server.requests.length - 1];
-
-    expect(request.method).toBe('POST');
-    expect(request.url).toBe(`/api/upgrade_assistant/cluster_settings`);
-    expect(request.status).toEqual(500);
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      `/api/upgrade_assistant/cluster_settings`,
+      expect.anything()
+    );
 
     // Verify the "Resolution" column of the table is updated
     expect(find('clusterSettingsResolutionStatusCell').at(0).text()).toEqual(
