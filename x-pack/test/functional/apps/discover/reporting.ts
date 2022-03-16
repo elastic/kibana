@@ -98,12 +98,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // get clipboard value using field search input, since
         // 'browser.getClipboardValue()' doesn't work, due to permissions
-        const pastToElement = await testSubjects.find('fieldFilterSearchInput');
-        await pastToElement.click();
+        const textInput = await testSubjects.find('fieldFilterSearchInput');
+        await textInput.click();
         await browser.getActions().keyDown(Key.CONTROL).perform();
         await browser.getActions().keyDown('v').perform();
 
-        const reportURL = decodeURIComponent(await pastToElement.getAttribute('value'));
+        const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.getActions().keyUp('v').perform();
 
         //  return field search input state
-        await pastToElement.clearValue();
+        await textInput.clearValue();
       });
 
       it('generates a report from a new search with data: default', async () => {
