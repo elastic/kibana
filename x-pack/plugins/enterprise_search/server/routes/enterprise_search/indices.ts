@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { HttpResponsePayload } from 'kibana/server';
-
 import { fetchIndices } from '../../lib/fetch_indices';
 import { RouteDependencies } from '../../plugin';
 
 export function registerListRoute({ router }: RouteDependencies) {
   router.get(
     { path: '/internal/enterprise_search/indices', validate: false },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const { client } = context.core.elasticsearch;
       try {
         const indices = await fetchIndices(client);
         return response.ok({
-          body: indices as HttpResponsePayload,
+          body: indices,
           headers: { 'content-type': 'application/json' },
         });
       } catch (error) {
