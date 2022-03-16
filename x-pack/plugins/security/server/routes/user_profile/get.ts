@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../';
-import type { AuthenticatedUserProfile, UserData } from '../../../common/';
+import type { AuthenticatedUserProfile } from '../../../common/';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -36,8 +36,12 @@ export function defineGetUserProfileRoute({
 
       const userProfileService = getUserProfileService();
       try {
-        const profile = await userProfileService.get(session.userProfileId, request.query.data);
-        const body: AuthenticatedUserProfile<UserData> = {
+        const profile = await userProfileService.get(
+          request,
+          session.userProfileId,
+          request.query.data
+        );
+        const body: AuthenticatedUserProfile = {
           ...profile,
           authentication_provider: session.provider,
         };

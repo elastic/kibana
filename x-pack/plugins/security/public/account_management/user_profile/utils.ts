@@ -66,7 +66,7 @@ export function createImageHandler(callback: (imageUrl: string | undefined) => v
  * Returns the hex representation of a random color (e.g `#F1B7E2`)
  */
 export function getRandomColor() {
-  return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
+  return '#' + String(Math.floor(Math.random() * 0xffffff).toString(16)).padStart(6, '0');
 }
 
 export const VALID_HEX_COLOR = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;

@@ -7,7 +7,7 @@
 
 import type { HttpStart } from 'src/core/public';
 
-import type { AuthenticatedUserProfile, UserData } from '../../../common/model';
+import type { AuthenticatedUserProfile, UserData } from '../../../common';
 
 const USER_PROFILE_URL = '/internal/security/user_profile';
 
@@ -25,7 +25,7 @@ export class UserProfileAPIClient {
   }
 
   /**
-   * Updates user preferences of the current user.
+   * Updates user profile data of the current user.
    * @param data Application data to be written (merged with existing data).
    */
   public update<T extends UserData>(data: T) {

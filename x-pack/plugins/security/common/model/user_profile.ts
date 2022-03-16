@@ -7,8 +7,7 @@
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 
-import type { AuthenticationProvider } from '../';
-import type { User } from './user';
+import type { AuthenticationProvider, User } from '../';
 import { getUserDisplayName } from './user';
 
 export interface UserInfo extends User {

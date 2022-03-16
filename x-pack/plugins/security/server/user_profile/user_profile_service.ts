@@ -25,7 +25,11 @@ export interface UserProfileServiceStart {
    * @param uid User ID
    * @param dataPath By default `get()` returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user.
    */
-  get<T extends UserData>(uid: string, dataPath?: string): Promise<UserProfile<T>>;
+  get<T extends UserData>(
+    request: KibanaRequest,
+    uid: string,
+    dataPath?: string
+  ): Promise<UserProfile<T>>;
 
   /**
    * Updates user preferences by identifier.
@@ -83,14 +87,16 @@ export class UserProfileService {
       }
     }
 
-    async function get<T extends UserData>(uid: string, dataPath?: string) {
+    async function get<T extends UserData>(request: KibanaRequest, uid: string, dataPath?: string) {
       try {
-        const body = await clusterClient.asInternalUser.transport.request<GetProfileResponse<T>>({
-          method: 'GET',
-          path: `_security/profile/${uid}${
-            dataPath ? `?data=${KIBANA_DATA_ROOT}.${dataPath}` : ''
-          }`,
-        });
+        const body = await clusterClient
+          .asScoped(request)
+          .asCurrentUser.transport.request<GetProfileResponse<T>>({
+            method: 'GET',
+            path: `_security/profile/${uid}${
+              dataPath ? `?data=${KIBANA_DATA_ROOT}.${dataPath}` : ''
+            }`,
+          });
         return { ...body[uid], data: body[uid].data[KIBANA_DATA_ROOT] ?? {} };
       } catch (error) {
         logger.error(`Failed to retrieve user profile [uid=${uid}]: ${error.message}`);
