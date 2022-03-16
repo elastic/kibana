@@ -40,6 +40,10 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { termQuery } from '../../../../observability/server';
+import {
+  ApmMlDetectorType,
+  getApmMlDetectorIndex,
+} from '../../../common/anomaly_detection/apm_ml_detectors';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -147,6 +151,10 @@ export function registerTransactionDurationAnomalyAlertType({
                   },
                   ...termQuery('partition_field_value', ruleParams.serviceName),
                   ...termQuery('by_field_value', ruleParams.transactionType),
+                  ...termQuery(
+                    'detector_index',
+                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
+                  ),
                 ] as QueryDslQueryContainer[],
               },
             },
@@ -208,6 +216,7 @@ export function registerTransactionDurationAnomalyAlertType({
               anomaly ? anomaly.score >= threshold : false
             ) ?? [];
 
+        console.log('### caue ~ anomalies', anomalies);
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
           const severityLevel = getSeverity(score);
