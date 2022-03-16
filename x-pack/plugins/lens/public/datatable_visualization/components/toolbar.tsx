@@ -16,51 +16,27 @@ import { DEFAULT_PAGE_SIZE } from './table_basic';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
-
-  const onChangeRowHeight = useCallback(
-    (newHeightMode) => {
+  const onChangeHeight = useCallback(
+    (newHeightMode, heightProperty, heightLinesProperty) => {
       const rowHeightLines =
         newHeightMode === 'single' ? 1 : newHeightMode !== 'auto' ? 2 : undefined;
       setState({
         ...state,
-        rowHeight: newHeightMode,
-        rowHeightLines,
+        [heightProperty]: newHeightMode,
+        [heightLinesProperty]: rowHeightLines,
       });
     },
     [setState, state]
   );
 
-  const onChangeRowHeightLines = useCallback(
-    (newRowHeightLines) => {
+  const onChangeHeightLines = useCallback(
+    (newRowHeightLines, heightLinesProperty) => {
       setState({
         ...state,
-        rowHeightLines: newRowHeightLines,
-      });
-    },
-    [state, setState]
-  );
-
-  const onChangeHeaderHeight = useCallback(
-    (newHeightMode) => {
-      const headerRowHeightLines =
-        newHeightMode === 'single' ? 1 : newHeightMode !== 'auto' ? 2 : undefined;
-      setState({
-        ...state,
-        headerRowHeight: newHeightMode,
-        headerRowHeightLines,
+        [heightLinesProperty]: newRowHeightLines,
       });
     },
     [setState, state]
-  );
-
-  const onChangeHeaderHeightLines = useCallback(
-    (newHeaderRowHeightLines) => {
-      setState({
-        ...state,
-        headerRowHeightLines: newHeaderRowHeightLines,
-      });
-    },
-    [state, setState]
   );
 
   const onTogglePagination = useCallback(() => {
@@ -88,8 +64,12 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
             defaultMessage: 'Header row height',
           })}
-          onChangeRowHeight={onChangeHeaderHeight}
-          onChangeRowHeightLines={onChangeHeaderHeightLines}
+          onChangeRowHeight={(mode) =>
+            onChangeHeight(mode, 'headerRowHeight', 'headerRowHeightLines')
+          }
+          onChangeRowHeightLines={(lines) => {
+            onChangeHeightLines(lines, 'headerRowHeightLines');
+          }}
           data-test-subj="lnsHeaderHeightSettings"
           maxRowHeight={5}
         />
@@ -99,8 +79,10 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
             defaultMessage: 'Cell row height',
           })}
-          onChangeRowHeight={onChangeRowHeight}
-          onChangeRowHeightLines={onChangeRowHeightLines}
+          onChangeRowHeight={(mode) => onChangeHeight(mode, 'rowHeight', 'rowHeightLines')}
+          onChangeRowHeightLines={(lines) => {
+            onChangeHeightLines(lines, 'rowHeightLines');
+          }}
           data-test-subj="lnsRowHeightSettings"
         />
         <EuiFormRow
