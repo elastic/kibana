@@ -2225,6 +2225,59 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-public.DataViewSavedObjectConflictError",
+        "type": "Class",
+        "tags": [],
+        "label": "DataViewSavedObjectConflictError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSavedObjectConflictError",
+            "text": "DataViewSavedObjectConflictError"
+          },
+          " extends Error"
+        ],
+        "path": "src/plugins/data_views/common/errors/data_view_saved_object_conflict.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewSavedObjectConflictError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data_views/common/errors/data_view_saved_object_conflict.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewSavedObjectConflictError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "savedObjectId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/errors/data_view_saved_object_conflict.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-public.DataViewsPublicPlugin",
         "type": "Class",
         "tags": [],
@@ -3640,6 +3693,26 @@
         "deprecated": true,
         "references": [
           {
+            "plugin": "upgradeAssistant",
+            "path": "x-pack/plugins/upgrade_assistant/target/types/__jest__/client_integration/helpers/app_context.mock.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/common/index.ts"
           },
@@ -4225,6 +4298,10 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/target/types/common/search/aggs/agg_config.d.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/public/search/errors/painless_error.tsx"
           },
           {
@@ -4580,6 +4657,22 @@
             "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/embeddable/embeddable.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/embeddable/embeddable.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
           },
@@ -4606,6 +4699,14 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
           },
           {
             "plugin": "transform",
@@ -4720,6 +4821,26 @@
             "path": "src/plugins/vis_types/vega/public/lib/extract_index_pattern.ts"
           },
           {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+          },
+          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
@@ -4729,7 +4850,43 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -4905,6 +5062,22 @@
             "path": "x-pack/plugins/lens/server/routes/field_stats.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
           },
@@ -5154,7 +5327,51 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
+            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
           },
           {
             "plugin": "maps",
@@ -5163,6 +5380,54 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -5249,8 +5514,28 @@
             "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
           },
           {
-            "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -5273,12 +5558,8 @@
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize_inner.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize_inner.tsx"
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "dataVisualizer",
@@ -5287,14 +5568,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/__stories__/fields.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/__stories__/fields.ts"
           }
         ],
         "children": [],
@@ -5992,6 +6265,74 @@
     "functions": [
       {
         "parentPluginId": "dataViews",
+        "id": "def-public.getFieldSubtypeMulti",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldSubtypeMulti",
+        "description": [],
+        "signature": [
+          "(field: HasSubtype) => ",
+          "IFieldSubTypeMulti",
+          " | undefined"
+        ],
+        "path": "src/plugins/data_views/common/fields/utils.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.getFieldSubtypeMulti.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "{ subType?: ",
+              "IFieldSubType",
+              " | undefined; }"
+            ],
+            "path": "src/plugins/data_views/common/fields/utils.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.getFieldSubtypeNested",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldSubtypeNested",
+        "description": [],
+        "signature": [
+          "(field: HasSubtype) => ",
+          "IFieldSubTypeNested",
+          " | undefined"
+        ],
+        "path": "src/plugins/data_views/common/fields/utils.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.getFieldSubtypeNested.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "{ subType?: ",
+              "IFieldSubType",
+              " | undefined; }"
+            ],
+            "path": "src/plugins/data_views/common/fields/utils.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-public.onRedirectNoIndexPattern",
         "type": "Function",
         "tags": [],
@@ -6140,6 +6481,147 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.DataViewAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataViewAttributes",
+        "description": [
+          "\nInterface for an index pattern saved object"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.fields",
+            "type": "string",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.typeMeta",
+            "type": "string",
+            "tags": [],
+            "label": "typeMeta",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.sourceFilters",
+            "type": "string",
+            "tags": [],
+            "label": "sourceFilters",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.fieldFormatMap",
+            "type": "string",
+            "tags": [],
+            "label": "fieldFormatMap",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.fieldAttrs",
+            "type": "string",
+            "tags": [],
+            "label": "fieldAttrs",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.runtimeFieldMap",
+            "type": "string",
+            "tags": [],
+            "label": "runtimeFieldMap",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.allowNoIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowNoIndex",
+            "description": [
+              "\nprevents errors when index pattern exists before indices"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "dataViews",
         "id": "def-public.DataViewListItem",
@@ -6452,6 +6934,204 @@
             "description": [],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.FieldSpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldSpec",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          " extends ",
+          "DataViewFieldBase"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [
+              "\nPopularity count is used by discover"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.conflictDescriptions",
+            "type": "Object",
+            "tags": [],
+            "label": "conflictDescriptions",
+            "description": [],
+            "signature": [
+              "Record<string, string[]> | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.format",
+            "type": "Object",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.esTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "esTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.searchable",
+            "type": "boolean",
+            "tags": [],
+            "label": "searchable",
+            "description": [],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.aggregatable",
+            "type": "boolean",
+            "tags": [],
+            "label": "aggregatable",
+            "description": [],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.readFromDocValues",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "readFromDocValues",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.indexed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "indexed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.customLabel",
+            "type": "string",
+            "tags": [],
+            "label": "customLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.runtimeField",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeField",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.shortDotsEnable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shortDotsEnable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.FieldSpec.isMapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isMapped",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -7678,6 +8358,30 @@
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
+          },
+          {
             "plugin": "visTypeTimelion",
             "path": "src/plugins/vis_types/timelion/public/helpers/plugin_services.ts"
           },
@@ -7700,6 +8404,22 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/actions/filters/create_filters_from_value_click.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/create_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/create_index_pattern_select.d.ts"
           },
           {
             "plugin": "visTypeTimelion",
@@ -16112,6 +16832,26 @@
         "deprecated": true,
         "references": [
           {
+            "plugin": "upgradeAssistant",
+            "path": "x-pack/plugins/upgrade_assistant/target/types/__jest__/client_integration/helpers/app_context.mock.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/common/index.ts"
           },
@@ -16697,6 +17437,10 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/target/types/common/search/aggs/agg_config.d.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/public/search/errors/painless_error.tsx"
           },
           {
@@ -17052,6 +17796,22 @@
             "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/embeddable/embeddable.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/embeddable/embeddable.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
           },
@@ -17078,6 +17838,14 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
           },
           {
             "plugin": "transform",
@@ -17192,6 +17960,26 @@
             "path": "src/plugins/vis_types/vega/public/lib/extract_index_pattern.ts"
           },
           {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+          },
+          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
@@ -17201,7 +17989,43 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -17377,6 +18201,22 @@
             "path": "x-pack/plugins/lens/server/routes/field_stats.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
           },
@@ -17626,7 +18466,51 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
+            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
           },
           {
             "plugin": "maps",
@@ -17635,6 +18519,54 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -17721,8 +18653,28 @@
             "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
           },
           {
-            "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -17745,12 +18697,8 @@
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize_inner.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize_inner.tsx"
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
             "plugin": "dataVisualizer",
@@ -17759,14 +18707,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/__stories__/fields.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/__stories__/fields.ts"
           }
         ],
         "children": [],
@@ -19618,6 +20558,14 @@
             "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/single_field_select.tsx"
           },
           {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/single_field_select.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/single_field_select.d.ts"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/server/autocomplete/terms_enum.ts"
           },
@@ -20304,6 +21252,22 @@
           {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/target/types/public/alerts/components/param_details_form/use_derived_index_pattern.d.ts"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/plugins/monitoring/target/types/public/alerts/components/param_details_form/use_derived_index_pattern.d.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -22474,34 +23438,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/server/index.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/discover_main_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/discover_main_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
           }
         ],
         "initialIsOpen": false
@@ -22977,6 +23913,30 @@
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
+          },
+          {
             "plugin": "visTypeTimelion",
             "path": "src/plugins/vis_types/timelion/public/helpers/plugin_services.ts"
           },
@@ -22999,6 +23959,22 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/actions/filters/create_filters_from_value_click.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/create_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/create_index_pattern_select.d.ts"
           },
           {
             "plugin": "visTypeTimelion",
@@ -23156,10 +24132,10 @@
     "objects": [
       {
         "parentPluginId": "dataViews",
-        "id": "def-common.FLEET_ASSETS_TO_IGNORE",
+        "id": "def-common.DEFAULT_ASSETS_TO_IGNORE",
         "type": "Object",
         "tags": [],
-        "label": "FLEET_ASSETS_TO_IGNORE",
+        "label": "DEFAULT_ASSETS_TO_IGNORE",
         "description": [
           "\nUsed to determine if the instance has any user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
         ],
@@ -23168,7 +24144,7 @@
         "children": [
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN",
             "type": "string",
             "tags": [],
             "label": "LOGS_INDEX_PATTERN",
@@ -23178,7 +24154,7 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN",
             "type": "string",
             "tags": [],
             "label": "METRICS_INDEX_PATTERN",
@@ -23188,7 +24164,7 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
             "label": "LOGS_DATA_STREAM_TO_IGNORE",
@@ -23198,7 +24174,7 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
             "label": "METRICS_DATA_STREAM_TO_IGNORE",
@@ -23208,7 +24184,17 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
+            "type": "string",
+            "tags": [],
+            "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
+            "description": [],
+            "path": "src/plugins/data_views/common/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE",
             "type": "string",
             "tags": [],
             "label": "METRICS_ENDPOINT_INDEX_TO_IGNORE",
