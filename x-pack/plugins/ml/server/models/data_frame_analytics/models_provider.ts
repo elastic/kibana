@@ -197,6 +197,7 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
                 total: memoryRes.trainedModelsTotalMemory,
                 by_model: modelsMemoryUsage,
               },
+              ml_max_in_bytes: node.mem.ml.max_in_bytes,
             },
           };
         }

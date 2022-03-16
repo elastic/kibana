@@ -15,8 +15,10 @@ import {
   ScaleType,
   SeriesColorAccessor,
   Settings,
+  LineAnnotation,
+  AnnotationDomainType,
 } from '@elastic/charts';
-import { euiPaletteGray } from '@elastic/eui';
+import { EuiIcon, euiPaletteGray } from '@elastic/eui';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useCurrentEuiTheme } from '../../components/color_range_legend';
@@ -123,6 +125,22 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         position={Position.Bottom}
         hide
         tickFormat={(d: number) => bytesFormatter(d)}
+      />
+
+      <LineAnnotation
+        id="line_annotation"
+        domainType={AnnotationDomainType.YDomain}
+        dataValues={[
+          {
+            dataValue: memoryOverview.ml_max_in_bytes,
+            details: bytesFormatter(memoryOverview.ml_max_in_bytes),
+            header: i18n.translate('xpack.ml.trainedModels.nodesList.memoryBreakdown', {
+              defaultMessage: 'Maximum memory available for the ML features',
+            }),
+          },
+        ]}
+        marker={<EuiIcon type="arrowDown" />}
+        markerPosition={Position.Top}
       />
 
       <BarSeries
