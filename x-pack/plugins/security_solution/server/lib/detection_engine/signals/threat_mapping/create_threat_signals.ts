@@ -18,6 +18,9 @@ import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
+import { getMappingFilters } from './get_mapping_filters';
+
+
 export const createThreatSignals = async ({
   alertId,
   buildRuleMessage,
@@ -66,6 +69,10 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
+  const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
+  const allEventFilters = [...filters, eventMappingFilter];
+  const allThreatFilters = [...threatFilters, indicatorMappingFilter];
+
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
@@ -73,7 +80,7 @@ export const createThreatSignals = async ({
     tuple,
     query,
     language,
-    filters,
+    filters: allEventFilters,
   });
 
   logger.debug(`Total event count: ${eventCount}`);
@@ -86,7 +93,7 @@ export const createThreatSignals = async ({
   const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
-    threatFilters,
+    threatFilters: allThreatFilters,
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
@@ -104,7 +111,7 @@ export const createThreatSignals = async ({
     exceptionItems,
     logger,
     services,
-    threatFilters,
+    threatFilters: allThreatFilters,
     threatIndex,
     threatIndicatorPath,
     threatLanguage,
@@ -165,7 +172,7 @@ export const createThreatSignals = async ({
         getEventList({
           services,
           exceptionItems,
-          filters,
+          filters: allEventFilters,
           query,
           language,
           index: inputIndex,
@@ -186,7 +193,7 @@ export const createThreatSignals = async ({
           currentEventList: slicedChunk,
           eventsTelemetry,
           exceptionItems,
-          filters,
+          filters: allEventFilters,
           inputIndex,
           language,
           listClient,
@@ -202,7 +209,7 @@ export const createThreatSignals = async ({
           type,
           wrapHits,
           threatQuery,
-          threatFilters,
+          threatFilters: allThreatFilters,
           threatLanguage,
           threatIndex,
           threatListConfig,
@@ -217,7 +224,7 @@ export const createThreatSignals = async ({
         getThreatList({
           esClient: services.scopedClusterClient.asCurrentUser,
           exceptionItems,
-          threatFilters,
+          threatFilters: allThreatFilters,
           query: threatQuery,
           language: threatLanguage,
           index: threatIndex,
@@ -238,7 +245,7 @@ export const createThreatSignals = async ({
           currentThreatList: slicedChunk,
           eventsTelemetry,
           exceptionItems,
-          filters,
+          filters: allEventFilters,
           inputIndex,
           language,
           listClient,
@@ -254,6 +261,7 @@ export const createThreatSignals = async ({
           type,
           wrapHits,
         }),
+
     });
   }
 
