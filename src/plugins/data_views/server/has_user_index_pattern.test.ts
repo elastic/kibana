@@ -138,6 +138,23 @@ describe('hasUserIndexPattern', () => {
       expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
     });
 
+    it('returns false if only logs-enterprise_search.api-default data stream exists', async () => {
+      esClient.indices.resolveIndex.mockReturnValue(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          indices: [],
+          data_streams: [
+            {
+              name: 'logs-enterprise_search.api-default',
+              timestamp_field: '@timestamp',
+              backing_indices: ['.ds-logs-enterprise_search.api-default-2022.03.07-000001'],
+            },
+          ],
+          aliases: [],
+        })
+      );
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
+    });
+
     it('returns false if only metrics-endpoint.metadata_current_default index exists', async () => {
       esClient.indices.resolveIndex.mockReturnValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
