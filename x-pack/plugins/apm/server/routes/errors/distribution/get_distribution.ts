@@ -34,7 +34,17 @@ export async function getErrorDistribution({
   end: number;
   offset?: string;
 }) {
-  const bucketSize = getBucketSize({ start, end });
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
+
+  const bucketSize = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
+  });
+
   const commonProps = {
     environment,
     kuery,
@@ -45,14 +55,8 @@ export async function getErrorDistribution({
   };
   const currentPeriodPromise = getBuckets({
     ...commonProps,
-    start,
-    end,
-  });
-
-  const { startWithOffset, endWithOffset } = getOffsetInMs({
-    start,
-    end,
-    offset,
+    start: startWithOffset,
+    end: endWithOffset,
   });
 
   const previousPeriodPromise = offset

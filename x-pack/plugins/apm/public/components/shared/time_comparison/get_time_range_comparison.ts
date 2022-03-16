@@ -71,8 +71,6 @@ export function getTimeRangeComparison({
   }
 
   return {
-    comparisonStart: startMoment.subtract(diff, 'ms').toISOString(),
-    comparisonEnd: endMoment.subtract(diff, 'ms').toISOString(),
     offset,
   };
 }

@@ -9,6 +9,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { getTimeRangeComparison } from './get_time_range_comparison';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 const eightDaysInHours = moment.duration(8, 'd').asHours();
 
@@ -69,12 +70,21 @@ function getSelectOptions({
         };
       }
       case TimeRangeComparisonEnum.PeriodBefore: {
-        const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+        const { offset } = getTimeRangeComparison({
           comparisonType: TimeRangeComparisonEnum.PeriodBefore,
           start,
           end,
           comparisonEnabled: true,
         });
+
+        const { startWithOffset, endWithOffset } = getOffsetInMs({
+          start: moment(start).valueOf(),
+          end: moment(end).valueOf(),
+          offset,
+        });
+
+        const comparisonStart = moment(startWithOffset).toISOString();
+        const comparisonEnd = moment(endWithOffset).toISOString();
 
         const dateFormat = getDateFormat({
           previousPeriodStart: comparisonStart,

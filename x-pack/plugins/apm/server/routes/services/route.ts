@@ -38,7 +38,6 @@ import {
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
-import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
 import {
   UnknownMLCapabilitiesError,
@@ -540,13 +539,6 @@ const serviceThroughputRoute = createApmServerRoute({
       end,
     });
 
-    const { bucketSize, intervalString } =
-      getBucketSizeForAggregatedTransactions({
-        start,
-        end,
-        searchAggregatedTransactions,
-      });
-
     const commonProps = {
       environment,
       kuery,
@@ -555,8 +547,6 @@ const serviceThroughputRoute = createApmServerRoute({
       setup,
       transactionType,
       transactionName,
-      intervalString,
-      bucketSize,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([

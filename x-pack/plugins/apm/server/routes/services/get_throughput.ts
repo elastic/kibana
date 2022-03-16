@@ -22,6 +22,7 @@ import {
 } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 
 interface Options {
   environment: string;
@@ -33,8 +34,6 @@ interface Options {
   transactionName?: string;
   start: number;
   end: number;
-  intervalString: string;
-  bucketSize: number;
   offset?: string;
 }
 
@@ -48,8 +47,6 @@ export async function getThroughput({
   transactionName,
   start,
   end,
-  intervalString,
-  bucketSize,
   offset,
 }: Options) {
   const { apmEventClient } = setup;
@@ -58,6 +55,12 @@ export async function getThroughput({
     start,
     end,
     offset,
+  });
+
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start: startWithOffset,
+    end: endWithOffset,
+    searchAggregatedTransactions,
   });
 
   const params = {
