@@ -9,7 +9,6 @@ import dateMath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import { detectionEngineRuleExecutionEventsUrl } from '../../../../plugins/security_solution/common/constants';
 
-import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
