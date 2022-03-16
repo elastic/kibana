@@ -164,8 +164,7 @@ interface] has four fields, summarized below:
 * `outcome` - One of the following values: `'exactMatch' | 'aliasMatch' | 'conflict'`
 * `alias_target_id` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It means that a legacy URL alias with this ID points
   to an object with a _different_ ID.
-* `suppress_redirect_toast` - This can be defined if the outcome is `'aliasMatch'`. It means that a legacy URL alias was intentionally
-  created for a specific purpose, and Kibana should not display a toast telling the user that the object has a new URL.
+* `alias_purpose` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It describes why the legacy URL alis was created.
 
 The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
 custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `alias_target_id` fields need to be
@@ -240,13 +239,13 @@ if (spacesApi && resolveResult.outcome === 'aliasMatch') {
   const newPath = `/this/page/${newObjectId}${window.location.hash}`; // Use the *local* path within this app (do not include the "/app/appId" prefix)
   await spacesApi.ui.redirectLegacyUrl({
     path: newPath,
-    suppressRedirectToast: !!resolveResult.suppress_redirect_toast, <1>
+    aliasPurpose: resolveResult.alias_purpose, <1>
     objectNoun: OBJECT_NOUN <2>
   });
   return;
 }
 ```
-<1> The `suppressRedirectToast` field is required as of 8.2, because the API response can now include an optional boolean to instruct the
+<1> The `aliasPurpose` field is required as of 8.2, because the API response now includes the reason the alias was created to inform the
     client whether a toast should be shown or not.
 <2> The `objectNoun` field is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say
     "dashboard" or "index pattern" instead!
