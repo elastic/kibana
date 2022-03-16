@@ -23,7 +23,7 @@ export interface FormRowProps {
 }
 
 /**
- * Renders a form row with correct state for inline validation.
+ * Component that renders a form row with all error states for inline validation.
  *
  * @example
  * ```typescript
@@ -32,7 +32,7 @@ export interface FormRowProps {
  * </FormRow>
  * ```
  *
- * @throws Error if name hasn't been provided or can't be inferred.
+ * @throws Error if name hasn't been provided and can't be inferred.
  */
 export const FormRow: FunctionComponent<EuiFormRowProps & FormRowProps> = (props) => {
   const formik = useFormikContext();
@@ -57,10 +57,7 @@ export const FormRow: FunctionComponent<EuiFormRowProps & FormRowProps> = (props
 export const OptionalText: FunctionComponent = () => {
   return (
     <EuiText size="xs" color="subdued">
-      <FormattedMessage
-        id="xpack.security.accountManagement.userProfile.newPasswordLabel"
-        defaultMessage="Optional"
-      />
+      <FormattedMessage id="xpack.security.formRow.optionalText" defaultMessage="Optional" />
     </EuiText>
   );
 };

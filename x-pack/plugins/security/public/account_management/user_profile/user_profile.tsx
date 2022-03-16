@@ -41,13 +41,17 @@ import {
   getUserAvatarInitials,
 } from '../../../common/model';
 import { Breadcrumb } from '../../components/breadcrumb';
+import {
+  FormChangesProvider,
+  useFormChanges,
+  useFormChangesContext,
+} from '../../components/form_changes';
+import { FormField } from '../../components/form_field';
+import { FormLabel } from '../../components/form_label';
+import { FormRow, OptionalText } from '../../components/form_row';
 import { UserAPIClient } from '../../management/users';
 import { ChangePasswordFlyout } from '../../management/users/edit_user/change_password_flyout';
 import { isUserReserved } from '../../management/users/user_utils';
-import { FormChangesProvider, useFormChanges, useFormChangesContext } from './form_changes';
-import { FormField } from './form_field';
-import { FormLabel } from './form_label';
-import { FormRow, OptionalText } from './form_row';
 import { UserAvatar } from './user_avatar';
 import { UserProfileAPIClient } from './user_profile_api_client';
 import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
@@ -175,7 +179,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           text={i18n.translate('xpack.security.accountManagement.userProfile.title', {
             defaultMessage: 'Profile',
           })}
-          href="/security/account"
         >
           {showDeleteFlyout ? (
             <ChangePasswordFlyout
@@ -306,6 +309,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   <FormField type="email" name="user.email" fullWidth />
                 </FormRow>
               </EuiDescribedFormGroup>
+
               <EuiDescribedFormGroup
                 fullWidth
                 title={

@@ -20,11 +20,12 @@ export interface FormLabelProps {
 }
 
 /**
- * Component that indicates whether a form field has changed.
+ * Component that visually indicates whether a field value has changed.
  *
- * @example
+ * @example Renders a dot next to "Email" label when field value changes.
  * ```typescript
- * <FormLabel for="color">Color</FormLabel>
+ * <FormLabel for="email">Email</FormLabel>
+ * <FormField name="email" />
  * ```
  */
 export const FormLabel: FunctionComponent<FormLabelProps> = (props) => {

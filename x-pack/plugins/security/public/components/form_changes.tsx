@@ -30,6 +30,11 @@ export interface FormChangesProps {
 
 /**
  * Custom React hook that allows tracking changes within a form.
+ *
+ * @example
+ * ```
+ * const { count } = useFormChanges(); // Form has {count} unsaved changes
+ * ```
  */
 export const useFormChanges = (): FormChangesProps => {
   const [count, setCount] = useState(0);

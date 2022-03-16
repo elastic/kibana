@@ -19,12 +19,12 @@ export interface FormFieldProps<T extends React.ElementType> {
 /**
  * Polymorphic component that renders a form field with all state required for inline validation.
  *
- * @example Text field with validation rule:
+ * @example Render a text field with validation rule:
  * ```typescript
  * <FormField name="initials" validate={{ required: 'Enter initials.' }} />
  * ```
  *
- * @example Color picker which uses non-standard value prop and change handler:
+ * @example Render a color picker using non-standard value prop and change handler:
  * ```typescript
  * <FormField
  *   as={EuiColorPicker}
@@ -89,16 +89,16 @@ export function createFieldValidator(options: ValidateOptions): FieldValidator {
     if (options.required && !value) {
       return options.required;
     }
-    if (options.minLength && value.length < options.minLength.value) {
+    if (options.minLength && typeof value === 'object' && value.length < options.minLength.value) {
       return options.minLength.message;
     }
-    if (options.maxLength && value.length > options.maxLength.value) {
+    if (options.maxLength && typeof value === 'object' && value.length > options.maxLength.value) {
       return options.maxLength.message;
     }
-    if (options.min && value.length < options.min.value) {
+    if (options.min && typeof value === 'number' && value < options.min.value) {
       return options.min.message;
     }
-    if (options.max && value.length > options.max.value) {
+    if (options.max && typeof value === 'number' && value > options.max.value) {
       return options.max.message;
     }
     if (options.pattern && !options.pattern.value.test(value)) {

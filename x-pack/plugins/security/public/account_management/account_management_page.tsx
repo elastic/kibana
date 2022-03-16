@@ -8,6 +8,9 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
+import type { CoreStart } from 'src/core/public';
+
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { getUserDisplayName } from '../../common/model';
 import { Breadcrumb } from '../components/breadcrumb';
 import { useCurrentUser, useUserProfile } from '../components/use_current_user';
@@ -15,6 +18,8 @@ import type { UserProfileProps } from './user_profile';
 import { UserProfile } from './user_profile';
 
 export const AccountManagementPage: FunctionComponent = () => {
+  const { services } = useKibana<CoreStart>();
+
   const currentUser = useCurrentUser();
   const userProfile = useUserProfile<Pick<UserProfileProps['data'], 'avatar'>>('avatar');
 
@@ -25,7 +30,7 @@ export const AccountManagementPage: FunctionComponent = () => {
   const displayName = getUserDisplayName(userProfile.value.user);
 
   return (
-    <Breadcrumb text={displayName} href="/security/account">
+    <Breadcrumb text={displayName} href={services.http.basePath.prepend('/security/account')}>
       <UserProfile user={currentUser.value} data={userProfile.value.data} />
     </Breadcrumb>
   );
