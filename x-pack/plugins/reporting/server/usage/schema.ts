@@ -12,7 +12,9 @@ import {
   ByAppCounts,
   JobTypes,
   LayoutCounts,
-  MetricsStats,
+  MetricsStatsCsv,
+  MetricsStatsPdf,
+  MetricsStatsPng,
   RangeStats,
   ReportingUsageType,
   SizePercentiles,
@@ -50,13 +52,31 @@ const sizesSchema: MakeSchemaFrom<SizePercentiles> = {
   '99.0': { type: 'long' },
 };
 
-const metricsSchema: MakeSchemaFrom<MetricsStats> = {
+const metricsSchemaCsv: MakeSchemaFrom<MetricsStatsCsv> = {
   csv_rows: {
     '50.0': { type: 'long' },
     '75.0': { type: 'long' },
     '95.0': { type: 'long' },
     '99.0': { type: 'long' },
   },
+};
+
+const metricsSchemaPng: MakeSchemaFrom<MetricsStatsPng> = {
+  png_cpu: {
+    '50.0': { type: 'long' },
+    '75.0': { type: 'long' },
+    '95.0': { type: 'long' },
+    '99.0': { type: 'long' },
+  },
+  png_memory: {
+    '50.0': { type: 'long' },
+    '75.0': { type: 'long' },
+    '95.0': { type: 'long' },
+    '99.0': { type: 'long' },
+  },
+};
+
+const metricsSchemaPdf: MakeSchemaFrom<MetricsStatsPdf> = {
   pdf_pages: {
     '50.0': { type: 'long' },
     '75.0': { type: 'long' },
@@ -75,18 +95,6 @@ const metricsSchema: MakeSchemaFrom<MetricsStats> = {
     '95.0': { type: 'long' },
     '99.0': { type: 'long' },
   },
-  png_cpu: {
-    '50.0': { type: 'long' },
-    '75.0': { type: 'long' },
-    '95.0': { type: 'long' },
-    '99.0': { type: 'long' },
-  },
-  png_memory: {
-    '50.0': { type: 'long' },
-    '75.0': { type: 'long' },
-    '95.0': { type: 'long' },
-    '99.0': { type: 'long' },
-  },
 };
 
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
@@ -94,18 +102,25 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   total: { type: 'long' },
   deprecated: { type: 'long' },
   sizes: sizesSchema,
-  metrics: metricsSchema,
-  app: appCountsSchema,
-  layout: layoutCountsSchema,
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
-  csv_searchsource: availableTotalSchema,
-  csv_searchsource_immediate: availableTotalSchema,
-  PNG: availableTotalSchema,
-  PNGV2: availableTotalSchema,
-  printable_pdf: availableTotalSchema,
-  printable_pdf_v2: availableTotalSchema,
+  csv_searchsource: { ...availableTotalSchema, metrics: metricsSchemaCsv },
+  csv_searchsource_immediate: { ...availableTotalSchema, metrics: metricsSchemaCsv },
+  PNG: { ...availableTotalSchema, metrics: metricsSchemaPng },
+  PNGV2: { ...availableTotalSchema, metrics: metricsSchemaPng },
+  printable_pdf: {
+    ...availableTotalSchema,
+    app: appCountsSchema,
+    layout: layoutCountsSchema,
+    metrics: metricsSchemaPdf,
+  },
+  printable_pdf_v2: {
+    ...availableTotalSchema,
+    app: appCountsSchema,
+    layout: layoutCountsSchema,
+    metrics: metricsSchemaPdf,
+  },
 };
 
 const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
@@ -130,7 +145,7 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
 
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {
   ...rangeStatsSchema,
+  last7Days: rangeStatsSchema,
   available: { type: 'boolean' },
   enabled: { type: 'boolean' },
-  last7Days: rangeStatsSchema,
 };

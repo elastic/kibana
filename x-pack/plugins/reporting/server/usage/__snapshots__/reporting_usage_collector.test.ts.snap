@@ -26,74 +26,7 @@ Object {
       "deprecated": Object {
         "type": "long",
       },
-      "layout": Object {
-        "canvas": Object {
-          "type": "long",
-        },
-        "preserve_layout": Object {
-          "type": "long",
-        },
-        "print": Object {
-          "type": "long",
-        },
-      },
       "metrics": Object {
-        "csv_rows": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_cpu": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_memory": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_pages": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
         "png_cpu": Object {
           "50.0": Object {
             "type": "long",
@@ -171,74 +104,7 @@ Object {
       "deprecated": Object {
         "type": "long",
       },
-      "layout": Object {
-        "canvas": Object {
-          "type": "long",
-        },
-        "preserve_layout": Object {
-          "type": "long",
-        },
-        "print": Object {
-          "type": "long",
-        },
-      },
       "metrics": Object {
-        "csv_rows": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_cpu": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_memory": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_pages": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
         "png_cpu": Object {
           "50.0": Object {
             "type": "long",
@@ -302,109 +168,14 @@ Object {
       "type": "boolean",
     },
     "csv_searchsource": Object {
-      "app": Object {
-        "canvas workpad": Object {
-          "type": "long",
-        },
-        "dashboard": Object {
-          "type": "long",
-        },
-        "search": Object {
-          "type": "long",
-        },
-        "visualization": Object {
-          "type": "long",
-        },
-      },
       "available": Object {
         "type": "boolean",
       },
       "deprecated": Object {
         "type": "long",
       },
-      "layout": Object {
-        "canvas": Object {
-          "type": "long",
-        },
-        "preserve_layout": Object {
-          "type": "long",
-        },
-        "print": Object {
-          "type": "long",
-        },
-      },
       "metrics": Object {
         "csv_rows": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_cpu": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_memory": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_pages": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "png_cpu": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "png_memory": Object {
           "50.0": Object {
             "type": "long",
           },
@@ -447,109 +218,14 @@ Object {
       },
     },
     "csv_searchsource_immediate": Object {
-      "app": Object {
-        "canvas workpad": Object {
-          "type": "long",
-        },
-        "dashboard": Object {
-          "type": "long",
-        },
-        "search": Object {
-          "type": "long",
-        },
-        "visualization": Object {
-          "type": "long",
-        },
-      },
       "available": Object {
         "type": "boolean",
       },
       "deprecated": Object {
         "type": "long",
       },
-      "layout": Object {
-        "canvas": Object {
-          "type": "long",
-        },
-        "preserve_layout": Object {
-          "type": "long",
-        },
-        "print": Object {
-          "type": "long",
-        },
-      },
       "metrics": Object {
         "csv_rows": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_cpu": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_memory": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "pdf_pages": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "png_cpu": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "png_memory": Object {
           "50.0": Object {
             "type": "long",
           },
@@ -616,74 +292,7 @@ Object {
         "deprecated": Object {
           "type": "long",
         },
-        "layout": Object {
-          "canvas": Object {
-            "type": "long",
-          },
-          "preserve_layout": Object {
-            "type": "long",
-          },
-          "print": Object {
-            "type": "long",
-          },
-        },
         "metrics": Object {
-          "csv_rows": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_cpu": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_memory": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_pages": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
           "png_cpu": Object {
             "50.0": Object {
               "type": "long",
@@ -761,74 +370,7 @@ Object {
         "deprecated": Object {
           "type": "long",
         },
-        "layout": Object {
-          "canvas": Object {
-            "type": "long",
-          },
-          "preserve_layout": Object {
-            "type": "long",
-          },
-          "print": Object {
-            "type": "long",
-          },
-        },
         "metrics": Object {
-          "csv_rows": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_cpu": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_memory": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_pages": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
           "png_cpu": Object {
             "50.0": Object {
               "type": "long",
@@ -889,109 +431,14 @@ Object {
         "type": "long",
       },
       "csv_searchsource": Object {
-        "app": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
         "available": Object {
           "type": "boolean",
         },
         "deprecated": Object {
           "type": "long",
         },
-        "layout": Object {
-          "canvas": Object {
-            "type": "long",
-          },
-          "preserve_layout": Object {
-            "type": "long",
-          },
-          "print": Object {
-            "type": "long",
-          },
-        },
         "metrics": Object {
           "csv_rows": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_cpu": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_memory": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_pages": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "png_cpu": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "png_memory": Object {
             "50.0": Object {
               "type": "long",
             },
@@ -1034,109 +481,14 @@ Object {
         },
       },
       "csv_searchsource_immediate": Object {
-        "app": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
         "available": Object {
           "type": "boolean",
         },
         "deprecated": Object {
           "type": "long",
         },
-        "layout": Object {
-          "canvas": Object {
-            "type": "long",
-          },
-          "preserve_layout": Object {
-            "type": "long",
-          },
-          "print": Object {
-            "type": "long",
-          },
-        },
         "metrics": Object {
           "csv_rows": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_cpu": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_memory": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "pdf_pages": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "png_cpu": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "png_memory": Object {
             "50.0": Object {
               "type": "long",
             },
@@ -1234,20 +586,6 @@ Object {
           },
         },
         "metrics": Object {
-          "csv_rows": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
           "pdf_cpu": Object {
             "50.0": Object {
               "type": "long",
@@ -1277,34 +615,6 @@ Object {
             },
           },
           "pdf_pages": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "png_cpu": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "png_memory": Object {
             "50.0": Object {
               "type": "long",
             },
@@ -1379,20 +689,6 @@ Object {
           },
         },
         "metrics": Object {
-          "csv_rows": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
           "pdf_cpu": Object {
             "50.0": Object {
               "type": "long",
@@ -1422,34 +718,6 @@ Object {
             },
           },
           "pdf_pages": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "png_cpu": Object {
-            "50.0": Object {
-              "type": "long",
-            },
-            "75.0": Object {
-              "type": "long",
-            },
-            "95.0": Object {
-              "type": "long",
-            },
-            "99.0": Object {
-              "type": "long",
-            },
-          },
-          "png_memory": Object {
             "50.0": Object {
               "type": "long",
             },
@@ -1997,20 +1265,6 @@ Object {
         },
       },
       "metrics": Object {
-        "csv_rows": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
         "pdf_cpu": Object {
           "50.0": Object {
             "type": "long",
@@ -2040,34 +1294,6 @@ Object {
           },
         },
         "pdf_pages": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "png_cpu": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "png_memory": Object {
           "50.0": Object {
             "type": "long",
           },
@@ -2142,20 +1368,6 @@ Object {
         },
       },
       "metrics": Object {
-        "csv_rows": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
         "pdf_cpu": Object {
           "50.0": Object {
             "type": "long",
@@ -2185,34 +1397,6 @@ Object {
           },
         },
         "pdf_pages": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "png_cpu": Object {
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "png_memory": Object {
           "50.0": Object {
             "type": "long",
           },
@@ -2714,7 +1898,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2730,7 +1913,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2748,7 +1930,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2758,7 +1939,6 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "metrics": undefined,
     "sizes": undefined,
     "total": 4,
   },
@@ -2766,7 +1946,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2784,7 +1963,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -2800,7 +1978,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -2817,7 +1994,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -2827,7 +2003,6 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "metrics": undefined,
       "sizes": undefined,
       "total": 4,
     },
@@ -2835,7 +2010,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -2852,7 +2026,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -2868,7 +2041,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -2897,7 +2069,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2913,7 +2084,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2945,7 +2115,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2961,7 +2130,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2979,7 +2147,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -2995,7 +2162,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3013,7 +2179,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3029,7 +2194,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3046,7 +2210,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3062,7 +2225,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3079,7 +2241,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3095,7 +2256,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3118,7 +2278,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3134,7 +2293,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3160,7 +2318,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3176,7 +2333,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3194,7 +2350,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3210,7 +2365,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3228,7 +2382,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3244,7 +2397,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3261,7 +2413,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3277,7 +2428,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3294,7 +2444,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3310,7 +2459,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3341,7 +2489,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3357,7 +2504,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3366,56 +2512,6 @@ Object {
       "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
-    },
-    "metrics": Object {
-      "csv_rows": Object {
-        "values": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "pdf_cpu": Object {
-        "values": Object {
-          "50.0": 0,
-          "75.0": 0,
-          "95.0": 0,
-          "99.0": 0,
-        },
-      },
-      "pdf_memory": Object {
-        "values": Object {
-          "50.0": 164.175,
-          "75.0": 165.3,
-          "95.0": 165.3,
-          "99.0": 165.3,
-        },
-      },
-      "pdf_pages": Object {
-        "values": Object {
-          "50.0": 1,
-          "75.0": 1,
-          "95.0": 1,
-          "99.0": 1,
-        },
-      },
-      "png_cpu": Object {
-        "values": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "png_memory": Object {
-        "values": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
     },
     "sizes": Object {
       "1.0": 1156282,
@@ -3442,7 +2538,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3452,7 +2547,6 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "metrics": undefined,
     "sizes": undefined,
     "total": 1,
   },
@@ -3460,7 +2554,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3478,7 +2571,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3488,7 +2580,6 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "metrics": undefined,
     "sizes": undefined,
     "total": 1,
   },
@@ -3496,7 +2587,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3514,7 +2604,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3524,7 +2613,6 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "metrics": undefined,
       "sizes": undefined,
       "total": 1,
     },
@@ -3532,7 +2620,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3549,7 +2636,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3559,7 +2645,6 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "metrics": undefined,
       "sizes": undefined,
       "total": 1,
     },
@@ -3567,7 +2652,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3584,7 +2668,6 @@ Object {
       "app": Object {
         "canvas workpad": 1,
         "dashboard": 1,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3594,7 +2677,6 @@ Object {
         "preserve_layout": 2,
         "print": 0,
       },
-      "metrics": undefined,
       "sizes": undefined,
       "total": 2,
     },
@@ -3602,7 +2684,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3636,7 +2717,6 @@ Object {
     "app": Object {
       "canvas workpad": 1,
       "dashboard": 1,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3646,7 +2726,6 @@ Object {
       "preserve_layout": 2,
       "print": 0,
     },
-    "metrics": undefined,
     "sizes": undefined,
     "total": 2,
   },
@@ -3654,7 +2733,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3691,7 +2769,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3701,7 +2778,6 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "metrics": undefined,
     "sizes": undefined,
     "total": 1,
   },
@@ -3709,7 +2785,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3727,7 +2802,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3737,7 +2811,6 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "metrics": undefined,
     "sizes": undefined,
     "total": 1,
   },
@@ -3745,7 +2818,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3763,7 +2835,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3779,7 +2850,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3796,7 +2866,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3812,7 +2881,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3829,7 +2897,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3845,7 +2912,6 @@ Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
         "visualization": 0,
       },
       "available": true,
@@ -3868,7 +2934,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 6,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
@@ -3878,7 +2943,6 @@ Object {
       "preserve_layout": 5,
       "print": 1,
     },
-    "metrics": undefined,
     "sizes": undefined,
     "total": 6,
   },
@@ -3886,7 +2950,6 @@ Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
-      "search": 0,
       "visualization": 0,
     },
     "available": true,
