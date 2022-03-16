@@ -19,6 +19,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
   const cached = useMemo(() => {
     const processTree: CSSObject = {
       height: `${height}px`,
+      position: 'relative',
     };
 
     const detailPanel: CSSObject = {

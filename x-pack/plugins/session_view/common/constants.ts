@@ -27,3 +27,5 @@ export const KIBANA_DATE_FORMAT = 'MMM DD, YYYY @ hh:mm:ss.SSS';
 // 3. Fewer round trips to the backend!
 export const PROCESS_EVENTS_PER_PAGE = 1000;
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
+
+export const DEBOUNCE_TIMEOUT = 500;

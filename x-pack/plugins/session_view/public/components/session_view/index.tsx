@@ -34,7 +34,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   const styles = useStyles({ height });
 
-  const onProcessSelected = useCallback((process: Process) => {
+  const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
   }, []);
 
