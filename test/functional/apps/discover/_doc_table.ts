@@ -18,7 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const docTable = getService('docTable');
   const queryBar = getService('queryBar');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedSearch',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -38,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover doc table');
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.unifiedSearch.closeTour();
     });
 
     it('should show records by default', async function () {
@@ -86,6 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.setWindowSize(600, 700);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedSearch.closeTour();
       });
 
       it('should load more rows when scrolling down the document table', async function () {
@@ -105,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedSearch.closeTour();
       });
       after(async () => {
         await kibanaServer.uiSettings.replace({});

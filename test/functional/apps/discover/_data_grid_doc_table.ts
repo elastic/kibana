@@ -18,7 +18,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'dashboard',
+    'unifiedSearch',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'doc_table:legacy': false,
@@ -37,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.unifiedSearch.closeTour();
     });
 
     after(async function () {
