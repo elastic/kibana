@@ -604,7 +604,7 @@ export const useField = <T, FormType = FormData, I = T>(
   // might not be wrapped inside a "useCallback" and that would trigger a possible infinite
   // amount of effect executions.
   useEffect(() => {
-    if (!isMounted.current) {
+    if (!isMounted.current || value === undefined) {
       return;
     }
 
