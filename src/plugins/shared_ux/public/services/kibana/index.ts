@@ -10,6 +10,11 @@ import type { SharedUXServices } from '..';
 import type { SharedUXPluginStartDeps } from '../../types';
 import type { KibanaPluginServiceFactory } from '../types';
 import { platformServiceFactory } from './platform';
+import { userPermissionsServiceFactory } from './permissions';
+import { editorsServiceFactory } from './editors';
+import { docLinksServiceFactory } from './doc_links';
+import { httpServiceFactory } from './http';
+import { applicationServiceFactory } from './application';
 
 /**
  * A factory function for creating a Kibana-based implementation of `SharedUXServices`.
@@ -19,4 +24,9 @@ export const servicesFactory: KibanaPluginServiceFactory<
   SharedUXPluginStartDeps
 > = (params) => ({
   platform: platformServiceFactory(params),
+  permissions: userPermissionsServiceFactory(params),
+  editors: editorsServiceFactory(params),
+  docLinks: docLinksServiceFactory(params),
+  http: httpServiceFactory(params),
+  application: applicationServiceFactory(params),
 });

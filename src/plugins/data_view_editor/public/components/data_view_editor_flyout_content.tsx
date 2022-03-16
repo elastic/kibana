@@ -167,14 +167,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isRollupIndex: () => false,
       pattern: '*',
       showAllIndices: allowHidden,
-      searchClient,
     }).then((dataSources) => {
       setAllSources(dataSources);
       const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
       setMatchedIndices(matchedSet);
       setIsLoadingSources(false);
     });
-  }, [http, allowHidden, searchClient]);
+  }, [http, allowHidden]);
 
   // loading list of data views
   useEffect(() => {
@@ -451,7 +450,6 @@ const loadMatchedIndices = memoizeOne(
         isRollupIndex,
         pattern: query,
         showAllIndices: allowHidden,
-        searchClient,
       });
       indexRequests.push(exactMatchedQuery);
       // provide default value when not making a request for the partialMatchQuery
@@ -462,14 +460,12 @@ const loadMatchedIndices = memoizeOne(
         isRollupIndex,
         pattern: query,
         showAllIndices: allowHidden,
-        searchClient,
       });
       const partialMatchQuery = getIndices({
         http,
         isRollupIndex,
         pattern: `${query}*`,
         showAllIndices: allowHidden,
-        searchClient,
       });
 
       indexRequests.push(exactMatchQuery);

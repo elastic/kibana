@@ -100,7 +100,6 @@ The following table describes the properties of the `options` object.
 |useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
 |defaultScheduleInterval|The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
-|minimumScheduleInterval|The minimum interval that will be allowed for all rules of this rule type.|boolean|
 |doesSetRecoveryContext|Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.|boolean|
 
 ### Executor
@@ -117,7 +116,6 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |services.shouldWriteAlerts()|This returns a boolean indicating whether the executor should write out alerts as data. This is determined by whether rule execution has been cancelled due to timeout AND whether both the Kibana `cancelAlertsOnRuleTimeout` flag and the rule type `cancelAlertsOnRuleTimeout` are set to `true`.|
 |services.shouldStopExecution()|This returns a boolean indicating whether rule execution has been cancelled due to timeout.|
-|services.search|This provides an implementation of Elasticsearch client `search` function that aborts searches if rule execution is cancelled mid-search.|
 |startedAt|The date and time the rule type started execution.|
 |previousStartedAt|The previous date and time the rule type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (e.g. threshold). Use rule type validation to ensure values are set before execution.|
@@ -322,7 +320,7 @@ const myRuleType: RuleType<
 		// Query Elasticsearch using a cancellable search
 		// If rule execution is cancelled mid-search, the search request will be aborted
 		// and an error will be thrown.
-		const esClient = services.search.asCurrentUser;
+		const esClient = services.scopedClusterClient.asCurrentUser;
 		await esClient.search(esQuery);
 
 		// Call a function to get the server's current CPU usage

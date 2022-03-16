@@ -15,6 +15,8 @@ import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/c
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';
 
+const NUMBER_OF_CAPABILITIES = 36;
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const spacesService = getService('spaces');
@@ -71,11 +73,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should have the right number of capabilities - space with ML', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER, idSpaceWithMl);
-        expect(Object.keys(capabilities).length).to.eql(32);
+        expect(Object.keys(capabilities).length).to.eql(NUMBER_OF_CAPABILITIES);
       });
       it('should have the right number of capabilities - space without ML', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER, idSpaceNoMl);
-        expect(Object.keys(capabilities).length).to.eql(32);
+        expect(Object.keys(capabilities).length).to.eql(NUMBER_OF_CAPABILITIES);
       });
 
       it('should get viewer capabilities - space with ML', async () => {
@@ -113,6 +115,10 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateAnnotation: true,
           canDeleteAnnotation: true,
           canViewMlNodes: false,
+          canGetTrainedModels: true,
+          canCreateTrainedModels: false,
+          canDeleteTrainedModels: false,
+          canStartStopTrainedModels: false,
         });
       });
 
@@ -151,6 +157,10 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateAnnotation: false,
           canDeleteAnnotation: false,
           canViewMlNodes: false,
+          canGetTrainedModels: false,
+          canCreateTrainedModels: false,
+          canDeleteTrainedModels: false,
+          canStartStopTrainedModels: false,
         });
       });
 
@@ -189,6 +199,10 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateAnnotation: true,
           canDeleteAnnotation: true,
           canViewMlNodes: true,
+          canGetTrainedModels: true,
+          canCreateTrainedModels: true,
+          canDeleteTrainedModels: true,
+          canStartStopTrainedModels: true,
         });
       });
 
@@ -227,6 +241,10 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateAnnotation: false,
           canDeleteAnnotation: false,
           canViewMlNodes: false,
+          canGetTrainedModels: false,
+          canCreateTrainedModels: false,
+          canDeleteTrainedModels: false,
+          canStartStopTrainedModels: false,
         });
       });
     });

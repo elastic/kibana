@@ -17,6 +17,7 @@ export interface IndexPatternTableItem {
   title: string;
   info?: string;
   default: boolean;
-  tag?: string[];
+  tags?: Array<{ key: string; name: string }>;
   sort: string;
+  namespaces?: string[];
 }
