@@ -703,7 +703,8 @@ class PackagePolicyService {
         appContextService
           .getLogger()
           .info(
-            `Package policy upgrade dry run ${hasErrors ? 'resulted in errors' : 'ran successfully'
+            `Package policy upgrade dry run ${
+              hasErrors ? 'resulted in errors' : 'ran successfully'
             }`
           );
         appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
@@ -948,8 +949,8 @@ async function _compilePackagePolicyInput(
 ) {
   const packagePolicyTemplate = input.policy_template
     ? pkgInfo.policy_templates?.find(
-      (policyTemplate) => policyTemplate.name === input.policy_template
-    )
+        (policyTemplate) => policyTemplate.name === input.policy_template
+      )
     : pkgInfo.policy_templates?.[0];
 
   if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
@@ -1317,10 +1318,10 @@ export function preconfigurePackageInputs(
     // policy template, so we only match on `type` in that case.
     let originalInput = preconfiguredInput.policy_template
       ? inputs.find(
-        (i) =>
-          i.type === preconfiguredInput.type &&
-          i.policy_template === preconfiguredInput.policy_template
-      )
+          (i) =>
+            i.type === preconfiguredInput.type &&
+            i.policy_template === preconfiguredInput.policy_template
+        )
       : inputs.find((i) => i.type === preconfiguredInput.type);
 
     // If the input do not exist skip
@@ -1391,9 +1392,9 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
     : Object.entries(override.vars!).map(([key, rest]) => ({
-      name: key,
-      ...(rest as any),
-    }));
+        name: key,
+        ...(rest as any),
+      }));
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
