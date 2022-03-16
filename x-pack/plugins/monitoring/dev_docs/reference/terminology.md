@@ -34,3 +34,5 @@ This is because you typically need the monitoring data when the production deplo
 #### Standalone Cluster
 
 A "fake" cluster in stack monitoring used to group any component metrics that are not associated with a cluster UUID (`cluster_uuid: ''`).
+
+The Stack Monitoring UI is built around the idea of an Elasticsearch cluster and showing all the products which publish into that cluster. Some stack components (Logstash and Beats) can work fine without an Elasticsearch cluster and are often used this way. The "Standalone Cluster" allows us to monitor components running in that mode.
