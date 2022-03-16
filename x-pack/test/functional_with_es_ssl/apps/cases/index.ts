@@ -13,6 +13,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
 
     after(async () => {});
 
-    loadTestFile(require.resolve('./create_case'));
+    loadTestFile(require.resolve('./basic_case_crud'));
   });
 };
