@@ -192,6 +192,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       // upon component unmounting
       // clear any data to prevent next page from rendering old charts
       explorerService.clearExplorerData();
+
+      anomalyExplorerContext.anomalyExplorerCommonStateService.destroy();
+      anomalyExplorerContext.anomalyTimelineStateService.destroy();
     };
   }, []);
 

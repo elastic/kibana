@@ -14,6 +14,7 @@ import {
   startWith,
   tap,
   debounceTime,
+  takeUntil,
 } from 'rxjs/operators';
 import { isEqual, sortBy, uniq } from 'lodash';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
@@ -40,6 +41,7 @@ import { InfluencersFilterQuery } from '../../../common/types/es_client';
 // FIXME get rid of the static import
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import type { Refresh } from '../routing/use_refresh';
+import { StateService } from '../services/state_service';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -49,7 +51,7 @@ interface SwimLanePagination {
 /**
  * Service for managing anomaly timeline state.
  */
-export class AnomalyTimelineStateService {
+export class AnomalyTimelineStateService extends StateService {
   private _explorerURLStateCallback:
     | ((update: AnomalyExplorerSwimLaneUrlState, replaceState?: boolean) => void)
     | null = null;
@@ -84,6 +86,8 @@ export class AnomalyTimelineStateService {
     private anomalyTimelineService: AnomalyTimelineService,
     private timefilter: TimefilterContract
   ) {
+    super();
+
     this._timeBounds$ = this.timefilter.getTimeUpdate$().pipe(
       startWith(null),
       map(() => this.timefilter.getBounds())
@@ -101,6 +105,7 @@ export class AnomalyTimelineStateService {
 
     this._swimLaneUrlState$
       .pipe(
+        takeUntil(this.unsubscribeAll$),
         map((v) => v?.severity ?? 0),
         distinctUntilChanged()
       )
@@ -114,12 +119,14 @@ export class AnomalyTimelineStateService {
     combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this.getContainerWidth$(),
-    ]).subscribe(([selectedJobs, containerWidth]) => {
-      if (!selectedJobs) return;
-      this._swimLaneBucketInterval$.next(
-        this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
-      );
-    });
+    ])
+      .pipe(takeUntil(this.unsubscribeAll$))
+      .subscribe(([selectedJobs, containerWidth]) => {
+        if (!selectedJobs) return;
+        this._swimLaneBucketInterval$.next(
+          this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
+        );
+      });
 
     this._initSelectedCells();
   }
@@ -133,18 +140,20 @@ export class AnomalyTimelineStateService {
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this.anomalyExplorerCommonStateService.getFilterSettings$(),
       this._selectedCells$,
-    ]).subscribe(([currentlySelected, selectedJobs, filterSettings, selectedCells]) => {
-      const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
-        currentlySelected,
-        filterSettings.filterActive,
-        filterSettings.filteredFields as string[],
-        false,
-        selectedCells,
-        selectedJobs
-      );
-      this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
-      this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
-    });
+    ])
+      .pipe(takeUntil(this.unsubscribeAll$))
+      .subscribe(([currentlySelected, selectedJobs, filterSettings, selectedCells]) => {
+        const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
+          currentlySelected,
+          filterSettings.filterActive,
+          filterSettings.filteredFields as string[],
+          false,
+          selectedCells,
+          selectedJobs
+        );
+        this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
+        this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
+      });
   }
 
   private _initSwimLanePagination() {
@@ -160,13 +169,15 @@ export class AnomalyTimelineStateService {
       ),
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
       this._timeBounds$,
-    ]).subscribe(([pagination, influencersFilerQuery]) => {
-      let resultPaginaiton: SwimLanePagination = pagination;
-      if (influencersFilerQuery) {
-        resultPaginaiton = { viewByPerPage: pagination.viewByPerPage, viewByFromPage: 1 };
-      }
-      this._swimLanePaginations$.next(resultPaginaiton);
-    });
+    ])
+      .pipe(takeUntil(this.unsubscribeAll$))
+      .subscribe(([pagination, influencersFilerQuery]) => {
+        let resultPaginaiton: SwimLanePagination = pagination;
+        if (influencersFilerQuery) {
+          resultPaginaiton = { viewByPerPage: pagination.viewByPerPage, viewByFromPage: 1 };
+        }
+        this._swimLanePaginations$.next(resultPaginaiton);
+      });
   }
 
   private _initOverallSwimLaneData() {
@@ -178,6 +189,7 @@ export class AnomalyTimelineStateService {
       this._refreshSubject$,
     ])
       .pipe(
+        takeUntil(this.unsubscribeAll$),
         tap(() => {
           this._isOverallSwimLaneLoading$.next(true);
         }),
@@ -225,6 +237,7 @@ export class AnomalyTimelineStateService {
       >
     )
       .pipe(
+        takeUntil(this.unsubscribeAll$),
         switchMap(
           ([
             selectedJobs,
@@ -285,6 +298,7 @@ export class AnomalyTimelineStateService {
       this._refreshSubject$,
     ])
       .pipe(
+        takeUntil(this.unsubscribeAll$),
         tap(() => {
           this._isViewBySwimLaneLoading$.next(true);
         }),
@@ -335,6 +349,7 @@ export class AnomalyTimelineStateService {
       this._timeBounds$,
     ])
       .pipe(
+        takeUntil(this.unsubscribeAll$),
         map(([viewByFieldName, swimLaneUrlState, swimLaneBucketInterval]) => {
           if (!swimLaneUrlState?.selectedType) {
             return;

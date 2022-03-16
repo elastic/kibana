@@ -6,13 +6,14 @@
  */
 
 import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged, map, skipWhile } from 'rxjs/operators';
+import { distinctUntilChanged, map, skipWhile, takeUntil } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import type { ExplorerJob } from './explorer_utils';
 import type { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 import type { AnomalyExplorerFilterUrlState } from '../../../common/types/locator';
 import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
+import { StateService } from '../services/state_service';
 
 export interface AnomalyExplorerState {
   selectedJobs: ExplorerJob[];
@@ -27,7 +28,7 @@ export type FilterSettings = Required<
  * Anomaly Explorer common state.
  * Manages related values in the URL state and applies required formatting.
  */
-export class AnomalyExplorerCommonStateService {
+export class AnomalyExplorerCommonStateService extends StateService {
   private _selectedJobs$ = new BehaviorSubject<ExplorerJob[] | undefined>(undefined);
   private _filterSettings$ = new BehaviorSubject<FilterSettings>(this._getDefaultFilterSettings());
   private _showCharts$ = new BehaviorSubject<boolean>(true);
@@ -42,6 +43,7 @@ export class AnomalyExplorerCommonStateService {
   }
 
   constructor(private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService) {
+    super();
     this._init();
   }
 
@@ -49,6 +51,7 @@ export class AnomalyExplorerCommonStateService {
     this.anomalyExplorerUrlStateService
       .getPageUrlState$()
       .pipe(
+        takeUntil(this.unsubscribeAll$),
         map((urlState) => urlState?.mlExplorerFilter),
         distinctUntilChanged(isEqual)
       )
@@ -63,6 +66,7 @@ export class AnomalyExplorerCommonStateService {
     this.anomalyExplorerUrlStateService
       .getPageUrlState$()
       .pipe(
+        takeUntil(this.unsubscribeAll$),
         map((urlState) => urlState?.mlShowCharts ?? true),
         distinctUntilChanged()
       )
