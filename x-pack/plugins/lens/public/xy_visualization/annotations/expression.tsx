@@ -7,7 +7,7 @@
 
 import './expression.scss';
 import React from 'react';
-import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import {
   AnnotationDomainType,
   AnnotationTooltipFormatter,
@@ -17,102 +17,15 @@ import {
 import type { FieldFormat } from 'src/plugins/field_formats/common';
 import { AnnotationConfig } from 'src/plugins/event_annotation/common';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-import type { IconPosition, YAxisMode, XYAnnotationLayerConfig } from '../../../common/expressions';
+import type { IconPosition, XYAnnotationLayerConfig } from '../../../common/expressions';
 import { hasIcon } from '../xy_config_panel/shared/icon_select';
-
-export const ANNOTATIONS_MARKER_SIZE = 20;
-
-const isNumericalString = (value?: string) => !value || !isNaN(Number(value));
-
-function getBaseIconPlacement(iconPosition?: IconPosition) {
-  return iconPosition === 'below' ? Position.Bottom : Position.Top;
-}
-
-function mapVerticalToHorizontalPlacement(placement: Position) {
-  switch (placement) {
-    case Position.Top:
-      return Position.Right;
-    case Position.Bottom:
-      return Position.Left;
-  }
-}
-
-function NumberIcon({ number }: { number: number }) {
-  return (
-    <EuiFlexGroup
-      justifyContent="spaceAround"
-      className="lnsXyAnnotationNumberIcon"
-      gutterSize="none"
-      alignItems="center"
-    >
-      <EuiText color="ghost" className="lnsXyAnnotationNumberIcon__text">
-        {number < 10 ? number : `9+`}
-      </EuiText>
-    </EuiFlexGroup>
-  );
-}
-
-function MarkerBody({ label, isHorizontal }: { label: string | undefined; isHorizontal: boolean }) {
-  if (!label) {
-    return null;
-  }
-  if (isHorizontal) {
-    return (
-      <div className="eui-textTruncate" style={{ maxWidth: ANNOTATIONS_MARKER_SIZE * 3 }}>
-        {label}
-      </div>
-    );
-  }
-  return (
-    <div
-      className="lnsXyDecorationRotatedWrapper"
-      style={{
-        width: ANNOTATIONS_MARKER_SIZE,
-      }}
-    >
-      <div
-        className="eui-textTruncate lnsXyDecorationRotatedWrapper__label"
-        style={{
-          maxWidth: ANNOTATIONS_MARKER_SIZE * 3,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
-interface MarkerConfig {
-  axisMode?: YAxisMode;
-  icon?: string;
-  textVisibility?: boolean;
-  label?: string;
-}
-
-function Marker({
-  config,
-  isHorizontal,
-  hasReducedPadding,
-}: {
-  config: MarkerConfig;
-  isHorizontal: boolean;
-  hasReducedPadding: boolean;
-}) {
-  if (isNumericalString(config.icon)) {
-    return <NumberIcon number={Number(config.icon)} />;
-  }
-  if (hasIcon(config.icon)) {
-    return <EuiIcon type={config.icon} />;
-  }
-  // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (config.textVisibility) {
-    if (hasReducedPadding) {
-      return <MarkerBody label={config.label} isHorizontal={!isHorizontal} />;
-    }
-    return <EuiIcon type="empty" />;
-  }
-  return null;
-}
+import {
+  getBaseIconPlacement,
+  mapVerticalToHorizontalPlacement,
+  LINES_MARKER_SIZE,
+  MarkerBody,
+  Marker,
+} from '../annotations_helpers';
 
 const getRoundedTimestamp = (
   timestamp: number,
@@ -203,6 +116,9 @@ const getCommonStyles = (configArr: AnnotationConfig[]) => {
     ),
     lineWidth: getCommonProperty(configArr, 'lineWidth', 1),
     lineStyle: getCommonProperty(configArr, 'lineStyle', 'solid'),
+    iconPosition: getCommonProperty(configArr, 'iconPosition', Position.Top as IconPosition),
+    label: getCommonProperty(configArr, 'label', ''),
+    textVisibility: getCommonProperty(configArr, 'textVisibility', false),
   };
 };
 
@@ -227,8 +143,6 @@ export const getCollectiveConfigsByInterval = (
       collectiveConfig = {
         ...collectiveConfig,
         ...commonStyles,
-        iconPosition: Position.Top as IconPosition,
-        textVisibility: false,
         icon: String(configArr.length),
         customTooltipDetails: createCustomTooltipDetails(configArr, formatter),
       };
@@ -249,14 +163,25 @@ export const Annotations = ({
       {collectiveAnnotationConfigs.map((config) => {
         const { roundedTimestamp } = config;
         const markerPositionVertical = getBaseIconPlacement(config.iconPosition);
-        const hasReducedPadding = paddingMap[markerPositionVertical] === ANNOTATIONS_MARKER_SIZE;
+        const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
         const id = `${config.id}-line`;
         return (
           <LineAnnotation
             id={id}
             key={id}
             domainType={AnnotationDomainType.XDomain}
-            marker={!hide ? <Marker {...{ config, isHorizontal, hasReducedPadding }} /> : undefined}
+            marker={
+              !hide ? (
+                <Marker
+                  {...{
+                    config,
+                    isHorizontal: !isHorizontal,
+                    hasReducedPadding,
+                    label: config.label,
+                  }}
+                />
+              ) : undefined
+            }
             markerBody={
               !hide ? (
                 <MarkerBody

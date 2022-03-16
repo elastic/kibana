@@ -72,11 +72,9 @@ import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axe
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
-import {
-  computeChartMargins,
-  getLinesCausedPaddings,
-  ReferenceLineAnnotations,
-} from './expression_reference_lines';
+import { ReferenceLineAnnotations } from './expression_reference_lines';
+
+import { computeChartMargins, getLinesCausedPaddings } from './annotations_helpers';
 
 import { Annotations, getCollectiveConfigsByInterval } from './annotations/expression';
 import { computeOverallDataDomain } from './reference_line_helpers';
