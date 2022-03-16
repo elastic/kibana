@@ -98,7 +98,7 @@ trap 'docker logout docker.elastic.co' EXIT
 docker image push "$KIBANA_ES_CLOUD_IMAGE"
 
 export ELASTICSEARCH_CLOUD_IMAGE="$KIBANA_ES_CLOUD_IMAGE"
-export ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM="$(docker images "$KIBANA_ES_CLOUD_IMAGE" --format "{{.Digest}}")"
+export ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM="$(docker inspect --format='{{index .RepoDigests 0}}' "$KIBANA_ES_CLOUD_IMAGE")"
 
 echo "--- Create checksums for snapshot files"
 cd "$destination"
