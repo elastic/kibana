@@ -32,7 +32,7 @@ export function generatePdfObservable(
         tracker.setMemoryUsage(metrics.memory);
       }
     }),
-    mergeMap(async ({ metrics, result, metadata }) => {
+    mergeMap(async ({ metrics, result }) => {
       tracker.endScreenshots();
       const warnings: string[] = [];
       if (result.errors) {
@@ -49,7 +49,7 @@ export function generatePdfObservable(
         warnings,
         metrics: {
           ...metrics,
-          pages: metadata.pageCount,
+          pages: metrics.pageCount,
         },
       };
     })

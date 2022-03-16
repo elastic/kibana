@@ -27,7 +27,6 @@ import type { LicensingPluginStart } from '../../licensing/server';
 import type {
   ScreenshottingStart,
   PngScreenshotOptions as BasePngScreenshotOptions,
-  PdfScreenshotOptions as BasePdfScreenshotOptions,
   PngScreenshotResult,
   PdfScreenshotResult,
   UrlOrUrlWithContext,

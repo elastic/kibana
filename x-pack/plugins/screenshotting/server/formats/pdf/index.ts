@@ -38,7 +38,7 @@ export interface PdfScreenshotOptions extends ScreenshotOptions<'pdf'> {
  * Final, formatted PDF result
  */
 export interface PdfScreenshotResult extends Omit<FormattedScreenshotResult, 'results'> {
-  metadata: { pageCount: number };
+  metrics: FormattedScreenshotResult['metrics'] & { pageCount: number };
   result: {
     data: Buffer;
     /**
@@ -82,7 +82,10 @@ export function toPdf({ title, logo, logger }: ScreenshotsResultsToPdfArgs) {
 
       return {
         ...screenshotResult,
-        metadata: { pageCount },
+        metrics: {
+          pageCount,
+          ...screenshotResult.metrics!,
+        },
         result: {
           data: buffer,
           errors: screenshotResult.results.flatMap((result) =>
