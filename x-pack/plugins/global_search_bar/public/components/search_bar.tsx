@@ -262,7 +262,7 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   const emptyMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Search Elastic',
+    defaultMessage: 'Find any page in Kibana',
   });
 
   useEvent('keydown', onKeyDown);
@@ -287,6 +287,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           trackUiMetric(METRIC_TYPE.COUNT, 'search_focus');
           setInitialLoad(true);
         },
+        fullWidth: true,
       }}
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}
