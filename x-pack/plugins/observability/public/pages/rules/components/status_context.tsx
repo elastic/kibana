@@ -69,6 +69,7 @@ export function StatusContext({
   ) : (
     <EuiPopover
       button={popOverButton}
+      closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downLeft"
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
