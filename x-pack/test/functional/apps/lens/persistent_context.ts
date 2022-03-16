@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.navigationalSearch.clickOnOption(0);
           await PageObjects.lens.waitForEmptyWorkspace();
           await PageObjects.lens.switchToVisualization('lnsMetric');
-          await PageObjects.lens.dragFieldToWorkspace('@timestamp');
+          await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'mtrVis');
         });
         it('preserves time range', async () => {
           // fill the navigation search and select empty
