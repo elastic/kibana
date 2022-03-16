@@ -53,6 +53,7 @@ export function ChangeDataView({
   onDataViewCreated,
   trigger,
   selectableProps,
+  showNewMenuTour = false,
 }: {
   trigger: ChangeDataViewTriggerProps;
   isMissingCurrent?: boolean;
@@ -61,6 +62,7 @@ export function ChangeDataView({
   onDataViewCreated?: () => void;
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
+  showNewMenuTour?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -75,10 +77,10 @@ export function ChangeDataView({
   const [isTourOpen, setIsTourOpen] = useState(false);
 
   useEffect(() => {
-    if (!isTourDismissed) {
+    if (showNewMenuTour && !isTourDismissed) {
       setIsTourOpen(true);
     }
-  }, [isTourDismissed, setIsTourOpen]);
+  }, [isTourDismissed, setIsTourOpen, showNewMenuTour]);
 
   const onTourDismiss = () => {
     storage.set(NEW_DATA_VIEW_MENU_STORAGE_KEY, true);

@@ -24,6 +24,7 @@ export interface DataViewPickerProps {
   selectableProps?: EuiSelectableProps;
   onAddField?: () => void;
   onDataViewCreated?: () => void;
+  showNewMenuTour?: boolean;
 }
 
 export const DataViewPicker = ({
@@ -34,6 +35,7 @@ export const DataViewPicker = ({
   onDataViewCreated,
   trigger,
   selectableProps,
+  showNewMenuTour,
 }: DataViewPickerProps) => {
   return (
     <ChangeDataView
@@ -44,6 +46,7 @@ export const DataViewPicker = ({
       onDataViewCreated={onDataViewCreated}
       trigger={trigger}
       selectableProps={selectableProps}
+      showNewMenuTour={showNewMenuTour}
     />
   );
 };
