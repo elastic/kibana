@@ -13,14 +13,14 @@ import {
   selectAllAgents,
   submitQuery,
   inputQuery,
-  findFormFieldByRowsLabelAndType,
-  deleteAndConfirm,
+  typeInECSFieldInput,
+  typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { getSavedQueriesComplexTest } from '../saved_queries';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
-  const SAVED_QUERY_DESCRIPTION = 'Test saved query description';
 
   beforeEach(() => {
     login(ROLES.t2_analyst);
@@ -34,46 +34,8 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  it(
-    'should create a new query and verify: \n ' +
-      '- query can viewed (status), edited and deleted ',
-    () => {
-      cy.contains('New live query').click();
-      selectAllAgents();
-      inputQuery('select * from uptime;');
-      submitQuery();
-      checkResults();
+  getSavedQueriesComplexTest();
 
-      // play saved query
-      cy.contains('Saved queries').click();
-      cy.contains(SAVED_QUERY_ID);
-      cy.contains('Add saved query').should('not.be.disabled');
-      cy.react('PlayButtonComponent', {
-        props: { savedQuery: { attributes: { id: SAVED_QUERY_ID } } },
-      }).click();
-      selectAllAgents();
-      submitQuery();
-
-      // edit saved query
-      cy.contains('Saved queries').click();
-      cy.contains(SAVED_QUERY_ID);
-      cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
-      }).click();
-      findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
-      cy.react('EuiButton').contains('Update query').click();
-      cy.contains(`${SAVED_QUERY_DESCRIPTION} Edited`);
-
-      // delete saved query
-      cy.contains(SAVED_QUERY_ID);
-      cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
-      }).click();
-      deleteAndConfirm('query');
-      cy.contains(SAVED_QUERY_ID);
-      cy.contains(/^No items found/);
-    }
-  );
   it('should not be able to add nor edit packs', () => {
     const PACK_NAME = 'removing-pack';
 
@@ -88,5 +50,53 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     cy.contains(PACK_NAME).click();
     cy.contains(`${PACK_NAME} details`);
     cy.contains('Edit').should('be.disabled');
+  });
+
+  it('should run query and enable ecs mapping', () => {
+    const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
+    cy.contains('New live query').click();
+    selectAllAgents();
+    inputQuery('select * from uptime; ');
+    cy.wait(500);
+    // checking submit by clicking cmd+enter
+    inputQuery(cmd);
+    checkResults();
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'osquery.days.number', index: 1 },
+    });
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'osquery.hours.number', index: 2 },
+    });
+
+    cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } }).click();
+    typeInECSFieldInput('message{downArrow}{enter}');
+    typeInOsqueryFieldInput('days{downArrow}{enter}');
+    submitQuery();
+
+    checkResults();
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'message', index: 1 },
+    });
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'osquery.days.number', index: 2 },
+    }).react('EuiIconIndexMapping');
+  });
+  it('to click the edit button and edit pack', () => {
+    navigateTo('/app/osquery/saved_queries');
+
+    cy.react('CustomItemAction', {
+      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+    }).click();
+    cy.contains('Custom key/value pairs.').should('exist');
+    cy.contains('Hours of uptime').should('exist');
+    cy.react('EuiButtonIcon', { props: { id: 'labels-trash' } }).click();
+    cy.react('EuiButton').contains('Update query').click();
+    cy.wait(5000);
+
+    cy.react('CustomItemAction', {
+      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+    }).click();
+    cy.contains('Custom key/value pairs').should('not.exist');
+    cy.contains('Hours of uptime').should('not.exist');
   });
 });

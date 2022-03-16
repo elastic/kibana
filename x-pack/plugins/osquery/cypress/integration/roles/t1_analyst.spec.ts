@@ -10,6 +10,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { ROLES } from '../../test';
 import { checkResults, selectAllAgents, submitQuery } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 
 describe('T1 Analyst - READ + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
@@ -79,5 +80,13 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains(PACK_NAME).click();
     cy.contains(`${PACK_NAME} details`);
     cy.contains('Edit').should('be.disabled');
+  });
+  it('should not be able to create new liveQuery from scratch', () => {
+    navigateTo('/app/osquery');
+
+    cy.contains('New live query').click();
+    selectAllAgents();
+    cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+    cy.contains('Submit').should('be.disabled');
   });
 });
