@@ -7,10 +7,11 @@
 
 import './expression_reference_lines.scss';
 import React from 'react';
-import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import type { IconPosition, YAxisMode, YConfig } from '../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
+import { Circle, Hexagon, Square, Triangle } from '../assets/annotation_icons';
 
 export const LINES_MARKER_SIZE = 20;
 
@@ -164,32 +165,19 @@ export function MarkerBody({
   );
 }
 
-interface MarkerConfig {
-  axisMode?: YAxisMode;
-  icon?: string;
-  textVisibility?: boolean;
-}
+const isNumericalString = (value: string) => !isNaN(Number(value));
 
-export function getMarkerToShow(
-  markerConfig: MarkerConfig,
-  label: string | undefined,
-  isHorizontal: boolean,
-  hasReducedPadding: boolean
-) {
-  // show an icon if present
-  if (hasIcon(markerConfig.icon)) {
-    return <EuiIcon type={markerConfig.icon} />;
-  }
-  // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (markerConfig.textVisibility) {
-    if (hasReducedPadding) {
-      return <MarkerBody label={label} isHorizontal={isHorizontal} />;
-    }
-    return <EuiIcon type="empty" />;
-  }
-}
+const shapesIconMap = {
+  circle: Circle,
+  hexagon: Hexagon,
+  triangle: Triangle,
+  square: Square,
+} as const;
 
-const isNumericalString = (value?: string) => value && !isNaN(Number(value));
+const isCustomAnnotationShape = (
+  value: string
+): value is 'circle' | 'hexagon' | 'triangle' | 'square' =>
+  ['circle', 'hexagon', 'triangle', 'square'].includes(value);
 
 function NumberIcon({ number }: { number: number }) {
   return (
@@ -212,6 +200,14 @@ interface MarkerConfig {
   textVisibility?: boolean;
 }
 
+export const AnnotationIcon = ({ type, ...rest }: { type: string } & EuiIconProps) => {
+  if (isNumericalString(type)) {
+    return <NumberIcon number={Number(type)} />;
+  }
+  const iconType = isCustomAnnotationShape(type) ? shapesIconMap[type] : type;
+  return <EuiIcon {...rest} type={iconType} />;
+};
+
 export function Marker({
   config,
   isHorizontal,
@@ -223,13 +219,11 @@ export function Marker({
   hasReducedPadding: boolean;
   label?: string;
 }) {
-  console.log('hello', config);
-  if (isNumericalString(config.icon)) {
-    return <NumberIcon number={Number(config.icon)} />;
+  const { icon } = config;
+  if (hasIcon(icon)) {
+    return <AnnotationIcon type={icon} />;
   }
-  if (hasIcon(config.icon)) {
-    return <EuiIcon type={config.icon} />;
-  }
+
   // if there's some text, check whether to show it as marker, or just show some padding for the icon
   if (config.textVisibility) {
     if (hasReducedPadding) {

@@ -7,13 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiIcon } from '@elastic/eui';
+import { EuiComboBox, EuiIcon, IconType } from '@elastic/eui';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
 }
 
-const icons = [
+export type IconSet = Array<{ value: string; label: string; icon?: IconType }>;
+
+export const euiIconsSet = [
   {
     value: 'empty',
     label: i18n.translate('xpack.lens.xyChart.iconSelect.noIconLabel', {
@@ -70,11 +72,11 @@ const icons = [
   },
 ];
 
-const IconView = (props: { value?: string; label: string }) => {
+const IconView = (props: { value?: string; label: string; icon?: IconType }) => {
   if (!props.value) return null;
   return (
     <span>
-      <EuiIcon type={props.value} />
+      <EuiIcon type={props.icon ?? props.value} />
       {` ${props.label}`}
     </span>
   );
@@ -83,16 +85,20 @@ const IconView = (props: { value?: string; label: string }) => {
 export const IconSelect = ({
   value,
   onChange,
+  customIconSet = euiIconsSet,
 }: {
   value?: string;
   onChange: (newIcon: string) => void;
+  customIconSet?: IconSet;
 }) => {
-  const selectedIcon = icons.find((option) => value === option.value) || icons[0];
+  const selectedIcon =
+    customIconSet.find((option) => value === option.value) ||
+    customIconSet.find((option) => option.value === 'empty')!;
 
   return (
     <EuiComboBox
       isClearable={false}
-      options={icons}
+      options={customIconSet}
       selectedOptions={[selectedIcon]}
       onChange={(selection) => {
         onChange(selection[0].value!);
@@ -100,7 +106,11 @@ export const IconSelect = ({
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
       compressed
-      prepend={hasIcon(selectedIcon.value) ? <EuiIcon type={selectedIcon.value} /> : undefined}
+      prepend={
+        hasIcon(selectedIcon.value) ? (
+          <EuiIcon type={selectedIcon.icon ?? selectedIcon.value} />
+        ) : undefined
+      }
     />
   );
 };

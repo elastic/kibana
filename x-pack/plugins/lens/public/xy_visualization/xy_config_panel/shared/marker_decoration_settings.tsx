@@ -11,7 +11,7 @@ import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { IconPosition, YAxisMode } from '../../../../common/expressions/xy_chart';
 
 import { TooltipWrapper } from '../../../shared_components';
-import { hasIcon, IconSelect } from './icon_select';
+import { hasIcon, IconSelect, IconSet } from './icon_select';
 import { idPrefix } from '../dimension_editor';
 
 interface LabelConfigurationOptions {
@@ -81,10 +81,12 @@ export const MarkerDecorationSettings = ({
   currentConfig,
   setConfig,
   isHorizontal,
+  customIconSet,
 }: {
   currentConfig?: MarkerDecorationConfig;
   setConfig: (config: MarkerDecorationConfig) => void;
   isHorizontal: boolean;
+  customIconSet?: IconSet;
 }) => {
   return (
     <>
@@ -133,6 +135,7 @@ export const MarkerDecorationSettings = ({
         })}
       >
         <IconSelect
+          customIconSet={customIconSet}
           value={currentConfig?.icon}
           onChange={(newIcon) => {
             setConfig({ icon: newIcon });

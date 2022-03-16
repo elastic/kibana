@@ -21,6 +21,8 @@ import { isHorizontalChart } from '../state_helpers';
 import { MarkerDecorationSettings } from '../xy_config_panel/shared/marker_decoration_settings';
 import { LineStyleSettings } from '../xy_config_panel/shared/line_style_settings';
 import { updateLayer } from '../xy_config_panel';
+import { Square, Triangle, Hexagon, Circle } from '../../assets/annotation_icons';
+import { euiIconsSet } from '../xy_config_panel/shared/icon_select';
 
 export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
   defaultMessage: 'Static Annotation',
@@ -102,6 +104,7 @@ export const AnnotationsPanel = (
         isHorizontal={isHorizontal}
         setConfig={setConfig}
         currentConfig={currentConfig}
+        customIconSet={annotationsIconSet}
       />
       <LineStyleSettings
         isHorizontal={isHorizontal}
@@ -136,3 +139,35 @@ export const AnnotationsPanel = (
     </>
   );
 };
+
+const annotationsIconSet = [
+  {
+    value: 'triangle',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.triangleIconLabel', {
+      defaultMessage: 'Triangle',
+    }),
+    icon: Triangle,
+  },
+  {
+    value: 'square',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.squareIconLabel', {
+      defaultMessage: 'Square',
+    }),
+    icon: Square,
+  },
+  {
+    value: 'circle',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.circleIconLabel', {
+      defaultMessage: 'Circle',
+    }),
+    icon: Circle,
+  },
+  {
+    value: 'hexagon',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.hexagonIconLabel', {
+      defaultMessage: 'Hexagon',
+    }),
+    icon: Hexagon,
+  },
+  ...euiIconsSet,
+];

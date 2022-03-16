@@ -25,6 +25,7 @@ import {
   LINES_MARKER_SIZE,
   MarkerBody,
   Marker,
+  AnnotationIcon,
 } from '../annotations_helpers';
 
 const getRoundedTimestamp = (
@@ -83,7 +84,7 @@ const createCustomTooltipDetails =
         {config.map(({ icon, label, key, color }) => (
           <div className="echTooltip__item--container">
             <span className="echTooltip__label">
-              {hasIcon(icon) ? <EuiIcon type={icon} color={color} /> : null}
+              {hasIcon(icon) ? <AnnotationIcon type={icon} color={color} /> : null}
               {label}
             </span>
             <span className="echTooltip__value">

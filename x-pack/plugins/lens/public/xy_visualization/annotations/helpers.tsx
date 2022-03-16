@@ -126,6 +126,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
           type: 'annotation_key',
           timestamp: newTimestamp,
         },
+        icon: 'triangle',
         ...previousConfig,
         id: columnId,
       },
