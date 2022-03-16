@@ -680,8 +680,8 @@ describe('Detections Rules API', () => {
     test('calls API with correct parameters', async () => {
       await fetchRuleExecutionEvents({
         ruleId: '42',
-        start: 'now-30',
-        end: 'now',
+        start: '2001-01-01T17:00:00.000Z',
+        end: '2001-01-02T17:00:00.000Z',
         queryText: '',
         statusFilters: '',
         signal: abortCtrl.signal,
@@ -692,10 +692,14 @@ describe('Detections Rules API', () => {
         {
           method: 'GET',
           query: {
-            end: 'now',
+            end: '2001-01-02T17:00:00.000Z',
+            page: undefined,
+            per_page: undefined,
             query_text: '',
+            sort_field: undefined,
+            sort_order: undefined,
+            start: '2001-01-01T17:00:00.000Z',
             status_filters: '',
-            start: 'now-30',
           },
           signal: abortCtrl.signal,
         }
