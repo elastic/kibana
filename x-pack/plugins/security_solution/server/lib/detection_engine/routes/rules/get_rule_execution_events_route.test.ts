@@ -24,6 +24,7 @@ describe('getRuleExecutionEventsRoute', () => {
   });
 
   describe('when it finds events in rule execution log', () => {
+    // TODO: Increase integrity of test coverage, including default params, boundaries, etc
     it('returns 200 response with the events', async () => {
       const executionEvents = getAggregateExecutionEvents();
       clients.ruleExecutionLog.getAggregateExecutionEvents.mockResolvedValue(executionEvents);

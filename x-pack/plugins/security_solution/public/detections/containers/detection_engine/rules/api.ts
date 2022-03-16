@@ -6,6 +6,7 @@
  */
 
 import { camelCase } from 'lodash';
+import dateMath from '@elastic/datemath';
 import { HttpStart } from 'src/core/public';
 
 import {
@@ -410,11 +411,13 @@ export const fetchRuleExecutionEvents = async ({
   signal?: AbortSignal;
 }): Promise<GetAggregateRuleExecutionEventsResponse> => {
   const url = detectionEngineRuleExecutionEventsUrl(ruleId);
+  const startDate = dateMath.parse(start);
+  const endDate = dateMath.parse(end, { roundUp: true });
   return KibanaServices.get().http.fetch<GetAggregateRuleExecutionEventsResponse>(url, {
     method: 'GET',
     query: {
-      start,
-      end,
+      start: startDate?.utc().toISOString(),
+      end: endDate?.utc().toISOString(),
       query_text: queryText?.trim(),
       status_filters: statusFilters?.trim(),
       page,

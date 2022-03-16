@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import { get } from 'lodash';
 import styled from 'styled-components';
@@ -25,6 +26,7 @@ import {
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../../common/constants';
+import { AggregateRuleExecutionEvent } from '../../../../../../../common/detection_engine/schemas/common';
 
 import {
   UtilityBar,
@@ -81,8 +83,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   // Pagination state
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState('timestamp');
-  const [sortDirection, setSortDirection] = useState('desc');
+  const [sortField, setSortField] = useState<keyof AggregateRuleExecutionEvent>('timestamp');
+  const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
   // Index for `add filter` action and toasts for errors
   const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
   const { addError } = useAppToasts();
@@ -310,7 +312,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         items={items}
         loading={isFetching}
         pagination={pagination}
-        // @ts-ignore-next-line //TODO: Resole sorting type
         sorting={sorting}
         onChange={onTableChangeCallback}
       />

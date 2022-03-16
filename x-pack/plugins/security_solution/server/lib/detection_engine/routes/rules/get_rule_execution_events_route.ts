@@ -42,7 +42,7 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
         status_filters: statusFilters = '',
         page,
         per_page: perPage,
-        sort_field: sortField = '@timestamp',
+        sort_field: sortField = 'timestamp',
         sort_order: sortOrder = 'desc',
       } = request.query;
       const siemResponse = buildSiemResponse(response);

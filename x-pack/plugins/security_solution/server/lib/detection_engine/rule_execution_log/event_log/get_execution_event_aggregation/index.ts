@@ -6,7 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { get } from 'lodash';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { flatMap, get } from 'lodash';
+import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { AggregateEventsBySavedObjectResult } from '../../../../../../../event_log/server';
 import { AggregateRuleExecutionEvent } from '../../../../../../common/detection_engine/schemas/common';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../../common/detection_engine/schemas/response';
@@ -42,7 +44,6 @@ const STATUS_FIELD = 'kibana.alert.rule.execution.status';
 const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
 
 const SORT_FIELD_TO_AGG_MAPPING: Record<string, string> = {
-  status: 'ruleExecution>status',
   timestamp: 'ruleExecution>executeStartTime',
   duration_ms: 'ruleExecution>executionDuration',
   indexing_duration_ms: 'securityMetrics>indexDuration',
@@ -50,7 +51,6 @@ const SORT_FIELD_TO_AGG_MAPPING: Record<string, string> = {
   gap_duration_ms: 'securityMetrics>gapDuration',
   schedule_delay_ms: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
-  security_status: 'securityStatus>status',
   // TODO: To be added in https://github.com/elastic/kibana/pull/126210
   // total_alerts_created: 'securityMetrics>totalAlertsDetected',
   // total_alerts_detected: 'securityMetrics>totalAlertsCreated',
@@ -59,7 +59,7 @@ const SORT_FIELD_TO_AGG_MAPPING: Record<string, string> = {
 /**
  * Returns `aggs` to be supplied to aggregateEventsBySavedObjectIds
  * @param maxExecutions upper bounds of execution events to return (to narrow below max terms agg limit)
- * @param page current page to retrieve
+ * @param page current page to retrieve, starting at 0
  * @param perPage number of execution events to display per page
  * @param sort field to sort on
  */
@@ -69,6 +69,32 @@ export const getExecutionEventAggregation = ({
   perPage,
   sort,
 }: ExecutionEventAggregationOptions): Record<string, estypes.AggregationsAggregationContainer> => {
+  // Last stop validation for any other consumers so there's a friendly message instead of failed ES Query
+  if (maxExecutions > MAX_EXECUTION_EVENTS_DISPLAYED) {
+    throw new BadRequestError(
+      `Invalid maxExecutions requested "${maxExecutions}" - must be less than ${MAX_EXECUTION_EVENTS_DISPLAYED}`
+    );
+  }
+
+  if (page < 0) {
+    throw new BadRequestError(`Invalid page field "${page}" - must be greater than 0`);
+  }
+
+  if (perPage <= 0) {
+    throw new BadRequestError(`Invalid perPage field "${perPage}" - must be greater than 0`);
+  }
+
+  const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
+  for (const field of sortFields) {
+    if (!Object.keys(SORT_FIELD_TO_AGG_MAPPING).includes(field)) {
+      throw new BadRequestError(
+        `Invalid sort field "${field}" - must be one of [${Object.keys(
+          SORT_FIELD_TO_AGG_MAPPING
+        ).join(',')}]`
+      );
+    }
+  }
+
   return {
     // Total unique executions for given root filters
     totalExecutions: {
@@ -211,7 +237,7 @@ export const getExecutionEventAggregation = ({
  * @param provider provider to match
  * @param action action to match
  */
-const getProviderAndActionFilter = (provider: string, action: string) => {
+export const getProviderAndActionFilter = (provider: string, action: string) => {
   return {
     bool: {
       must: [

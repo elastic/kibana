@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { IEventLogClient } from '../../../../../../event_log/server';
@@ -63,12 +62,6 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
-      const startDate = dateMath.parse(start);
-      const endDate = dateMath.parse(end, { roundUp: true });
-
-      invariant(startDate?.isValid(), `Required "start" field is not valid: ${start}`);
-      invariant(endDate?.isValid(), `Required "end" field is not valid: ${end}`);
-      // TODO: validate remaining params
 
       // Current workaround to support root level filters without missing fields in the aggregate event
       // or including events from statuses that aren't selected
@@ -77,14 +70,15 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       let statusIds: string[] = [];
       if (statusFilters.length) {
         const statusResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
-          start: startDate?.utc().toISOString(),
-          end: endDate?.utc().toISOString(),
+          start,
+          end,
           filter: `kibana.alert.rule.execution.status:(${statusFilters.join(' OR ')})`,
           aggs: {
             filteredExecutionUUIDs: {
               terms: {
                 field: 'kibana.alert.rule.execution.uuid',
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
+                order: { '@timestamp': 'desc' },
               },
             },
           },
@@ -108,14 +102,15 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
           ? `${queryText} AND kibana.alert.rule.execution.uuid:(${statusIds.join(' OR ')})`
           : queryText;
         const filteredResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
-          start: startDate?.utc().toISOString(),
-          end: endDate?.utc().toISOString(),
+          start,
+          end,
           filter: queryTextFilter,
           aggs: {
             filteredExecutionUUIDs: {
               terms: {
                 field: 'kibana.alert.rule.execution.uuid',
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
+                order: { '@timestamp': 'desc' },
               },
             },
           },
@@ -132,9 +127,8 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         }
       }
 
-      //
-      const statusAndFilterIds = Array.from(new Set([...statusIds, ...filterIds]));
       // Early return if no results based on both status and queryText filter
+      const statusAndFilterIds = Array.from(new Set([...statusIds, ...filterIds]));
       if ((statusFilters.length || queryText.length) && statusAndFilterIds.length === 0) {
         return {
           total: 0,
@@ -146,10 +140,9 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       const idsFilter = statusAndFilterIds.length
         ? `kibana.alert.rule.execution.uuid:(${statusAndFilterIds.join(' OR ')})`
         : '';
-
       const results = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
-        start: startDate?.utc().toISOString(), // TODO: Is there a way to get typescript to know startDate isn't null based on the above invariant?
-        end: endDate?.utc().toISOString(),
+        start,
+        end,
         filter: idsFilter,
         aggs: getExecutionEventAggregation({
           maxExecutions: MAX_EXECUTION_EVENTS_DISPLAYED,
