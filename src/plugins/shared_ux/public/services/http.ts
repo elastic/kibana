@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPluginServiceFactory } from '../types';
-import { SharedUXHttpService } from '../http';
-import { SharedUXPluginStartDeps } from '../../types';
+import { SharedUxHttpService } from '@kbn/shared-ux-services';
+
+import { KibanaPluginServiceFactory } from './types';
+import { SharedUXPluginStartDeps } from '../types';
 
 export type HttpServiceFactory = KibanaPluginServiceFactory<
-  SharedUXHttpService,
+  SharedUxHttpService,
   SharedUXPluginStartDeps
 >;
 
 /**
  * A factory function for creating a Kibana-based implementation of `SharedUXEditorsService`.
  */
-export const httpServiceFactory: HttpServiceFactory = ({ coreStart, startPlugins }) => ({
+export const httpServiceFactory: HttpServiceFactory = ({ coreStart }) => ({
   addBasePath: coreStart.http.basePath.prepend,
 });
