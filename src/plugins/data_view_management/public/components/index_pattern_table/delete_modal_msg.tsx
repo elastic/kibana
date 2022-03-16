@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut, EuiTableFieldDataColumnType, EuiBasicTable } from '@elastic/eui';
+import { EuiCallOut, EuiTableFieldDataColumnType, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -57,6 +57,7 @@ export const deleteModalMsg = (views: RemoveDataViewProps[], hasSpaces: boolean)
         iconType="alert"
         title="Data views are deleted from every space they are shared in."
       />
+      <EuiSpacer size="m" />
       <div>
         <FormattedMessage
           id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
@@ -67,6 +68,7 @@ export const deleteModalMsg = (views: RemoveDataViewProps[], hasSpaces: boolean)
           values={{ count: views.length }}
         />
       </div>
+      <EuiSpacer size="m" />
       <EuiBasicTable tableCaption={tableTitle} items={views} columns={columns} />
     </div>
   );

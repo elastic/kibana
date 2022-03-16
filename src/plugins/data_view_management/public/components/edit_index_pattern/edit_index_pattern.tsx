@@ -123,7 +123,7 @@ export const EditIndexPattern = withRouter(
       indexPattern.namespaces && indexPattern.namespaces.length > 1 ? (
         <FormattedMessage
           id="indexPatternManagement.editDataView.deleteWarningWithNamespaces"
-          defaultMessage="The data view '{dataViewName}' will be deleted from every space it is shared in. You can't undo this action."
+          defaultMessage="The data view {dataViewName} will be deleted from every space it is shared in. You can't undo this action."
           values={{
             dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
           }}
@@ -131,7 +131,7 @@ export const EditIndexPattern = withRouter(
       ) : (
         <FormattedMessage
           id="indexPatternManagement.editDataView.deleteWarning"
-          defaultMessage="The data view '{dataViewName}' will be deleted. You can't undo this action."
+          defaultMessage="The data view {dataViewName} will be deleted. You can't undo this action."
           values={{
             dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
           }}
@@ -144,7 +144,7 @@ export const EditIndexPattern = withRouter(
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
           deleteIndexPatternClick={() =>
-            removeHandler([indexPattern as RemoveDataViewProps], warning)
+            removeHandler([indexPattern as RemoveDataViewProps], <EuiText>{warning}</EuiText>)
           }
           defaultIndex={defaultIndex}
           canSave={userEditPermission}

@@ -173,6 +173,7 @@ export const IndexPatternTable = ({
   const alertColumn = {
     name: 'Actions',
     field: 'id',
+    width: '10%',
     actions: [
       {
         name: i18n.translate('indexPatternManagement.dataViewTable.columnDelete', {
@@ -201,6 +202,7 @@ export const IndexPatternTable = ({
       name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
         defaultMessage: 'Name',
       }),
+      width: '70%',
       render: (name: string, dataView: IndexPatternTableItem) => (
         <div>
           <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
@@ -224,6 +226,7 @@ export const IndexPatternTable = ({
       name: i18n.translate('indexPatternManagement.dataViewTable.spacesColumn', {
         defaultMessage: 'Spaces',
       }),
+      width: '20%',
       render: (name: string, dataView: IndexPatternTableItem) => {
         return spaces ? (
           <SpacesList
