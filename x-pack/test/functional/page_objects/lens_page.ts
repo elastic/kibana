@@ -1175,7 +1175,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async clickAddField() {
-      await testSubjects.click('lnsIndexPatternActions');
+      await testSubjects.click('lns-dataView-switch-link');
       await testSubjects.existOrFail('indexPattern-add-field');
       await testSubjects.click('indexPattern-add-field');
     },

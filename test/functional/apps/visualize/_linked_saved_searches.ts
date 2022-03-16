@@ -33,11 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.visualize.initTests();
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await filterBar.addFilter('extension.raw', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch(savedSearchName);
-        await PageObjects.unifiedSearch.closeTour();
         discoverSavedSearchUrlPath = (await browser.getCurrentUrl()).split('?')[0];
       });
 

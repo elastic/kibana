@@ -79,6 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visualize.gotoVisualizationLandingPage();
           await listingTable.searchForItemWithName('lnsTableVis');
           await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
+          await PageObjects.unifiedSearch.closeTour();
           await PageObjects.lens.goToTimeRange();
           await PageObjects.navigationalSearch.focus();
           await PageObjects.navigationalSearch.searchFor('type:application lens');
@@ -114,13 +115,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsTableVis');
         await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.lens.goToTimeRange();
         // go to empty vis
         await PageObjects.lens.goToListingPageViaBreadcrumbs();
         await PageObjects.visualize.clickNewVisualization();
         await PageObjects.visualize.waitForGroupsSelectPage();
         await PageObjects.visualize.clickVisType('lens');
-        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.lens.waitForEmptyWorkspace();
         await PageObjects.lens.switchToVisualization('lnsMetric');
         await PageObjects.lens.dragFieldToWorkspace('@timestamp');

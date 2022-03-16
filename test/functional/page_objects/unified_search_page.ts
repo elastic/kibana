@@ -14,9 +14,7 @@ export class UnifiedSearchPageObject extends FtrService {
   public async closeTour() {
     const tourIsOpen = await this.testSubjects.exists('dataViewPickerTourLink');
     if (tourIsOpen) {
-      const skipTour = await this.testSubjects.find('dataViewPickerTourLink');
-      skipTour.focus();
-      return skipTour.click();
+      await this.testSubjects.click('dataViewPickerTourLink');
     }
   }
 }

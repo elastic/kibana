@@ -105,6 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.unifiedSearch.closeTour();
       });
 
       afterEach(async () => {

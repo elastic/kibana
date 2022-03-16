@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
+      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
@@ -42,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update and delete a formula', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 

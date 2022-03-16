@@ -247,6 +247,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await queryBar.clearQuery();
@@ -277,6 +278,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
         });
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.header.awaitKibanaChrome();
         const initialTimeString = await PageObjects.discover.getChartTimespan();
         await queryBar.submitQuery();
@@ -295,6 +297,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add a field, sort by it, remove it and also sorting by it', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.discover.clickFieldListItemAdd('_score');
         await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
