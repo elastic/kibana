@@ -190,7 +190,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async getTransformList(): Promise<GetTransformsResponseSchema> {
+    async getTransformList(size: number = 10): Promise<GetTransformsResponseSchema> {
       const { body, status } = await esSupertest.get(`/_transform`);
       this.assertResponseStatusCode(200, status, body);
 
