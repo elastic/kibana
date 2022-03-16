@@ -30,28 +30,26 @@ export function getStaticDate(
 ) {
   const fallbackValue = +new Date(Date.now());
 
-  if (!activeData || Object.values(activeData).every(({ rows }) => !rows || !rows.length)) {
+  const dataLayersId = dataLayers.map(({ layerId }) => layerId);
+  if (
+    !activeData ||
+    Object.entries(activeData)
+      .filter(([key]) => dataLayersId.includes(key))
+      .every(([, { rows }]) => !rows || !rows.length)
+  ) {
     return fallbackValue;
   }
 
-  const dataLayersId = dataLayers.map(({ layerId }) => layerId);
   const minDate = dataLayersId.reduce((acc, lId) => {
     const xAccessor = dataLayers.find((dataLayer) => dataLayer.layerId === lId)?.xAccessor!;
-    const layerMinTimestamp = activeData[lId]?.rows?.[0]?.[xAccessor];
-    if (layerMinTimestamp && layerMinTimestamp < acc) {
-      return layerMinTimestamp;
-    }
-    return acc;
+    const firstTimestamp = activeData[lId]?.rows?.[0]?.[xAccessor];
+    return firstTimestamp && firstTimestamp < acc ? firstTimestamp : acc;
   }, MAX_DATE);
 
   const maxDate = dataLayersId.reduce((acc, lId) => {
     const xAccessor = dataLayers.find((dataLayer) => dataLayer.layerId === lId)?.xAccessor!;
-    const layerMinTimestamp =
-      activeData[lId]?.rows?.[activeData?.[lId]?.rows?.length - 1]?.[xAccessor];
-    if (layerMinTimestamp && layerMinTimestamp > acc) {
-      return layerMinTimestamp;
-    }
-    return acc;
+    const lastTimestamp = activeData[lId]?.rows?.[activeData?.[lId]?.rows?.length - 1]?.[xAccessor];
+    return lastTimestamp && lastTimestamp > acc ? lastTimestamp : acc;
   }, MIN_DATE);
   const middleDate = (minDate + maxDate) / 2;
   return middleDate;
