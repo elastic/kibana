@@ -107,6 +107,10 @@ export const Schema = (args: Args) => {
   );
 };
 
+// --- VALIDATION
+
+export { Validation } from './storybook/form_validation';
+
 // --- CHANGE LISTENERS
 
 /**
