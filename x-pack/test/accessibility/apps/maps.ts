@@ -83,17 +83,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('map inspect button', async function () {
-      await testSubjects.click('openInspectorButton'); // close modal from previous test
+      await testSubjects.click('openInspectorButton');
       await a11y.testAppSnapshot();
     });
 
     it('map inspect view chooser ', async function () {
-      await testSubjects.click('inspectorViewChooser'); // close modal from previous test
+      await testSubjects.click('inspectorViewChooser');
       await a11y.testAppSnapshot();
     });
 
     it('map inspector view chooser requests', async function () {
-      await testSubjects.click('inspectorViewChooserRequests'); // close modal from previous test
+      await testSubjects.click('inspectorViewChooserRequests');
       await a11y.testAppSnapshot();
     });
 
