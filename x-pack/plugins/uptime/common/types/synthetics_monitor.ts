@@ -6,12 +6,16 @@
  */
 
 import { SimpleSavedObject } from 'kibana/public';
-import { SyntheticsMonitorWithSecrets } from '../runtime_types';
+import { SyntheticsMonitorWithSecrets, SyntheticsMonitor } from '../runtime_types';
 
 export interface MonitorIdParam {
   monitorId: string;
 }
 
 export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitorWithSecrets> & {
+  updated_at: string;
+};
+
+export type DecryptedSyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor> & {
   updated_at: string;
 };

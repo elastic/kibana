@@ -34,7 +34,7 @@ import {
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 import { hydrateSavedObjects } from './hydrate_saved_object';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 
 import { normalizeSecrets } from './utils/secrets';
 
@@ -112,6 +112,7 @@ export class SyntheticsService {
   public registerServiceLocations() {
     const service = this;
     getServiceLocations(service.server).then((result) => {
+      console.warn('got service locations');
       service.locations = result.locations;
       service.apiClient.locations = result.locations;
     });
@@ -338,7 +339,7 @@ export class SyntheticsService {
     if (this.indexTemplateExists) {
       // without mapping, querying won't make sense
       hydrateSavedObjects({
-        monitors: monitors as unknown as SyntheticsMonitorSavedObject[],
+        monitors: monitors as unknown as DecryptedSyntheticsMonitorSavedObject[],
         server: this.server,
       });
     }

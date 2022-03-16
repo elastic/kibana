@@ -15,7 +15,7 @@ import {
   ServiceLocationsApiResponseCodec,
   ServiceLocationErrors,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
 
 export const setMonitor = async ({
@@ -32,7 +32,11 @@ export const setMonitor = async ({
   }
 };
 
-export const getMonitor = async ({ id }: { id: string }): Promise<SyntheticsMonitorSavedObject> => {
+export const getMonitor = async ({
+  id,
+}: {
+  id: string;
+}): Promise<DecryptedSyntheticsMonitorSavedObject> => {
   return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };
 

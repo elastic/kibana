@@ -8,14 +8,14 @@
 import moment from 'moment';
 import { UptimeESClient } from '../lib';
 import { UptimeServerSetup } from '../adapters';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 import { MonitorFields, Ping } from '../../../common/runtime_types';
 
 export const hydrateSavedObjects = async ({
   monitors,
   server,
 }: {
-  monitors: SyntheticsMonitorSavedObject[];
+  monitors: DecryptedSyntheticsMonitorSavedObject[];
   server: UptimeServerSetup;
 }) => {
   try {
