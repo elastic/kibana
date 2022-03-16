@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const flyout = getService('flyout');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/91939
   describe.skip('Accessibility Search Profiler Editor', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('searchProfiler');
@@ -60,13 +59,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on the dropdown link', async () => {
-      const viewShardDetailslink = await testSubjects.findAll('viewShardDetails');
+      const viewShardDetailslink = await testSubjects.findAll('openCloseShardDetails');
       await viewShardDetailslink[0].click();
       await a11y.testAppSnapshot();
     });
 
     it('click on the open-close shard details link', async () => {
-      const openShardDetailslink = await testSubjects.findAll('openCloseShardDetails');
+      const openShardDetailslink = await testSubjects.findAll('viewShardDetails');
       await openShardDetailslink[0].click();
       await a11y.testAppSnapshot();
     });
