@@ -12,7 +12,7 @@
 import { flow, get, mapValues } from 'lodash';
 import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
 import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
-import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '../../../data/common';
+import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '../../../data/server';
 import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
 import type { SavedSearchAttributes } from '../../common/types';
 
