@@ -16,22 +16,22 @@ const defaultLogViewId = 'default';
 
 export const createUninitializedUseLogViewMock =
   (logViewId: string = defaultLogViewId) =>
-  () => ({
+  (): IUseLogView => ({
     derivedDataView: {
       fields: [],
       title: 'unknown',
     },
     hasFailedLoading: false,
-    hasFailedLoadingSource: false,
-    hasFailedLoadingSourceStatus: false,
-    hasFailedResolvingSource: false,
+    hasFailedLoadingLogView: false,
+    hasFailedLoadingLogViewStatus: false,
+    hasFailedResolvingLogView: false,
     initialize: jest.fn(),
     isLoading: false,
     isLoadingLogView: false,
     isLoadingLogViewStatus: false,
     isResolvingLogView: false,
     isUninitialized: true,
-    latestLoadSourceFailures: [],
+    latestLoadLogViewFailures: [],
     load: jest.fn(),
     logView: undefined,
     logViewId,
