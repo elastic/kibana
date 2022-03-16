@@ -68,8 +68,8 @@ export class ProcessImpl implements Process {
         const { group_leader: groupLeader, session_leader: sessionLeader } =
           child.getDetails().process;
 
-        // search matches will never be filtered out
-        if (child.searchMatched) {
+        // search matches or processes with alerts will never be filtered out
+        if (child.searchMatched || child.hasAlerts()) {
           return true;
         }
 
