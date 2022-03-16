@@ -31,6 +31,11 @@ export const getShowUnderlyingDataLabel = () =>
  * Uses "AND" along dimension 1 and "OR" along dimension 2
  */
 function joinQueries(queries: Query[][]) {
+  // leave a single query alone
+  if (queries.length === 1 && queries[0].length === 1) {
+    return queries[0][0].query;
+  }
+
   const expression = queries
     .filter((subQueries) => subQueries.length)
     .map((subQueries) =>

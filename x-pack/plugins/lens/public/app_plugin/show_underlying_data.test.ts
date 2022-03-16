@@ -177,7 +177,7 @@ describe('combineQueryAndFilters', () => {
         },
         undefined
       )
-    ).toEqual({ query: { language: 'kuery', query: '( myfield: * )' }, filters: [] });
+    ).toEqual({ query: { language: 'kuery', query: 'myfield: *' }, filters: [] });
   });
 
   it('should concatenate filters with existing query if languages match (AND it)', () => {
@@ -210,7 +210,7 @@ describe('combineQueryAndFilters', () => {
         },
         undefined
       )
-    ).toEqual({ query: { language: 'kuery', query: '( otherField: * )' }, filters: [] });
+    ).toEqual({ query: { language: 'kuery', query: 'otherField: *' }, filters: [] });
   });
 
   it('should build single kuery expression from meta filters and join using OR and AND at the right level', () => {
@@ -263,7 +263,7 @@ describe('combineQueryAndFilters', () => {
         undefined
       )
     ).toEqual({
-      query: { language: 'lucene', query: '( myField )' },
+      query: { language: 'lucene', query: 'myField' },
       filters: [
         {
           $state: {
@@ -388,7 +388,7 @@ describe('combineQueryAndFilters', () => {
             must: [
               {
                 query_string: {
-                  query: '( anotherField )',
+                  query: 'anotherField',
                 },
               },
             ],
@@ -406,7 +406,7 @@ describe('combineQueryAndFilters', () => {
       ],
       query: {
         language: 'kuery',
-        query: '( myField: * )',
+        query: 'myField: *',
       },
     });
   });
