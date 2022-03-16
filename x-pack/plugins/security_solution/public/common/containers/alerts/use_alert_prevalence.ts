@@ -21,7 +21,7 @@ export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 interface UseAlertPrevalenceOptions {
   field: string;
   value: string | string[] | undefined | null;
-  timelineId: TimelineId;
+  timelineId: string;
   signalIndexName: string | null;
 }
 
@@ -58,6 +58,12 @@ export const useAlertPrevalence = ({
   if (data) {
     const buckets = data.aggregations?.[ALERT_PREVALENCE_AGG]?.buckets;
     if (buckets && buckets.length > 0) {
+      /**
+       * Currently for array fields like `process.args` or potentially any `ip` fields
+       * We show the combined count of all occurences of the value, even though those values
+       * could be shared across multiple documents. To make this clearer, we should separate
+       * these values into separate table rows
+       */
       count = buckets?.reduce((sum, bucket) => sum + (bucket?.doc_count ?? 0), 0);
     }
   }
@@ -77,6 +83,48 @@ const generateAlertPrevalenceQuery = (
   from: string,
   to: string
 ) => {
+  const actualValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
+  let query;
+  query = {
+    bool: {
+      must: {
+        match: {
+          [field]: actualValue,
+        },
+      },
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: from,
+              lte: to,
+            },
+          },
+        },
+      ],
+    },
+  };
+
+  if (Array.isArray(value) && value.length > 1) {
+    const shouldValues = value.map((val) => ({ match: { [field]: val } }));
+    query = {
+      bool: {
+        minimum_should_match: 1,
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
+            },
+          },
+        ],
+        should: shouldValues,
+      },
+    };
+  }
+
   return {
     size: 0,
     aggs: {
@@ -87,25 +135,7 @@ const generateAlertPrevalenceQuery = (
         },
       },
     },
-    query: {
-      bool: {
-        filter: [
-          {
-            terms: {
-              [field]: value,
-            },
-          },
-          {
-            range: {
-              '@timestamp': {
-                gte: from,
-                lte: to,
-              },
-            },
-          },
-        ],
-      },
-    },
+    query,
     runtime_mappings: {},
   };
 };

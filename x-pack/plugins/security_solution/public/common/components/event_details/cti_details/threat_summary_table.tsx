@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled, { AnyStyledComponent } from 'styled-components';
 import { EuiInMemoryTable } from '@elastic/eui';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const ThreatSummaryTable = styled(EuiInMemoryTable as any)`
+export const ThreatSummaryTable = styled(EuiInMemoryTable as unknown as AnyStyledComponent)`
   .euiTableHeaderCell,
   .euiTableRowCell {
     border: none;
