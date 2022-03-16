@@ -25,19 +25,23 @@ export function resizeImage(imageUrl: string, maxSize: number) {
         return resolve(imageUrl);
       }
 
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (context) {
-        if (image.width >= image.height) {
-          canvas.width = maxSize;
-          canvas.height = Math.floor((image.height * maxSize) / image.width);
-        } else {
-          canvas.height = maxSize;
-          canvas.width = Math.floor((image.width * maxSize) / image.height);
+      try {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        if (context) {
+          if (image.width >= image.height) {
+            canvas.width = maxSize;
+            canvas.height = Math.floor((image.height * maxSize) / image.width);
+          } else {
+            canvas.height = maxSize;
+            canvas.width = Math.floor((image.width * maxSize) / image.height);
+          }
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const resizedDataUrl = canvas.toDataURL();
+          return resolve(resizedDataUrl);
         }
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        const resizedDataUrl = canvas.toDataURL();
-        return resolve(resizedDataUrl);
+      } catch (error) {
+        return reject(error);
       }
 
       return reject();

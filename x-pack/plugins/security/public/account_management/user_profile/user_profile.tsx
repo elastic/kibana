@@ -183,26 +183,30 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 />
               ),
               rightSideItems: [
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.reservedUserWarning"
-                      defaultMessage="You can't change the password for this account."
-                    />
-                  }
-                >
-                  <EuiButton
-                    onClick={() => setShowDeleteFlyout(true)}
-                    iconType="lock"
-                    isDisabled={!canChangePassword}
-                    fill
-                  >
+                canChangePassword ? (
+                  <EuiButton onClick={() => setShowDeleteFlyout(true)} iconType="lock" fill>
                     <FormattedMessage
                       id="xpack.security.accountManagement.userProfile.changePasswordButton"
                       defaultMessage="Change password"
                     />
                   </EuiButton>
-                </EuiToolTip>,
+                ) : (
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.reservedUserWarning"
+                        defaultMessage="You can't change the password for this account."
+                      />
+                    }
+                  >
+                    <EuiButton iconType="lock" isDisabled fill>
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.changePasswordButton"
+                        defaultMessage="Change password"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
+                ),
               ],
             }}
             bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
@@ -252,7 +256,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     helpText={
                       !isReservedUser ? (
                         <FormattedMessage
-                          id="xpack.security.accountManagement.userProfile.saveChangesButtonLabel"
+                          id="xpack.security.accountManagement.userProfile.usernameDisabledHelpText"
                           defaultMessage="Username can't be changed once created."
                         />
                       ) : null
@@ -268,7 +272,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   label={
                     <FormLabel for="user.full_name">
                       <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                        id="xpack.security.accountManagement.userProfile.fullNameLabel"
                         defaultMessage="Full name"
                       />
                     </FormLabel>
@@ -284,7 +288,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   label={
                     <FormLabel for="user.email">
                       <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                        id="xpack.security.accountManagement.userProfile.emailLabel"
                         defaultMessage="Email address"
                       />
                     </FormLabel>
@@ -302,90 +306,92 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 title={
                   <h2>
                     <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.usernameGroupTitle"
+                      id="xpack.security.accountManagement.userProfile.avatarGroupTitle"
                       defaultMessage="Avatar"
                     />
                   </h2>
                 }
                 description={
                   <FormattedMessage
-                    id="xpack.security.accountManagement.userProfile.usernameGroupDescription"
+                    id="xpack.security.accountManagement.userProfile.avatarGroupDescription"
                     defaultMessage="Pick a color or photo to represent yourself."
                   />
                 }
               >
-                <EuiFormRow fullWidth>
-                  <EuiKeyPadMenu
-                    checkable={{
-                      legend: (
-                        <FormLabel for="avatarType">
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.userProfile.usernameGroupDescription"
-                            defaultMessage="Avatar type"
-                          />
-                        </FormLabel>
-                      ),
-                    }}
-                  >
-                    <EuiKeyPadMenuItem
-                      checkable="single"
-                      name="avatarType"
-                      label={
-                        <FormattedMessage
-                          id="xpack.security.accountManagement.userProfile.usernameGroupDescription"
-                          defaultMessage="Initials"
-                        />
-                      }
-                      onChange={() => formik.setFieldValue('avatarType', 'initials')}
-                      isSelected={formik.values.avatarType === 'initials'}
-                      isDisabled={isReservedUser}
-                    >
-                      <EuiIcon type="lettering" size="l" />
-                    </EuiKeyPadMenuItem>
-                    <EuiKeyPadMenuItem
-                      checkable="single"
-                      name="avatarType"
-                      label={
-                        <FormattedMessage
-                          id="xpack.security.accountManagement.userProfile.usernameGroupDescription"
-                          defaultMessage="Image"
-                        />
-                      }
-                      onChange={() => formik.setFieldValue('avatarType', 'image')}
-                      isSelected={formik.values.avatarType === 'image'}
-                      isDisabled={isReservedUser}
-                    >
-                      <EuiIcon type="image" size="l" />
-                    </EuiKeyPadMenuItem>
-                  </EuiKeyPadMenu>
-                </EuiFormRow>
-                <EuiSpacer />
+                {!isReservedUser && (
+                  <>
+                    <EuiFormRow fullWidth>
+                      <EuiKeyPadMenu
+                        checkable={{
+                          legend: (
+                            <FormLabel for="avatarType">
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.userProfile.avatarTypeGroupDescription"
+                                defaultMessage="Avatar type"
+                              />
+                            </FormLabel>
+                          ),
+                        }}
+                      >
+                        <EuiKeyPadMenuItem
+                          checkable="single"
+                          name="avatarType"
+                          label={
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.userProfile.initialsAvatarTypeLabel"
+                              defaultMessage="Initials"
+                            />
+                          }
+                          onChange={() => formik.setFieldValue('avatarType', 'initials')}
+                          isSelected={formik.values.avatarType === 'initials'}
+                          isDisabled={isReservedUser}
+                        >
+                          <EuiIcon type="lettering" size="l" />
+                        </EuiKeyPadMenuItem>
+                        <EuiKeyPadMenuItem
+                          checkable="single"
+                          name="avatarType"
+                          label={
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.userProfile.imageAvatarTypeLabel"
+                              defaultMessage="Image"
+                            />
+                          }
+                          onChange={() => formik.setFieldValue('avatarType', 'image')}
+                          isSelected={formik.values.avatarType === 'image'}
+                          isDisabled={isReservedUser}
+                        >
+                          <EuiIcon type="image" size="l" />
+                        </EuiKeyPadMenuItem>
+                      </EuiKeyPadMenu>
+                    </EuiFormRow>
+                    <EuiSpacer />
+                  </>
+                )}
 
                 <EuiSplitPanel.Outer direction="row" hasBorder>
                   <EuiSplitPanel.Inner
                     grow={false}
                     color={isReservedUser ? 'transparent' : 'subdued'}
                   >
-                    <UserAvatar
-                      user={{ username: user.username, full_name: formik.values.user.full_name }}
-                      avatar={
-                        formik.values.avatarType === 'image'
-                          ? {
-                              imageUrl: formik.values.data.avatar.imageUrl,
-                              initials: '?',
-                            }
-                          : {
-                              initials: formik.values.data.avatar.initials || '?',
-                              color: VALID_HEX_COLOR.test(formik.values.data.avatar.color)
-                                ? formik.values.data.avatar.color
-                                : undefined,
-                            }
-                      }
-                      isDisabled={
-                        formik.values.avatarType === 'image' && !formik.values.data.avatar.imageUrl
-                      }
-                      size="xl"
-                    />
+                    {formik.values.avatarType === 'image' && !formik.values.data.avatar.imageUrl ? (
+                      <UserAvatar size="xl" />
+                    ) : (
+                      <UserAvatar
+                        user={{ username: user.username, full_name: formik.values.user.full_name }}
+                        avatar={{
+                          imageUrl:
+                            formik.values.avatarType === 'image'
+                              ? formik.values.data.avatar.imageUrl
+                              : undefined,
+                          initials: formik.values.data.avatar.initials || '?',
+                          color: VALID_HEX_COLOR.test(formik.values.data.avatar.color)
+                            ? formik.values.data.avatar.color
+                            : undefined,
+                        }}
+                        size="xl"
+                      />
+                    )}
                   </EuiSplitPanel.Inner>
                   <EuiSplitPanel.Inner color={isReservedUser ? 'transparent' : 'plain'}>
                     {formik.values.avatarType === 'image' ? (
@@ -393,7 +399,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                         label={
                           <FormLabel for="data.avatar.imageUrl">
                             <FormattedMessage
-                              id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                              id="xpack.security.accountManagement.userProfile.imageUrlLabel"
                               defaultMessage="Image"
                             />
                           </FormLabel>
@@ -416,7 +422,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           })}
                           validate={{
                             required: i18n.translate(
-                              'xpack.security.accountManagement.userProfile.initialsRequiredError',
+                              'xpack.security.accountManagement.userProfile.imageUrlRequiredError',
                               {
                                 defaultMessage: 'Upload an image.',
                               }
@@ -433,7 +439,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           label={
                             <FormLabel for="data.avatar.initials">
                               <FormattedMessage
-                                id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                                id="xpack.security.accountManagement.userProfile.initialsLabel"
                                 defaultMessage="Initials"
                               />
                             </FormLabel>
@@ -468,7 +474,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           label={
                             <FormLabel for="data.avatar.color">
                               <FormattedMessage
-                                id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                                id="xpack.security.accountManagement.userProfile.colorLabel"
                                 defaultMessage="Color"
                               />
                             </FormLabel>
@@ -484,7 +490,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                                 style={{ height: 18 }}
                               >
                                 <FormattedMessage
-                                  id="xpack.security.accountManagement.userProfile.usernameGroupDescription"
+                                  id="xpack.security.accountManagement.userProfile.randomizeButton"
                                   defaultMessage="Randomize"
                                 />
                               </EuiButtonEmpty>
@@ -507,7 +513,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                               pattern: {
                                 value: VALID_HEX_COLOR,
                                 message: i18n.translate(
-                                  'xpack.security.accountManagement.userProfile.colorInvalidError',
+                                  'xpack.security.accountManagement.userProfile.colorPatternError',
                                   {
                                     defaultMessage: 'Enter a valid HEX color code.',
                                   }
