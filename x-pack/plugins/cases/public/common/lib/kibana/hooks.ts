@@ -160,23 +160,36 @@ export const useNavigation = (appId: string) => {
   return { navigateTo, getAppUrl };
 };
 
+interface Capabilities {
+  crud: boolean;
+  read: boolean;
+}
+interface UseApplicationCapabilities {
+  actions: Capabilities;
+  generalCases: Capabilities;
+  visualize: Capabilities;
+  dashboard: Capabilities;
+}
+
 /**
- * Returns the capabilities of the main cases application
+ * Returns the capabilities of various applications
  *
  */
-export const useApplicationCapabilities = (): { crud: boolean; read: boolean } => {
-  const capabilities = useKibana().services.application.capabilities;
-  const casesCapabilities = capabilities[FEATURE_ID];
-  return {
-    crud: !!casesCapabilities?.crud_cases,
-    read: !!casesCapabilities?.read_cases,
-  };
-};
-export const useKibanaCapabilities = (): { visualize?: boolean; dashboard?: boolean } => {
+
+export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
+  const casesCapabilities = capabilities[FEATURE_ID];
 
   return {
-    visualize: !!capabilities?.visualize?.save,
-    dashboard: !!capabilities?.dashboard?.show && !!capabilities?.dashboard?.createNew,
+    actions: { crud: !!capabilities.actions?.execute, read: !!capabilities.actions?.show },
+    generalCases: {
+      crud: !!casesCapabilities?.crud_cases,
+      read: !!casesCapabilities?.read_cases,
+    },
+    visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
+    dashboard: {
+      crud: !!capabilities.dashboard?.show,
+      read: !!capabilities.dashboard?.createNew,
+    },
   };
 };
