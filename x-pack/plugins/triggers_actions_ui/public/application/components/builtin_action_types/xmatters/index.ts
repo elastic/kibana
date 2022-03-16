@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { memoryOverviewServiceProvider } from './memory_overview_service';
+export { getActionType as getXmattersActionType } from './xmatters';
