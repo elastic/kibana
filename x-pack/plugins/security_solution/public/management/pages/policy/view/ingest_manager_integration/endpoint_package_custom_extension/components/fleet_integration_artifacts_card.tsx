@@ -18,6 +18,7 @@ import { LinkWithIcon } from './link_with_icon';
 import { StyledEuiFlexItem } from './styled_components';
 import { useSummaryArtifact } from '../../../../../../hooks/artifacts';
 import { ExceptionsListApiClient } from '../../../../../../services/exceptions_list/exceptions_list_api_client';
+import { useTestIdGenerator } from '../../../../../../components/hooks/use_test_id_generator';
 
 const ARTIFACTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
@@ -48,6 +49,7 @@ export const FleetIntegrationArtifactsCard = memo<{
   searchableFields: readonly string[];
   labels?: ARTIFACTS_LABELS_TYPE;
   privileges?: boolean;
+  'data-test-subj': string;
 }>(
   ({
     policyId,
@@ -56,10 +58,12 @@ export const FleetIntegrationArtifactsCard = memo<{
     searchableFields,
     labels = ARTIFACTS_LABELS,
     privileges = true,
+    'data-test-subj': dataTestSubj,
   }) => {
     const toasts = useToasts();
     const { getAppUrl } = useAppUrl();
     const policyArtifactsPath = getArtifactsPath(policyId);
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const { data } = useSummaryArtifact(
       artifactApiClientInstance,
@@ -105,13 +109,13 @@ export const FleetIntegrationArtifactsCard = memo<{
           })}
           appPath={policyArtifactsPath}
           appState={policyArtifactsRouteState}
-          data-test-subj="artifacts-link-to-exceptions"
+          data-test-subj={getTestId('link-to-exceptions')}
           size="m"
         >
           {labels.linkLabel}
         </LinkWithIcon>
       ),
-      [getAppUrl, labels.linkLabel, policyArtifactsPath, policyArtifactsRouteState]
+      [getAppUrl, getTestId, labels.linkLabel, policyArtifactsPath, policyArtifactsRouteState]
     );
 
     // do not render if doesn't have privileges.
@@ -125,7 +129,7 @@ export const FleetIntegrationArtifactsCard = memo<{
         hasShadow={false}
         paddingSize="l"
         hasBorder
-        data-test-subj="artifacts-fleet-integration-card"
+        data-test-subj={getTestId('fleet-integration-card')}
       >
         <EuiFlexGroup
           alignItems="baseline"

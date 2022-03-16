@@ -245,6 +245,7 @@ const WrappedPolicyDetailsForm = memo<{
             getArtifactsPath={getPolicyTrustedAppsPath}
             searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
             labels={TRUSTED_APPS_LABELS}
+            data-test-subj="trustedApps"
           />
           <EuiSpacer size="s" />
           <FleetIntegrationArtifactsCard
@@ -253,6 +254,7 @@ const WrappedPolicyDetailsForm = memo<{
             getArtifactsPath={getPolicyEventFiltersPath}
             searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
             labels={EVENT_FILTERS_LABELS}
+            data-test-subj="eventFilters"
           />
           <EuiSpacer size="s" />
           <FleetIntegrationArtifactsCard
@@ -262,6 +264,7 @@ const WrappedPolicyDetailsForm = memo<{
             searchableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
             labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
             privileges={privileges.canIsolateHost}
+            data-test-subj="hostIsolationExceptions"
           />
           <EuiSpacer size="s" />
           <FleetIntegrationArtifactsCard
@@ -270,6 +273,7 @@ const WrappedPolicyDetailsForm = memo<{
             getArtifactsPath={getPolicyBlocklistsPath}
             searchableFields={BLOCKLIST_SEARCHABLE_FIELDS}
             labels={BLOCKLISTS_LABELS}
+            data-test-subj="blocklists"
           />
         </div>
         <EuiSpacer size="l" />

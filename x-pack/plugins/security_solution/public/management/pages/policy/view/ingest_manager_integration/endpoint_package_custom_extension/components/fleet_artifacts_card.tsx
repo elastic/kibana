@@ -22,6 +22,7 @@ import { ExceptionItemsSummary } from './exception_items_summary';
 import { StyledEuiFlexGridGroup, StyledEuiFlexGridItem } from './styled_components';
 import { useSummaryArtifact } from '../../../../../../hooks/artifacts';
 import { ExceptionsListApiClient } from '../../../../../../services/exceptions_list/exceptions_list_api_client';
+import { useTestIdGenerator } from '../../../../../../components/hooks/use_test_id_generator';
 
 const ARTIFACTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
@@ -49,13 +50,21 @@ export type FleetArtifactsCardProps = PackageCustomExtensionComponentProps & {
   artifactApiClientInstance: ExceptionsListApiClient;
   getArtifactsPath: () => string;
   labels?: ARTIFACTS_LABELS_TYPE;
+  'data-test-subj': string;
 };
 
 export const FleetArtifactsCard = memo<FleetArtifactsCardProps>(
-  ({ pkgkey, artifactApiClientInstance, getArtifactsPath, labels = ARTIFACTS_LABELS }) => {
+  ({
+    pkgkey,
+    artifactApiClientInstance,
+    getArtifactsPath,
+    labels = ARTIFACTS_LABELS,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { getAppUrl } = useAppUrl();
     const toasts = useToasts();
     const artifactsListUrlPath = getArtifactsPath();
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const { data } = useSummaryArtifact(artifactApiClientInstance, {}, [], {
       onError: (error) => toasts.addDanger(labels.artifactsSummaryApiError(error.message)),
@@ -84,7 +93,7 @@ export const FleetArtifactsCard = memo<FleetArtifactsCardProps>(
     }, [getAppUrl, pkgkey]);
 
     return (
-      <EuiPanel hasShadow={false} paddingSize="l" hasBorder data-test-subj="fleedArtifactsCard">
+      <EuiPanel hasShadow={false} paddingSize="l" hasBorder data-test-subj={getTestId('fleetCard')}>
         <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
           <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
             <EuiText>
@@ -102,7 +111,7 @@ export const FleetArtifactsCard = memo<FleetArtifactsCardProps>(
                 })}
                 appPath={artifactsListUrlPath}
                 appState={artifactsRouteState}
-                data-test-subj="linkArtifacts"
+                data-test-subj={getTestId('artifactsLink')}
               >
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.fleetCustomExtension.manageArtifactsLinkLabel"

@@ -145,6 +145,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
             artifactApiClientInstance={trustedAppsApiClientInstance}
             getArtifactsPath={getTrustedAppsListPath}
             labels={TRUSTED_APPS_LABELS}
+            data-test-subj="trustedApps"
           />
           <EuiSpacer />
           <FleetArtifactsCard
@@ -152,6 +153,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
             artifactApiClientInstance={eventFiltersApiClientInstance}
             getArtifactsPath={getEventFiltersListPath}
             labels={EVENT_FILTERS_LABELS}
+            data-test-subj="eventFilters"
           />
           <EuiSpacer />
           <FleetArtifactsCard
@@ -159,6 +161,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
             artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
             getArtifactsPath={getHostIsolationExceptionsListPath}
             labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
+            data-test-subj="hostIsolationExceptions"
           />
           <EuiSpacer />
           <FleetArtifactsCard
@@ -166,6 +169,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
             artifactApiClientInstance={bloklistsApiClientInstance}
             getArtifactsPath={getBlocklistsListPath}
             labels={BLOCKLISTS_LABELS}
+            data-test-subj="blocklists"
           />
         </ReactQueryClientProvider>
       </div>
