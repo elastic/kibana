@@ -81,7 +81,7 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
 
   if (!actions.read) {
     return (
-      <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
+      <EuiText data-test-subj="create-case-connector-permissions-error-msg" size="s">
         <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
       </EuiText>
     );
