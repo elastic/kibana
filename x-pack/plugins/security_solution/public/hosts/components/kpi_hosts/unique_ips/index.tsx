@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueIpsArea } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_area';
@@ -60,6 +60,9 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
     filterQuery,
     endDate: to,

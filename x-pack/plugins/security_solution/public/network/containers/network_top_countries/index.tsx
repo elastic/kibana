@@ -32,7 +32,7 @@ import * as i18n from './translations';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkTopCountriesQuery';
+export const ID = 'networkTopCountriesQuery';
 
 export interface NetworkTopCountriesArgs {
   id: string;

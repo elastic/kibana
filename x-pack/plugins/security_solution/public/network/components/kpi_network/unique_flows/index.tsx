@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueFlowIds } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_flow_ids';
@@ -40,6 +40,9 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniqueFlows({
     filterQuery,
     endDate: to,

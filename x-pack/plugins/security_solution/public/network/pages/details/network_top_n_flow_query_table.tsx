@@ -6,7 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
 import { useNetworkTopNFlow, ID } from '../../containers/network_top_n_flow';
@@ -28,6 +28,9 @@ export const NetworkTopNFlowQueryTable = ({
 }: NetworkWithIndexComponentsQueryTableProps) => {
   const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },

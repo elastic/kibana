@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { kpiTlsHandshakes } from '../../../../common/components/visualization_actions/configs/network/kpi_tls_handshakes';
@@ -40,6 +40,9 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiTlsHandshakes({
     filterQuery,
     endDate: to,

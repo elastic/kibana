@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
@@ -29,6 +29,9 @@ export const IPsQueryTabBody = ({
 }: IPsQueryTabBodyProps) => {
   const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },

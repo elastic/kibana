@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { kpiHostArea } from '../../../../common/components/visualization_actions/configs/hosts/kpi_host_area';
@@ -45,6 +45,9 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiHosts({
     filterQuery,
     endDate: to,

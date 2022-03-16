@@ -63,8 +63,8 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
   isInspect,
   loading,
   loadPage,
-  showMorePagesIndicator,
   setQuerySkip,
+  showMorePagesIndicator,
   totalCount,
   type,
 }) => {

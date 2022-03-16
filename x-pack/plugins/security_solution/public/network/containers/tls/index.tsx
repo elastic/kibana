@@ -29,7 +29,7 @@ import { getInspectResponse } from '../../../helpers';
 import { FlowTargetSourceDest, PageInfoPaginated } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkTlsQuery';
+export const ID = 'networkTlsQuery';
 
 export interface NetworkTlsArgs {
   id: string;

@@ -34,7 +34,7 @@ import { InspectResponse } from '../../../types';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'hostsUncommonProcessesQuery';
+export const ID = 'hostsUncommonProcessesQuery';
 
 export interface UncommonProcessesArgs {
   id: string;
