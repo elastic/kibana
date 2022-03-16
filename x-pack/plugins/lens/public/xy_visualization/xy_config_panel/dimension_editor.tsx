@@ -50,16 +50,12 @@ export function DimensionEditor(
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
 
-  const localLayer: XYDataLayerConfig = layer;
-
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: props.state,
     onChange: props.setState,
   });
 
-  const localYConfig = localLayer?.yConfig?.find(
-    (yAxisConfig) => yAxisConfig.forAccessor === accessor
-  );
+  const localYConfig = layer?.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor);
   const axisMode = localYConfig?.axisMode || 'auto';
 
   const setConfig = useCallback(
@@ -67,7 +63,7 @@ export function DimensionEditor(
       if (yConfig == null) {
         return;
       }
-      const newYConfigs = [...(localLayer.yConfig || [])];
+      const newYConfigs = [...(layer.yConfig || [])];
       const existingIndex = newYConfigs.findIndex(
         (yAxisConfig) => yAxisConfig.forAccessor === accessor
       );
@@ -79,15 +75,16 @@ export function DimensionEditor(
           ...yConfig,
         });
       }
-      setLocalState(updateLayer(localState, { ...localLayer, yConfig: newYConfigs }, index));
+      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
     },
-    [accessor, index, localState, localLayer, setLocalState]
+    [accessor, index, localState, layer, setLocalState]
   );
 
   if (isReferenceLayer(layer)) {
     return <ReferenceLinePanel {...props} />;
   }
 
+  const localLayer: XYDataLayerConfig = layer;
   if (props.groupId === 'breakdown') {
     return (
       <>

@@ -161,7 +161,10 @@ export const xyChartFunction: ExpressionFunctionDefinition<
   },
   fn(data, args, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
-      logDataTable(handlers.inspectorAdapters.tables, data.tables);
+      handlers.inspectorAdapters.tables.logDataTable(
+        handlers.inspectorAdapters.tables,
+        data.tables
+      );
     }
     return {
       type: 'render',
