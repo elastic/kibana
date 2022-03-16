@@ -17,6 +17,14 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
 }
 
 <ServicesProvider
+  application={
+    Object {
+      "currentAppId$": Observable {
+        "_isScalar": false,
+      },
+      "navigateToUrl": [Function],
+    }
+  }
   docLinks={
     Object {
       "dataViewsDocsLink": "dummy link",
@@ -27,8 +35,14 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
       "openDataViewEditor": [MockFunction],
     }
   }
+  http={
+    Object {
+      "addBasePath": [MockFunction],
+    }
+  }
   permissions={
     Object {
+      "canAccessFleet": true,
       "canCreateNewDataView": true,
     }
   }
