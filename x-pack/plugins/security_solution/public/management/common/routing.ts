@@ -182,7 +182,7 @@ const normalizePolicyDetailsArtifactsListPageLocation = (
 ): Partial<PolicyDetailsArtifactsPageLocation> => {
   if (location) {
     return {
-      ...(!isDefaultOrMissing(location.page, MANAGEMENT_DEFAULT_PAGE)
+      ...(!isDefaultOrMissing(location.page, MANAGEMENT_DEFAULT_PAGE + 1)
         ? { page: location.page }
         : {}),
       ...(!isDefaultOrMissing(location.pageSize, MANAGEMENT_DEFAULT_PAGE_SIZE)
