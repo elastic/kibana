@@ -94,7 +94,7 @@ export const LOGS_FEATURE = {
       catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       savedObject: {
-        all: ['infrastructure-ui-source'],
+        all: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
         read: [],
       },
       alerting: {
