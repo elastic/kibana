@@ -23,7 +23,7 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { dnsTopDomainsAttrs } from '../../../common/components/visualization_actions/configs/network/dns_top_domains';
+import { dnsTopDomainsLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../../common/components/query_toggle';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
@@ -46,7 +46,7 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   histogramType: MatrixHistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
-  lensAttributes: dnsTopDomainsAttrs,
+  lensAttributes: dnsTopDomainsLensAttributes,
 };
 
 const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({

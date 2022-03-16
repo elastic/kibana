@@ -7,7 +7,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { mockCasesContract } from '../../../../../cases/public/mocks';
 import { useKibana } from '../../lib/kibana';
-import { kpiHostMetric } from './configs/hosts/kpi_host_metric';
+import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToNewCase } from './use_add_to_new_case';
 
 jest.mock('../../lib/kibana/kibana_react');
@@ -31,7 +31,7 @@ describe('', () => {
   it('getUseCasesAddToNewCaseFlyout with attachments', () => {
     const { result } = renderHook(() =>
       useAddToNewCase({
-        lensAttributes: kpiHostMetric,
+        lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         userCanCrud: true,
       })
@@ -41,7 +41,7 @@ describe('', () => {
         {
           comment: `!{lens${JSON.stringify({
             timeRange,
-            attributes: kpiHostMetric,
+            attributes: kpiHostMetricLensAttributes,
           })}}`,
           owner,
           type,
@@ -54,7 +54,7 @@ describe('', () => {
   it("button disalbled if user Can't Crud", () => {
     const { result } = renderHook(() =>
       useAddToNewCase({
-        lensAttributes: kpiHostMetric,
+        lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         userCanCrud: false,
       })
@@ -76,7 +76,7 @@ describe('', () => {
   it('button disalbled if no timeRange', () => {
     const { result } = renderHook(() =>
       useAddToNewCase({
-        lensAttributes: kpiHostMetric,
+        lensAttributes: kpiHostMetricLensAttributes,
         timeRange: null,
         userCanCrud: true,
       })

@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiUniqueFlowIds } from '../../../../common/components/visualization_actions/configs/network/kpi_unique_flow_ids';
+import { kpiUniqueFlowIdsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_flow_ids';
 import { useNetworkKpiUniqueFlows, ID } from '../../../containers/kpi_network/unique_flows';
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
@@ -22,7 +22,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
       {
         key: 'uniqueFlowId',
         value: null,
-        lensAttributes: kpiUniqueFlowIds,
+        lensAttributes: kpiUniqueFlowIdsLensAttributes,
       },
     ],
     description: i18n.UNIQUE_FLOW_IDS,

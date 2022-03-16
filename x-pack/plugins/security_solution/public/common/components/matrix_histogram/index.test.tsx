@@ -13,7 +13,7 @@ import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { TestProviders } from '../../mock';
 import { mockRuntimeMappings } from '../../containers/source/mock';
-import { dnsTopDomainsAttrs } from '../visualization_actions/configs/network/dns_top_domains';
+import { dnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 jest.mock('../../lib/kibana');
 
@@ -175,7 +175,7 @@ describe('Matrix Histogram Component', () => {
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsAttrs,
+        lensAttributes: dnsTopDomainsLensAttributes,
       };
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
@@ -194,7 +194,7 @@ describe('Matrix Histogram Component', () => {
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsAttrs,
+        lensAttributes: dnsTopDomainsLensAttributes,
       };
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
@@ -213,7 +213,7 @@ describe('Matrix Histogram Component', () => {
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsAttrs,
+        lensAttributes: dnsTopDomainsLensAttributes,
       };
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
@@ -234,7 +234,7 @@ describe('Matrix Histogram Component', () => {
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsAttrs,
+        lensAttributes: dnsTopDomainsLensAttributes,
       };
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
@@ -256,7 +256,7 @@ describe('Matrix Histogram Component', () => {
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsAttrs,
+        lensAttributes: dnsTopDomainsLensAttributes,
       };
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
@@ -270,7 +270,7 @@ describe('Matrix Histogram Component', () => {
     test("it doesn't renders VisualizationActions except Host / Network pages", () => {
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsAttrs,
+        lensAttributes: dnsTopDomainsLensAttributes,
       };
 
       (useRouteSpy as jest.Mock).mockReturnValue([

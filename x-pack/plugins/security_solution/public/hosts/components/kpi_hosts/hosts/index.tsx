@@ -8,8 +8,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiHostArea } from '../../../../common/components/visualization_actions/configs/hosts/kpi_host_area';
-import { kpiHostMetric } from '../../../../common/components/visualization_actions/configs/hosts/kpi_host_metric';
+import { kpiHostAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_area';
+import { kpiHostMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_metric';
 import { useHostsKpiHosts, ID } from '../../../containers/kpi_hosts/hosts';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
@@ -25,12 +25,12 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.hosts,
         icon: 'storage',
-        lensAttributes: kpiHostMetric,
+        lensAttributes: kpiHostMetricLensAttributes,
       },
     ],
     enableAreaChart: true,
     description: i18n.HOSTS,
-    areaChartLensAttributes: kpiHostArea,
+    areaChartLensAttributes: kpiHostAreaLensAttributes,
   },
 ];
 

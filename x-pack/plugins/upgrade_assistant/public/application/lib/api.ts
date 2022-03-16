@@ -240,6 +240,16 @@ export class ApiService {
     });
   }
 
+  public async updateClusterSettings(settings: string[]) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/cluster_settings`,
+      method: 'post',
+      body: {
+        settings: JSON.stringify(settings),
+      },
+    });
+  }
+
   public useLoadRemoteClusters() {
     return this.useRequest<string[]>({
       path: `${API_BASE_PATH}/remote_clusters`,

@@ -7,6 +7,9 @@
  */
 
 import React from 'react';
+
+import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
+
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import {
   SharedUXPluginSetup,
@@ -15,8 +18,7 @@ import {
   SharedUXPluginSetupDeps,
 } from './types';
 
-import { ServicesProvider } from './services';
-import { servicesFactory } from './services/kibana';
+import { servicesFactory } from './services';
 
 /**
  * The Kibana plugin for Shared User Experience (Shared UX).
@@ -34,7 +36,7 @@ export class SharedUXPlugin implements Plugin<SharedUXPluginSetup, SharedUXPlugi
 
     return {
       ServicesContext: ({ children }) => (
-        <ServicesProvider {...services}>{children}</ServicesProvider>
+        <SharedUxServicesProvider {...services}>{children}</SharedUxServicesProvider>
       ),
     };
   }

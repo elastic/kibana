@@ -67,7 +67,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
     initialPageSize: 10,
     totalItemCount: networks.length,
     pageSizeOptions: [5, 10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   if (!hasMlUserPermissions(capabilities)) {

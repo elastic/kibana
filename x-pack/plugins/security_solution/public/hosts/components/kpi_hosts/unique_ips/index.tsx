@@ -8,10 +8,10 @@
 import React, { useEffect, useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiUniqueIpsArea } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_area';
-import { kpiUniqueIpsBar } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_bar';
-import { kpiUniqueIpsDestinationMetric } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_destination_metric';
-import { kpiUniqueIpsSourceMetric } from '../../../../common/components/visualization_actions/configs/hosts/kpi_unique_ips_source_metric';
+import { kpiUniqueIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_area';
+import { kpiUniqueIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_bar';
+import { kpiUniqueIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_destination_metric';
+import { kpiUniqueIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_source_metric';
 import { useHostsKpiUniqueIps, ID } from '../../../containers/kpi_hosts/unique_ips';
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
@@ -29,7 +29,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.uniqueSourceIps,
         icon: 'visMapCoordinate',
-        lensAttributes: kpiUniqueIpsSourceMetric,
+        lensAttributes: kpiUniqueIpsSourceMetricLensAttributes,
       },
       {
         key: 'uniqueDestinationIps',
@@ -38,14 +38,14 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.uniqueDestinationIps,
         icon: 'visMapCoordinate',
-        lensAttributes: kpiUniqueIpsDestinationMetric,
+        lensAttributes: kpiUniqueIpsDestinationMetricLensAttributes,
       },
     ],
     enableAreaChart: true,
     enableBarChart: true,
     description: i18n.UNIQUE_IPS,
-    areaChartLensAttributes: kpiUniqueIpsArea,
-    barChartLensAttributes: kpiUniqueIpsBar,
+    areaChartLensAttributes: kpiUniqueIpsAreaLensAttributes,
+    barChartLensAttributes: kpiUniqueIpsBarLensAttributes,
   },
 ];
 

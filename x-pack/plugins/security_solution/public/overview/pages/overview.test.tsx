@@ -21,7 +21,6 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
-import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -79,10 +78,6 @@ useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
 const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
-
-jest.mock('../containers/overview_cti_links/use_ti_integrations');
-const useTiIntegrationsMock = useTiIntegrations as jest.Mock;
-useTiIntegrationsMock.mockReturnValue({});
 
 jest.mock('../../risk_score/containers');
 const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
