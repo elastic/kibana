@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { shallow } from 'enzyme';
 import { noop } from 'lodash/fp';
-import React from 'react';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../../../timelines/public/components';
 
 import { useSourcererDataView } from '../../../../../../common/containers/sourcerer';
 import { ExecutionLogTable } from './execution_log_table';
