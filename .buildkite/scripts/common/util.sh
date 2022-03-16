@@ -20,13 +20,7 @@ check_for_changed_files() {
   C_RESET='\033[0m' # Reset color
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
-
-  if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
-    # api_docs can also generate new files and deletions, which don't show up in ls-files
-    GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc'; git status --porcelain api_docs)"
-  else
-    GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
-  fi
+  GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
 
   if [ "$GIT_CHANGES" ]; then
     if [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
@@ -50,14 +44,6 @@ check_for_changed_files() {
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
       git add -u -- . ':!.bazelrc'
-
-      # Mostly, we're concerned about files that already exist that could be updated
-      # However, api_docs can create new files or delete old ones
-      # If there are more specialized cases like this in the future, we should figure out a better solution for this
-      if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
-        git add 'api_docs/*.json' || true
-        git add 'api_docs/*.mdx' || true
-      fi
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push

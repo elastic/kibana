@@ -17,7 +17,6 @@ import {
   groupPluginApi,
   getFileName,
   getSlug,
-  writeFileIfChanged,
 } from '../utils';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
 import { WritePluginDocsOpts } from './types';
@@ -122,8 +121,7 @@ ${
   mdx += scopApiToMdx(scopedDoc.server, 'Server', json, 'server');
   mdx += scopApiToMdx(scopedDoc.common, 'Common', json, 'common');
 
-  const mdxPath = Path.resolve(folder, fileName + '.mdx');
-  writeFileIfChanged(mdxPath, mdx, log);
+  fs.writeFileSync(Path.resolve(folder, fileName + '.mdx'), mdx);
 }
 
 function getJsonName(name: string): string {
