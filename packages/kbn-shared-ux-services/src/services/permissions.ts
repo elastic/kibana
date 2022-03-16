@@ -12,4 +12,5 @@
 export interface SharedUxUserPermissionsService {
   /** True if the user has permission to create a new Data View, false otherwise. */
   canCreateNewDataView: boolean;
+  canAccessFleet: boolean;
 }

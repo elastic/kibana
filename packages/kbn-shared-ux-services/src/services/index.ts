@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+export type { SharedUxApplicationService } from './application';
 export type { SharedUxDocLinksService } from './doc_links';
 export type { SharedUxEditorsService } from './editors';
+export type { SharedUxHttpService } from './http';
 export type { SharedUxUserPermissionsService } from './permissions';
 export type { SharedUxPlatformService } from './platform';
 

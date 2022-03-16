@@ -38,6 +38,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//react",
+  "@npm//rxjs",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -53,6 +54,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
+  "@npm//rxjs",
 ]
 
 jsts_transpiler(

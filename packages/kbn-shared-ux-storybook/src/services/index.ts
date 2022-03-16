@@ -8,22 +8,28 @@
 
 import type { ServiceFactory, SharedUxServices } from '@kbn/shared-ux-services';
 
-import { platformServiceFactory } from './platform';
-import { editorsServiceFactory } from './editors';
-import { userPermissionsServiceFactory } from './permissions';
+import { applicationServiceFactory } from './application';
 import { docLinksServiceFactory } from './doc_links';
+import { editorsServiceFactory } from './editors';
+import { httpServiceFactory } from './http';
+import { platformServiceFactory } from './platform';
+import { userPermissionsServiceFactory } from './permissions';
 
-export { platformServiceFactory } from './platform';
-export { editorsServiceFactory } from './editors';
-export { userPermissionsServiceFactory } from './permissions';
+export { applicationServiceFactory } from './application';
 export { docLinksServiceFactory } from './doc_links';
+export { editorsServiceFactory } from './editors';
+export { httpServiceFactory } from './http';
+export { platformServiceFactory } from './platform';
+export { userPermissionsServiceFactory } from './permissions';
 
 /**
  * A factory function for creating a Storybook implementation of `SharedUxServices`.
  */
 export const servicesFactory: ServiceFactory<SharedUxServices, {}> = (params) => ({
-  platform: platformServiceFactory(params),
-  permissions: userPermissionsServiceFactory(),
-  editors: editorsServiceFactory(),
+  application: applicationServiceFactory(),
   docLinks: docLinksServiceFactory(),
+  editors: editorsServiceFactory(),
+  http: httpServiceFactory(params),
+  permissions: userPermissionsServiceFactory(),
+  platform: platformServiceFactory(params),
 });

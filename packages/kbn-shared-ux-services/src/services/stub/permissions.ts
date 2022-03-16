@@ -19,4 +19,5 @@ export type UserPermissionsServiceFactory = ServiceFactory<SharedUxUserPermissio
  */
 export const userPermissionsServiceFactory: UserPermissionsServiceFactory = () => ({
   canCreateNewDataView: true,
+  canAccessFleet: true,
 });

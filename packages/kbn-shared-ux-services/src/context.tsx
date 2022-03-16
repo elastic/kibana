@@ -59,3 +59,7 @@ export const useEditors = () => useSharedUxServices().editors;
  * React hook for accessing the pre-wired `SharedUxDocLinksService`.
  */
 export const useDocLinks = () => useSharedUxServices().docLinks;
+
+export const useHttp = () => useSharedUxServices().http;
+
+export const useApplication = () => useSharedUxServices().application;

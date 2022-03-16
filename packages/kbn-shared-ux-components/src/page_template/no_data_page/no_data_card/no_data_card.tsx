@@ -9,7 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiCard } from '@elastic/eui';
+
 import type { NoDataCardProps } from './types';
+import { NoDataCardStyles } from './no_data_card.styles';
 
 const recommendedLabel = i18n.translate(
   'sharedUXComponents.pageTemplate.noDataPage.recommendedLabel',
@@ -30,12 +32,21 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
   title,
   button,
   description,
+  isDisabled,
   ...cardRest
 }) => {
+  const styles = NoDataCardStyles();
+
   const footer = () => {
-    if (typeof button !== 'string') {
+    // Don't render the footer action if disabled
+    if (isDisabled) {
+      return;
+    }
+    // Render a custom footer action if the button is not a simple string
+    if (button && typeof button !== 'string') {
       return button;
     }
+    // Default footer action is a button with the provided or default string
     return <EuiButton fill>{button || title}</EuiButton>;
   };
   const label = recommended ? recommendedLabel : undefined;
@@ -43,11 +54,13 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
 
   return (
     <EuiCard
+      css={styles}
       paddingSize="l"
       title={title!}
       description={cardDescription}
       betaBadgeProps={{ label }}
       footer={footer()}
+      isDisabled={isDisabled}
       {...cardRest}
     />
   );

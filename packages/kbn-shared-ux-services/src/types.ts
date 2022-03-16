@@ -9,10 +9,12 @@
 import { FC } from 'react';
 
 import {
+  SharedUxApplicationService,
+  SharedUxDocLinksService,
+  SharedUxEditorsService,
+  SharedUxHttpService,
   SharedUxPlatformService,
   SharedUxUserPermissionsService,
-  SharedUxEditorsService,
-  SharedUxDocLinksService,
 } from './services';
 
 /**
@@ -24,10 +26,12 @@ import {
  * for different environments, (e.g. Jest, Storybook, etc.)
  */
 export interface SharedUxServices {
-  platform: SharedUxPlatformService;
-  permissions: SharedUxUserPermissionsService;
-  editors: SharedUxEditorsService;
+  application: SharedUxApplicationService;
   docLinks: SharedUxDocLinksService;
+  editors: SharedUxEditorsService;
+  http: SharedUxHttpService;
+  permissions: SharedUxUserPermissionsService;
+  platform: SharedUxPlatformService;
 }
 
 /**

@@ -9,9 +9,11 @@
 export { servicesDecorator } from './decorators';
 
 export {
-  servicesFactory,
+  applicationServiceFactory,
   docLinksServiceFactory,
   editorsServiceFactory,
+  httpServiceFactory,
   platformServiceFactory,
+  servicesFactory,
   userPermissionsServiceFactory,
 } from './services';

@@ -8,27 +8,33 @@
 
 import type { SharedUxServices, ServiceFactory } from '../../types';
 
+import { applicationServiceFactory } from './application';
+import { docLinksServiceFactory } from './doc_links';
+import { editorsServiceFactory } from './editors';
+import { httpServiceFactory } from './http';
 import { platformServiceFactory } from './platform';
 import { userPermissionsServiceFactory } from './permissions';
-import { editorsServiceFactory } from './editors';
-import { docLinksServiceFactory } from './doc_links';
 
 /**
  * A factory function for creating simple stubbed implementations of all `SharedUxServices`.
  */
 export const stubServicesFactory: ServiceFactory<SharedUxServices> = () => ({
-  platform: platformServiceFactory(),
-  permissions: userPermissionsServiceFactory(),
-  editors: editorsServiceFactory(),
+  application: applicationServiceFactory(),
   docLinks: docLinksServiceFactory(),
+  editors: editorsServiceFactory(),
+  http: httpServiceFactory(),
+  permissions: userPermissionsServiceFactory(),
+  platform: platformServiceFactory(),
 });
 
 /**
  * A collection of stubbed service factories.
  */
 export const stubServiceFactories = {
+  applicationServiceFactory,
   docLinksServiceFactory,
   editorsServiceFactory,
+  httpServiceFactory,
   platformServiceFactory,
   userPermissionsServiceFactory,
 };
