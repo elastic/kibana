@@ -303,6 +303,11 @@ export async function resolveSavedObjects(
         importedObjectCount++;
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(
+        '🚨 resolveSavedObjects(...)',
+        `import error: ${error.constructor.name} - ${error.savedObjectType}`
+      );
       if (error.constructor.name === 'SavedObjectNotFound') {
         if (error.savedObjectType === 'index-pattern') {
           conflictedIndexPatterns.push({ obj, doc: searchDoc });
@@ -323,6 +328,11 @@ export async function resolveSavedObjects(
         importedObjectCount++;
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(
+        '🚨 resolveSavedObjects(...)',
+        `import error: ${error.constructor.name} - ${error.savedObjectType}`
+      );
       const isIndexPatternNotFound =
         error.constructor.name === 'SavedObjectNotFound' &&
         error.savedObjectType === 'index-pattern';
