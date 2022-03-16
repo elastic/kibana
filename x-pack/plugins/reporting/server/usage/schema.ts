@@ -74,7 +74,7 @@ const metricsSchemaPdf: MakeSchemaFrom<Pick<MetricsStats, 'pdf_cpu' | 'pdf_memor
     pdf_pages: metricsPercentilesSchema,
   };
 
-const totalsSchema: MakeSchemaFrom<AvailableTotal> = {
+const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
@@ -83,12 +83,16 @@ const totalsSchema: MakeSchemaFrom<AvailableTotal> = {
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
-  csv_searchsource: { ...totalsSchema, metrics: metricsSchemaCsv },
-  csv_searchsource_immediate: { ...totalsSchema, metrics: metricsSchemaCsv },
-  PNG: { ...totalsSchema, metrics: metricsSchemaPng },
-  PNGV2: { ...totalsSchema, metrics: metricsSchemaPng },
-  printable_pdf: { ...totalsSchema, layout: layoutCountsSchema, metrics: metricsSchemaPdf },
-  printable_pdf_v2: { ...totalsSchema, layout: layoutCountsSchema, metrics: metricsSchemaPdf },
+  csv_searchsource: { ...availableTotalSchema, metrics: metricsSchemaCsv },
+  csv_searchsource_immediate: { ...availableTotalSchema, metrics: metricsSchemaCsv },
+  PNG: { ...availableTotalSchema, metrics: metricsSchemaPng },
+  PNGV2: { ...availableTotalSchema, metrics: metricsSchemaPng },
+  printable_pdf: { ...availableTotalSchema, layout: layoutCountsSchema, metrics: metricsSchemaPdf },
+  printable_pdf_v2: {
+    ...availableTotalSchema,
+    layout: layoutCountsSchema,
+    metrics: metricsSchemaPdf,
+  },
 };
 
 const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
