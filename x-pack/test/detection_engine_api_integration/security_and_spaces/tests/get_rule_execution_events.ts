@@ -25,7 +25,6 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
   const log = getService('log');
 
   describe('Get Rule Execution Log Events', () => {
@@ -108,8 +107,12 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].indexing_duration_ms).to.eql(0);
       expect(response.body.events[0].gap_duration_ms).to.eql(0);
       expect(response.body.events[0].security_status).to.eql('partial failure');
-      expect(response.body.events[0].security_message).to.include(
-        'Check privileges failed to execute ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [no-name-index]'
+      expect(
+        response.body.events[0].security_message
+          .startsWith(
+            'Check privileges failed to execute ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [no-name-index]'
+          )
+          .to.be(true)
       );
     });
 
@@ -140,7 +143,6 @@ export default ({ getService }: FtrProviderContext) => {
     //   );
     // });
 
-    // TODO: Determine how to fake a failure with gap
     // it('should return execution events when providing a basic filter', async () => {
     //   const rule = getRuleForSignalTesting(['auditbeat-*', 'no-name-index']);
     //   const { id } = await createRule(supertest, log, rule);
@@ -167,7 +169,6 @@ export default ({ getService }: FtrProviderContext) => {
     //   );
     // });
 
-    // TODO: Determine how to fake a failure with gap
     // it('should return execution events when providing a complex filter references fields from multiple sub-agg documents', async () => {
     //   const rule = getRuleForSignalTesting(['auditbeat-*', 'no-name-index']);
     //   const { id } = await createRule(supertest, log, rule);
