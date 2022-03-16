@@ -34,6 +34,7 @@ export const CopySource: Task = {
         '!**/mocks.js',
         '!**/test_utils.js',
         '!**/test_helpers.js',
+        '!**/*.{md,mdx,asciidoc}',
         '!src/plugins/telemetry/schema/**', // Skip telemetry schemas
         // this is the dev-only entry
         '!src/setup_node_env/index.js',
