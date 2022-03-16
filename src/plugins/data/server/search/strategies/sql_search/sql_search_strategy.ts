@@ -36,15 +36,20 @@ export const sqlSearchStrategyProvider = (
   function asyncSearch(
     { id, ...request }: SqlSearchStrategyRequest,
     options: IAsyncSearchOptions,
-    { esClient, searchSessionsClient }: SearchStrategyDependencies
+    { esClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+
+    // disable search sessions until session task manager supports SQL
+    // https://github.com/elastic/kibana/issues/127880
+    // const sessionConfig = searchSessionsClient.getConfig();
+    const sessionConfig = null;
 
     const search = async () => {
       if (id) {
         const params: SqlGetAsyncRequest = {
           format: request.params?.format ?? 'json',
-          ...getDefaultAsyncGetParams(searchSessionsClient.getConfig(), options),
+          ...getDefaultAsyncGetParams(sessionConfig, options),
           id,
         };
 
@@ -58,7 +63,7 @@ export const sqlSearchStrategyProvider = (
         const params: SqlQueryRequest = {
           format: request.params?.format ?? 'json',
           ...request.params,
-          ...(await getDefaultAsyncSubmitParams(searchSessionsClient.getConfig(), options)),
+          ...(await getDefaultAsyncSubmitParams(sessionConfig, options)),
         };
 
         const { headers, body } = await client.sql.query(params, {
