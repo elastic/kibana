@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Afancilenstest');
       await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       expect(await PageObjects.lens.getTitle()).to.eql('Afancilenstest');
 
