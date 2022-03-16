@@ -78,9 +78,9 @@ test('Model of jobTypes', () => {
     {
       PNG: {
         available: true,
-        total: 0,
+        total: 3,
         sizes: sizesAggResponse,
-        app: { dashboard: 0, visualization: 0, 'canvas workpad': 0 },
+        app: { dashboard: 0, visualization: 3, 'canvas workpad': 0 },
         metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
       },
       printable_pdf: {
@@ -108,7 +108,7 @@ test('Model of jobTypes', () => {
         "canvas workpad": 0,
         "dashboard": 0,
         "search": 0,
-        "visualization": 0,
+        "visualization": 3,
       },
       "available": true,
       "deprecated": 0,
@@ -130,7 +130,7 @@ test('Model of jobTypes', () => {
         "95.0": 11935594,
         "99.0": 11935594,
       },
-      "total": 0,
+      "total": 3,
     }
   `);
   expect(result.csv_searchsource).toMatchInlineSnapshot(`
