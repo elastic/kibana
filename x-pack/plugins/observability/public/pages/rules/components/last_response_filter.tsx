@@ -31,8 +31,7 @@ export const LastResponseFilter: React.FunctionComponent<StatusFilterProps> = ({
     if (onChange) {
       onChange(selectedValues);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedValues]);
+  }, [selectedValues, onChange]);
 
   useEffect(() => {
     setSelectedValues(selectedStatuses);

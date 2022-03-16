@@ -17,24 +17,22 @@ export function Name({ name, rule }: RuleNameProps) {
     `/app/management/insightsAndAlerting/triggersActions/rule/${rule.id}`
   );
   const link = (
-    <>
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiLink title={name} href={detailsLink}>
-                {name}
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            {rule.ruleType}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiLink title={name} href={detailsLink}>
+              {name}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText color="subdued" size="xs">
+          {rule.ruleType}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
   return (
     <>
