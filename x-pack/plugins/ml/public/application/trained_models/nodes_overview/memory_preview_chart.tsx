@@ -134,8 +134,8 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
           {
             dataValue: memoryOverview.ml_max_in_bytes,
             details: bytesFormatter(memoryOverview.ml_max_in_bytes),
-            header: i18n.translate('xpack.ml.trainedModels.nodesList.memoryBreakdown', {
-              defaultMessage: 'Maximum memory available for the ML features',
+            header: i18n.translate('xpack.ml.trainedModels.nodesList.mlMaxMemory', {
+              defaultMessage: 'Maximum memory permitted for ML native processes',
             }),
           },
         ]}
