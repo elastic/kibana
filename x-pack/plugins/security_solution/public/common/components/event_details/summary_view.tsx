@@ -65,8 +65,8 @@ const rowProps = {
 const SummaryViewComponent: React.FC<{
   goToTable: () => void;
   title: string;
-  summaryRows: AlertSummaryRow[];
-}> = ({ goToTable, summaryRows, title }) => {
+  rows: AlertSummaryRow[];
+}> = ({ goToTable, rows, title }) => {
   return (
     <div>
       <EuiFlexGroup>
@@ -84,7 +84,7 @@ const SummaryViewComponent: React.FC<{
       <EuiSpacer size="s" />
       <SummaryTable
         data-test-subj="summary-view"
-        items={summaryRows}
+        items={rows}
         columns={summaryColumns}
         rowProps={rowProps}
         compressed

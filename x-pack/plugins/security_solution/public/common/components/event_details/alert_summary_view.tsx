@@ -28,7 +28,7 @@ const AlertSummaryViewComponent: React.FC<{
     [browserFields, data, eventId, isDraggable, timelineId]
   );
 
-  return <SummaryView summaryRows={summaryRows} title={title} goToTable={goToTable} />;
+  return <SummaryView rows={summaryRows} title={title} goToTable={goToTable} />;
 };
 
 export const AlertSummaryView = React.memo(AlertSummaryViewComponent);
