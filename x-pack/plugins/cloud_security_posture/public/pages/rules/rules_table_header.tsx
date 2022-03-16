@@ -46,7 +46,7 @@ interface ButtonProps {
 const LastModificationLabel = ({ lastModified }: { lastModified: string }) => (
   <EuiText size="s">
     <FormattedMessage
-      id="xpack.csp.rules.tableHeader lastModificationLabel"
+      id="xpack.csp.rules.tableHeader.lastModificationLabel"
       defaultMessage="Last modification to integration {timeAgo} "
       values={{ timeAgo: moment(lastModified).fromNow() }}
     />
