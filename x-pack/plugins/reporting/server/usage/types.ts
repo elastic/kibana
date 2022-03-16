@@ -173,7 +173,6 @@ export interface MetricsStats {
   pdf_pages: MetricsPercentiles;
   png_cpu: MetricsPercentiles;
   png_memory: MetricsPercentiles;
-  lol: MetricsPercentiles;
 }
 
 export type ReportingUsageType = RangeStats & {
