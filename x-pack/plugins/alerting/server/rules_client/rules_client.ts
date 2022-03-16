@@ -383,7 +383,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      snoozeEndTime: data.snoozeEndTime ? new Date(data.snoozeEndTime).toISOString() : null,
+      snoozeEndTime: null,
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
