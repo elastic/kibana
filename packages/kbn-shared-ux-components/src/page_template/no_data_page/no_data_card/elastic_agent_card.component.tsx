@@ -22,25 +22,28 @@ export type ElasticAgentCardComponentProps = ElasticAgentCardProps & {
 };
 
 const noPermissionTitle = i18n.translate(
-  'sharedUX.noDataPage.elasticAgentCard.noPermission.title',
+  'sharedUXComponents.noDataPage.elasticAgentCard.noPermission.title',
   {
     defaultMessage: `Contact your administrator`,
   }
 );
 
 const noPermissionDescription = i18n.translate(
-  'sharedUX.noDataPage.elasticAgentCard.noPermission.description',
+  'sharedUXComponents.noDataPage.elasticAgentCard.noPermission.description',
   {
     defaultMessage: `This integration is not yet enabled. Your administrator has the required permissions to turn it on.`,
   }
 );
 
-const elasticAgentCardTitle = i18n.translate('sharedUX.noDataPage.elasticAgentCard.title', {
-  defaultMessage: 'Add Elastic Agent',
-});
+const elasticAgentCardTitle = i18n.translate(
+  'sharedUXComponents.noDataPage.elasticAgentCard.title',
+  {
+    defaultMessage: 'Add Elastic Agent',
+  }
+);
 
 const elasticAgentCardDescription = i18n.translate(
-  'sharedUX.noDataPage.elasticAgentCard.description',
+  'sharedUXComponents.noDataPage.elasticAgentCard.description',
   {
     defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
   }
