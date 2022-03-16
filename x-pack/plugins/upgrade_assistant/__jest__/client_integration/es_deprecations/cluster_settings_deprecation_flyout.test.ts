@@ -13,7 +13,8 @@ import { esDeprecationsMockResponse } from './mocked_responses';
 
 describe('Cluster settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   const clusterSettingDeprecation = esDeprecationsMockResponse.deprecations[4];
 
   afterAll(() => {
@@ -21,6 +22,10 @@ describe('Cluster settings deprecation flyout', () => {
   });
 
   beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
     httpRequestsMockHelpers.setReindexStatusResponse({
       reindexOp: null,
@@ -34,7 +39,7 @@ describe('Cluster settings deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     const { actions, component } = testBed;
