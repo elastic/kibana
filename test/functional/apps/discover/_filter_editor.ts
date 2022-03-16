@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedSearch']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover filter editor');
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
