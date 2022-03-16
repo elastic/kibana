@@ -493,79 +493,121 @@ describe('data modeling', () => {
             buckets: {
               all: {
                 doc_count: 4,
-                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] } },
                 statusByApp: {
-                  buckets: [{
-                    key: 'completed',
-                    doc_count: 4,
-                    jobTypes: {
-                      buckets: [{
-                        key: 'printable_pdf',
-                        doc_count: 2,
-                        appNames: {
-                          buckets: [{ key: 'canvas workpad', doc_count: 1 }, {
-                            key: 'dashboard',
-                            doc_count: 1
-                          },]
-                        }
-                      }, {
-                        key: 'PNG',
-                        doc_count: 1,
-                        appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }
-                      }, { key: 'csv_searchsource', doc_count: 1, appNames: { buckets: [] } },]
-                    }
-                  },]
+                  buckets: [
+                    {
+                      key: 'completed',
+                      doc_count: 4,
+                      jobTypes: {
+                        buckets: [
+                          {
+                            key: 'printable_pdf',
+                            doc_count: 2,
+                            appNames: {
+                              buckets: [
+                                { key: 'canvas workpad', doc_count: 1 },
+                                {
+                                  key: 'dashboard',
+                                  doc_count: 1,
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            key: 'PNG',
+                            doc_count: 1,
+                            appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] },
+                          },
+                          { key: 'csv_searchsource', doc_count: 1, appNames: { buckets: [] } },
+                        ],
+                      },
+                    },
+                  ],
                 },
                 objectTypes: {
                   doc_count: 2,
-                  pdf: { buckets: [{ key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 },] }
+                  pdf: {
+                    buckets: [
+                      { key: 'canvas workpad', doc_count: 1 },
+                      { key: 'dashboard', doc_count: 1 },
+                    ],
+                  },
                 },
                 statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
                 jobTypes: {
-                  buckets: [{ key: 'printable_pdf', doc_count: 2 }, {
-                    key: 'PNG',
-                    doc_count: 1
-                  }, { key: 'csv_searchsource', doc_count: 1 },]
+                  buckets: [
+                    { key: 'printable_pdf', doc_count: 2 },
+                    {
+                      key: 'PNG',
+                      doc_count: 1,
+                      layoutTypes: {
+                        doc_count: 2,
+                        pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] },
+                      },
+                    },
+                    { key: 'csv_searchsource', doc_count: 1 },
+                  ],
                 },
               },
               last7Days: {
                 doc_count: 4,
-                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] } },
+                layoutTypes: {
+                  doc_count: 2,
+                  pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] },
+                },
                 statusByApp: {
-                  buckets: [{
-                    key: 'completed',
-                    doc_count: 4,
-                    jobTypes: {
-                      buckets: [{
-                        key: 'printable_pdf',
-                        doc_count: 2,
-                        appNames: {
-                          buckets: [{ key: 'canvas workpad', doc_count: 1 }, {
-                            key: 'dashboard',
-                            doc_count: 1
-                          },]
-                        }
-                      }, {
-                        key: 'PNG',
-                        doc_count: 1,
-                        appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }
-                      }, { key: 'csv_searchsource', doc_count: 1, appNames: { buckets: [] } },]
-                    }
-                  },]
+                  buckets: [
+                    {
+                      key: 'completed',
+                      doc_count: 4,
+                      jobTypes: {
+                        buckets: [
+                          {
+                            key: 'printable_pdf',
+                            doc_count: 2,
+                            appNames: {
+                              buckets: [
+                                { key: 'canvas workpad', doc_count: 1 },
+                                {
+                                  key: 'dashboard',
+                                  doc_count: 1,
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            key: 'PNG',
+                            doc_count: 1,
+                            appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] },
+                          },
+                          { key: 'csv_searchsource', doc_count: 1, appNames: { buckets: [] } },
+                        ],
+                      },
+                    },
+                  ],
                 },
                 objectTypes: {
                   doc_count: 2,
-                  pdf: { buckets: [{ key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 },] }
+                  pdf: {
+                    buckets: [
+                      { key: 'canvas workpad', doc_count: 1 },
+                      { key: 'dashboard', doc_count: 1 },
+                    ],
+                  },
                 },
                 statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
                 jobTypes: {
-                  buckets: [{ key: 'printable_pdf', doc_count: 2 }, {
-                    key: 'PNG',
-                    doc_count: 1
-                  }, { key: 'csv_searchsource', doc_count: 1 },]
+                  buckets: [
+                    { key: 'printable_pdf', doc_count: 2 },
+                    {
+                      key: 'PNG',
+                      doc_count: 1,
+                    },
+                    { key: 'csv_searchsource', doc_count: 1 },
+                  ],
                 },
               },
-            }, // prettier-ignore
+            },
           },
         },
       })

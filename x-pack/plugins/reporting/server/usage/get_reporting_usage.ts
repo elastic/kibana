@@ -99,8 +99,8 @@ function getAggStats(
       total: count,
       deprecated: deprecatedCount,
       sizes: sizes?.values,
-      app: getKeyCount(objectTypes.buckets),
-      layout: getKeyCount(layoutTypes.buckets),
+      app: getKeyCount(get(objectTypes, 'buckets', [])),
+      layout: getKeyCount(get(layoutTypes, 'buckets', [])),
       metrics: (metrics && metrics[key]) || undefined,
     };
     return { ...accum, [key]: total };
@@ -151,7 +151,7 @@ function normalizeMetrics(metrics: estypes.AggregationsStringTermsAggregate | un
   }, {} as { [K in keyof JobTypes]: MetricsStats });
 }
 
-type RangeStatSets = RangeStats & { last7Days: RangeStats };
+type RangeStatSets = Partial<RangeStats> & { last7Days: Partial<RangeStats> };
 
 type ESResponse = Partial<estypes.SearchResponse>;
 
@@ -175,6 +175,9 @@ async function handleResponse(response: ESResponse): Promise<RangeStatSets> {
   return { last7Days: last7DaysUsage, ...allUsage };
 }
 
+/*
+ * Reporting Usage Collector's "fetch" method
+ */
 export async function getReportingUsage(
   getLicense: GetLicense,
   esClient: ElasticsearchClient,
@@ -253,14 +256,12 @@ export async function getReportingUsage(
       const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
       const availability = exportTypesHandler.getAvailability(featureAvailability);
       const { last7Days, ...all } = usage;
-      const rangeStatsLast7Days = last7Days as RangeStats;
-      const rangeStatsAll = all as RangeStats;
 
       return {
         available: true,
         enabled: true,
-        last7Days: getExportStats(rangeStatsLast7Days, availability, exportTypesHandler),
-        ...getExportStats(rangeStatsAll, availability, exportTypesHandler),
+        last7Days: getExportStats(last7Days, availability, exportTypesHandler),
+        ...getExportStats(all, availability, exportTypesHandler),
       };
     });
 }

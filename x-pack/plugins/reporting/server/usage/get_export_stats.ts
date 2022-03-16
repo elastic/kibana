@@ -59,7 +59,7 @@ const isAvailable = (featureAvailability: FeatureAvailabilityMap, feature: strin
   !!featureAvailability[feature];
 
 function getAvailableTotalForFeature(
-  jobType: CombinedJobTypeStats,
+  jobType: CombinedJobTypeStats | undefined,
   exportType: keyof JobTypes,
   featureAvailability: FeatureAvailabilityMap
 ): AvailableTotal {
@@ -70,12 +70,12 @@ function getAvailableTotalForFeature(
   // merge the additional stats for the jobType
   const availableTotal: CombinedJobTypeStats = {
     available: isAvailable(featureAvailability, exportType),
-    total: jobType.total || 0,
+    total: jobType?.total || 0,
     deprecated,
-    sizes: jobType.sizes,
-    metrics: { ...metricsForFeature[exportType], ...jobType.metrics },
-    app: { ...defaultTotalsForFeature.app, ...jobType.app },
-    layout: needsLayout ? { ...defaultTotalsForFeature.layout, ...jobType.layout } : undefined,
+    sizes: jobType?.sizes,
+    metrics: { ...metricsForFeature[exportType], ...jobType?.metrics },
+    app: { ...defaultTotalsForFeature.app, ...jobType?.app },
+    layout: needsLayout ? { ...defaultTotalsForFeature.layout, ...jobType?.layout } : undefined,
   };
 
   return availableTotal;
@@ -89,38 +89,30 @@ function getAvailableTotalForFeature(
  * Reporting data, even if the type is unknown to this Kibana instance.
  */
 export const getExportStats = (
-  rangeStatsInput: RangeStats,
+  rangeStatsInput: Partial<RangeStats>,
   featureAvailability: FeatureAvailabilityMap,
   exportTypesHandler: ExportTypesHandler
-) => {
+): RangeStats => {
   const {
     _all: rangeAll,
     status: rangeStatus,
     statuses: rangeStatusByApp,
     output_size: outputSize,
-    ...rangeStatsRest
+    ...rangeStats
   } = rangeStatsInput;
 
-  const rangeStats: Record<keyof JobTypes, CombinedJobTypeStats> = rangeStatsRest;
-
   // combine the known types with any unknown type found in reporting data
-  const statsForExportType = exportTypesHandler.getJobTypes().reduce((accum, exportType) => {
-    const availableTotal = rangeStats[exportType];
-
-    if (!availableTotal) {
-      return {
-        ...accum,
-        [exportType]: {
-          available: isAvailable(featureAvailability, exportType),
-        },
-      };
-    }
-
-    return {
+  const statsForExportType = exportTypesHandler.getJobTypes().reduce(
+    (accum, exportType) => ({
       ...accum,
-      [exportType]: getAvailableTotalForFeature(availableTotal, exportType, featureAvailability),
-    };
-  }, {});
+      [exportType]: getAvailableTotalForFeature(
+        rangeStats[exportType],
+        exportType,
+        featureAvailability
+      ),
+    }),
+    {}
+  );
 
   const resultStats = {
     ...statsForExportType,
