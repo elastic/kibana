@@ -383,7 +383,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      snoozeEndTime: null,
+      snoozeEndTime: data.snoozeEndTime ? new Date(data.snoozeEndTime).toISOString() : null,
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -1548,8 +1548,8 @@ export class RulesClient {
     // If snoozeEndTime is -1, instead mute all
     const newAttrs =
       snoozeEndTime === -1
-        ? { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false }
-        : { muteAll: true, snoozeEndTime: null };
+        ? { muteAll: true, snoozeEndTime: null }
+        : { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false };
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
