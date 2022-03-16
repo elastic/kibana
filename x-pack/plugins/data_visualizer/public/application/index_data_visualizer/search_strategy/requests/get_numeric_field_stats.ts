@@ -90,11 +90,14 @@ export const getNumericFieldsStatsRequest = (
     // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
     if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
       aggs[`${safeFieldName}_top`] = {
-        sampler: {
-          shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-        },
-        aggs: {
-          top,
+        // @ts-expect-error type for sampling agg not yet updated
+        sampling: {
+          random_sampler: {
+            probability: 0.2,
+          },
+          aggs: {
+            top,
+          },
         },
       };
     } else {
