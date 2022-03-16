@@ -21534,8 +21534,6 @@
     "xpack.reporting.exportTypes.common.failedToDecryptReportJobDataErrorMessage": "无法解密报告作业数据。请确保已设置 {encryptionKey}，然后重新生成此报告。{err}",
     "xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage": "作业标头缺失",
     "xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues": "CSV 可能包含值已转义的公式",
-    "xpack.reporting.exportTypes.printablePdf.logoDescription": "由 Elastic 提供支持",
-    "xpack.reporting.exportTypes.printablePdf.pagingDescription": "第 {currentPage} 页，共 {pageCount} 页",
     "xpack.reporting.jobCreatedBy.unknownUserPlaceholderText": "未知",
     "xpack.reporting.jobsQuery.deleteError": "无法删除报告：{error}",
     "xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage": "抱歉，您无权查看 {jobType} 信息",
