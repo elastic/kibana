@@ -282,6 +282,48 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.DatePickerContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "DatePickerContextProvider",
+        "description": [],
+        "signature": [
+          "({ children }: { children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.DatePickerContextProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.DatePickerContextProvider.$1.children",
+                "type": "Object",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                ],
+                "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.ExploratoryView",
         "type": "Function",
         "tags": [],

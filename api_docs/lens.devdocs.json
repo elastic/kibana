@@ -653,7 +653,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ sortField: string; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
+              "{ sortField: string; showArrayValues: boolean; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
             "deprecated": false

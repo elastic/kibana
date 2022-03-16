@@ -965,6 +965,7 @@
             ],
             "path": "src/core/public/index.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "visTypeVega",
@@ -1322,6 +1323,7 @@
             ],
             "path": "src/core/public/index.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "monitoring",
@@ -1334,6 +1336,10 @@
               {
                 "plugin": "visTypeVega",
                 "path": "src/plugins/vis_types/vega/public/plugin.ts"
+              },
+              {
+                "plugin": "visTypeVega",
+                "path": "src/plugins/vis_types/vega/target/types/public/data_model/search_api.d.ts"
               }
             ]
           }
@@ -8052,6 +8058,7 @@
         ],
         "path": "src/core/server/plugins/types.ts",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [],
         "children": [
           {
@@ -17533,6 +17540,7 @@
             ],
             "path": "src/core/server/metrics/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "monitoring",

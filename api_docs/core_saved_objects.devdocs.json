@@ -13465,6 +13465,7 @@
             ],
             "path": "src/core/server/saved_objects/migrations/core/migration_logger.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "lens",
