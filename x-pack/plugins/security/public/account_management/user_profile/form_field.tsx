@@ -17,7 +17,7 @@ export interface FormFieldProps<T extends React.ElementType> {
 }
 
 /**
- * Renders a form field with correct inline validation states.
+ * Polymorphic component that renders a form field with all state required for inline validation.
  *
  * @example Text field with validation rule:
  * ```typescript
@@ -54,7 +54,7 @@ export function FormField<T extends React.ElementType = typeof EuiFieldText>({
       {...rest}
       onBlur={(event) => {
         onBlur?.(event);
-        helpers.setTouched(true); // Marking as touched manually here since some EUI fields don't pass on the correct `event` argument causing errors when `field.onBlur(event)` is called as a result of spreading `field` props.
+        helpers.setTouched(true); // Marking as touched manually here since some EUI fields don't pass on the correct `event` argument causing errors when `field.onBlur(event)` is called as a result of spreading `field` props above.
       }}
     />
   );

@@ -6,33 +6,39 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { useFormikContext } from 'formik';
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 
 import { useFormChangesContext } from './form_changes';
 
 export interface FormLabelProps {
-  isEqual: boolean;
+  /**
+   * Name of target form field.
+   */
+  for: string;
 }
 
 /**
- * Renders a form label that indicates if a field value has changed.
+ * Component that indicates whether a form field has changed.
  *
  * @example
  * ```typescript
- * <FormLabel isEqual={formik.values.color === formik.initialValues.color}>
- *   Color
- * </FormLabel>
+ * <FormLabel for="color">Color</FormLabel>
  * ```
  */
-export const FormLabel: FunctionComponent<FormLabelProps> = ({ isEqual, children }) => {
-  const { register } = useFormChangesContext();
+export const FormLabel: FunctionComponent<FormLabelProps> = (props) => {
+  const formik = useFormikContext();
+  const { report } = useFormChangesContext();
 
-  useEffect(() => register(isEqual), [isEqual]); // eslint-disable-line react-hooks/exhaustive-deps
+  const meta = formik.getFieldMeta(props.for);
+  const isEqual = meta.value === meta.initialValue;
+
+  useEffect(() => report(isEqual), [isEqual]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs">
-      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{props.children}</EuiFlexItem>
       {!isEqual ? (
         <EuiFlexItem grow={false}>
           <EuiIcon type="dot" color="success" />

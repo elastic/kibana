@@ -13,14 +13,17 @@ import React, { Children } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FormLabel } from './form_label';
-
 export interface FormRowProps {
+  /**
+   * Optional name of form field.
+   *
+   * If not provided the name will be inferred from its child element.
+   */
   name?: string;
 }
 
 /**
- * Renders a form row with correct error states.
+ * Renders a form row with correct state for inline validation.
  *
  * @example
  * ```typescript
@@ -28,6 +31,8 @@ export interface FormRowProps {
  *   <FormField name="email" />
  * </FormRow>
  * ```
+ *
+ * @throws Error if name hasn't been provided or can't be inferred.
  */
 export const FormRow: FunctionComponent<EuiFormRowProps & FormRowProps> = (props) => {
   const formik = useFormikContext();
@@ -36,23 +41,14 @@ export const FormRow: FunctionComponent<EuiFormRowProps & FormRowProps> = (props
 
   if (!name) {
     throw new Error(
-      'name prop is undefined, please verify you are rendering either <FormRow> itself or its direct child with a name prop to correctly identify the field.'
+      'name prop is undefined, please verify you are either rendering <FormRow> itself or its child with a name prop.'
     );
   }
 
   const meta = formik.getFieldMeta(name);
 
   return (
-    <EuiFormRow
-      error={meta.error}
-      isInvalid={meta.touched && !!meta.error}
-      {...props}
-      label={
-        props.label ? (
-          <FormLabel isEqual={meta.value === meta.initialValue}>{props.label}</FormLabel>
-        ) : undefined
-      }
-    >
+    <EuiFormRow error={meta.error} isInvalid={meta.touched && !!meta.error} {...props}>
       {child}
     </EuiFormRow>
   );

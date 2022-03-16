@@ -276,10 +276,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
                 <FormRow
                   label={
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.newPasswordLabel"
-                      defaultMessage="Full name"
-                    />
+                    <FormLabel for="user.full_name">
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                        defaultMessage="Full name"
+                      />
+                    </FormLabel>
                   }
                   labelAppend={<OptionalText />}
                   isDisabled={isReservedUser}
@@ -290,10 +292,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
                 <FormRow
                   label={
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.newPasswordLabel"
-                      defaultMessage="Email address"
-                    />
+                    <FormLabel for="user.email">
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                        defaultMessage="Email address"
+                      />
+                    </FormLabel>
                   }
                   labelAppend={<OptionalText />}
                   isDisabled={isReservedUser}
@@ -323,9 +327,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   <EuiKeyPadMenu
                     checkable={{
                       legend: (
-                        <FormLabel
-                          isEqual={formik.values.avatarType === formik.initialValues.avatarType}
-                        >
+                        <FormLabel for="avatarType">
                           <FormattedMessage
                             id="xpack.security.accountManagement.userProfile.usernameGroupDescription"
                             defaultMessage="Avatar type"
@@ -398,10 +400,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     {formik.values.avatarType === 'image' ? (
                       <FormRow
                         label={
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.userProfile.newPasswordLabel"
-                            defaultMessage="Image"
-                          />
+                          <FormLabel for="data.avatar.imageUrl">
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                              defaultMessage="Image"
+                            />
+                          </FormLabel>
                         }
                         isDisabled={isReservedUser}
                         fullWidth
@@ -410,7 +414,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           as={EuiFilePicker}
                           name="data.avatar.imageUrl"
                           value={undefined} /* EuiFilePicker breaks if value is provided  */
-                          display="default"
                           initialPromptText={
                             <FormattedMessage
                               id="xpack.security.accountManagement.userProfile.imageUrlPromptText"
@@ -429,18 +432,20 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                             ),
                           }}
                           accept={IMAGE_FILE_TYPES.join(',')}
+                          display="default"
                           fullWidth
                         />
                       </FormRow>
                     ) : (
                       <>
                         <FormRow
-                          name="data.avatar.initials"
                           label={
-                            <FormattedMessage
-                              id="xpack.security.accountManagement.userProfile.newPasswordLabel"
-                              defaultMessage="Initials"
-                            />
+                            <FormLabel for="data.avatar.initials">
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                                defaultMessage="Initials"
+                              />
+                            </FormLabel>
                           }
                           isDisabled={isReservedUser}
                           fullWidth
@@ -470,10 +475,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
                         <FormRow
                           label={
-                            <FormattedMessage
-                              id="xpack.security.accountManagement.userProfile.newPasswordLabel"
-                              defaultMessage="Color"
-                            />
+                            <FormLabel for="data.avatar.color">
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.userProfile.newPasswordLabel"
+                                defaultMessage="Color"
+                              />
+                            </FormLabel>
                           }
                           labelAppend={
                             !isReservedUser ? (

@@ -5,19 +5,38 @@
  * 2.0.
  */
 
-import { createContext, useContext, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-export interface FormChanges {
+export interface FormChangesProps {
+  /**
+   * Number of fields rendered on the page that have changed.
+   */
   count: number;
-  register(isEqual: boolean): undefined | (() => void);
+
+  /**
+   * Callback function used by a form field to indicate whether its current value is different to its initial value.
+   *
+   * @example
+   * ```
+   * const { report } = useFormChangesContext();
+   * const isEqual = formik.values.email === formik.initialValues.email;
+   *
+   * useEffect(() => report(isEqual), [isEqual]);
+   * ```
+   */
+  report(isEqual: boolean): undefined | (() => void);
 }
 
-export const useFormChanges = (): FormChanges => {
+/**
+ * Custom React hook that allows tracking changes within a form.
+ */
+export const useFormChanges = (): FormChangesProps => {
   const [count, setCount] = useState(0);
 
   return {
     count,
-    register: (isEqual: boolean) => {
+    report: (isEqual: boolean) => {
       if (!isEqual) {
         setCount((c) => c + 1);
         return () => setCount((c) => c - 1);
@@ -26,18 +45,31 @@ export const useFormChanges = (): FormChanges => {
   };
 };
 
-export const FormChangesContext = createContext<FormChanges | undefined>(undefined);
+const FormChangesContext = createContext<FormChangesProps | undefined>(undefined);
 
 export const FormChangesProvider = FormChangesContext.Provider;
 
+/**
+ * Custom React hook that returns all @see FormChangesProps state from context.
+ *
+ * @throws Error when called within a component that isn't a child of a <FormChanges> component.
+ */
 export function useFormChangesContext() {
-  const context = useContext(FormChangesContext);
+  const value = useContext(FormChangesContext);
 
-  if (!context) {
+  if (!value) {
     throw new Error(
-      'FormChanges context is undefined, please verify you are calling useFormChangesContext() as child of a <FormChangesProvider> component.'
+      'FormChanges context is undefined, please verify you are calling useFormChangesContext() as child of a <FormChanges> component.'
     );
   }
 
-  return context;
+  return value;
 }
+
+/**
+ * Component that allows tracking changes within a form.
+ */
+export const FormChanges: FunctionComponent = ({ children }) => {
+  const value = useFormChanges();
+  return <FormChangesProvider value={value}>{children}</FormChangesProvider>;
+};
