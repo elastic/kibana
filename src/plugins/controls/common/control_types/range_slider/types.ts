@@ -6,5 +6,14 @@
  * Side Public License, v 1.
  */
 
-export * from './options_list';
-export * from './range_slider';
+import { ControlInput } from '../../types';
+
+export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
+
+export type RangeValue = [string, string];
+
+export interface RangeSliderEmbeddableInput extends ControlInput {
+  fieldName: string;
+  dataViewId: string;
+  value: RangeValue;
+}
