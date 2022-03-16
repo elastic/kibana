@@ -25,9 +25,10 @@ export const useFetchSessionViewProcessEvents = (
   const { http } = useKibana<CoreStart>().services;
   const [isJumpToFirstPage, setIsJumpToFirstPage] = useState<boolean>(false);
   const jumpToCursor = jumpToEvent && jumpToEvent.process.start;
+  const cachingKeys = [QUERY_KEY_PROCESS_EVENTS, sessionEntityId];
 
   const query = useInfiniteQuery(
-    QUERY_KEY_PROCESS_EVENTS,
+    cachingKeys,
     async ({ pageParam = {} }) => {
       let { cursor } = pageParam;
       const { forward } = pageParam;
@@ -83,8 +84,9 @@ export const useFetchSessionViewProcessEvents = (
 
 export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
+  const cachingKeys = [QUERY_KEY_ALERTS, sessionEntityId];
   const query = useQuery(
-    QUERY_KEY_ALERTS,
+    cachingKeys,
     async () => {
       const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
         query: {
