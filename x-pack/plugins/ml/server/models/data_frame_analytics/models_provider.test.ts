@@ -49,7 +49,7 @@ describe('Model service', () => {
               ml: {
                 data_frame_analytics_in_bytes: 0,
                 native_code_overhead_in_bytes: 0,
-                max_in_bytes: 0,
+                max_in_bytes: 1073741824,
                 anomaly_detectors_in_bytes: 0,
                 native_inference_in_bytes: 1555161790,
               },
@@ -75,7 +75,7 @@ describe('Model service', () => {
               ml: {
                 data_frame_analytics_in_bytes: 0,
                 native_code_overhead_in_bytes: 0,
-                max_in_bytes: 0,
+                max_in_bytes: 1073741824,
                 anomaly_detectors_in_bytes: 0,
                 native_inference_in_bytes: 1555161790,
               },
@@ -101,7 +101,7 @@ describe('Model service', () => {
               ml: {
                 data_frame_analytics_in_bytes: 0,
                 native_code_overhead_in_bytes: 0,
-                max_in_bytes: 0,
+                max_in_bytes: 1073741824,
                 anomaly_detectors_in_bytes: 0,
                 native_inference_in_bytes: 1555161790,
               },
@@ -219,6 +219,7 @@ describe('Model service', () => {
           },
           id: '3qIoLFnbSi-DwVrYioUCdw',
           memory_overview: {
+            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },
@@ -339,6 +340,7 @@ describe('Model service', () => {
           },
           id: 'DpCy7SOBQla3pu0Dq-tnYw',
           memory_overview: {
+            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },
@@ -462,6 +464,7 @@ describe('Model service', () => {
           },
           id: 'pt7s6lKHQJaP4QHKtU-Q0Q',
           memory_overview: {
+            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },
