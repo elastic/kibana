@@ -114,7 +114,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
             <EuiFlexItem grow={6}>
               <SearchBar
                 value={draftKuery}
-                data-test-subj="agentList.queryInput"
                 onChange={(newSearch, submit) => {
                   onDraftKueryChange(newSearch);
                   if (submit) {
