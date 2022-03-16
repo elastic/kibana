@@ -11,7 +11,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
-import { useTimeRange } from '../hooks/use_time_range';
+import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { ApmIndicesConfig } from '../../common/typings';
@@ -45,7 +45,7 @@ const apps: DataContextApps[] = ['apm', 'synthetics', 'infra_logs', 'infra_metri
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
   const { http } = useKibana<ObservabilityAppServices>().services;
   const [forceUpdate, setForceUpdate] = useState('');
-  const { absoluteStart, absoluteEnd } = useTimeRange();
+  const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
@@ -77,7 +77,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
             };
             switch (app) {
               case 'ux':
-                const params = { absoluteTime: { start: absoluteStart, end: absoluteEnd } };
+                const params = { absoluteTime: { start: absoluteStart!, end: absoluteEnd! } };
                 const resultUx = await getDataHandler(app)?.hasData(params);
                 updateState({
                   hasData: resultUx?.hasData,

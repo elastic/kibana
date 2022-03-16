@@ -141,9 +141,9 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = config.unsafe.rules
+  const manageRulesHref = config.unsafe.rules.enabled
     ? http.basePath.prepend('/app/observability/rules')
-    : http.basePath.prepend('/insightsAndAlerting/triggersActions/alerts');
+    : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {

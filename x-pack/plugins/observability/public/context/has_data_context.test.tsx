@@ -11,17 +11,12 @@ import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { coreMock } from 'src/core/public/mocks';
 import { registerDataHandler, unregisterDataHandler } from '../data_handler';
 import { useHasData } from '../hooks/use_has_data';
-import * as routeParams from '../hooks/use_route_params';
-import * as timeRange from '../hooks/use_time_range';
 import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { HasDataContextProvider } from './has_data_context';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ApmIndicesConfig } from '../../common/typings';
 import { act } from '@testing-library/react';
-
-const relativeStart = '2020-10-08T06:00:00.000Z';
-const relativeEnd = '2020-10-08T07:00:00.000Z';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
@@ -59,21 +54,7 @@ function registerApps<T extends ObservabilityFetchDataPlugins>(
 }
 
 describe('HasDataContextProvider', () => {
-  beforeAll(() => {
-    jest.spyOn(routeParams, 'useRouteParams').mockImplementation(() => ({
-      query: {
-        from: relativeStart,
-        to: relativeEnd,
-      },
-      path: {},
-    }));
-    jest.spyOn(timeRange, 'useTimeRange').mockImplementation(() => ({
-      relativeStart,
-      relativeEnd,
-      absoluteStart: new Date(relativeStart).valueOf(),
-      absoluteEnd: new Date(relativeEnd).valueOf(),
-    }));
-  });
+  beforeAll(() => {});
 
   describe('when no plugin has registered', () => {
     it('hasAnyData returns undefined and all apps return undefined', async () => {
