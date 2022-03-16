@@ -8899,74 +8899,6 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-common.storedPackagePoliciesToAgentInputs",
-        "type": "Function",
-        "tags": [],
-        "label": "storedPackagePoliciesToAgentInputs",
-        "description": [],
-        "signature": [
-          "(packagePolicies: ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          "[], outputId?: string) => ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.FullAgentPolicyInput",
-            "text": "FullAgentPolicyInput"
-          },
-          "[]"
-        ],
-        "path": "x-pack/plugins/fleet/common/services/package_policies_to_agent_inputs.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.storedPackagePoliciesToAgentInputs.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "packagePolicies",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/fleet/common/services/package_policies_to_agent_inputs.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.storedPackagePoliciesToAgentInputs.$2",
-            "type": "string",
-            "tags": [],
-            "label": "outputId",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/fleet/common/services/package_policies_to_agent_inputs.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-common.validatePackagePolicy",
         "type": "Function",
         "tags": [],
@@ -18123,6 +18055,27 @@
                 "text": "DryRunPackagePolicy"
               },
               "] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/package_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.UpgradePackagePolicyDryRunResponseItem.agent_diff",
+            "type": "Object",
+            "tags": [],
+            "label": "agent_diff",
+            "description": [],
+            "signature": [
+              "[",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.FullAgentPolicyInput",
+                "text": "FullAgentPolicyInput"
+              },
+              "[]] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/package_policy.ts",
             "deprecated": false

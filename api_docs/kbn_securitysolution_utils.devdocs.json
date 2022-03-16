@@ -63,8 +63,8 @@
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "server",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.TrustedAppEntryTypes",
-            "text": "TrustedAppEntryTypes"
+            "section": "def-server.EntryTypes",
+            "text": "EntryTypes"
           },
           "; value: string; }) => boolean"
         ],
@@ -108,7 +108,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"match\" | \"wildcard\""
+                  "\"match\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false
@@ -158,8 +158,8 @@
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "server",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.TrustedAppEntryTypes",
-            "text": "TrustedAppEntryTypes"
+            "section": "def-server.EntryTypes",
+            "text": "EntryTypes"
           },
           "; value: string; }) => boolean"
         ],
@@ -223,7 +223,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"match\" | \"wildcard\""
+                  "\"match\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false
@@ -406,6 +406,20 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-server.EntryTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "EntryTypes",
+        "description": [],
+        "signature": [
+          "\"match\" | \"wildcard\" | \"match_any\""
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-server.FILENAME_WILDCARD_WARNING",

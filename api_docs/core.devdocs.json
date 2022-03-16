@@ -7572,6 +7572,18 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.ElasticsearchConfig.maxSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxSockets",
+            "description": [
+              "\nThe maximum number of sockets that can be used for communications with elasticsearch."
+            ],
+            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ElasticsearchConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -7792,7 +7804,7 @@
                 "label": "rawConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; healthCheck: Readonly<{} & { delay: moment.Duration; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
+                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; healthCheck: Readonly<{} & { delay: moment.Duration; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; maxSockets: number; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
                 ],
                 "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
                 "deprecated": false,
@@ -23292,7 +23304,7 @@
             "section": "def-server.ElasticsearchConfig",
             "text": "ElasticsearchConfig"
           },
-          ", \"username\" | \"hosts\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"compression\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
+          ", \"username\" | \"hosts\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"maxSockets\" | \"compression\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
         ],
         "path": "src/core/server/elasticsearch/client/client_config.ts",
         "deprecated": false,
