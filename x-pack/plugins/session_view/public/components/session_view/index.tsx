@@ -25,7 +25,12 @@ import { useFetchSessionViewProcessEvents } from './hooks';
 /**
  * The main wrapper component for the session view.
  */
-export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionViewDeps) => {
+export const SessionView = ({
+  sessionEntityId,
+  height,
+  jumpToEvent,
+  alertsFlyoutCallback,
+}: SessionViewDeps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
 
@@ -162,6 +167,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     fetchNextPage={fetchNextPage}
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
+                    alertsFlyoutCallback={alertsFlyoutCallback}
                   />
                 </div>
               )}

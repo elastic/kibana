@@ -17,6 +17,7 @@ interface ProcessTreeAlertDeps {
   isSelected: boolean;
   onClick: (alert: ProcessEventAlert | null) => void;
   selectAlert: (alertUuid: string) => void;
+  alertsFlyoutCallback?: (alertUuid: string) => void;
 }
 
 export const ProcessTreeAlert = ({
@@ -25,6 +26,7 @@ export const ProcessTreeAlert = ({
   isSelected,
   onClick,
   selectAlert,
+  alertsFlyoutCallback,
 }: ProcessTreeAlertDeps) => {
   const styles = useStyles({ isInvestigated, isSelected });
 
@@ -36,7 +38,7 @@ export const ProcessTreeAlert = ({
     }
   }, [isInvestigated, isSelected, uuid, selectAlert]);
 
-  if (!(alert.kibana && rule)) {
+  if (!(alert.kibana && rule && uuid)) {
     return null;
   }
 
@@ -44,6 +46,10 @@ export const ProcessTreeAlert = ({
 
   const handleClick = () => {
     onClick(alert.kibana?.alert ?? null);
+  };
+
+  const handleExpandClick = () => {
+    alertsFlyoutCallback?.(uuid);
   };
 
   return (
@@ -55,7 +61,12 @@ export const ProcessTreeAlert = ({
       data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
       onClick={handleClick}
     >
-      <EuiButtonIcon iconType="expand" aria-label="expand" css={styles.alertRowItem} />
+      <EuiButtonIcon
+        iconType="expand"
+        aria-label="expand"
+        css={styles.alertRowItem}
+        onClick={handleExpandClick}
+      />
       <EuiIcon type="alert" css={styles.alertRowItem} />
       <EuiText size="s" css={styles.alertRuleName}>
         {name}

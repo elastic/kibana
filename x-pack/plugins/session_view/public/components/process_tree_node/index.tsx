@@ -40,6 +40,7 @@ export interface ProcessDeps {
   selectedProcessId?: string;
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
+  alertsFlyoutCallback?: (alertUuid: string) => void;
 }
 
 /**
@@ -55,6 +56,7 @@ export function ProcessTreeNode({
   selectedProcessId,
   scrollerRef,
   onChangeJumpToEventVisibility,
+  alertsFlyoutCallback,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -242,6 +244,7 @@ export function ProcessTreeNode({
           jumpToAlertID={jumpToAlertID}
           isProcessSelected={selectedProcessId === process.id}
           onAlertSelected={onProcessClicked}
+          alertsFlyoutCallback={alertsFlyoutCallback}
         />
       )}
 
@@ -259,6 +262,7 @@ export function ProcessTreeNode({
                 selectedProcessId={selectedProcessId}
                 scrollerRef={scrollerRef}
                 onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
+                alertsFlyoutCallback={alertsFlyoutCallback}
               />
             );
           })}
