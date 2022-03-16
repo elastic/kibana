@@ -211,7 +211,8 @@ export function FieldSelect({
                 {
                   label: fieldIsInvalid
                     ? selectedField
-                    : currentIndexPattern.getFieldByName(selectedField)?.displayName,
+                    : currentIndexPattern.getFieldByName(selectedField)?.displayName ??
+                      selectedField,
                   value: { type: 'field', field: selectedField },
                 },
               ]
