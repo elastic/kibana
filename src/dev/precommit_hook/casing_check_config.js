@@ -61,15 +61,15 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
-  // Bundled package names typically use a format like ${pkgName}-${pkgVersion}, so don't lint them
-  'x-pack/plugins/fleet/server/bundled_packages/**/*',
-
   // Bazel default files
   '**/WORKSPACE.bazel',
   '**/BUILD.bazel',
 
   // Buildkite
   '.buildkite/**/*',
+
+  // generator templates use weird filenames based on the requirements for the files they're generating
+  'packages/kbn-generate/templates/**/*',
 ];
 
 /**

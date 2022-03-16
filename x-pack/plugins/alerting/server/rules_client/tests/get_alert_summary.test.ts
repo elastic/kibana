@@ -40,6 +40,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  minimumScheduleInterval: '1m',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -222,7 +223,12 @@ describe('getAlertSummary()', () => {
           "end": "2019-02-12T21:01:22.479Z",
           "page": 1,
           "per_page": 10000,
-          "sort_order": "desc",
+          "sort": Array [
+            Object {
+              "sort_field": "@timestamp",
+              "sort_order": "desc",
+            },
+          ],
           "start": "2019-02-12T21:00:22.479Z",
         },
         undefined,
@@ -259,7 +265,12 @@ describe('getAlertSummary()', () => {
           "end": "2019-02-12T21:01:22.479Z",
           "page": 1,
           "per_page": 10000,
-          "sort_order": "desc",
+          "sort": Array [
+            Object {
+              "sort_field": "@timestamp",
+              "sort_order": "desc",
+            },
+          ],
           "start": "2019-02-12T21:00:22.479Z",
         },
         Array [
