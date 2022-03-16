@@ -38,6 +38,7 @@ interface EditControlGroupProps {
   width: ControlWidth;
   controlStyle: ControlStyle;
   setAllWidths: boolean;
+  controlCount: number;
   updateControlStyle: (controlStyle: ControlStyle) => void;
   updateWidth: (newWidth: ControlWidth) => void;
   updateAllControlWidths: (newWidth: ControlWidth) => void;
@@ -49,6 +50,7 @@ export const ControlGroupEditor = ({
   width,
   controlStyle,
   setAllWidths,
+  controlCount,
   updateControlStyle,
   updateWidth,
   updateAllControlWidths,
@@ -90,27 +92,30 @@ export const ControlGroupEditor = ({
             }}
           />
         </EuiFormRow>
-        <EuiSpacer size="s" />
-        <EuiCheckbox
-          id="editControls_setAllSizesCheckbox"
-          label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-          checked={applyToAll}
-          onChange={(e) => {
-            setApplyToAll(e.target.checked);
-          }}
-        />
-        <EuiSpacer size="l" />
-
-        <EuiButtonEmpty
-          onClick={onCancel}
-          aria-label={'delete-all'}
-          iconType="trash"
-          color="danger"
-          flush="left"
-          size="s"
-        >
-          {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-        </EuiButtonEmpty>
+        {controlCount > 0 ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCheckbox
+              id="editControls_setAllSizesCheckbox"
+              label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
+              checked={applyToAll}
+              onChange={(e) => {
+                setApplyToAll(e.target.checked);
+              }}
+            />
+            <EuiSpacer size="l" />
+            <EuiButtonEmpty
+              onClick={onCancel}
+              aria-label={'delete-all'}
+              iconType="trash"
+              color="danger"
+              flush="left"
+              size="s"
+            >
+              {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+            </EuiButtonEmpty>{' '}
+          </>
+        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">

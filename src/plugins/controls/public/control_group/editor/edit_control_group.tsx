@@ -65,6 +65,7 @@ export const EditControlGroup = ({
             width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
             controlStyle={controlStyle ?? DEFAULT_CONTROL_STYLE}
             setAllWidths={false}
+            controlCount={Object.keys(panels ?? {}).length}
             updateControlStyle={setControlStyle}
             updateWidth={setDefaultControlWidth}
             updateAllControlWidths={setAllControlWidths}
