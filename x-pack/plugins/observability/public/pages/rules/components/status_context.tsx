@@ -50,15 +50,19 @@ export function StatusContext({
     },
     [item, togglePopover, enableRule, disableRule, currentStatus, onStatusChanged]
   );
-  const panelItems = Object.values(RuleStatus).map((status: RuleStatus) => (
-    <EuiContextMenuItem
-      icon={status === currentStatus ? 'check' : 'empty'}
-      key={status}
-      onClick={() => onContextMenuItemClick(status)}
-    >
-      {statusMap[status].label}
-    </EuiContextMenuItem>
-  ));
+  const panelItems = useMemo(
+    () =>
+      Object.values(RuleStatus).map((status: RuleStatus) => (
+        <EuiContextMenuItem
+          icon={status === currentStatus ? 'check' : 'empty'}
+          key={status}
+          onClick={() => onContextMenuItemClick(status)}
+        >
+          {statusMap[status].label}
+        </EuiContextMenuItem>
+      )),
+    [currentStatus, onContextMenuItemClick]
+  );
 
   return isUpdating ? (
     <EuiLoadingSpinner data-test-subj="enableSpinner" size="m" />
