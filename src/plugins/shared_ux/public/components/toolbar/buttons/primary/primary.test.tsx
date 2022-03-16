@@ -11,9 +11,9 @@ import React from 'react';
 import { ServicesProvider, SharedUXServices } from '../../../../services';
 import { servicesFactory } from '../../../../services/mocks';
 
-import { SolutionToolbarButton } from '../primary/primary';
+import { ToolbarButton } from './primary';
 
-describe('<SolutionToolbarButton />', () => {
+describe('<ToolbarButton />', () => {
   let services: SharedUXServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
@@ -23,18 +23,14 @@ describe('<SolutionToolbarButton />', () => {
       enzymeMount(<ServicesProvider {...services}>{element}</ServicesProvider>);
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   test('is rendered', () => {
-    const component = mount(<SolutionToolbarButton label="test" />);
+    const component = mount(<ToolbarButton label="test" />);
 
     expect(component).toMatchSnapshot();
   });
   test('it can be passed a functional onClick handler', () => {
     const mockHandler = jest.fn();
-    const component = mount(<SolutionToolbarButton label="withOnClick" onClick={mockHandler} />);
+    const component = mount(<ToolbarButton label="withOnClick" onClick={mockHandler} />);
     component.simulate('click');
     expect(mockHandler).toHaveBeenCalled();
   });
