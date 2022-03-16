@@ -49,7 +49,7 @@ export class VisualizePageObject extends FtrService {
 
   remoteEsPrefix = 'ftr-remote:';
 
-  public async initTests(isNewLibrary = false, useCcs: boolean) {
+  public async initTests(isNewLibrary = false, useCcs = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
     await this.kibanaServer.importExport.load(
       'test/functional/fixtures/kbn_archiver/visualize.json'
