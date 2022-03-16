@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
 
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
 
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.setFilterBy('bytes > 4000');
       await PageObjects.common.sleep(1000);
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
 
