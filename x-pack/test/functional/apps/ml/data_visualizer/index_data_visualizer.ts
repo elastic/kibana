@@ -262,7 +262,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         );
 
         if (lensNonMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(lensNonMetricField.fieldName);
+          await ml.dataVisualizerTable.assertLensActionShowChart(
+            lensNonMetricField.fieldName,
+            'xyVisChart'
+          );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
       });
