@@ -13,10 +13,10 @@ import normalizePath from 'normalize-path';
 import globby from 'globby';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { discoverBazelPackages, generatePackagesBuildBazelFile } from '@kbn/bazel-packages';
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { createFailError, createFlagError, isFailError, sortPackageJson } from '@kbn/dev-utils';
 
-import { ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
+import { TEMPLATE_DIR, ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 
 export const PackageCommand: GenerateCommand = {
@@ -49,7 +49,7 @@ export const PackageCommand: GenerateCommand = {
 
     const containingDir = flags.dir ? Path.resolve(`${flags.dir}`) : ROOT_PKG_DIR;
     const packageDir = Path.resolve(containingDir, name.slice(1).replace('/', '-'));
-    const repoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
+    const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
 
     try {
       await Fsp.readdir(packageDir);
@@ -107,8 +107,8 @@ export const PackageCommand: GenerateCommand = {
           name,
           web,
           dev,
-          directoryName: Path.basename(repoRelativeDir),
-          repoRelativeDir,
+          directoryName: Path.basename(normalizedRepoRelativeDir),
+          normalizedRepoRelativeDir,
         },
       });
     }
@@ -122,17 +122,20 @@ export const PackageCommand: GenerateCommand = {
       ? [packageJson.devDependencies, packageJson.dependencies]
       : [packageJson.dependencies, packageJson.devDependencies];
 
-    addDeps[name] = `link:bazel-bin/${repoRelativeDir}`;
-    addDeps[typePkgName] = `link:bazel-bin/${repoRelativeDir}/npm_module_types`;
+    addDeps[name] = `link:bazel-bin/${normalizedRepoRelativeDir}`;
+    addDeps[typePkgName] = `link:bazel-bin/${normalizedRepoRelativeDir}/npm_module_types`;
     delete removeDeps[name];
     delete removeDeps[typePkgName];
 
     await Fsp.writeFile(packageJsonPath, sortPackageJson(JSON.stringify(packageJson)));
     log.info('Updated package.json file');
 
-    await Fsp.writeFile(
+    await render.toFile(
+      Path.resolve(TEMPLATE_DIR, 'packages_BUILD.bazel.ejs'),
       Path.resolve(REPO_ROOT, 'packages/BUILD.bazel'),
-      generatePackagesBuildBazelFile(await discoverBazelPackages())
+      {
+        packages: await discoverBazelPackages(),
+      }
     );
     log.info('Updated packages/BUILD.bazel');
 
