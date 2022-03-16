@@ -62,8 +62,9 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
-import { incrementInMemoryMetric, IN_MEMORY_METRICS } from '../monitoring';
-import { getRecoveredAlerts, createWrappedScopedClusterClientFactory } from '../lib';
+import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { createWrappedScopedClusterClientFactory } from '../lib';
+import { getRecoveredAlerts } from '../lib';
 import {
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
@@ -112,6 +113,7 @@ export class TaskRunner<
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private readonly inMemoryMetrics: InMemoryMetrics;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -127,7 +129,8 @@ export class TaskRunner<
       RecoveryActionGroupId
     >,
     taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext
+    context: TaskRunnerContext,
+    inMemoryMetrics: InMemoryMetrics
   ) {
     this.context = context;
     this.logger = context.logger;
@@ -139,6 +142,7 @@ export class TaskRunner<
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuid.v4();
+    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   private async getDecryptedAttributes(
@@ -792,9 +796,9 @@ export class TaskRunner<
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
-      incrementInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+      this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
       if (executionStatus.error) {
-        incrementInMemoryMetric(IN_MEMORY_METRICS.RULE_FAILURES);
+        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
       }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(

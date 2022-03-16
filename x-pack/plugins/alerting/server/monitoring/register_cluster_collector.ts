@@ -7,19 +7,18 @@
 import stats from 'stats-lite';
 import { MonitoringCollectionSetup } from '../../../monitoring_collection/server';
 import { CoreSetup } from '../../../../../src/core/server';
-import { ActionsPluginsStart } from '../plugin';
-import { ActionsMetric } from './types';
-import { getAllInMemoryMetrics, IN_MEMORY_METRICS } from '.';
+import { AlertingPluginsStart } from '../plugin';
+import { ClusterRulesMetric } from './types';
 
-export function registerCollector({
+export function registerClusterCollector({
   monitoringCollection,
   core,
 }: {
   monitoringCollection: MonitoringCollectionSetup;
-  core: CoreSetup<ActionsPluginsStart, unknown>;
+  core: CoreSetup<AlertingPluginsStart, unknown>;
 }) {
   monitoringCollection.registerMetric({
-    type: 'actions',
+    type: 'cluster_rules',
     schema: {
       overdue: {
         count: {
@@ -34,16 +33,8 @@ export function registerCollector({
           },
         },
       },
-      failures: {
-        type: 'long',
-      },
-      executions: {
-        type: 'long',
-      },
     },
     fetch: async () => {
-      const inMemoryMetrics = getAllInMemoryMetrics();
-
       const services = await core.getStartServices();
       const now = +new Date();
       const { docs: overdueTasks } = await services[1].taskManager.fetch({
@@ -53,7 +44,7 @@ export function registerCollector({
               {
                 term: {
                   'task.scope': {
-                    value: 'actions',
+                    value: 'alerting',
                   },
                 },
               },
@@ -127,7 +118,7 @@ export function registerCollector({
         (overdueTask) => now - +new Date(overdueTask.runAt || overdueTask.retryAt)
       );
 
-      const metrics: ActionsMetric = {
+      const metrics: ClusterRulesMetric = {
         overdue: {
           count: overdueTasks.length,
           duration: {
@@ -135,8 +126,6 @@ export function registerCollector({
             p99: stats.percentile(overdueTasksDurations, 0.99),
           },
         },
-        failures: inMemoryMetrics[IN_MEMORY_METRICS.ACTION_FAILURES],
-        executions: inMemoryMetrics[IN_MEMORY_METRICS.ACTION_EXECUTIONS],
       };
 
       if (isNaN(metrics.overdue.duration.p50)) {

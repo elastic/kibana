@@ -5,32 +5,37 @@
  * 2.0.
  */
 
-import {
-  getAllInMemoryMetrics,
-  getInMemoryMetric,
-  incrementInMemoryMetric,
-  IN_MEMORY_METRICS,
-} from '.';
+import { InMemoryMetrics, IN_MEMORY_METRICS } from '.';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 
 describe('inMemoryMetrics', () => {
+  const logger = loggingSystemMock.createLogger();
+  const inMemoryMetrics = new InMemoryMetrics(logger);
+
   beforeEach(() => {
-    const all = getAllInMemoryMetrics();
+    const all = inMemoryMetrics.getAllInMemoryMetrics();
     for (const key of Object.keys(all)) {
       all[key as IN_MEMORY_METRICS] = 0;
     }
   });
 
   it('should increment', () => {
-    incrementInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
-    expect(getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(1);
+    inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+    expect(inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(1);
   });
 
   it('should set to null if incrementing will set over the max integer', () => {
-    const all = getAllInMemoryMetrics();
+    const all = inMemoryMetrics.getAllInMemoryMetrics();
     all[IN_MEMORY_METRICS.ACTION_EXECUTIONS] = Number.MAX_SAFE_INTEGER;
-    incrementInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
-    expect(getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(null);
-    incrementInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
-    expect(getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(null);
+    inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+    expect(inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(null);
+    expect(logger.info).toHaveBeenCalledWith(
+      `Metric ${IN_MEMORY_METRICS.ACTION_EXECUTIONS} has reached the max safe integer value and will no longer be used, skipping increment.`
+    );
+    inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+    expect(inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(null);
+    expect(logger.info).toHaveBeenCalledWith(
+      `Metric ${IN_MEMORY_METRICS.ACTION_EXECUTIONS} is null because the counter ran over the max safe integer value, skipping increment.`
+    );
   });
 });

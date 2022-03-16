@@ -12,10 +12,12 @@ import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '../../licensing/server/mocks';
+import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let ruleTypeRegistryParams: ConstructorOptions;
 
 const taskManager = taskManagerMock.createSetup();
+const inMemoryMetrics = inMemoryMetricsMock.create();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -26,6 +28,7 @@ beforeEach(() => {
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: '1m',
+    inMemoryMetrics,
   };
 });
 

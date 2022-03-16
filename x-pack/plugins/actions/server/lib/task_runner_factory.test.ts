@@ -17,12 +17,14 @@ import { savedObjectsClientMock, loggingSystemMock, httpServiceMock } from 'src/
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { ActionTypeDisabledError } from './errors';
 import { actionsClientMock } from '../mocks';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const mockedActionExecutor = actionExecutorMock.create();
 const eventLogger = eventLoggerMock.create();
+const inMemoryMetrics = inMemoryMetricsMock.create();
 
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
@@ -84,14 +86,18 @@ beforeEach(() => {
 });
 
 test(`throws an error if factory isn't initialized`, () => {
-  const factory = new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true }));
+  const factory = new TaskRunnerFactory(
+    new ActionExecutor({ isESOCanEncrypt: true, inMemoryMetrics })
+  );
   expect(() =>
     factory.create({ taskInstance: mockedTaskInstance })
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
 });
 
 test(`throws an error if factory is already initialized`, () => {
-  const factory = new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true }));
+  const factory = new TaskRunnerFactory(
+    new ActionExecutor({ isESOCanEncrypt: true, inMemoryMetrics })
+  );
   factory.initialize(taskRunnerFactoryInitializerParams);
   expect(() =>
     factory.initialize(taskRunnerFactoryInitializerParams)
