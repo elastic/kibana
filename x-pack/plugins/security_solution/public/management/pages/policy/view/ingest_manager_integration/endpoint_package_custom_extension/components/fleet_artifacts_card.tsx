@@ -31,7 +31,7 @@ const ARTIFACTS_LABELS = {
     }),
   cardTitle: (
     <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetCustomExtension.ArtifactsLabel"
+      id="xpack.securitySolution.endpoint.fleetCustomExtension.title"
       defaultMessage="Artifacts"
     />
   ),

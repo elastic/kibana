@@ -24,6 +24,99 @@ import { EventFiltersApiClient } from '../../../../event_filters/service/event_f
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { BlocklistsApiClient } from '../../../../blocklist/services';
 
+export const TRUSTED_APPS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummarySummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title"
+      defaultMessage="Trusted apps"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsManageLabel"
+      defaultMessage="Manage trusted apps"
+    />
+  ),
+};
+
+export const EVENT_FILTERS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummarySummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.eventFilters.fleetIntegration.title"
+      defaultMessage="Event filters"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersManageLabel"
+      defaultMessage="Manage event filters"
+    />
+  ),
+};
+
+export const HOST_ISOLATION_EXCEPTIONS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsSummarySummary.error',
+      {
+        defaultMessage:
+          'There was an error trying to fetch host isolation exceptions stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.hostIsolationExceptions.fleetIntegration.title"
+      defaultMessage="Host isolation exceptions"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsManageLabel"
+      defaultMessage="Manage host isolation exceptions"
+    />
+  ),
+};
+
+export const BLOCKLISTS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsSummarySummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch blocklists stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
+      defaultMessage="Blocklists"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsManageLabel"
+      defaultMessage="Manage blocklists"
+    />
+  ),
+};
+
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
     const http = useHttp();
@@ -32,107 +125,17 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       [http]
     );
 
-    const TRUSTED_APPS_LABELS = {
-      artifactsSummaryApiError: (error: string) =>
-        i18n.translate(
-          'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummarySummary.error',
-          {
-            defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
-            values: { error },
-          }
-        ),
-      cardTitle: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title"
-          defaultMessage="Trusted apps"
-        />
-      ),
-      linkLabel: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsManageLabel"
-          defaultMessage="Manage trusted apps"
-        />
-      ),
-    };
     const eventFiltersApiClientInstance = useMemo(
       () => EventFiltersApiClient.getInstance(http),
       [http]
     );
 
-    const EVENT_FILTERS_LABELS = {
-      artifactsSummaryApiError: (error: string) =>
-        i18n.translate(
-          'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummarySummary.error',
-          {
-            defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
-            values: { error },
-          }
-        ),
-      cardTitle: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.eventFilters.fleetIntegration.title"
-          defaultMessage="Event filters"
-        />
-      ),
-      linkLabel: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersManageLabel"
-          defaultMessage="Manage event filters"
-        />
-      ),
-    };
     const hostIsolationExceptionsApiClientInstance = useMemo(
       () => HostIsolationExceptionsApiClient.getInstance(http),
       [http]
     );
 
-    const HOST_ISOLATION_EXCEPTIONS_LABELS = {
-      artifactsSummaryApiError: (error: string) =>
-        i18n.translate(
-          'xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsSummarySummary.error',
-          {
-            defaultMessage:
-              'There was an error trying to fetch host isolation exceptions stats: "{error}"',
-            values: { error },
-          }
-        ),
-      cardTitle: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolationExceptions.fleetIntegration.title"
-          defaultMessage="Host isolation exceptions"
-        />
-      ),
-      linkLabel: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsManageLabel"
-          defaultMessage="Manage host isolation exceptions"
-        />
-      ),
-    };
     const bloklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
-
-    const BLOCKLISTS_LABELS = {
-      artifactsSummaryApiError: (error: string) =>
-        i18n.translate(
-          'xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsSummarySummary.error',
-          {
-            defaultMessage: 'There was an error trying to fetch blocklists stats: "{error}"',
-            values: { error },
-          }
-        ),
-      cardTitle: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
-          defaultMessage="Blocklists"
-        />
-      ),
-      linkLabel: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsManageLabel"
-          defaultMessage="Manage blocklists"
-        />
-      ),
-    };
 
     return (
       <div data-test-subj="fleetEndpointPackageCustomContent">

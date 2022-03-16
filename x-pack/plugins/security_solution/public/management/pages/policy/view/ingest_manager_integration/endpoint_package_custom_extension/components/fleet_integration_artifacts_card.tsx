@@ -21,19 +21,19 @@ import { ExceptionsListApiClient } from '../../../../../../services/exceptions_l
 
 const ARTIFACTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
-    i18n.translate('xpack.securitySolution.endpoint.fleetCustomExtension.artifactsSummary.error', {
+    i18n.translate('xpack.securitySolution.endpoint.fleetIntegrationCard.artifactsSummary.error', {
       defaultMessage: 'There was an error trying to fetch artifacts stats: "{error}"',
       values: { error },
     }),
   cardTitle: (
     <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetCustomExtension.artifactsManageLabel"
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.title"
       defaultMessage="Artifacts"
     />
   ),
   linkLabel: (
     <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetCustomExtension.artifactsManageLabel"
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.artifactsManageLabel"
       defaultMessage="Manage artifacts"
     />
   ),
@@ -78,7 +78,7 @@ export const FleetIntegrationArtifactsCard = memo<{
       return {
         backLink: {
           label: i18n.translate(
-            'xpack.securitySolution.endpoint.fleetCustomExtension.artifacts.backButtonLabel',
+            'xpack.securitySolution.endpoint.fleetIntegrationCard.artifacts.backButtonLabel',
             {
               defaultMessage: `Back to Fleet integration policy`,
             }

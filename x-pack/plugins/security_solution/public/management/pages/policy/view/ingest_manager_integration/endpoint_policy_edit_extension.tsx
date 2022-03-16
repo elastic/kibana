@@ -42,6 +42,94 @@ import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../block
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
+
+export const BLOCKLISTS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate('xpack.securitySolution.endpoint.fleetIntegrationCard.blocklistsSummary.error', {
+      defaultMessage: 'There was an error trying to fetch blocklists stats: "{error}"',
+      values: { error },
+    }),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
+      defaultMessage="Blocklists"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.blocklistsManageLabel"
+      defaultMessage="Manage blocklists"
+    />
+  ),
+};
+export const HOST_ISOLATION_EXCEPTIONS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetIntegrationCard.hostIsolationExceptionsSummary.error',
+      {
+        defaultMessage:
+          'There was an error trying to fetch host isolation exceptions stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.hostIsolationExceptions.fleetIntegration.title"
+      defaultMessage="Host isolation exceptions"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.hostIsolationExceptionsManageLabel"
+      defaultMessage="Manage host isolation exceptions"
+    />
+  ),
+};
+export const EVENT_FILTERS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetIntegrationCard.eventFiltersSummarySummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.eventFilters.fleetIntegration.title"
+      defaultMessage="Event filters"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.eventFiltersManageLabel"
+      defaultMessage="Manage event filters"
+    />
+  ),
+};
+export const TRUSTED_APPS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetIntegrationCard.trustedAppsSummarySummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title"
+      defaultMessage="Trusted apps"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.trustedAppsManageLabel"
+      defaultMessage="Manage trusted apps"
+    />
+  ),
+};
+
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -72,110 +160,20 @@ const WrappedPolicyDetailsForm = memo<{
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
 
-  const BLOCKLISTS_LABELS = {
-    artifactsSummaryApiError: (error: string) =>
-      i18n.translate(
-        'xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsSummary.error',
-        {
-          defaultMessage: 'There was an error trying to fetch blocklists stats: "{error}"',
-          values: { error },
-        }
-      ),
-    cardTitle: (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
-        defaultMessage="Blocklists"
-      />
-    ),
-    linkLabel: (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsManageLabel"
-        defaultMessage="Manage blocklists"
-      />
-    ),
-  };
   const hostIsolationExceptionsApiClientInstance = useMemo(
     () => HostIsolationExceptionsApiClient.getInstance(http),
     [http]
   );
 
-  const HOST_ISOLATION_EXCEPTIONS_LABELS = {
-    artifactsSummaryApiError: (error: string) =>
-      i18n.translate(
-        'xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsSummary.error',
-        {
-          defaultMessage:
-            'There was an error trying to fetch host isolation exceptions stats: "{error}"',
-          values: { error },
-        }
-      ),
-    cardTitle: (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.hostIsolationExceptions.fleetIntegration.title"
-        defaultMessage="Host isolation exceptions"
-      />
-    ),
-    linkLabel: (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsManageLabel"
-        defaultMessage="Manage host isolation exceptions"
-      />
-    ),
-  };
   const eventFiltersApiClientInstance = useMemo(
     () => EventFiltersApiClient.getInstance(http),
     [http]
   );
 
-  const EVENT_FILTERS_LABELS = {
-    artifactsSummaryApiError: (error: string) =>
-      i18n.translate(
-        'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummarySummary.error',
-        {
-          defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
-          values: { error },
-        }
-      ),
-    cardTitle: (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.eventFilters.fleetIntegration.title"
-        defaultMessage="Event filters"
-      />
-    ),
-    linkLabel: (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersManageLabel"
-        defaultMessage="Manage event filters"
-      />
-    ),
-  };
   const trustedAppsApiClientInstance = useMemo(
     () => TrustedAppsApiClient.getInstance(http),
     [http]
   );
-
-  const TRUSTED_APPS_LABELS = {
-    artifactsSummaryApiError: (error: string) =>
-      i18n.translate(
-        'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummarySummary.error',
-        {
-          defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
-          values: { error },
-        }
-      ),
-    cardTitle: (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title"
-        defaultMessage="Trusted apps"
-      />
-    ),
-    linkLabel: (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsManageLabel"
-        defaultMessage="Manage trusted apps"
-      />
-    ),
-  };
 
   // When the form is initially displayed, trigger the Redux middleware which is based on
   // the location information stored via the `userChangedUrl` action.
