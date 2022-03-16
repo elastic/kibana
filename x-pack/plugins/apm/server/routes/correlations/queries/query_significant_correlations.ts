@@ -13,7 +13,7 @@ import type {
   FieldValuePair,
   CorrelationsParams,
 } from '../../../../common/correlations/types';
-import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
 import {
   computeExpectationsAndRanges,
@@ -77,14 +77,14 @@ export const fetchSignificantCorrelations = async (
     )
   );
 
-  const latencyCorrelations: LatencyCorrelation[] = fulfilled.filter(
+  const latencyCorrelations = fulfilled.filter(
     (d) => d && 'histogram' in d
-  );
-  let fallbackResult =
+  ) as LatencyCorrelation[];
+  let fallbackResult: LatencyCorrelation | undefined =
     latencyCorrelations.length > 0
       ? undefined
       : fulfilled
-          .filter((d) => !d?.histogram)
+          .filter((d) => !(d as LatencyCorrelation)?.histogram)
           .reduce((d, result) => {
             if (d?.correlation !== undefined) {
               if (!result) {

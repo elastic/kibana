@@ -32,9 +32,7 @@ export async function fetchTransactionDurationCorrelationWithHistogram(
   histogramRangeSteps: number[],
   totalDocCount: number,
   fieldValuePair: FieldValuePair
-): Promise<
-  LatencyCorrelation | Omit<LatencyCorrelation, 'histogram'> | undefined
-> {
+) {
   const { correlation, ksTest } = await fetchTransactionDurationCorrelation(
     esClient,
     params,
@@ -58,13 +56,15 @@ export async function fetchTransactionDurationCorrelationWithHistogram(
         correlation,
         ksTest,
         histogram: logHistogram,
-      };
+      } as LatencyCorrelation;
     } else {
       return {
         ...fieldValuePair,
         correlation,
         ksTest,
-      };
+      } as Omit<LatencyCorrelation, 'histogram'>;
     }
   }
+
+  return undefined;
 }
