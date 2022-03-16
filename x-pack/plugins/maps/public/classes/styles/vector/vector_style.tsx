@@ -794,17 +794,15 @@ export class VectorStyle implements IVectorStyle {
   }
 
   clearFeatureState(featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) {
-    const tmpFeatureIdentifier: { source: string; id: string | number; } = {
+    const tmpFeatureIdentifier: FeatureIdentifier = {
       source: '',
-      id: '',
+      id: undefined,
     };
     for (let i = 0; i < featureCollection.features.length; i++) {
-      const featureId = featureCollection.features[i].id;
-      if (featureId) {
-        tmpFeatureIdentifier.source = sourceId;
-        tmpFeatureIdentifier.id = featureId;
-        mbMap.removeFeatureState(tmpFeatureIdentifier);
-      }
+      const feature = featureCollection.features[i];
+      tmpFeatureIdentifier.source = sourceId;
+      tmpFeatureIdentifier.id = feature.id;
+      mbMap.removeFeatureState(tmpFeatureIdentifier);
     }
   }
 
