@@ -36,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
       pkgVersion = getPkRes.body.item.version;
       // pkgVersion
       // Install latest version of the package
-      const res = await supertest
+      await supertest
         .post(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${pkgVersion}`)
         .send({
           force: true,
