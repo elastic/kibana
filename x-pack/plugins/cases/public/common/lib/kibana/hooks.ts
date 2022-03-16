@@ -189,8 +189,8 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
-        crud: !!capabilities.dashboard?.show,
-        read: !!capabilities.dashboard?.createNew,
+        crud: !!capabilities.dashboard?.createNew,
+        read: !!capabilities.dashboard?.show,
       },
     }),
     [

@@ -38,6 +38,14 @@ export const createStartServicesMock = (): StartServices => {
     new Map([['testAppId', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
   );
 
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    actions: { save: true, show: true },
+    generalCases: { crud_cases: true, read_cases: true },
+    visualize: { save: true, show: true },
+    dashboard: { show: true, createNew: true },
+  };
+
   return services;
 };
 
