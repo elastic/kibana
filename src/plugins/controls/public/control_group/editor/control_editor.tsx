@@ -100,24 +100,25 @@ export const ControlEditor = ({
     ) : null;
   };
 
-  const typeButtons = getControlTypes().map((type) => {
-    const factory = getControlFactory(type);
-    const icon = (factory as EmbeddableFactoryDefinition).getIconType?.();
-    return (
-      <EuiKeyPadMenuItem
-        id={`createControlButton_${type}`}
-        data-test-subj={`create-${type}-control`}
-        label={(factory as EmbeddableFactoryDefinition).getDisplayName()}
-        isSelected={selectedType === type}
-        isDisabled={!isCreate}
-        onClick={() => {
-          setSelectedType(type);
-        }}
-      >
-        <EuiIcon type={!icon || icon === 'empty' ? 'controlsHorizontal' : icon} size="l" />
-      </EuiKeyPadMenuItem>
-    );
-  });
+  const getTypeButtons = (controlTypes: string[]) => {
+    return controlTypes.map((type) => {
+      const factory = getControlFactory(type);
+      const icon = (factory as EmbeddableFactoryDefinition).getIconType?.();
+      return (
+        <EuiKeyPadMenuItem
+          id={`createControlButton_${type}`}
+          data-test-subj={`create-${type}-control`}
+          label={(factory as EmbeddableFactoryDefinition).getDisplayName()}
+          isSelected={selectedType === type}
+          onClick={() => {
+            setSelectedType(type);
+          }}
+        >
+          <EuiIcon type={!icon || icon === 'empty' ? 'controlsHorizontal' : icon} size="l" />
+        </EuiKeyPadMenuItem>
+      );
+    });
+  };
 
   return (
     <>
@@ -133,7 +134,9 @@ export const ControlEditor = ({
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm>
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
-            <EuiKeyPadMenu>{typeButtons}</EuiKeyPadMenu>
+            <EuiKeyPadMenu>
+              {isCreate ? getTypeButtons(getControlTypes()) : getTypeButtons([selectedType])}
+            </EuiKeyPadMenu>
           </EuiFormRow>
           {selectedType ? (
             <>
