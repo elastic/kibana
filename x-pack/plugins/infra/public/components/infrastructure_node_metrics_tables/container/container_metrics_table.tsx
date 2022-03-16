@@ -68,7 +68,7 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
   );
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="xl" />;
+    return <EuiLoadingSpinner size="xl" data-test-subj="containerMetricsTableLoader" />;
   }
 
   return (
@@ -79,6 +79,7 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
         columns={columns}
         sorting={sortSettings}
         onChange={onTableSortChange}
+        data-test-subj="containerMetricsTable"
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
@@ -88,6 +89,7 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
             pageCount={pageCount}
             currentPageIndex={currentPageIndex}
             setCurrentPageIndex={setCurrentPageIndex}
+            data-test-subj="containerMetricsTablePagination"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

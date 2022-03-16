@@ -36,6 +36,7 @@ const { options: hostMetricsOptions, metricByField } = metricsToApiOptions(
   hostMetricsMap,
   'host.name'
 );
+export { metricByField };
 
 export interface HostNodeMetricsRow {
   name: string;

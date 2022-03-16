@@ -66,7 +66,7 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
   };
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="xl" />;
+    return <EuiLoadingSpinner size="xl" data-test-subj="podMetricsTableLoader" />;
   }
 
   return (
@@ -77,6 +77,7 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
         columns={columns}
         sorting={sorting}
         onChange={onTableSortChange}
+        data-test-subj="podMetricsTable"
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
@@ -86,6 +87,7 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
             pageCount={pageCount}
             currentPageIndex={currentPageIndex}
             setCurrentPageIndex={setCurrentPageIndex}
+            data-test-subj="podMetricsTablePagination"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

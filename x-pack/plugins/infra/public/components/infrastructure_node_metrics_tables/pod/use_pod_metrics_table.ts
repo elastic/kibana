@@ -37,6 +37,7 @@ const { options: podMetricsOptions, metricByField } = metricsToApiOptions(
   podMetricsMap,
   'kubernetes.pod.name'
 );
+export { metricByField };
 
 export interface PodNodeMetricsRow {
   name: string;

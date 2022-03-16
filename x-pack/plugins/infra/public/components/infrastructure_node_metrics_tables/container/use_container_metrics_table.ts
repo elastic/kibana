@@ -37,6 +37,7 @@ const { options: containerMetricsOptions, metricByField } = metricsToApiOptions(
   containerMetricsMap,
   'container.id'
 );
+export { metricByField };
 
 export interface ContainerNodeMetricsRow {
   name: string;

@@ -68,7 +68,7 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
   );
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="xl" />;
+    return <EuiLoadingSpinner size="xl" data-test-subj="hostMetricsTableLoader" />;
   }
 
   return (
@@ -79,6 +79,7 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
         columns={columns}
         sorting={sortSettings}
         onChange={onTableSortChange}
+        data-test-subj="hostMetricsTable"
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
@@ -88,6 +89,7 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
             pageCount={pageCount}
             currentPageIndex={currentPageIndex}
             setCurrentPageIndex={setCurrentPageIndex}
+            data-test-subj="hostMetricsTablePagination"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
