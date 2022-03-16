@@ -109,7 +109,7 @@ export const createThreatSignals = async ({
     threatQuery,
   });
 
-  if (true || eventCount < threatListCount) {
+  if (eventCount < threatListCount) {
     let eventList = await getEventList({
       services,
       exceptionItems,
@@ -125,7 +125,7 @@ export const createThreatSignals = async ({
     });
 
     while (eventList.hits.hits.length !== 0) {
-      // verifyExecutionCanProceed();
+      verifyExecutionCanProceed();
       const chunks = chunk(itemsPerSearch, eventList.hits.hits);
       logger.debug(
         buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`)
@@ -215,7 +215,7 @@ export const createThreatSignals = async ({
     });
 
     while (threatList.hits.hits.length !== 0) {
-      // verifyExecutionCanProceed();
+      verifyExecutionCanProceed();
       const chunks = chunk(itemsPerSearch, threatList.hits.hits);
       logger.debug(
         buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`)

@@ -14,8 +14,42 @@ import type {
   ThreatEnrichment,
   ThreatListItem,
   ThreatMatchNamedQuery,
+  SignalMatch,
 } from './types';
 import { extractNamedQueries } from './utils';
+
+export const getSignalMatchesFromThreatList = (
+  threatList: ThreatListItem[] = []
+): SignalMatch[] => {
+  const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
+
+  threatList.forEach((threatHit) =>
+    extractNamedQueries(threatHit).forEach((item) => {
+      const signalId = item.id;
+      if (!signalId) {
+        return;
+      }
+
+      if (!signalMap[signalId]) {
+        signalMap[signalId] = [];
+      }
+
+      signalMap[signalId].push({
+        id: threatHit._id,
+        index: threatHit._index,
+        field: item.value,
+        value: item.field,
+      });
+    })
+  );
+
+  const signalMatches = Object.entries(signalMap).map(([key, value]) => ({
+    signalId: key,
+    queries: value,
+  }));
+
+  return signalMatches;
+};
 
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
@@ -78,7 +112,7 @@ export const enrichSignalThreatMatches = async (
   signals: SignalSearchResponse,
   getMatchedThreats: GetMatchedThreats,
   indicatorPath: string,
-  signalMatchesArg: any
+  signalMatchesArg?: SignalMatch[]
 ): Promise<SignalSearchResponse> => {
   const signalHits = signals.hits.hits;
   if (signalHits.length === 0) {
@@ -86,13 +120,21 @@ export const enrichSignalThreatMatches = async (
   }
 
   const uniqueHits = groupAndMergeSignalMatches(signalHits);
-  const signalMatches = signalMatchesArg
+  const signalMatches: SignalMatch[] = signalMatchesArg
     ? signalMatchesArg
     : uniqueHits.map((signalHit) => ({
         signalId: signalHit._id,
         queries: extractNamedQueries(signalHit),
       }));
-  const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
+
+  const matchedThreatIds = [
+    ...new Set(
+      signalMatches
+        .map((signalMatch) => signalMatch.queries)
+        .flat()
+        .map(({ id }) => id)
+    ),
+  ];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
 
   const enrichmentsWithoutAtomic = signalMatches.map((signalMatch) =>

@@ -119,10 +119,11 @@ export interface CreateEventSignalOptions {
   wrapHits: WrapHits;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
-  // threatIndicatorPath: ThreatIndicatorPath;
+  threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
+  threatListConfig: ThreatListConfig;
 }
 
 type EntryKey = 'field' | 'value';
@@ -263,4 +264,9 @@ export interface EventCountOptions {
   filters: unknown[];
   tuple: RuleRangeTuple;
   timestampOverride?: string;
+}
+
+export interface SignalMatch {
+  signalId: string;
+  queries: ThreatMatchNamedQuery[];
 }

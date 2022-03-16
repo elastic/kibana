@@ -10,12 +10,11 @@ import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import { CreateEventSignalOptions } from './types';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
-import { getThreatList } from './get_threat_list';
-import { extractNamedQueries } from './utils';
+import { SearchAfterAndBulkCreateReturnType, SignalSearchResponse } from '../types';
+import { getAllThreatListHits } from './get_threat_list';
 import {
-  groupAndMergeSignalMatches,
   enrichSignalThreatMatches,
+  getSignalMatchesFromThreatList,
 } from './enrich_signal_threat_matches';
 
 export const createEventSignal = async ({
@@ -37,7 +36,6 @@ export const createEventSignal = async ({
   savedId,
   searchAfterSize,
   services,
-  threatEnrichment,
   threatMapping,
   tuple,
   type,
@@ -65,52 +63,22 @@ export const createEventSignal = async ({
     );
     return currentResult;
   } else {
-    // should we get all threat list? or only per page?
-    const threatList = await getThreatList({
+    const threatListHits = await getAllThreatListHits({
       esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
       threatFilters: [...threatFilters, threatFilter],
       query: threatQuery,
       language: threatLanguage,
       index: threatIndex,
-      searchAfter: undefined,
       logger,
       buildRuleMessage,
       threatListConfig,
     });
 
-    const uniqueHits = groupAndMergeSignalMatches(threatList.hits.hits);
-    const threatMatches = uniqueHits.map((threatHit) =>
-      extractNamedQueries(threatHit).map((item) => {
-        const newField = item.value;
-        const newValue = item.field;
-        return {
-          ...item,
-          field: newField,
-          value: newValue,
-          signalId: item.id,
-          id: threatHit._id,
-        };
-      })
-    );
-    const signalMap = {};
-
-    threatMatches.forEach((queries) =>
-      queries.forEach((query) => {
-        if (signalMap[query.signalId]) {
-          signalMap[query.signalId].push(query);
-        } else {
-          signalMap[query.signalId] = [query];
-        }
-      })
-    );
-
-    const signalMatches = Object.entries(signalMap).map(([key, value]) => ({
-      signalId: key,
-      queries: value,
-    }));
+    const signalMatches = getSignalMatchesFromThreatList(threatListHits);
 
     const ids = signalMatches.map((item) => item.signalId);
+
     const indexFilter = {
       query: {
         bool: {
@@ -132,26 +100,26 @@ export const createEventSignal = async ({
       lists: exceptionItems,
     });
 
-    logger.debug(buildRuleMessage(`${JSON.stringify(threatMatches)}`));
-
     logger.debug(
       buildRuleMessage(
         `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
       )
     );
 
+    const threatEnrichment = (signals: SignalSearchResponse): Promise<SignalSearchResponse> =>
+      enrichSignalThreatMatches(
+        signals,
+        () => Promise.resolve(threatListHits),
+        threatIndicatorPath,
+        signalMatches
+      );
+
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       buildRuleMessage,
       bulkCreate,
       completeRule,
-      enrichment: (signals) =>
-        enrichSignalThreatMatches(
-          signals,
-          () => threatList.hits.hits,
-          threatIndicatorPath,
-          signalMatches
-        ),
+      enrichment: threatEnrichment,
       eventsTelemetry,
       exceptionsList: exceptionItems,
       filter: esFilter,
