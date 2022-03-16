@@ -36,7 +36,6 @@ interface ProcessTreeDeps {
   selectedProcess?: Process | null;
   onProcessSelected: (process: Process | null) => void;
   setSearchResults?: (results: Process[]) => void;
-
   timeStampOn?: boolean;
   verboseModeOn?: boolean;
 }

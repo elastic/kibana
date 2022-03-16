@@ -151,6 +151,7 @@ export function ProcessTreeNode({
     parent,
     working_directory: workingDirectory,
     exit_code: exitCode,
+    start,
   } = processDetails.process;
 
   const children = process.getChildren(verboseModeOn);
@@ -167,7 +168,7 @@ export function ProcessTreeNode({
     : 'sessionView:processTreeNodeForkIcon';
   const processIcon = hasExec ? 'console' : 'branch';
 
-  const timeStampsNormal = formatDate(process.getDetails().process.start, KIBANA_DATE_FORMAT);
+  const timeStampsNormal = formatDate(start, KIBANA_DATE_FORMAT);
 
   return (
     <div>
