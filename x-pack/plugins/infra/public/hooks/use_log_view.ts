@@ -30,45 +30,37 @@ export const useLogView = ({
   const [loadLogViewRequest, loadLogView] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async (logViewId_) => {
-        return await logViews.getLogView(logViewId_);
-      },
+      createPromise: logViews.getLogView.bind(logViews),
       onResolve: setLogView,
     },
-    [logViewId, logViews.getLogView]
+    [logViews]
   );
 
   const [resolveLogViewRequest, resolveLogView] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async (logViewAttributes: LogViewAttributes) => {
-        return await logViews.resolveLogView(logViewAttributes);
-      },
+      createPromise: logViews.resolveLogView.bind(logViews),
       onResolve: setResolvedLogView,
     },
-    [logViews.resolveLogView]
+    [logViews]
   );
 
   const [updateLogViewRequest, updateLogView] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async (logViewId_: string, logViewAttributes: Partial<LogViewAttributes>) => {
-        return await logViews.putLogView(logViewId_, logViewAttributes);
-      },
+      createPromise: logViews.putLogView.bind(logViews),
       onResolve: setLogView,
     },
-    [logViewId, logViews.putLogView]
+    [logViews]
   );
 
   const [loadLogViewStatusRequest, loadLogViewStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async (resolvedLogViewToCheck) => {
-        return await logViews.getResolvedLogViewStatus(resolvedLogViewToCheck);
-      },
+      createPromise: logViews.getResolvedLogViewStatus.bind(logViews),
       onResolve: setLogViewStatus,
     },
-    [logViewId, fetch]
+    [logViews]
   );
 
   const derivedDataView = useMemo(
@@ -87,10 +79,7 @@ export const useLogView = ({
   const isLoading =
     isLoadingLogView || isResolvingLogView || isLoadingLogViewStatus || isUpdatingLogView;
 
-  const isUninitialized =
-    loadLogViewRequest.state === 'uninitialized' ||
-    resolveLogViewRequest.state === 'uninitialized' ||
-    loadLogViewStatusRequest.state === 'uninitialized';
+  const isUninitialized = loadLogViewRequest.state === 'uninitialized';
 
   const hasFailedLoadingSource = loadLogViewRequest.state === 'rejected';
   const hasFailedResolvingSource = resolveLogViewRequest.state === 'rejected';
