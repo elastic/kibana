@@ -200,7 +200,6 @@ export const useKpiMatrixStatus = (
     loading,
   }));
 const StyledTitle = styled.h6`
-  color: #993366;
   line-height: 200%;
 `;
 export const StatItemsComponent = React.memo<StatItemsProps>(

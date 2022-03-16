@@ -65,9 +65,7 @@ export interface HeaderSectionProps extends HeaderProps {
   titleSize?: EuiTitleSize;
   tooltip?: string;
 }
-const StyledTitle = styled.h4`
-  color: #663399;
-`;
+
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
@@ -113,7 +111,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               )}
               <EuiFlexItem>
                 <EuiTitle size={titleSize}>
-                  <StyledTitle data-test-subj="header-section-title">
+                  <h4 data-test-subj="header-section-title">
                     <span className="eui-textBreakNormal">{title}</span>
                     {tooltip && (
                       <>
@@ -121,7 +119,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                         <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
                       </>
                     )}
-                  </StyledTitle>
+                  </h4>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
