@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiBasicTable, EuiSpacer, EuiTableSortingType } from '@elastic/eui';
 import { RulesTableProps } from '../types';
 import { RuleTableItem } from '../../../../../triggers_actions_ui/public';
@@ -24,6 +24,23 @@ export function RulesTable({
   onSortChange,
   isLoading,
 }: RulesTableProps) {
+  const onChange = useCallback(
+    ({
+      page: changedPage,
+      sort: changedSort,
+    }: {
+      page?: Pagination;
+      sort?: EuiTableSortingType<RuleTableItem>['sort'];
+    }) => {
+      if (changedPage) {
+        onPageChange(changedPage);
+      }
+      if (changedSort) {
+        onSortChange(changedSort);
+      }
+    },
+    [onPageChange, onSortChange]
+  );
   return (
     <section data-test-subj="rulesList">
       <EuiSpacer size="xs" />
@@ -42,20 +59,7 @@ export function RulesTable({
             totalItemCount,
           }}
           sorting={{ sort }}
-          onChange={({
-            page: changedPage,
-            sort: changedSort,
-          }: {
-            page?: Pagination;
-            sort?: EuiTableSortingType<RuleTableItem>['sort'];
-          }) => {
-            if (changedPage) {
-              onPageChange(changedPage);
-            }
-            if (changedSort) {
-              onSortChange(changedSort);
-            }
-          }}
+          onChange={onChange}
         />
       </>
     </section>
