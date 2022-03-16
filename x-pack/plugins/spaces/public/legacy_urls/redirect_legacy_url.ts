@@ -20,14 +20,14 @@ export function createRedirectLegacyUrl(
 ): SpacesApiUi['redirectLegacyUrl'] {
   return async function ({
     path,
-    suppressRedirectToast,
+    aliasPurpose,
     objectNoun = DEFAULT_OBJECT_NOUN,
   }: RedirectLegacyUrlParams) {
     const [{ notifications, application }] = await getStartServices();
     const { currentAppId$, navigateToApp } = application;
     const appId = await currentAppId$.pipe(first()).toPromise(); // retrieve the most recent value from the BehaviorSubject
 
-    if (!suppressRedirectToast) {
+    if (aliasPurpose === 'savedObjectConversion') {
       const title = i18n.translate('xpack.spaces.redirectLegacyUrlToast.title', {
         defaultMessage: `We redirected you to a new URL`,
       });

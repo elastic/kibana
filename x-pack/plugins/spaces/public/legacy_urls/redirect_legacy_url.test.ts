@@ -29,25 +29,26 @@ describe('#redirectLegacyUrl', () => {
     return { redirectLegacyUrl, toasts, application };
   };
 
-  it('redirects to the given path in the current app and creates a toast when suppressRedirectToast=false', async () => {
+  it('redirects to the given path in the current app and creates a toast when aliasPurpose is "savedObjectConversion"', async () => {
     const { redirectLegacyUrl, toasts, application } = setup();
 
     const path = '/foo?bar#baz';
-    await redirectLegacyUrl({ path, suppressRedirectToast: false });
+    await redirectLegacyUrl({ path, aliasPurpose: 'savedObjectConversion' });
 
     expect(toasts.addInfo).toHaveBeenCalledTimes(1);
     expect(application.navigateToApp).toHaveBeenCalledTimes(1);
     expect(application.navigateToApp).toHaveBeenCalledWith(APP_ID, { replace: true, path });
   });
 
-  it('redirects to the given path in the current app and does not create a toast when suppressRedirectToast=true', async () => {
+  it('redirects to the given path in the current app and does not create a toast when aliasPurpose is not "savedObjectConversion"', async () => {
     const { redirectLegacyUrl, toasts, application } = setup();
 
     const path = '/foo?bar#baz';
-    await redirectLegacyUrl({ path, suppressRedirectToast: true });
+    await redirectLegacyUrl({ path, aliasPurpose: undefined });
+    await redirectLegacyUrl({ path, aliasPurpose: 'savedObjectImport' });
 
     expect(toasts.addInfo).not.toHaveBeenCalled();
-    expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+    expect(application.navigateToApp).toHaveBeenCalledTimes(2);
     expect(application.navigateToApp).toHaveBeenCalledWith(APP_ID, { replace: true, path });
   });
 });

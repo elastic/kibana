@@ -290,6 +290,7 @@ describe('Initializing the store', () => {
           sharingSavedObjectProps: {
             outcome: 'aliasMatch',
             aliasTargetId: 'id2',
+            aliasPurpose: 'savedObjectConversion',
           },
         },
       });
@@ -303,7 +304,7 @@ describe('Initializing the store', () => {
       });
       expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
         path: '#/edit/id2?search',
-        suppressRedirectToast: false,
+        aliasPurpose: 'savedObjectConversion',
         objectNoun: 'Lens visualization',
       });
     });

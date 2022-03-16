@@ -77,7 +77,7 @@ export const VisualizeEditorCommon = ({
         const newPath = `${urlFor(newObjectId!)}${services.history.location.search}`;
         await services.spaces.ui.redirectLegacyUrl({
           path: newPath,
-          suppressRedirectToast: !!sharingSavedObjectProps.suppressRedirectToast,
+          aliasPurpose: sharingSavedObjectProps.aliasPurpose,
           objectNoun: i18n.translate('visualizations.legacyUrlConflict.objectNoun', {
             defaultMessage: '{visName} visualization',
             values: {

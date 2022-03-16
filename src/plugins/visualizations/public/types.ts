@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion } from 'kibana/public';
+import type { SavedObjectsMigrationVersion, SavedObjectsResolveResponse } from 'src/core/public';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,
@@ -38,9 +38,9 @@ export interface ISavedVis {
   savedSearchRefName?: string;
   savedSearchId?: string;
   sharingSavedObjectProps?: {
-    outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-    aliasTargetId?: string;
-    suppressRedirectToast?: boolean;
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
 }

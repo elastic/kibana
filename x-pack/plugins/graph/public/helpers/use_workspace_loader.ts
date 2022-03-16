@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
+import type { SavedObjectsResolveResponse } from 'src/core/public';
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -27,9 +28,9 @@ interface WorkspaceUrlParams {
   id?: string;
 }
 export interface SharingSavedObjectProps {
-  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-  aliasTargetId?: string;
-  suppressRedirectToast?: boolean;
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 interface WorkspaceLoadedState {
@@ -143,7 +144,7 @@ export const useWorkspaceLoader = ({
         const newPath = getEditUrl(coreStart.http.basePath.prepend, { id: newObjectId }) + search;
         spaces.ui.redirectLegacyUrl({
           path: newPath,
-          suppressRedirectToast: !!fetchedSharingSavedObjectProps.suppressRedirectToast,
+          aliasPurpose: fetchedSharingSavedObjectProps.aliasPurpose,
           objectNoun: i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
             defaultMessage: 'Graph',
           }),

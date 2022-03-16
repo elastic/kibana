@@ -8,6 +8,7 @@
 
 import { assign, cloneDeep } from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/public';
+import type { ResolvedSimpleSavedObject } from 'src/core/public';
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
@@ -35,9 +36,9 @@ export interface DashboardSavedObject extends SavedObject {
   getQuery(): Query;
   getFilters(): Filter[];
   getFullEditPath: (editMode?: boolean) => string;
-  outcome?: string;
-  aliasId?: string;
-  suppressRedirectToast?: boolean;
+  outcome?: ResolvedSimpleSavedObject['outcome'];
+  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 
   controlGroupInput?: Omit<RawControlGroupAttributes, 'id'>;
 }
@@ -102,9 +103,9 @@ export function createSavedDashboardClass(
     public static searchSource = true;
     public showInRecentlyAccessed = true;
 
-    public outcome?: string;
-    public aliasId?: string;
-    public suppressRedirectToast?: boolean;
+    public outcome?: ResolvedSimpleSavedObject['outcome'];
+    public aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+    public aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 
     constructor(arg: { id: string; useResolve: boolean } | string) {
       super({
@@ -155,7 +156,7 @@ export function createSavedDashboardClass(
           const {
             outcome,
             alias_target_id: aliasId,
-            suppress_redirect_toast: suppressRedirectToast,
+            alias_purpose: aliasPurpose,
             saved_object: resp,
           } = await savedObjectsClient.resolve(esType, id);
 
@@ -169,7 +170,7 @@ export function createSavedDashboardClass(
 
           this.outcome = outcome;
           this.aliasId = aliasId;
-          this.suppressRedirectToast = suppressRedirectToast;
+          this.aliasPurpose = aliasPurpose;
           await this.applyESResp(respMapped);
 
           return this;

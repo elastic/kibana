@@ -55,7 +55,7 @@ export const getPersisted = async ({
       );
       await spaces.ui.redirectLegacyUrl({
         path: newPath,
-        suppressRedirectToast: !!sharingSavedObjectProps.suppressRedirectToast,
+        aliasPurpose: sharingSavedObjectProps.aliasPurpose,
         objectNoun: i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
           defaultMessage: 'Lens visualization',
         }),

@@ -80,10 +80,7 @@ export interface InternalBulkResolveError {
   error: DecoratedError;
 }
 
-interface AliasInfo {
-  targetId: string;
-  suppressRedirectToast?: boolean;
-}
+type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
 
 export async function internalBulkResolve<T>(
   params: InternalBulkResolveParams
@@ -135,8 +132,7 @@ export async function internalBulkResolve<T>(
           _index: objectIndex,
         });
         const { targetId, purpose } = legacyUrlAlias;
-        const suppressRedirectToast = !!purpose ? true : undefined; // If this alias was intentionally created by a user for a reason, the client should not display a redirect toast.
-        aliasInfoArray.push({ targetId, suppressRedirectToast });
+        aliasInfoArray.push({ targetId, purpose });
         return;
       }
     }
@@ -188,7 +184,8 @@ export async function internalBulkResolve<T>(
           // @ts-expect-error MultiGetHit._source is optional
           saved_object: getSavedObjectFromSource(registry, type, id, exactMatchDoc),
           outcome: 'conflict',
-          alias_target_id: aliasInfo!.targetId!,
+          alias_target_id: aliasInfo!.targetId,
+          alias_purpose: aliasInfo!.purpose,
         };
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
       } else if (foundExactMatch) {
@@ -209,7 +206,7 @@ export async function internalBulkResolve<T>(
           ),
           outcome: 'aliasMatch',
           alias_target_id: aliasInfo!.targetId,
-          suppress_redirect_toast: aliasInfo!.suppressRedirectToast,
+          alias_purpose: aliasInfo!.purpose,
         };
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
       }

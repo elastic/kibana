@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SavedObjectsResolveResponse } from 'src/core/public';
+
 /**
  * Properties for the LegacyUrlConflict component.
  */
@@ -54,10 +56,12 @@ export interface RedirectLegacyUrlParams {
    */
   path: string;
   /**
-   * Whether or not to suppress the toast that tells the user "We redirected you to a new URL". This should be defined by the
-   * `suppressRedirectToast` attribute of the legacy URL alias.
+   * The reason the resolved alias was created.
+   *
+   * This is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias was created
+   * because of saved object conversion, then we will display a toast telling the user that the object has a new URL.
    */
-  suppressRedirectToast: boolean;
+  aliasPurpose: SavedObjectsResolveResponse['alias_purpose'];
   /**
    * The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new location_.
    * Default value is 'object'.

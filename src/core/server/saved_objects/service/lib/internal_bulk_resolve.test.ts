@@ -167,16 +167,16 @@ describe('internalBulkResolve', () => {
   function expectAliasMatchResult({
     id,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    suppress_redirect_toast,
+    alias_purpose,
   }: {
     id: string;
-    suppress_redirect_toast?: boolean;
+    alias_purpose?: string;
   }) {
     return {
       saved_object: `mock-obj-for-${id}`,
       outcome: 'aliasMatch',
       alias_target_id: id,
-      suppress_redirect_toast,
+      alias_purpose,
     };
   }
 
@@ -185,17 +185,17 @@ describe('internalBulkResolve', () => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     alias_target_id,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    suppress_redirect_toast,
+    alias_purpose,
   }: {
     id: string;
     alias_target_id: string;
-    suppress_redirect_toast?: boolean;
+    alias_purpose?: string;
   }) {
     return {
       saved_object: `mock-obj-for-${id}`,
       outcome: 'conflict',
       alias_target_id,
-      suppress_redirect_toast,
+      alias_purpose,
     };
   }
 
@@ -296,7 +296,9 @@ describe('internalBulkResolve', () => {
         { type: OBJ_TYPE, id: '2' }, // not found error
         { type: OBJ_TYPE, id: '3' }, // exactMatch outcome
         { type: OBJ_TYPE, id: '4' }, // aliasMatch outcome
-        { type: OBJ_TYPE, id: '5' }, // conflict outcome
+        { type: OBJ_TYPE, id: '5' }, // aliasMatch outcome with purpose
+        { type: OBJ_TYPE, id: '6' }, // conflict outcome
+        { type: OBJ_TYPE, id: '7' }, // conflict outcome with purpose
       ];
       const params = setup(objects, { namespace });
       mockBulkResults(
@@ -304,63 +306,36 @@ describe('internalBulkResolve', () => {
         { found: false }, // fetch alias for obj 2
         { found: false }, // fetch alias for obj 3
         { found: true, targetId: '4-newId' }, // fetch alias for obj 4
-        { found: true, targetId: '5-newId' } // fetch alias for obj 5
+        { found: true, targetId: '5-newId', purpose: 'x' }, // fetch alias for obj 5
+        { found: true, targetId: '6-newId' }, // fetch alias for obj 6
+        { found: true, targetId: '7-newId', purpose: 'y' } // fetch alias for obj 7
       );
       mockMgetResults(
         { found: false }, // fetch obj 2
         { found: true }, // fetch obj 3
         { found: false }, // fetch obj 4
         { found: true }, // fetch obj 4-newId
-        { found: true }, // fetch obj 5
-        { found: true } // fetch obj 5-newId
+        { found: false }, // fetch obj 5
+        { found: true }, // fetch obj 5-newId
+        { found: true }, // fetch obj 6
+        { found: true }, // fetch obj 6-newId
+        { found: true }, // fetch obj 7
+        { found: true } // fetch obj 7-newId
       );
 
       const result = await internalBulkResolve(params);
-      expectBulkArgs(expectedNamespaceString, ['2', '3', '4', '5']);
-      expectMgetArgs(namespace, ['2', '3', '4', '4-newId', '5', '5-newId']);
+      const bulkIds = ['2', '3', '4', '5', '6', '7'];
+      expectBulkArgs(expectedNamespaceString, bulkIds);
+      const mgetIds = ['2', '3', '4', '4-newId', '5', '5-newId', '6', '6-newId', '7', '7-newId'];
+      expectMgetArgs(namespace, mgetIds);
       expect(result.resolved_objects).toEqual([
         expectUnsupportedTypeError({ id: '1' }),
         expectNotFoundError({ id: '2' }),
         expectExactMatchResult({ id: '3' }),
         expectAliasMatchResult({ id: '4-newId' }),
-        expectConflictResult({ id: '5', alias_target_id: '5-newId' }),
-      ]);
-    });
-
-    it('returns `suppress_redirect_toast: true` iff the alias has a purpose and the outcome is aliasMatch', async () => {
-      const objects = [
-        { type: UNSUPPORTED_TYPE, id: '1' }, // unsupported type error
-        { type: OBJ_TYPE, id: '2' }, // not found error
-        { type: OBJ_TYPE, id: '3' }, // exactMatch outcome
-        { type: OBJ_TYPE, id: '4' }, // aliasMatch outcome
-        { type: OBJ_TYPE, id: '5' }, // conflict outcome
-      ];
-      const params = setup(objects, { namespace });
-      mockBulkResults(
-        // does not attempt to fetch alias for obj 1, because that is an unsupported type
-        { found: false }, // fetch alias for obj 2
-        { found: false }, // fetch alias for obj 3
-        { found: true, targetId: '4-newId', purpose: 'some-purpose' }, // fetch alias for obj 4
-        { found: true, targetId: '5-newId', purpose: 'some-purpose' } // fetch alias for obj 5
-      );
-      mockMgetResults(
-        { found: false }, // fetch obj 2
-        { found: true }, // fetch obj 3
-        { found: false }, // fetch obj 4
-        { found: true }, // fetch obj 4-newId
-        { found: true }, // fetch obj 5
-        { found: true } // fetch obj 5-newId
-      );
-
-      const result = await internalBulkResolve(params);
-      expectBulkArgs(expectedNamespaceString, ['2', '3', '4', '5']);
-      expectMgetArgs(namespace, ['2', '3', '4', '4-newId', '5', '5-newId']);
-      expect(result.resolved_objects).toEqual([
-        expectUnsupportedTypeError({ id: '1' }),
-        expectNotFoundError({ id: '2' }),
-        expectExactMatchResult({ id: '3' }),
-        expectAliasMatchResult({ id: '4-newId', suppress_redirect_toast: true }),
-        expectConflictResult({ id: '5', alias_target_id: '5-newId' }), // even though this alias has a purpose, this result does not include `suppress_redirect_toast: true`
+        expectAliasMatchResult({ id: '5-newId', alias_purpose: 'x' }),
+        expectConflictResult({ id: '6', alias_target_id: '6-newId' }),
+        expectConflictResult({ id: '7', alias_target_id: '7-newId', alias_purpose: 'y' }),
       ]);
     });
   }

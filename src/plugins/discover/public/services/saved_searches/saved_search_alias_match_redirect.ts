@@ -29,12 +29,12 @@ export const useSavedSearchAliasMatchRedirect = ({
     async function aliasMatchRedirect() {
       if (savedSearch) {
         const sharingSavedObjectProps = savedSearch.sharingSavedObjectProps ?? {};
-        const { aliasTargetId, outcome } = sharingSavedObjectProps;
+        const { outcome, aliasPurpose, aliasTargetId } = sharingSavedObjectProps;
 
         if (spaces && aliasTargetId && outcome === 'aliasMatch') {
           await spaces.ui.redirectLegacyUrl({
             path: `${getSavedSearchUrl(aliasTargetId)}${history().location.search}`,
-            suppressRedirectToast: !!sharingSavedObjectProps.suppressRedirectToast,
+            aliasPurpose,
             objectNoun: i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
               defaultMessage: '{savedSearch} search',
               values: {

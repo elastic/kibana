@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectReference } from 'src/core/types';
+import type { SavedObjectsResolveResponse } from 'src/core/public';
 import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
@@ -16,10 +17,10 @@ import { extractReferences, injectReferences } from '../common/migrations/refere
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
 export interface SharingSavedObjectProps {
-  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
-  suppressRedirectToast?: boolean;
 }
 
 type MapDoc = MapSavedObjectAttributes & {
@@ -85,7 +86,7 @@ export function getMapAttributeService(): MapAttributeService {
         saved_object: savedObject,
         outcome,
         alias_target_id: aliasTargetId,
-        suppress_redirect_toast: suppressRedirectToast,
+        alias_purpose: aliasPurpose,
       } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
@@ -105,8 +106,8 @@ export function getMapAttributeService(): MapAttributeService {
           sharingSavedObjectProps: {
             aliasTargetId,
             outcome,
+            aliasPurpose,
             sourceId: savedObjectId,
-            suppressRedirectToast,
           },
         },
       };

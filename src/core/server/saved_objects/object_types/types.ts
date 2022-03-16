@@ -53,10 +53,10 @@ export interface LegacyUrlAlias {
    */
   disabled?: boolean;
   /**
-   * Optional reason this alias was created. If undefined, it indicates the alias was created during migration.
+   * The reason this alias was created.
    *
    * Currently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if it was
-   * created for any specific purpose, then we will not display a toast telling the user that the object has a new URL.
+   * created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.
    */
-  purpose?: string;
+  purpose?: 'savedObjectConversion' | 'savedObjectImport';
 }

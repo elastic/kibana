@@ -100,6 +100,7 @@ describe('VisualizeEditorCommon', () => {
               sharingSavedObjectProps: {
                 outcome: 'aliasMatch',
                 aliasTargetId: 'alias_id',
+                aliasPurpose: 'savedObjectConversion',
               },
             },
             vis: {
@@ -113,7 +114,7 @@ describe('VisualizeEditorCommon', () => {
     );
     expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
       path: '#/edit/alias_id?_g=test',
-      suppressRedirectToast: false,
+      aliasPurpose: 'savedObjectConversion',
       objectNoun: 'TSVB visualization',
     });
   });

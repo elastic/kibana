@@ -22,6 +22,8 @@ import {
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
+  alias_purpose as savedObjectResolveAliasPurpose,
+  outcome as savedObjectResolveOutcome,
   SortOrder,
   author,
   building_block_type,
@@ -115,9 +117,9 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
-    outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
+    outcome: savedObjectResolveOutcome,
     alias_target_id: t.string,
-    suppress_redirect_toast: t.boolean,
+    alias_purpose: savedObjectResolveAliasPurpose,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),

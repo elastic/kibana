@@ -129,10 +129,10 @@ describe('getSavedSearch', () => {
           "setParent": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
+          "aliasPurpose": undefined,
           "aliasTargetId": undefined,
           "errorJSON": undefined,
           "outcome": "exactMatch",
-          "suppressRedirectToast": undefined,
         },
         "sort": Array [
           Array [

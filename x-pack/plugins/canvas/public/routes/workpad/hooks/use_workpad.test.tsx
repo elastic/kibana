@@ -113,6 +113,7 @@ describe('useWorkpad', () => {
       outcome: 'aliasMatch',
       workpad: workpadResponse,
       aliasId,
+      aliasPurpose: 'savedObjectConversion',
     });
 
     const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
@@ -120,7 +121,7 @@ describe('useWorkpad', () => {
       await waitFor(() => expect(mockRedirectLegacyUrl).toHaveBeenCalled());
       expect(mockRedirectLegacyUrl).toBeCalledWith({
         path: `#${aliasId}`,
-        suppressRedirectToast: false,
+        aliasPurpose: 'savedObjectConversion',
         objectNoun: 'Workpad',
       });
     } catch (e) {

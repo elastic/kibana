@@ -35,6 +35,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
       sharingSavedObjectProps: {
         outcome: 'aliasMatch',
         aliasTargetId: 'aliasTargetId',
+        aliasPurpose: 'savedObjectConversion',
       },
     } as SavedSearch;
 
@@ -42,7 +43,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
 
     expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
       path: '#/view/aliasTargetId?_g=foo',
-      suppressRedirectToast: false,
+      aliasPurpose: 'savedObjectConversion',
       objectNoun: 'my-title search',
     });
   });

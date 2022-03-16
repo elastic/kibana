@@ -217,7 +217,8 @@ describe('CaseView', () => {
 
   it('should redirect case view when resolves to alias match', async () => {
     const resolveAliasId = `${defaultGetCase.data.id}_2`;
-    mockGetCase({ resolveOutcome: 'aliasMatch', resolveAliasId });
+    const resolveAliasPurpose = 'savedObjectConversion' as const;
+    mockGetCase({ resolveOutcome: 'aliasMatch', resolveAliasId, resolveAliasPurpose });
     const wrapper = mount(
       <TestProviders>
         <CaseView {...caseViewProps} />
@@ -228,7 +229,7 @@ describe('CaseView', () => {
       expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
       expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith({
         path: `/cases/${resolveAliasId}`,
-        suppressRedirectToast: false,
+        aliasPurpose: resolveAliasPurpose,
         objectNoun: 'case',
       });
     });

@@ -48,7 +48,7 @@ export const CaseView = React.memo(
       data,
       resolveOutcome,
       resolveAliasId,
-      resolveSuppressRedirectToast,
+      resolveAliasPurpose,
       isLoading,
       isError,
       fetchCase,
@@ -60,11 +60,11 @@ export const CaseView = React.memo(
         const newPath = `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}`;
         spacesApi.ui.redirectLegacyUrl({
           path: `${newPath}${window.location.search}${window.location.hash}`,
-          suppressRedirectToast: !!resolveSuppressRedirectToast,
+          aliasPurpose: resolveAliasPurpose,
           objectNoun: i18n.CASE,
         });
       }
-    }, [resolveOutcome, resolveAliasId, resolveSuppressRedirectToast, basePath, spacesApi]);
+    }, [resolveOutcome, resolveAliasId, resolveAliasPurpose, basePath, spacesApi]);
 
     const getLegacyUrlConflictCallout = useCallback(() => {
       // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario

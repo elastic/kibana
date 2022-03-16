@@ -352,7 +352,7 @@ export class MapApp extends React.Component<Props, State> {
       const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
       await spaces.ui.redirectLegacyUrl({
         path: newPath,
-        suppressRedirectToast: !!sharingSavedObjectProps.suppressRedirectToast,
+        aliasPurpose: sharingSavedObjectProps.aliasPurpose,
         objectNoun: getMapEmbeddableDisplayName(),
       });
       return;

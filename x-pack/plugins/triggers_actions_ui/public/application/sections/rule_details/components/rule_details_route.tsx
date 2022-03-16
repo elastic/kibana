@@ -71,7 +71,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
         const path = basePath.prepend(`insightsAndAlerting/triggersActions/rule/${rule.id}`);
         spacesApi.ui.redirectLegacyUrl({
           path,
-          suppressRedirectToast: !!(rule as ResolvedRule).suppress_redirect_toast,
+          aliasPurpose: (rule as ResolvedRule).alias_purpose,
           objectNoun: i18n.translate(
             'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
             { defaultMessage: 'rule' }

@@ -294,7 +294,7 @@ export const internalRuleToAPIResponse = (
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
     alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
-    suppress_redirect_toast: isResolvedRule(rule) ? rule.suppress_redirect_toast : undefined,
+    alias_purpose: isResolvedRule(rule) ? rule.alias_purpose : undefined,
     // Alerting framework params
     id: rule.id,
     updated_at: rule.updatedAt.toISOString(),

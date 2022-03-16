@@ -50,7 +50,7 @@ export function getLensAttributeService(
         saved_object: savedObject,
         outcome,
         alias_target_id: aliasTargetId,
-        suppress_redirect_toast: suppressRedirectToast,
+        alias_purpose: aliasPurpose,
       } = await savedObjectStore.load(savedObjectId);
       const { attributes, references, id } = savedObject;
       const document = {
@@ -61,8 +61,8 @@ export function getLensAttributeService(
       const sharingSavedObjectProps = {
         aliasTargetId,
         outcome,
+        aliasPurpose,
         sourceId: id,
-        suppressRedirectToast,
       };
 
       return {

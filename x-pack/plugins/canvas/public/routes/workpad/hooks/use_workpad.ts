@@ -74,12 +74,12 @@ export const useWorkpad = (
     (async () => {
       if (!resolveInfo) return;
 
-      const { aliasId, outcome, suppressRedirectToast } = resolveInfo;
+      const { aliasId, outcome, aliasPurpose } = resolveInfo;
       if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
         const redirectPath = getRedirectPath(aliasId);
         await platformService.redirectLegacyUrl({
           path: `#${redirectPath}`,
-          suppressRedirectToast: !!suppressRedirectToast,
+          aliasPurpose,
           objectNoun: getWorkpadLabel(),
         });
       }

@@ -612,7 +612,7 @@ export class SavedObjectsClient {
       saved_object: simpleSavedObject,
       outcome: resolveResponse.outcome,
       alias_target_id: resolveResponse.alias_target_id,
-      suppress_redirect_toast: resolveResponse.suppress_redirect_toast,
+      alias_purpose: resolveResponse.alias_purpose,
     };
   }
 
