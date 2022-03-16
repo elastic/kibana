@@ -233,54 +233,6 @@ const WrappedPolicyDetailsForm = memo<{
     });
   }, [onChange, updatedPolicy]);
 
-  const policyTrustedAppsPath = useMemo(() => getPolicyTrustedAppsPath(policyId), [policyId]);
-  const policyTrustedAppRouteState = useMemo<PolicyDetailsRouteState>(() => {
-    const fleetPackageIntegrationCustomUrlPath = `#${
-      pagePathGetters.integration_policy_edit({ packagePolicyId: policyId })[1]
-    }`;
-
-    return {
-      backLink: {
-        label: i18n.translate(
-          'xpack.securitySolution.endpoint.fleetCustomExtension.artifacts.backButtonLabel',
-          {
-            defaultMessage: `Back to Fleet integration policy`,
-          }
-        ),
-        navigateTo: [
-          INTEGRATIONS_PLUGIN_ID,
-          {
-            path: fleetPackageIntegrationCustomUrlPath,
-          },
-        ],
-        href: getAppUrl({
-          appId: INTEGRATIONS_PLUGIN_ID,
-          path: fleetPackageIntegrationCustomUrlPath,
-        }),
-      },
-    };
-  }, [getAppUrl, policyId]);
-
-  const policyTrustedAppsLink = useMemo(
-    () => (
-      <LinkWithIcon
-        href={getAppUrl({
-          path: policyTrustedAppsPath,
-        })}
-        appPath={policyTrustedAppsPath}
-        appState={policyTrustedAppRouteState}
-        data-test-subj="linkToTrustedApps"
-        size="m"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
-          defaultMessage="Manage trusted applications"
-        />
-      </LinkWithIcon>
-    ),
-    [getAppUrl, policyTrustedAppsPath, policyTrustedAppRouteState]
-  );
-
   return (
     <div data-test-subj="endpointIntegrationPolicyForm">
       <>
