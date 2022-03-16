@@ -8,9 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from '../primary/primary';
+import { ToolbarButton, Props as ToolbarButtonProps } from '../primary/primary';
 
-export type Props = Omit<SolutionToolbarButtonProps, 'iconType' | 'label'>;
+export type Props = Omit<ToolbarButtonProps, 'iconType' | 'label'>;
 
 const label = {
   getLibraryButtonLabel: () =>
@@ -20,7 +20,7 @@ const label = {
 };
 
 export const AddFromLibraryButton = ({ onClick, ...rest }: Props) => (
-  <SolutionToolbarButton
+  <ToolbarButton
     {...rest}
     iconType="folderOpen"
     onClick={onClick}
