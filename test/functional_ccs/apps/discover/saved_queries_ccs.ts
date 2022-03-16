@@ -140,9 +140,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
         expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
-        await retry.waitFor(
+        await retry.waitForWithTimeout(
           'the right hit count',
-          async () => (await PageObjects.discover.getHitCount()) === '2,766'
+          15000,
+          async () => (await PageObjects.discover.getHitCount()) === '2,792'
         );
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });

@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitForWithTimeout(
           'the right hit count',
           15000,
-          async () => (await PageObjects.discover.getHitCount()) === '2,766'
+          async () => (await PageObjects.discover.getHitCount()) === '2,792'
         );
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
