@@ -207,6 +207,7 @@ export const createThreatSignals = async ({
           threatIndex,
           threatListConfig,
           threatIndicatorPath,
+          perPage
         }),
     });
   } else {

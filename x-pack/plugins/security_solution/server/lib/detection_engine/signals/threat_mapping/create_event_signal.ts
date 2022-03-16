@@ -46,6 +46,7 @@ export const createEventSignal = async ({
   threatIndex,
   threatListConfig,
   threatIndicatorPath,
+  perPage,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -73,6 +74,7 @@ export const createEventSignal = async ({
       logger,
       buildRuleMessage,
       threatListConfig,
+      perPage,
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);

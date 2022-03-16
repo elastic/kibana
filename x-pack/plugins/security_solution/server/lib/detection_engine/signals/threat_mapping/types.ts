@@ -124,6 +124,7 @@ export interface CreateEventSignalOptions {
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
   threatListConfig: ThreatListConfig;
+  perPage?: number;
 }
 
 type EntryKey = 'field' | 'value';
