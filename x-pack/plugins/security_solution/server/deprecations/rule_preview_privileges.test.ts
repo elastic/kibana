@@ -5,36 +5,10 @@
  * 2.0.
  */
 
-import {
-  deprecationsServiceMock,
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from 'src/core/server/mocks';
+import { deprecationsServiceMock } from 'src/core/server/mocks';
 import { RegisterDeprecationsConfig } from 'src/core/server';
-import { Role } from '../../../security/common/model';
-import {
-  registerRulePreviewPrivilegeDeprecations,
-  roleHasReadAccess,
-} from './rule_preview_privileges';
-
-const emptyRole: Role = {
-  name: 'mockRole',
-  metadata: { _reserved: false },
-  elasticsearch: { cluster: [], indices: [], run_as: [] },
-  kibana: [{ spaces: [], base: [], feature: {} }],
-};
-
-const getRoleMock = (
-  indicesOverrides: Role['elasticsearch']['indices'] = [],
-  name = 'mockRole'
-): Role => ({
-  ...emptyRole,
-  name,
-  elasticsearch: {
-    ...emptyRole.elasticsearch,
-    indices: indicesOverrides,
-  },
-});
+import { registerRulePreviewPrivilegeDeprecations } from './rule_preview_privileges';
+import { getRoleMock, getContextMock } from './utils.mock';
 
 const getDependenciesMock = () => ({
   deprecationsService: deprecationsServiceMock.createSetupContract(),
@@ -47,11 +21,6 @@ const getDependenciesMock = () => ({
     buildNum: 1,
   },
   applicationName: 'kibana-.kibana',
-});
-
-const getContextMock = () => ({
-  esClient: elasticsearchServiceMock.createScopedClusterClient(),
-  savedObjectsClient: savedObjectsClientMock.create(),
 });
 
 describe('rule preview privileges deprecation', () => {
@@ -200,65 +169,6 @@ describe('rule preview privileges deprecation', () => {
           title: 'The Detections Rule Preview feature is changing',
         },
       ]);
-    });
-  });
-
-  describe('utilities', () => {
-    describe('roleHasReadAccess', () => {
-      it('returns true if the role has read privilege to all signals indexes', () => {
-        const role = getRoleMock([
-          {
-            names: ['.siem-signals-*'],
-            privileges: ['read'],
-          },
-        ]);
-        expect(roleHasReadAccess(role)).toEqual(true);
-      });
-
-      it('returns true if the role has read privilege to a single signals index', () => {
-        const role = getRoleMock([
-          {
-            names: ['.siem-signals-spaceId'],
-            privileges: ['read'],
-          },
-        ]);
-        expect(roleHasReadAccess(role)).toEqual(true);
-      });
-
-      it('returns true if the role has all privilege to a single signals index', () => {
-        const role = getRoleMock([
-          {
-            names: ['.siem-signals-spaceId', 'other-index'],
-            privileges: ['all'],
-          },
-        ]);
-        expect(roleHasReadAccess(role)).toEqual(true);
-      });
-
-      it('returns false if the role has read privilege to other indices', () => {
-        const role = getRoleMock([
-          {
-            names: ['other-index'],
-            privileges: ['read'],
-          },
-        ]);
-        expect(roleHasReadAccess(role)).toEqual(false);
-      });
-
-      it('returns false if the role has all privilege to other indices', () => {
-        const role = getRoleMock([
-          {
-            names: ['other-index', 'second-index'],
-            privileges: ['all'],
-          },
-        ]);
-        expect(roleHasReadAccess(role)).toEqual(false);
-      });
-
-      it('returns false if the role has no specific privileges', () => {
-        const role = getRoleMock();
-        expect(roleHasReadAccess(role)).toEqual(false);
-      });
     });
   });
 });

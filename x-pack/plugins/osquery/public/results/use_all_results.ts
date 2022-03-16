@@ -82,7 +82,9 @@ export const useAllResults = ({
 
       return {
         ...responseData,
-        columns: Object.keys(responseData.edges[0].fields || {}).sort(),
+        columns: Object.keys(
+          (responseData.edges?.length && responseData.edges[0].fields) || {}
+        ).sort(),
         inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
