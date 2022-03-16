@@ -9,23 +9,18 @@ import { IScopedClusterClient } from 'kibana/server';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 
-async function fetchIndicesCall(client: IScopedClusterClient): Promise<unknown> {
-  const indexNamesString = 'enterprise-search-index-*';
+import { ElasticsearchIndex } from '../../common/types';
 
-  // This call retrieves alias and settings (incl. hidden status) information about indices
+export const fetchIndices = async (client: IScopedClusterClient): Promise<ElasticsearchIndex[]> => {
+  const indexNamesString = 'search-*';
+
+  // This call retrieves alias and settings information about indices
   const indices = await client.asCurrentUser.indices.get({
     index: indexNamesString,
     expand_wildcards: ['open'],
     // only get specified index properties from ES to keep the response under 536MB
     // node.js string length limit: https://github.com/nodejs/node/issues/33960
-    filter_path: [
-      '*.aliases',
-      '*.settings.index.number_of_shards',
-      '*.settings.index.number_of_replicas',
-      '*.settings.index.frozen',
-      '*.settings.index.hidden',
-      '*.data_stream',
-    ],
+    filter_path: ['*.aliases'],
     // for better performance only compute aliases and settings of indices but not mappings
     // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
     features: ['aliases', 'settings'],
@@ -50,22 +45,11 @@ async function fetchIndicesCall(client: IScopedClusterClient): Promise<unknown> 
       status: indexStats?.status,
       name: indexName,
       uuid: indexStats?.uuid,
-      primary: indexData.settings?.index?.number_of_shards,
-      replica: indexData.settings?.index?.number_of_replicas,
       documents: indexStats?.total?.docs?.count ?? 0,
       documents_deleted: indexStats?.total?.docs?.deleted ?? 0,
       size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
       primary_size: new ByteSizeValue(indexStats?.primaries?.store?.size_in_bytes ?? 0).toString(),
-      // @ts-expect-error
-      isFrozen: indexData.settings?.index?.frozen === 'true',
       aliases: aliases.length ? aliases : 'none',
-      hidden: indexData.settings?.index?.hidden === 'true',
-      data_stream: indexData.data_stream,
     };
   });
-}
-
-export const fetchIndices = async (client: IScopedClusterClient, indexNames?: string[]) => {
-  const indices = await fetchIndicesCall(client, indexNames);
-  return indices;
 };
