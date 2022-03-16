@@ -7,22 +7,21 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDatePicker, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiDatePicker, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import moment from 'moment';
 import { AnnotationConfig } from 'src/plugins/event_annotation/common/types';
-import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYState } from '../types';
-import { FormatFactory } from '../../../common';
-import { XYAnnotationLayerConfig } from '../../../common/expressions';
-import { ColorPicker } from '../xy_config_panel/color_picker';
-import { NameInput, useDebouncedValue } from '../../shared_components';
-import { isHorizontalChart } from '../state_helpers';
-import { MarkerDecorationSettings } from '../xy_config_panel/shared/marker_decoration_settings';
-import { LineStyleSettings } from '../xy_config_panel/shared/line_style_settings';
-import { updateLayer } from '../xy_config_panel';
-import { Square, Triangle, Hexagon, Circle } from '../../assets/annotation_icons';
-import { euiIconsSet } from '../xy_config_panel/shared/icon_select';
+import type { VisualizationDimensionEditorProps } from '../../../types';
+import { State, XYState } from '../../types';
+import { FormatFactory } from '../../../../common';
+import { XYAnnotationLayerConfig } from '../../../../common/expressions';
+import { ColorPicker } from '../../xy_config_panel/color_picker';
+import { NameInput, useDebouncedValue } from '../../../shared_components';
+import { isHorizontalChart } from '../../state_helpers';
+import { MarkerDecorationSettings } from '../../xy_config_panel/shared/marker_decoration_settings';
+import { LineStyleSettings } from '../../xy_config_panel/shared/line_style_settings';
+import { updateLayer } from '../../xy_config_panel';
+import { annotationsIconSet } from './icon_set';
 
 export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
   defaultMessage: 'Static Annotation',
@@ -59,40 +58,33 @@ export const AnnotationsPanel = (
       if (existingIndex !== -1) {
         newConfigs[existingIndex] = { ...newConfigs[existingIndex], ...config };
       } else {
-        // that should never happen
-        return;
+        return; // that should never happen because annotations are created before config panel is opened
       }
       setLocalState(updateLayer(localState, { ...localLayer, config: newConfigs }, index));
     },
     [accessor, index, localState, localLayer, setLocalState]
   );
+
   return (
     <>
-      <EuiFormRow
-        display="rowCompressed"
-        fullWidth
+      <ConfigPanelDatePicker
+        value={moment(currentConfig?.key.timestamp)}
+        onChange={(date) => {
+          if (date) {
+            setConfig({
+              key: {
+                ...(currentConfig?.key || { keyType: 'point_in_time' }),
+                type: 'annotation_key',
+                timestamp: date?.valueOf(),
+              },
+            });
+          }
+        }}
         label={i18n.translate('xpack.lens.xyChart.annotationDate', {
           defaultMessage: 'Annotation date',
         })}
-      >
-        <EuiDatePicker
-          showTimeSelect
-          selected={moment(currentConfig?.key.timestamp)}
-          onChange={(date) => {
-            if (date) {
-              setConfig({
-                key: {
-                  ...(currentConfig?.key || { keyType: 'point_in_time' }),
-                  type: 'annotation_key',
-                  timestamp: date?.valueOf(),
-                },
-              });
-            }
-          }}
-          dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-          data-test-subj="lnsXY_axisOrientation_groups"
-        />
-      </EuiFormRow>
+      />
+      ;
       <NameInput
         value={currentConfig?.label || defaultAnnotationLabel}
         defaultValue={defaultAnnotationLabel}
@@ -119,55 +111,60 @@ export const AnnotationsPanel = (
           defaultMessage: 'Color',
         })}
       />
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.xyChart.annotation.name', {
-          defaultMessage: 'Hide annotation',
-        })}
-        display="columnCompressedSwitch"
-      >
-        <EuiSwitch
-          compressed
-          label={i18n.translate('xpack.lens.xyChart.annotation.name', {
-            defaultMessage: 'Hide annotation',
-          })}
-          showLabel={false}
-          data-test-subj="lns-annotations-hide-annotation"
-          checked={Boolean(currentConfig?.isHidden)}
-          onChange={(ev) => setConfig({ isHidden: ev.target.checked })}
-        />
-      </EuiFormRow>
+      <ConfigPanelHideSwitch
+        value={Boolean(currentConfig?.isHidden)}
+        onChange={(ev) => setConfig({ isHidden: ev.target.checked })}
+      />
     </>
   );
 };
 
-const annotationsIconSet = [
-  {
-    value: 'triangle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.triangleIconLabel', {
-      defaultMessage: 'Triangle',
-    }),
-    icon: Triangle,
-  },
-  {
-    value: 'square',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.squareIconLabel', {
-      defaultMessage: 'Square',
-    }),
-    icon: Square,
-  },
-  {
-    value: 'circle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.circleIconLabel', {
-      defaultMessage: 'Circle',
-    }),
-    icon: Circle,
-  },
-  {
-    value: 'hexagon',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.hexagonIconLabel', {
-      defaultMessage: 'Hexagon',
-    }),
-    icon: Hexagon,
-  },
-  ...euiIconsSet,
-];
+const ConfigPanelDatePicker = ({
+  value,
+  label,
+  onChange,
+}: {
+  value: moment.Moment;
+  label: string;
+  onChange: (val: moment.Moment | null) => void;
+}) => {
+  return (
+    <EuiFormRow display="rowCompressed" fullWidth label={label}>
+      <EuiDatePicker
+        showTimeSelect
+        selected={value}
+        onChange={onChange}
+        dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+        data-test-subj="lnsXY_annotation_date_picker"
+      />
+    </EuiFormRow>
+  );
+};
+
+const ConfigPanelHideSwitch = ({
+  value,
+  onChange,
+}: {
+  value: boolean;
+  onChange: (event: EuiSwitchEvent) => void;
+}) => {
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.xyChart.annotation.name', {
+        defaultMessage: 'Hide annotation',
+      })}
+      display="columnCompressedSwitch"
+    >
+      <EuiSwitch
+        compressed
+        label={i18n.translate('xpack.lens.xyChart.annotation.name', {
+          defaultMessage: 'Hide annotation',
+        })}
+        showLabel={false}
+        data-test-subj="lns-annotations-hide-annotation"
+        checked={value}
+        onChange={onChange}
+      />
+    </EuiFormRow>
+  );
+};

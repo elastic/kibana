@@ -6,12 +6,8 @@
  */
 
 import * as React from 'react';
-interface SVGRProps {
-  title?: string;
-  titleId?: string;
-}
-
-const IconSquare = ({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> & SVGRProps) => (
+import { EuiIconProps } from '@elastic/eui';
+export const IconSquare = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
     width={16}
     height={16}
@@ -24,5 +20,3 @@ const IconSquare = ({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> 
     <path fillRule="evenodd" d="M15 1H1v14h14V1zM0 0v16h16V0H0z" />
   </svg>
 );
-
-export const Square = IconSquare;

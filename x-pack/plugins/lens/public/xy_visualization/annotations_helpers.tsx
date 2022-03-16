@@ -7,11 +7,11 @@
 
 import './expression_reference_lines.scss';
 import React from 'react';
-import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText, IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import type { IconPosition, YAxisMode, YConfig } from '../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
-import { Circle, Hexagon, Square, Triangle } from '../assets/annotation_icons';
+import { IconCircle, IconHexagon, IconSquare, IconTriangle } from '../assets/annotation_icons';
 
 export const LINES_MARKER_SIZE = 20;
 
@@ -168,11 +168,11 @@ export function MarkerBody({
 const isNumericalString = (value: string) => !isNaN(Number(value));
 
 const shapesIconMap = {
-  circle: Circle,
-  hexagon: Hexagon,
-  triangle: Triangle,
-  square: Square,
-} as const;
+  circle: IconCircle,
+  hexagon: IconHexagon,
+  triangle: IconTriangle,
+  square: IconSquare,
+};
 
 const isCustomAnnotationShape = (
   value: string

@@ -7,7 +7,6 @@
 
 import './expression.scss';
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
 import {
   AnnotationDomainType,
   AnnotationTooltipFormatter,

@@ -142,7 +142,7 @@ export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig
   return layer.config.map((config) => {
     return {
       columnId: config.id,
-      triggerIcon: 'color' as const,
+      triggerIcon: config.isHidden ? ('invisible' as const) : ('color' as const),
       color: config?.color || defaultAnnotationColor,
     };
   });
@@ -164,7 +164,6 @@ export const getAnnotationsConfiguration = ({
       dataLayer.xAccessor &&
       checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
   );
-
   return {
     noDatasource: true,
     groups: [

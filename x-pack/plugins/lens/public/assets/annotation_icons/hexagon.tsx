@@ -6,12 +6,9 @@
  */
 
 import * as React from 'react';
-interface SVGRProps {
-  title?: string;
-  titleId?: string;
-}
+import { EuiIconProps } from '@elastic/eui';
 
-const IconHexagon = ({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> & SVGRProps) => (
+export const IconHexagon = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
     width={16}
     height={16}
@@ -27,5 +24,3 @@ const IconHexagon = ({ title, titleId, ...props }: React.SVGProps<SVGSVGElement>
     />
   </svg>
 );
-
-export const Hexagon = IconHexagon;

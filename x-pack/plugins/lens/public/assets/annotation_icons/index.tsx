@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { Circle } from './circle';
-export { Hexagon } from './hexagon';
-export { Square } from './square';
-export { Triangle } from './triangle';
+export { IconCircle } from './circle';
+export { IconHexagon } from './hexagon';
+export { IconSquare } from './square';
+export { IconTriangle } from './triangle';

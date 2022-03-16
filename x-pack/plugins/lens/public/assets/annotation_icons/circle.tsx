@@ -6,12 +6,9 @@
  */
 
 import * as React from 'react';
-interface SVGRProps {
-  title?: string;
-  titleId?: string;
-}
+import { EuiIconProps } from '@elastic/eui';
 
-const IconCircle = ({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> & SVGRProps) => (
+export const IconCircle = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
     width={16}
     height={16}
@@ -28,5 +25,3 @@ const IconCircle = ({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> 
     />
   </svg>
 );
-
-export const Circle = IconCircle;
