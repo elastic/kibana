@@ -25,6 +25,7 @@ const ACTION_TYPE_IDS = [
   '.swimlane',
   '.teams',
   '.webhook',
+  '.xmatters',
 ];
 
 export function createActionTypeRegistry(): {

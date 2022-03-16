@@ -670,7 +670,7 @@ export class TaskRunner<
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
-    const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
+    const scheduleDelay = runDate.getTime() - this.taskInstance.scheduledAt.getTime();
 
     const event = createAlertEventLogRecordObject({
       ruleId,
@@ -679,7 +679,7 @@ export class TaskRunner<
       namespace,
       executionId: this.executionId,
       task: {
-        scheduled: this.taskInstance.runAt.toISOString(),
+        scheduled: this.taskInstance.scheduledAt.toISOString(),
         scheduleDelay: Millis2Nanos * scheduleDelay,
       },
       savedObjects: [
