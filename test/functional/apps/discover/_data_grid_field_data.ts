@@ -15,14 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects([
-    'common',
-    'header',
-    'discover',
-    'visualize',
-    'timePicker',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
   const dataGrid = getService('dataGrid');
 
@@ -35,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.unifiedSearch.closeTour();
     });
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {

@@ -343,7 +343,7 @@ export const QueryBarTopRow = React.memo(
 
       return (
         <EuiFlexItem grow={false}>
-          <DataViewPicker showNewMenuTour={true} {...props.dataViewPickerComponentProps} />
+          <DataViewPicker showNewMenuTour {...props.dataViewPickerComponentProps} />
         </EuiFlexItem>
       );
     }

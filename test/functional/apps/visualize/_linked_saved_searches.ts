@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'timePicker',
     'visChart',
-    'unifiedSearch',
   ]);
 
   describe('saved search visualizations from visualize app', function describeIndexTests() {
@@ -33,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.visualize.initTests();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await filterBar.addFilter('extension.raw', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();

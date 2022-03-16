@@ -15,13 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const visualTesting = getService('visualTesting');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -36,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
