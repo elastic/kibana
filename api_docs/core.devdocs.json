@@ -1334,10 +1334,6 @@
               {
                 "plugin": "visTypeVega",
                 "path": "src/plugins/vis_types/vega/public/plugin.ts"
-              },
-              {
-                "plugin": "visTypeVega",
-                "path": "src/plugins/vis_types/vega/target/types/public/data_model/search_api.d.ts"
               }
             ]
           }
