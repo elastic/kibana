@@ -6,12 +6,9 @@
  */
 import { ReactElement, ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
-import { TimelinesUIStart } from '../../timelines/public';
 import { ProcessEvent } from '../common/types/process_tree';
 
-export type SessionViewServices = CoreStart & {
-  timelines: TimelinesUIStart;
-};
+export type SessionViewServices = CoreStart;
 
 export interface SessionViewUIStart {
   getSessionViewTableProcessTree: (props: any) => ReactElement;
@@ -34,14 +31,6 @@ export interface EuiTabProps {
   disabled?: boolean;
   append?: ReactNode;
   prepend?: ReactNode;
-}
-
-export interface SessionViewTableProcessTreeProps {
-  // expects an ISO 8601 string
-  start: string;
-  // expects an ISO 8601 string
-  end: string;
-  kuery?: string;
 }
 
 export interface DetailPanelProcess {
