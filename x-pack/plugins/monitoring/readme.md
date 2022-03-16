@@ -9,7 +9,7 @@ This plugin provides the Stack Monitoring kibana application.
 - [Version Compatibility](dev_docs/how_to/version_compatibility.md)
 
 ## Concepts
-- [Architectural Overview](dev_docs/reference/architectural_overview.md) (WIP)
+- [Architectural Overview](dev_docs/reference/architectural_overview.md)
 - [Terminology](dev_docs/reference/terminology.md) (WIP)
 - [Data Collection modes](dev_docs/reference/data_collection_modes.md) (WIP)
 - [Rules and Alerts](dev_docs/reference/rules_alerts.md)
