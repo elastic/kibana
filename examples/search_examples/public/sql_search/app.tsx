@@ -114,6 +114,7 @@ export const SqlSearchExampleApp = ({ notifications, data }: SearchExamplesAppDe
                   value={sqlQuery}
                   onChange={(e) => setSqlQuery(e.target.value)}
                   fullWidth
+                  data-test-subj="sqlQueryInput"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -141,6 +142,7 @@ export const SqlSearchExampleApp = ({ notifications, data }: SearchExamplesAppDe
                   overflowHeight={720}
                   isCopyable
                   data-test-subj="requestCodeBlock"
+                  isVirtualized
                 >
                   {JSON.stringify(request, null, 2)}
                 </EuiCodeBlock>
@@ -158,6 +160,7 @@ export const SqlSearchExampleApp = ({ notifications, data }: SearchExamplesAppDe
                   isCopyable
                   data-test-subj="responseCodeBlock"
                   overflowHeight={720}
+                  isVirtualized
                 >
                   {JSON.stringify(rawResponse, null, 2)}
                 </EuiCodeBlock>
