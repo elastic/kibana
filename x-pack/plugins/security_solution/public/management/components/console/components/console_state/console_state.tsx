@@ -6,22 +6,23 @@
  */
 
 import React, { useReducer, memo, createContext, PropsWithChildren, useContext } from 'react';
-import { initiateState, stateDataReducer } from './state_reducer';
-import { CommandServiceInterface } from '../../types';
+import { InitialStateInterface, initiateState, stateDataReducer } from './state_reducer';
 import { ConsoleStore } from './types';
 
 const ConsoleStateContext = createContext<null | ConsoleStore>(null);
 
-type ConsoleStateProviderProps = PropsWithChildren<{
-  commandService: CommandServiceInterface;
-}>;
+type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
 
 /**
  * A Console wide data store for internal state management between inner components
  */
 export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
-  ({ commandService, children }) => {
-    const [state, dispatch] = useReducer(stateDataReducer, { commandService }, initiateState);
+  ({ commandService, scrollToBottom, children }) => {
+    const [state, dispatch] = useReducer(
+      stateDataReducer,
+      { commandService, scrollToBottom },
+      initiateState
+    );
 
     // FIXME:PT should handle cases where props that are in the store change
     //          Probably need to have a `useAffect()` that just does a `dispatch()` to update those.

@@ -10,9 +10,10 @@ import { CommandServiceInterface } from '../../types';
 
 export interface ConsoleDataState {
   commandService: CommandServiceInterface;
+  scrollToBottom: () => void;
 }
 
-export type ConsoleDataAction = { type: 'test' } | { type: 'test2' };
+export type ConsoleDataAction = { type: 'scrollDown' } | { type: 'test2' };
 
 export interface ConsoleStore {
   state: ConsoleDataState;

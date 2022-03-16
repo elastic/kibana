@@ -60,6 +60,18 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
   const consoleWindowRef = useRef<HTMLDivElement | null>(null);
   const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
 
+  const scrollToBottom = useCallback(() => {
+    // FIXME:PT avoid setTimeout()
+    setTimeout(() => {
+      if (consoleWindowRef.current) {
+        consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
+      }
+    }, 1);
+
+    // NOTE: its IMPORTANT that this callback does NOT have any dependencies, because
+    //       it is stored in State and currently not updated if it changes.
+  }, []);
+
   const handleConsoleClick = useCallback(() => {
     if (inputFocusRef.current) {
       inputFocusRef.current();
@@ -244,7 +256,7 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
     <ConsoleWindow onClick={handleConsoleClick}>
       {/* FIXME:PT Delete ConsoleInternalContext once all code moved to using state hooks */}
       <ConsoleInternalContext.Provider value={internalServices}>
-        <ConsoleStateProvider commandService={consoleService}>
+        <ConsoleStateProvider commandService={consoleService} scrollToBottom={scrollToBottom}>
           <EuiPanel className="ui-panel" panelRef={consoleWindowRef}>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={true}>

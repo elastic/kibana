@@ -7,15 +7,16 @@
 
 import { Reducer } from 'react';
 import { ConsoleDataAction, ConsoleDataState } from './types';
-import { CommandServiceInterface } from '../../types';
+
+export type InitialStateInterface = Pick<ConsoleDataState, 'commandService' | 'scrollToBottom'>;
 
 export const initiateState = ({
   commandService,
-}: {
-  commandService: CommandServiceInterface;
-}): ConsoleDataState => {
+  scrollToBottom,
+}: InitialStateInterface): ConsoleDataState => {
   return {
     commandService,
+    scrollToBottom,
   };
 };
 
