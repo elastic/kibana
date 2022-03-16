@@ -38,7 +38,7 @@ import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
-import { getRuleDataForClusters } from '../kibana/rules';
+import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '../kibana/rules';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -168,11 +168,12 @@ export async function getClustersFromRequest(
     }
   }
   // add kibana data
-  const [kibanas, kibanaRules] =
+  const [kibanas, kibanaClusterRules, kibanaInstanceRules] =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
       ? await Promise.all([
           getKibanasForClusters(req, clusters, '*'),
-          getRuleDataForClusters(req, clusters, '*'),
+          getClusterRuleDataForClusters(req, clusters, '*'),
+          getInstanceRuleDataForClusters(req, clusters, '*'),
         ])
       : [[], []];
   // add the kibana data to each cluster
@@ -183,8 +184,14 @@ export async function getClustersFromRequest(
     );
     set(clusters[clusterIndex], 'kibana', kibana.stats);
 
-    const clusterKibanaRules = kibanaRules?.find((rule) => rule.clusterUuid === kibana.clusterUuid);
-    set(clusters[clusterIndex], 'kibana.ruleData', clusterKibanaRules ?? {});
+    const clusterKibanaRules = kibanaClusterRules?.find(
+      (rule) => rule.clusterUuid === kibana.clusterUuid
+    );
+    const instanceKibanaRules = kibanaInstanceRules?.find(
+      (rule) => rule.clusterUuid === kibana.clusterUuid
+    );
+    set(clusters[clusterIndex], 'kibana.clusterRuleData', clusterKibanaRules ?? {});
+    set(clusters[clusterIndex], 'kibana.instanceRuleData', instanceKibanaRules ?? {});
   });
 
   // add logstash data

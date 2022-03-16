@@ -12,12 +12,16 @@ import { Globals } from '../../../static_globals';
 import { createQuery } from '../../create_query';
 import { KibanaClusterRuleMetric } from '../../metrics';
 
-export async function getRuleDataForClusters(req: LegacyRequest, clusters: Cluster[], ccs: string) {
+export async function getInstanceRuleDataForClusters(
+  req: LegacyRequest,
+  clusters: Cluster[],
+  ccs: string
+) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
 
   const moduleType = 'kibana';
-  const type = 'kibana_rules';
+  const type = 'kibana_node_rules';
   const dataset = 'rules';
   const indexPatterns = getNewIndexPatterns({
     config: Globals.app.config,
@@ -45,29 +49,14 @@ export async function getRuleDataForClusters(req: LegacyRequest, clusters: Clust
             metric,
           }),
           aggs: {
-            overdue_count: {
-              max: {
-                field: 'kibana_rules.overdue.count',
-              },
-            },
-            overdue_duration_p50: {
-              max: {
-                field: 'kibana_rules.overdue.duration.p50',
-              },
-            },
-            overdue_duration_p99: {
-              max: {
-                field: 'kibana_rules.overdue.duration.p99',
-              },
-            },
             executions: {
               max: {
-                field: 'kibana_rules.executions',
+                field: 'kibana_node_rules.executions',
               },
             },
             failures: {
               max: {
-                field: 'kibana_rules.failures',
+                field: 'kibana_node_rules.failures',
               },
             },
           },
@@ -79,9 +68,6 @@ export async function getRuleDataForClusters(req: LegacyRequest, clusters: Clust
       return {
         failures: response.aggregations?.failures?.value,
         executions: response.aggregations?.executions?.value,
-        overdueCount: response.aggregations?.overdue_count?.value,
-        overdueDurationP50: response.aggregations?.overdue_duration_p50?.value,
-        overdueDurationP99: response.aggregations?.overdue_duration_p99?.value,
         clusterUuid,
       };
     })

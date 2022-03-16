@@ -4,4 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getRuleDataForClusters } from './get_rule_data_for_clusters';
+export { getClusterRuleDataForClusters } from './get_cluster_rule_data_for_clusters';
+export { getInstanceRuleDataForClusters } from './get_instance_rule_data_for_clusters';
