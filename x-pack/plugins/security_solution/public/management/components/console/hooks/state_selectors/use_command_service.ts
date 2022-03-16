@@ -9,7 +9,5 @@ import { useConsoleStore } from '../../components/console_state/console_state';
 import { CommandServiceInterface } from '../../types';
 
 export const useCommandService = (): CommandServiceInterface => {
-  const { state } = useConsoleStore();
-
-  return state.commandService;
+  return useConsoleStore().state.commandService;
 };

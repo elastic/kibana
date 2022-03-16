@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Reducer } from 'react';
-import { ConsoleDataAction, ConsoleDataState } from './types';
+import { ConsoleDataState, ConsoleStoreReducer } from './types';
+import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
 
 export type InitialStateInterface = Pick<ConsoleDataState, 'commandService' | 'scrollToBottom'>;
 
@@ -17,9 +17,19 @@ export const initiateState = ({
   return {
     commandService,
     scrollToBottom,
+    commandHistory: [],
   };
 };
 
-export const stateDataReducer: Reducer<ConsoleDataState, ConsoleDataAction> = (state, action) => {
+export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
+  switch (action.type) {
+    case 'scrollDown':
+      state.scrollToBottom();
+      return state;
+
+    case 'executeCommand':
+      return handleExecuteCommand(state, action);
+  }
+
   return state;
 };

@@ -12,7 +12,7 @@ import { CommandExecutionFailure } from './command_execution_failure';
 import { UserCommandInput } from './user_command_input';
 import { useInternalServices } from './internal_context';
 import { Command } from '../types';
-import { useCommandService } from '../hooks/state/use_command_service';
+import { useCommandService } from '../hooks/state_selectors/use_command_service';
 
 const CommandOutputContainer = styled.div`
   position: relative;

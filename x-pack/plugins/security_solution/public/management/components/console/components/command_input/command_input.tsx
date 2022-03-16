@@ -10,6 +10,7 @@ import { CommonProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { KeyCapture, KeyCaptureProps } from './key_capture';
+import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 
 const CommandInputContainer = styled.div`
   .prompt {
@@ -46,16 +47,16 @@ const CommandInputContainer = styled.div`
 `;
 
 export interface CommandInputProps extends CommonProps {
-  onExecute: (command: { input: string }) => void;
   prompt?: string;
   isWaiting?: boolean;
   focusRef?: KeyCaptureProps['focusRef'];
 }
 
 export const CommandInput = memo<CommandInputProps>(
-  ({ prompt = '>', onExecute, focusRef, ...commonProps }) => {
+  ({ prompt = '>', focusRef, ...commonProps }) => {
     // TODO:PT Support having a "console not focused" mode where the cursor will not blink
 
+    const dispatch = useConsoleStateDispatch();
     const [textEntered, setTextEntered] = useState<string>('');
     const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
     const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
@@ -97,14 +98,14 @@ export const CommandInput = memo<CommandInputProps>(
             // ENTER
             // Execute command and blank out the input area
             case 13:
-              onExecute({ input: updatedState });
+              dispatch({ type: 'executeCommand', payload: { input: updatedState } });
               return '';
           }
 
           return updatedState;
         });
       },
-      [onExecute]
+      [dispatch]
     );
 
     return (

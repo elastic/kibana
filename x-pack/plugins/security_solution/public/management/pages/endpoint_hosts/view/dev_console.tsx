@@ -9,10 +9,12 @@ import React, { memo, useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUrlParams } from '../../../components/hooks/use_url_params';
 import { EndpointConsole } from '../../../components/endpoint_console';
+import { HostMetadata } from '../../../../../common/endpoint/types';
 
 // ------------------------------------------------------------
 // FOR DEV PURPOSES ONLY
 // FIXME:PT Delete once we have support via row actions menu
+// ------------------------------------------------------------
 export const DevConsole = memo(() => {
   const isConsoleEnabled = useIsExperimentalFeatureEnabled('responseActionsConsoleEnabled');
   const {
@@ -65,7 +67,7 @@ export const DevConsole = memo(() => {
         dataset: 'endpoint.metadata',
         namespace: 'default',
       },
-    };
+    } as unknown as HostMetadata;
   }, []);
 
   return isConsoleEnabled && showConsole ? (

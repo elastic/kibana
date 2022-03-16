@@ -69,7 +69,7 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
     }, 1);
 
     // NOTE: its IMPORTANT that this callback does NOT have any dependencies, because
-    //       it is stored in State and currently not updated if it changes.
+    // it is stored in State and currently not updated if it changes
   }, []);
 
   const handleConsoleClick = useCallback(() => {
@@ -235,7 +235,7 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
   const internalServices: InternalServices = useMemo(() => {
     return {
       scrollDown: () => {
-        // FIXME:PT avoid setTimeout()
+        // FIXME:PT avoid setTimeout()???
         setTimeout(() => {
           if (consoleWindowRef.current) {
             consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
@@ -248,9 +248,9 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
   // Anytime we add a new item to the history, scroll down so that command input remains visible
   useEffect(() => {
     if (historyItems.length) {
-      internalServices.scrollDown();
+      scrollToBottom();
     }
-  }, [historyItems.length, internalServices]);
+  }, [historyItems.length, scrollToBottom]);
 
   return (
     <ConsoleWindow onClick={handleConsoleClick}>

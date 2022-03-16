@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { Console } from '../console';
 import { EndpointConsoleService } from './endpoint_console_service';
-import { HostMetadata } from '../../../../../../../common/endpoint/types';
+import type { HostMetadata } from '../../../../common/endpoint/types';
 
 export interface EndpointConsoleProps {
   endpoint: HostMetadata;

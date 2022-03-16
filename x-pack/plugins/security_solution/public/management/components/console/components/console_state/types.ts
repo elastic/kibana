@@ -5,17 +5,30 @@
  * 2.0.
  */
 
-import { Dispatch } from 'react';
+import { Dispatch, Reducer } from 'react';
 import { CommandServiceInterface } from '../../types';
+import { HistoryItemComponent } from '../history_item';
 
 export interface ConsoleDataState {
+  /** Command service defined on input to the `Console` component by consumers of the component */
   commandService: CommandServiceInterface;
   scrollToBottom: () => void;
+  /**
+   * List of commands entered by the user and being shown in the UI
+   */
+  commandHistory: Array<ReturnType<HistoryItemComponent>>;
 }
 
-export type ConsoleDataAction = { type: 'scrollDown' } | { type: 'test2' };
+export type ConsoleDataAction =
+  | { type: 'scrollDown' }
+  | { type: 'executeCommand'; payload: { input: string } };
 
 export interface ConsoleStore {
   state: ConsoleDataState;
   dispatch: Dispatch<ConsoleDataAction>;
 }
+
+export type ConsoleStoreReducer<A extends ConsoleDataAction = ConsoleDataAction> = Reducer<
+  ConsoleDataState,
+  A
+>;

@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { CommonProps, EuiFlexGroup } from '@elastic/eui';
 import { HistoryItemComponent } from './history_item';
+import { useCommandHistory } from '../hooks/state_selectors/use_command_history';
 
 // FIXME: implement a buffer for how many items should be shown in the console (maybe virtual scrolling)
 
@@ -16,6 +17,8 @@ export type OutputHistoryProps = CommonProps & {
 };
 
 export const OutputHistory = memo<OutputHistoryProps>(({ children, className }) => {
+  const historyItems = useCommandHistory();
+
   return (
     <EuiFlexGroup
       className={className}
@@ -24,7 +27,7 @@ export const OutputHistory = memo<OutputHistoryProps>(({ children, className }) 
       alignItems="flexEnd"
       responsive={false}
     >
-      {children}
+      {historyItems}
     </EuiFlexGroup>
   );
 });
