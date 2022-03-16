@@ -55,13 +55,13 @@ export function OverviewPage({ routeParams }: Props) {
   ]);
 
   const indexNames = useAlertIndexNames();
-
-  const { core, ObservabilityPageTemplate, config } = usePluginContext();
+  const { cases, docLinks, http } = useKibana<ObservabilityAppServices>().services;
+  const { ObservabilityPageTemplate, config } = usePluginContext();
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, refreshInterval, refreshPaused } =
     useDatePickerContext();
 
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
+  const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
@@ -83,8 +83,7 @@ export function OverviewPage({ routeParams }: Props) {
     return refetch.current && refetch.current();
   }, []);
 
-  const kibana = useKibana<ObservabilityAppServices>();
-  const CasesContext = kibana.services.cases.ui.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (hasAnyData === undefined) {
@@ -95,8 +94,8 @@ export function OverviewPage({ routeParams }: Props) {
 
   const noDataConfig = getNoDataConfig({
     hasData,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
   const alertsLink = config.unsafe.alertingExperience.enabled
