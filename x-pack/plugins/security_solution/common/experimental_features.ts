@@ -22,7 +22,7 @@ export const allowedExperimentalValues = Object.freeze({
   riskyHostsEnabled: false,
   securityRulesCancelEnabled: false,
   pendingActionResponsesWithAck: true,
-  policyListEnabled: false,
+  policyListEnabled: true,
 
   /**
    * This is used for enabling the end to end tests for the security_solution telemetry.
