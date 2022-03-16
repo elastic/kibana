@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import {
   Criteria,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSwitch,
   EuiToolTip,
   EuiTableFieldDataColumnType,
@@ -115,7 +115,7 @@ const getColumns = ({
     width: '60%',
     truncateText: true,
     render: (name, rule) => (
-      <EuiLink
+      <EuiButtonEmpty
         className="eui-textTruncate"
         title={name}
         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -124,7 +124,7 @@ const getColumns = ({
         }}
       >
         {name}
-      </EuiLink>
+      </EuiButtonEmpty>
     ),
   },
   {
@@ -136,7 +136,7 @@ const getColumns = ({
     field: 'updatedAt',
     name: TEXT.UPDATED_AT,
     width: '15%',
-    render: (timestamp) => moment.duration(moment().diff(timestamp)).humanize(),
+    render: (timestamp) => moment(timestamp).fromNow(),
   },
   {
     field: 'attributes.enabled',
@@ -146,12 +146,12 @@ const getColumns = ({
         content={
           enabled ? (
             <FormattedMessage
-              id="xpack.csp.rules.deactivateRuleLabel"
+              id="xpack.csp.rules.rulesTableHeader.deactivateRuleTooltip"
               defaultMessage="Deactivate Rule"
             />
           ) : (
             <FormattedMessage
-              id="xpack.csp.rules.activateRuleLabel"
+              id="xpack.csp.rules.rulesTableHeader.activateRuleTooltip"
               defaultMessage="Activate Rule"
             />
           )
