@@ -3117,6 +3117,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-utility@link:bazel-bin/packages/kbn-shared-ux-utility":
+  version "0.0.0"
+  uid ""
+
 "@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
   version "0.0.0"
   uid ""
@@ -6083,6 +6099,22 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-utility@link:bazel-bin/packages/kbn-shared-ux-utility/npm_module_types":
   version "0.0.0"
   uid ""
 
