@@ -59,6 +59,7 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
@@ -671,8 +672,7 @@ class PackagePolicyService {
         appContextService
           .getLogger()
           .info<PackagePolicyUpgradeLogMeta>(
-            `Package policy upgrade dry run ${
-              hasErrors ? 'resulted in errors' : 'ran successfully'
+            `Package policy upgrade dry run ${hasErrors ? 'resulted in errors' : 'ran successfully'
             } ${JSON.stringify(upgradeMeta)}`,
             upgradeMeta
           );
@@ -681,6 +681,9 @@ class PackagePolicyService {
       return {
         name: updatedPackagePolicy.name,
         diff: [packagePolicy, updatedPackagePolicy],
+        // TODO: Currently only returns the agent inputs for current package policy, not the upgraded one
+        // as we only show this version in the UI
+        agent_diff: [storedPackagePolicyToAgentInputs(packagePolicy, packageInfo)],
         hasErrors,
       };
     } catch (error) {
@@ -815,8 +818,8 @@ async function _compilePackagePolicyInput(
 ) {
   const packagePolicyTemplate = input.policy_template
     ? pkgInfo.policy_templates?.find(
-        (policyTemplate) => policyTemplate.name === input.policy_template
-      )
+      (policyTemplate) => policyTemplate.name === input.policy_template
+    )
     : pkgInfo.policy_templates?.[0];
 
   if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
@@ -1185,10 +1188,10 @@ export function preconfigurePackageInputs(
     // policy template, so we only match on `type` in that case.
     let originalInput = preconfiguredInput.policy_template
       ? inputs.find(
-          (i) =>
-            i.type === preconfiguredInput.type &&
-            i.policy_template === preconfiguredInput.policy_template
-        )
+        (i) =>
+          i.type === preconfiguredInput.type &&
+          i.policy_template === preconfiguredInput.policy_template
+      )
       : inputs.find((i) => i.type === preconfiguredInput.type);
 
     // If the input do not exist skip
@@ -1284,9 +1287,9 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
     : Object.entries(override.vars!).map(([key, rest]) => ({
-        name: key,
-        ...(rest as any),
-      }));
+      name: key,
+      ...(rest as any),
+    }));
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
@@ -1318,14 +1321,13 @@ export async function incrementPackageName(
 
   const pkgPoliciesWithMatchingNames = packagePolicyData?.items
     ? packagePolicyData.items
-        .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-        .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort((a, b) => a - b)
+      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
+      .sort((a, b) => a - b)
     : [];
 
-  return `${packageName}-${
-    pkgPoliciesWithMatchingNames.length
-      ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-      : 1
-  }`;
+  return `${packageName}-${pkgPoliciesWithMatchingNames.length
+    ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+    : 1
+    }`;
 }

@@ -63,7 +63,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { hasUpgradeAvailable } from './utils';
 
@@ -368,8 +368,8 @@ export const EditPackagePolicyForm = memo<{
     if (packageInfo && policyId) {
       return from === 'package-edit'
         ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-          })
+          pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+        })
         : getHref('policy_details', { policyId });
     }
     return '/';
@@ -379,8 +379,8 @@ export const EditPackagePolicyForm = memo<{
     if (packageInfo && policyId) {
       return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
         ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-          })
+          pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+        })
         : getHref('policy_details', { policyId });
     }
     return '/';
@@ -421,11 +421,11 @@ export const EditPackagePolicyForm = memo<{
         text:
           agentCount && agentPolicy
             ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
-                values: {
-                  agentPolicyName: agentPolicy.name,
-                },
-              })
+              defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
+              values: {
+                agentPolicyName: agentPolicy.name,
+              },
+            })
             : undefined,
       });
     } else {
@@ -473,23 +473,23 @@ export const EditPackagePolicyForm = memo<{
     packageInfo,
     tabs: tabsViews?.length
       ? [
-          {
-            title: i18n.translate('xpack.fleet.editPackagePolicy.settingsTabName', {
-              defaultMessage: 'Settings',
-            }),
-            isSelected: selectedTab === 0,
-            onClick: () => {
-              setSelectedTab(0);
-            },
+        {
+          title: i18n.translate('xpack.fleet.editPackagePolicy.settingsTabName', {
+            defaultMessage: 'Settings',
+          }),
+          isSelected: selectedTab === 0,
+          onClick: () => {
+            setSelectedTab(0);
           },
-          ...tabsViews.map(({ title }, index) => ({
-            title,
-            isSelected: selectedTab === index + 1,
-            onClick: () => {
-              setSelectedTab(index + 1);
-            },
-          })),
-        ]
+        },
+        ...tabsViews.map(({ title }, index) => ({
+          title,
+          isSelected: selectedTab === index + 1,
+          onClick: () => {
+            setSelectedTab(index + 1);
+          },
+        })),
+      ]
       : [],
   };
 
@@ -747,11 +747,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
             </EuiFlyoutHeader>
             <FlyoutBody>
               <EuiCodeBlock isCopyable fontSize="m" whiteSpace="pre">
-                {JSON.stringify(
-                  storedPackagePoliciesToAgentInputs([currentPackagePolicy]),
-                  null,
-                  2
-                )}
+                {JSON.stringify(dryRunData[0].agent_diff?.[0] || [], null, 2)}
               </EuiCodeBlock>
             </FlyoutBody>
           </EuiFlyout>
