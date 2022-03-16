@@ -49,16 +49,18 @@ export interface Props {
    * triggered on input of user into search field
    */
   onChange: (field: string, value: string | boolean | undefined) => void;
-
-  /**
-   * the input value of the user
-   */
-  value?: string;
-
   /**
    * types for the type filter
    */
   types: string[];
+  /**
+   * types presented in current data view
+   */
+  presentedFieldTypes: string[];
+  /**
+   * the input value of the user
+   */
+  value?: string;
 }
 
 interface FieldTypeTableItem {
@@ -69,31 +71,12 @@ interface FieldTypeTableItem {
 
 const TABLE_STYLE = { width: 350 };
 const FIELD_TYPES_PER_PAGE = 6;
-const FIELD_TYPES = [
-  'boolean',
-  'conflict',
-  'date',
-  'date_range',
-  'geo_point',
-  'geo_shape',
-  'histogram',
-  'ip',
-  'ip_range',
-  'keyword',
-  'murmur3',
-  'number',
-  'number_range',
-  '_source',
-  'string',
-  'nested',
-  'version',
-];
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types }: Props) {
+export function DiscoverFieldSearch({ onChange, value, types, presentedFieldTypes }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -124,17 +107,18 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
 
   const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex } = usePager({
     initialPageSize: FIELD_TYPES_PER_PAGE,
-    totalItems: FIELD_TYPES.length,
+    totalItems: presentedFieldTypes.length,
   });
-  const items: FieldTypeTableItem[] = useMemo(
-    () =>
-      FIELD_TYPES.map((element, index) => ({
+  const items: FieldTypeTableItem[] = useMemo(() => {
+    return presentedFieldTypes
+      .sort((one, another) => one.localeCompare(another))
+      .map((element, index) => ({
         id: index,
         dataType: element,
         description: getFieldTypeDescription(element),
-      })).slice(startIndex, pageSize + startIndex),
-    [pageSize, startIndex]
-  );
+      }))
+      .slice(startIndex, pageSize + startIndex);
+  }, [pageSize, presentedFieldTypes, startIndex]);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
@@ -400,18 +384,20 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               columns={columnsSidebar}
             />
             <EuiSpacer size="s" />
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiPagination
-                  aria-label={i18n.translate('discover.fieldChooser.paginationAriaLabel', {
-                    defaultMessage: 'Field types navigation',
-                  })}
-                  activePage={curPageIndex}
-                  pageCount={totalPages}
-                  onPageClick={changePageIndex}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {presentedFieldTypes.length > FIELD_TYPES_PER_PAGE && (
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiPagination
+                    aria-label={i18n.translate('discover.fieldChooser.paginationAriaLabel', {
+                      defaultMessage: 'Field types navigation',
+                    })}
+                    activePage={curPageIndex}
+                    pageCount={totalPages}
+                    onPageClick={changePageIndex}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </EuiPopover>
         </EuiFilterGroup>
       </EuiFlexItem>

@@ -196,16 +196,18 @@ export function DiscoverSidebarComponent({
     }
   }, [paginate, scrollContainer, unpopularFields]);
 
-  const fieldTypes = useMemo(() => {
+  const { fieldTypes, presentedFieldTypes } = useMemo(() => {
     const result = ['any'];
+    const dataViewFieldTypes = new Set<string>();
     if (Array.isArray(fields)) {
       for (const field of fields) {
+        dataViewFieldTypes.add(field.type);
         if (result.indexOf(field.type) === -1) {
           result.push(field.type);
         }
       }
     }
-    return result;
+    return { fieldTypes: result, presentedFieldTypes: Array.from(dataViewFieldTypes) };
   }, [fields]);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
@@ -351,6 +353,7 @@ export function DiscoverSidebarComponent({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              presentedFieldTypes={presentedFieldTypes}
             />
           </form>
         </EuiFlexItem>
