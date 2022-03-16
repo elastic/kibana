@@ -36,13 +36,22 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  // const bsearch = getService('bsearch');
   const secureBsearch = getService('secureBsearch');
   const log = getService('log');
 
   const SPACE1 = 'space1';
 
   describe('ruleRegistryAlertsSearchStrategy', () => {
+    let kibanaVersion;
+    before(async () => {
+      const {
+        body: {
+          kibana: { version },
+        },
+      } = await supertest.get(`/api/stats`).set('kbn-xsrf', 'true').expect(200);
+      kibanaVersion = version;
+    });
+
     describe('logs', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -59,6 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
             password: logsOnlySpacesAll.password,
           },
           referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.LOGS],
           },
@@ -79,6 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
             password: logsOnlySpacesAll.password,
           },
           referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.LOGS],
             pagination: {
@@ -151,6 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
             password: obsOnlySpacesAllEsRead.password,
           },
           referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
@@ -171,6 +183,7 @@ export default ({ getService }: FtrProviderContext) => {
             password: obsOnlySpacesAllEsRead.password,
           },
           referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
           },
@@ -199,6 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
             password: obsOnlySpacesAll.password,
           },
           referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.APM],
           },
@@ -222,6 +236,7 @@ export default ({ getService }: FtrProviderContext) => {
             password: obsOnlySpacesAll.password,
           },
           referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [],
           },

@@ -14,8 +14,6 @@ import type SuperTest from 'supertest';
 import { IEsSearchResponse } from 'src/plugins/data/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { RetryService } from '../../../../test/common/services/retry/retry';
-// @ts-ignore
-import { version } from '../../../package.json';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
   return resp.text
@@ -32,6 +30,7 @@ interface SendOptions {
   supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>;
   auth: { username: string; password: string };
   referer?: string;
+  kibanaVersion?: string;
   options: object;
   strategy: string;
   space?: string;
@@ -42,21 +41,44 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
     supertestWithoutAuth,
     auth,
     referer,
+    kibanaVersion,
     options,
     strategy,
     space,
   }: SendOptions): Promise<T> => {
     const spaceUrl = getSpaceUrlPrefix(space);
     const { body } = await retry.try(async () => {
-      const result = await supertestWithoutAuth
-        .post(`${spaceUrl}/internal/search/${strategy}`)
-        .auth(auth.username, auth.password)
-        .set('referer', referer ?? '')
-        .set('kbn-version', version)
-        .set('kbn-xsrf', 'true')
-        .send(options);
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(result));
+      let result;
+      const url = `${spaceUrl}/internal/search/${strategy}`;
+      if (referer && kibanaVersion) {
+        result = await supertestWithoutAuth
+          .post(url)
+          .auth(auth.username, auth.password)
+          .set('referer', referer)
+          .set('kbn-version', kibanaVersion)
+          .set('kbn-xsrf', 'true')
+          .send(options);
+      } else if (referer) {
+        result = await supertestWithoutAuth
+          .post(url)
+          .auth(auth.username, auth.password)
+          .set('referer', referer)
+          .set('kbn-xsrf', 'true')
+          .send(options);
+      } else if (kibanaVersion) {
+        result = await supertestWithoutAuth
+          .post(url)
+          .auth(auth.username, auth.password)
+          .set('kbn-version', kibanaVersion)
+          .set('kbn-xsrf', 'true')
+          .send(options);
+      } else {
+        result = await supertestWithoutAuth
+          .post(url)
+          .auth(auth.username, auth.password)
+          .set('kbn-xsrf', 'true')
+          .send(options);
+      }
       if (result.status === 500 || result.status === 200) {
         return result;
       }
