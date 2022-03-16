@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiIconTip,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -61,12 +60,7 @@ export const SessionViewDisplayOptions = ({
             content={
               <FormattedMessage
                 id="xpack.sessionView.sessionViewToggle.sessionViewToggleOptionsVerboseModeTooltips"
-                defaultMessage="When verbose mode is enabled, session view displays all processes created in that session in the selected time period. When disabled, only process group leaders are rendered under the session leader process. This may hide many processes, such as shell startup, shell completion, and forks caused by builtin commands.  For more information on process groups see {VERBOSE_MODE_TOOLTIPS_LINK}"
-                values={{
-                  VERBOSE_MODE_TOOLTIPS_LINK: (
-                    <EuiLink href="https://en.wikipedia.org/wiki/Process_group">here</EuiLink>
-                  ),
-                }}
+                defaultMessage="Verbose mode displays all processes created in a session, including shell startup, shell completion, and forks caused by built-in commands"
               />
             }
           />
@@ -91,7 +85,7 @@ export const SessionViewDisplayOptions = ({
         display={displayOptions.verboseMode ? 'fill' : 'empty'}
         onClick={toggleOptionButton}
         size="m"
-        aria-label="Option"
+        aria-label="Session view display option"
         data-test-subj="sessionView:sessionViewOptionButton"
       />
     </EuiFlexItem>

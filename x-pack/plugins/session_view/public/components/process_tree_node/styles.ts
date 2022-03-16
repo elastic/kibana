@@ -105,10 +105,8 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       fontFamily: font.familyCode,
       fontSize: size.m,
       fontWeight: font.weight.regular,
-      lineHeight: '18px',
-      letterSpacing: '0em',
       paddingRight: size.base,
-      paddingLeft: `min(${size.xxl})`,
+      paddingLeft: size.xxl,
       position: 'relative',
     };
 
