@@ -87,6 +87,21 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.template = template;
     this.compileOptions = options;
 
+    this.compileOptions.knownHelpers = Object.assign(
+      Object.create(null),
+      {
+        helperMissing: true,
+        blockHelperMissing: true,
+        each: true,
+        if: true,
+        unless: true,
+        with: true,
+        log: true,
+        lookup: true,
+      },
+      this.compileOptions.knownHelpers
+    );
+
     const container: Container = (this.container = {
       helpers: Object.assign({}, helpers),
       strict(obj, name, loc) {
@@ -207,13 +222,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     if (this.compileOptions.knownHelpers && this.compileOptions.knownHelpers[name]) {
       this.invokeKnownHelper(sexpr, name);
     } else if (this.compileOptions.knownHelpersOnly) {
-      // TODO: Ensure knownHelpers array is pre-populated with built in helpers
       throw new Handlebars.Exception(
         'You specified knownHelpersOnly, but used the unknown helper ' + name,
         sexpr
       );
     } else {
-      this.invokeHelper(sexpr, path.original); // TODO: Shoul this be `name` instead of `path.original`?
+      this.invokeHelper(sexpr, path.original); // TODO: Should this be `name` instead of `path.original`?
     }
   }
 
@@ -233,8 +247,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // If the helper is not found, `helperMissing` is called.
   private invokeHelper(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
     const helper = this.setupHelper(sexpr, name);
-    helper.fn =
-      helper.fn || (this.compileOptions.strict ? undefined : this.container.hooks.helperMissing);
+    if (!helper.fn) {
+      if (this.compileOptions.strict) {
+        helper.fn = this.container.strict(helper.context, name, sexpr.loc);
+      } else {
+        helper.fn =
+          this.container.lookupProperty(helper.context, name) || this.container.hooks.helperMissing;
+      }
+    }
 
     const result = helper.fn.apply(helper.context, helper.params);
 
@@ -248,27 +268,24 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   ) {
     const path = sexpr.path;
     const name = path.parts[0];
-    const isBlock = program != null || inverse != null;
-
-    let result;
+    const isBlock = program != null || inverse != null; // TODO: Could also just be derived from sexpr.program / sexpr.inverse
 
     if (isBlock) {
       const currentOutput = this.output;
       this.output = [];
       this.accept(path);
-      result = this.output[0];
+      const result = this.output[0];
       this.output = currentOutput;
+      this.ambiguousBlockValue(sexpr as hbs.AST.BlockStatement, result);
     } else {
-      this.accept(path);
+      const invokeResult = this.invokeAmbiguous(sexpr, name);
+      // TODO: By just checking for `undefined`, we don't know if there was a function call or not. Really we want to enter this if-block if there were a function call, no matter the return value
+      if (invokeResult !== undefined) {
+        this.output.push(invokeResult);
+      } else {
+        this.accept(path);
+      }
     }
-
-    const invokeResult = this.invokeAmbiguous(sexpr, name);
-
-    if (!isBlock) {
-      this.output.push(invokeResult);
-    }
-
-    return result;
   }
 
   // This operation is used when an expression like `{{foo}}`
@@ -283,17 +300,17 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     if (!helper.fn) {
       if (this.compileOptions.strict) {
-        helper.fn = this.container.strict(sexpr, name, sexpr.loc);
+        helper.fn = this.container.strict(helper.context, name, sexpr.loc);
       } else {
         helper.fn =
-          this.container.lookupProperty(sexpr, name) || this.container.hooks.helperMissing;
+          (helper.context != null && this.container.lookupProperty(helper.context, name)) ||
+          this.container.hooks.helperMissing;
       }
     }
 
-    const result =
-      typeof helper.fn === 'function' ? helper.fn.apply(helper.context, helper.params) : helper.fn;
-
-    return result;
+    if (typeof helper.fn === 'function') {
+      return helper.fn.apply(helper.context, helper.params);
+    }
   }
 
   private setupHelper(
@@ -353,8 +370,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         this.simpleSexpr(block);
         break;
       default:
-        const result = this.ambiguousSexpr(block, program, inverse);
-        this.ambiguousBlockValue(block, result);
+        this.ambiguousSexpr(block, program, inverse);
     }
   }
 

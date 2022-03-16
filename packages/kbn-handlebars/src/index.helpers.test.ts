@@ -74,6 +74,26 @@ describe('helpers', () => {
         .toCompileTo('Goodbye cruel world!');
     });
 
+    it('in cases of conflict, helpers win', () => {
+      expectTemplate('{{{lookup}}}')
+        .withInput({ lookup: 'Explicit' })
+        .withHelpers({
+          lookup() {
+            return 'helpers';
+          },
+        })
+        .toCompileTo('helpers');
+
+      expectTemplate('{{lookup}}')
+        .withInput({ lookup: 'Explicit' })
+        .withHelpers({
+          lookup() {
+            return 'helpers';
+          },
+        })
+        .toCompileTo('helpers');
+    });
+
     it('the helpers hash is available is nested contexts', () => {
       expectTemplate('{{#outer}}{{#inner}}{{helper}}{{/inner}}{{/outer}}')
         .withInput({ outer: { inner: { unused: [] } } })
@@ -267,6 +287,14 @@ describe('helpers', () => {
         .toCompileTo('undefined');
     });
 
+    it('Builtin helpers available in knownHelpers only mode', () => {
+      expectTemplate('{{#unless foo}}bar{{/unless}}')
+        .withCompileOptions({
+          knownHelpersOnly: true,
+        })
+        .toCompileTo('bar');
+    });
+
     it('Field lookup works in knownHelpers only mode', () => {
       expectTemplate('{{foo}}')
         .withCompileOptions({
@@ -313,9 +341,42 @@ describe('helpers', () => {
     it('should include in ambiguous mustache calls', () => {
       expectTemplate('{{helper}}').withHelpers(helpers).toCompileTo('ran: helper');
     });
+
+    it('should include in helper mustache calls', () => {
+      expectTemplate('{{helper 1}}').withHelpers(helpers).toCompileTo('ran: helper');
+    });
+
+    it('should include in helper block calls', () => {
+      expectTemplate('{{#helper 1}}{{/helper}}').withHelpers(helpers).toCompileTo('ran: helper');
+    });
+
+    it('should include in known helper calls', () => {
+      expectTemplate('{{helper}}')
+        .withCompileOptions({
+          knownHelpers: { helper: true },
+          knownHelpersOnly: true,
+        })
+        .withHelpers(helpers)
+        .toCompileTo('ran: helper');
+    });
   });
 
   describe('name conflicts', () => {
+    it('helpers take precedence over same-named context properties', () => {
+      expectTemplate('{{goodbye}} {{cruel world}}')
+        .withHelper('goodbye', function (this: any) {
+          return this.goodbye.toUpperCase();
+        })
+        .withHelper('cruel', function (world) {
+          return 'cruel ' + world.toUpperCase();
+        })
+        .withInput({
+          goodbye: 'goodbye',
+          world: 'world',
+        })
+        .toCompileTo('GOODBYE cruel WORLD');
+    });
+
     it('Scoped names take precedence over helpers', () => {
       expectTemplate('{{this.goodbye}} {{cruel world}} {{cruel this.goodbye}}')
         .withHelper('goodbye', function (this: any) {
@@ -367,6 +428,17 @@ describe('helpers', () => {
       expectTemplate('{{#with test "string"}}{{/with}}').toThrow(
         /#with requires exactly one argument/
       );
+    });
+  });
+
+  describe('the lookupProperty-option', () => {
+    it('should be passed to custom helpers', () => {
+      expectTemplate('{{testHelper}}')
+        .withHelper('testHelper', function testHelper(this: any, options) {
+          return options.lookupProperty(this, 'testProperty');
+        })
+        .withInput({ testProperty: 'abc' })
+        .toCompileTo('abc');
     });
   });
 });

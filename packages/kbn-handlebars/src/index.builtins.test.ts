@@ -35,6 +35,26 @@ describe('builtin helpers', () => {
         .toCompileTo('cruel !');
     });
 
+    it('each with function argument', () => {
+      const string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+
+      expectTemplate(string)
+        .withInput({
+          goodbyes() {
+            return [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }];
+          },
+          world: 'world',
+        })
+        .toCompileTo('goodbye! Goodbye! GOODBYE! cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbyes: [],
+          world: 'world',
+        })
+        .toCompileTo('cruel world!');
+    });
+
     it('each on implicit context', () => {
       expectTemplate('{{#each}}{{text}}! {{/each}}cruel world!').toThrow(Handlebars.Exception);
     });

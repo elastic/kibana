@@ -27,6 +27,18 @@ describe('strict', () => {
       expectTemplate('{{hello}}').withCompileOptions({ strict: true }).toThrow(Error);
     });
 
+    it('should not run helperMissing for helper calls', () => {
+      expectTemplate('{{hello foo}}')
+        .withCompileOptions({ strict: true })
+        .withInput({ foo: true })
+        .toThrow(/"hello" not defined in/);
+
+      expectTemplate('{{#hello foo}}{{/hello}}')
+        .withCompileOptions({ strict: true })
+        .withInput({ foo: true })
+        .toThrow(/"hello" not defined in/);
+    });
+
     it('should allow undefined hash when passed to helpers', () => {
       expectTemplate('{{helper value=@foo}}')
         .withCompileOptions({

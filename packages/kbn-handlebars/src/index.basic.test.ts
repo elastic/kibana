@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Handlebars from '.';
 import { expectTemplate } from './__jest__/test_bench';
 
 describe('basic context', () => {
@@ -120,6 +121,24 @@ describe('basic context', () => {
     /* eslint-enable */
   });
 
+  it('should handle undefined and null', () => {
+    expectTemplate('{{undefined}}')
+      .withInput({
+        undefined() {
+          return 'undefined!';
+        },
+      })
+      .toCompileTo('undefined!');
+
+    expectTemplate('{{null}}')
+      .withInput({
+        null() {
+          return 'null!';
+        },
+      })
+      .toCompileTo('null!');
+  });
+
   it('newlines', () => {
     expectTemplate("Alan's\nTest").toCompileTo("Alan's\nTest");
     expectTemplate("Alan's\rTest").toCompileTo("Alan's\rTest");
@@ -141,6 +160,66 @@ describe('basic context', () => {
     expectTemplate('{{awesome}}')
       .withInput({ awesome: 'Escaped, <b> looks like: &lt;b&gt;' })
       .toCompileTo('Escaped, &lt;b&gt; looks like: &amp;lt;b&amp;gt;');
+  });
+
+  it("functions returning safestrings shouldn't be escaped", () => {
+    expectTemplate('{{awesome}}')
+      .withInput({
+        awesome() {
+          return new Handlebars.SafeString("&'\\<>");
+        },
+      })
+      .toCompileTo("&'\\<>");
+  });
+
+  it('functions', () => {
+    expectTemplate('{{awesome}}')
+      .withInput({
+        awesome() {
+          return 'Awesome';
+        },
+      })
+      .toCompileTo('Awesome');
+
+    expectTemplate('{{awesome}}')
+      .withInput({
+        awesome() {
+          return this.more;
+        },
+        more: 'More awesome',
+      })
+      .toCompileTo('More awesome');
+  });
+
+  it('functions with context argument', () => {
+    expectTemplate('{{awesome frank}}')
+      .withInput({
+        awesome(context: any) {
+          return context;
+        },
+        frank: 'Frank',
+      })
+      .toCompileTo('Frank');
+  });
+
+  it('block functions with context argument', () => {
+    expectTemplate('{{#awesome 1}}inner {{.}}{{/awesome}}')
+      .withInput({
+        awesome(context: any, options: any) {
+          return options.fn(context);
+        },
+      })
+      .toCompileTo('inner 1');
+  });
+
+  it('block functions without context argument', () => {
+    expectTemplate('{{#awesome}}inner{{/awesome}}')
+      .withInput({
+        awesome(options: any) {
+          return options.fn(this);
+        },
+      })
+      .toCompileTo('inner');
   });
 
   it('paths with hyphens', () => {
@@ -263,6 +342,30 @@ describe('basic context', () => {
       .toCompileTo('bar hellobar Hellobar HELLO');
   });
 
+  it('this keyword nested inside helpers param', () => {
+    expectTemplate('{{#hellos}}{{foo text/this/foo}}{{/hellos}}').toThrow(
+      'Invalid path: text/this - 1:17'
+    );
+
+    expectTemplate('{{foo [this]}}')
+      .withInput({
+        foo(value: any) {
+          return value;
+        },
+        this: 'bar',
+      })
+      .toCompileTo('bar');
+
+    expectTemplate('{{foo text/[this]}}')
+      .withInput({
+        foo(value: any) {
+          return value;
+        },
+        text: { this: 'bar' },
+      })
+      .toCompileTo('bar');
+  });
+
   it('pass string literals', () => {
     expectTemplate('{{"foo"}}').toCompileTo('');
     expectTemplate('{{"foo"}}').withInput({ foo: 'bar' }).toCompileTo('bar');
@@ -279,11 +382,31 @@ describe('basic context', () => {
     expectTemplate('{{12}}').withInput({ '12': 'bar' }).toCompileTo('bar');
     expectTemplate('{{12.34}}').toCompileTo('');
     expectTemplate('{{12.34}}').withInput({ '12.34': 'bar' }).toCompileTo('bar');
+    expectTemplate('{{12.34 1}}')
+      .withInput({
+        '12.34'(arg: any) {
+          return 'bar' + arg;
+        },
+      })
+      .toCompileTo('bar1');
   });
 
   it('pass boolean literals', () => {
     expectTemplate('{{true}}').toCompileTo('');
     expectTemplate('{{true}}').withInput({ '': 'foo' }).toCompileTo('');
     expectTemplate('{{false}}').withInput({ false: 'foo' }).toCompileTo('foo');
+  });
+
+  it('should handle literals in subexpression', () => {
+    expectTemplate('{{foo (false)}}')
+      .withInput({
+        false() {
+          return 'bar';
+        },
+      })
+      .withHelper('foo', function (arg) {
+        return arg;
+      })
+      .toCompileTo('bar');
   });
 });
