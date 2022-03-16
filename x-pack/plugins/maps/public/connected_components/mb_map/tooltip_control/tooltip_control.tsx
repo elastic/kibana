@@ -17,7 +17,7 @@ import {
   PointLike,
 } from '@kbn/mapbox-gl';
 import uuid from 'uuid/v4';
-import { Feature, Geometry } from 'geojson';
+import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
@@ -205,7 +205,7 @@ export class TooltipControl extends Component<Props, {}> {
         break;
       }
 
-      const featureId = layer.getFeatureId(mbFeature as Feature);
+      const featureId = layer.getFeatureId(mbFeature);
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {

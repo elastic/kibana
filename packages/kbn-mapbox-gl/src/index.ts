@@ -24,6 +24,7 @@ import type {
   GeoJSONFeature,
   CustomLayerInterface,
   FilterSpecification,
+  FeatureIdentifier,
 } from 'maplibre-gl';
 
 // @ts-expect-error
@@ -58,4 +59,5 @@ export type {
   GeoJSONFeature,
   CustomLayerInterface,
   FilterSpecification,
+  FeatureIdentifier,
 };
