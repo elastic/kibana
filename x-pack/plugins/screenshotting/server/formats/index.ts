@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './pdf';
-export * from './png';
+export { PdfLayoutParams, PdfScreenshotOptions, PdfScreenshotResult, toPdf } from './pdf';
+export { PngLayoutParams, PngScreenshotOptions, PngScreenshotResult, toPng } from './png';
 export type { FormattedScreenshotResult } from './types';
