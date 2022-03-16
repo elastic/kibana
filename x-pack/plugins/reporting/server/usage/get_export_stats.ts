@@ -7,21 +7,29 @@
 
 import { DEPRECATED_JOB_TYPES } from '../../common/constants';
 import { ExportTypesHandler } from './get_export_type_handler';
-import { AvailableTotal, FeatureAvailabilityMap, RangeStats } from './types';
+import {
+  AvailableTotal,
+  FeatureAvailabilityMap,
+  MetricsStats,
+  RangeStats,
+  ScreenshotJobType,
+} from './types';
 
 const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(jobType);
-const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> = {
+const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & ScreenshotJobType = {
   total: 0,
   deprecated: 0,
   app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
   layout: { canvas: 0, print: 0, preserve_layout: 0 },
 };
 
+type CombinedJobTypeStats = AvailableTotal & ScreenshotJobType & { metrics: MetricsStats };
+
 const isAvailable = (featureAvailability: FeatureAvailabilityMap, feature: string) =>
   !!featureAvailability[feature];
 
 function getAvailableTotalForFeature(
-  jobType: AvailableTotal,
+  jobType: CombinedJobTypeStats,
   typeKey: string,
   featureAvailability: FeatureAvailabilityMap
 ): AvailableTotal {
@@ -29,7 +37,7 @@ function getAvailableTotalForFeature(
   const deprecated = jobTypeIsDeprecated(typeKey) ? jobType.total : jobType.deprecated || 0;
 
   // merge the additional stats for the jobType
-  const availableTotal: AvailableTotal = {
+  const availableTotal: CombinedJobTypeStats = {
     available: isAvailable(featureAvailability, typeKey),
     total: jobType.total,
     deprecated,
@@ -64,7 +72,9 @@ export const getExportStats = (
 
   // combine the known types with any unknown type found in reporting data
   const statsForExportType = exportTypesHandler.getJobTypes().reduce((accum, exportType) => {
-    const availableTotal = rangeStats[exportType as keyof typeof rangeStats];
+    const availableTotal = rangeStats[exportType as keyof typeof rangeStats] as
+      | CombinedJobTypeStats
+      | undefined;
 
     if (!availableTotal) {
       return {

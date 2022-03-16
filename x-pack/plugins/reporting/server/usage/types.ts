@@ -23,8 +23,11 @@ interface SizeStats {
   sizes?: { values: SizePercentiles };
 }
 
-// FIXME: find a way to get this from exportTypesHandler or common/constants
-export type BaseJobTypes =
+/*
+ * NOTE: This list needs to be explicit in order for the telemetry schema check script to resolve the types.
+ * However, using `keyof JobTypes` is functionally the same thing
+ */
+type BaseJobTypes =
   | 'csv_searchsource'
   | 'csv_searchsource_immediate'
   | 'PNG'
@@ -151,14 +154,6 @@ export interface MetricsStatsPdf {
   pdf_pages: MetricsPercentiles;
 }
 
-export type BaseMetricsKeys =
-  | 'csv_rows'
-  | 'pdf_cpu'
-  | 'pdf_memory'
-  | 'pdf_pages'
-  | 'png_cpu'
-  | 'png_memory';
-
 export interface MetricsPercentiles {
   '50.0': number | null;
   '75.0': number | null;
@@ -166,9 +161,15 @@ export interface MetricsPercentiles {
   '99.0': number | null;
 }
 
-export type MetricsStats = {
-  [K in BaseMetricsKeys]: MetricsPercentiles;
-};
+export interface MetricsStats {
+  csv_rows: MetricsPercentiles;
+  pdf_cpu: MetricsPercentiles;
+  pdf_memory: MetricsPercentiles;
+  pdf_pages: MetricsPercentiles;
+  png_cpu: MetricsPercentiles;
+  png_memory: MetricsPercentiles;
+  lol: MetricsPercentiles;
+}
 
 export type ReportingUsageType = RangeStats & {
   available: boolean;

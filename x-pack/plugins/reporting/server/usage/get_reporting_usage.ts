@@ -16,7 +16,6 @@ import type {
   AggregationBuckets,
   AggregationResultBuckets,
   AvailableTotal,
-  BaseJobTypes,
   FeatureAvailabilityMap,
   JobTypes,
   KeyCountBucket,
@@ -87,15 +86,17 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
     };
   }, {});
 
+type CombinedTotals = Omit<AvailableTotal, 'available'> & { metrics?: MetricsStats };
+
 function getAggStats(
   aggs: AggregationResultBuckets,
-  metrics?: { [K in BaseJobTypes]: MetricsStats }
+  metrics?: { [K in keyof JobTypes]: MetricsStats }
 ): Partial<RangeStats> {
   const { buckets: jobBuckets } = aggs[keys.JOB_TYPE] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
     const { key, doc_count: count, isDeprecated, sizes } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
-    const total: Omit<AvailableTotal, 'available'> = {
+    const total: CombinedTotals = {
       total: count,
       deprecated: deprecatedCount,
       sizes: sizes?.values,
@@ -155,7 +156,7 @@ function normalizeMetrics(metrics: estypes.AggregationsStringTermsAggregate | un
         csv_rows: next.csv_rows,
       },
     };
-  }, {} as { [K in BaseJobTypes]: MetricsStats });
+  }, {} as { [K in keyof JobTypes]: MetricsStats });
 }
 
 type RangeStatSets = Partial<RangeStats> & {

@@ -117,7 +117,10 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
-      "metrics": undefined,
+      "metrics": Object {
+        "png_cpu": Object {},
+        "png_memory": Object {},
+      },
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -127,7 +130,7 @@ test('Model of jobTypes', () => {
         "95.0": 11935594,
         "99.0": 11935594,
       },
-      "total": 3,
+      "total": 0,
     }
   `);
   expect(result.csv_searchsource).toMatchInlineSnapshot(`
@@ -145,7 +148,9 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
-      "metrics": undefined,
+      "metrics": Object {
+        "csv_rows": Object {},
+      },
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -173,7 +178,11 @@ test('Model of jobTypes', () => {
         "preserve_layout": 3,
         "print": 0,
       },
-      "metrics": undefined,
+      "metrics": Object {
+        "pdf_cpu": Object {},
+        "pdf_memory": Object {},
+        "pdf_pages": Object {},
+      },
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -218,7 +227,10 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         "preserve_layout": 0,
         "print": 0,
       },
-      "metrics": undefined,
+      "metrics": Object {
+        "png_cpu": Object {},
+        "png_memory": Object {},
+      },
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -265,7 +277,7 @@ test('Incorporate metric stats', () => {
   expect(result.PNGV2).toMatchInlineSnapshot(`
     Object {
       "app": Object {
-        "canvas workpad": 0,
+        "canvas workpad": 3,
         "dashboard": 0,
         "search": 0,
         "visualization": 0,
@@ -278,30 +290,6 @@ test('Incorporate metric stats', () => {
         "print": 0,
       },
       "metrics": Object {
-        "csv_rows": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "pdf_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "pdf_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "pdf_pages": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
         "png_cpu": Object {
           "50.0": 0.01,
           "75.0": 0.01,
@@ -330,8 +318,8 @@ test('Incorporate metric stats', () => {
   expect(result.printable_pdf_v2).toMatchInlineSnapshot(`
     Object {
       "app": Object {
-        "canvas workpad": 3,
-        "dashboard": 0,
+        "canvas workpad": 0,
+        "dashboard": 3,
         "search": 0,
         "visualization": 0,
       },
@@ -343,12 +331,6 @@ test('Incorporate metric stats', () => {
         "print": 0,
       },
       "metrics": Object {
-        "csv_rows": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
         "pdf_cpu": Object {
           "50.0": 0.01,
           "75.0": 0.01,
@@ -366,18 +348,6 @@ test('Incorporate metric stats', () => {
           "75.0": 4,
           "95.0": 4,
           "99.0": 4,
-        },
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
         },
       },
       "sizes": Object {
