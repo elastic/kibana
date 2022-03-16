@@ -11,6 +11,11 @@ import { promisify } from 'util';
 
 // @ts-expect-error @types/gulp-babel is outdated and doesn't work for gulp-babel v8
 import gulpBabel from 'gulp-babel';
+
+// @ts-expect-error
+import gulpTerser from 'gulp-terser';
+import terser from 'terser';
+
 import vfs from 'vinyl-fs';
 
 import { Task, Build } from '../lib';
@@ -38,7 +43,7 @@ const transpileWithBabel = async (srcGlobs: string[], build: Build, presets: str
       babelrc: false,
       presets,
     }),
-
+    gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
     vfs.dest(buildRoot)
   );
 };
