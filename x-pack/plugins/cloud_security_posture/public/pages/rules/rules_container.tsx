@@ -38,6 +38,7 @@ interface RulesPageData {
   total: number;
   error?: string;
   loading: boolean;
+  lastModified: string | null;
 }
 
 export type RulesState = RulesPageData & RulesQuery;
@@ -82,8 +83,15 @@ const getRulesPageData = (
     rules_map: new Map(rules.map((rule) => [rule.id, rule])),
     rules_page: page.map((rule) => changedRules.get(rule.attributes.id) || rule),
     total: data?.total || 0,
+    lastModified: getLastModified(rules) || null,
   };
 };
+
+const getLastModified = (data: RuleSavedObject[]): string | undefined =>
+  data
+    .map((v) => v.updatedAt)
+    .filter(isNonNullable)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
 
 const getPage = (data: readonly RuleSavedObject[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
@@ -108,15 +116,6 @@ export const RulesContainer = () => {
   });
 
   const { mutate: bulkUpdate, isLoading: isUpdating } = useBulkUpdateCspRules();
-
-  const lastModified = useMemo(
-    () =>
-      data?.savedObjects
-        .map((v) => v.updatedAt)
-        .filter(isNonNullable)
-        .sort((a, b) => +new Date(b) - +new Date(a))[0] || '',
-    [data]
-  );
 
   const rulesPageData = useMemo(
     () => getRulesPageData({ data, error, status }, changedRules, rulesQuery),
@@ -187,7 +186,7 @@ export const RulesContainer = () => {
           searchValue={rulesQuery.search}
           totalRulesCount={rulesPageData.all_rules.length}
           isSearching={status === 'loading'}
-          lastModified={lastModified}
+          lastModified={rulesPageData.lastModified}
         />
         <EuiSpacer />
         <RulesTable

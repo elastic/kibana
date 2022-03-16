@@ -32,7 +32,7 @@ interface RulesTableToolbarProps {
   selectedRulesCount: number;
   searchValue: string;
   isSearching: boolean;
-  lastModified?: string;
+  lastModified: string | null;
 }
 
 interface CounterProps {
@@ -46,9 +46,9 @@ interface ButtonProps {
 const LastModificationLabel = ({ lastModified }: { lastModified: string }) => (
   <EuiText size="s">
     <FormattedMessage
-      id="xpack.csp.rules.lastModificationLabel"
+      id="xpack.csp.rules.tableHeader lastModificationLabel"
       defaultMessage="Last modification to integration {timeAgo} "
-      values={{ timeAgo: moment.duration(moment().diff(+new Date(lastModified))).humanize() }}
+      values={{ timeAgo: moment(lastModified).fromNow() }}
     />
   </EuiText>
 );
