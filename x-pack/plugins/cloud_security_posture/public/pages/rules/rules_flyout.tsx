@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { RuleSavedObject } from './use_csp_rules';
 import * as TEXT from './translations';
 
@@ -35,19 +36,68 @@ const tabs = ['overview', 'remediation', 'rego code'] as const;
 type RuleTab = typeof tabs[number];
 
 const getOverviewCard = (rule: RuleSavedObject): EuiDescriptionListProps['listItems'] => [
-  { title: 'Framework Sources', description: '' },
-  { title: 'Section', description: '' },
-  { title: 'Profile Applicability', description: '' },
-  { title: 'Description', description: rule.attributes.description },
-  { title: 'Audit', description: '' },
-  { title: 'References', description: '' },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.frameworkSourcesLabel', {
+      defaultMessage: 'Framework Sources',
+    }),
+    description: '',
+  },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.sectionsLabel', { defaultMessage: 'Sections' }),
+    description: '',
+  },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.profileApplicabilityLabel', {
+      defaultMessage: 'Profile Applicability',
+    }),
+    description: '',
+  },
+
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.profileApplicabilityLabel', {
+      defaultMessage: 'Profile Applicability',
+    }),
+    description: rule.attributes.description,
+  },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.auditLabel', {
+      defaultMessage: 'Audit',
+    }),
+    description: '',
+  },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.referencesLabel', {
+      defaultMessage: 'References',
+    }),
+    description: '',
+  },
 ];
 
 const getRemediationCard = (rule: RuleSavedObject): EuiDescriptionListProps['listItems'] => [
-  { title: 'Remediation', description: rule.attributes.remediation },
-  { title: 'Impact', description: rule.attributes.impact },
-  { title: 'Default Value', description: rule.attributes.default_value },
-  { title: 'Rationale', description: rule.attributes.rationale },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.remediationLabel', {
+      defaultMessage: 'Remediation',
+    }),
+    description: rule.attributes.remediation,
+  },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.impactLabel', {
+      defaultMessage: 'Impact',
+    }),
+    description: rule.attributes.impact,
+  },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.defaultValueLabel', {
+      defaultMessage: 'Default Value',
+    }),
+    description: rule.attributes.default_value,
+  },
+  {
+    title: i18n.translate('xpack.rules.ruleFlyout.rationaleLabel', {
+      defaultMessage: 'Rationale',
+    }),
+    description: rule.attributes.rationale,
+  },
 ];
 
 export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
