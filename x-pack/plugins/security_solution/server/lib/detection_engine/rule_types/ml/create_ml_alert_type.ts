@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateNonExact, validate } from '@kbn/securitysolution-io-ts-utils';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
@@ -24,7 +24,7 @@ export const createMlAlertType = (
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validate(object as object, machineLearningRuleParams);
+          const [validated, errors] = validateNonExact(object, machineLearningRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
