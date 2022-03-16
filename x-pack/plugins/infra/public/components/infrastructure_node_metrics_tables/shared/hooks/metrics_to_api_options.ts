@@ -27,8 +27,6 @@ export function metricsToApiOptions<T extends string>(metricsMap: MetricsMap<T>,
     aggregation: 'avg',
     groupBy,
     metrics,
-    forceInterval: true,
-    dropLastBucket: true,
   };
 
   return {
