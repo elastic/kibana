@@ -115,13 +115,6 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const externalConnectorFields = (
     <>
-      {/* TODO: get a docs link in here for the external connector
-      <ConfigDocsLinks
-        name={name}
-        documentationUrl={documentationUrl}
-        applicationPortalUrl={applicationPortalUrl}
-        applicationLinkTitle={applicationLinkTitle}
-      /> */}
       <EuiFormRow
         label={i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.externalConnectorConfig.urlLabel',
