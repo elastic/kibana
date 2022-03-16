@@ -9122,7 +9122,6 @@
     "xpack.enterpriseSearch.appSearch.metaEngineCreation.successMessage": "Le métamoteur \"{name}\" a été créé",
     "xpack.enterpriseSearch.appSearch.metaEngineCreation.title": "Créer un métamoteur",
     "xpack.enterpriseSearch.appSearch.metaEngines.title": "Métamoteurs",
-    "xpack.enterpriseSearch.appSearch.metaEngines.upgradeDescription": "Veuillez {readDocumentationLink} pour en savoir plus ou effectuer une mise à niveau vers une licence Platinum pour commencer.",
     "xpack.enterpriseSearch.appSearch.multiInputRows.addValueButtonLabel": "Ajouter une valeur",
     "xpack.enterpriseSearch.appSearch.multiInputRows.inputRowPlaceholder": "Entrer une valeur",
     "xpack.enterpriseSearch.appSearch.multiInputRows.removeValueButtonLabel": "Retirer une valeur",
