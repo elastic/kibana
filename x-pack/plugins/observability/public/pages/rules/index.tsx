@@ -40,12 +40,13 @@ interface Pagination {
 }
 
 export function RulesPage() {
-  const { core, ObservabilityPageTemplate } = usePluginContext();
-  const { docLinks } = useKibana().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
   const {
     http,
+    docLinks,
     notifications: { toasts },
-  } = core;
+  } = useKibana().services;
+
   const [rules, setRules] = useState<RuleState>({ data: [], totalItemsCount: 0 });
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
