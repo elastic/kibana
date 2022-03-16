@@ -46,18 +46,12 @@ export const LogsSettingsPage = () => {
     },
   ]);
 
-  const {
-    logView: source,
-    hasFailedLoadingSource,
-    isLoading,
-    isUninitialized,
-    update: updateSource,
-    resolvedLogView: resolvedSourceConfiguration,
-  } = useLogViewContext();
+  const { logView, hasFailedLoadingLogView, isLoading, isUninitialized, update, resolvedLogView } =
+    useLogViewContext();
 
   const availableFields = useMemo(
-    () => resolvedSourceConfiguration?.fields.map((field) => field.name) ?? [],
-    [resolvedSourceConfiguration]
+    () => resolvedLogView?.fields.map((field) => field.name) ?? [],
+    [resolvedLogView]
   );
 
   const {
@@ -66,22 +60,22 @@ export const LogsSettingsPage = () => {
     logIndicesFormElement,
     logColumnsFormElement,
     nameFormElement,
-  } = useLogSourceConfigurationFormState(source?.attributes);
+  } = useLogSourceConfigurationFormState(logView?.attributes);
 
   const persistUpdates = useCallback(async () => {
-    await updateSource(formState);
+    await update(formState);
     sourceConfigurationFormElement.resetValue();
-  }, [updateSource, sourceConfigurationFormElement, formState]);
+  }, [update, sourceConfigurationFormElement, formState]);
 
   const isWriteable = useMemo(
-    () => shouldAllowEdit && source && source.origin !== 'internal',
-    [shouldAllowEdit, source]
+    () => shouldAllowEdit && logView && logView.origin !== 'internal',
+    [shouldAllowEdit, logView]
   );
 
-  if ((isLoading || isUninitialized) && !resolvedSourceConfiguration) {
+  if ((isLoading || isUninitialized) && !resolvedLogView) {
     return <SourceLoadingPage />;
   }
-  if (hasFailedLoadingSource) {
+  if (hasFailedLoadingLogView) {
     return null;
   }
 

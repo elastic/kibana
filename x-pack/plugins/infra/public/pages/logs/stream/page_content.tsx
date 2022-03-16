@@ -24,7 +24,7 @@ export const StreamPageContent: React.FunctionComponent = () => {
     hasFailedLoading,
     isLoading,
     isUninitialized,
-    latestLoadSourceFailures,
+    latestLoadLogViewFailures,
     load,
     logViewStatus,
   } = useLogViewContext();
@@ -32,7 +32,7 @@ export const StreamPageContent: React.FunctionComponent = () => {
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={load} />;
+    return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
   } else {
     return (
       <LogStreamPageWrapper className={APP_WRAPPER_CLASS}>

@@ -20,7 +20,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
     hasFailedLoading,
     isLoading,
     isUninitialized,
-    latestLoadSourceFailures,
+    latestLoadLogViewFailures,
     load,
     logViewId,
     resolvedLogView,
@@ -35,7 +35,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
   } else if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={load} />;
+    return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
   } else if (resolvedLogView != null) {
     return (
       <LogFlyout.Provider>

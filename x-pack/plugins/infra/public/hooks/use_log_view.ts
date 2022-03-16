@@ -81,11 +81,11 @@ export const useLogView = ({
 
   const isUninitialized = loadLogViewRequest.state === 'uninitialized';
 
-  const hasFailedLoadingSource = loadLogViewRequest.state === 'rejected';
-  const hasFailedResolvingSource = resolveLogViewRequest.state === 'rejected';
-  const hasFailedLoadingSourceStatus = loadLogViewStatusRequest.state === 'rejected';
+  const hasFailedLoadingLogView = loadLogViewRequest.state === 'rejected';
+  const hasFailedResolvingLogView = resolveLogViewRequest.state === 'rejected';
+  const hasFailedLoadingLogViewStatus = loadLogViewStatusRequest.state === 'rejected';
 
-  const latestLoadSourceFailures = [
+  const latestLoadLogViewFailures = [
     loadLogViewRequest,
     resolveLogViewRequest,
     loadLogViewStatusRequest,
@@ -93,7 +93,7 @@ export const useLogView = ({
     .filter(isRejectedPromiseState)
     .map(({ value }) => (value instanceof Error ? value : new Error(`${value}`)));
 
-  const hasFailedLoading = latestLoadSourceFailures.length > 0;
+  const hasFailedLoading = latestLoadLogViewFailures.length > 0;
 
   const load = useCallback(async () => {
     const loadedLogView = await loadLogView(logViewId);
@@ -115,11 +115,9 @@ export const useLogView = ({
   );
 
   const initialize = useCallback(async () => {
-    if (!isUninitialized) {
-      return;
+    if (isUninitialized) {
+      return await load();
     }
-
-    return await load();
   }, [isUninitialized, load]);
 
   return {
@@ -129,10 +127,10 @@ export const useLogView = ({
 
     // Failure states
     hasFailedLoading,
-    hasFailedLoadingSource,
-    hasFailedLoadingSourceStatus,
-    hasFailedResolvingSource,
-    latestLoadSourceFailures,
+    hasFailedLoadingLogView,
+    hasFailedLoadingLogViewStatus,
+    hasFailedResolvingLogView,
+    latestLoadLogViewFailures,
 
     // Loading states
     isLoading,

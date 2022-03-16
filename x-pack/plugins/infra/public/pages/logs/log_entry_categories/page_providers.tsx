@@ -18,7 +18,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
     hasFailedLoading,
     isLoading,
     isUninitialized,
-    latestLoadSourceFailures,
+    latestLoadLogViewFailures,
     load,
     resolvedLogView,
     logViewId,
@@ -31,7 +31,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
   if (space == null) {
     return null;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={load} />;
+    return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
   } else if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (resolvedLogView != null) {
