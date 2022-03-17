@@ -18,6 +18,7 @@ import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../comm
 import { useEsDocSearch } from '../../../../utils/use_es_doc_search';
 import { DataView } from '../../../../../../data_views/public';
 import { ElasticRequestState } from '../../../../application/doc/types';
+import { getHeight } from './get_height';
 
 interface SourceViewerProps {
   id: string;
@@ -29,27 +30,9 @@ interface SourceViewerProps {
 
 // Ihe number of lines displayed without scrolling used for classic table, which renders the component
 // inline limitation was necessary to enable virtualized scrolling, which improves performance
-const MAX_LINES_CLASSIC_TABLE = 500;
-
-export function getHeight(editor: monaco.editor.IStandaloneCodeEditor, useDocExplorer: boolean) {
-  const editorElement = editor?.getDomNode();
-  if (!editorElement) {
-    return 0;
-  }
-  if (useDocExplorer) {
-    // assign a good height filling the available space of the document flyout
-    const position = editorElement.getBoundingClientRect();
-    return window.innerHeight - position.top - 25;
-  } else {
-    // takes care of the classic table, display a maximum of 500 lines
-    // why not display it all? Due to performance issues when the browser needs to render it all
-    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-    const lineCount = editor.getModel()?.getLineCount() || 1;
-    const displayedLineCount =
-      lineCount > MAX_LINES_CLASSIC_TABLE ? MAX_LINES_CLASSIC_TABLE : lineCount;
-    return editor.getTopForLineNumber(displayedLineCount + 1) + lineHeight;
-  }
-}
+export const MAX_LINES_CLASSIC_TABLE = 500;
+// Displayed margin of the code editor to the window bottom when rendered in the document explorer flyout
+export const MARGIN_BOTTOM = 25;
 
 export const DocViewerSource = ({
   id,
