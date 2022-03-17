@@ -17,7 +17,11 @@ import {
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
 import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
-import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
+import {
+  AlertExecutionDetails,
+  AlertStates,
+  InventoryMetricThresholdParams,
+} from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
@@ -61,7 +65,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params, alertId }) => {
+  >(async ({ services, params, alertId, executionId }) => {
+    const alertExecutionDetails: AlertExecutionDetails = { alertId, executionId };
     const startTime = Date.now();
     const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
@@ -121,6 +126,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           compositeSize,
           filterQuery,
           logger,
+          alertExecutionDetails,
         })
       )
     );
@@ -215,9 +221,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     }
     const stopTime = Date.now();
     logger.debug(
-      `Inventory Threshold Rule (${alertId}) schedule ${scheduledActionsCount} actions in ${
-        stopTime - startTime
-      }ms`
+      `Inventory Threshold Rule (${JSON.stringify(
+        alertExecutionDetails
+      )}) schedule ${scheduledActionsCount} actions in ${stopTime - startTime}ms`
     );
   });
 

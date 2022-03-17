@@ -7,7 +7,10 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import type { Logger } from '@kbn/logging';
-import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import {
+  AlertExecutionDetails,
+  InventoryMetricConditions,
+} from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import {
   InventoryItemType,
@@ -46,6 +49,7 @@ export const getData = async (
   compositeSize: number,
   condition: InventoryMetricConditions,
   logger: Logger,
+  alertExecutionDetails: AlertExecutionDetails,
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput,
   afterKey?: BucketKey,
@@ -73,6 +77,7 @@ export const getData = async (
         compositeSize,
         condition,
         logger,
+        alertExecutionDetails,
         filterQuery,
         customMetric,
         nextAfterKey,
@@ -97,9 +102,9 @@ export const getData = async (
     filterQuery,
     customMetric
   );
-  logger.trace(`Request: ${JSON.stringify(request)}`);
+  logger.trace(`Request (${JSON.stringify(alertExecutionDetails)}): ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);
-  logger.trace(`Response: ${JSON.stringify(body)}`);
+  logger.trace(`Response (${JSON.stringify(alertExecutionDetails)}): ${JSON.stringify(body)}`);
   if (body.aggregations) {
     return handleResponse(body.aggregations, previousNodes);
   }
