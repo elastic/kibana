@@ -74,16 +74,14 @@ export function CasesAppServiceProvider({ getService, getPageObject }: FtrProvid
       const button = await find.byCssSelector(
         '[data-test-subj="case-view-status-dropdown"] button'
       );
-      button.click();
+      await button.click();
 
       await testSubjects.click('case-view-status-dropdown-in-progress');
 
       // wait for backend response
-      await retry.tryForTime(5000, () =>
-        find.byCssSelector(
-          '[data-test-subj="header-page-supplements"] [data-test-subj="status-badge-in-progress"]'
-        )
-      );
+      await testSubjects.existOrFail('header-page-supplements > status-badge-in-progress', {
+        timeout: 5000,
+      });
     },
 
     /**
@@ -93,16 +91,14 @@ export function CasesAppServiceProvider({ getService, getPageObject }: FtrProvid
       const button = await find.byCssSelector(
         '[data-test-subj="case-view-status-dropdown"] button'
       );
-      button.click();
+      await button.click();
 
       await testSubjects.click('case-view-status-dropdown-closed');
 
       // wait for backend response
-      await retry.tryForTime(5000, () =>
-        find.byCssSelector(
-          '[data-test-subj="header-page-supplements"] [data-test-subj="status-badge-closed"]'
-        )
-      );
+      await testSubjects.existOrFail('header-page-supplements > status-badge-closed', {
+        timeout: 5000,
+      });
     },
 
     /**
@@ -112,16 +108,14 @@ export function CasesAppServiceProvider({ getService, getPageObject }: FtrProvid
       const button = await find.byCssSelector(
         '[data-test-subj="case-view-status-dropdown"] button'
       );
-      button.click();
+      await button.click();
 
       await testSubjects.click('case-view-status-dropdown-open');
 
       // wait for backend response
-      await retry.tryForTime(5000, () =>
-        find.byCssSelector(
-          '[data-test-subj="header-page-supplements"] [data-test-subj="status-badge-open"]'
-        )
-      );
+      await testSubjects.existOrFail('header-page-supplements > status-badge-open', {
+        timeout: 5000,
+      });
     },
 
     async deleteAllBulkListAction() {

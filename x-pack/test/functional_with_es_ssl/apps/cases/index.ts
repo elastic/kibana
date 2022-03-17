@@ -8,11 +8,13 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Cases stack management', function () {
+  describe.only('Cases stack management', function () {
     before(async () => {});
 
     after(async () => {});
 
-    loadTestFile(require.resolve('./basic_case_crud'));
+    loadTestFile(require.resolve('./create_case_form'));
+    loadTestFile(require.resolve('./edit_case_form'));
+    loadTestFile(require.resolve('./list_view'));
   });
 };
