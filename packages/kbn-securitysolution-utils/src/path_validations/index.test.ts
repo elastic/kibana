@@ -24,6 +24,12 @@ describe('validateFilePathInput', () => {
       expect(
         validateFilePathInput({ os, value: 'C:\\Windows\\*\\FILENAME.EXE-1231205124.gz' })
       ).not.toEqual(FILENAME_WILDCARD_WARNING);
+      expect(
+        validateFilePathInput({
+          os,
+          value: 'C:\\Windows\\*\\file-name.path华语-1234 --su..ffix.txt',
+        })
+      ).not.toEqual(FILENAME_WILDCARD_WARNING);
     });
 
     it('warns on wildcard in file name at the end of the path', () => {
@@ -55,6 +61,9 @@ describe('validateFilePathInput', () => {
       expect(validateFilePathInput({ os, value: '/opt/*/FILENAME.EXE-1231205124.gz' })).not.toEqual(
         FILENAME_WILDCARD_WARNING
       );
+      expect(
+        validateFilePathInput({ os, value: '/opt/*/file-name.path华语-1234 --su..ffix.txt' })
+      ).not.toEqual(FILENAME_WILDCARD_WARNING);
     });
     it('warns on wildcard in file name at the end of the path', () => {
       expect(validateFilePathInput({ os, value: '/opt/bin*' })).toEqual(FILENAME_WILDCARD_WARNING);
@@ -610,6 +619,13 @@ describe('Executable filenames with wildcard PATHS', () => {
         value: '/op*/**/app.dmg',
       })
     ).toEqual(true);
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.MAC,
+        type: 'wildcard',
+        value: '/sy*/file-name.dot..dot...dot-华语',
+      })
+    ).toEqual(true);
   });
 
   it('should return TRUE when WINDOWS wildcards paths have a executable name', () => {
@@ -618,6 +634,13 @@ describe('Executable filenames with wildcard PATHS', () => {
         os: OperatingSystem.WINDOWS,
         type: 'wildcard',
         value: 'c:\\**\\path.exe',
+      })
+    ).toEqual(true);
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.WINDOWS,
+        type: 'wildcard',
+        value: 'C:\\*\\file-name.path华语 1234.txt',
       })
     ).toEqual(true);
   });
