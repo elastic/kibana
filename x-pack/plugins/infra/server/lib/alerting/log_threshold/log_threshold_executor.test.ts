@@ -419,11 +419,16 @@ describe('Log threshold executor', () => {
             },
           },
         } as UngroupedSearchQueryResponse;
+
+        const indexedStartedAt = "2022-03-17T11:26:11.843Z";
+        const kibanaBaseUrl = undefined; // Test when server.rewriteBasePath: in not provided.
         processUngroupedResults(
           results,
           ruleParams,
           alertsMock.createAlertFactory.create,
-          alertUpdaterMock
+          alertUpdaterMock,
+          indexedStartedAt,
+          kibanaBaseUrl
         );
         // First call, second argument
         expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
@@ -437,6 +442,7 @@ describe('Log threshold executor', () => {
               matchingDocuments: 10,
               isRatio: false,
               reason: '10 log entries in the last 5 mins. Alert when > 5.',
+              viewInAppUrl: `/app/logs/link-to/default/logs?time=1647516371843`,
             },
           },
         ]);
@@ -484,11 +490,17 @@ describe('Log threshold executor', () => {
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
+
+        const indexedStartedAt = "2022-03-17T11:26:11.843Z";
+        const kibanaBaseUrl = "http://localhost:5601/kibana"
+
         processGroupByResults(
           results,
           ruleParams,
           alertsMock.createAlertFactory.create,
-          alertUpdaterMock
+          alertUpdaterMock,
+          indexedStartedAt,
+          kibanaBaseUrl
         );
         expect(alertUpdaterMock.mock.calls.length).toBe(2);
         // First call, second argument
@@ -504,6 +516,7 @@ describe('Log threshold executor', () => {
               isRatio: false,
               reason:
                 '10 log entries in the last 5 mins for i-am-a-host-name-1, i-am-a-dataset-1. Alert when > 5.',
+              viewInAppUrl: `${kibanaBaseUrl}/app/logs/link-to/default/logs?time=1647516371843`,
             },
           },
         ]);
@@ -521,6 +534,7 @@ describe('Log threshold executor', () => {
               isRatio: false,
               reason:
                 '20 log entries in the last 5 mins for i-am-a-host-name-3, i-am-a-dataset-3. Alert when > 5.',
+              viewInAppUrl: `${kibanaBaseUrl}/app/logs/link-to/default/logs?time=1647516371843`,
             },
           },
         ]);
