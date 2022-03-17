@@ -111,9 +111,11 @@ export const DEBOUNCE_INTERVAL = 100;
 
 // Overall progress is a float from 0 to 1.
 const LOADED_OVERALL_HISTOGRAM = 0.05;
-const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
+const LOADED_FIELD_CANDIDATES = 0.05;
 const LOADED_DONE = 1;
-const PROGRESS_STEP_P_VALUES = 0.9;
+const PROGRESS_STEP_P_VALUES = 0.6;
+const PROGRESS_STEP_HISTOGRAMS = 0.1;
+const PROGRESS_STEP_FREQUENT_ITEMS = 0.1;
 
 export function useChangePointDetection(
   dataView: DataView,
@@ -157,6 +159,7 @@ export function useChangePointDetection(
   const abortCtrl = useRef(new AbortController());
 
   const startFetch = useCallback(async () => {
+    let loaded = 0;
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
 
@@ -183,9 +186,11 @@ export function useChangePointDetection(
         ccsWarning: false,
       };
 
+      loaded += LOADED_OVERALL_HISTOGRAM;
+
       setResponse({
         ...responseUpdate,
-        loaded: LOADED_OVERALL_HISTOGRAM,
+        loaded,
         loadingState: 'Loading field candidates.',
       });
       setResponse.flush();
@@ -202,8 +207,9 @@ export function useChangePointDetection(
         return;
       }
 
+      loaded += LOADED_FIELD_CANDIDATES;
       setResponse({
-        loaded: LOADED_FIELD_CANDIDATES,
+        loaded,
         loadingState: `Identified ${fieldCandidates.length} field candidates.`,
       });
       setResponse.flush();
@@ -236,11 +242,10 @@ export function useChangePointDetection(
         }
 
         chunkLoadCounter++;
+        loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
         setResponse({
           ...responseUpdate,
-          loaded:
-            LOADED_FIELD_CANDIDATES +
-            (chunkLoadCounter / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES,
+          loaded,
           loadingState: `Identified ${
             responseUpdate.changePoints?.length ?? 0
           } significant field/value pairs.`,
@@ -273,7 +278,9 @@ export function useChangePointDetection(
 
       responseUpdate.fieldStats = stats;
 
+      loaded += 0.05;
       setResponse({
+        loaded,
         loadingState: `Loading overall timeseries.`,
       });
       setResponse.flush();
@@ -285,7 +292,9 @@ export function useChangePointDetection(
 
       responseUpdate.overallTimeSeries = overallTimeSeries[0].data;
 
+      loaded += 0.05;
       setResponse({
+        loaded,
         loadingState: `Loading significant timeseries.`,
       });
       setResponse.flush();
@@ -319,9 +328,10 @@ export function useChangePointDetection(
             responseUpdate.changePoints[index].histogram = cpTimeSeries[0].data;
           }
         });
+        loaded += (1 / responseUpdate.changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
         setResponse({
           ...responseUpdate,
-          loaded: 0.99,
+          loaded,
           isRunning: true,
         });
       }
@@ -346,7 +356,9 @@ export function useChangePointDetection(
         return;
       }
 
+      loaded += PROGRESS_STEP_FREQUENT_ITEMS;
       setResponse({
+        loaded,
         loadingState: `Loading frequent item sets.`,
       });
       setResponse.flush();
