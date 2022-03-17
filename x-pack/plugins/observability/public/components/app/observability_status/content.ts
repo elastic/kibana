@@ -75,7 +75,7 @@ export const getContent = (
       }),
       addLink: http.basePath.prepend('/app/integrations/browse?q=metrics'),
       learnMoreLink: docLinks.links.observability.analyzeMetrics,
-      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
+      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.metrics.goToAppTitle', {
         defaultMessage: 'Show inventory',
       }),
       goToAppLink: http.basePath.prepend('/app/metrics/inventory'),
@@ -93,7 +93,7 @@ export const getContent = (
       }),
       addLink: http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
       learnMoreLink: docLinks.links.observability.monitorUptimeSynthetics,
-      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
+      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.uptime.goToAppTitle', {
         defaultMessage: 'Show monitors ',
       }),
       goToAppLink: http.basePath.prepend('/app/uptime'),
@@ -112,7 +112,7 @@ export const getContent = (
       }),
       addLink: http.basePath.prepend('/app/home#/tutorial/apm'),
       learnMoreLink: docLinks.links.observability.userExperience,
-      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
+      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.ux.goToAppTitle', {
         defaultMessage: 'Show dashboard',
       }),
       goToAppLink: http.basePath.prepend('/app/ux'),
@@ -131,7 +131,7 @@ export const getContent = (
       }),
       addLink: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules'),
       learnMoreLink: docLinks.links.observability.createAlerts,
-      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
+      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.alert.goToAppTitle', {
         defaultMessage: 'Show alerts',
       }),
       goToAppLink: http.basePath.prepend('/app/observability/alerts'),
