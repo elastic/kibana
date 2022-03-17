@@ -7,7 +7,7 @@
 
 import { ConsoleDataState, ConsoleStoreReducer } from './types';
 import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
-import { ConsoleBuiltinCommandsService } from '../../builtins/builtin_command_service';
+import { ConsoleBuiltinCommandsService } from '../../service/builtin_command_service';
 
 export type InitialStateInterface = Pick<ConsoleDataState, 'commandService' | 'scrollToBottom'>;
 

@@ -8,7 +8,7 @@
 import React, { ReactNode } from 'react';
 import { HistoryItem, HistoryItemComponent } from '../components/history_item';
 import { HelpOutput } from '../components/help_output';
-import { ParsedCommandInput } from '../service/parsed_command_input';
+import { ParsedCommandInput } from './parsed_command_input';
 import { CommandList } from '../components/command_list';
 import { CommandUsage } from '../components/command_usage';
 import { Command, CommandDefinition, CommandServiceInterface } from '../types';

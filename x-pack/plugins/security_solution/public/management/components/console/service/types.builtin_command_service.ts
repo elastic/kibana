@@ -7,7 +7,7 @@
 
 import { ReactNode } from 'react';
 import { CommandDefinition, CommandServiceInterface } from '../types';
-import { ParsedCommandInput } from '../service/parsed_command_input';
+import { ParsedCommandInput } from './parsed_command_input';
 import { HistoryItemComponent } from '../components/history_item';
 
 export interface BuiltinCommandServiceInterface extends CommandServiceInterface {
