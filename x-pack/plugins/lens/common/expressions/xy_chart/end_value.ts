@@ -30,7 +30,7 @@ export const endValueDefinitions = [
   },
   {
     id: 'Nearest',
-    title: i18n.translate('xpack.lens.endValueDescription.nearest', {
+    title: i18n.translate('xpack.lens.endValue.nearest', {
       defaultMessage: 'Nearest',
     }),
     description: i18n.translate('xpack.lens.endValueDescription.nearest', {
