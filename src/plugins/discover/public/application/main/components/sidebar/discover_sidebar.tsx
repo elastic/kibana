@@ -196,7 +196,7 @@ export function DiscoverSidebarComponent({
     }
   }, [paginate, scrollContainer, unpopularFields]);
 
-  const { fieldTypes, presentedFieldTypes } = useMemo(() => {
+  const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
     const dataViewFieldTypes = new Set<string>();
     if (Array.isArray(fields)) {
@@ -207,7 +207,7 @@ export function DiscoverSidebarComponent({
         }
       }
     }
-    return { fieldTypes: result, presentedFieldTypes: Array.from(dataViewFieldTypes) };
+    return { fieldTypes: result, presentFieldTypes: Array.from(dataViewFieldTypes) };
   }, [fields]);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
@@ -353,7 +353,7 @@ export function DiscoverSidebarComponent({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
-              presentedFieldTypes={presentedFieldTypes}
+              presentFieldTypes={presentFieldTypes}
             />
           </form>
         </EuiFlexItem>

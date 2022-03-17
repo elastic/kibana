@@ -56,7 +56,7 @@ export interface Props {
   /**
    * types presented in current data view
    */
-  presentedFieldTypes: string[];
+  presentFieldTypes: string[];
   /**
    * the input value of the user
    */
@@ -76,7 +76,7 @@ const FIELD_TYPES_PER_PAGE = 6;
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types, presentedFieldTypes }: Props) {
+export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -107,10 +107,10 @@ export function DiscoverFieldSearch({ onChange, value, types, presentedFieldType
 
   const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex } = usePager({
     initialPageSize: FIELD_TYPES_PER_PAGE,
-    totalItems: presentedFieldTypes.length,
+    totalItems: presentFieldTypes.length,
   });
   const items: FieldTypeTableItem[] = useMemo(() => {
-    return presentedFieldTypes
+    return presentFieldTypes
       .sort((one, another) => one.localeCompare(another))
       .map((element, index) => ({
         id: index,
@@ -118,7 +118,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentedFieldType
         description: getFieldTypeDescription(element),
       }))
       .slice(startIndex, pageSize + startIndex);
-  }, [pageSize, presentedFieldTypes, startIndex]);
+  }, [pageSize, presentFieldTypes, startIndex]);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
@@ -384,7 +384,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentedFieldType
               columns={columnsSidebar}
             />
             <EuiSpacer size="s" />
-            {presentedFieldTypes.length > FIELD_TYPES_PER_PAGE && (
+            {presentFieldTypes.length > FIELD_TYPES_PER_PAGE && (
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiPagination
