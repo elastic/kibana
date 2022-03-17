@@ -447,6 +447,13 @@ const expectAssetsInstalled = ({
       id: 'sample_security_rule',
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
+    const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
+      type: 'cloud_security_posture-rule-template',
+      id: 'sample_cloud_security_posture_rule_template',
+    });
+    expect(resCloudSecurityPostureRuleTemplate.id).equal(
+      'sample_cloud_security_posture_rule_template'
+    );
     const resTag = await kibanaServer.savedObjects.get({
       type: 'tag',
       id: 'sample_tag',
@@ -498,6 +505,10 @@ const expectAssetsInstalled = ({
     expect(sortedRes).eql({
       installed_kibana_space_id: 'default',
       installed_kibana: [
+        {
+          id: 'sample_cloud_security_posture_rule_template',
+          type: 'cloud_security_posture-rule-template',
+        },
         {
           id: 'sample_dashboard',
           type: 'dashboard',
@@ -612,6 +623,7 @@ const expectAssetsInstalled = ({
         { id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71', type: 'epm-packages-assets' },
         { id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b', type: 'epm-packages-assets' },
         { id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad', type: 'epm-packages-assets' },
+        { id: '943d5767-41f5-57c3-ba02-48e0f6a837db', type: 'epm-packages-assets' },
         { id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487', type: 'epm-packages-assets' },
         { id: '60d6d054-57e4-590f-a580-52bf3f5e7cca', type: 'epm-packages-assets' },
         { id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43', type: 'epm-packages-assets' },

@@ -72,6 +72,7 @@ export enum KibanaAssetType {
   map = 'map',
   lens = 'lens',
   securityRule = 'security_rule',
+  cloudSecurityPostureRuleTemplate = 'cloud_security_posture_rule_template',
   mlModule = 'ml_module',
   tag = 'tag',
 }
@@ -88,6 +89,7 @@ export enum KibanaSavedObjectType {
   lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
+  cloudSecurityPostureRuleTemplate = 'cloud_security_posture_rule_template',
   tag = 'tag',
 }
 

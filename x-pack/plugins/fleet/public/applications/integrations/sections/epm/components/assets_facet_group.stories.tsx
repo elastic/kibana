@@ -28,6 +28,7 @@ export const AssetsFacetGroup = ({ width }: Args) => {
       <Component
         assets={{
           kibana: {
+            cloud_security_posture_rule_template: [],
             dashboard: [],
             visualization: [],
             index_pattern: [],

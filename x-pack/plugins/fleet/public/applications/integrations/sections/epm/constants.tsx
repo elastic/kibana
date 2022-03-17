@@ -74,6 +74,12 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   tag: i18n.translate('xpack.fleet.epm.assetTitles.tag', {
     defaultMessage: 'Tag',
   }),
+  cloud_security_posture_rule_template: i18n.translate(
+    'xpack.fleet.epm.assetTitles.cloudSecurityPostureRuleTemplate',
+    {
+      defaultMessage: 'Cloud Security Posture rule template',
+    }
+  ),
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
@@ -89,6 +95,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   map: 'emsApp',
   lens: 'lensApp',
   security_rule: 'securityApp',
+  cloud_security_posture_rule_template: 'securityApp', // TODO ICON
   ml_module: 'mlApp',
   tag: 'tagApp',
 };
