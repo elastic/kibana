@@ -27,7 +27,7 @@ export function ShowAsLabel(props: Props) {
               <p>
                 <FormattedMessage
                   id="xpack.maps.source.esGeoGrid.clusterDescription"
-                  defaultMessage="Uses geotile grid aggregation to group your documents into grids. The cluster location is the weighted centroid for all documents in the gridded cell."
+                  defaultMessage="Groups documents into grids with a weighted center for each grid cell."
                 />
               </p>
             </dd>
@@ -37,7 +37,7 @@ export function ShowAsLabel(props: Props) {
               <p>
                 <FormattedMessage
                   id="xpack.maps.source.esGeoGrid.gridDescription"
-                  defaultMessage="Uses geotile grid aggregation to group your documents into grids. Displays the bounding box polygon for each gridded cell."
+                  defaultMessage="Groups documents into grids with a polygon for each grid cell."
                 />
               </p>
             </dd>
@@ -47,7 +47,7 @@ export function ShowAsLabel(props: Props) {
               <p>
                 <FormattedMessage
                   id="xpack.maps.source.esGeoGrid.hexDescription"
-                  defaultMessage="Uses geohex grid aggregation to group your documents into H3 hexagon grids. Displays the hexagon polygon for each gridded cell."
+                  defaultMessage="Groups documents into H3 hexagon grids with a hexagon for each cell."
                 />
               </p>
               {props.isHexDisabled ? <em>{props.hexDisabledReason}</em> : null}
