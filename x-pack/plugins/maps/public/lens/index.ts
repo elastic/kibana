@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DataVisualizerIndexPatternManagement } from './index_pattern_management';
+export { setupLensChoroplethChart } from './choropleth_chart';
