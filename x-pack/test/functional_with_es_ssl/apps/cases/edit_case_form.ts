@@ -23,7 +23,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     // create the case to test on
     before(async () => {
       await common.navigateToApp('casesStackManagement');
-      await casesApp.createCaseFromCreateCasePage();
+      await casesAppApi.createNthRandomCases(1);
     });
 
     after(async () => {
