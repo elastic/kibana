@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { MonitorManagementList, MonitorManagementListPageState } from './monitor_list';
-import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
-import { useInvalidMonitors } from '../hooks/use_invalid_monitors';
-import { Ping } from '../../../../common/runtime_types';
+import { MonitorManagementListResult, Ping } from '../../../../common/runtime_types';
 
 interface Props {
   loading: boolean;
   pageState: MonitorManagementListPageState;
-  monitorSavedObjects: [];
+  monitorSavedObjects?: MonitorManagementListResult['monitors'];
   onPageStateChange: (state: MonitorManagementListPageState) => void;
   onUpdate: () => void;
   errorSummaries: Ping[];

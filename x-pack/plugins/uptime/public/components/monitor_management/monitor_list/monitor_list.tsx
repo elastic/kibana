@@ -35,7 +35,6 @@ import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { InlineError } from './inline_error';
 
 export interface MonitorManagementListPageState {
   pageIndex: number;
@@ -196,17 +195,10 @@ export const MonitorManagementList = ({
           name={fields[ConfigKey.NAME]}
           isDisabled={!canEdit}
           onUpdate={onUpdate}
+          errorSummaries={errorSummaries}
+          monitors={list.monitors}
         />
       ),
-    },
-    {
-      align: 'right' as const,
-      field: 'id',
-      name: '',
-      render: (id: string) => {
-        const errorSummary = errorSummaries?.find((summary) => summary.config_id === id);
-        return errorSummary ? <InlineError errorSummary={errorSummary} /> : null;
-      },
     },
   ] as Array<EuiBasicTableColumn<SyntheticsMonitorWithId>>;
 

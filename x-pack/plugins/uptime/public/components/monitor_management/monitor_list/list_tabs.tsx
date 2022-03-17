@@ -17,13 +17,17 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
+import { MonitorManagementListPageState } from './monitor_list';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export const MonitorListTabs = ({
   invalidTotal,
   onUpdate,
+  onPageStateChange,
 }: {
   invalidTotal: number;
   onUpdate: () => void;
+  onPageStateChange: (state: MonitorManagementListPageState) => void;
 }) => {
   const [selectedTabId, setSelectedTabId] = useState('all');
 
@@ -35,7 +39,8 @@ export const MonitorListTabs = ({
 
   useEffect(() => {
     setSelectedTabId(viewType);
-  }, [viewType]);
+    onPageStateChange({ pageIndex: 1, pageSize: 10, sortOrder: 'asc', sortField: ConfigKey.NAME });
+  }, [viewType, onPageStateChange]);
 
   const tabs = [
     {

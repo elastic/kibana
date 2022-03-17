@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, useCallback, Reducer, useState } from 'react';
+import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '../../../../observability/public';
@@ -67,7 +67,11 @@ export const MonitorManagementPage: React.FC = () => {
 
   return (
     <>
-      <MonitorListTabs invalidTotal={monitorSavedObjects?.length ?? 0} onUpdate={onUpdate} />
+      <MonitorListTabs
+        invalidTotal={monitorSavedObjects?.length ?? 0}
+        onUpdate={onUpdate}
+        onPageStateChange={onPageStateChange}
+      />
       {viewType === 'all' ? (
         <AllMonitors
           pageState={pageState}
@@ -84,7 +88,7 @@ export const MonitorManagementPage: React.FC = () => {
           onUpdate={onUpdate}
           errorSummaries={errorSummaries}
           invalidTotal={count ?? 0}
-          loading={Boolean(loading) || objectsLoading}
+          loading={Boolean(loading) || Boolean(objectsLoading)}
         />
       )}
     </>

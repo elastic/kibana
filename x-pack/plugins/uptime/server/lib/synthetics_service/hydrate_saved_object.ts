@@ -50,7 +50,8 @@ export const hydrateSavedObjects = async ({
             return { ...monitor, attributes: { ...monitor.attributes, urls: url } };
           }
           return monitor;
-        });
+        })
+        .filter((monitor) => monitor.attributes.urls);
       await server.authSavedObjectsClient?.bulkUpdate(updatedObjects);
     }
   } catch (e) {

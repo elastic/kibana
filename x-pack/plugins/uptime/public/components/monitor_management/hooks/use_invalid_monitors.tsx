@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../../observability/public';
 import { Ping, SyntheticsMonitor } from '../../../../common/runtime_types';
@@ -24,7 +25,18 @@ export const useInvalidMonitors = (errorSummaries?: Ping[]) => {
       if (response) {
         const { resolved_objects: resolvedObjects } = response;
         return resolvedObjects
-          .filter((sv) => !Boolean(sv.saved_object.error))
+          .filter((sv) => {
+            if (sv.saved_object.updatedAt) {
+              const errorSummary = errorSummaries?.find(
+                (summary) => summary.config_id === sv.saved_object.id
+              );
+              if (errorSummary) {
+                return moment(sv.saved_object.updatedAt).isBefore(moment(errorSummary.timestamp));
+              }
+            }
+
+            return !Boolean(sv.saved_object.error);
+          })
           .map(({ saved_object: savedObject }) => savedObject);
       }
     }
