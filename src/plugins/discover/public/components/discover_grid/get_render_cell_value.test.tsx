@@ -169,45 +169,49 @@ describe('Discover grid cell rendering', function () {
       >
         <EuiDescriptionListTitle>
           extension
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": ".gz",
+              "__html": ".gz<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           bytesDisplayName
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": 100,
+              "__html": "100<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           _index
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": "test",
+              "__html": "test<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           _score
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": 1,
+              "__html": "1<wbr/>",
             }
           }
         />
@@ -286,49 +290,49 @@ describe('Discover grid cell rendering', function () {
       >
         <EuiDescriptionListTitle>
           extension
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": Array [
-                ".gz",
-              ],
+              "__html": ".gz<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           bytesDisplayName
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": Array [
-                100,
-              ],
+              "__html": "100<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           _index
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": "test",
+              "__html": "test<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           _score
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": 1,
+              "__html": "1<wbr/>",
             }
           }
         />
@@ -365,49 +369,49 @@ describe('Discover grid cell rendering', function () {
       >
         <EuiDescriptionListTitle>
           extension
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": Array [
-                ".gz",
-              ],
+              "__html": ".gz<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           bytesDisplayName
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": Array [
-                100,
-              ],
+              "__html": "100<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           _index
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": "test",
+              "__html": "test<wbr/>",
             }
           }
         />
         <EuiDescriptionListTitle>
           _score
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": 1,
+              "__html": "1<wbr/>",
             }
           }
         />
@@ -491,12 +495,13 @@ describe('Discover grid cell rendering', function () {
       >
         <EuiDescriptionListTitle>
           object.value
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": "100",
+              "__html": "100<wbr/>",
             }
           }
         />
@@ -533,12 +538,13 @@ describe('Discover grid cell rendering', function () {
       >
         <EuiDescriptionListTitle>
           object.value
+          <wbr />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="dscDiscoverGrid__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": "100",
+              "__html": "100<wbr/>",
             }
           }
         />
