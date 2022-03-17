@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import { AlertExecutionDetails } from '../../../../common/alerting/metrics/types';
@@ -52,5 +52,26 @@ export const createScopedLogger = (
       scopedLogger.debug(formatMessage(msg), meta),
     trace: <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
       scopedLogger.trace(formatMessage(msg), meta),
+    warn: <Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta) => {
+      if (isError(errorOrMessage)) {
+        scopedLogger.warn(errorOrMessage, meta);
+      } else {
+        scopedLogger.warn(formatMessage(errorOrMessage), meta);
+      }
+    },
+    error: <Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta) => {
+      if (isError(errorOrMessage)) {
+        scopedLogger.error(errorOrMessage, meta);
+      } else {
+        scopedLogger.error(formatMessage(errorOrMessage), meta);
+      }
+    },
+    fatal: <Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta) => {
+      if (isError(errorOrMessage)) {
+        scopedLogger.fatal(errorOrMessage, meta);
+      } else {
+        scopedLogger.fatal(formatMessage(errorOrMessage), meta);
+      }
+    },
   };
 };

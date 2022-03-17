@@ -82,7 +82,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
-        logger.error(e);
+        logger.error(e.message);
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory('*', reason);
