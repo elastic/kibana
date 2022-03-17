@@ -56,6 +56,7 @@ export const createRuleTypeMocks = (
     ...getUptimeESMockClient(),
     ...alertsMock.createAlertServices(),
     alertWithLifecycle: jest.fn().mockReturnValue({ scheduleActions, replaceState }),
+    getAlertStartedDate: jest.fn().mockReturnValue('2022-03-17T13:13:33.755Z'),
     logger: loggerMock,
   };
 
