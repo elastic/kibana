@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Id } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -19,12 +18,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
 
   async function clearAllApiKeys() {
-    const existingKeys = await (
-      await es.security.queryApiKeys()
-    ).api_keys.map((key) => {
-      return key.id;
-    });
-    await es.security.invalidateApiKey({ ids: existingKeys as Id[] });
+    const existingKeys = await es.security.queryApiKeys();
+    if (existingKeys.count > 0) {
+      await (
+        await es.security.queryApiKeys()
+      ).api_keys.map(async (key) => {
+        await es.security.invalidateApiKey({ ids: [key.id] });
+      });
+    } else {
+      log.debug('No API keys to delete.');
+    }
   }
 
   describe('Home page', function () {
