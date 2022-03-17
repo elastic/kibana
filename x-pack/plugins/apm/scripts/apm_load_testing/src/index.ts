@@ -128,7 +128,7 @@ function getAverageRequestTimings() {
     ([name, obj]) => {
       return {
         name,
-        avg: meanBy(obj, (o) => o.endTime),
+        avgEndTime: meanBy(obj, (o) => o.endTime),
       };
     }
   );

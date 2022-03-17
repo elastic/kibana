@@ -27,15 +27,15 @@ After running for the specified number of iterations, the average `endTime` for 
 [
   {
     "name": "http://localhost:5601/internal/apm/sorted_and_filtered_services",
-    "avg": 9862
+    "avgEndTime": 9862
   },
   {
     "name": "http://localhost:5601/internal/apm/services",
-    "avg": 11744
+    "avgEndTime": 11744
   },
   {
     "name": "http://localhost:5601/internal/apm/services/detailed_statistics",
-    "avg": 16135
+    "avgEndTime": 16135
   }
 ]
 ```
