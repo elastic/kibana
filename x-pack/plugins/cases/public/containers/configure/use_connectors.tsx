@@ -39,7 +39,6 @@ export const useConnectors = (): UseConnectorsResponse => {
 
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
-
   const refetchConnectors = useCallback(async () => {
     if (!actions.read) {
       setState({
