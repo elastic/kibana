@@ -17,6 +17,7 @@ import { useForm } from '../hooks/use_form';
 import { useFormData } from '../hooks/use_form_data';
 import { Form, Props as FormProps } from './form';
 import { UseField } from './use_field';
+import { formStories } from './storybook';
 
 export default {
   component: Form,
@@ -26,9 +27,16 @@ export default {
   parameters: {
     controls: { hideNoControlsWarning: true },
   },
+  docs: {
+    source: {
+      type: 'code',
+    },
+  },
 } as ComponentMeta<typeof Form>;
 
 type Args = Pick<FormProps, 'children' | 'FormWrapper'>;
+
+const { Validation, DeSerializer } = formStories;
 
 /**
  * Validate the form and return its data.
@@ -107,9 +115,7 @@ export const Schema = (args: Args) => {
   );
 };
 
-// --- VALIDATION
-
-export { Validation } from './storybook/form_validation';
+export { Validation, DeSerializer };
 
 // --- CHANGE LISTENERS
 
