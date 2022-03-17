@@ -21,7 +21,6 @@ import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { PartitionElementEvent } from '@elastic/charts';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import { useComplianceDashboardDataApi } from '../../../common/api/use_compliance_dashboard_data_api';
 import { ChartPanel } from '../../../components/chart_panel';
 import * as TEXT from '../translations';
 import { ComplianceDashboardData, Evaluation } from '../../../../common/types';
@@ -29,13 +28,13 @@ import { RisksTable } from '../compliance_charts/risks_table';
 import { INTERNAL_FEATURE_FLAGS, RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 
-const logoMap: ReadonlyMap<string, EuiIconType> = new Map([['CIS Kubernetes', 'logoKubernetes']]);
+const logoMap: ReadonlyMap<string, EuiIconType> = new Map([
+  ['CIS Kubernetes V1.20', 'logoKubernetes'],
+]);
 
 const getBenchmarkLogo = (benchmarkName: string): EuiIconType => {
   return logoMap.get(benchmarkName) ?? 'logoElastic';
 };
-
-const mockClusterId = '2468540';
 
 const cardHeight = 300;
 
@@ -46,7 +45,6 @@ export const BenchmarksSection = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
-  const getStats = useComplianceDashboardDataApi();
 
   const handleElementClick = (clusterId: string, elements: PartitionElementEvent[]) => {
     const [element] = elements;
@@ -84,7 +82,7 @@ export const BenchmarksSection = ({
                         <h4>{cluster.meta.benchmarkName}</h4>
                       </EuiText>
                       <EuiText style={{ textAlign: 'center' }}>
-                        <h4>{`Cluster ID ${shortId || mockClusterId}`}</h4>
+                        <h4>{`Cluster ID ${shortId}`}</h4>
                       </EuiText>
                       <EuiSpacer size="xs" />
                       <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
@@ -106,12 +104,7 @@ export const BenchmarksSection = ({
                   grow={4}
                   style={{ borderRight: `1px solid ${euiTheme.colors.lightShade}` }}
                 >
-                  <ChartPanel
-                    title={TEXT.COMPLIANCE_SCORE}
-                    hasBorder={false}
-                    isLoading={getStats.isLoading}
-                    isError={getStats.isError}
-                  >
+                  <ChartPanel title={TEXT.COMPLIANCE_SCORE} hasBorder={false}>
                     <CloudPostureScoreChart
                       id={`${cluster.meta.clusterId}_score_chart`}
                       data={cluster.stats}
@@ -122,12 +115,7 @@ export const BenchmarksSection = ({
                   </ChartPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={4}>
-                  <ChartPanel
-                    title={TEXT.RISKS}
-                    hasBorder={false}
-                    isLoading={getStats.isLoading}
-                    isError={getStats.isError}
-                  >
+                  <ChartPanel title={TEXT.RISKS} hasBorder={false}>
                     <RisksTable
                       data={cluster.resourcesTypes}
                       maxItems={3}
