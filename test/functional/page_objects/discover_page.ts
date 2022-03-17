@@ -358,8 +358,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickIndexPatternActions() {
     await this.retry.try(async () => {
-      await this.testSubjects.click('discoverIndexPatternActions');
-      await this.testSubjects.existOrFail('discover-addRuntimeField-popover');
+      await this.testSubjects.click('discover-dataView-switch-link');
     });
   }
 
