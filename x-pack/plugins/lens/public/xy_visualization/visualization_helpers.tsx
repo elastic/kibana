@@ -142,9 +142,6 @@ export const isReferenceLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYReferenceLineLayerConfig => layer.layerType === layerTypes.REFERENCELINE;
 
-export const getReferenceLayers = (layers: XYLayerConfig[]) =>
-  (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
-
 export function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
