@@ -1,0 +1,26 @@
+[[data-views-service-has-data]]
+=== hasData service provided by Data view
+
+++++
+<titleabbrev>hasData service</titleabbrev>
+++++
+
+A standardized way to check the empty state for indices and data views.
+
+
+[[data-views-service-has-data-has-es-data]]
+==== Check to see if Elastic Search data exists
+
+`hasESData: () => Promise<boolean>; // Check to see if ES data exists`
+
+
+[[data-views-service-has-data-has-data-view]]
+==== Check to see if Data view exists
+
+`hasDataView: () => Promise<boolean>; // Check to see if any data view exists (primitive or user created)`
+
+
+[[data-views-service-has-data-has-user-data-view]]
+==== Check to see if user created data views exists
+
+`hasUserDataView: () => Promise; // Check to see if user created data views exists`
