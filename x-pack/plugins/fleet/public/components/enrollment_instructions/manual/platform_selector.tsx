@@ -47,7 +47,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
 }) => {
   const { platform, setPlatform } = usePlatform();
 
-  const callout = (
+  const systemPackageCallout = (
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.callout', {
         defaultMessage:
@@ -106,7 +106,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           )}
           {platform === 'deb' && (
             <>
-              {callout}
+              {systemPackageCallout}
               <EuiSpacer size="m" />
               <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
                 <CommandCode>{linuxDebCommand}</CommandCode>
@@ -115,7 +115,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           )}
           {platform === 'rpm' && (
             <>
-              {callout}
+              {systemPackageCallout}
               <EuiSpacer size="m" />
               <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
                 <CommandCode>{linuxRpmCommand}</CommandCode>
