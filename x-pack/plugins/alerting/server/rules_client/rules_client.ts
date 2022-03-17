@@ -179,34 +179,44 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-export type BulkEditAction =
+type BulkEditActionRuleFields = keyof Pick<
+  Rule,
+  'actions' | 'schedule' | 'tags' | 'throttle' | 'notifyWhen'
+>;
+
+export type BulkEditActionRule =
   | {
       action: 'add' | 'delete' | 'set';
-      field: 'tags';
-      value: string[];
-    }
-  | {
-      action: 'add' | 'delete' | 'set';
-      field: 'params.index';
+      field: Extract<BulkEditActionRuleFields, 'tags'>;
       value: string[];
     }
   | {
       action: 'add' | 'set';
-      field: 'actions';
+      field: Extract<BulkEditActionRuleFields, 'actions'>;
       value: NormalizedAlertAction[];
+    }
+  | {
+      action: 'set';
+      field: Extract<BulkEditActionRuleFields, 'schedule'>;
+      value: Rule['schedule'];
+    }
+  | {
+      action: 'set';
+      field: Extract<BulkEditActionRuleFields, 'throttle'>;
+      value: Rule['throttle'];
+    }
+  | {
+      action: 'set';
+      field: Extract<BulkEditActionRuleFields, 'notifyWhen'>;
+      value: Rule['notifyWhen'];
     };
 
-export interface BulkEditOptions {
+type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Params;
+
+export interface BulkEditOptions<Params extends RuleTypeParams> {
   filter?: string;
-  // modifier: (p: RawRule) => RawRule;
-  actions: BulkEditAction[];
-  data: {
-    name?: string;
-    schedule?: IntervalSchedule;
-    params?: RuleTypeParams;
-    throttle?: string | null;
-    notifyWhen?: RuleNotifyWhenType | null;
-  };
+  paramsModifier?: RuleParamsModifier<Params>;
+  actions: BulkEditActionRule[];
 }
 
 export interface BulkEditError {
@@ -1161,7 +1171,11 @@ export class RulesClient {
     );
   }
 
-  public async bulkEdit({ filter, actions, data = {} }: BulkEditOptions) {
+  public async bulkEdit<Params extends RuleTypeParams>({
+    filter,
+    actions,
+    paramsModifier,
+  }: BulkEditOptions<Params>) {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -1259,16 +1273,20 @@ export class RulesClient {
               attributes = this.applyBulkEditAction(action, attributes);
             }
 
+            const ruleParams = paramsModifier
+              ? paramsModifier(rule.attributes.params as Params)
+              : rule.attributes.params;
+
             // validate rule params
             const validatedAlertTypeParams = validateRuleTypeParams(
-              { ...attributes.params, ...data.params },
+              ruleParams,
               ruleType.validate?.params
             );
             validateMutatedRuleTypeParams(validatedAlertTypeParams, ruleType.validate?.params);
 
             // validate schedule interval
-            if (data.schedule) {
-              const intervalInMs = parseDuration(data.schedule.interval);
+            if (attributes.schedule.interval) {
+              const intervalInMs = parseDuration(attributes.schedule.interval as string);
               if (intervalInMs < this.minimumScheduleIntervalInMs) {
                 throw Boom.badRequest(
                   `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
@@ -1299,13 +1317,13 @@ export class RulesClient {
             const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
             // get notifyWhen
-            const notifyWhen = data.notifyWhen
-              ? getAlertNotifyWhenType(data.notifyWhen, data.throttle ?? null)
-              : attributes.notifyWhen;
+            const notifyWhen = getAlertNotifyWhenType(
+              attributes.notifyWhen,
+              attributes.throttle ?? null
+            );
 
             const updatedAttributes = this.updateMeta({
               ...attributes,
-              ...data,
               ...apiKeyAttributes,
               params: updatedParams as RawRule['params'],
               actions: rawAlertActions,
@@ -2300,7 +2318,7 @@ export class RulesClient {
     return alertAttributes;
   }
 
-  private applyBulkEditAction<R extends object>(action: BulkEditAction, rule: R) {
+  private applyBulkEditAction<R extends object>(action: BulkEditActionRule, rule: R) {
     const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
       Array.from(new Set([...arr, ...items]));
 

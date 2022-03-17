@@ -7,8 +7,9 @@
 
 import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
 import { Logger } from 'src/core/server';
+import { RuleAlertType } from '../../rules/types';
+
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { SetupPlugins } from '../../../../plugin';
@@ -16,7 +17,11 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { preparePayload } from '../../rules/bulk_action_edit';
+import {
+  splitBulkEditActions,
+  ruleParamsModifier,
+  actionAdapterForRulesClient,
+} from '../../rules/bulk_action_edit';
 import { buildSiemResponse } from '../utils';
 
 const MAX_ROUTE_CONCURRENCY = 5;
@@ -66,9 +71,13 @@ export const performBulkEditPOCRoute = (
 
         let results;
         if (body.action === BulkAction.edit) {
+          const { ruleParamsModifierActions, rulesClientActions } = splitBulkEditActions(body.edit);
+
           results = await rulesClient.bulkEdit({
             filter: body.query !== '' ? body.query : undefined,
-            ...preparePayload(body.edit),
+            actions: rulesClientActions.map(actionAdapterForRulesClient),
+            paramsModifier: (ruleParams) =>
+              ruleParamsModifier(ruleParams as RuleAlertType['params'], ruleParamsModifierActions),
           });
         }
         return response.ok({

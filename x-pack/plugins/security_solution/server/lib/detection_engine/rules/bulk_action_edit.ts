@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BulkEditActionRule } from '../../../../../alerting/server';
 import { RuleAlertType } from './types';
 
 import {
@@ -22,6 +23,9 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
   return arr.filter((item) => !itemsSet.has(item));
 };
 
+/**
+ * Deprecated
+ */
 export const applyBulkActionEditToRule = (
   existingRule: RuleAlertType,
   action: BulkActionEditPayload
@@ -88,73 +92,121 @@ export const applyBulkActionEditToRule = (
   return rule;
 };
 
-const actionAdapter = (action: BulkActionEditPayload, payload) => {
+export const applyBulkActionEditToRuleParams = (
+  existingRuleParams: RuleAlertType['params'],
+  action: BulkActionEditPayload
+): RuleAlertType['params'] => {
+  let ruleParams = { ...existingRuleParams };
+
   switch (action.type) {
-    // tags actions
-    case BulkActionEditType.add_tags:
-      payload.actions.push({
-        field: 'tags',
-        action: 'add',
-        value: action.value,
-      });
-      break;
-
-    case BulkActionEditType.delete_tags:
-      payload.actions.push({
-        field: 'tags',
-        action: 'delete',
-        value: action.value,
-      });
-      break;
-
-    case BulkActionEditType.set_tags:
-      payload.actions.push({
-        field: 'tags',
-        action: 'set',
-        value: action.value,
-      });
-      break;
-
     // index_patterns actions
+    // index pattern is not present in machine learning rule type, so we throw error on it
     case BulkActionEditType.add_index_patterns:
-      payload.actions.push({
-        field: 'params.index',
-        action: 'add',
-        value: action.value,
-      });
+      invariant(
+        ruleParams.type !== 'machine_learning',
+        "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
+      );
+
+      ruleParams.index = addItemsToArray(ruleParams.index ?? [], action.value);
       break;
 
     case BulkActionEditType.delete_index_patterns:
-      payload.actions.push({
-        field: 'params.index',
-        action: 'delete',
-        value: action.value,
-      });
+      invariant(
+        ruleParams.type !== 'machine_learning',
+        "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
+      );
+
+      ruleParams.index = deleteItemsFromArray(ruleParams.index ?? [], action.value);
       break;
 
     case BulkActionEditType.set_index_patterns:
-      payload.actions.push({
-        field: 'params.index',
-        action: 'set',
-        value: action.value,
-      });
+      invariant(
+        ruleParams.type !== 'machine_learning',
+        "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+      );
+
+      ruleParams.index = action.value;
       break;
 
+    // timeline actions
     case BulkActionEditType.set_timeline:
-      payload.data.params = {
+      ruleParams = {
+        ...ruleParams,
         timelineId: action.value.timeline_id,
         timelineTitle: action.value.timeline_title,
       };
   }
 
-  return payload;
+  return ruleParams;
 };
 
-export const preparePayload = (actions: BulkActionEditPayload[]) => {
-  const payload = {
-    data: {},
-    actions: [],
+export const ruleParamsModifier = (
+  existingRuleParams: RuleAlertType['params'],
+  actions: BulkActionEditPayload[]
+) => {
+  return actions.reduce(
+    (acc, action) => ({ ...acc, ...applyBulkActionEditToRuleParams(acc, action) }),
+    existingRuleParams
+  );
+};
+
+export const splitBulkEditActions = (actions: BulkActionEditPayload[]) => {
+  const splitActions: {
+    ruleParamsModifierActions: BulkActionEditPayload[];
+    rulesClientActions: BulkActionEditPayload[];
+  } = {
+    ruleParamsModifierActions: [],
+    rulesClientActions: [],
   };
 
-  return actions.reduce((acc, action) => actionAdapter(action, acc), payload);
+  return actions.reduce((acc, action) => {
+    switch (action.type) {
+      case BulkActionEditType.add_tags:
+      case BulkActionEditType.set_tags:
+      case BulkActionEditType.delete_tags:
+        acc.rulesClientActions.push(action);
+        break;
+      default:
+        acc.ruleParamsModifierActions.push(action);
+    }
+
+    return acc;
+  }, splitActions);
 };
+
+export const actionAdapterForRulesClient = (action: BulkActionEditPayload): BulkEditActionRule => {
+  switch (action.type) {
+    // tags actions
+    case BulkActionEditType.add_tags:
+      return {
+        field: 'tags',
+        action: 'add',
+        value: action.value,
+      };
+
+    case BulkActionEditType.delete_tags:
+      return {
+        field: 'tags',
+        action: 'delete',
+        value: action.value,
+      };
+
+    case BulkActionEditType.set_tags:
+      return {
+        field: 'tags',
+        action: 'set',
+        value: action.value,
+      };
+  }
+
+  throw Error('No action match');
+};
+
+// export const preparePayload = (actions: BulkActionEditPayload[]) => {
+//   const payload = {
+//     data: {},
+//     actions: [],
+//   };
+
+//   return actions.reduce((acc, action) => actionAdapter(action, acc), payload);
+// };
