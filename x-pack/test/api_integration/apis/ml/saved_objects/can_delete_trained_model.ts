@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     space?: string
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(
         `${
           space ? `/s/${space}` : ''
@@ -39,8 +39,8 @@ export default ({ getService }: FtrProviderContext) => {
       )
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ ids })
-      .expect(expectedStatusCode);
+      .send({ ids });
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
     return body;
   }
 

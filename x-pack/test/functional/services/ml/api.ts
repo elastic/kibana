@@ -1065,11 +1065,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       spacesToRemove: string[],
       space?: string
     ) {
-      const { body } = await kbnSupertest
+      const { body, status } = await kbnSupertest
         .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_trained_models_spaces`)
         .set(COMMON_REQUEST_HEADERS)
-        .send({ modelIds: [modelId], spacesToAdd, spacesToRemove })
-        .expect(200);
+        .send({ modelIds: [modelId], spacesToAdd, spacesToRemove });
+      this.assertResponseStatusCode(200, status, body);
 
       expect(body).to.eql({
         [modelId]: { success: true, type: 'trained-model' },
@@ -1077,10 +1077,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async assertTrainedModelSpaces(modelId: string, expectedSpaces: string[]) {
-      const { body } = await kbnSupertest
+      const { body, status } = await kbnSupertest
         .get('/api/ml/saved_objects/trained_models_spaces')
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      this.assertResponseStatusCode(200, status, body);
       if (expectedSpaces.length > 0) {
         // Should list expected spaces correctly
         expect(body).to.have.property('trainedModels');
@@ -1105,10 +1105,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async initSavedObjects(simulate: boolean = false, space?: string) {
-      const { body } = await kbnSupertest
+      const { body, status } = await kbnSupertest
         .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/initialize?simulate=${simulate}`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      this.assertResponseStatusCode(200, status, body);
       return body;
     },
 

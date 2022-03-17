@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       .set(COMMON_REQUEST_HEADERS)
       .send({ mlSavedObjectType });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
-      
+
     return body;
   }
 
