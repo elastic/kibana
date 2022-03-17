@@ -48,7 +48,6 @@ export const fetchIndices = async (client: IScopedClusterClient): Promise<Elasti
       documents: indexStats?.total?.docs?.count ?? 0,
       documents_deleted: indexStats?.total?.docs?.deleted ?? 0,
       size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
-      primary_size: new ByteSizeValue(indexStats?.primaries?.store?.size_in_bytes ?? 0).toString(),
       aliases: aliases.length ? aliases : 'none',
     };
   });

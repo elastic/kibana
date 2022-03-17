@@ -13,6 +13,5 @@ export interface ElasticsearchIndex {
   documents: number;
   documents_deleted: number;
   size: string;
-  primary_size: string;
   aliases: string | string[];
 }
