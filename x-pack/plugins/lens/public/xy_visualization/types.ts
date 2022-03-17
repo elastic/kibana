@@ -37,7 +37,7 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
-  emphasizeFitting: boolean;
+  emphasizeFitting?: boolean;
   endValue?: EndValue;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;

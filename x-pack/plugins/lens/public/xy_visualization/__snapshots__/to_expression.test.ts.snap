@@ -34,10 +34,10 @@ Object {
           "",
         ],
         "emphasizeFitting": Array [
-          false,
+          true,
         ],
         "endValue": Array [
-          "None",
+          "Nearest",
         ],
         "fillOpacity": Array [
           0.3,
