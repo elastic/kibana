@@ -64,6 +64,20 @@ export const useUrlPagination = (): UrlPagination => {
   const location = useLocation();
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
+
+  useEffect(() => {
+    // Replace old page_index and page_size url params by the new ones, page and pageSize
+    if ((urlParams.page_index && !urlParams.page) || (urlParams.page_size && !urlParams.pageSize)) {
+      history.replace(
+        `${history.location.pathname}${location.search
+          .replaceAll('page_size', 'pageSize')
+          .replaceAll('page_index', 'page')}`
+      );
+    }
+    // Apply this only when on mount this hook
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const urlPaginationParams = useMemo(() => {
     return paginationFromUrlParams(urlParams);
   }, [urlParams]);
