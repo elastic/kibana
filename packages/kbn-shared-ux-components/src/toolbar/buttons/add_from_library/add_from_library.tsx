@@ -14,7 +14,7 @@ export type Props = Omit<ToolbarButtonProps, 'iconType' | 'label'>;
 
 const label = {
   getLibraryButtonLabel: () =>
-    i18n.translate('sharedUX.toolbar.buttons.addFromLibrary.libraryButtonLabel', {
+    i18n.translate('sharedUXComponents.toolbar.buttons.addFromLibrary.libraryButtonLabel', {
       defaultMessage: 'Add from library',
     }),
 };
