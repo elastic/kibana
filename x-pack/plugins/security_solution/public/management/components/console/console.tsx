@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-import { OutputHistory } from './components/output_history';
+import { HistoryOutput } from './components/history_output';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { CommandServiceInterface } from './types';
 import { ConsoleStateProvider } from './components/console_state';
@@ -74,7 +74,7 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
         <EuiPanel className="ui-panel" panelRef={consoleWindowRef}>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={true}>
-              <OutputHistory />
+              <HistoryOutput />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <CommandInput prompt={prompt} focusRef={inputFocusRef} />

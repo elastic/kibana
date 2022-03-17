@@ -12,7 +12,7 @@ import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_st
 
 export type OutputHistoryProps = CommonProps;
 
-export const OutputHistory = memo<OutputHistoryProps>((commonProps) => {
+export const HistoryOutput = memo<OutputHistoryProps>((commonProps) => {
   const historyItems = useCommandHistory();
   const dispatch = useConsoleStateDispatch();
 
@@ -35,4 +35,4 @@ export const OutputHistory = memo<OutputHistoryProps>((commonProps) => {
   );
 });
 
-OutputHistory.displayName = 'OutputHistory';
+HistoryOutput.displayName = 'HistoryOutput';
