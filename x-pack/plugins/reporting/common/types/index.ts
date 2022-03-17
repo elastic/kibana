@@ -62,6 +62,16 @@ export interface TaskRunResult {
   max_size_reached?: boolean;
   warnings?: string[];
   metrics?: TaskRunMetrics;
+
+  /**
+   * When running a report task we may finish with warnings that were triggered
+   * by an error. We can pass the error code via the task run result to the
+   * task runner so that it can be recorded for telemetry.
+   *
+   * Alternatively, this field can be populated in the event that the task does
+   * not complete in the task runner's error handler.
+   */
+  error_code?: string;
 }
 
 export interface ReportSource {
@@ -71,7 +81,6 @@ export interface ReportSource {
    */
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
-  error_code?: string;
   payload: BasePayload;
   meta: {
     // for telemetry

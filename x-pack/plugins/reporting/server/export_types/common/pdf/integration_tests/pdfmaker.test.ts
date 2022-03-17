@@ -10,8 +10,8 @@
 import path from 'path';
 import { isUint8Array } from 'util/types';
 import { createMockLayout } from '../../../../../../screenshotting/server/layouts/mock';
+import { PdfWorkerOutOfMemoryError } from '../../../../../common/errors';
 import { PdfMaker } from '../';
-import { PdfWorkerOutOfMemoryError } from '../pdfmaker_errors';
 
 const imageBase64 = Buffer.from(
   `iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAGFBMVEXy8vJpaWn7+/vY2Nj39/cAAACcnJzx8fFvt0oZAAAAi0lEQVR4nO3SSQoDIBBFwR7U3P/GQXKEIIJULXr9H3TMrHhX5Yysvj3jjM8+XRnVa9wec8QuHKv3h74Z+PNyGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/xu3Bxy026rXu4ljdUVW395xUFfGzLo946DK+QW+bgCTFcecSAAAAABJRU5ErkJggg==`,
