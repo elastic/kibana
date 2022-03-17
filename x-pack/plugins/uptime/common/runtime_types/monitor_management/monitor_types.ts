@@ -56,7 +56,7 @@ export const ZipUrlTLSSensitiveFieldsCodec = t.partial({
 
 export const ZipUrlTLSCodec = t.intersection([ZipUrlTLSFieldsCodec, ZipUrlTLSSensitiveFieldsCodec]);
 
-export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
+export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSCodec>;
 
 // CommonFields
 export const CommonFieldsCodec = t.intersection([
