@@ -295,6 +295,9 @@ export interface GetAlertSummaryParams {
   numberOfExecutions?: number;
 }
 
+const MAX_RULES_NUMBER_FOR_BULK_EDIT = 10000;
+const API_KEY_GENERATE_CONCURRENCY = 50;
+
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
@@ -1185,7 +1188,7 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.BULK_UPDATE,
+          action: RuleAuditAction.BULK_EDIT,
           error,
         })
       );
@@ -1197,7 +1200,7 @@ export class RulesClient {
         ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
         : authorizationFilter) ?? filter;
 
-    const { aggregations } = await this.unsecuredSavedObjectsClient.find<
+    const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
       RuleBulkEditAggregation
     >({
@@ -1214,10 +1217,13 @@ export class RulesClient {
       },
     });
 
+    if (total > MAX_RULES_NUMBER_FOR_BULK_EDIT) {
+      throw Error(`More than ${MAX_RULES_NUMBER_FOR_BULK_EDIT} rules matched for bulk edit`);
+    }
     const buckets = aggregations?.alertTypeId.buckets;
 
     if (buckets === undefined) {
-      throw Error('Aggregation by alertTypeId is empty');
+      throw Error('Aggregation by alertTypeId|consumer is empty');
     }
 
     await pMap(buckets, async ({ key: [ruleType, consumer] }) => {
@@ -1347,13 +1353,13 @@ export class RulesClient {
             });
             this.auditLogger?.log(
               ruleAuditEvent({
-                action: RuleAuditAction.BULK_UPDATE,
+                action: RuleAuditAction.BULK_EDIT,
                 error,
               })
             );
           }
         },
-        { concurrency: 50 }
+        { concurrency: API_KEY_GENERATE_CONCURRENCY }
       );
     }
 

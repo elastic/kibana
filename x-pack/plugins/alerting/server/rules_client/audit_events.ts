@@ -23,7 +23,7 @@ export enum RuleAuditAction {
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
   AGGREGATE = 'rule_aggregate',
-  BULK_UPDATE = 'rule_bulk_update',
+  BULK_EDIT = 'rule_bulk_edit',
 }
 
 type VerbsTuple = [string, string, string];
@@ -33,7 +33,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_get: ['access', 'accessing', 'accessed'],
   rule_resolve: ['access', 'accessing', 'accessed'],
   rule_update: ['update', 'updating', 'updated'],
-  rule_bulk_update: ['update', 'updating', 'updated'],
+  rule_bulk_edit: ['update', 'updating', 'updated'],
   rule_update_api_key: ['update API key of', 'updating API key of', 'updated API key of'],
   rule_enable: ['enable', 'enabling', 'enabled'],
   rule_disable: ['disable', 'disabling', 'disabled'],
@@ -51,7 +51,7 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_get: 'access',
   rule_resolve: 'access',
   rule_update: 'change',
-  rule_bulk_update: 'change',
+  rule_bulk_edit: 'change',
   rule_update_api_key: 'change',
   rule_enable: 'change',
   rule_disable: 'change',
