@@ -149,6 +149,7 @@ Below is a document in the expected structure, with descriptions of the fields:
     ],
     alert: {
       rule: {
+        rule_type_id: "rule type id",
         consumer: "rule consumer",
         execution: {
           uuid: "UUID of current rule execution cycle",
