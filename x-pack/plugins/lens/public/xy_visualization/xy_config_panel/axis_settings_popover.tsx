@@ -435,7 +435,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           isInvalid={inclusiveZeroError || boundaryError}
           label={' '}
           helpText={
-            hasBarOrAreaOnAxis && !inclusiveZeroError
+            hasBarOrAreaOnAxis && (!inclusiveZeroError || boundaryError)
               ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
                   defaultMessage: 'Bounds must include zero.',
                 })
@@ -519,12 +519,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
               />
             }
             compressed
-            append={i18n.translate('xpack.lens.xyChart.upperBoundLabel', {
-              defaultMessage: 'Upper',
-            })}
-            prepend={i18n.translate('xpack.lens.xyChart.lowerBoundLabel', {
-              defaultMessage: 'Lower',
-            })}
           />
         </EuiFormRow>
       )}
