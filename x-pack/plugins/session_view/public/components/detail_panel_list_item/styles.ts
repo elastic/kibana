@@ -20,11 +20,10 @@ export const useStyles = ({ display }: StylesDeps) => {
     const item: CSSObject = {
       display,
       alignItems: 'center',
-      padding: euiTheme.size.s,
       width: '100%',
-      fontSize: 'inherit',
+      fontSize: 14,
       fontWeight: 'inherit',
-      minHeight: '36px',
+      minHeight: '24px',
     };
 
     const copiableItem: CSSObject = {
