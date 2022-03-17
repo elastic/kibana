@@ -24,6 +24,7 @@ import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/sche
 import { UPDATE_RULES_CONFIG_ROUTE_PATH } from '../../../common/constants';
 import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 import { PackagePolicyServiceInterface } from '../../../../fleet/server';
+import { CspRouter } from '../../types';
 
 export const getPackagePolicy = async (
   soClient: SavedObjectsClientContract,
@@ -99,13 +100,17 @@ export const updatePackagePolicy = (
   return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
 };
 
-export const defineUpdateRulesConfigRoute = (router: IRouter, cspContext: CspAppContext): void =>
+export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.post(
     {
       path: UPDATE_RULES_CONFIG_ROUTE_PATH,
       validate: { query: configurationUpdateInputSchema },
     },
     async (context, request, response) => {
+      if (!context.fleet.authz.fleet.all) {
+        return response.forbidden();
+      }
+
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const soClient = context.core.savedObjects.client;

@@ -23,6 +23,7 @@ import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../com
 import { CspAppContext } from '../../plugin';
 import type { Benchmark } from '../../../common/types';
 import { isNonNullable } from '../../../common/utils/helpers';
+import { CspRouter } from '../../types';
 
 type BenchmarksQuerySchema = TypeOf<typeof benchmarksInputSchema>;
 
@@ -132,13 +133,17 @@ const createBenchmarks = (
       .filter(isNonNullable);
   });
 
-export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppContext): void =>
+export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: BENCHMARKS_ROUTE_PATH,
       validate: { query: benchmarksInputSchema },
     },
     async (context, request, response) => {
+      if (!context.fleet.authz.fleet.all) {
+        return response.forbidden();
+      }
+
       try {
         const soClient = context.core.savedObjects.client;
         const { query } = request;
