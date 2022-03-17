@@ -283,7 +283,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           content={
             <FormattedMessage
               id="xpack.lists.exceptions.builder.exceptionMatchesOperator.warningMessage.wildcardInFilepath"
-              defaultMessage="To make a more efficient Event Filter, use multiple conditions and make them as specific as possible when using wildcards in the path values. For instance, adding a process.name or file.name field."
+              defaultMessage="To make a more efficient event filter, use multiple conditions and make them as specific as possible when using wildcards in the path values. For instance, adding a process.name or file.name field."
             />
           }
           size="m"
