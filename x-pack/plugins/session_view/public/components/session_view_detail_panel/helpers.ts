@@ -21,7 +21,8 @@ export const getDetailPanelProcess = (process: Process) => {
   processData.id = process.id;
   processData.start = process.events[0]['@timestamp'];
   processData.end = process.events[process.events.length - 1]['@timestamp'];
-  processData.args = process.events.find(event => event.event.action === 'exec')?.process.args ?? [];
+  processData.args =
+    process.events.find((event) => event.event.action === 'exec')?.process.args ?? [];
   processData.executable = [];
 
   process.events.forEach((event) => {
