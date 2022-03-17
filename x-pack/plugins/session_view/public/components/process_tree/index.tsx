@@ -37,6 +37,8 @@ interface ProcessTreeDeps {
   onProcessSelected: (process: Process | null) => void;
   setSearchResults?: (results: Process[]) => void;
   alertsFlyoutCallback?: (alertUuid: string) => void;
+  timeStampOn?: boolean;
+  verboseModeOn?: boolean;
 }
 
 export const ProcessTree = ({
@@ -53,6 +55,8 @@ export const ProcessTree = ({
   onProcessSelected,
   setSearchResults,
   alertsFlyoutCallback,
+  timeStampOn,
+  verboseModeOn,
 }: ProcessTreeDeps) => {
   const [isInvestigatedEventVisible, setIsInvestigatedEventVisible] = useState<boolean>(true);
   const [isInvestigatedEventAbove, setIsInvestigatedEventAbove] = useState<boolean>(false);
@@ -188,6 +192,8 @@ export const ProcessTree = ({
             scrollerRef={scrollerRef}
             onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
             alertsFlyoutCallback={alertsFlyoutCallback}
+            timeStampOn={timeStampOn}
+            verboseModeOn={verboseModeOn}
           />
         )}
         <div
