@@ -30,7 +30,7 @@ import { RouteDependencies } from '../../../';
 
 import { Body, Query } from './validation_config';
 
-export function toURL(base: string, path: string) {
+function toURL(base: string, path: string) {
   const [p, query = ''] = path.split('?');
 
   // if there is a '+' sign in query e.g. ?q=create_date:[2020-05-10T08:00:00.000+08:00 TO *]
