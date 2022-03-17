@@ -7,10 +7,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import type { Logger } from '@kbn/logging';
-import {
-  AlertExecutionDetails,
-  InventoryMetricConditions,
-} from '../../../../../common/alerting/metrics';
+import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import {
   InventoryItemType,
