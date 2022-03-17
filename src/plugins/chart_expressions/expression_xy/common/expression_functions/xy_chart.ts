@@ -7,7 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type {
+  ExpressionFunctionDefinition,
+  TablesAdapter,
+  Datatable,
+} from '../../../../expressions';
 import { LensMultiTable, XYArgs, XYRender } from '../types';
 import {
   XY_CHART,
@@ -25,6 +29,13 @@ import {
   LABELS_ORIENTATION_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
 } from '../constants';
+
+export const logDataTable = (
+  tableAdapter: TablesAdapter,
+  datatables: Record<string, Datatable> = {}
+) => {
+  Object.entries(datatables).forEach(([key, table]) => tableAdapter.logDatatable(key, table));
+};
 
 export const xyChartFunction: ExpressionFunctionDefinition<
   typeof XY_CHART,
@@ -161,11 +172,9 @@ export const xyChartFunction: ExpressionFunctionDefinition<
   },
   fn(data, args, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.logDatatable(
-        handlers.inspectorAdapters.tables,
-        data.tables
-      );
+      logDataTable(handlers.inspectorAdapters.tables, data.tables);
     }
+
     return {
       type: 'render',
       as: XY_CHART_RENDERER,
