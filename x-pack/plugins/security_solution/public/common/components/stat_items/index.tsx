@@ -18,7 +18,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useQueryToggle } from '../query_toggle';

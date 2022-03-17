@@ -94,6 +94,13 @@ export const useQueryAlerts = <Hit, Aggs>({
     if (!isEmpty(query) && !skip) {
       fetchData();
     }
+
+    if (skip) {
+      setLoading(false);
+      isSubscribed = false;
+      abortCtrl.abort();
+    }
+
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
