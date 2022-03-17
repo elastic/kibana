@@ -47,7 +47,6 @@ export async function setFullTimeRange(
     toasts?.addWarning({
       title: i18n.translate('xpack.dataVisualizer.index.fullTimeRangeSelector.noResults', {
         defaultMessage: 'No results match your search criteria',
-        values: { timeFieldName: indexPattern.timeFieldName },
       }),
     });
   }
