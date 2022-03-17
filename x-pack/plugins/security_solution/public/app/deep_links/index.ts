@@ -271,6 +271,24 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           }),
         ],
         order: 9004,
+        deepLinks: [
+          {
+            id: SecurityPageName.usersAnomalies,
+            title: i18n.translate('xpack.securitySolution.search.users.anomalies', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: `${USERS_PATH}/anomalies`,
+            isPremium: true,
+          },
+          {
+            id: SecurityPageName.usersRisk,
+            title: i18n.translate('xpack.securitySolution.search.users.risk', {
+              defaultMessage: 'Risk',
+            }),
+            path: `${USERS_PATH}/userRisk`,
+            isPremium: true,
+          },
+        ],
       },
     ],
   },

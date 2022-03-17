@@ -597,20 +597,93 @@ describe('Datatable Visualization', () => {
       ).toEqual([20]);
     });
 
-    it('sets fitRowToContent based on state', () => {
+    it('sets rowHeight "auto" fit based on state', () => {
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).fitRowToContent
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, fitRowToContent: false })
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
           .fitRowToContent
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, fitRowToContent: true })
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'custom' })
+          .fitRowToContent
+      ).toEqual([false]);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'auto' })
           .fitRowToContent
       ).toEqual([true]);
+    });
+
+    it('sets rowHeightLines fit based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).rowHeightLines).toEqual(
+        [1]
+      );
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
+          .rowHeightLines
+      ).toEqual([1]);
+
+      // should ignore lines value based on mode
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: 'single',
+          rowHeightLines: 5,
+        }).rowHeightLines
+      ).toEqual([1]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: 'custom',
+          rowHeightLines: 5,
+        }).rowHeightLines
+      ).toEqual([5]);
+
+      // should fallback to 2 for custom in case it's not set
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: 'custom',
+        }).rowHeightLines
+      ).toEqual([2]);
+    });
+
+    it('sets headerRowHeight && headerRowHeightLines correctly', () => {
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
+      ).toEqual([1]);
+
+      // should fallback to single in case it's not set
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
+      ).toEqual(['single']);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, headerRowHeight: 'single' })
+          .headerRowHeightLines
+      ).toEqual([1]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: 'custom',
+          headerRowHeightLines: 5,
+        }).headerRowHeightLines
+      ).toEqual([5]);
+
+      // should fallback to 2 for custom in case it's not set
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: 'custom',
+        }).headerRowHeightLines
+      ).toEqual([2]);
     });
   });
 
