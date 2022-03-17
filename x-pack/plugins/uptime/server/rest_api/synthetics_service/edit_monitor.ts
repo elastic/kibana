@@ -10,6 +10,7 @@ import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import {
   MonitorFields,
+  EncryptedSyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
   SyntheticsMonitor,
   ConfigKey,
@@ -57,8 +58,10 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     const { monitorId } = request.params;
 
     try {
-      const previousMonitor: SavedObject<SyntheticsMonitorWithSecrets> =
-        await savedObjectsClient.get(syntheticsMonitorType, monitorId);
+      const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(
+        syntheticsMonitorType,
+        monitorId
+      );
 
       /* Decrypting the previous monitor before editing ensures that all existing fields remain
        * on the object, even in flows where decryption does not take place, such as the enabled tab
@@ -78,7 +81,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       });
 
-      const editMonitor: SavedObjectsUpdateResponse<SyntheticsMonitorWithSecrets> =
+      const editMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
         await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,

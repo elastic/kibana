@@ -9,7 +9,6 @@ import { SavedObject } from 'kibana/server';
 import {
   MonitorFields,
   SyntheticsMonitor,
-  SyntheticsMonitorWithSecrets,
   EncryptedSyntheticsMonitor,
 } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
@@ -36,7 +35,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     }
 
     const newMonitor: SavedObject<EncryptedSyntheticsMonitor> =
-      await savedObjectsClient.create<SyntheticsMonitorWithSecrets>(
+      await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
         syntheticsMonitorType,
         formatSecrets({
           ...monitor,
