@@ -11,13 +11,12 @@ import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrap
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, settings, timePicker, visChart, unifiedSearch } = getPageObjects([
+  const { common, dashboard, settings, timePicker, visChart } = getPageObjects([
     'common',
     'dashboard',
     'settings',
     'timePicker',
     'visChart',
-    'unifiedSearch',
   ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -69,7 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('applied on discover', async () => {
       await common.navigateToApp('discover');
-      await unifiedSearch.closeTour();
       await timePicker.setAbsoluteRange(
         'Sep 19, 2017 @ 06:31:44.000',
         'Sep 23, 2018 @ 18:31:44.000'
