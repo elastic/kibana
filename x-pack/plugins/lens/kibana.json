@@ -36,7 +36,8 @@
     "lens"
   ],
   "extraPublicDirs": [
-    "common/constants"
+    "common/constants",
+    "common/expressions"
   ],
   "requiredBundles": [
     "savedObjects",
