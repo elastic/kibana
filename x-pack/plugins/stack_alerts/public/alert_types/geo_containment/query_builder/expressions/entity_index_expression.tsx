@@ -72,7 +72,8 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
   useEffect(() => {
     if (oldIndexPattern !== indexPattern) {
       fields.current.geoFields =
-        (indexPattern.fields.length &&
+        (indexPattern.fields &&
+          indexPattern.fields.length &&
           indexPattern.fields.filter((field: DataViewField) =>
             ES_GEO_FIELD_TYPES.includes(field.type)
           )) ||
@@ -82,7 +83,8 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
       }
 
       fields.current.dateFields =
-        (indexPattern.fields.length &&
+        (indexPattern.fields &&
+          indexPattern.fields.length &&
           indexPattern.fields.filter((field: DataViewField) => field.type === 'date')) ||
         [];
       if (fields.current.dateFields.length) {

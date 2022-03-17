@@ -73,7 +73,8 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   useEffect(() => {
     if (oldIndexPattern !== boundaryIndexPattern) {
       fields.current.geoFields =
-        (boundaryIndexPattern.fields.length &&
+        (boundaryIndexPattern.fields &&
+          boundaryIndexPattern.fields.length &&
           boundaryIndexPattern.fields.filter((field: DataViewField) =>
             ES_GEO_SHAPE_TYPES.includes(field.type)
           )) ||
@@ -83,7 +84,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
       }
 
       fields.current.boundaryNameFields = [
-        ...boundaryIndexPattern.fields.filter((field: DataViewField) => {
+        ...(boundaryIndexPattern.fields ?? []).filter((field: DataViewField) => {
           return (
             BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
             !field.name.startsWith('_') &&
