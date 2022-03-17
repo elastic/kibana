@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -70,10 +71,7 @@ export function CasesAppServiceProvider({ getService, getPageObject }: FtrProvid
      * Marks a case in progress via the status dropdown
      */
     async markCaseInProgressViaDropdown() {
-      const button = await find.byCssSelector(
-        '[data-test-subj="case-view-status-dropdown"] button'
-      );
-      await button.click();
+      await this.openCaseSetStatusDropdown();
 
       await testSubjects.click('case-view-status-dropdown-in-progress');
 
@@ -87,10 +85,7 @@ export function CasesAppServiceProvider({ getService, getPageObject }: FtrProvid
      * Marks a case closed via the status dropdown
      */
     async markCaseClosedViaDropdown() {
-      const button = await find.byCssSelector(
-        '[data-test-subj="case-view-status-dropdown"] button'
-      );
-      await button.click();
+      this.openCaseSetStatusDropdown();
 
       await testSubjects.click('case-view-status-dropdown-closed');
 
@@ -104,10 +99,7 @@ export function CasesAppServiceProvider({ getService, getPageObject }: FtrProvid
      * Marks a case open via the status dropdown
      */
     async markCaseOpenViaDropdown() {
-      const button = await find.byCssSelector(
-        '[data-test-subj="case-view-status-dropdown"] button'
-      );
-      await button.click();
+      this.openCaseSetStatusDropdown();
 
       await testSubjects.click('case-view-status-dropdown-open');
 
@@ -134,6 +126,18 @@ export function CasesAppServiceProvider({ getService, getPageObject }: FtrProvid
           await header.waitUntilLoadingHasFinished();
         }
       } while (rows.length > 0);
+    },
+
+    async validateCasesTableHasNthRows(nrRows: number) {
+      const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
+      expect(rows.length).equal(nrRows);
+    },
+
+    async openCaseSetStatusDropdown() {
+      const button = await find.byCssSelector(
+        '[data-test-subj="case-view-status-dropdown"] button'
+      );
+      await button.click();
     },
   };
 }

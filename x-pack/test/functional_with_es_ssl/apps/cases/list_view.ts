@@ -41,8 +41,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const NUMBER_CASES = 2;
       await casesAppApi.createNthRandomCases(NUMBER_CASES);
       await common.navigateToApp('casesStackManagement');
-      const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
-      expect(rows.length).equal(NUMBER_CASES);
+      await casesApp.validateCasesTableHasNthRows(NUMBER_CASES);
     });
 
     it('deletes a case correctly from the list', async () => {
@@ -66,8 +65,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await input.pressKeys(browser.keys.ENTER);
 
       await retry.tryForTime(5000, async () => {
-        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
-        expect(rows.length).equal(1);
+        await casesApp.validateCasesTableHasNthRows(1);
       });
     });
 
@@ -89,8 +87,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await common.navigateToApp('casesStackManagement');
       // deletes them from the UI
       await casesApp.deleteAllCasesFromListUi();
-      const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
-      expect(rows.length).equal(0);
+      await casesApp.validateCasesTableHasNthRows(0);
     });
 
     describe('changes status from the list', () => {
@@ -102,30 +99,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('to in progress', async () => {
-        const button = await find.byCssSelector(
-          '[data-test-subj="case-view-status-dropdown"] button'
-        );
-        await button.click();
+        await casesApp.openCaseSetStatusDropdown();
         await testSubjects.click('case-view-status-dropdown-in-progress');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('status-badge-in-progress');
       });
 
       it('to closed', async () => {
-        const button = await find.byCssSelector(
-          '[data-test-subj="case-view-status-dropdown"] button'
-        );
-        await button.click();
+        await casesApp.openCaseSetStatusDropdown();
         await testSubjects.click('case-view-status-dropdown-closed');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('status-badge-closed');
       });
 
       it('to open', async () => {
-        const button = await find.byCssSelector(
-          '[data-test-subj="case-view-status-dropdown"] button'
-        );
-        await button.click();
+        await casesApp.openCaseSetStatusDropdown();
         await testSubjects.click('case-view-status-dropdown-open');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('status-badge-open');
