@@ -107,7 +107,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                   <button
                     aria-label="close"
                     className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -381,6 +380,7 @@ Array [
       role="dialog"
     >
       <button
+        aria-label="Close this dialog"
         data-test-subj="euiFlyoutCloseButton"
         onClick={[Function]}
         type="button"
@@ -723,6 +723,7 @@ Array [
     role="dialog"
   >
     <button
+      aria-label="Close this dialog"
       data-test-subj="euiFlyoutCloseButton"
       onClick={[Function]}
       type="button"
