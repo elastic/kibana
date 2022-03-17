@@ -17,8 +17,8 @@ import { BaseResponseType } from '../../../types';
 const { collapseLiteralStrings } = XJson;
 
 export interface EsRequestArgs {
-  requests: Array<{ url: string; method: string; data: string[] }>;
   http: HttpSetup;
+  requests: Array<{ url: string; method: string; data: string[] }>;
 }
 
 export interface ESResponseObject<V = unknown> {
@@ -84,7 +84,6 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
         if (response) {
           const isSuccess =
-            typeof response.status === 'number' &&
             // Things like DELETE index where the index is not there are OK.
             ((response.status >= 200 && response.status < 300) || response.status === 404);
 
@@ -117,7 +116,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             });
 
             // single request terminate via sendNextRequest as well
-            sendNextRequest();
+            await sendNextRequest();
           }
         }
       } catch (error) {

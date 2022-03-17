@@ -46,7 +46,7 @@ export const useSendCurrentRequestToES = () => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequestToES({ requests, http });
+      const results = await sendRequestToES({ http, requests });
 
       let saveToHistoryError: undefined | Error;
       const { historyDisabled } = settings.toJSON();
