@@ -290,7 +290,7 @@ const newLayerFn = {
   [layerTypes.ANNOTATIONS]: ({ layerId }: { layerId: string }): XYAnnotationLayerConfig => ({
     layerId,
     layerType: layerTypes.ANNOTATIONS,
-    config: [],
+    annotations: [],
   }),
 };
 

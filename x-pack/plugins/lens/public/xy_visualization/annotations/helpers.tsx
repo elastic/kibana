@@ -114,14 +114,14 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   const dataLayers = getDataLayers(prevState.layers);
   const newLayer = { ...foundLayer } as XYAnnotationLayerConfig;
 
-  const hasConfig = newLayer.config?.some(({ id }) => id === columnId);
+  const hasConfig = newLayer.annotations?.some(({ id }) => id === columnId);
   const previousConfig = previousColumn
-    ? newLayer.config?.find(({ id }) => id === previousColumn)
+    ? newLayer.annotations?.find(({ id }) => id === previousColumn)
     : false;
   if (!hasConfig) {
     const newTimestamp = getStaticDate(dataLayers, frame?.activeData);
-    newLayer.config = [
-      ...(newLayer.config || []),
+    newLayer.annotations = [
+      ...(newLayer.annotations || []),
       {
         label: defaultAnnotationLabel,
         key: {
@@ -141,11 +141,11 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
 };
 
 export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) => {
-  return layer.config.map((config) => {
+  return layer.annotations.map((annotation) => {
     return {
-      columnId: config.id,
-      triggerIcon: config.isHidden ? ('invisible' as const) : ('color' as const),
-      color: config?.color || defaultAnnotationColor,
+      columnId: annotation.id,
+      triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
+      color: annotation?.color || defaultAnnotationColor,
     };
   });
 };
@@ -210,10 +210,10 @@ export const getUniqueLabels = (layers: XYLayerConfig[]) => {
   };
 
   annotationLayers.forEach((layer) => {
-    if (!layer.config) {
+    if (!layer.annotations) {
       return;
     }
-    layer.config.forEach((l) => {
+    layer.annotations.forEach((l) => {
       columnLabelMap[l.id] = makeUnique(l.label);
     });
   });

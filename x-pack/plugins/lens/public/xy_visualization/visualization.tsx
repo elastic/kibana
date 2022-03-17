@@ -404,9 +404,8 @@ export const getXyVisualization = ({
     }
     if (isAnnotationsLayer(foundLayer)) {
       const newLayer = { ...foundLayer };
-      if ('config' in newLayer) {
-        newLayer.config = newLayer.config.filter(({ id }) => id !== columnId);
-      }
+      newLayer.annotations = newLayer.annotations.filter(({ id }) => id !== columnId);
+
       const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
       return {
         ...prevState,

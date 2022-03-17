@@ -39,7 +39,7 @@ const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInte
 };
 
 export interface AnnotationsProps {
-  collectiveAnnotationConfigs: CollectiveConfig[];
+  groupedAnnotations: CollectiveConfig[];
   formatter?: FieldFormat;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
@@ -60,7 +60,7 @@ const groupVisibleConfigsByInterval = (
   firstTimestamp?: number
 ) => {
   return layers
-    .flatMap(({ config: configs }) => configs.filter((config) => !config.isHidden))
+    .flatMap(({ annotations }) => annotations.filter((a) => !a.isHidden))
     .reduce<Record<string, EventAnnotationArgs[]>>((acc, current) => {
       const roundedTimestamp = getRoundedTimestamp(
         moment(current.time).valueOf(),
@@ -122,7 +122,7 @@ const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
   };
 };
 
-export const getCollectiveConfigsByInterval = (
+export const getAnnotationsGroupedByInterval = (
   layers: AnnotationLayerArgs[],
   minInterval?: number,
   firstTimestamp?: number,
@@ -150,7 +150,7 @@ export const getCollectiveConfigsByInterval = (
 };
 
 export const Annotations = ({
-  collectiveAnnotationConfigs,
+  groupedAnnotations,
   formatter,
   isHorizontal,
   paddingMap,
@@ -160,11 +160,11 @@ export const Annotations = ({
 }: AnnotationsProps) => {
   return (
     <>
-      {collectiveAnnotationConfigs.map((config) => {
-        const markerPositionVertical = getBaseIconPlacement(config.iconPosition);
+      {groupedAnnotations.map((annotation) => {
+        const markerPositionVertical = getBaseIconPlacement(annotation.iconPosition);
         const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
-        const id = snakeCase(config.label);
-        const { roundedTimestamp } = config;
+        const id = snakeCase(annotation.label);
+        const { roundedTimestamp } = annotation;
         return (
           <LineAnnotation
             id={id}
@@ -174,10 +174,10 @@ export const Annotations = ({
               !hide ? (
                 <Marker
                   {...{
-                    config,
+                    config: annotation,
                     isHorizontal: !isHorizontal,
                     hasReducedPadding,
-                    label: config.label,
+                    label: annotation.label,
                   }}
                 />
               ) : undefined
@@ -185,7 +185,9 @@ export const Annotations = ({
             markerBody={
               !hide ? (
                 <MarkerBody
-                  label={config.textVisibility && !hasReducedPadding ? config.label : undefined}
+                  label={
+                    annotation.textVisibility && !hasReducedPadding ? annotation.label : undefined
+                  }
                   isHorizontal={!isHorizontal}
                 />
               ) : undefined
@@ -202,19 +204,19 @@ export const Annotations = ({
                 ).valueOf(),
                 header:
                   formatter?.convert(roundedTimestamp) || moment(roundedTimestamp).toISOString(),
-                details: config.label,
+                details: annotation.label,
               },
             ]}
-            customTooltipDetails={config.customTooltipDetails}
+            customTooltipDetails={annotation.customTooltipDetails}
             style={{
               line: {
-                strokeWidth: config.lineWidth || 1,
-                stroke: config.color || defaultAnnotationColor,
+                strokeWidth: annotation.lineWidth || 1,
+                stroke: annotation.color || defaultAnnotationColor,
                 dash:
-                  config.lineStyle === 'dashed'
-                    ? [(config.lineWidth || 1) * 3, config.lineWidth || 1]
-                    : config.lineStyle === 'dotted'
-                    ? [config.lineWidth || 1, config.lineWidth || 1]
+                  annotation.lineStyle === 'dashed'
+                    ? [(annotation.lineWidth || 1) * 3, annotation.lineWidth || 1]
+                    : annotation.lineStyle === 'dotted'
+                    ? [annotation.lineWidth || 1, annotation.lineWidth || 1]
                     : undefined,
                 opacity: 1,
               },

@@ -81,7 +81,7 @@ import { ReferenceLineAnnotations } from './expression_reference_lines';
 
 import { computeChartMargins, getLinesCausedPaddings } from './annotations_helpers';
 
-import { Annotations, getCollectiveConfigsByInterval } from './annotations/expression';
+import { Annotations, getAnnotationsGroupedByInterval } from './annotations/expression';
 import { computeOverallDataDomain } from './reference_line_helpers';
 import {
   getReferenceLayers,
@@ -371,7 +371,7 @@ export function XYChart({
 
   const xColumnId = firstTable.columns.find((col) => col.id === filteredLayers[0].xAccessor)?.id;
 
-  const collectiveAnnotationConfigs = getCollectiveConfigsByInterval(
+  const groupedAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
     minInterval,
     xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
@@ -379,7 +379,7 @@ export function XYChart({
   );
   const visualConfigs = [
     ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
-    ...collectiveAnnotationConfigs,
+    ...groupedAnnotations,
   ].filter(Boolean);
 
   const linesPaddings = getLinesCausedPaddings(visualConfigs, yAxesMap);
@@ -594,7 +594,7 @@ export function XYChart({
         !chartHasMoreThanOneBarSeries)
   );
 
-  const bottomAnnotationsExist = collectiveAnnotationConfigs.length && linesPaddings.bottom;
+  const bottomAnnotationsExist = groupedAnnotations.length && linesPaddings.bottom;
 
   const shouldUseNewTimeAxis =
     isTimeViz &&
@@ -1017,10 +1017,10 @@ export function XYChart({
           paddingMap={linesPaddings}
         />
       ) : null}
-      {collectiveAnnotationConfigs.length ? (
+      {groupedAnnotations.length ? (
         <Annotations
           hide={annotationsLayers?.[0].hide}
-          collectiveAnnotationConfigs={collectiveAnnotationConfigs}
+          groupedAnnotations={groupedAnnotations}
           formatter={xAxisFormatter}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}

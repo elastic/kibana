@@ -6,8 +6,8 @@
  */
 
 import {
-  EventAnnotationArgs,
   EventAnnotationConfig,
+  EventAnnotationOutput,
 } from '../../../../../../../src/plugins/event_annotation/common';
 import type { ExpressionFunctionDefinition } from '../../../../../../../src/plugins/expressions/common';
 import { layerTypes } from '../../../constants';
@@ -15,57 +15,53 @@ import { layerTypes } from '../../../constants';
 export interface XYAnnotationLayerConfig {
   layerId: string;
   layerType: typeof layerTypes.ANNOTATIONS;
-  config: EventAnnotationConfig[];
+  annotations: EventAnnotationConfig[];
   hide?: boolean;
 }
 
 export interface AnnotationLayerArgs {
+  annotations: EventAnnotationOutput[];
   layerId: string;
   layerType: typeof layerTypes.ANNOTATIONS;
-  config: EventAnnotationArgs[];
   hide?: boolean;
 }
-export interface XYAnnotationLayerArgsResult {
-  layerId: string;
-  layerType: typeof layerTypes.ANNOTATIONS;
+export type XYAnnotationLayerArgsResult = AnnotationLayerArgs & {
   type: 'lens_xy_annotation_layer';
-  config: EventAnnotationArgs[];
-  hide?: boolean;
-}
-
-export const annotationLayerConfig: ExpressionFunctionDefinition<
+};
+export function annotationLayerConfig(): ExpressionFunctionDefinition<
   'lens_xy_annotation_layer',
   null,
   AnnotationLayerArgs,
   XYAnnotationLayerArgsResult
-> = {
-  name: 'lens_xy_annotation_layer',
-  aliases: [],
-  type: 'lens_xy_annotation_layer',
-  help: `Configure a layer in the xy chart`,
-  inputTypes: ['null'],
-  args: {
-    layerId: {
-      types: ['string'],
-      help: '',
+> {
+  return {
+    name: 'lens_xy_annotation_layer',
+    aliases: [],
+    type: 'lens_xy_annotation_layer',
+    inputTypes: ['null'],
+    help: 'Annotation layer in lens',
+    args: {
+      layerId: {
+        types: ['string'],
+        help: '',
+      },
+      layerType: { types: ['string'], options: [layerTypes.ANNOTATIONS], help: '' },
+      hide: {
+        types: ['boolean'],
+        default: false,
+        help: 'Show details',
+      },
+      annotations: {
+        types: ['manual_event_annotation'],
+        help: '',
+        multi: true,
+      },
     },
-    layerType: { types: ['string'], options: [layerTypes.ANNOTATIONS], help: '' },
-    hide: {
-      types: ['boolean'],
-      default: false,
-      help: 'Show details',
+    fn: (input, args) => {
+      return {
+        type: 'lens_xy_annotation_layer',
+        ...args,
+      };
     },
-    config: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['manual_event_annotation' as any],
-      help: 'Additional configuration for y axes',
-      multi: true,
-    },
-  },
-  fn: function fn(input: unknown, args: AnnotationLayerArgs) {
-    return {
-      type: 'lens_xy_annotation_layer',
-      ...args,
-    };
-  },
-};
+  };
+}

@@ -54,7 +54,7 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 
 export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (isAnnotationsLayer(layer)) {
-    return layer?.config?.find((config) => config.id === accessor)?.color || null;
+    return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
   if (isDataLayer(layer) && layer.splitAccessor) {
     return null;

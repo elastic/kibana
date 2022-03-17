@@ -84,8 +84,8 @@ const simplifiedLayerExpression = {
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
     ...layer,
     hide: true,
-    yConfig: layer.yConfig?.map(({ lineWidth, ...config }) => ({
-      ...config,
+    yConfig: layer.yConfig?.map(({ lineWidth, ...rest }) => ({
+      ...rest,
       lineWidth: 1,
       icon: undefined,
       textVisibility: false,
@@ -94,8 +94,8 @@ const simplifiedLayerExpression = {
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
     ...layer,
     hide: true,
-    config: layer.config?.map(({ lineWidth, ...config }) => ({
-      ...config,
+    annotations: layer.annotations?.map(({ lineWidth, ...rest }) => ({
+      ...rest,
       lineWidth: 1,
       icon: undefined,
       textVisibility: false,
@@ -175,11 +175,11 @@ export const buildExpression = (
 
   const uniqueLabels = getUniqueLabels(state.layers);
   const validAnnotationsLayers = getAnnotationsLayers(state.layers)
-    .filter((layer) => Boolean(layer.config.length))
+    .filter((layer) => Boolean(layer.annotations.length))
     .map((layer) => {
       return {
         ...layer,
-        config: layer.config.map((c) => ({
+        annotations: layer.annotations.map((c) => ({
           ...c,
           label: uniqueLabels[c.id],
         })),
@@ -417,19 +417,19 @@ const annotationLayerToExpression = (
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
           layerType: [layerTypes.ANNOTATIONS],
-          config: layer.config
-            ? layer.config.map(
-                (config): Ast =>
+          annotations: layer.annotations
+            ? layer.annotations.map(
+                (ann): Ast =>
                   eventAnnotationService.toExpression({
-                    time: config.key.timestamp,
-                    label: config.label || defaultAnnotationLabel,
-                    textVisibility: config.textVisibility,
-                    icon: config.icon,
-                    iconPosition: config.iconPosition,
-                    lineStyle: config.lineStyle,
-                    lineWidth: config.lineWidth,
-                    color: config.color,
-                    isHidden: Boolean(config.isHidden),
+                    time: ann.key.timestamp,
+                    label: ann.label || defaultAnnotationLabel,
+                    textVisibility: ann.textVisibility,
+                    icon: ann.icon,
+                    iconPosition: ann.iconPosition,
+                    lineStyle: ann.lineStyle,
+                    lineWidth: ann.lineWidth,
+                    color: ann.color,
+                    isHidden: Boolean(ann.isHidden),
                   })
               )
             : [],
