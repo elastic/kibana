@@ -38,7 +38,8 @@ export function createActionTypeRegistry(): {
     taskManager: taskManagerMock.createSetup(),
     licensing: licensingMock.createSetup(),
     taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true, inMemoryMetrics })
+      new ActionExecutor({ isESOCanEncrypt: true }),
+      inMemoryMetrics
     ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: licenseStateMock.create(),

@@ -29,7 +29,8 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
     taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true, inMemoryMetrics })
+      new ActionExecutor({ isESOCanEncrypt: true }),
+      inMemoryMetrics
     ),
     actionsConfigUtils: mockedActionsConfig,
     licenseState: mockedLicenseState,
