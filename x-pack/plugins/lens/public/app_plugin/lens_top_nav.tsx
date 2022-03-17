@@ -171,7 +171,6 @@ function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
