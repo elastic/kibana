@@ -73,6 +73,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private output: any[] = [];
   private template: string;
   private compileOptions: ExtendedCompileOptions;
+  private initialHelpers: { [name: string]: Handlebars.HelperDelegate };
   private ast?: hbs.AST.Program;
   private container: Container;
   // @ts-expect-error
@@ -102,8 +103,10 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       this.compileOptions.knownHelpers
     );
 
+    this.initialHelpers = Object.assign({}, helpers);
+
     const container: Container = (this.container = {
-      helpers: Object.assign({}, helpers),
+      helpers: {},
       strict(obj, name, loc) {
         if (!obj || !(name in obj)) {
           throw new Handlebars.Exception('"' + name + '" not defined in ' + obj, {
@@ -134,10 +137,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       hooks: {},
     });
 
-    const keepHelperInHelpers = false;
-    moveHelperToHooks(container, 'helperMissing', keepHelperInHelpers);
-    moveHelperToHooks(container, 'blockHelperMissing', keepHelperInHelpers);
-
     // @ts-expect-error
     this.defaultHelperOptions.lookupProperty = container.lookupProperty;
   }
@@ -145,7 +144,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   render(context: any, options: ExtendedRuntimeOptions = {}): string {
     this.scopes = [context];
     this.output = [];
-    this.container.helpers = Object.assign(this.container.helpers, options.helpers);
+    this.container.helpers = Object.assign(this.initialHelpers, options.helpers);
+    this.container.hooks = {};
+
+    const keepHelperInHelpers = false;
+    moveHelperToHooks(this.container, 'helperMissing', keepHelperInHelpers);
+    moveHelperToHooks(this.container, 'blockHelperMissing', keepHelperInHelpers);
 
     if (!this.ast) {
       this.ast = Handlebars.parse(this.template); // TODO: can we get away with using parseWithoutProcessing instead?
@@ -252,7 +256,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         helper.fn = this.container.strict(helper.context, name, sexpr.loc);
       } else {
         helper.fn =
-          this.container.lookupProperty(helper.context, name) || this.container.hooks.helperMissing;
+          (helper.context && this.container.lookupProperty(helper.context, name)) ||
+          this.container.hooks.helperMissing;
       }
     }
 

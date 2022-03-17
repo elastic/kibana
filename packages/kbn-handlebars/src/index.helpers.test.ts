@@ -312,6 +312,34 @@ describe('helpers', () => {
     });
   });
 
+  describe('helperMissing', () => {
+    it('if a context is not found, helperMissing is used', () => {
+      expectTemplate('{{hello}} {{link_to world}}').toThrow(/Missing helper: "link_to"/);
+    });
+
+    it('if a context is not found, custom helperMissing is used', () => {
+      expectTemplate('{{hello}} {{link_to world}}')
+        .withInput({ hello: 'Hello', world: 'world' })
+        .withHelper('helperMissing', function (mesg, options) {
+          if (options.name === 'link_to') {
+            return new Handlebars.SafeString('<a>' + mesg + '</a>');
+          }
+        })
+        .toCompileTo('Hello <a>world</a>');
+    });
+
+    it('if a value is not found, custom helperMissing is used', () => {
+      expectTemplate('{{hello}} {{link_to}}')
+        .withInput({ hello: 'Hello', world: 'world' })
+        .withHelper('helperMissing', function (options) {
+          if (options.name === 'link_to') {
+            return new Handlebars.SafeString('<a>winning</a>');
+          }
+        })
+        .toCompileTo('Hello <a>winning</a>');
+    });
+  });
+
   describe('knownHelpers', () => {
     it('Known helper should render helper', () => {
       expectTemplate('{{hello}}')
