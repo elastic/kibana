@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { min } from 'lodash';
+import { join } from 'path';
 import datemath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
@@ -307,7 +308,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       timerange: oldVersionTimeRange,
     } = rawParams;
     const { kibanaBaseUrl } = _server;
-
+    // Need to extract the pathname if exists (server.basePath) to concatenate it correctly later for viewInAppUrl.
+    const kibanaBasePath = kibanaBaseUrl ? new URL(kibanaBaseUrl).pathname : '';
     const uptimeEsClient = createUptimeESClient({
       esClient: scopedClusterClient.asCurrentUser,
       savedObjectsClient,
@@ -380,7 +382,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           },
         });
         const fullViewInAppUrl = kibanaBaseUrl
-          ? new URL(relativeViewInAppUrl, kibanaBaseUrl)
+          ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl)
           : relativeViewInAppUrl;
         alert.scheduleActions(MONITOR_STATUS.id, {
           [ALERT_REASON_MSG]: monitorSummary.reason,
@@ -452,7 +454,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         },
       });
       const fullViewInAppUrl = kibanaBaseUrl
-        ? new URL(relativeViewInAppUrl, kibanaBaseUrl)
+        ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl)
         : relativeViewInAppUrl;
 
       alert.scheduleActions(MONITOR_STATUS.id, {
