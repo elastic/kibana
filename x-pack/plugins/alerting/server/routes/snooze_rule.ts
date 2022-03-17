@@ -11,6 +11,7 @@ import { ILicenseState, RuleMutedError } from '../lib';
 import { verifyAccessAndContext, RewriteRequestCase } from './lib';
 import { SnoozeOptions } from '../rules_client';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { validateSnoozeDate } from '../lib/validate_snooze_date';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -19,12 +20,7 @@ const paramSchema = schema.object({
 const bodySchema = schema.object({
   snooze_end_time: schema.oneOf([
     schema.string({
-      validate: (value) => {
-        const parsedValue = Date.parse(value);
-        if (isNaN(parsedValue)) return `Invalid date: ${value}`;
-        if (parsedValue <= Date.now()) return `Invalid snooze date as it is in the past: ${value}`;
-        return;
-      },
+      validate: validateSnoozeDate,
     }),
     schema.literal(-1),
   ]),
