@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiAutoRefreshButton,
   EuiTableSortingType,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -59,7 +60,10 @@ import {
   RULES_BREADCRUMB_TEXT,
   RULES_SINGLE_TITLE,
   RULES_PLURAL_TITLE,
+  SEARCH_PLACEHOLDER,
 } from './translations';
+
+const ENTER_KEY = 13;
 
 export function RulesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -75,6 +79,9 @@ export function RulesPage() {
     field: 'name',
     direction: 'asc',
   });
+  const [inputText, setInputText] = useState<string | undefined>();
+  const [searchText, setSearchText] = useState<string | undefined>();
+
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -85,6 +92,7 @@ export function RulesPage() {
   };
 
   const { rulesState, setRulesState, reload } = useFetchRules({
+    searchText,
     ruleLastResponseFilter,
     page,
     sort,
@@ -250,6 +258,25 @@ export function RulesPage() {
         }}
       />
       <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            fullWidth
+            isClearable
+            data-test-subj="ruleSearchField"
+            onChange={(e) => {
+              setInputText(e.target.value);
+              if (e.target.value === '') {
+                setSearchText(e.target.value);
+              }
+            }}
+            onKeyUp={(e) => {
+              if (e.keyCode === ENTER_KEY) {
+                setSearchText(inputText);
+              }
+            }}
+            placeholder={SEARCH_PLACEHOLDER}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LastResponseFilter
             key="rule-lastResponse-filter"
