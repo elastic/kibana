@@ -45,8 +45,8 @@ const displayRuleChangedWarn = (toastNotifications: ToastsStart) => {
     defaultMessage: 'Alert rule has changed',
   });
   const warnDescription = i18n.translate('discover.viewAlert.alertRuleChangedWarnDescription', {
-    defaultMessage: `Displayed documents might not match the documents triggered notification, 
-    since the rule configuration has been changed.`,
+    defaultMessage: `The displayed documents might not match the documents that triggered the alert
+     because the rule configuration changed.`,
   });
 
   toastNotifications.addWarning({

@@ -35,7 +35,8 @@ export function getAlertType(alerting: AlertingSetup): RuleTypeModel<EsQueryAler
 
 - Value: \\{\\{context.value\\}\\}
 - Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}
-- Timestamp: \\{\\{context.date\\}\\}`,
+- Timestamp: \\{\\{context.date\\}\\}
+- Link: \\{\\{context.link\\}\\}`,
       }
     ),
     requiresAppContext: false,

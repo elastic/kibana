@@ -113,7 +113,7 @@ export const SearchSourceExpression = ({
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.searchThreshold.ui.conditionPrompt"
-            defaultMessage="When the number of documents matching"
+            defaultMessage="When the number of documents match"
           />
         </h5>
       </EuiTitle>

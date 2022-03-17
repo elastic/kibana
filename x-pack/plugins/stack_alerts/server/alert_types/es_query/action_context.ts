@@ -30,6 +30,9 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
   conditions: string;
   // query matches
   hits: estypes.SearchHit[];
+  // a link to see records that triggered the alert for Discover alert
+  // a link which navigates to stack management in case of Elastic query alert
+  link: string;
 }
 
 export function addMessages(
@@ -50,13 +53,15 @@ export function addMessages(
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}
-- Timestamp: {date}`,
+- Timestamp: {date}
+- Link: {link}`,
     values: {
       name: alertInfo.name,
       value: baseContext.value,
       conditions: baseContext.conditions,
       window,
       date: baseContext.date,
+      link: baseContext.link,
     },
   });
 
