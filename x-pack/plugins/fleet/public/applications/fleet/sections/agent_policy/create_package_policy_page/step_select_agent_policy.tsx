@@ -99,6 +99,7 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
             const isAPMPackageAndDataOutputIsLogstash =
               packageInfo.name === FLEET_APM_PACKAGE &&
               getDataOutputForPolicy(agentConf)?.type === outputType.Logstash;
+
             return {
               inputDisplay: (
                 <>
@@ -204,7 +205,10 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     } else setHasAgentPolicyError(true);
   }, [selectedAgentPolicyError, selectedPolicyId, setHasAgentPolicyError]);
 
-  const onChange = useCallback((newValue: string) => setSelectedPolicyId(newValue), []);
+  const onChange = useCallback(
+    (newValue: string) => setSelectedPolicyId(newValue === '' ? undefined : newValue),
+    []
+  );
 
   // Display agent policies list error if there is one
   if (agentPoliciesError) {
