@@ -73,9 +73,8 @@ function getAvailableTotalForFeature(
 ): AvailableTotal {
   // if the type itself is deprecated, all jobs are deprecated, otherwise only some of them might be
   const deprecated = jobTypeIsDeprecated(exportType) ? jobType?.total : jobType?.deprecated || 0;
-  const needsLayout = jobTypeIsPdf(exportType);
 
-  // merge the additional stats for the jobType
+  // merge given stats with defaults
   const availableTotal: CombinedJobTypeStats = {
     available: isAvailable(featureAvailability, exportType),
     total: jobType?.total || 0,
@@ -83,7 +82,9 @@ function getAvailableTotalForFeature(
     sizes: { ...defaultTotalsForFeature.sizes, ...jobType?.sizes },
     metrics: { ...metricsForFeature[exportType], ...jobType?.metrics },
     app: { ...defaultTotalsForFeature.app, ...jobType?.app },
-    layout: needsLayout ? { ...defaultTotalsForFeature.layout, ...jobType?.layout } : undefined,
+    layout: jobTypeIsPdf(exportType)
+      ? { ...defaultTotalsForFeature.layout, ...jobType?.layout }
+      : undefined,
   };
 
   return availableTotal;
