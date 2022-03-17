@@ -220,6 +220,7 @@ export function createExecutionHandler<
         consumer: ruleConsumer,
         action: EVENT_LOG_ACTIONS.executeAction,
         executionId,
+        spaceId,
         instanceId: alertId,
         group: actionGroup,
         subgroup: actionSubgroup,

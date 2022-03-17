@@ -462,6 +462,7 @@ export class TaskRunner<
         namespace,
         ruleType,
         rule,
+        spaceId,
       });
     }
 
@@ -682,6 +683,7 @@ export class TaskRunner<
       consumer: this.ruleConsumer!,
       action: EVENT_LOG_ACTIONS.execute,
       namespace,
+      spaceId,
       executionId: this.executionId,
       task: {
         scheduled: this.taskInstance.scheduledAt.toISOString(),
@@ -921,6 +923,7 @@ export class TaskRunner<
             namespace,
           },
         ],
+        space_ids: [spaceId],
       },
       rule: {
         id: ruleId,
@@ -1010,6 +1013,7 @@ function generateNewAndRecoveredAlertEvents<
     recoveredAlerts,
     rule,
     ruleType,
+    spaceId,
   } = params;
   const originalAlertIds = Object.keys(originalAlerts);
   const currentAlertIds = Object.keys(currentAlerts);
@@ -1105,6 +1109,7 @@ function generateNewAndRecoveredAlertEvents<
             namespace,
           },
         ],
+        space_ids: [spaceId],
       },
       message,
       rule: {

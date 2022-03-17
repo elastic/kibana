@@ -206,6 +206,9 @@ describe('Create Execution Handler', () => {
                 "type_id": "test",
               },
             ],
+            "space_ids": Array [
+              "test1",
+            ],
           },
           "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
           "rule": Object {

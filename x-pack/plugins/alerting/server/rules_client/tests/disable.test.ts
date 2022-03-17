@@ -349,6 +349,7 @@ describe('disable()', () => {
             type_id: 'myType',
           },
         ],
+        space_ids: ['default'],
       },
       message: "instance '1' has recovered due to the rule was disabled",
       rule: {

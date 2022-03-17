@@ -43,6 +43,7 @@ describe('createAlertEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -70,6 +71,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -111,6 +113,7 @@ describe('createAlertEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       event: {
@@ -145,6 +148,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: 'message text here',
       rule: {
@@ -189,6 +193,7 @@ describe('createAlertEventLogRecordObject', () => {
             typeId: '.email',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       event: {
@@ -229,6 +234,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: '.email',
           },
         ],
+        space_ids: ['default'],
       },
       message: 'action execution start',
       rule: {

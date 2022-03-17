@@ -161,6 +161,7 @@ export const mockTaskInstance = () => ({
   taskType: 'alerting:test',
   params: {
     alertId: RULE_ID,
+    spaceId: 'default',
   },
   ownerId: null,
 });
@@ -237,6 +238,7 @@ export const generateEventLog = ({
       },
     }),
     saved_objects: savedObjects,
+    space_ids: ['default'],
     ...(task && {
       task: {
         schedule_delay: 0,
@@ -358,7 +360,7 @@ export const generateEnqueueFunctionInput = () => ({
     },
     type: 'SAVED_OBJECT',
   },
-  spaceId: undefined,
+  spaceId: 'default',
 });
 
 export const generateAlertInstance = ({ id, duration, start }: GeneratorParams = { id: 1 }) => ({

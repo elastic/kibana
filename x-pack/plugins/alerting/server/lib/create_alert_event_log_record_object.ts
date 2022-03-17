@@ -16,6 +16,7 @@ interface CreateAlertEventLogRecordParams {
   ruleId: string;
   ruleType: UntypedNormalizedRuleType;
   action: string;
+  spaceId?: string;
   consumer?: string;
   ruleName?: string;
   instanceId?: string;
@@ -50,6 +51,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     subgroup,
     namespace,
     consumer,
+    spaceId,
   } = params;
   const alerting =
     params.instanceId || group || subgroup
@@ -86,7 +88,6 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
         },
       },
       ...(alerting ? alerting : {}),
-
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
         type: so.type,
@@ -94,6 +95,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
         type_id: so.typeId,
         namespace,
       })),
+      ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
     },
     ...(message ? { message } : {}),
