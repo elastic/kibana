@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* eslint complexity: ["error", 40]*/
+// FIXME:PT remove the complexity
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
@@ -14,6 +17,19 @@ import { UnknownCommand } from '../../unknow_comand';
 import { HelpOutput } from '../../help_output';
 import { BadArgument } from '../../bad_argument';
 import { CommandExecutionOutput } from '../../command_execution_output';
+import { CommandDefinition } from '../../../types';
+
+const toCliArgumentOption = (argName: string) => `--${argName}`;
+
+const getRequiredArguments = (argDefinitions: CommandDefinition['args']): string[] => {
+  if (!argDefinitions) {
+    return [];
+  }
+
+  return Object.entries(argDefinitions)
+    .filter(([_, argDef]) => argDef.required)
+    .map(([argName]) => argName);
+};
 
 export const handleExecuteCommand: ConsoleStoreReducer<
   ConsoleDataAction & { type: 'executeCommand' }
@@ -63,6 +79,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       ],
     };
   }
+
+  const requiredArgs = getRequiredArguments(commandDefinition.args);
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs()) {
@@ -122,9 +140,38 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       };
     }
 
-    // unsupported arguments
+    // Missing required Arguments
+    for (const requiredArg of requiredArgs) {
+      if (!parsedInput.args[requiredArg]) {
+        return {
+          ...state,
+          commandHistory: [
+            ...state.commandHistory,
+            <HistoryItem>
+              <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+                {i18n.translate(
+                  'xpack.securitySolution.console.commandValidation.missingRequiredArg',
+                  {
+                    defaultMessage: 'missing required argument: {argName}',
+                    values: {
+                      argName: toCliArgumentOption(parsedInput.name),
+                    },
+                  }
+                )}
+              </BadArgument>
+            </HistoryItem>,
+          ],
+        };
+      }
+    }
+
+    // Validate each argument given to the command
     for (const argName of Object.keys(parsedInput.args)) {
-      if (!commandDefinition.args[argName]) {
+      const argDefinition = commandDefinition.args[argName];
+      const argInput = parsedInput.args[argName];
+
+      // Unknown argument
+      if (!argDefinition) {
         return {
           ...state,
           commandHistory: [
@@ -133,7 +180,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
                 {i18n.translate('xpack.securitySolution.console.commandValidation.unsupportedArg', {
                   defaultMessage: 'unsupported argument: {argName}',
-                  values: { argName },
+                  values: { argName: toCliArgumentOption(argName) },
                 })}
               </BadArgument>
             </HistoryItem>,
@@ -141,12 +188,74 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         };
       }
 
-      // FIXME:PT implement validation of arguments `allowMultiples`
+      // does not allow multiple values
+      if (
+        !argDefinition.allowMultiples &&
+        Array.isArray(argInput.values) &&
+        argInput.values.length > 0
+      ) {
+        return {
+          ...state,
+          commandHistory: [
+            ...state.commandHistory,
+            <HistoryItem>
+              <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+                {i18n.translate(
+                  'xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce',
+                  {
+                    defaultMessage: 'argument can only be used once: {argName}',
+                    values: { argName: toCliArgumentOption(argName) },
+                  }
+                )}
+              </BadArgument>
+            </HistoryItem>,
+          ],
+        };
+      }
 
-      // FIXME:PT implement validation of required arguments
+      if (argDefinition.validate) {
+        const validationResult = argDefinition.validate(argInput);
 
-      // FIXME:PT Implement calling validator
+        if (validationResult !== true) {
+          return {
+            ...state,
+            commandHistory: [
+              ...state.commandHistory,
+              <HistoryItem>
+                <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+                  {i18n.translate(
+                    'xpack.securitySolution.console.commandValidation.invalidArgValue',
+                    {
+                      defaultMessage: 'invalid argument value: {argName}. {error}',
+                      values: { argName: toCliArgumentOption(argName), error: validationResult },
+                    }
+                  )}
+                </BadArgument>
+              </HistoryItem>,
+            ],
+          };
+        }
+      }
     }
+  } else if (requiredArgs.length > 0) {
+    return {
+      ...state,
+      commandHistory: [
+        ...state.commandHistory,
+        <HistoryItem>
+          <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+            {i18n.translate('xpack.securitySolution.console.commandValidation.mustHaveArgs', {
+              defaultMessage: 'missing required arguments: {requiredArgs}',
+              values: {
+                requiredArgs: requiredArgs
+                  .map((argName) => toCliArgumentOption(argName))
+                  .join(', '),
+              },
+            })}
+          </BadArgument>
+        </HistoryItem>,
+      ],
+    };
   } else if (commandDefinition.mustHaveArgs) {
     return {
       ...state,
@@ -154,7 +263,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         ...state.commandHistory,
         <HistoryItem>
           <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-            {i18n.translate('xpack.securitySolution.console.commandValidation.oneArgIsRequred', {
+            {i18n.translate('xpack.securitySolution.console.commandValidation.oneArgIsRequired', {
               defaultMessage: 'at least one argument must be used',
             })}
           </BadArgument>

@@ -14,16 +14,18 @@ import argsplit from 'argsplit';
 
 // FIXME:PT Type `ParsedCommandInput` should be a generic that allows for the args's keys to be defined
 
+export interface ParsedArgData {
+  /** For arguments that were used only once. Will be `undefined` if multiples were used */
+  value: undefined | string;
+  /** For arguments that were used multiple times */
+  values: undefined | string[];
+}
+
 export interface ParsedCommandInput {
   input: string;
   name: string;
   args: {
-    [argName: string]: {
-      /** For arguments that were used only once. Will be `undefined` if multiples were used */
-      value: undefined | string;
-      /** For arguments that were used multiple times */
-      values: undefined | string[];
-    };
+    [argName: string]: ParsedArgData;
   };
   unknownArgs: undefined | string[];
   hasArgs(): boolean;

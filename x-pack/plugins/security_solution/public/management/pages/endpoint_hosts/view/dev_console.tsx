@@ -37,6 +37,12 @@ class DevCommandService implements CommandServiceInterface {
               return true;
             },
           },
+          bad: {
+            required: false,
+            allowMultiples: false,
+            about: 'will fail validation',
+            validate: () => 'This is a bad value',
+          },
         },
       },
       {

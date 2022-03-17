@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from 'react';
-import { ParsedCommandInput } from './service/parsed_command_input';
+import { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
 export interface CommandDefinition {
   name: string;
@@ -19,8 +19,11 @@ export interface CommandDefinition {
       required: boolean;
       allowMultiples: boolean;
       about: string;
-      /** should return `true` if valid or a string with the error message */
-      validate?: () => true | string;
+      /**
+       * Validate the individual values given to this argument.
+       * Should return `true` if valid or a string with the error message
+       */
+      validate?: (argData: ParsedArgData) => true | string;
       // Selector: Idea is that the schema can plugin in a rich component for the
       // user to select something (ex. a file)
       // FIXME: implement selector
