@@ -19,8 +19,10 @@ export function useLocations() {
   } = useSelector(monitorManagementListSelector);
 
   useEffect(() => {
-    dispatch(getServiceLocations());
-  }, [dispatch]);
+    if (!locations.length) {
+      dispatch(getServiceLocations());
+    }
+  }, [dispatch, locations]);
 
   return {
     locations,

@@ -30,7 +30,9 @@ export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid, o
     const isSelected = !checkboxIdToSelectedMap[optionId];
     const location = locations.find((loc) => loc.id === optionId);
     if (isSelected) {
-      setLocations((prevLocations) => (location ? [...prevLocations, location] : prevLocations));
+      setLocations((prevLocations) =>
+        location ? [...prevLocations, { id: location.id }] : prevLocations
+      );
     } else {
       setLocations((prevLocations) => [...prevLocations].filter((loc) => loc.id !== optionId));
     }

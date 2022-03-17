@@ -15,7 +15,10 @@ import {
   MonitorManagementList,
   MonitorManagementListPageState,
 } from '../../components/monitor_management/monitor_list/monitor_list';
+import { LOADING_LABEL, ERROR_HEADING_LABEL, MONITOR_LOADING_ERROR_LABEL } from './content';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
+import { useLocations } from '../../components/monitor_management/hooks/use_locations';
+import { Loader } from '../../components/monitor_management/loader/loader';
 
 export const MonitorManagementPage: React.FC = () => {
   const [pageState, dispatchPageAction] = useReducer<typeof monitorManagementPageReducer>(
@@ -27,6 +30,8 @@ export const MonitorManagementPage: React.FC = () => {
       sortField: ConfigKey.NAME,
     }
   );
+
+  const { error: locationsError, loading: locationsLoading } = useLocations();
 
   const onPageStateChange = useCallback(
     (state) => {
@@ -52,12 +57,20 @@ export const MonitorManagementPage: React.FC = () => {
   }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder]);
 
   return (
-    <MonitorManagementList
-      pageState={pageState}
-      monitorList={monitorList}
-      onPageStateChange={onPageStateChange}
-      onUpdate={onUpdate}
-    />
+    <Loader
+      loading={locationsLoading}
+      loadingTitle={LOADING_LABEL}
+      error={Boolean(locationsError)}
+      errorTitle={ERROR_HEADING_LABEL}
+      errorBody={MONITOR_LOADING_ERROR_LABEL}
+    >
+      <MonitorManagementList
+        pageState={pageState}
+        monitorList={monitorList}
+        onPageStateChange={onPageStateChange}
+        onUpdate={onUpdate}
+      />
+    </Loader>
   );
 };
 

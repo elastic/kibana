@@ -22,12 +22,16 @@ export const ManifestLocationCodec = t.interface({
   status: t.string,
 });
 
-export const ServiceLocationCodec = t.interface({
-  id: t.string,
-  label: t.string,
-  geo: LocationGeoCodec,
-  url: t.string,
-});
+export const ServiceLocationCodec = t.intersection([
+  t.interface({
+    id: t.string,
+  }),
+  t.partial({
+    label: t.string,
+    geo: LocationGeoCodec,
+    url: t.string,
+  }),
+]);
 
 export const ServiceLocationErrors = t.array(
   t.interface({
