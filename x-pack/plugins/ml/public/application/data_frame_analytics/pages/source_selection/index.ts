@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './analytics_navigation_bar';
+export { Page } from './page';
