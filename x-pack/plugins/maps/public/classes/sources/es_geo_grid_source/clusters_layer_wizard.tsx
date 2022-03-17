@@ -38,7 +38,8 @@ export const clustersLayerWizardConfig: LayerWizard = {
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGridClustersDescription', {
-    defaultMessage: 'Group Elasticsearch documents into grids and hexbins. Display metrics for each group',
+    defaultMessage:
+      'Group Elasticsearch documents into grids and hexbins. Display metrics for each group',
   }),
   icon: ClustersLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {

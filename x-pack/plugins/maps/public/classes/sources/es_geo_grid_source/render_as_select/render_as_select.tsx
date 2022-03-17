@@ -68,13 +68,12 @@ export function RenderAsSelect(props: Props) {
 
   const currentOption = options.find((option) => option.value === props.renderAs) || options[0];
 
-  const selectLabel = <ShowAsLabel isHexDisabled={isHexDisabled} hexDisabledReason={hexDisabledReason}/>;
+  const selectLabel = (
+    <ShowAsLabel isHexDisabled={isHexDisabled} hexDisabledReason={hexDisabledReason} />
+  );
 
   return (
-    <EuiFormRow
-      label={selectLabel}
-      display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
-    >
+    <EuiFormRow label={selectLabel} display={props.isColumnCompressed ? 'columnCompressed' : 'row'}>
       <EuiButtonGroup
         type="single"
         legend={i18n.translate('xpack.maps.source.esGeoGrid.showAsSelector', {

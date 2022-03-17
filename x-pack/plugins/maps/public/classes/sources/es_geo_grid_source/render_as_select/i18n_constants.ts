@@ -11,9 +11,12 @@ export const CLUSTER_LABEL = i18n.translate('xpack.maps.source.esGeoGrid.pointsD
   defaultMessage: 'Clusters',
 });
 
-export const GRID_LABEL = i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
-  defaultMessage: 'Grids',
-});
+export const GRID_LABEL = i18n.translate(
+  'xpack.maps.source.esGeoGrid.gridRectangleDropdownOption',
+  {
+    defaultMessage: 'Grids',
+  }
+);
 
 export const HEX_LABEL = i18n.translate('xpack.maps.source.esGeoGrid.hexDropdownOption', {
   defaultMessage: 'Hexbins',
