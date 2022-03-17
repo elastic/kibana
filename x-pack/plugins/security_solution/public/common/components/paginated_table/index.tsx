@@ -49,7 +49,7 @@ import { useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
-import { useQueryToggle } from '../query_toggle';
+import { useQueryToggle } from '../../containers/query_toggle';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 

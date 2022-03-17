@@ -45,7 +45,7 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
-import { useQueryToggle } from '../../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,

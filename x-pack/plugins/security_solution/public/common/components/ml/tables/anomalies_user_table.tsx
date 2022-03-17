@@ -23,7 +23,7 @@ import { Panel } from '../../panel';
 import { anomaliesTableDefaultEquality } from './default_equality';
 import { convertAnomaliesToUsers } from './convert_anomalies_to_users';
 import { getAnomaliesUserTableColumnsCurated } from './get_anomalies_user_table_columns';
-import { useQueryToggle } from '../../query_toggle';
+import { useQueryToggle } from '../../../containers/query_toggle';
 
 const sorting = {
   sort: {

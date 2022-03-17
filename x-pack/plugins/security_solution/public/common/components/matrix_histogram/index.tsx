@@ -34,7 +34,7 @@ import { GetLensAttributes, LensAttributes } from '../visualization_actions/type
 import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
 import { APP_ID, SecurityPageName } from '../../../../common/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { useQueryToggle } from '../query_toggle';
+import { useQueryToggle } from '../../containers/query_toggle';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {

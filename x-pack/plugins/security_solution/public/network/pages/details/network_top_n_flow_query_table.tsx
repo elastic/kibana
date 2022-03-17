@@ -11,7 +11,7 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
 import { useNetworkTopNFlow, ID } from '../../containers/network_top_n_flow';
 import { NetworkWithIndexComponentsQueryTableProps } from './types';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 

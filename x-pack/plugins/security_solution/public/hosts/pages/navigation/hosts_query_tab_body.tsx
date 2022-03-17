@@ -11,7 +11,7 @@ import { useAllHost, ID } from '../../containers/hosts';
 import { HostsComponentsQueryProps } from './types';
 import { HostsTable } from '../../components/hosts_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const HostsTableManage = manageQuery(HostsTable);
 

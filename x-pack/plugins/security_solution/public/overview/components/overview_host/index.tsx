@@ -23,7 +23,7 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { LinkButton } from '../../../common/components/links';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 export interface OwnProps {
   startDate: GlobalTimeArgs['from'];

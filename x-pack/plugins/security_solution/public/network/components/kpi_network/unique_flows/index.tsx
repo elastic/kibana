@@ -13,7 +13,7 @@ import { useNetworkKpiUniqueFlows, ID } from '../../../containers/kpi_network/un
 import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
-import { useQueryToggle } from '../../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {

@@ -22,7 +22,7 @@ import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { authenticationLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/hosts/authentication';
 import { LensAttributes } from '../../../common/components/visualization_actions/types';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 

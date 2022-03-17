@@ -20,7 +20,7 @@ import { BasicTable } from './basic_table';
 import { networkEquality } from './network_equality';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
 import { Panel } from '../../panel';
-import { useQueryToggle } from '../../query_toggle';
+import { useQueryToggle } from '../../../containers/query_toggle';
 
 const sorting = {
   sort: {

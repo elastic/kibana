@@ -20,7 +20,7 @@ import {
   useUserRiskScore,
   useUserRiskScoreKpi,
 } from '../../../risk_score/containers';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 

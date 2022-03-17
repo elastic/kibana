@@ -12,7 +12,7 @@ import { UsersComponentsQueryProps } from './types';
 
 import { AuthenticationTable } from '../../../hosts/components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 

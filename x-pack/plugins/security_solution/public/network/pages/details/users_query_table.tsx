@@ -11,7 +11,7 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { useNetworkUsers, ID } from '../../containers/users';
 import { NetworkComponentsQueryProps } from './types';
 import { UsersTable } from '../../components/users_table';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const UsersTableManage = manageQuery(UsersTable);
 

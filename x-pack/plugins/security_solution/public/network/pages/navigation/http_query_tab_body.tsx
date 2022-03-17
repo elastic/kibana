@@ -14,7 +14,7 @@ import { networkModel } from '../../store';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { HttpQueryTabBodyProps } from './types';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 

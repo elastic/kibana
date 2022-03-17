@@ -27,7 +27,7 @@ import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
 import { RuleLink } from '../../../detections/pages/detection_engine/rules/all/use_columns';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 export interface TopHostScoreContributorsProps
   extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {

@@ -21,7 +21,7 @@ import { get, getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { useQueryToggle } from '../query_toggle';
+import { useQueryToggle } from '../../containers/query_toggle';
 
 import {
   HostsKpiStrategyResponse,

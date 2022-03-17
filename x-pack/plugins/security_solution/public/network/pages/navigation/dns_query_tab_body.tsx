@@ -24,7 +24,7 @@ import { MatrixHistogramType } from '../../../../common/search_strategy/security
 import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { dnsTopDomainsLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/dns_top_domains';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 

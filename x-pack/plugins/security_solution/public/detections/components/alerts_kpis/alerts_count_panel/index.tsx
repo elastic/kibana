@@ -24,7 +24,7 @@ import type { AlertsCountAggregation } from './types';
 import { DEFAULT_STACK_BY_FIELD } from '../common/config';
 import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
-import { useQueryToggle } from '../../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 

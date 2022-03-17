@@ -16,7 +16,7 @@ import { useHostsKpiAuthentications, ID } from '../../../containers/kpi_hosts/au
 import { HostsKpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
-import { useQueryToggle } from '../../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {

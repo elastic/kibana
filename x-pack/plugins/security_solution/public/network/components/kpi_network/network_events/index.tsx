@@ -14,7 +14,7 @@ import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiNetworkEventsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_network_events';
-import { useQueryToggle } from '../../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];

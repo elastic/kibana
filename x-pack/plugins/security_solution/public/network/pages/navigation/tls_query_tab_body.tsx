@@ -11,7 +11,7 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { useNetworkTls, ID } from '../../containers/tls';
 import { TlsTable } from '../../components/tls_table';
 import { TlsQueryTabBodyProps } from './types';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const TlsTableManage = manageQuery(TlsTable);
 

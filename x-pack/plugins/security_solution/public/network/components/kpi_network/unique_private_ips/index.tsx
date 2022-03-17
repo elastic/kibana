@@ -20,7 +20,7 @@ import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../commo
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
 import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
-import { useQueryToggle } from '../../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];

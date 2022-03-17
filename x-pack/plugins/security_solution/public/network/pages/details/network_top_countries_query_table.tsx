@@ -11,7 +11,7 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { NetworkWithIndexComponentsQueryTableProps } from './types';
 import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
 import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 

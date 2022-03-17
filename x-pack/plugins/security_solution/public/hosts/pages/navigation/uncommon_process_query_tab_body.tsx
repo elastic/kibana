@@ -11,7 +11,7 @@ import { useUncommonProcesses, ID } from '../../containers/uncommon_processes';
 import { HostsComponentsQueryProps } from './types';
 import { UncommonProcessTable } from '../../components/uncommon_process_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { useQueryToggle } from '../../../common/components/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 

@@ -21,7 +21,7 @@ import { BasicTable } from './basic_table';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
 import { Panel } from '../../panel';
 import { anomaliesTableDefaultEquality } from './default_equality';
-import { useQueryToggle } from '../../query_toggle';
+import { useQueryToggle } from '../../../containers/query_toggle';
 
 const sorting = {
   sort: {
