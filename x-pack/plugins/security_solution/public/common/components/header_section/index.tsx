@@ -19,7 +19,7 @@ import styled, { css } from 'styled-components';
 import { InspectButton } from '../inspect';
 
 import { Subtitle } from '../subtitle';
-import * as i18n from '../query_toggle/translations';
+import * as i18n from '../../containers/query_toggle/translations';
 
 interface HeaderProps {
   border?: boolean;
@@ -99,6 +99,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               {toggleQuery && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    data-test-subj="query-toggle-header"
                     aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
                     color="text"
                     display="empty"
@@ -140,7 +141,11 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
             </EuiFlexItem>
           )}
 
-          {headerFilters && toggleStatus && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
+          {headerFilters && toggleStatus && (
+            <EuiFlexItem data-test-subj="header-section-filters" grow={false}>
+              {headerFilters}
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
 

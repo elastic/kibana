@@ -37,7 +37,7 @@ import { InspectButton } from '../inspect';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
-import * as i18n from '../query_toggle/translations';
+import * as i18n from '../../containers/query_toggle/translations';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;

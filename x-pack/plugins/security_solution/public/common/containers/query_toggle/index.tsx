@@ -10,18 +10,17 @@ import { useKibana } from '../../lib/kibana';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 export const getUniqueStorageKey = (pageName: string, id?: string): string | null =>
-  id ? `kibana.siem:${id}.query.toggle:${pageName}` : null;
-
-export const useQueryToggle = (
-  id?: string
-): {
+  id && pageName.length > 0 ? `kibana.siem:${id}.query.toggle:${pageName}` : null;
+export interface QueryToggle {
   toggleStatus: boolean;
   setToggleStatus: (b: boolean) => void;
-} => {
+}
+
+export const useQueryToggle = (id?: string): QueryToggle => {
+  const [{ pageName }] = useRouteSpy();
   const {
     services: { storage },
   } = useKibana();
-  const [{ pageName }] = useRouteSpy();
   const storageKey = getUniqueStorageKey(pageName, id);
 
   const [storageValue, setStorageValue] = useState(
