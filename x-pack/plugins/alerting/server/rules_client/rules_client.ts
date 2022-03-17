@@ -194,22 +194,24 @@ export type BulkEditActionRule =
       action: 'add' | 'set';
       field: Extract<BulkEditActionRuleFields, 'actions'>;
       value: NormalizedAlertAction[];
-    }
-  | {
-      action: 'set';
-      field: Extract<BulkEditActionRuleFields, 'schedule'>;
-      value: Rule['schedule'];
-    }
-  | {
-      action: 'set';
-      field: Extract<BulkEditActionRuleFields, 'throttle'>;
-      value: Rule['throttle'];
-    }
-  | {
-      action: 'set';
-      field: Extract<BulkEditActionRuleFields, 'notifyWhen'>;
-      value: Rule['notifyWhen'];
     };
+
+// schedule, throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
+// | {
+//     action: 'set';
+//     field: Extract<BulkEditActionRuleFields, 'schedule'>;
+//     value: Rule['schedule'];
+//   }
+// | {
+//     action: 'set';
+//     field: Extract<BulkEditActionRuleFields, 'throttle'>;
+//     value: Rule['throttle'];
+//   }
+// | {
+//     action: 'set';
+//     field: Extract<BulkEditActionRuleFields, 'notifyWhen'>;
+//     value: Rule['notifyWhen'];
+//   };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Params;
 
