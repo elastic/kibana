@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Labels } from 'elastic-apm-node';
+import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
   packageMock,
   mockedRootDir,
@@ -14,7 +14,7 @@ import {
   resetAllMocks,
 } from './config.test.mocks';
 
-import { ApmConfiguration } from './config';
+import { ApmConfiguration, CENTRALIZED_SERVICE_BASE_CONFIG } from './config';
 
 describe('ApmConfiguration', () => {
   beforeEach(() => {
@@ -148,32 +148,58 @@ describe('ApmConfiguration', () => {
     );
   });
 
-  it('correctly sets environment by reading env vars', () => {
-    delete process.env.ELASTIC_APM_ENVIRONMENT;
-    delete process.env.NODE_ENV;
+  describe('env vars', () => {
+    beforeEach(() => {
+      delete process.env.ELASTIC_APM_ENVIRONMENT;
+      delete process.env.ELASTIC_APM_SECRET_TOKEN;
+      delete process.env.ELASTIC_APM_SERVER_URL;
+      delete process.env.NODE_ENV;
+    });
 
-    let config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'development',
-      })
-    );
+    it('correctly sets environment by reading env vars', () => {
+      let config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'development',
+        })
+      );
 
-    process.env.NODE_ENV = 'production';
-    config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'production',
-      })
-    );
+      process.env.NODE_ENV = 'production';
+      config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'production',
+        })
+      );
 
-    process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
-    config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'ci',
-      })
-    );
+      process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
+      config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'ci',
+        })
+      );
+    });
+
+    it('uses default config if serverUrl is not set', () => {
+      process.env.ELASTIC_APM_SECRET_TOKEN = 'banana';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig).toHaveProperty(
+        'secretToken',
+        (CENTRALIZED_SERVICE_BASE_CONFIG as AgentConfigOptions).secretToken
+      );
+      expect(serverConfig).toHaveProperty('serverUrl', CENTRALIZED_SERVICE_BASE_CONFIG.serverUrl);
+    });
+
+    it('uses env vars config if serverUrl is set', () => {
+      process.env.ELASTIC_APM_SECRET_TOKEN = 'banana';
+      process.env.ELASTIC_APM_SERVER_URL = 'http://banana.com/';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig).toHaveProperty('secretToken', process.env.ELASTIC_APM_SECRET_TOKEN);
+      expect(serverConfig).toHaveProperty('serverUrl', process.env.ELASTIC_APM_SERVER_URL);
+    });
   });
 
   describe('contextPropagationOnly', () => {

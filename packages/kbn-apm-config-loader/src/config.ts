@@ -24,7 +24,7 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
   globalLabels: {},
 };
 
-const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
+export const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
   serverUrl: 'https://kibana-cloud-apm.apm.us-east-1.aws.found.io',
 
   // The secretToken below is intended to be hardcoded in this file even though
@@ -136,7 +136,7 @@ export class ApmConfiguration {
       config.serverUrl = process.env.ELASTIC_APM_SERVER_URL;
     }
 
-    if (process.env.ELASTIC_APM_SERVER_URL) {
+    if (process.env.ELASTIC_APM_SECRET_TOKEN) {
       config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
     }
 
@@ -253,11 +253,7 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const config = merge(
-      {},
-      this.getConfigFromKibanaConfig(),
-      this.getConfigFromEnv()
-    );
+    const config = merge({}, this.getConfigFromKibanaConfig(), this.getConfigFromEnv());
 
     if (config.active === false && config.contextPropagationOnly !== false) {
       throw new Error(
