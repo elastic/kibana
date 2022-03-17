@@ -367,10 +367,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         // in single field mode, allow the automatic switch of the function to
         // the most appropriate one
         if (fields.length === 1) {
-          const newFieldOp = operationSupportMatrix.operationByField[sourcefield]
-            ?.values()
-            .next().value;
-          if (newFieldOp !== 'terms') {
+          const possibleOperations = operationSupportMatrix.operationByField[sourcefield];
+          const termsSupported = possibleOperations?.has('terms');
+          if (!termsSupported) {
+            const newFieldOp = possibleOperations?.values().next().value;
             return updateLayer(
               insertOrReplaceColumn({
                 layer,
