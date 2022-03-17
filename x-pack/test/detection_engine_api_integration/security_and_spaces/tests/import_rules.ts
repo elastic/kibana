@@ -126,17 +126,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors: [
-            {
-              error: {
-                message:
-                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
-                status_code: 403,
-              },
-              rule_id: '(unknown id)',
-            },
-          ],
-          success: false,
+          errors: [],
+          success: true,
           success_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
