@@ -43,9 +43,13 @@ export const getConfigFromFiles = (configFiles: readonly string[]): Record<strin
   let mergedYaml: Record<string, any> = {};
 
   for (const configFile of configFiles) {
-    const yaml = readYaml(configFile);
-    if (yaml !== null) {
-      mergedYaml = merge(mergedYaml, yaml);
+    try {
+      const yaml = readYaml(configFile);
+      if (yaml !== null) {
+        mergedYaml = merge(mergedYaml, yaml);
+      }
+    } catch (e) {
+      /* tslint:disable:no-empty */
     }
   }
 
