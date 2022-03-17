@@ -181,6 +181,7 @@ export function createExecutionHandler<
         params: action.params,
         spaceId,
         apiKey: apiKey ?? null,
+        consumer: ruleConsumer,
         source: asSavedObjectExecutionSource({
           id: ruleId,
           type: 'alert',

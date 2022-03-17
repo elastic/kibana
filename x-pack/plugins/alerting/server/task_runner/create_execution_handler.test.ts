@@ -137,6 +137,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "consumer": "rule-consumer",
         "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {
@@ -265,6 +266,7 @@ describe('Create Execution Handler', () => {
     });
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
+      consumer: 'rule-consumer',
       id: '2',
       params: {
         foo: true,
@@ -359,6 +361,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "consumer": "rule-consumer",
         "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {
@@ -402,6 +405,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "consumer": "rule-consumer",
         "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {

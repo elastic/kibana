@@ -13,6 +13,7 @@ describe('createActionEventLogRecordObject', () => {
       createActionEventLogRecordObject({
         actionId: '1',
         action: 'execute-start',
+        consumer: 'test-consumer',
         timestamp: '1970-01-01T00:00:00.000Z',
         task: {
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -27,6 +28,7 @@ describe('createActionEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -37,6 +39,7 @@ describe('createActionEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'test-consumer',
             execution: {
               uuid: '123abc',
             },
@@ -50,6 +53,7 @@ describe('createActionEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -67,6 +71,7 @@ describe('createActionEventLogRecordObject', () => {
         message: 'action execution start',
         namespace: 'default',
         executionId: '123abc',
+        consumer: 'test-consumer',
         savedObjects: [
           {
             id: '2',
@@ -84,6 +89,7 @@ describe('createActionEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'test-consumer',
             execution: {
               uuid: '123abc',
             },
