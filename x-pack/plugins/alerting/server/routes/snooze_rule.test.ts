@@ -91,7 +91,7 @@ describe('snoozeAlertRoute', () => {
           id: '1',
         },
         body: {
-          snoozeEndTime: -1,
+          snooze_end_time: -1,
         },
       },
       ['noContent']
@@ -104,7 +104,7 @@ describe('snoozeAlertRoute', () => {
       Array [
         Object {
           "id": "1",
-          "snoozeEndTime": undefined,
+          "snoozeEndTime": -1,
         },
       ]
     `);
