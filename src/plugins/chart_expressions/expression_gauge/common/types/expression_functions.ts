@@ -47,13 +47,13 @@ export interface GaugeState {
   shape: GaugeShape;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   percentageMode?: boolean;
+  commonLabel?: string;
 }
 
 export type GaugeArguments = GaugeState & {
   shape: GaugeShape;
   colorMode: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteState>;
-  commonLabel?: string;
   ariaLabel?: string;
 };
 
