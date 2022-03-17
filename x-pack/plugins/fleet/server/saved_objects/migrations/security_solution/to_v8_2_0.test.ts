@@ -12,7 +12,12 @@ import type { PackagePolicy } from '../../../../common';
 import { migratePackagePolicyToV820 as migration } from './to_v8_2_0';
 
 describe('8.2.0 Endpoint Package Policy migration', () => {
-  const policyDoc = ({ windowsMalware = {}, macMalware = {}, linuxMalware = {} }) => {
+  const policyDoc = ({
+    windowsMalware = {},
+    macMalware = {},
+    linuxMalware = {},
+    linuxAdvanced = {},
+  }) => {
     return {
       id: 'mock-saved-object-id',
       attributes: {
@@ -48,6 +53,7 @@ describe('8.2.0 Endpoint Package Policy migration', () => {
                   },
                   linux: {
                     ...linuxMalware,
+                    ...linuxAdvanced,
                   },
                 },
               },
@@ -70,6 +76,7 @@ describe('8.2.0 Endpoint Package Policy migration', () => {
       windowsMalware: { malware: { mode: 'off', blocklist: false } },
       macMalware: { malware: { mode: 'off', blocklist: false } },
       linuxMalware: { malware: { mode: 'off', blocklist: false } },
+      linuxAdvanced: { advanced: { events: { session_data: false } } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
@@ -86,6 +93,7 @@ describe('8.2.0 Endpoint Package Policy migration', () => {
       windowsMalware: { malware: { mode: 'prevent', blocklist: true } },
       macMalware: { malware: { mode: 'prevent', blocklist: true } },
       linuxMalware: { malware: { mode: 'prevent', blocklist: true } },
+      linuxAdvanced: { advanced: { events: { session_data: false } } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
@@ -102,6 +110,30 @@ describe('8.2.0 Endpoint Package Policy migration', () => {
       windowsMalware: { malware: { mode: 'detect', blocklist: true } },
       macMalware: { malware: { mode: 'detect', blocklist: true } },
       linuxMalware: { malware: { mode: 'detect', blocklist: true } },
+      linuxAdvanced: { advanced: { events: { session_data: false } } },
+    });
+
+    expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
+  });
+
+  it('adds linux advanced value without overwriting existing values', () => {
+    const initialDoc = policyDoc({
+      windowsMalware: { malware: { mode: 'detect' } },
+      macMalware: { malware: { mode: 'detect' } },
+      linuxMalware: { malware: { mode: 'detect' } },
+      linuxAdvanced: { advanced: { elasticsearch: { tls: { verify_hostname: false } } } },
+    });
+
+    const migratedDoc = policyDoc({
+      windowsMalware: { malware: { mode: 'detect', blocklist: true } },
+      macMalware: { malware: { mode: 'detect', blocklist: true } },
+      linuxMalware: { malware: { mode: 'detect', blocklist: true } },
+      linuxAdvanced: {
+        advanced: {
+          events: { session_data: false },
+          elasticsearch: { tls: { verify_hostname: false } },
+        },
+      },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);

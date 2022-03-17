@@ -28,6 +28,18 @@ export const migratePackagePolicyToV820: SavedObjectMigrationFn<PackagePolicy, P
     policy.windows.malware.blocklist = policy.windows.malware.mode !== 'off';
     policy.mac.malware.blocklist = policy.mac.malware.mode !== 'off';
     policy.linux.malware.blocklist = policy.linux.malware.mode !== 'off';
+
+    const advancedLinuxSessionData = {
+      events: {
+        session_data: false,
+      },
+    };
+
+    if (policy.linux.advanced === undefined || policy.linux.advanced === null) {
+      policy.linux.advanced = advancedLinuxSessionData;
+    } else {
+      policy.linux.advanced.events = advancedLinuxSessionData.events;
+    }
   }
 
   return updatedPackagePolicyDoc;
