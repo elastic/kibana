@@ -8,19 +8,21 @@
 
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ServicesProvider, SharedUXServices } from '../../../../services';
-import { servicesFactory } from '../../../../services/mocks';
-
+import {
+  SharedUxServicesProvider,
+  SharedUxServices,
+  mockServicesFactory,
+} from '@kbn/shared-ux-services';
 import { ToolbarButton } from '../primary/primary';
 
 describe('<ToolbarButton />', () => {
-  let services: SharedUXServices;
+  let services: SharedUxServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
   beforeEach(() => {
-    services = servicesFactory();
+    services = mockServicesFactory();
     mount = (element: JSX.Element) =>
-      enzymeMount(<ServicesProvider {...services}>{element}</ServicesProvider>);
+      enzymeMount(<SharedUxServicesProvider {...services}>{element}</SharedUxServicesProvider>);
   });
 
   test('is rendered', () => {

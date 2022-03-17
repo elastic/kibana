@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ToolbarButton /> is rendered 1`] = `
-<ServicesProvider
+<SharedUxServicesProvider
   application={
     Object {
       "currentAppId$": Observable {
@@ -12,7 +12,7 @@ exports[`<ToolbarButton /> is rendered 1`] = `
   }
   docLinks={
     Object {
-      "dataViewsDocsLink": "dummy link",
+      "dataViewsDocLink": "dummy link",
     }
   }
   editors={
@@ -105,5 +105,5 @@ exports[`<ToolbarButton /> is rendered 1`] = `
       </EuiButtonDisplay>
     </EuiButton>
   </ToolbarButton>
-</ServicesProvider>
+</SharedUxServicesProvider>
 `;
