@@ -73,7 +73,10 @@ export const createEventSignal = async ({
       index: threatIndex,
       logger,
       buildRuleMessage,
-      threatListConfig,
+      threatListConfig: {
+        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
+        fields: undefined,
+      },
       perPage,
     });
 

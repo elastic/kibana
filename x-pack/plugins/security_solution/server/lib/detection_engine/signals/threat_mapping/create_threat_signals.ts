@@ -20,7 +20,6 @@ import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 
-
 export const createThreatSignals = async ({
   alertId,
   buildRuleMessage,
@@ -214,7 +213,7 @@ export const createThreatSignals = async ({
           threatIndex,
           threatListConfig,
           threatIndicatorPath,
-          perPage
+          perPage,
         }),
     });
   } else {
@@ -261,7 +260,6 @@ export const createThreatSignals = async ({
           type,
           wrapHits,
         }),
-
     });
   }
 

@@ -37,8 +37,8 @@ export const getSignalMatchesFromThreatList = (
       signalMap[signalId].push({
         id: threatHit._id,
         index: threatHit._index,
-        field: item.value,
-        value: item.field,
+        field: item.field,
+        value: item.value,
       });
     })
   );

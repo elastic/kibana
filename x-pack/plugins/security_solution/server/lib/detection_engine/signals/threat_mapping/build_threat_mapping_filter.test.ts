@@ -36,6 +36,7 @@ describe('build_threat_mapping_filter', () => {
           threatMapping,
           threatList,
           chunkSize: 1025,
+          entryKey: 'value',
         })
       ).toThrow('chunk sizes cannot exceed 1024 in size');
     });
@@ -44,28 +45,28 @@ describe('build_threat_mapping_filter', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
       expect(() =>
-        buildThreatMappingFilter({ threatMapping, threatList, chunkSize: 1023 })
+        buildThreatMappingFilter({ threatMapping, threatList, chunkSize: 1023, entryKey: 'value' })
       ).not.toThrow();
     });
 
     test('it should create the correct entries when using the default mocks', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
-      const filter = buildThreatMappingFilter({ threatMapping, threatList });
+      const filter = buildThreatMappingFilter({ threatMapping, threatList, entryKey: 'value' });
       expect(filter).toEqual(getThreatMappingFilterMock());
     });
 
     test('it should not mutate the original threatMapping', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
-      buildThreatMappingFilter({ threatMapping, threatList });
+      buildThreatMappingFilter({ threatMapping, threatList, entryKey: 'value' });
       expect(threatMapping).toEqual(getThreatMappingMock());
     });
 
     test('it should not mutate the original threatListItem', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
-      buildThreatMappingFilter({ threatMapping, threatList });
+      buildThreatMappingFilter({ threatMapping, threatList, entryKey: 'value' });
       expect(threatList).toEqual(getThreatListSearchResponseMock().hits.hits);
     });
   });
