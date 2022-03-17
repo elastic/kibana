@@ -8,7 +8,7 @@
 import { Dispatch, Reducer } from 'react';
 import { CommandServiceInterface } from '../../types';
 import { HistoryItemComponent } from '../history_item';
-import { BuiltinCommandServiceInterface } from '../../builtins/types.commands_handler_service';
+import { BuiltinCommandServiceInterface } from '../../builtins/types.builtin_command_service';
 
 export interface ConsoleDataState {
   /** Command service defined on input to the `Console` component by consumers of the component */

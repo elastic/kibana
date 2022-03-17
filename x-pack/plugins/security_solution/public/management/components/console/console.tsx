@@ -16,7 +16,7 @@ import { UnknownCommand } from './components/unknow_comand';
 import { CommandExecutionOutput } from './components/command_execution_output';
 import { parseCommandInput } from './service/parsed_command_input';
 import { BadArgument } from './components/bad_argument';
-import { ConsoleBuiltinCommandsService } from './builtins/commands_handler_service';
+import { ConsoleBuiltinCommandsService } from './builtins/builtin_command_service';
 import { ConsoleInternalContext, InternalServices } from './components/internal_context';
 import { CommandServiceInterface } from './types';
 import { ConsoleStateProvider } from './components/console_state';
