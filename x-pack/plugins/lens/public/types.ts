@@ -368,10 +368,13 @@ export interface DatasourcePublicAPI {
   /**
    * Collect all defined filters from all the operations in the layer
    */
-  getFilters: (activeData?: FramePublicAPI['activeData']) => {
-    kuery: Query[][];
-    lucene: Query[][];
-  };
+  getFilters: (activeData?: FramePublicAPI['activeData']) => Record<
+    'enabled' | 'disabled',
+    {
+      kuery: Query[][];
+      lucene: Query[][];
+    }
+  >;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -643,6 +646,7 @@ export interface SuggestionRequest<T = unknown> {
    * Different suggestions can be generated for each subtype of the visualization
    */
   subVisualizationId?: string;
+  activeData?: Record<string, Datatable>;
 }
 
 /**
