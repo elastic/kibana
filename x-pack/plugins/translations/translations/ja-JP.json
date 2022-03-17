@@ -9992,8 +9992,6 @@
     "xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataButtonLabel": "完全なデータを使用",
     "xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel": "凍結されたデータティアを除外",
     "xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel": "凍結されたデータティアを含める",
-    "xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationDescription": "異常検知は時間ベースのインデックスでのみ実行されます",
-    "xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle": "インデックスパターン {indexPatternTitle} は時系列に基づくものではありません",
     "xpack.dataVisualizer.index.lensChart.averageOfLabel": "{fieldName}の平均",
     "xpack.dataVisualizer.index.lensChart.chartTitle": "{fieldName}のLens",
     "xpack.dataVisualizer.index.lensChart.countLabel": "カウント",
