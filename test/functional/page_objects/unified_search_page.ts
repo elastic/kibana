@@ -9,12 +9,10 @@
 import { FtrService } from '../ftr_provider_context';
 
 export class UnifiedSearchPageObject extends FtrService {
-  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly browser = this.ctx.getService('browser');
 
-  public async closeTour() {
-    const tourIsOpen = await this.testSubjects.exists('dataViewPickerTourLink');
-    if (tourIsOpen) {
-      await this.testSubjects.click('dataViewPickerTourLink');
-    }
+  public async closeTourPopover() {
+    await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
+    await this.browser.refresh();
   }
 }

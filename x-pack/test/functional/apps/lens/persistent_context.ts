@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'common',
     'navigationalSearch',
-    'unifiedSearch',
   ]);
   const browser = getService('browser');
   const filterBar = getService('filterBar');
@@ -42,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await PageObjects.visualize.navigateToNewVisualization();
           await PageObjects.visualize.clickVisType('lens');
-          await PageObjects.unifiedSearch.closeTour();
           await PageObjects.lens.goToTimeRange();
           await PageObjects.navigationalSearch.focus();
           await PageObjects.navigationalSearch.searchFor('type:lens lnsTableVis');
@@ -79,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visualize.gotoVisualizationLandingPage();
           await listingTable.searchForItemWithName('lnsTableVis');
           await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
-          await PageObjects.unifiedSearch.closeTour();
           await PageObjects.lens.goToTimeRange();
           await PageObjects.navigationalSearch.focus();
           await PageObjects.navigationalSearch.searchFor('type:application lens');
@@ -115,7 +112,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsTableVis');
         await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
-        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.lens.goToTimeRange();
         // go to empty vis
         await PageObjects.lens.goToListingPageViaBreadcrumbs();
@@ -159,7 +155,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should carry over time range and pinned filters to discover', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange(
         'Sep 6, 2015 @ 06:31:44.000',
         'Sep 18, 2025 @ 06:31:44.000'

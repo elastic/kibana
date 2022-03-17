@@ -7,13 +7,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'unifiedSearch']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
 
   describe('lens color palette tests', () => {
     it('should allow to pick color palette in xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({

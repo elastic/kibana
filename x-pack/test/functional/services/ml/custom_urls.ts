@@ -20,7 +20,7 @@ export function MachineLearningCustomUrlsProvider({
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['dashboard', 'discover', 'header', 'unifiedSearch']);
+  const PageObjects = getPageObjects(['dashboard', 'discover', 'header']);
 
   return {
     async assertCustomUrlsLength(expectedLength: number) {
@@ -170,7 +170,6 @@ export function MachineLearningCustomUrlsProvider({
 
     async assertDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
-      await PageObjects.unifiedSearch.closeTour();
       // Make sure all existing popovers are closed
       await browser.pressKeys(browser.keys.ESCAPE);
 

@@ -9,14 +9,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'unifiedSearch']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const elasticChart = getService('elasticChart');
 
   describe('lens multi terms suite', () => {
     it('should allow creation of lens xy chart with multi terms categories', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.unifiedSearch.closeTour();
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.lens.goToTimeRange();
 

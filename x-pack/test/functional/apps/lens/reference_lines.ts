@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'unifiedSearch']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show a disabled reference layer button if no data dimension is defined', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.unifiedSearch.closeTour();
 
       await testSubjects.click('lnsLayerAddButton');
       await retry.waitFor('wait for layer popup to appear', async () =>

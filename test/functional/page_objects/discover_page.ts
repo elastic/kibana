@@ -23,6 +23,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -538,6 +539,7 @@ export class DiscoverPageObject extends FtrService {
    * Check if Discover app is currently rendered on the screen.
    */
   public async isDiscoverAppOnScreen(): Promise<boolean> {
+    await this.unifiedSearch.closeTourPopover();
     const result = await this.find.allByCssSelector('.dscPage');
     return result.length === 1;
   }

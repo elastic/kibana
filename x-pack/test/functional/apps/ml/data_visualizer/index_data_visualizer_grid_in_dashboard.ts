@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'settings',
     'dashboard',
     'header',
-    'unifiedSearch',
   ]);
   const ml = getService('ml');
   const retry = getService('retry');
@@ -41,7 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, true);
 
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.unifiedSearch.closeTour();
         if (testData.isSavedSearch) {
           await retry.tryForTime(2 * 1000, async () => {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);

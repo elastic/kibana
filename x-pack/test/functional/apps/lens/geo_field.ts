@@ -9,20 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'visualize',
-    'lens',
-    'header',
-    'maps',
-    'timePicker',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'header', 'maps', 'timePicker']);
 
   describe('lens visualize geo field tests', () => {
     it('should visualize geo fields in maps', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.switchDataPanelIndexPattern('logstash-*');
       await PageObjects.timePicker.setAbsoluteRange(
         'Sep 22, 2015 @ 00:00:00.000',

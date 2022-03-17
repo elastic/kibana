@@ -23,7 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'security',
     'spaceSelector',
     'header',
-    'unifiedSearch',
   ]);
 
   async function setDiscoverTimeRange() {
@@ -37,7 +36,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.unifiedSearch.closeTour();
       await setDiscoverTimeRange();
     });
 

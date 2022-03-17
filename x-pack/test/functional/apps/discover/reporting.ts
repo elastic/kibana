@@ -17,13 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects([
-    'reporting',
-    'common',
-    'discover',
-    'timePicker',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
 
   const setFieldsFromSource = async (setValue: boolean) => {
@@ -49,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
         await reportingAPI.initEcommerce();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
@@ -80,7 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
@@ -178,7 +170,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await createDocs();
         await reportingAPI.initLogs();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.discover.loadSavedSearch('Sparse Columns');
       });
 
@@ -216,7 +207,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await reportingAPI.initEcommerce();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.unifiedSearch.closeTour();
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 

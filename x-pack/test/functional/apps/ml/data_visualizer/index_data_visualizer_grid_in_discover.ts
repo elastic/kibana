@@ -19,13 +19,7 @@ import {
 } from './index_test_data';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects([
-    'common',
-    'discover',
-    'timePicker',
-    'settings',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
   const ml = getService('ml');
   const retry = getService('retry');
 
@@ -35,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   function runTestsWhenDisabled(testData: TestData) {
     it('should not show view mode toggle or Field stats table', async function () {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.unifiedSearch.closeTour();
       if (testData.isSavedSearch) {
         await retry.tryForTime(2 * 1000, async () => {
           await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
@@ -55,7 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe(`with ${testData.suiteTitle}`, function () {
       it(`displays the 'Field statistics' table content correctly`, async function () {
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.unifiedSearch.closeTour();
         if (testData.isSavedSearch) {
           await retry.tryForTime(2 * 1000, async () => {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);

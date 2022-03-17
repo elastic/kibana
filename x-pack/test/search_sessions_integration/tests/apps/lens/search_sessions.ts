@@ -11,14 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const searchSession = getService('searchSessions');
-  const PageObjects = getPageObjects([
-    'visualize',
-    'lens',
-    'common',
-    'timePicker',
-    'header',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'timePicker', 'header']);
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
 
@@ -39,7 +32,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.isShowingNoResults()).to.be(false);

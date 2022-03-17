@@ -9,13 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'visualize',
-    'lens',
-    'header',
-    'timePicker',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'header', 'timePicker']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
@@ -36,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({

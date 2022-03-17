@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'unifiedSearch']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
 
@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
     });

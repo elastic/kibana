@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
     'context',
     'searchSessionsManagement',
-    'unifiedSearch',
   ]);
   const searchSessions = getService('searchSessions');
   const retry = getService('retry');
@@ -36,7 +35,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/discover/default'
       );
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });

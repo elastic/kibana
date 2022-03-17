@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'unifiedSearch']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const browser = getService('browser');
@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.unifiedSearch.closeTour();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
