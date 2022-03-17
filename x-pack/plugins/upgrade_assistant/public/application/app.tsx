@@ -40,29 +40,34 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
 
   const missingManageSpacesPrivilege = core.application.capabilities.spaces.manage !== true;
 
-  const [clusterUpgradeState, setClusterUpradeState] =
+  const [clusterUpgradeState, setClusterUpgradeState] =
     useState<ClusterUpgradeState>('isPreparingForUpgrade');
 
   useEffect(() => {
     api.onClusterUpgradeStateChange((newClusterUpgradeState: ClusterUpgradeState) => {
-      setClusterUpradeState(newClusterUpgradeState);
+      setClusterUpgradeState(newClusterUpgradeState);
     });
   }, [api]);
 
   if (missingManageSpacesPrivilege) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageContent
+        verticalPosition="center"
+        horizontalPosition="center"
+        color="subdued"
+        data-test-subj="missingKibanaPrivilegesMessage"
+      >
         <NotAuthorizedSection
           title={
             <FormattedMessage
               id="xpack.upgradeAssistant.app.deniedPrivilegeTitle"
-              defaultMessage="You're missing Kibana privileges"
+              defaultMessage="You require a Kibana admin role"
             />
           }
           message={
             <FormattedMessage
               id="xpack.upgradeAssistant.app.deniedPrivilegeDescription"
-              defaultMessage="To use Upgrade Assistant, you must have Kibana admin privileges."
+              defaultMessage="To use Upgrade Assistant and resolve deprecation issues, you must have access to manage all Kibana spaces."
             />
           }
         />
