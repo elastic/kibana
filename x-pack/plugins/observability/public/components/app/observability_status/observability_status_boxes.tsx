@@ -34,8 +34,8 @@ export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
         </EuiTitle>
       </EuiFlexItem>
       {noHasDataBoxes.map((box) => (
-        <EuiFlexItem>
-          <EmptyStatusBox key={box.id} {...box} />
+        <EuiFlexItem key={box.id}>
+          <EmptyStatusBox {...box} />
         </EuiFlexItem>
       ))}
 
@@ -52,8 +52,8 @@ export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
         </EuiTitle>
       </EuiFlexItem>
       {hasDataBoxes.map((box) => (
-        <EuiFlexItem>
-          <CompletedStatusBox key={box.id} {...box} />
+        <EuiFlexItem key={box.id}>
+          <CompletedStatusBox {...box} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
