@@ -42,7 +42,7 @@ export const navTabs: SecurityNav = {
   },
   [SecurityPageName.detectionAndResponse]: {
     id: SecurityPageName.detectionAndResponse,
-    name: 'Detection & Response',
+    name: i18n.DETECTION_RESPONSE,
     href: APP_DETECTION_RESPONSE_PATH,
     disabled: false,
     urlKey: 'detection_response',

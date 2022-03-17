@@ -14,6 +14,7 @@ import { SecurityPageName } from '../types';
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
+  DETECTION_RESPONSE,
   DETECT,
   ALERTS,
   RULES,
@@ -85,7 +86,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
   },
   {
     id: SecurityPageName.detectionAndResponse,
-    title: 'Detection & Response',
+    title: DETECTION_RESPONSE,
     path: DETECTION_RESPONSE_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
     experimentalKey: 'detectionResponseEnabled',
