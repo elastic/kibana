@@ -10,20 +10,29 @@ import { VISUALIZATION_COLORS } from '@elastic/eui';
 import type { AuthenticationProvider, User } from '../';
 import { getUserDisplayName } from './user';
 
+/**
+ * User information returned in user profile.
+ */
 export interface UserInfo extends User {
   active: boolean;
 }
 
+/**
+ * Avatar stored in user profile.
+ */
 export interface UserAvatar {
   initials?: string;
   color?: string;
   imageUrl?: string;
 }
 
+/**
+ * Placeholder for data stored in user profile.
+ */
 export type UserData = Record<string, unknown>;
 
 /**
- * Describes properties of the user's profile.
+ * Describes properties stored in user profile.
  */
 export interface UserProfile<T extends UserData = UserData> {
   /**
@@ -57,8 +66,8 @@ export interface AuthenticatedUserProfile<T extends UserData = UserData> extends
   authentication_provider: AuthenticationProvider;
 }
 
-const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"
-const USER_AVATAR_MAX_INITIALS = 2;
+export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"
+export const USER_AVATAR_MAX_INITIALS = 2;
 
 /**
  * Determines the color for the provided user profile.

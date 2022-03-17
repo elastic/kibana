@@ -14,7 +14,11 @@ export type {
   UserInfo,
   UserAvatar,
 } from './user_profile';
-export { getUserAvatarColor, getUserAvatarInitials } from './user_profile';
+export {
+  getUserAvatarColor,
+  getUserAvatarInitials,
+  USER_AVATAR_MAX_INITIALS,
+} from './user_profile';
 export { getUserDisplayName } from './user';
 export type { AuthenticatedUser, UserRealm } from './authenticated_user';
 export { canUserChangePassword, isUserAnonymous } from './authenticated_user';

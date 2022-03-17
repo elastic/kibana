@@ -15,6 +15,7 @@ import {
   getUserAvatarColor,
   getUserAvatarInitials,
   getUserDisplayName,
+  USER_AVATAR_MAX_INITIALS,
 } from '../../../common/model';
 
 export interface UserAvatarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
@@ -50,7 +51,7 @@ export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, .
     <EuiAvatar
       name={displayName}
       initials={getUserAvatarInitials(user, avatar)}
-      initialsLength={2}
+      initialsLength={USER_AVATAR_MAX_INITIALS}
       color={getUserAvatarColor(user, avatar)}
       {...rest}
     />
