@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -17,6 +17,7 @@ import {
   EuiAutoRefreshButton,
   EuiTableSortingType,
   EuiFieldSearch,
+  OnRefreshChangeProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -81,7 +82,8 @@ export function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-
+  const [refreshInterval, setRefreshInterval] = useState(10000);
+  const [isPaused, setIsPaused] = useState(false);
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -89,6 +91,14 @@ export function RulesPage() {
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setCurrentRuleToEdit(ruleItem);
+  };
+
+  const onRefreshChange = ({
+    isPaused: isPausedChanged,
+    refreshInterval: refreshIntervalChanged,
+  }: OnRefreshChangeProps) => {
+    setIsPaused(isPausedChanged);
+    setRefreshInterval(refreshIntervalChanged);
   };
 
   const { rulesState, setRulesState, reload } = useFetchRules({
@@ -99,6 +109,15 @@ export function RulesPage() {
   });
   const { data: rules, totalItemCount, error } = rulesState;
   const { ruleTypeIndex } = useLoadRuleTypes({ filteredSolutions: OBSERVABILITY_SOLUTIONS });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isPaused) {
+        reload();
+      }
+    }, refreshInterval);
+    return () => clearInterval(interval);
+  }, [refreshInterval, reload, isPaused]);
 
   useBreadcrumbs([
     {
@@ -315,9 +334,9 @@ export function RulesPage() {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiAutoRefreshButton
-            isPaused={false}
-            refreshInterval={3000}
-            onRefreshChange={() => {}}
+            isPaused={isPaused}
+            refreshInterval={refreshInterval}
+            onRefreshChange={onRefreshChange}
             shortHand
           />
         </EuiFlexItem>
