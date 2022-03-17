@@ -382,7 +382,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           },
         });
         const fullViewInAppUrl = kibanaBaseUrl
-          ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl)
+          ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl).toString()
           : relativeViewInAppUrl;
         alert.scheduleActions(MONITOR_STATUS.id, {
           [ALERT_REASON_MSG]: monitorSummary.reason,
@@ -454,7 +454,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         },
       });
       const fullViewInAppUrl = kibanaBaseUrl
-        ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl)
+        ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl).toString()
         : relativeViewInAppUrl;
 
       alert.scheduleActions(MONITOR_STATUS.id, {
