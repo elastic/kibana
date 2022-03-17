@@ -308,7 +308,7 @@ export class SyntheticsService {
     const { saved_objects: encryptedMonitors } = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
       namespaces: ['*'],
-      perPage: 500,
+      perPage: 10000,
     });
 
     const start = Date.now();
