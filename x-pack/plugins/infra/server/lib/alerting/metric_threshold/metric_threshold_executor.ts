@@ -65,7 +65,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
-    const { services, params, state } = options;
+    const { services, params, state, startedAt } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
@@ -92,7 +92,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
-        const timestamp = moment().toISOString();
+        const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
@@ -135,7 +135,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       params as EvaluatedRuleParams,
       config,
       prevGroups,
-      compositeSize
+      compositeSize,
+      { end: startedAt.valueOf() }
     );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.

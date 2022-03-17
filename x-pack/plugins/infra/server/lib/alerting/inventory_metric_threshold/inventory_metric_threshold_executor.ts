@@ -61,7 +61,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params }) => {
+  >(async ({ services, params, startedAt }) => {
     const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
@@ -86,7 +86,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           group: '*',
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
-          timestamp: moment().toISOString(),
+          timestamp: startedAt.toISOString(),
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
@@ -117,6 +117,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           esClient: services.scopedClusterClient.asCurrentUser,
           compositeSize,
           filterQuery,
+          startedAt,
         })
       )
     );
@@ -197,7 +198,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             group,
             alertState: stateToAlertMessage[nextState],
             reason,
-            timestamp: moment().toISOString(),
+            timestamp: startedAt.toISOString(),
             value: mapToConditionsLookup(results, (result) =>
               formatMetric(result[group].metric, result[group].currentValue)
             ),
