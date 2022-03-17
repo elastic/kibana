@@ -72,7 +72,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             size: 100,
             thresholdComparator: '<',
             threshold: [0],
-            searchType: 'esQuery',
           });
           await createAlert({
             name: 'always fire',
@@ -80,7 +79,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             size: 100,
             thresholdComparator: '>',
             threshold: [-1],
-            searchType: 'esQuery',
           });
         },
       ] as const,
@@ -164,7 +162,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             thresholdComparator: '<',
             threshold: [0],
             timeField: 'date_epoch_millis',
-            searchType: 'esQuery',
             esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
           });
           await createAlert({
@@ -174,7 +171,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             thresholdComparator: '>',
             threshold: [-1],
             timeField: 'date_epoch_millis',
-            searchType: 'esQuery',
           });
         },
       ] as const,
@@ -275,7 +271,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             size: 100,
             thresholdComparator: '<',
             threshold: [-1],
-            searchType: 'esQuery',
           });
           await createAlert({
             name: 'fires once',
@@ -285,7 +280,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             size: 100,
             thresholdComparator: '>=',
             threshold: [0],
-            searchType: 'esQuery',
           });
         },
       ] as const,
@@ -363,7 +357,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             size: 100,
             thresholdComparator: '<',
             threshold: [1],
-            searchType: 'esQuery',
           });
         },
       ] as const,
@@ -449,7 +442,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       esQuery?: string;
       timeField?: string;
       searchConfiguration?: unknown;
-      searchType: 'esQuery' | 'searchSource';
+      searchType?: 'searchSource';
     }
 
     async function createAlert(params: CreateAlertParams): Promise<string> {
@@ -476,15 +469,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
       };
 
       const alertParams =
-        params.searchType === 'esQuery'
+        params.searchType === 'searchSource'
           ? {
+              searchConfiguration: params.searchConfiguration,
+            }
+          : {
               index: [ES_TEST_INDEX_NAME],
               timeField: params.timeField || 'date',
               esQuery: params.esQuery,
-            }
-          : {
-              searchConfiguration: params.searchConfiguration,
             };
+
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')

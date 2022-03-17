@@ -109,7 +109,6 @@ const defaultEsQueryExpressionParams: EsQueryAlertParams<SearchType.esQuery> = {
   index: ['test-index'],
   timeField: '@timestamp',
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-  searchType: SearchType.esQuery,
 };
 
 describe('EsQueryAlertTypeExpression', () => {

@@ -81,7 +81,6 @@ export const EsQueryExpression = ({
     threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
     size: size ?? DEFAULT_VALUES.SIZE,
-    searchType: SearchType.esQuery,
     esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
   });
 

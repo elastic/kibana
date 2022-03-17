@@ -26,7 +26,7 @@ const EsQueryAlertParamsSchemaProperties = {
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   thresholdComparator: schema.string({ validate: validateComparator }) as Type<Comparator>,
-  searchType: schema.oneOf([schema.literal('esQuery'), schema.literal('searchSource')]),
+  searchType: schema.nullable(schema.literal('searchSource')),
   // searchSource alert param only
   searchConfiguration: schema.conditional(
     schema.siblingRef('searchType'),
@@ -37,21 +37,21 @@ const EsQueryAlertParamsSchemaProperties = {
   // esQuery alert params only
   esQuery: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('esQuery'),
-    schema.string({ minLength: 1 }),
-    schema.never()
+    schema.literal('searchSource'),
+    schema.never(),
+    schema.string({ minLength: 1 })
   ),
   index: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('esQuery'),
-    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-    schema.never()
+    schema.literal('searchSource'),
+    schema.never(),
+    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 })
   ),
   timeField: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('esQuery'),
-    schema.string({ minLength: 1 }),
-    schema.never()
+    schema.literal('searchSource'),
+    schema.never(),
+    schema.string({ minLength: 1 })
   ),
 };
 
@@ -63,8 +63,7 @@ const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
-  const { esQuery, thresholdComparator, threshold, searchType }: EsQueryAlertParams =
-    anyParams as EsQueryAlertParams;
+  const { esQuery, thresholdComparator, threshold, searchType } = anyParams as EsQueryAlertParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {

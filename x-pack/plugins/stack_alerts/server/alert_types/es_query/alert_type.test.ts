@@ -64,8 +64,8 @@ describe('alertType', () => {
             "name": "conditions",
           },
           Object {
-            "description": "A link to the records that triggered this alert, if it was created from Discover.
-              For Elastic query alerts, this link navigates to Stack Management.",
+            "description": "If the alert rule was created in Discover, the link will navigate
+             to Discover showing the records that triggered this alert. In the other case the link will navigate to the rule's status page.",
             "name": "link",
           },
         ],
@@ -114,7 +114,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.LT,
         threshold: [0],
-        searchType: 'esQuery',
       };
 
       expect(alertType.validate?.params?.validate(params)).toBeTruthy();
@@ -133,7 +132,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
-        searchType: 'esQuery',
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
@@ -151,7 +149,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
-        searchType: 'esQuery',
       };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -181,7 +178,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
-        searchType: 'esQuery',
       };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -227,7 +223,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
-        searchType: 'esQuery',
       };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -276,7 +271,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
-        searchType: 'esQuery',
       };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -319,7 +313,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
-        searchType: 'esQuery',
       };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -391,7 +384,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
-        searchType: 'esQuery',
       };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -437,7 +429,6 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
-        searchType: 'esQuery',
       };
       const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 

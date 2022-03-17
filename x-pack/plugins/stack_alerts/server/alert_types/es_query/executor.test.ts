@@ -15,7 +15,6 @@ describe('es_query executor', () => {
     timeWindowUnit: 'm',
     threshold: [],
     thresholdComparator: '>=',
-    searchType: 'esQuery',
     esQuery: '{ "query": "test-query" }',
     index: ['test-index'],
     timeField: '',

@@ -18,7 +18,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.index.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.index[0]).toBe('Index is required.');
@@ -33,7 +32,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.timeField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
@@ -48,7 +46,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe('Query must be valid JSON.');
@@ -63,7 +60,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe(`Query field is required.`);
@@ -93,7 +89,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       thresholdComparator: '<',
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold0[0]).toBe('Threshold 0 is required.');
@@ -109,7 +104,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       thresholdComparator: 'between',
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe('Threshold 1 is required.');
@@ -125,7 +119,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       thresholdComparator: 'between',
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe(
@@ -142,7 +135,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.size[0]).toBe(
@@ -159,7 +151,6 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
       threshold: [0],
       timeField: '',
-      searchType: SearchType.esQuery,
     };
     expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.size[0]).toBe(

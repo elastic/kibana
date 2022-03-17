@@ -25,12 +25,11 @@ export interface CommonAlertParams<T extends SearchType> extends AlertTypeParams
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
-  searchType: T;
 }
 
-export type EsQueryAlertParams<T = SearchType> = T extends SearchType.esQuery
-  ? CommonAlertParams<SearchType.esQuery> & OnlyEsQueryAlertParams
-  : CommonAlertParams<SearchType.searchSource> & OnlySearchSourceAlertParams;
+export type EsQueryAlertParams<T = SearchType> = T extends SearchType.searchSource
+  ? CommonAlertParams<SearchType.searchSource> & OnlySearchSourceAlertParams
+  : CommonAlertParams<SearchType.esQuery> & OnlyEsQueryAlertParams;
 
 export interface OnlyEsQueryAlertParams {
   esQuery: string;
@@ -38,5 +37,6 @@ export interface OnlyEsQueryAlertParams {
   timeField: string;
 }
 export interface OnlySearchSourceAlertParams {
+  searchType: 'searchSource';
   searchConfiguration: SerializedSearchSourceFields;
 }
