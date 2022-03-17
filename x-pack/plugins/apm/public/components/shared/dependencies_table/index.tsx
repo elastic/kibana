@@ -178,9 +178,29 @@ export function DependenciesTable(props: Props) {
     },
     {
       field: 'impactValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
-        defaultMessage: 'Impact',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.dependenciesTable.columnImpactTip',
+            {
+              defaultMessage:
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
+              defaultMessage: 'Impact',
+            })}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      ),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         return (
