@@ -117,27 +117,27 @@ export function useProgressiveFetcher<TReturn>(
     [isSamplingEnabled, ...dependencies]
   );
 
-  // const mediumFetch = useFetcher(
-  //   (regularCallApmApi) => {
-  //     if (!isSamplingEnabled) {
-  //       return;
-  //     }
-  //     return callback(clientWithProbability(regularCallApmApi, MEDIUM));
-  //   },
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   [isSamplingEnabled, ...dependencies]
-  // );
+  const mediumFetch = useFetcher(
+    (regularCallApmApi) => {
+      if (!isSamplingEnabled) {
+        return;
+      }
+      return callback(clientWithProbability(regularCallApmApi, MEDIUM));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isSamplingEnabled, ...dependencies]
+  );
 
-  // const lowFetch = useFetcher(
-  //   (regularCallApmApi) => {
-  //     if (!isSamplingEnabled) {
-  //       return;
-  //     }
-  //     return callback(clientWithProbability(regularCallApmApi, LOW));
-  //   },
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   [isSamplingEnabled, ...dependencies]
-  // );
+  const lowFetch = useFetcher(
+    (regularCallApmApi) => {
+      if (!isSamplingEnabled) {
+        return;
+      }
+      return callback(clientWithProbability(regularCallApmApi, LOW));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isSamplingEnabled, ...dependencies]
+  );
 
   const noneFetch = useFetcher(
     (regularCallApmApi) => {
@@ -147,12 +147,7 @@ export function useProgressiveFetcher<TReturn>(
     dependencies
   );
 
-  const fetches = [
-    noneFetch,
-    // lowFetch,
-    // mediumFetch,
-    highFetch,
-  ];
+  const fetches = [noneFetch, lowFetch, mediumFetch, highFetch];
 
   const isError = noneFetch.status === FETCH_STATUS.FAILURE;
 
