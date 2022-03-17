@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const { common } = getPageObjects(['maps', 'common']);
 
@@ -18,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Maps', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
       );
@@ -26,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
       );
