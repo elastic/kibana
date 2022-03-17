@@ -11,6 +11,9 @@ import { Unit } from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { getDefaultControlColumn } from '../../../../timelines/components/timeline/body/control_columns';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getHistogramConfig, getThresholdHistogramConfig, isNoisy } from './helpers';
@@ -21,6 +24,15 @@ import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { formatDate } from '../../../../common/components/super_date_picker';
 import { FieldValueThreshold } from '../threshold_input';
+import { alertsDefaultModel } from '../../alerts_table/default_config';
+import { RenderCellValue } from '../../../configurations/security_solution_detections';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
+import { TimelineId } from '../../../../../common/types';
+import { APP_ID, APP_UI_ID, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { DetailsPanel } from '../../../../timelines/components/side_panel';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -51,7 +63,7 @@ export const PreviewHistogram = ({
   index,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
-
+  const { timelines: timelinesUi, cases: casesUi } = useKibana().services;
   const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
   const to = useMemo(() => 'now', []);
   const startDate = useMemo(() => formatDate(from), [from]);
@@ -69,7 +81,30 @@ export const PreviewHistogram = ({
     ruleType,
   });
 
+  const {
+    columns,
+    dataProviders,
+    deletedEventIds,
+    kqlMode,
+    isLive,
+    itemsPerPage,
+    itemsPerPageOptions,
+    graphEventId,
+    sort,
+  } = alertsDefaultModel;
+
+  const {
+    browserFields,
+    docValueFields,
+    indexPattern,
+    runtimeMappings,
+    loading: isLoadingIndexPattern,
+  } = useSourcererDataView(SourcererScopeName.detections);
+
   const previousPreviewId = usePrevious(previewId);
+  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
+    'tGridEventRenderedViewEnabled'
+  );
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
@@ -121,38 +156,86 @@ export const PreviewHistogram = ({
         : i18n.QUERY_PREVIEW_TITLE(totalCount),
     [isLoading, totalCount, thresholdTotalCount, isThresholdRule]
   );
+  const CasesContext = casesUi.getCasesContext();
 
   return (
-    <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
-      <EuiFlexGroup gutterSize="none" direction="column">
-        <EuiFlexItem grow={1}>
-          <HeaderSection
-            id={`${ID}-${previewId}`}
-            title={i18n.QUERY_GRAPH_HITS_TITLE}
-            titleSize="xs"
-            subtitle={subtitle}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          {isLoading ? (
-            <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
-          ) : (
-            <BarChart
-              configs={isThresholdRule ? thresholdBarConfig : barConfig}
-              barChart={isThresholdRule ? thresholdChartData : chartData}
-              data-test-subj="preview-histogram-bar-chart"
+    <>
+      <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
+        <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexItem grow={1}>
+            <HeaderSection
+              id={`${ID}-${previewId}`}
+              title={i18n.QUERY_GRAPH_HITS_TITLE}
+              titleSize="xs"
+              subtitle={subtitle}
             />
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <>
-            <EuiSpacer />
-            <EuiText size="s" color="subdued">
-              <p>{i18n.QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS}</p>
-            </EuiText>
-          </>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Panel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            {isLoading ? (
+              <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
+            ) : (
+              <BarChart
+                configs={isThresholdRule ? thresholdBarConfig : barConfig}
+                barChart={isThresholdRule ? thresholdChartData : chartData}
+                data-test-subj="preview-histogram-bar-chart"
+              />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <>
+              <EuiSpacer />
+              <EuiText size="s" color="subdued">
+                <p>{i18n.QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS}</p>
+              </EuiText>
+            </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Panel>
+      <EuiSpacer />
+      <CasesContext owner={[APP_ID]} userCanCrud={false}>
+        {timelinesUi.getTGrid<'embedded'>({
+          additionalFilters: <></>,
+          appId: APP_UI_ID,
+          browserFields,
+          columns,
+          dataProviders,
+          deletedEventIds,
+          disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+          docValueFields,
+          end: to,
+          entityType: 'alerts',
+          filters: [],
+          globalFullScreen: false,
+          graphEventId,
+          hasAlertsCrud: false,
+          id: TimelineId.detectionsPage,
+          indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
+          indexPattern,
+          isLive,
+          isLoadingIndexPattern,
+          itemsPerPage,
+          itemsPerPageOptions,
+          kqlMode,
+          query: { query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' },
+          renderCellValue: RenderCellValue,
+          rowRenderers: defaultRowRenderers,
+          runtimeMappings,
+          setQuery: () => {},
+          sort,
+          start: from,
+          tGridEventRenderedViewEnabled,
+          type: 'embedded',
+          leadingControlColumns: getDefaultControlColumn(1),
+        })}
+        <DetailsPanel
+          browserFields={browserFields}
+          entityType={'alerts'}
+          docValueFields={docValueFields}
+          isFlyoutView
+          runtimeMappings={runtimeMappings}
+          timelineId={TimelineId.detectionsPage}
+        />
+      </CasesContext>
+    </>
   );
 };
