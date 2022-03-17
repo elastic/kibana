@@ -39,7 +39,6 @@ export const evaluateCondition = async ({
   lookbackSize,
   startTime,
   logger,
-  alertExecutionDetails,
 }: {
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
@@ -51,7 +50,6 @@ export const evaluateCondition = async ({
   lookbackSize?: number;
   startTime?: number;
   logger: Logger;
-  alertExecutionDetails: AlertExecutionDetails;
 }): Promise<Record<string, ConditionResult>> => {
   const { metric, customMetric } = condition;
 
@@ -78,7 +76,6 @@ export const evaluateCondition = async ({
     compositeSize,
     condition,
     logger,
-    alertExecutionDetails,
     filterQuery,
     customMetric
   );

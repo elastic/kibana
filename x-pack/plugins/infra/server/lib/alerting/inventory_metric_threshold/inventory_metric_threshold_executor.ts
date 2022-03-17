@@ -36,6 +36,7 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
+import { createScopedLogger } from '../common/utils';
 import { evaluateCondition } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
@@ -70,7 +71,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     const startTime = Date.now();
     const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
-    const logger = libs.logger.get('inventoryRule');
+    const logger = createScopedLogger(libs.logger, 'inventoryRule', alertExecutionDetails);
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
@@ -126,7 +127,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           compositeSize,
           filterQuery,
           logger,
-          alertExecutionDetails,
         })
       )
     );
@@ -220,11 +220,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       }
     }
     const stopTime = Date.now();
-    logger.debug(
-      `Inventory Threshold Rule (${JSON.stringify(
-        alertExecutionDetails
-      )}) schedule ${scheduledActionsCount} actions in ${stopTime - startTime}ms`
-    );
+    logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
   });
 
 const formatThreshold = (metric: SnapshotMetricType, value: number) => {

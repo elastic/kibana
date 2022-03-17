@@ -7,6 +7,8 @@
 
 import { isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
+import { Logger, LogMeta } from '@kbn/logging';
+import { AlertExecutionDetails } from '../../../../common/alerting/metrics/types';
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -33,3 +35,22 @@ export const validateIsStringElasticsearchJSONFilter = (value: string) => {
 };
 
 export const UNGROUPED_FACTORY_KEY = '*';
+
+export const createScopedLogger = (
+  logger: Logger,
+  scope: string,
+  alertExecutionDetails: AlertExecutionDetails
+): Logger => {
+  const scopedLogger = logger.get(scope);
+  const formatMessage = (msg: string) =>
+    `[AlertId: ${alertExecutionDetails.alertId}][ExecutionId: ${alertExecutionDetails.executionId}] ${msg}`;
+  return {
+    ...scopedLogger,
+    info: <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
+      scopedLogger.info(formatMessage(msg), meta),
+    debug: <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
+      scopedLogger.debug(formatMessage(msg), meta),
+    trace: <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
+      scopedLogger.trace(formatMessage(msg), meta),
+  };
+};

@@ -95,7 +95,6 @@ export default function ({ getService }: FtrProviderContext) {
     compositeSize: 10000,
     startTime: DATES['8.0.0'].hosts_only.max,
     logger,
-    alertExecutionDetails: { alertId: 'test-alert', executionId: 'test-execution' },
   };
 
   describe('Inventory Threshold Rule Executor', () => {
