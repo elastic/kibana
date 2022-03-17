@@ -7,6 +7,10 @@
 
 export { getFullAgentPolicy } from './full_agent_policy';
 export {
-  validateOutputForPolicy,
+  storedPackagePolicyToAgentInputs,
+  storedPackagePoliciesToAgentInputs,
+} from './package_policies_to_agent_inputs';
+export {
   getDataOutputForAgentPolicy,
+  validateOutputForPolicy,
 } from './validate_outputs_for_policy';
