@@ -48,17 +48,16 @@ export class VisualizePageObject extends FtrService {
   };
 
   remoteEsPrefix = 'ftr-remote:';
+  defaultIndexString = 'logstash-*';
 
-  public async initTests(isNewLibrary = false, useCcs = false) {
+  public async initTests(isNewLibrary = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
     await this.kibanaServer.importExport.load(
       'test/functional/fixtures/kbn_archiver/visualize.json'
     );
 
-    const defaultIndexString = useCcs ? `${this.remoteEsPrefix}logstash-*` : 'logstash-*';
-
     await this.kibanaServer.uiSettings.replace({
-      defaultIndex: defaultIndexString,
+      defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
@@ -234,9 +233,8 @@ export class VisualizePageObject extends FtrService {
     await this.saveVisualization(vizName);
   }
 
-  public async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED, useCcs = false) {
-    const finalIndexPattern = useCcs ? `${this.remoteEsPrefix}${indexPattern}` : indexPattern;
-    await this.testSubjects.click(`savedObjectTitle${finalIndexPattern.split(' ').join('-')}`);
+  public async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
+    await this.testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
   }
 
