@@ -459,9 +459,9 @@ export class SettingsPageObject extends FtrService {
       return;
     }
 
-    const tableView = await this.testSubjects.exists('createDataViewButtonFlyout');
+    const tableView = await this.testSubjects.exists('createIndexPatternButton');
     if (tableView) {
-      await this.testSubjects.click('createDataViewButtonFlyout');
+      await this.testSubjects.click('createIndexPatternButton');
     }
     const flyoutView2 = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView2) {
