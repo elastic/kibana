@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiButton, EuiSpacer, EuiHealth } from '@elastic/eui';
@@ -28,6 +28,7 @@ import {
 } from '../../components';
 import { FormHook, FieldConfig } from '../types';
 import { useForm } from '../hooks/use_form';
+import { useFormData } from '../hooks/use_form_data';
 import { Form } from './form';
 import { UseField } from './use_field';
 
@@ -54,7 +55,7 @@ export default {
         <div style={{ maxWidth: '600px' }}>
           <Form form={form}>
             <>
-              {Story()}
+              <Story />
               <EuiSpacer />
               <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
             </>
@@ -271,4 +272,44 @@ FieldTypes.argTypes = {
     options: fieldTypeOptions,
     control: { type: 'radio' },
   },
+};
+
+// --- CHANGE LISTENERS
+
+/**
+ * This Story outputs the order in which different state update
+ * and events occur whenever a field value changes.
+ */
+export const ChangeListeners = () => {
+  const onFieldChangeHook = ({ title }: { title: string }) => {
+    action('1. useFormData() -> onChange() handler')(title);
+  };
+  const [{ title }] = useFormData({ watch: 'title', onChange: onFieldChangeHook });
+
+  const onFieldChangeProp = (value: string) => {
+    action('2. onChange() prop handler')(value);
+  };
+
+  useEffect(() => {
+    action('4. useEffect() "title" changed')(title);
+  }, [title]);
+
+  return (
+    <UseField<string>
+      path="title"
+      component={TextField}
+      config={{
+        label: 'Title',
+        helpText: 'This is a help text for the field.',
+        validations: [
+          {
+            validator: ({ value }) => {
+              action('3. Validating "title" field')(value);
+            },
+          },
+        ],
+      }}
+      onChange={onFieldChangeProp}
+    />
+  );
 };
