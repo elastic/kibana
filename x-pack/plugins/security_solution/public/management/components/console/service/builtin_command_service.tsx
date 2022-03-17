@@ -18,7 +18,7 @@ const builtInCommands = (): CommandDefinition[] => {
   return [
     {
       name: 'help',
-      about: 'View list of available commands',
+      about: 'View list of available commands', // FIXME:PT i18n here and bleow
     },
     {
       name: 'clear',

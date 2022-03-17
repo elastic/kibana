@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { CommonProps, EuiFlexGroup } from '@elastic/eui';
-import { HistoryItemComponent } from './history_item';
 import { useCommandHistory } from '../hooks/state_selectors/use_command_history';
+import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 
-// FIXME: implement a buffer for how many items should be shown in the console (maybe virtual scrolling)
+export type OutputHistoryProps = CommonProps;
 
-export type OutputHistoryProps = CommonProps & {
-  children: HistoryItemComponent | HistoryItemComponent[];
-};
-
-export const OutputHistory = memo<OutputHistoryProps>(({ children, className }) => {
+export const OutputHistory = memo<OutputHistoryProps>((commonProps) => {
   const historyItems = useCommandHistory();
+  const dispatch = useConsoleStateDispatch();
+
+  // Anytime we add a new item to the history
+  // scroll down so that command input remains visible
+  useEffect(() => {
+    dispatch({ type: 'scrollDown' });
+  }, [dispatch, historyItems.length]);
 
   return (
     <EuiFlexGroup
-      className={className}
+      {...commonProps}
       wrap={true}
       direction="row"
       alignItems="flexEnd"
