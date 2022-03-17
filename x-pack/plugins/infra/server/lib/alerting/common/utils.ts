@@ -42,35 +42,35 @@ export const createScopedLogger = (
   alertExecutionDetails: AlertExecutionDetails
 ): Logger => {
   const scopedLogger = logger.get(scope);
-  const formatMessage = (msg: string) =>
+  const fmtMsg = (msg: string) =>
     `[AlertId: ${alertExecutionDetails.alertId}][ExecutionId: ${alertExecutionDetails.executionId}] ${msg}`;
   return {
     ...scopedLogger,
     info: <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
-      scopedLogger.info(formatMessage(msg), meta),
+      scopedLogger.info(fmtMsg(msg), meta),
     debug: <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
-      scopedLogger.debug(formatMessage(msg), meta),
+      scopedLogger.debug(fmtMsg(msg), meta),
     trace: <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
-      scopedLogger.trace(formatMessage(msg), meta),
+      scopedLogger.trace(fmtMsg(msg), meta),
     warn: <Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta) => {
       if (isError(errorOrMessage)) {
         scopedLogger.warn(errorOrMessage, meta);
       } else {
-        scopedLogger.warn(formatMessage(errorOrMessage), meta);
+        scopedLogger.warn(fmtMsg(errorOrMessage), meta);
       }
     },
     error: <Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta) => {
       if (isError(errorOrMessage)) {
         scopedLogger.error(errorOrMessage, meta);
       } else {
-        scopedLogger.error(formatMessage(errorOrMessage), meta);
+        scopedLogger.error(fmtMsg(errorOrMessage), meta);
       }
     },
     fatal: <Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta) => {
       if (isError(errorOrMessage)) {
         scopedLogger.fatal(errorOrMessage, meta);
       } else {
-        scopedLogger.fatal(formatMessage(errorOrMessage), meta);
+        scopedLogger.fatal(fmtMsg(errorOrMessage), meta);
       }
     },
   };
