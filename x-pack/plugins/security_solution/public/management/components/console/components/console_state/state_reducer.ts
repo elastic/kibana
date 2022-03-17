@@ -7,6 +7,7 @@
 
 import { ConsoleDataState, ConsoleStoreReducer } from './types';
 import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
+import { ConsoleBuiltinCommandsService } from '../../builtins/commands_handler_service';
 
 export type InitialStateInterface = Pick<ConsoleDataState, 'commandService' | 'scrollToBottom'>;
 
@@ -18,6 +19,7 @@ export const initiateState = ({
     commandService,
     scrollToBottom,
     commandHistory: [],
+    builtinCommandService: new ConsoleBuiltinCommandsService(),
   };
 };
 

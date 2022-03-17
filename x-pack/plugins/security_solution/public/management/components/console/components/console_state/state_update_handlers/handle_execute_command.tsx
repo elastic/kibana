@@ -23,32 +23,28 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     return state;
   }
 
-  const commandService = state.commandService;
+  const { commandService, builtinCommandService } = state;
 
-  // FIXME:PT this should be set to teh internal command service once available
-  const builtinCommandService = state.commandService;
-
-  // FIXME:PT Handle internal command
   // Is it an internal command?
-  // if (builtinCommandService.isBuiltin(parsedInput.name)) {
-  //   const commandOutput = builtinCommandService.executeBuiltinCommand(
-  //     parsedInput,
-  //     consoleService
-  //   );
-  //
-  //   if (commandOutput.clearBuffer) {
-  //     setHistoryItems([]);
-  //   } else {
-  //     setHistoryItems((prevState) => {
-  //       return [...prevState, commandOutput.result];
-  //     });
-  //   }
-  //
-  //   return;
-  // }
+  if (builtinCommandService.isBuiltin(parsedInput.name)) {
+    const commandOutput = builtinCommandService.executeBuiltinCommand(parsedInput, commandService);
 
-  // Validate and execute the defined command
+    if (commandOutput.clearBuffer) {
+      return {
+        ...state,
+        commandHistory: [],
+      };
+    }
 
+    return {
+      ...state,
+      commandHistory: [...state.commandHistory, commandOutput.result],
+    };
+  }
+
+  // ----------------------------------------------------
+  // Validate and execute the user defined command
+  // ----------------------------------------------------
   const commandDefinition = commandService
     .getCommandList()
     .find((definition) => definition.name === parsedInput.name);
@@ -66,8 +62,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       ],
     };
   }
-
-  // FIXME:PT the validation checks below should be lifted and centralized so that they can be reused (in builtinCommands)
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs()) {

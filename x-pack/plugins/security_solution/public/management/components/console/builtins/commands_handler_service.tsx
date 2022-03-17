@@ -6,7 +6,6 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { builtInCommands } from './commands';
 import { HistoryItem, HistoryItemComponent } from '../components/history_item';
 import { HelpOutput } from '../components/help_output';
@@ -14,8 +13,11 @@ import { ParsedCommandInput } from '../service/parsed_command_input';
 import { CommandList } from '../components/command_list';
 import { CommandUsage } from '../components/command_usage';
 import { Command, CommandDefinition, CommandServiceInterface } from '../types';
+import { BuiltinCommandServiceInterface } from './types.commands_handler_service';
 
-export class ConsoleBuiltinCommandsService implements CommandServiceInterface {
+// FIXME:PT move this entire module under `../service`
+
+export class ConsoleBuiltinCommandsService implements BuiltinCommandServiceInterface {
   constructor(private commandList = builtInCommands()) {}
 
   getCommandList(): CommandDefinition[] {
@@ -31,7 +33,7 @@ export class ConsoleBuiltinCommandsService implements CommandServiceInterface {
   executeBuiltinCommand(
     parsedInput: ParsedCommandInput,
     contextConsoleService: CommandServiceInterface
-  ): { result: HistoryItemComponent | null; clearBuffer?: boolean } {
+  ): { result: ReturnType<HistoryItemComponent> | null; clearBuffer?: boolean } {
     switch (parsedInput.name) {
       case 'help':
         return {

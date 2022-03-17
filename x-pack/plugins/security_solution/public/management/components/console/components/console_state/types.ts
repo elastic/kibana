@@ -8,10 +8,14 @@
 import { Dispatch, Reducer } from 'react';
 import { CommandServiceInterface } from '../../types';
 import { HistoryItemComponent } from '../history_item';
+import { BuiltinCommandServiceInterface } from '../../builtins/types.commands_handler_service';
 
 export interface ConsoleDataState {
   /** Command service defined on input to the `Console` component by consumers of the component */
   commandService: CommandServiceInterface;
+  /** Command service for builtin console commands */
+  builtinCommandService: BuiltinCommandServiceInterface;
+  /** UI function that scrolls the console down to the bottom */
   scrollToBottom: () => void;
   /**
    * List of commands entered by the user and being shown in the UI
