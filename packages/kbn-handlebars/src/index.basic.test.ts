@@ -210,9 +210,44 @@ describe('basic context', () => {
       .toCompileTo('Frank');
   });
 
+  it('pathed functions with context argument', () => {
+    expectTemplate('{{bar.awesome frank}}')
+      .withInput({
+        bar: {
+          awesome(context: any) {
+            return context;
+          },
+        },
+        frank: 'Frank',
+      })
+      .toCompileTo('Frank');
+  });
+
+  it('depthed functions with context argument', () => {
+    expectTemplate('{{#with frank}}{{../awesome .}}{{/with}}')
+      .withInput({
+        awesome(context: any) {
+          return context;
+        },
+        frank: 'Frank',
+      })
+      .toCompileTo('Frank');
+  });
+
   it('block functions with context argument', () => {
     expectTemplate('{{#awesome 1}}inner {{.}}{{/awesome}}')
       .withInput({
+        awesome(context: any, options: any) {
+          return options.fn(context);
+        },
+      })
+      .toCompileTo('inner 1');
+  });
+
+  it('depthed block functions with context argument', () => {
+    expectTemplate('{{#with value}}{{#../awesome 1}}inner {{.}}{{/../awesome}}{{/with}}')
+      .withInput({
+        value: true,
         awesome(context: any, options: any) {
           return options.fn(context);
         },

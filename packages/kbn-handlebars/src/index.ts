@@ -255,9 +255,11 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       if (this.compileOptions.strict) {
         helper.fn = this.container.strict(helper.context, name, sexpr.loc);
       } else {
-        helper.fn =
-          (helper.context && this.container.lookupProperty(helper.context, name)) ||
-          this.container.hooks.helperMissing;
+        const currentOutput = this.output;
+        this.output = [];
+        this.accept(sexpr.path);
+        helper.fn = this.output[0] || this.container.hooks.helperMissing;
+        this.output = currentOutput;
       }
     }
 
