@@ -9,7 +9,7 @@ import { MetricResult } from '../../../monitoring_collection/server';
 export type ClusterRulesMetric = MetricResult<{
   overdue: {
     count: number;
-    duration: {
+    delay: {
       p50: number;
       p99: number;
     };

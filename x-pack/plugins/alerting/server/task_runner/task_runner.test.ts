@@ -175,10 +175,6 @@ describe('Task Runner', () => {
     );
     mockedRuleTypeSavedObject.monitoring!.execution.history = [];
     mockedRuleTypeSavedObject.monitoring!.execution.calculated_metrics.success_ratio = 0;
-    // const all = getAllInMemoryMetrics();
-    // for (const key of Object.keys(all)) {
-    //   all[key as IN_MEMORY_METRICS] = 0;
-    // }
   });
 
   test('successfully executes the task', async () => {
@@ -2515,9 +2511,9 @@ describe('Task Runner', () => {
       references: [],
     });
 
-    for (let i = 0; i < 2; i++) {
-      await taskRunner.run();
-    }
+    await taskRunner.run();
+    await taskRunner.run();
+    await taskRunner.run();
 
     ruleType.executor.mockImplementation(
       async ({
@@ -2533,11 +2529,14 @@ describe('Task Runner', () => {
       }
     );
     await taskRunner.run();
+    await taskRunner.cancel();
 
-    expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(4);
+    expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(6);
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
     expect(inMemoryMetrics.increment.mock.calls[1][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
     expect(inMemoryMetrics.increment.mock.calls[2][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-    expect(inMemoryMetrics.increment.mock.calls[3][0]).toBe(IN_MEMORY_METRICS.RULE_FAILURES);
+    expect(inMemoryMetrics.increment.mock.calls[3][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+    expect(inMemoryMetrics.increment.mock.calls[4][0]).toBe(IN_MEMORY_METRICS.RULE_FAILURES);
+    expect(inMemoryMetrics.increment.mock.calls[5][0]).toBe(IN_MEMORY_METRICS.RULE_TIMEOUTS);
   });
 });

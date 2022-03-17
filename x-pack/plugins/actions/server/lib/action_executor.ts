@@ -30,7 +30,6 @@ import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -71,18 +70,11 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
-  private readonly inMemoryMetrics: InMemoryMetrics;
+
   private actionInfo: ActionInfo | undefined;
 
-  constructor({
-    isESOCanEncrypt,
-    inMemoryMetrics,
-  }: {
-    isESOCanEncrypt: boolean;
-    inMemoryMetrics: InMemoryMetrics;
-  }) {
+  constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
-    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
@@ -282,11 +274,6 @@ export class ActionExecutor {
           logger.warn(
             `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
           );
-        }
-
-        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
-        if (result.status !== 'ok') {
-          this.inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
         }
 
         eventLogger.logEvent(event);

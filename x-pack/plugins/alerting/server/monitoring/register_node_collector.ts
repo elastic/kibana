@@ -24,11 +24,15 @@ export function registerNodeCollector({
       executions: {
         type: 'long',
       },
+      timeouts: {
+        type: 'long',
+      },
     },
     fetch: async () => {
       return {
         failures: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_FAILURES),
         executions: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS),
+        timeouts: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_TIMEOUTS),
       };
     },
   });

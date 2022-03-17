@@ -18,6 +18,7 @@ import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { ActionTypeDisabledError } from './errors';
 import { actionsClientMock } from '../mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { IN_MEMORY_METRICS } from '../monitoring';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -48,7 +49,7 @@ beforeAll(() => {
     },
     taskType: 'actions:1',
   };
-  taskRunnerFactory = new TaskRunnerFactory(mockedActionExecutor);
+  taskRunnerFactory = new TaskRunnerFactory(mockedActionExecutor, inMemoryMetrics);
   mockedActionExecutor.initialize(actionExecutorInitializerParams);
   taskRunnerFactory.initialize(taskRunnerFactoryInitializerParams);
 });
@@ -87,7 +88,8 @@ beforeEach(() => {
 
 test(`throws an error if factory isn't initialized`, () => {
   const factory = new TaskRunnerFactory(
-    new ActionExecutor({ isESOCanEncrypt: true, inMemoryMetrics })
+    new ActionExecutor({ isESOCanEncrypt: true }),
+    inMemoryMetrics
   );
   expect(() =>
     factory.create({ taskInstance: mockedTaskInstance })
@@ -96,7 +98,8 @@ test(`throws an error if factory isn't initialized`, () => {
 
 test(`throws an error if factory is already initialized`, () => {
   const factory = new TaskRunnerFactory(
-    new ActionExecutor({ isESOCanEncrypt: true, inMemoryMetrics })
+    new ActionExecutor({ isESOCanEncrypt: true }),
+    inMemoryMetrics
   );
   factory.initialize(taskRunnerFactoryInitializerParams);
   expect(() =>
@@ -568,7 +571,7 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
 });
 
 test(`doesn't use API key when not provided`, async () => {
-  const factory = new TaskRunnerFactory(mockedActionExecutor);
+  const factory = new TaskRunnerFactory(mockedActionExecutor, inMemoryMetrics);
   factory.initialize(taskRunnerFactoryInitializerParams);
   const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
 
@@ -790,4 +793,93 @@ test('treats errors as errors if the error is thrown instead of returned', async
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
     `Action '2' failed and will retry: undefined`
   );
+});
+
+test('increments monitoring metrics after execution', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      executionId: '123abc',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  await taskRunner.run();
+
+  expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(1);
+  expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+});
+
+test('increments monitoring metrics after a failed execution', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({
+    status: 'error',
+    actionId: '2',
+    message: 'Error message',
+    data: { foo: true },
+    retry: false,
+  });
+
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      executionId: '123abc',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  let err;
+  try {
+    await taskRunner.run();
+  } catch (e) {
+    err = e;
+  }
+
+  expect(err).toBeDefined();
+  expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(2);
+  expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+  expect(inMemoryMetrics.increment.mock.calls[1][0]).toBe(IN_MEMORY_METRICS.ACTION_FAILURES);
+});
+
+test('increments monitoring metrics after a timeout', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      executionId: '123abc',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  await taskRunner.cancel();
+
+  expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(1);
+  expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
 });

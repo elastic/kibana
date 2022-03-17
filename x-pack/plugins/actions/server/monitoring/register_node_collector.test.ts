@@ -32,10 +32,12 @@ describe('registerNodeCollector()', () => {
           return 2;
         case IN_MEMORY_METRICS.ACTION_EXECUTIONS:
           return 10;
+        case IN_MEMORY_METRICS.ACTION_TIMEOUTS:
+          return 1;
       }
     });
 
     const result = (await metrics.node_actions.fetch()) as NodeActionsMetric;
-    expect(result).toStrictEqual({ failures: 2, executions: 10 });
+    expect(result).toStrictEqual({ failures: 2, executions: 10, timeouts: 1 });
   });
 });

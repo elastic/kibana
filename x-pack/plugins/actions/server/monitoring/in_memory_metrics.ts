@@ -10,6 +10,7 @@ import { Logger } from '@kbn/logging';
 export enum IN_MEMORY_METRICS {
   ACTION_EXECUTIONS = 'actionExecutions',
   ACTION_FAILURES = 'actionFailures',
+  ACTION_TIMEOUTS = 'actionTimeouts',
 }
 
 export class InMemoryMetrics {
@@ -17,6 +18,7 @@ export class InMemoryMetrics {
   private inMemoryMetrics: Record<IN_MEMORY_METRICS, number | null> = {
     [IN_MEMORY_METRICS.ACTION_EXECUTIONS]: 0,
     [IN_MEMORY_METRICS.ACTION_FAILURES]: 0,
+    [IN_MEMORY_METRICS.ACTION_TIMEOUTS]: 0,
   };
 
   constructor(logger: Logger) {
