@@ -38,3 +38,10 @@ export const NAVIGATION_EVENTS_TITLE = i18n.translate(
     defaultMessage: 'Events',
   }
 );
+
+export const NAVIGATION_ALERTS_TITLE = i18n.translate(
+  'xpack.securitySolution.users.navigation.alertsTitle',
+  {
+    defaultMessage: 'External alerts',
+  }
+);

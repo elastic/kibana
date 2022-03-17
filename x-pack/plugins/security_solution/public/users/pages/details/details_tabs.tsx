@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { UsersTableType } from '../../store/model';
@@ -18,6 +18,8 @@ import { Anomaly } from '../../../common/components/ml/types';
 import { usersDetailsPagePath } from '../constants';
 import { TimelineId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
+import { AlertsView } from '../../../common/components/alerts_viewer';
+import { filterUserExternalAlertData } from './helpers';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -60,6 +62,14 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       [setAbsoluteRangeDatePicker]
     );
 
+    const alertsPageFilters = useMemo(
+      () =>
+        pageFilters != null
+          ? [...filterUserExternalAlertData, ...pageFilters]
+          : filterUserExternalAlertData,
+      [pageFilters]
+    );
+
     const tabProps = {
       deleteQuery,
       endDate: to,
@@ -84,6 +94,15 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
             {...tabProps}
             pageFilters={pageFilters}
             timelineId={TimelineId.usersPageEvents}
+          />
+        </Route>
+
+        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.alerts})`}>
+          <AlertsView
+            entityType="events"
+            timelineId={TimelineId.usersPageExternalAlerts}
+            pageFilters={alertsPageFilters}
+            {...tabProps}
           />
         </Route>
       </Switch>

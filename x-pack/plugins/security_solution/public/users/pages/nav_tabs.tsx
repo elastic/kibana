@@ -44,6 +44,12 @@ export const navTabsUsers = (
       href: getTabsOnUsersUrl(UsersTableType.events),
       disabled: false,
     },
+    [UsersTableType.alerts]: {
+      id: UsersTableType.alerts,
+      name: i18n.NAVIGATION_ALERTS_TITLE,
+      href: getTabsOnUsersUrl(UsersTableType.alerts),
+      disabled: false,
+    },
   };
 
   if (!hasMlUserPermissions) {

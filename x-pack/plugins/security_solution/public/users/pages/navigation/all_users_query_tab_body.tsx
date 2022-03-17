@@ -36,12 +36,11 @@ export const AllUsersQueryTabBody = ({
     indexNames,
     skip,
     startDate,
-    // TODO Fix me!!
+    // TODO Move authentication table, hook and store to the user folder when 'usersEnabled' is removed
     // @ts-ignore
     type,
     deleteQuery,
   });
-  // TODO Use a different table
   return (
     <AuthenticationTableManage
       data={authentications}
@@ -58,7 +57,7 @@ export const AllUsersQueryTabBody = ({
       totalCount={totalCount}
       docValueFields={docValueFields}
       indexNames={indexNames}
-      // TODO Fix me!!
+      // TODO Move authentication table, hook and store to the user folder when 'usersEnabled' is removed
       // @ts-ignore
       type={type}
     />
