@@ -120,12 +120,13 @@ export const ReorderableTable = <Item extends object>({
         )}
 
         {bottomRows.map((row, rowIndex) => (
-          <BodyRow
+          <BodyRow // Shoving a generic ReactNode into a BodyRow is kind of a hack
             key={rowIndex}
             rowIdentifier={showRowIndex ? '∞' : undefined}
             columns={[{ render: () => row }]}
             item={{}}
             leftAction={disableReordering ? undefined : <> </>}
+            data-test-subj="BottomRow"
           />
         ))}
       </div>

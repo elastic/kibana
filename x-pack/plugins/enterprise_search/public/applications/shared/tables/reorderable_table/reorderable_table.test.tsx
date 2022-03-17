@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. unreorderableItemsder one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -129,6 +136,20 @@ describe('ReorderableTable', () => {
         leftAction: expect.anything(),
       });
     });
+
+    it('will render bottom rows that cant be reordered', () => {
+      const bottomRows = [<div />, <div />];
+      const wrapper = shallow(
+        <ReorderableTable
+          noItemsMessage={<p>No Items</p>}
+          items={items}
+          bottomRows={bottomRows}
+          columns={columns}
+        />
+      );
+
+      expect(wrapper.find('[data-test-subj="BottomRow"]')).toHaveLength(2);
+    });
   });
 
   describe('when reorderable is turned off on the table', () => {
@@ -177,6 +198,7 @@ describe('ReorderableTable', () => {
     const wrapper = shallow(
       <ReorderableTable noItemsMessage={<p>No Items</p>} items={[]} columns={[]} className="foo" />
     );
+
     expect(wrapper.hasClass('foo')).toBe(true);
   });
 
@@ -184,6 +206,7 @@ describe('ReorderableTable', () => {
     const wrapper = shallow(
       <ReorderableTable noItemsMessage={<p>No Items</p>} items={[]} columns={columns} />
     );
+
     expect(wrapper.find('[data-test-subj="NoItems"]').exists()).toBe(true);
     expect(wrapper.find(BodyRows).exists()).toBe(false);
     expect(wrapper.find(DraggableBodyRows).exists()).toBe(false);
