@@ -20,3 +20,7 @@ This plugin provides the Stack Monitoring kibana application.
 ## Troubleshooting
 - [Diagnostic queries](dev_docs/runbook/diagnostic_queries.md)
 - [CPU metrics](dev_docs/runbook/cpu_metrics.md)
+
+## Additional reference
+
+- [Internal documentation for engineers working on Stack Monitoring](https://github.com/elastic/observability-dev/tree/main/docs/monitoring)
