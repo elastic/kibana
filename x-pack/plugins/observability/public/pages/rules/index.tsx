@@ -284,6 +284,21 @@ export function RulesPage() {
             onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="refreshRulesButton"
+            iconType="refresh"
+            onClick={reload}
+            name="refresh"
+            color="primary"
+          >
+            <FormattedMessage
+              id="xpack.observability.rules.refreshRulesButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButton>
+          ,
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
