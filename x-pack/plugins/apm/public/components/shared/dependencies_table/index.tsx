@@ -9,6 +9,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiToolTip,
+  EuiIcon,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -131,9 +133,29 @@ export function DependenciesTable(props: Props) {
     },
     {
       field: 'errorRateValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-        defaultMessage: 'Failed transaction rate',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.dependenciesTable.columnErrorRateTip',
+            {
+              defaultMessage:
+                'The percentage of failed transactions for the selected service. HTTP transactions from the HTTP server perspective do not consider a 4xx status code (client error) a failure because the failure was caused by the caller, not the server.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
+              defaultMessage: 'Failed transaction rate',
+            })}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      ),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
