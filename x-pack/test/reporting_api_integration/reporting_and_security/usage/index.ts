@@ -18,6 +18,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./archived_data'));
     loadTestFile(require.resolve('./initial'));
+    loadTestFile(require.resolve('./metrics'));
     loadTestFile(require.resolve('./new_jobs'));
   });
 }
