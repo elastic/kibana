@@ -28,6 +28,34 @@ export interface State {
 
 export const GlobalStateContext = createContext({} as State);
 
+const REFRESH_INTERVAL_OVERRIDE = {
+  pause: false,
+  value: 10000,
+};
+
+/**
+ * Stack Monitoring relies on live data to offer a relevant dashboard experience.
+ * Since current refresh interval defaults to a paused state we should override it
+ * to an active interval when it's not conflicting with user-defined values.
+ * This logic can be removed if we move forward with a suiting defaults
+ * https://github.com/elastic/kibana/issues/70562
+ */
+const shouldOverrideRefreshInterval = (
+  uiSettings: MonitoringStartServices['uiSettings'],
+  timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter']
+): boolean => {
+  const isUserDefined =
+    timefilter.isRefreshIntervalTouched() ||
+    !uiSettings.isDefault(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS);
+  if (isUserDefined) {
+    return false;
+  }
+
+  const currentInterval = timefilter.getRefreshInterval();
+  const isPaused = currentInterval.pause || currentInterval.value === 0;
+  return isPaused;
+};
+
 export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
   uiSettings,
   query,
@@ -45,24 +73,17 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     localState[key] = initialState[key];
   }
 
-  const { value, pause } = Legacy.shims.timefilter.getRefreshInterval();
-  const refreshDefaults = uiSettings.get(
-    UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
-  ) as RefreshInterval;
-
-  localState.refreshInterval = {
-    value: value ?? refreshDefaults.value,
-    pause: pause ?? refreshDefaults.pause,
-  };
-  Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
-
   localState.save = () => {
     const newState = { ...localState };
     delete newState.save;
     state.setState(newState);
   };
 
-  localState.save();
+  if (shouldOverrideRefreshInterval(uiSettings, Legacy.shims.timefilter)) {
+    localState.refreshInterval = REFRESH_INTERVAL_OVERRIDE;
+    Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
+    localState.save();
+  }
 
   return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;
 };
