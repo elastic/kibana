@@ -94,6 +94,7 @@ test('Model of jobTypes', () => {
       csv_searchsource: {
         available: true,
         total: 3,
+        app: { search: 3 },
         sizes: sizesAggResponse,
         metrics: { csv_rows: {} } as MetricsStats,
       },
@@ -134,7 +135,7 @@ test('Model of jobTypes', () => {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
+        "search": 3,
         "visualization": 0,
       },
       "available": true,

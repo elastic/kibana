@@ -85,7 +85,7 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
     };
   }, {});
 
-type CombinedTotals = Omit<AvailableTotal, 'available'> & {
+type JobType = Omit<AvailableTotal, 'available'> & {
   layout: LayoutCounts;
   metrics?: MetricsStats;
 };
@@ -98,15 +98,17 @@ function getAggStats(
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
     const { key, doc_count: count, isDeprecated, sizes, layoutTypes, objectTypes } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
-    const total: CombinedTotals = {
+
+    // format the search results into the telemetry schema
+    const jobType: JobType = {
       total: count,
       deprecated: deprecatedCount,
-      sizes: get(sizes, 'values', {} as SizePercentiles),
       app: getKeyCount(get(objectTypes, 'buckets', [])),
-      layout: getKeyCount(get(layoutTypes, 'buckets', [])),
       metrics: (metrics && metrics[key]) || undefined,
+      sizes: get(sizes, 'values', {} as SizePercentiles),
+      layout: getKeyCount(get(layoutTypes, 'buckets', [])),
     };
-    return { ...accum, [key]: total };
+    return { ...accum, [key]: jobType };
   }, {} as JobTypes);
 
   const all = aggs.doc_count;
@@ -208,15 +210,15 @@ export async function getReportingUsage(
                 [keys.OUTPUT_SIZE]: {
                   percentiles: { field: fields.OUTPUT_SIZE, percents: SIZE_PERCENTILES },
                 },
-                [keys.OBJECT_TYPE]: {
-                  terms: { field: fields.OBJECT_TYPE, size: DEFAULT_TERMS_SIZE },
-                },
                 [keys.LAYOUT]: { terms: { field: fields.LAYOUT, size: DEFAULT_TERMS_SIZE } },
                 [keys.STATUS_BY_APP]: {
                   terms: { field: fields.STATUS, size: DEFAULT_TERMS_SIZE },
                   aggs: {
                     appNames: { terms: { field: fields.OBJECT_TYPE, size: DEFAULT_TERMS_SIZE } },
                   },
+                },
+                [keys.OBJECT_TYPE]: {
+                  terms: { field: fields.OBJECT_TYPE, size: DEFAULT_TERMS_SIZE },
                 },
               },
             },

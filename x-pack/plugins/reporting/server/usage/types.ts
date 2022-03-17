@@ -19,15 +19,15 @@ interface DocCount {
   doc_count: number;
 }
 
-interface SizeStats {
+interface SizeBuckets {
   sizes?: { values: SizePercentiles };
 }
 
-interface ObjectTypeStats {
+interface ObjectTypeBuckets {
   objectTypes: AggregationBuckets;
 }
 
-interface LayoutTypeStats {
+interface LayoutTypeBuckets {
   layoutTypes: AggregationBuckets;
 }
 
@@ -43,7 +43,11 @@ type BaseJobTypes =
   | 'printable_pdf'
   | 'printable_pdf_v2';
 
-export interface KeyCountBucket extends DocCount, SizeStats, ObjectTypeStats, LayoutTypeStats {
+export interface KeyCountBucket
+  extends DocCount,
+    SizeBuckets,
+    ObjectTypeBuckets,
+    LayoutTypeBuckets {
   key: BaseJobTypes;
   isDeprecated?: DocCount;
 }
@@ -64,7 +68,7 @@ export interface StatusByAppBucket extends DocCount {
   };
 }
 
-export interface AggregationResultBuckets extends DocCount, SizeStats {
+export interface AggregationResultBuckets extends DocCount, SizeBuckets {
   jobTypes?: AggregationBuckets;
   statusTypes: AggregationBuckets;
   statusByApp: {
@@ -133,16 +137,16 @@ export type RangeStats = JobTypes & {
   output_size?: SizePercentiles;
 };
 
-export interface MetricsStatsCsv {
+interface MetricsStatsCsv {
   csv_rows: MetricsPercentiles;
 }
 
-export interface MetricsStatsPng {
+interface MetricsStatsPng {
   png_cpu: MetricsPercentiles;
   png_memory: MetricsPercentiles;
 }
 
-export interface MetricsStatsPdf {
+interface MetricsStatsPdf {
   pdf_cpu: MetricsPercentiles;
   pdf_memory: MetricsPercentiles;
   pdf_pages: MetricsPercentiles;
