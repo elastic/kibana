@@ -245,6 +245,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -280,6 +281,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -319,6 +321,7 @@ describe('Task Runner Cancel', () => {
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -511,6 +514,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         task: {
@@ -546,6 +550,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -586,6 +591,7 @@ describe('Task Runner Cancel', () => {
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -661,6 +667,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         task: {
@@ -697,6 +704,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -732,6 +740,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -773,6 +782,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -805,6 +815,7 @@ describe('Task Runner Cancel', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -850,6 +861,7 @@ describe('Task Runner Cancel', () => {
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {

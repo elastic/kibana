@@ -74,6 +74,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     kibana: {
       alert: {
         rule: {
+          rule_type_id: ruleType.id,
           ...(consumer ? { consumer } : {}),
           ...(executionId
             ? {

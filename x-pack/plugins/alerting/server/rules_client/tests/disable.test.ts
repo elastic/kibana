@@ -332,6 +332,7 @@ describe('disable()', () => {
         alert: {
           rule: {
             consumer: 'myApp',
+            rule_type_id: '123',
           },
         },
         alerting: {

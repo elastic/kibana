@@ -58,6 +58,7 @@ describe('createAlertEventLogRecordObject', () => {
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -127,6 +128,7 @@ describe('createAlertEventLogRecordObject', () => {
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -204,6 +206,7 @@ describe('createAlertEventLogRecordObject', () => {
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {

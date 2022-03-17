@@ -909,6 +909,7 @@ export class TaskRunner<
             execution: {
               uuid: this.executionId,
             },
+            rule_type_id: this.ruleType.id,
           },
         },
         saved_objects: [
@@ -1087,6 +1088,7 @@ function generateNewAndRecoveredAlertEvents<
             execution: {
               uuid: executionId,
             },
+            rule_type_id: ruleType.id,
           },
         },
         alerting: {

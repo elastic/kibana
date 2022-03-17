@@ -184,6 +184,7 @@ describe('Create Execution Handler', () => {
                 "execution": Object {
                   "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 },
+                "rule_type_id": "test",
               },
             },
             "alerting": Object {

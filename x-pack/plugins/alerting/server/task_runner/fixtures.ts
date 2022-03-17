@@ -225,6 +225,7 @@ export const generateEventLog = ({
             },
           }),
         },
+        rule_type_id: 'test',
       },
     },
     ...((actionSubgroup || actionGroupId || instanceId || status) && {
