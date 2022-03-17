@@ -32,7 +32,8 @@ export const SessionView = ({
   sessionEntityId,
   height,
   jumpToEvent,
-  alertsFlyoutCallback,
+  loadAlertDetails,
+  handleOnAlertDetailsClosed,
 }: SessionViewDeps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
@@ -187,7 +188,8 @@ export const SessionView = ({
                     fetchNextPage={fetchNextPage}
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
-                    alertsFlyoutCallback={alertsFlyoutCallback}
+                    loadAlertDetails={loadAlertDetails}
+                    handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
                     timeStampOn={displayOptions.timestamp}
                     verboseModeOn={displayOptions.verboseMode}
                   />

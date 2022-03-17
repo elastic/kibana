@@ -43,7 +43,8 @@ export interface ProcessDeps {
   verboseModeOn?: boolean;
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
-  alertsFlyoutCallback?: (alertUuid: string) => void;
+  loadAlertDetails?: (alertUuid: string) => void;
+  handleOnAlertDetailsClosed?: (alertUuid: string, status?: string) => void;
 }
 
 /**
@@ -61,7 +62,8 @@ export function ProcessTreeNode({
   verboseModeOn = true,
   scrollerRef,
   onChangeJumpToEventVisibility,
-  alertsFlyoutCallback,
+  loadAlertDetails,
+  handleOnAlertDetailsClosed,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -253,7 +255,8 @@ export function ProcessTreeNode({
           jumpToAlertID={jumpToAlertID}
           isProcessSelected={selectedProcessId === process.id}
           onAlertSelected={onProcessClicked}
-          alertsFlyoutCallback={alertsFlyoutCallback}
+          loadAlertDetails={loadAlertDetails}
+          handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
         />
       )}
 
@@ -273,7 +276,8 @@ export function ProcessTreeNode({
                 verboseModeOn={verboseModeOn}
                 scrollerRef={scrollerRef}
                 onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
-                alertsFlyoutCallback={alertsFlyoutCallback}
+                loadAlertDetails={loadAlertDetails}
+                handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
               />
             );
           })}
