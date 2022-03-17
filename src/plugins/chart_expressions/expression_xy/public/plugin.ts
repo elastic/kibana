@@ -14,7 +14,7 @@ import { ChartsPluginStart } from '../../../charts/public';
 import { CoreSetup, CoreStart, IUiSettingsClient } from '../../../../core/public';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
-  xyChartFunction,
+  xyVisFunction,
   yAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
@@ -56,7 +56,7 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineLayerConfigFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
-    expressions.registerFunction(xyChartFunction);
+    expressions.registerFunction(xyVisFunction);
 
     const getStartDeps: GetStartDepsFn = async () => {
       const [coreStart, deps] = await core.getStartServices();

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-export const XY_CHART = 'xyVis';
+export const XY_VIS = 'xyVis';
 export const Y_CONFIG = 'yConfig';
 export const MULTITABLE = 'lens_multitable';
 export const DATA_LAYER = 'dataLayer';
 export const LEGEND_CONFIG = 'legendConfig';
-export const XY_CHART_RENDERER = 'xyVis';
+export const XY_VIS_RENDERER = 'xyVis';
 export const GRID_LINES_CONFIG = 'gridlinesConfig';
 export const TICK_LABELS_CONFIG = 'tickLabelsConfig';
 export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';

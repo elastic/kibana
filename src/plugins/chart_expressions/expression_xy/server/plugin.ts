@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
 
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
-  xyChartFunction,
+  xyVisFunction,
   yAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
@@ -36,7 +36,7 @@ export class ExpressionXyPlugin
     expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineLayerConfigFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
-    expressions.registerFunction(xyChartFunction);
+    expressions.registerFunction(xyVisFunction);
   }
 
   public start(core: CoreStart) {}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { XY_CHART_RENDERER } from '../constants';
+import { XY_VIS_RENDERER } from '../constants';
 import { LensMultiTable, XYArgs } from './expression_functions';
 
 export interface XYChartProps {
@@ -16,6 +16,6 @@ export interface XYChartProps {
 
 export interface XYRender {
   type: 'render';
-  as: typeof XY_CHART_RENDERER;
+  as: typeof XY_VIS_RENDERER;
   value: XYChartProps;
 }

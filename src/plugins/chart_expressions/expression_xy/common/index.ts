@@ -10,7 +10,7 @@ export const PLUGIN_ID = 'expressionXy';
 export const PLUGIN_NAME = 'expressionXy';
 
 export {
-  xyChartFunction,
+  xyVisFunction,
   yAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './xy_chart';
+export * from './xy_vis';
 export * from './legend_config';
 export * from './y_axis_config';
 export * from './data_layer_config';

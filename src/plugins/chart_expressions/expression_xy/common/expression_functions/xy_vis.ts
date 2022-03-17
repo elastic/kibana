@@ -14,7 +14,7 @@ import type {
 } from '../../../../expressions';
 import { LensMultiTable, XYArgs, XYRender } from '../types';
 import {
-  XY_CHART,
+  XY_VIS,
   DATA_LAYER,
   MULTITABLE,
   XYCurveTypes,
@@ -22,7 +22,7 @@ import {
   ValueLabelModes,
   FittingFunctions,
   GRID_LINES_CONFIG,
-  XY_CHART_RENDERER,
+  XY_VIS_RENDERER,
   AXIS_EXTENT_CONFIG,
   TICK_LABELS_CONFIG,
   REFERENCE_LINE_LAYER,
@@ -37,13 +37,13 @@ export const logDataTable = (
   Object.entries(datatables).forEach(([key, table]) => tableAdapter.logDatatable(key, table));
 };
 
-export const xyChartFunction: ExpressionFunctionDefinition<
-  typeof XY_CHART,
+export const xyVisFunction: ExpressionFunctionDefinition<
+  typeof XY_VIS,
   LensMultiTable,
   XYArgs,
   XYRender
 > = {
-  name: XY_CHART,
+  name: XY_VIS,
   type: 'render',
   inputTypes: [MULTITABLE],
   help: i18n.translate('expressionXY.xyVis.help', {
@@ -181,7 +181,7 @@ export const xyChartFunction: ExpressionFunctionDefinition<
 
     return {
       type: 'render',
-      as: XY_CHART_RENDERER,
+      as: XY_VIS_RENDERER,
       value: {
         data,
         args: {
