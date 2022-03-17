@@ -9,9 +9,11 @@
 import { Validation } from './form_validation';
 import { DeSerializer } from './form_de_serializer';
 import { DefaultValue } from './form_default_value';
+import { IsModified } from './form_is_modified';
 
 export const formStories = {
   Validation,
   DeSerializer,
   DefaultValue,
+  IsModified,
 };

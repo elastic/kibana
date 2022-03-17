@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 
@@ -14,7 +14,6 @@ import { TextField } from '../../components';
 import { STORYBOOK_SECTION } from '../constants';
 import { FormHook, FieldConfig } from '../types';
 import { useForm } from '../hooks/use_form';
-import { useFormData } from '../hooks/use_form_data';
 import { Form, Props as FormProps } from './form';
 import { UseField } from './use_field';
 import { formStories } from './storybook';
@@ -36,7 +35,7 @@ export default {
 
 type Args = Pick<FormProps, 'children' | 'FormWrapper'>;
 
-const { DefaultValue, Validation, DeSerializer } = formStories;
+const { DefaultValue, Validation, DeSerializer, IsModified } = formStories;
 
 /**
  * Validate the form and return its data.
@@ -99,4 +98,4 @@ export const Schema = (args: Args) => {
   );
 };
 
-export { DefaultValue, Validation, DeSerializer };
+export { DefaultValue, Validation, DeSerializer, IsModified };
