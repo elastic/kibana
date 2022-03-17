@@ -202,9 +202,31 @@ export function getColumns({
     {
       field: 'impact',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnImpact',
-        { defaultMessage: 'Impact' }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.transactionsTableColumnImpactTip',
+            {
+              defaultMessage:
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnImpact',
+              {
+                defaultMessage: 'Impact',
+              }
+            )}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {
