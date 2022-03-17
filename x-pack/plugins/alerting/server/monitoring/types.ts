@@ -19,4 +19,5 @@ export type ClusterRulesMetric = MetricResult<{
 export type NodeRulesMetric = MetricResult<{
   failures: number | null;
   executions: number | null;
+  timeouts: number | null;
 }>;
