@@ -48,7 +48,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
-  snooze_end_time: snoozeEndTime,
+  // Remove this object spread boolean check after snoozeEndTime is added to the public API
+  ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),

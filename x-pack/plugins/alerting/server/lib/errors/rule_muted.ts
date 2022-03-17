@@ -14,6 +14,6 @@ export class RuleMutedError extends Error implements ErrorThatHandlesItsOwnRespo
   }
 
   public sendResponse(res: KibanaResponseFactory) {
-    return res.conflict({ body: { message: this.message } });
+    return res.badRequest({ body: { message: this.message } });
   }
 }
