@@ -137,6 +137,7 @@ const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
 
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
+const TIMESTAMP = Date.now();
 
 const runtimeMappings: estypes.MappingRuntimeFields = {
   runtime_field: {
@@ -169,7 +170,7 @@ describe('Log threshold executor', () => {
         ...baseRuleParams,
         criteria: positiveCriteria,
       };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, TIMESTAMP);
       expect(filters.mustFilters).toEqual(expectedPositiveFilterClauses);
     });
 
@@ -178,14 +179,14 @@ describe('Log threshold executor', () => {
         ...baseRuleParams,
         criteria: negativeCriteria,
       };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, TIMESTAMP);
 
       expect(filters.mustNotFilters).toEqual(expectedNegativeFilterClauses);
     });
 
     test('Handles time range', () => {
       const ruleParams: RuleParams = { ...baseRuleParams, criteria: [] };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, TIMESTAMP);
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
       expect(filters.rangeFilter.range[TIMESTAMP_FIELD].format).toBe('epoch_millis');
@@ -207,7 +208,8 @@ describe('Log threshold executor', () => {
           ruleParams,
           TIMESTAMP_FIELD,
           FILEBEAT_INDEX,
-          runtimeMappings
+          runtimeMappings,
+          TIMESTAMP
         );
         expect(query).toEqual({
           index: 'filebeat-*',
@@ -257,7 +259,8 @@ describe('Log threshold executor', () => {
             ruleParams,
             TIMESTAMP_FIELD,
             FILEBEAT_INDEX,
-            runtimeMappings
+            runtimeMappings,
+            TIMESTAMP
           );
 
           expect(query).toEqual({
@@ -327,7 +330,8 @@ describe('Log threshold executor', () => {
             ruleParams,
             TIMESTAMP_FIELD,
             FILEBEAT_INDEX,
-            runtimeMappings
+            runtimeMappings,
+            TIMESTAMP
           );
 
           expect(query).toEqual({
@@ -423,7 +427,8 @@ describe('Log threshold executor', () => {
           results,
           ruleParams,
           alertsMock.createAlertFactory.create,
-          alertUpdaterMock
+          alertUpdaterMock,
+          TIMESTAMP
         );
         // First call, second argument
         expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
@@ -488,7 +493,8 @@ describe('Log threshold executor', () => {
           results,
           ruleParams,
           alertsMock.createAlertFactory.create,
-          alertUpdaterMock
+          alertUpdaterMock,
+          TIMESTAMP
         );
         expect(alertUpdaterMock.mock.calls.length).toBe(2);
         // First call, second argument
