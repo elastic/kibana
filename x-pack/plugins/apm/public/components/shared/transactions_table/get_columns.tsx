@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -147,9 +147,31 @@ export function getColumns({
     {
       field: 'errorRate',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        { defaultMessage: 'Failed transaction rate' }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
+            {
+              defaultMessage:
+                'The percentage of failed transactions for the selected service. HTTP transactions from the HTTP server perspective do not consider a 4xx status code (client error) a failure because the failure was caused by the caller, not the server.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
+              {
+                defaultMessage: 'Failed transaction rate',
+              }
+            )}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { errorRate, name }) => {
