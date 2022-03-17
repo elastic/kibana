@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 
 import { NavigateToPath } from '../../../contexts/kibana';
@@ -13,29 +14,27 @@ import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../data_frame_analytics/pages/job_map/page';
+import { Page } from '../../../data_frame_analytics/pages/source_selection';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const analyticsMapRouteFactory = (
+export const analyticsSourceSelectionRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/data_frame_analytics/map',
+  path: '/data_frame_analytics/source_selection',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  title: i18n.translate('xpack.ml.dataFrameAnalytics.analyticsMap.docTitle', {
-    defaultMessage: 'Analytics Map',
+  title: i18n.translate('xpack.ml.dataFrameAnalytics.sourceSelection.docTitle', {
+    defaultMessage: 'Source Selection',
   }),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.analyticsMapLabel', {
-        defaultMessage: 'Analytics Map',
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameSourceSelectionLabel', {
+        defaultMessage: 'Source Selection',
       }),
     },
   ],
-  enableDatePicker: true,
-  'data-test-subj': 'mlPageAnalyticsMap',
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
