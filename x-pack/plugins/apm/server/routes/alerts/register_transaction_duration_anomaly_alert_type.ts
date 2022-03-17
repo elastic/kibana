@@ -16,6 +16,7 @@ import {
 import { compact } from 'lodash';
 import { ESSearchResponse } from 'src/core/types/elasticsearch';
 import { KibanaRequest } from '../../../../../../src/core/server';
+import { termQuery } from '../../../../observability/server';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   AlertType,
@@ -24,7 +25,10 @@ import {
   formatTransactionDurationAnomalyReason,
 } from '../../../common/alert_types';
 import { getSeverity } from '../../../common/anomaly_detection';
-import { ApmMlDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
+import {
+  ApmMlDetectorType,
+  getApmMlDetectorIndex,
+} from '../../../common/anomaly_detection/apm_ml_detectors';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -37,7 +41,6 @@ import {
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 import { RegisterRuleDependencies } from './register_apm_alerts';
@@ -135,7 +138,9 @@ export function registerTransactionDurationAnomalyAlertType({
             query: {
               bool: {
                 filter: [
+                  { term: { result_type: 'record' } },
                   { terms: { job_id: jobIds } },
+                  { term: { is_interim: false } },
                   {
                     range: {
                       timestamp: {
@@ -144,11 +149,12 @@ export function registerTransactionDurationAnomalyAlertType({
                       },
                     },
                   },
-                  ...apmMlAnomalyQuery({
-                    serviceName: ruleParams.serviceName,
-                    transactionType: ruleParams.transactionType,
-                    detectorTypes: [ApmMlDetectorType.txLatency],
-                  }),
+                  ...termQuery('partition_field_value', ruleParams.serviceName),
+                  ...termQuery('by_field_value', ruleParams.transactionType),
+                  ...termQuery(
+                    'detector_index',
+                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
+                  ),
                 ] as QueryDslQueryContainer[],
               },
             },
