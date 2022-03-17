@@ -76,7 +76,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         );
 
       const monitorWithRevision = formatSecrets({
-        ...decryptedPreviousMonitor,
+        ...decryptedPreviousMonitor.attributes,
         ...monitor,
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       });
