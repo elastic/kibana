@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { layerTypes } from '../../../common';
 import type {
   XYDataLayerConfig,
@@ -34,7 +35,7 @@ export function getStaticDate(
   dataLayers: XYDataLayerConfig[],
   activeData: FramePublicAPI['activeData']
 ) {
-  const fallbackValue = +new Date(Date.now());
+  const fallbackValue = moment().toISOString();
 
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
   if (
@@ -58,7 +59,7 @@ export function getStaticDate(
     return lastTimestamp && lastTimestamp > acc ? lastTimestamp : acc;
   }, MIN_DATE);
   const middleDate = (minDate + maxDate) / 2;
-  return middleDate;
+  return moment(middleDate).toISOString();
 }
 
 export const getAnnotationsSupportedLayer = (

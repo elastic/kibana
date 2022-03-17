@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { EventAnnotationArgs, manualEventAnnotation } from './manual_event_annotation';
-export type { EventAnnotationConfig } from './types';
+import { StyleProps } from '../types';
+
+export type EventAnnotationArgs = {
+  time: string;
+} & StyleProps;
+
+export type EventAnnotationOutput = EventAnnotationArgs & { type: 'manual_event_annotation' };

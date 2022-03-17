@@ -74,7 +74,7 @@ export const AnnotationsPanel = (
             setConfig({
               key: {
                 ...(currentConfig?.key || { type: 'point_in_time' }),
-                timestamp: date?.valueOf(),
+                timestamp: date.toISOString(),
               },
             });
           }
@@ -95,7 +95,7 @@ export const AnnotationsPanel = (
         setConfig={setConfig}
         currentConfig={{
           axisMode: 'bottom',
-          ...currentConfig
+          ...currentConfig,
         }}
         customIconSet={annotationsIconSet}
       />

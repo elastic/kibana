@@ -11,7 +11,7 @@ export type IconPosition = 'auto' | 'left' | 'right' | 'above' | 'below';
 export type AnnotationType = 'manual';
 export type KeyType = 'point_in_time';
 
-interface StyleProps {
+export interface StyleProps {
   label: string;
   color?: string;
   icon?: string;
@@ -22,16 +22,11 @@ interface StyleProps {
   isHidden?: boolean;
 }
 
+// Lens state
 export type EventAnnotationConfig = {
   id: string;
   key: {
     type: KeyType;
-    timestamp: number;
+    timestamp: string;
   };
 } & StyleProps;
-
-export type EventAnnotationArgs = {
-  time: number;
-} & StyleProps;
-
-export type EventAnnotationOutput = EventAnnotationArgs & { type: 'manual_event_annotation' };

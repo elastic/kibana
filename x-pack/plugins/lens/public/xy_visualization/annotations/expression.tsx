@@ -16,6 +16,7 @@ import {
 } from '@elastic/charts';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
 import { EventAnnotationArgs } from 'src/plugins/event_annotation/common';
+import moment from 'moment';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 import type { AnnotationLayerArgs, IconPosition } from '../../../common/expressions';
 import { hasIcon } from '../xy_config_panel/shared/icon_select';
@@ -28,17 +29,13 @@ import {
   AnnotationIcon,
 } from '../annotations_helpers';
 
-const getRoundedTimestamp = (
-  timestamp: number,
-  firstTimestamp?: number,
-  minInterval?: number,
-  isBarChart?: boolean
-) => {
+const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
   if (!firstTimestamp || !minInterval) {
     return timestamp;
   }
   const roundedTimestamp = timestamp - ((timestamp - firstTimestamp) % minInterval);
-  return isBarChart ? roundedTimestamp + minInterval / 2 : roundedTimestamp;
+  // todo: postprocess if it's bar
+  return roundedTimestamp;
 };
 
 export interface AnnotationsProps {
@@ -47,6 +44,8 @@ export interface AnnotationsProps {
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
   hide?: boolean;
+  minInterval?: number;
+  isBarChart?: boolean;
 }
 
 interface CollectiveConfig extends EventAnnotationArgs {
@@ -58,17 +57,15 @@ interface CollectiveConfig extends EventAnnotationArgs {
 const groupVisibleConfigsByInterval = (
   layers: AnnotationLayerArgs[],
   minInterval?: number,
-  firstTimestamp?: number,
-  isBarChart?: boolean,
+  firstTimestamp?: number
 ) => {
   return layers
     .flatMap(({ config: configs }) => configs.filter((config) => !config.isHidden))
     .reduce<Record<string, EventAnnotationArgs[]>>((acc, current) => {
       const roundedTimestamp = getRoundedTimestamp(
-        Number(current.time),
+        moment(current.time).valueOf(),
         firstTimestamp,
-        minInterval,
-        isBarChart
+        minInterval
       );
       return {
         ...acc,
@@ -78,7 +75,10 @@ const groupVisibleConfigsByInterval = (
 };
 
 const createCustomTooltipDetails =
-  (config: EventAnnotationArgs[], formatter?: FieldFormat): AnnotationTooltipFormatter | undefined =>
+  (
+    config: EventAnnotationArgs[],
+    formatter?: FieldFormat
+  ): AnnotationTooltipFormatter | undefined =>
   () => {
     return (
       <div>
@@ -88,9 +88,7 @@ const createCustomTooltipDetails =
               {hasIcon(icon) ? <AnnotationIcon type={icon} color={color} /> : null}
               {label}
             </span>
-            <span className="echTooltip__value">
-              {formatter?.convert(time) || String(time)}
-            </span>
+            <span className="echTooltip__value">{formatter?.convert(time) || String(time)}</span>
           </div>
         ))}
       </div>
@@ -128,18 +126,16 @@ export const getCollectiveConfigsByInterval = (
   layers: AnnotationLayerArgs[],
   minInterval?: number,
   firstTimestamp?: number,
-  isBarChart?: boolean,
   formatter?: FieldFormat
 ) => {
-  const visibleGroupedConfigs = groupVisibleConfigsByInterval(
-    layers,
-    minInterval,
-    firstTimestamp,
-    isBarChart,
-  );
+  const visibleGroupedConfigs = groupVisibleConfigsByInterval(layers, minInterval, firstTimestamp);
   let collectiveConfig: CollectiveConfig;
   return Object.entries(visibleGroupedConfigs).map(([roundedTimestamp, configArr]) => {
-    collectiveConfig = { ...configArr[0], roundedTimestamp: Number(roundedTimestamp), axisMode: 'bottom' };
+    collectiveConfig = {
+      ...configArr[0],
+      roundedTimestamp: Number(roundedTimestamp),
+      axisMode: 'bottom',
+    };
     if (configArr.length > 1) {
       const commonStyles = getCommonStyles(configArr);
       collectiveConfig = {
@@ -159,15 +155,16 @@ export const Annotations = ({
   isHorizontal,
   paddingMap,
   hide,
+  minInterval,
+  isBarChart,
 }: AnnotationsProps) => {
   return (
     <>
       {collectiveAnnotationConfigs.map((config) => {
-        const { roundedTimestamp } = config;
         const markerPositionVertical = getBaseIconPlacement(config.iconPosition);
         const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
-        const id = snakeCase(config.label)
-        
+        const id = snakeCase(config.label);
+        const { roundedTimestamp } = config;
         return (
           <LineAnnotation
             id={id}
@@ -200,8 +197,11 @@ export const Annotations = ({
             }
             dataValues={[
               {
-                dataValue: Number(roundedTimestamp),
-                header: formatter?.convert(roundedTimestamp) || String(roundedTimestamp),
+                dataValue: moment(
+                  isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
+                ).valueOf(),
+                header:
+                  formatter?.convert(roundedTimestamp) || moment(roundedTimestamp).toISOString(),
                 details: config.label,
               },
             ]}

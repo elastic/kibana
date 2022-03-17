@@ -8,7 +8,7 @@
 
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { EventAnnotationArgs, EventAnnotationOutput } from './types';
-
+export { EventAnnotationArgs } from './types';
 export const manualEventAnnotation: ExpressionFunctionDefinition<
   'manual_event_annotation',
   null,
@@ -22,7 +22,7 @@ export const manualEventAnnotation: ExpressionFunctionDefinition<
   inputTypes: ['null'],
   args: {
     time: {
-      types: ['number'],
+      types: ['string'],
       help: 'The name',
     },
     label: {

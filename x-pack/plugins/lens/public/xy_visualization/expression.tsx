@@ -375,7 +375,6 @@ export function XYChart({
     annotationsLayers,
     minInterval,
     xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
-    filteredBarLayers.length > 0,
     xAxisFormatter
   );
   const visualConfigs = [
@@ -1025,6 +1024,8 @@ export function XYChart({
           formatter={xAxisFormatter}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
+          isBarChart={filteredBarLayers.length > 0}
+          minInterval={minInterval}
         />
       ) : null}
     </Chart>
