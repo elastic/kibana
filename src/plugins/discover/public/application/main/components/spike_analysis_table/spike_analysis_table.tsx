@@ -263,11 +263,6 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     // onTableChange(tableSettings);
   }, []);
 
-  const barSeries = useMemo(
-    () => orderBy(response?.overallTimeSeries ?? [], 'normalizedScore', 'desc'),
-    [response?.overallTimeSeries]
-  );
-
   const cpBarSeries = useMemo(
     () =>
       response.changePoints?.map((cp) => {
@@ -275,7 +270,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           ...cp,
           data:
             response?.overallTimeSeries?.map((o, i) => {
-              const current = cp.histogram.find((d) => d.key_as_string === o.key_as_string) ?? {
+              const current = cp.histogram?.find((d) => d.key_as_string === o.key_as_string) ?? {
                 doc_count: 0,
               };
               return {
