@@ -41,13 +41,13 @@ export function TimeComparison() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
-    urlParams: { comparisonEnabled, comparisonType },
+    urlParams: { comparisonEnabled, offset },
   } = useLegacyUrlParams();
 
   const comparisonOptions = getComparisonOptions({ start, end });
 
   // Sets default values
-  if (comparisonEnabled === undefined || comparisonType === undefined) {
+  if (comparisonEnabled === undefined || offset === undefined) {
     urlHelpers.replace(history, {
       query: {
         comparisonEnabled:
@@ -57,22 +57,20 @@ export function TimeComparison() {
           }) === false
             ? 'false'
             : 'true',
-        comparisonType: comparisonType
-          ? comparisonType
-          : comparisonOptions[0].value,
+        offset: offset ? offset : comparisonOptions[0].value,
       },
     });
     return null;
   }
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
-    ({ value }) => value === comparisonType
+    ({ value }) => value === offset
   );
 
   // Replaces type when current one is no longer available in the select options
   if (comparisonOptions.length !== 0 && !isSelectedComparisonTypeAvailable) {
     urlHelpers.replace(history, {
-      query: { comparisonType: comparisonOptions[0].value },
+      query: { offset: comparisonOptions[0].value },
     });
     return null;
   }
@@ -83,7 +81,7 @@ export function TimeComparison() {
       data-test-subj="comparisonSelect"
       disabled={!comparisonEnabled}
       options={comparisonOptions}
-      value={comparisonType}
+      value={offset}
       prepend={
         <PrependContainer>
           <EuiCheckbox
@@ -116,7 +114,7 @@ export function TimeComparison() {
         });
         urlHelpers.push(history, {
           query: {
-            comparisonType: e.target.value,
+            offset: e.target.value,
           },
         });
       }}

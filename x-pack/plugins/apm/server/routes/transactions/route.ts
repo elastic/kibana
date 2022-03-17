@@ -21,12 +21,8 @@ import { getLatencyPeriods } from './get_latency_charts';
 import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_periods';
 import { getColdstartRatePeriods } from '../../lib/transaction_groups/get_coldstart_rate';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  offsetRt,
-  environmentRt,
-  kueryRt,
-  rangeRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { offsetRt } from '../../../common/offset_rt';
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:

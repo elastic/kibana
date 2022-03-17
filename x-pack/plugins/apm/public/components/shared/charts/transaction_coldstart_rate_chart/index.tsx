@@ -20,13 +20,9 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { TimeRangeComparisonType } from '../../../../../common/runtime_types/comparison_type_rt';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -39,7 +35,7 @@ interface Props {
   environment: string;
   transactionName?: string;
   comparisonEnabled?: boolean;
-  comparisonType?: TimeRangeComparisonType;
+  offset?: string;
 }
 
 type ColdstartRate =
@@ -63,7 +59,7 @@ export function TransactionColdstartRateChart({
   kuery,
   transactionName,
   comparisonEnabled,
-  comparisonType,
+  offset,
 }: Props) {
   const theme = useTheme();
 
@@ -75,12 +71,6 @@ export function TransactionColdstartRateChart({
 
   const { serviceName, transactionType } = useApmServiceContext();
   const comparisonChartTheme = getComparisonChartTheme();
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const endpoint = transactionName
     ? ('GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name' as const)
@@ -100,7 +90,7 @@ export function TransactionColdstartRateChart({
               start,
               end,
               transactionType,
-              offset,
+              offset: comparisonEnabled ? offset : undefined,
               ...(transactionName ? { transactionName } : {}),
             },
           },
@@ -117,6 +107,7 @@ export function TransactionColdstartRateChart({
       transactionName,
       offset,
       endpoint,
+      comparisonEnabled,
     ]
   );
 

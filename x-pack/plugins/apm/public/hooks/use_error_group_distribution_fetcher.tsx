@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
@@ -21,16 +20,11 @@ export function useErrorGroupDistributionFetcher({
   environment: string;
 }) {
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
+    query: { rangeFrom, rangeTo, offset, comparisonEnabled },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -44,7 +38,7 @@ export function useErrorGroupDistributionFetcher({
                 kuery,
                 start,
                 end,
-                offset,
+                offset: comparisonEnabled ? offset : undefined,
                 groupId,
               },
             },
@@ -52,7 +46,16 @@ export function useErrorGroupDistributionFetcher({
         );
       }
     },
-    [environment, kuery, serviceName, start, end, offset, groupId]
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      offset,
+      groupId,
+      comparisonEnabled,
+    ]
   );
 
   return { errorDistributionData: data, status };

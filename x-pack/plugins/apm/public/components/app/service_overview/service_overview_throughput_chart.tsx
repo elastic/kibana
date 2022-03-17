@@ -23,10 +23,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../shared/time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -47,7 +44,7 @@ export function ServiceOverviewThroughputChart({
   transactionName?: string;
 }) {
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
@@ -61,12 +58,6 @@ export function ServiceOverviewThroughputChart({
   const { transactionType, serviceName } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -84,7 +75,7 @@ export function ServiceOverviewThroughputChart({
                 start,
                 end,
                 transactionType,
-                offset,
+                offset: comparisonEnabled ? offset : undefined,
                 transactionName,
               },
             },
@@ -101,6 +92,7 @@ export function ServiceOverviewThroughputChart({
       transactionType,
       offset,
       transactionName,
+      comparisonEnabled,
     ]
   );
 

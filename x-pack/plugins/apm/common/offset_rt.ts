@@ -6,13 +6,5 @@
  */
 
 import * as t from 'io-ts';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
 
-export { environmentRt } from '../../common/environment_rt';
-
-export const rangeRt = t.type({
-  start: isoToEpochRt,
-  end: isoToEpochRt,
-});
-
-export const kueryRt = t.type({ kuery: t.string });
+export const offsetRt = t.partial({ offset: t.string });

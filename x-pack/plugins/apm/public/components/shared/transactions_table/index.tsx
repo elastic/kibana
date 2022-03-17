@@ -17,7 +17,6 @@ import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../links/elastic_docs_link';
@@ -98,18 +97,11 @@ export function TransactionsTable({
 
   const { transactionType, serviceName } = useApmServiceContext();
   const {
-    query: { comparisonEnabled, comparisonType, latencyAggregationType },
+    query: { comparisonEnabled, offset, latencyAggregationType },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions',
     '/services/{serviceName}/overview'
   );
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -165,8 +157,8 @@ export function TransactionsTable({
       pageIndex,
       direction,
       field,
-      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
-      comparisonType,
+      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
+      offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
     ]
@@ -211,7 +203,7 @@ export function TransactionsTable({
                 transactionNames: JSON.stringify(
                   transactionGroups.map(({ name }) => name).sort()
                 ),
-                offset,
+                offset: comparisonEnabled ? offset : undefined,
               },
             },
           }
@@ -233,7 +225,7 @@ export function TransactionsTable({
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,
-    comparisonType,
+    offset,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;

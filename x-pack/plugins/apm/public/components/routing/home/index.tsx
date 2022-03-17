@@ -9,7 +9,6 @@ import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
@@ -23,6 +22,7 @@ import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overvi
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { ServiceGroupsRedirect } from '../service_groups_redirect';
 import { RedirectTo } from '../redirect_to';
+import { offsetRt } from '../../../../common/offset_rt';
 
 function page<TPath extends string>({
   path,
@@ -138,8 +138,8 @@ export const home = {
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
           refreshInterval: t.string,
           comparisonEnabled: toBooleanRt,
-          comparisonType: comparisonTypeRt,
         }),
+        offsetRt,
       ]),
     }),
     defaults: {
@@ -171,10 +171,12 @@ export const home = {
       '/backends': {
         element: <Outlet />,
         params: t.partial({
-          query: t.partial({
-            comparisonEnabled: toBooleanRt,
-            comparisonType: comparisonTypeRt,
-          }),
+          query: t.intersection([
+            t.partial({
+              comparisonEnabled: toBooleanRt,
+            }),
+            offsetRt,
+          ]),
         }),
         children: {
           '/backends/{backendName}/overview': {

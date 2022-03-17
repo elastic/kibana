@@ -15,10 +15,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
@@ -60,7 +57,7 @@ export function FailedTransactionRateChart({
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -74,12 +71,6 @@ export function FailedTransactionRateChart({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -98,7 +89,7 @@ export function FailedTransactionRateChart({
                 end,
                 transactionType,
                 transactionName,
-                offset,
+                offset: comparisonEnabled ? offset : undefined,
               },
             },
           }
@@ -114,6 +105,7 @@ export function FailedTransactionRateChart({
       transactionType,
       transactionName,
       offset,
+      comparisonEnabled,
     ]
   );
 

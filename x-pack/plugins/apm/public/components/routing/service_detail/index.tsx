@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { ServiceOverview } from '../../app/service_overview';
@@ -29,6 +28,7 @@ import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { offsetRt } from '../../../../common/offset_rt';
 
 function page({
   title,
@@ -81,12 +81,12 @@ export const serviceDetail = {
           }),
           t.partial({
             comparisonEnabled: toBooleanRt,
-            comparisonType: comparisonTypeRt,
             latencyAggregationType: t.string,
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
             refreshInterval: t.string,
           }),
+          offsetRt,
         ]),
       }),
     ]),
@@ -134,8 +134,8 @@ export const serviceDetail = {
                   traceId: t.string,
                   transactionId: t.string,
                   comparisonEnabled: toBooleanRt,
-                  comparisonType: comparisonTypeRt,
                 }),
+                offsetRt,
               ]),
             }),
           },

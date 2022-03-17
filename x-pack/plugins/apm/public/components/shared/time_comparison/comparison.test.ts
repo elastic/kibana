@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
-import { getTimeRangeComparison } from './get_time_range_comparison';
 import { getDateRange } from '../../../context/url_params_context/helpers';
 import { getComparisonOptions } from './get_comparison_options';
 import moment from 'moment-timezone';
@@ -19,22 +17,7 @@ function getExpectedTimesAndComparisons({
   rangeTo: string;
 }) {
   const { start, end } = getDateRange({ rangeFrom, rangeTo });
-  const comparisonOptions = getComparisonOptions({ start, end });
-
-  const comparisons = comparisonOptions.map(({ value, text }) => {
-    const { offset } = getTimeRangeComparison({
-      comparisonEnabled: true,
-      comparisonType: value,
-      start,
-      end,
-    });
-
-    return {
-      value,
-      text,
-      offset,
-    };
-  });
+  const comparisons = getComparisonOptions({ start, end });
 
   return {
     start,
@@ -77,14 +60,12 @@ describe('Comparison test suite', () => {
     it('should return comparison by day and week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.DayBefore,
           text: 'Day before',
-          offset: '1d',
+          value: '1d',
         },
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -108,9 +89,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -134,9 +114,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -160,9 +139,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by period and format text as DD/MM HH:mm when range years are the same', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.PeriodBefore,
           text: '07/01 18:00 - 15/01 18:00',
-          offset: '691200000ms',
+          value: '691200000ms',
         },
       ]);
     });
@@ -170,7 +148,7 @@ describe('Comparison test suite', () => {
     it('should have the same offset for start / end and comparisonStart / comparisonEnd', () => {
       const { start, end, comparisons } = expectation;
       const diffInMs = moment(end).diff(moment(start));
-      expect(`${diffInMs}ms`).toBe(comparisons[0].offset);
+      expect(`${diffInMs}ms`).toBe(comparisons[0].value);
     });
   });
 
@@ -192,9 +170,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by period and format text as DD/MM HH:mm when range years are the same', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.PeriodBefore,
           text: '06/01 06:00 - 15/01 00:00',
-          offset: '756000000ms',
+          value: '756000000ms',
         },
       ]);
     });
@@ -202,7 +179,7 @@ describe('Comparison test suite', () => {
     it('should have the same offset for start / end and comparisonStart / comparisonEnd', () => {
       const { start, end, comparisons } = expectation;
       const diffInMs = moment(end).diff(moment(start));
-      expect(`${diffInMs}ms`).toBe(comparisons[0].offset);
+      expect(`${diffInMs}ms`).toBe(comparisons[0].value);
     });
   });
 
@@ -224,14 +201,12 @@ describe('Comparison test suite', () => {
     it('should return comparison by day and week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.DayBefore,
           text: 'Day before',
-          offset: '1d',
+          value: '1d',
         },
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -255,9 +230,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -281,14 +255,12 @@ describe('Comparison test suite', () => {
     it('should return comparison by day and week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.DayBefore,
           text: 'Day before',
-          offset: '1d',
+          value: '1d',
         },
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -312,14 +284,12 @@ describe('Comparison test suite', () => {
     it('should return comparison by day and week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.DayBefore,
           text: 'Day before',
-          offset: '1d',
+          value: '1d',
         },
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -343,9 +313,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -369,9 +338,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by week', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.WeekBefore,
           text: 'Week before',
-          offset: '1w',
+          value: '1w',
         },
       ]);
     });
@@ -395,9 +363,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by period and format text as DD/MM/YY HH:mm when range years are different', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.PeriodBefore,
           text: '15/11/21 18:30 - 15/12/21 18:30',
-          offset: '2592000000ms',
+          value: '2592000000ms',
         },
       ]);
     });
@@ -405,7 +372,7 @@ describe('Comparison test suite', () => {
     it('should have the same offset for start / end and comparisonStart / comparisonEnd', () => {
       const { start, end, comparisons } = expectation;
       const diffInMs = moment(end).diff(moment(start));
-      expect(`${diffInMs}ms`).toBe(comparisons[0].offset);
+      expect(`${diffInMs}ms`).toBe(comparisons[0].value);
     });
   });
 
@@ -427,9 +394,8 @@ describe('Comparison test suite', () => {
     it('should only return comparison by period and format text as DD/MM/YY HH:mm when range years are different', () => {
       expect(expectation.comparisons).toEqual([
         {
-          value: TimeRangeComparisonEnum.PeriodBefore,
           text: '14/11/21 05:29 - 15/12/21 00:00',
-          offset: '2658615500ms',
+          value: '2658615500ms',
         },
       ]);
     });
@@ -437,7 +403,7 @@ describe('Comparison test suite', () => {
     it('should have the same offset for start / end and comparisonStart / comparisonEnd', () => {
       const { start, end, comparisons } = expectation;
       const diffInMs = moment(end).diff(moment(start));
-      expect(`${diffInMs}ms`).toBe(comparisons[0].offset);
+      expect(`${diffInMs}ms`).toBe(comparisons[0].value);
     });
   });
 });

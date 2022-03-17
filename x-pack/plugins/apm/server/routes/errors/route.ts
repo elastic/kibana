@@ -10,15 +10,11 @@ import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getErrorDistribution } from './distribution/get_distribution';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import {
-  environmentRt,
-  kueryRt,
-  rangeRt,
-  offsetRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
+import { offsetRt } from '../../../common/offset_rt';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
   endpoint:

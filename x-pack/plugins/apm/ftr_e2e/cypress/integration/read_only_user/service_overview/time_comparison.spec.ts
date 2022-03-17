@@ -70,7 +70,7 @@ describe('Service overview: Time Comparison', () => {
 
   it('enables by default the time comparison feature with Last 24 hours selected', () => {
     cy.visit(serviceOverviewPath);
-    cy.url().should('include', 'comparisonEnabled=true&comparisonType=day');
+    cy.url().should('include', 'comparisonEnabled=true&offset=1d');
   });
 
   describe('when comparison is toggled off', () => {

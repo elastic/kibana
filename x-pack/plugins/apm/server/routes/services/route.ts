@@ -29,12 +29,7 @@ import { getServiceProfilingTimeline } from './profiling/get_service_profiling_t
 import { getServiceInfrastructure } from './get_service_infrastructure';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  offsetRt,
-  rangeRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
@@ -52,6 +47,7 @@ import { ConnectionStatsItemWithImpact } from './../../../common/connections';
 import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filtered_services';
 import { ServiceHealthStatus } from './../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
+import { offsetRt } from '../../../common/offset_rt';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
