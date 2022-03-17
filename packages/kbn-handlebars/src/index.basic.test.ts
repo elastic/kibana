@@ -255,6 +255,16 @@ describe('basic context', () => {
       .toCompileTo('inner 1');
   });
 
+  it('block functions without context argument', () => {
+    expectTemplate('{{#awesome}}inner{{/awesome}}')
+      .withInput({
+        awesome(options: any) {
+          return options.fn(this);
+        },
+      })
+      .toCompileTo('inner');
+  });
+
   it('pathed block functions without context argument', () => {
     expectTemplate('{{#foo.awesome}}inner{{/foo.awesome}}')
       .withInput({

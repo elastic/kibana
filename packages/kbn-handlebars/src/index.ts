@@ -219,12 +219,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const isBlock = 'program' in sexpr || 'inverse' in sexpr;
 
     if (isBlock) {
-      const currentOutput = this.output;
-      this.output = [];
-      this.accept(path);
-      const result = this.output[0];
-      this.output = currentOutput;
-
+      const result = this.resolveNode(path)[0];
       const lambdaResult = this.container.lambda(result, this.scopes[0]);
       this.blockValue(sexpr, lambdaResult);
     } else {
@@ -281,11 +276,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       if (this.compileOptions.strict) {
         helper.fn = this.container.strict(helper.context, name, sexpr.loc);
       } else {
-        const currentOutput = this.output;
-        this.output = [];
-        this.accept(sexpr.path);
-        helper.fn = this.output[0] || this.container.hooks.helperMissing;
-        this.output = currentOutput;
+        helper.fn = this.resolveNode(sexpr.path)[0] || this.container.hooks.helperMissing;
       }
     }
 
@@ -365,7 +356,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     if (blockHelper) {
       throw new Error('Not implemented!'); // TODO: Handle or remove this
     }
-    return [...this.getParams(block), this.setupParams(block, helperName)];
+    return [...this.resolveNode(block.params), this.setupParams(block, helperName)];
   }
 
   private setupParams(
@@ -382,9 +373,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     if (isBlock) {
       options.fn = (nextContext: any) => {
         this.scopes.unshift(nextContext);
-        this.acceptKey(block, 'program');
+        const result = this.resolveNode(block.program).join('');
         this.scopes.shift();
-        return ''; // TODO: supposed to return a string
+        return result;
       };
       options.inverse = noop;
     }
@@ -456,13 +447,21 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output.push(null);
   }
 
-  private getParams(block: { params: hbs.AST.Expression[] }): any[] {
+  private resolveNode(nodeOrArrayOfNodes: hbs.AST.Node | hbs.AST.Node[]): any[] {
     const currentOutput = this.output;
     this.output = [];
-    this.acceptArray(block.params);
-    const params = this.output;
+
+    if (Array.isArray(nodeOrArrayOfNodes)) {
+      this.acceptArray(nodeOrArrayOfNodes);
+    } else {
+      this.accept(nodeOrArrayOfNodes);
+    }
+
+    const result = this.output;
+
     this.output = currentOutput;
-    return params;
+
+    return result;
   }
 }
 
