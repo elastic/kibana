@@ -27,7 +27,7 @@ import {
   sendTelemetryEvents,
   formatTelemetryUpdateEvent,
 } from './telemetry/monitor_upgrade_sender';
-import { formatSecrets } from '../../lib/synthetics_service/utils/secrets';
+import { formatSecrets, normalizeSecrets } from '../../lib/synthetics_service/utils/secrets';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
@@ -47,14 +47,6 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   }): Promise<any> => {
     const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     const monitor = request.body as SyntheticsMonitor;
-
-    const validationResult = validateMonitor(monitor as MonitorFields);
-
-    if (!validationResult.valid) {
-      const { reason: message, details, payload } = validationResult;
-      return response.badRequest({ body: { message, attributes: { details, ...payload } } });
-    }
-
     const { monitorId } = request.params;
 
     try {
@@ -75,9 +67,20 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
           }
         );
 
-      const monitorWithRevision = formatSecrets({
-        ...decryptedPreviousMonitor.attributes,
+      const editedMonitor = {
+        ...normalizeSecrets(decryptedPreviousMonitor).attributes,
         ...monitor,
+      };
+
+      const validationResult = validateMonitor(editedMonitor as MonitorFields);
+
+      if (!validationResult.valid) {
+        const { reason: message, details, payload } = validationResult;
+        return response.badRequest({ body: { message, attributes: { details, ...payload } } });
+      }
+
+      const monitorWithRevision = formatSecrets({
+        ...editedMonitor,
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       });
 
@@ -90,7 +93,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
       const errors = await syntheticsService.pushConfigs(request, [
         {
-          ...monitor,
+          ...editedMonitor,
           id: editMonitor.id,
           fields: {
             config_id: editMonitor.id,
@@ -117,6 +120,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
       }
+      logger.error(updateErr);
 
       throw updateErr;
     }
