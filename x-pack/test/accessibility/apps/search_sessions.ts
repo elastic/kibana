@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    // https://github.com/elastic/kibana/issues/128009
     it.skip('Search sessions management toggled on a single status meets a11y requirements ', async () => {
       await (await find.byCssSelector('[title="expired"]')).click();
 
