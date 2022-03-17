@@ -40,6 +40,7 @@ export interface LatencyCorrelation extends FieldValuePair {
 
 export interface CorrelationsProgress {
   error?: string;
+  loadingState?: string;
   isRunning: boolean;
   loaded: number;
 }

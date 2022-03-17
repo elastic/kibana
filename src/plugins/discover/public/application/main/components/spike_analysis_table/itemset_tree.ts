@@ -193,7 +193,6 @@ export function ItemSetTreeFactory(
 
           return bv - av;
         });
-        console.log('candidateNodes', candidateNodes.length);
 
         // Update the tree.
         workingNodes.push(candidateNodes[candidateNodes.length - 1].addChild(itemSet));

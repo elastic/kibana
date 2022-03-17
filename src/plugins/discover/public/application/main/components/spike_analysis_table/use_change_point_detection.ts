@@ -165,6 +165,7 @@ export function useChangePointDetection(
       isRunning: true,
       // explicitly set these to undefined to override a possible previous state.
       error: undefined,
+      loadingState: 'Loading ...',
       changePoints: undefined,
       fieldStats: undefined,
       tree: undefined,
@@ -185,6 +186,7 @@ export function useChangePointDetection(
       setResponse({
         ...responseUpdate,
         loaded: LOADED_OVERALL_HISTOGRAM,
+        loadingState: 'Loading field candidates.',
       });
       setResponse.flush();
 
@@ -196,22 +198,13 @@ export function useChangePointDetection(
         }
       );
 
-      // const { fieldCandidates } = await callApmApi(
-      //   'GET /internal/apm/correlations/field_candidates',
-      //   {
-      //     signal: abortCtrl.current.signal,
-      //     params: {
-      //       query: fetchParams,
-      //     },
-      //   }
-      // );
-
       if (abortCtrl.current.signal.aborted) {
         return;
       }
 
       setResponse({
         loaded: LOADED_FIELD_CANDIDATES,
+        loadingState: `Identified ${fieldCandidates.length} field candidates.`,
       });
       setResponse.flush();
 
@@ -248,6 +241,9 @@ export function useChangePointDetection(
           loaded:
             LOADED_FIELD_CANDIDATES +
             (chunkLoadCounter / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES,
+          loadingState: `Identified ${
+            responseUpdate.changePoints?.length ?? 0
+          } significant field/value pairs.`,
         });
 
         if (abortCtrl.current.signal.aborted) {
@@ -255,6 +251,9 @@ export function useChangePointDetection(
         }
       }
 
+      setResponse({
+        loadingState: `Loading fields stats.`,
+      });
       setResponse.flush();
 
       const { stats } = await http.post<{ stats: FieldStats[] }>(
@@ -274,12 +273,22 @@ export function useChangePointDetection(
 
       responseUpdate.fieldStats = stats;
 
+      setResponse({
+        loadingState: `Loading overall timeseries.`,
+      });
+      setResponse.flush();
+
       const overallTimeSeries = await http.post<HistogramResponse>({
         path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
         body,
       });
 
       responseUpdate.overallTimeSeries = overallTimeSeries[0].data;
+
+      setResponse({
+        loadingState: `Loading significant timeseries.`,
+      });
+      setResponse.flush();
 
       // time series filtered by fields
       if (responseUpdate.changePoints) {
@@ -331,10 +340,16 @@ export function useChangePointDetection(
           ...responseUpdate,
           loaded: LOADED_DONE,
           isRunning: false,
+          loadingState: `Done.`,
         });
         setResponse.flush();
         return;
       }
+
+      setResponse({
+        loadingState: `Loading frequent item sets.`,
+      });
+      setResponse.flush();
 
       const { frequentItems, totalDocCount } = await http.post<{
         frequentItems: FrequentItems;
@@ -348,6 +363,11 @@ export function useChangePointDetection(
         }),
       });
 
+      setResponse({
+        loadingState: `Generating tree structure`,
+      });
+      setResponse.flush();
+
       const tree = generateItemsets(
         frequentItems,
         responseUpdate.changePoints ?? [],
@@ -360,6 +380,7 @@ export function useChangePointDetection(
         ...responseUpdate,
         loaded: LOADED_DONE,
         isRunning: false,
+        loadingState: `Done.`,
       });
       setResponse.flush();
     } catch (e) {
@@ -382,14 +403,15 @@ export function useChangePointDetection(
     setResponse.flush();
   }, [setResponse]);
 
-  const { error, loaded, isRunning, ...returnedResponse } = response;
+  const { error, loaded, loadingState, isRunning, ...returnedResponse } = response;
   const progress = useMemo(
     () => ({
       error,
       loaded: Math.round(loaded * 100) / 100,
+      loadingState,
       isRunning,
     }),
-    [error, loaded, isRunning]
+    [error, loaded, loadingState, isRunning]
   );
 
   return {
