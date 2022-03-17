@@ -117,7 +117,7 @@ export const ControlGroupEditor = ({
               size="s"
             >
               {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-            </EuiButtonEmpty>{' '}
+            </EuiButtonEmpty>
           </>
         ) : null}
       </EuiFlyoutBody>
