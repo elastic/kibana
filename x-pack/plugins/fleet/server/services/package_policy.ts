@@ -59,6 +59,7 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
@@ -681,6 +682,9 @@ class PackagePolicyService {
       return {
         name: updatedPackagePolicy.name,
         diff: [packagePolicy, updatedPackagePolicy],
+        // TODO: Currently only returns the agent inputs for current package policy, not the upgraded one
+        // as we only show this version in the UI
+        agent_diff: [storedPackagePolicyToAgentInputs(packagePolicy, packageInfo)],
         hasErrors,
       };
     } catch (error) {
