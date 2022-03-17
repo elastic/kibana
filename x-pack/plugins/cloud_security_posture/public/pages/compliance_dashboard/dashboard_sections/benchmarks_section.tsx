@@ -21,10 +21,10 @@ import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { PartitionElementEvent } from '@elastic/charts';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
+import { useComplianceDashboardDataApi } from '../../../common/api/use_compliance_dashboard_data_api';
 import { ChartPanel } from '../../../components/chart_panel';
 import * as TEXT from '../translations';
-import { Evaluation } from '../../../../common/types';
+import { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { INTERNAL_FEATURE_FLAGS, RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
@@ -39,12 +39,14 @@ const mockClusterId = '2468540';
 
 const cardHeight = 300;
 
-export const BenchmarksSection = () => {
+export const BenchmarksSection = ({
+  complianceData,
+}: {
+  complianceData: ComplianceDashboardData;
+}) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
-  const getStats = useCloudPostureStatsApi();
-  const clusters = getStats.isSuccess && getStats.data.clusters;
-  if (!clusters) return null;
+  const getStats = useComplianceDashboardDataApi();
 
   const handleElementClick = (clusterId: string, elements: PartitionElementEvent[]) => {
     const [element] = elements;
@@ -68,7 +70,7 @@ export const BenchmarksSection = () => {
 
   return (
     <>
-      {clusters.map((cluster) => {
+      {complianceData.clusters.map((cluster) => {
         const shortId = cluster.meta.clusterId.slice(0, 6);
 
         return (

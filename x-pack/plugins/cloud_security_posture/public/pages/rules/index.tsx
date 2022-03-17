@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { CspPageTemplate } from '../../components/page_template';
+import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
+import { CspPageTemplate } from '../../components/csp_page_template';
 import { RulesContainer } from './rules_container';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
@@ -21,10 +22,11 @@ const pageHeader: EuiPageHeaderProps = {
 const breadcrumbs = [allNavigationItems.rules];
 
 export const Rules = () => {
+  const dataViewQuery = useKubebeatDataView();
   useCspBreadcrumbs(breadcrumbs);
 
   return (
-    <CspPageTemplate pageHeader={pageHeader}>
+    <CspPageTemplate pageHeader={pageHeader} status={dataViewQuery.status}>
       <RulesContainer />
     </CspPageTemplate>
   );

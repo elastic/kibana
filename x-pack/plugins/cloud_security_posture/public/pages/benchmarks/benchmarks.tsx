@@ -9,7 +9,7 @@ import React from 'react';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { CspLoadingState } from '../../components/csp_loading_state';
-import { CspPageTemplate } from '../../components/page_template';
+import { CspPageTemplate } from '../../components/csp_page_template';
 import { BenchmarksTable } from './benchmarks_table';
 import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS, LOADING_BENCHMARKS } from './translations';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
@@ -29,22 +29,23 @@ const BENCHMARKS_BREADCRUMBS = [allNavigationItems.benchmarks];
 export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'cspBenchmarksTable';
 // TODO: Error state
 export const BENCHMARKS_ERROR_TEXT = 'TODO: Error state';
+
 const BenchmarksErrorState = () => <div>{BENCHMARKS_ERROR_TEXT}</div>;
+
+const BenchmarksLoadingState = () => <CspLoadingState>{LOADING_BENCHMARKS}</CspLoadingState>;
 
 export const Benchmarks = () => {
   useCspBreadcrumbs(BENCHMARKS_BREADCRUMBS);
   const query = useCspBenchmarkIntegrations();
 
   return (
-    <CspPageTemplate pageHeader={PAGE_HEADER}>
-      {query.status === 'loading' && (
-        <>
-          <EuiSpacer size="xxl" />
-          <CspLoadingState>{LOADING_BENCHMARKS}</CspLoadingState>
-        </>
-      )}
-      {query.status === 'error' && <BenchmarksErrorState />}
-      {query.status === 'success' && (
+    <CspPageTemplate
+      pageHeader={PAGE_HEADER}
+      status={query.status}
+      loadingRender={BenchmarksLoadingState}
+      errorRender={BenchmarksErrorState}
+    >
+      {query.data && (
         <BenchmarksTable benchmarks={query.data} data-test-subj={BENCHMARKS_TABLE_DATA_TEST_SUBJ} />
       )}
     </CspPageTemplate>

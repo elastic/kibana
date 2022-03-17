@@ -11,25 +11,14 @@ import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
-import { useCloudPostureStatsApi } from '../../common/api';
-import { CspPageTemplate } from '../../components/page_template';
+import { useComplianceDashboardDataApi } from '../../common/api';
+import { CspPageTemplate } from '../../components/csp_page_template';
 import * as TEXT from './translations';
 
-const CompliancePage = () => {
-  const getStats = useCloudPostureStatsApi();
-  if (getStats.isLoading) return null;
-
-  return (
-    <>
-      <SummarySection />
-      <EuiSpacer />
-      <BenchmarksSection />
-      <EuiSpacer />
-    </>
-  );
-};
+const NO_DATA_CONFIG = {};
 
 export const ComplianceDashboard = () => {
+  const getDashboarDataQuery = useComplianceDashboardDataApi();
   useCspBreadcrumbs([allNavigationItems.dashboard]);
 
   return (
@@ -37,8 +26,17 @@ export const ComplianceDashboard = () => {
       pageHeader={{
         pageTitle: TEXT.CLOUD_POSTURE,
       }}
+      status={getDashboarDataQuery.status}
+      noDataConfig={!getDashboarDataQuery.data ? NO_DATA_CONFIG : undefined}
     >
-      <CompliancePage />
+      {getDashboarDataQuery.data && (
+        <>
+          <SummarySection complianceData={getDashboarDataQuery.data} />
+          <EuiSpacer />
+          <BenchmarksSection complianceData={getDashboarDataQuery.data} />
+          <EuiSpacer />
+        </>
+      )}
     </CspPageTemplate>
   );
 };
