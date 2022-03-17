@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
@@ -65,8 +64,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
-    const timeframe = { end: moment().valueOf() };
-    const { services, params, state } = options;
+    const { services, params, state, startedAt } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
@@ -93,7 +91,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
-        const timestamp = moment().toISOString();
+        const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
@@ -106,7 +104,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
         return {
-          lastRunTimestamp: timeframe.end,
+          lastRunTimestamp: startedAt.valueOf(),
           missingGroups: [],
           groupBy: params.groupBy,
           filterQuery: params.filterQuery,
@@ -136,7 +134,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       compositeSize,
       alertOnGroupDisappear,
       state.lastRunTimestamp,
-      timeframe,
+      { end: startedAt.valueOf() },
       previousMissingGroups
     );
 
@@ -211,7 +209,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
 
       if (reason) {
-        const timestamp = moment().toISOString();
+        const timestamp = startedAt.toISOString();
         const actionGroupId =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
@@ -239,7 +237,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
     return {
-      lastRunTimestamp: timeframe.end,
+      lastRunTimestamp: startedAt.valueOf(),
       missingGroups: [...nextMissingGroups],
       groupBy: params.groupBy,
       filterQuery: params.filterQuery,
