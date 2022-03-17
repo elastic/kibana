@@ -8,17 +8,10 @@
 
 import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { PaletteOutput, PaletteRegistry } from '../../../../charts/public';
 import type { Datatable } from '../../../../expressions';
-import type { AccessorConfig, FramePublicAPI } from '../types';
-import { getColumnToLabelMap } from './state';
 import { FormatFactory } from '../types';
-import { isDataLayer, isReferenceLayer } from './visualization';
-import {
-  DataLayerConfigResult,
-  ReferenceLineLayerConfigResult,
-  XYLayerConfigResult,
-} from '../../common';
+import { isDataLayer } from './visualization';
+import { DataLayerConfigResult, XYLayerConfigResult } from '../../common';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -95,67 +88,6 @@ export function getColorAssignments(
           sortedLayer.accessors.indexOf(yAccessor)
         );
       },
-    };
-  });
-}
-
-const getReferenceLineAccessorColorConfig = (layer: ReferenceLineLayerConfigResult) => {
-  return layer.accessors.map((accessor) => {
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
-    return {
-      columnId: accessor,
-      triggerIcon: 'color' as const,
-      color: currentYConfig?.color || defaultReferenceLineColor,
-    };
-  });
-};
-
-export function getAccessorColorConfig(
-  colorAssignments: ColorAssignments,
-  frame: Pick<FramePublicAPI, 'datasourceLayers'>,
-  layer: XYLayerConfigResult,
-  paletteService: PaletteRegistry
-): AccessorConfig[] {
-  if (isReferenceLayer(layer)) {
-    return getReferenceLineAccessorColorConfig(layer);
-  }
-
-  const layerContainsSplits = Boolean(layer.splitAccessor);
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
-  return layer.accessors.map((accessor) => {
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
-    if (layerContainsSplits) {
-      return {
-        columnId: accessor as string,
-        triggerIcon: 'disabled',
-      };
-    }
-    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
-    const rank = colorAssignments[currentPalette.name].getRank(
-      layer,
-      columnToLabel[accessor] || accessor,
-      accessor
-    );
-    const customColor =
-      currentYConfig?.color ||
-      (totalSeriesCount != null
-        ? paletteService.get(currentPalette.name).getCategoricalColor(
-            [
-              {
-                name: columnToLabel[accessor] || accessor,
-                rankAtDepth: rank,
-                totalSeriesAtDepth: totalSeriesCount,
-              },
-            ],
-            { maxDepth: 1, totalSeries: totalSeriesCount },
-            currentPalette.params
-          )
-        : undefined);
-    return {
-      columnId: accessor as string,
-      triggerIcon: customColor ? 'color' : 'disabled',
-      color: customColor ?? undefined,
     };
   });
 }

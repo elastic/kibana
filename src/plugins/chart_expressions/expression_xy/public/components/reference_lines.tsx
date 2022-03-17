@@ -14,7 +14,6 @@ import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '../../../../field_formats/common';
-import type { PaletteRegistry } from '../../../../charts/public';
 import type { ReferenceLineLayerConfigResult, IconPosition, YAxisMode } from '../../common';
 import type { LensMultiTable } from '../../common/types';
 import { hasIcon } from '../helpers';
@@ -192,8 +191,6 @@ export interface ReferenceLineAnnotationsProps {
   layers: ReferenceLineLayerConfigResult[];
   data: LensMultiTable;
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
-  paletteService: PaletteRegistry;
-  syncColors: boolean;
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
@@ -203,8 +200,6 @@ export const ReferenceLineAnnotations = ({
   layers,
   data,
   formatters,
-  paletteService,
-  syncColors,
   axesMap,
   isHorizontal,
   paddingMap,

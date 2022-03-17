@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type { SeriesType, XYLayerConfigResult, YConfig, ValidLayer } from '../../common';
-import { visualizationDefinitions } from '../definitions';
+import type { SeriesType, XYLayerConfigResult, YConfig } from '../../common';
 import { getDataLayers, isDataLayer } from './visualization';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -17,14 +14,6 @@ export function isHorizontalSeries(seriesType: SeriesType) {
     seriesType === 'bar_horizontal' ||
     seriesType === 'bar_horizontal_stacked' ||
     seriesType === 'bar_horizontal_percentage_stacked'
-  );
-}
-
-export function isPercentageSeries(seriesType: SeriesType) {
-  return (
-    seriesType === 'bar_percentage_stacked' ||
-    seriesType === 'bar_horizontal_percentage_stacked' ||
-    seriesType === 'area_percentage_stacked'
   );
 }
 
@@ -36,16 +25,6 @@ export function isHorizontalChart(layers: XYLayerConfigResult[]) {
   return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
 }
 
-export function getIconForSeries(type: SeriesType): EuiIconType {
-  const definition = visualizationDefinitions.find((t) => t.id === type);
-
-  if (!definition) {
-    throw new Error(`Unknown series type ${type}`);
-  }
-
-  return (definition.icon as EuiIconType) || 'empty';
-}
-
 export const getSeriesColor = (layer: XYLayerConfigResult, accessor: string) => {
   if (isDataLayer(layer) && layer.splitAccessor) {
     return null;
@@ -54,39 +33,3 @@ export const getSeriesColor = (layer: XYLayerConfigResult, accessor: string) => 
     layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
   );
 };
-
-export const getColumnToLabelMap = (
-  layer: XYLayerConfigResult,
-  datasource: DatasourcePublicAPI
-) => {
-  const columnToLabel: Record<string, string> = {};
-  layer.accessors
-    .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])
-    .forEach((accessor) => {
-      const operation = datasource.getOperationForColumnId(accessor);
-      if (operation?.label) {
-        columnToLabel[accessor] = operation.label;
-      }
-    });
-  return columnToLabel;
-};
-
-export function hasHistogramSeries(
-  layers: ValidLayer[] = [],
-  datasourceLayers?: FramePublicAPI['datasourceLayers']
-) {
-  if (!datasourceLayers) {
-    return false;
-  }
-  const validLayers = layers.filter(({ accessors }) => accessors.length);
-
-  return validLayers.some(({ layerId, xAccessor }: ValidLayer) => {
-    const xAxisOperation = datasourceLayers[layerId].getOperationForColumnId(xAccessor);
-    return (
-      xAxisOperation &&
-      xAxisOperation.isBucketed &&
-      xAxisOperation.scale &&
-      xAxisOperation.scale !== 'ordinal'
-    );
-  });
-}

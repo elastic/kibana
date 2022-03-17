@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { SeriesTypes } from '../../common/constants';
 import {
   BarIcon,
@@ -23,13 +22,13 @@ import {
 
 export const visualizationDefinitions = [
   { id: SeriesTypes.BAR, icon: BarIcon },
-  { id: SeriesTypes.BAR_HORIZONTAL, icon: BarHorizontalIcon },
   { id: SeriesTypes.BAR_STACKED, icon: BarStackedIcon },
+  { id: SeriesTypes.BAR_HORIZONTAL, icon: BarHorizontalIcon },
   { id: SeriesTypes.BAR_PERCENTAGE_STACKED, icon: BarPercentageIcon },
   { id: SeriesTypes.BAR_HORIZONTAL_STACKED, icon: BarHorizontalStackedIcon },
   { id: SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED, icon: BarHorizontalPercentageIcon },
+  { id: SeriesTypes.LINE, icon: LineIcon },
   { id: SeriesTypes.AREA, icon: AreaIcon },
   { id: SeriesTypes.AREA_STACKED, icon: AreaStackedIcon },
   { id: SeriesTypes.AREA_PERCENTAGE_STACKED, icon: AreaPercentageIcon },
-  { id: SeriesTypes.LINE, icon: LineIcon },
 ];

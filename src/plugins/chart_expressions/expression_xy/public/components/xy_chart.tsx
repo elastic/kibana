@@ -885,8 +885,6 @@ export function XYChart({
         <ReferenceLineAnnotations
           layers={referenceLineLayers}
           data={data}
-          syncColors={syncColors}
-          paletteService={paletteService}
           formatters={{
             left: yAxesMap.left?.formatter,
             right: yAxesMap.right?.formatter,
