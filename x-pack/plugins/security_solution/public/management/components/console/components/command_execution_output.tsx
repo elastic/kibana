@@ -10,9 +10,9 @@ import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import { CommandExecutionFailure } from './command_execution_failure';
 import { UserCommandInput } from './user_command_input';
-import { useInternalServices } from './internal_context';
 import { Command } from '../types';
 import { useCommandService } from '../hooks/state_selectors/use_command_service';
+import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 
 const CommandOutputContainer = styled.div`
   position: relative;
@@ -31,7 +31,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
   const consoleService = useCommandService();
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [output, setOutput] = useState<ReactNode | null>(null);
-  const internalServices = useInternalServices();
+  const dispatch = useConsoleStateDispatch();
 
   // FIXME:PT implement the `run in the background` functionality
   const [showRunInBackground, setShowRunInTheBackground] = useState(false);
@@ -62,9 +62,9 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
 
   useEffect(() => {
     if (!isRunning) {
-      internalServices.scrollDown();
+      dispatch({ type: 'scrollDown' });
     }
-  }, [isRunning, internalServices]);
+  }, [isRunning, dispatch]);
 
   return (
     <CommandOutputContainer>

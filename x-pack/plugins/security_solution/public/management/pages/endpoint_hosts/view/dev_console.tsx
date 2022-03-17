@@ -71,7 +71,7 @@ export const DevConsole = memo(() => {
   }, []);
 
   return isConsoleEnabled && showConsole ? (
-    <div style={{ height: 'calc(100vh - 300px)' }}>
+    <div style={{ height: '400px' }}>
       <EndpointConsole endpoint={endpoint} />
     </div>
   ) : null;

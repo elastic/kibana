@@ -51,7 +51,8 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
   const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
 
   const scrollToBottom = useCallback(() => {
-    // FIXME:PT avoid setTimeout()
+    // We need the `setTimeout` here because in some cases, the command output
+    // will take a bit of time to populate its content due to the use of Promises
     setTimeout(() => {
       if (consoleWindowRef.current) {
         consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;

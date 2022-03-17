@@ -21,7 +21,9 @@ export interface CommandDefinition {
       about: string;
       /** should return `true` if valid or a string with the error message */
       validate?: () => true | string;
-      // Selector: Idea is that the schema can plugin in a rich component for the user to select something (ex. a file)
+      // Selector: Idea is that the schema can plugin in a rich component for the
+      // user to select something (ex. a file)
+      // FIXME: implement selector
       selector?: () => unknown;
     };
   };
@@ -31,9 +33,12 @@ export interface CommandDefinition {
  * A command to be executed (as entered by the user)
  */
 export interface Command {
-  // FIXME:PT this should be a generic that allows for the arguments type to be used
+  /** The raw input entered by the user */
   input: string;
+  // FIXME:PT this should be a generic that allows for the arguments type to be used
+  /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInput;
+  /** The command defined associated with this user command */
   commandDefinition: CommandDefinition;
 }
 
