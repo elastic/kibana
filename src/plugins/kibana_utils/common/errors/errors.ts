@@ -59,7 +59,7 @@ export function isSavedObjectNotFoundError(error: Error | undefined): error is S
   // and the error will be an instance of other class with the same interface
   // (actually the copy of SavedObjectNotFound class)
   const savedObjectError = error as unknown as SavedObjectNotFound;
-  return savedObjectError ? savedObjectError.isSavedObjectNotFoundError : false;
+  return savedObjectError ? !!savedObjectError.isSavedObjectNotFoundError : false;
 }
 
 /**
