@@ -33,6 +33,7 @@ type MetricAggs = Record<string, MetricsAggregationMap>;
 
 export type GenericMetricsRequest = APMEventESSearchRequest & {
   body: {
+    size: number;
     aggs: {
       timeseriesData: {
         date_histogram: AggregationOptionsByType['date_histogram'];

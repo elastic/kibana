@@ -108,7 +108,7 @@ describe('setupRequest', () => {
       const { apmEventClient } = await setupRequest(mockResources);
       await apmEventClient.search('foo', {
         apm: { events: [ProcessorEvent.transaction] },
-        body: { foo: 'bar' },
+        body: { size: 10 },
       });
 
       expect(
@@ -172,6 +172,7 @@ describe('with includeFrozen=false', () => {
       apm: {
         events: [],
       },
+      body: { size: 10 },
     });
 
     const params =
@@ -193,6 +194,7 @@ describe('with includeFrozen=true', () => {
 
     await apmEventClient.search('foo', {
       apm: { events: [] },
+      body: { size: 10 },
     });
 
     const params =
