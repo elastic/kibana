@@ -135,7 +135,11 @@ export function registerTransactionDurationAnomalyAlertType({
             query: {
               bool: {
                 filter: [
-                  { terms: { job_id: jobIds } },
+                  {
+                    terms: {
+                      job_id: jobIds,
+                    },
+                  },
                   {
                     range: {
                       timestamp: {
