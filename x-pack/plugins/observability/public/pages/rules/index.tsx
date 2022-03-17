@@ -60,6 +60,7 @@ import {
   RULES_SINGLE_TITLE,
   RULES_PLURAL_TITLE,
 } from './translations';
+import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 
 export function RulesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -198,7 +199,11 @@ export function RulesPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <>{RULES_PAGE_TITLE} </>,
+        pageTitle: (
+          <>
+            {RULES_PAGE_TITLE} <ExperimentalBadge />
+          </>
+        ),
         rightSideItems: [
           <EuiButton
             iconType="plusInCircle"
