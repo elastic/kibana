@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
