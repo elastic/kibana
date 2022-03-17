@@ -323,6 +323,19 @@ describe('helpers', () => {
         })
         .toCompileTo('yep');
     });
+
+    it('lambdas resolved by blockHelperMissing are bound to the context', () => {
+      expectTemplate('{{#truthy}}yep{{/truthy}}')
+        .withInput({
+          truthy() {
+            return this.truthiness();
+          },
+          truthiness() {
+            return false;
+          },
+        })
+        .toCompileTo('');
+    });
   });
 
   describe('name field', () => {
@@ -344,6 +357,10 @@ describe('helpers', () => {
 
     it('should include in helper mustache calls', () => {
       expectTemplate('{{helper 1}}').withHelpers(helpers).toCompileTo('ran: helper');
+    });
+
+    it('should include in ambiguous block calls', () => {
+      expectTemplate('{{#helper}}{{/helper}}').withHelpers(helpers).toCompileTo('ran: helper');
     });
 
     it('should include in helper block calls', () => {

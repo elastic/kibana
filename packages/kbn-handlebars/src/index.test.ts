@@ -45,6 +45,52 @@ describe('Handlebars.compileAST', () => {
   });
 });
 
+test('Only provide options.fn/inverse to block helpers', () => {
+  function toHaveProperties(...args: any[]) {
+    toHaveProperties.calls++;
+    const options = args[args.length - 1];
+    expect(options).toHaveProperty('fn');
+    expect(options).toHaveProperty('inverse');
+    return 42;
+  }
+  toHaveProperties.calls = 0;
+
+  function toNotHaveProperties(...args: any[]) {
+    toNotHaveProperties.calls++;
+    const options = args[args.length - 1];
+    expect(options).not.toHaveProperty('fn');
+    expect(options).not.toHaveProperty('inverse');
+    return 42;
+  }
+  toNotHaveProperties.calls = 0;
+
+  const nonBlockTemplates = ['{{foo}}', '{{foo 1 2}}'];
+  const blockTemplates = ['{{#foo}}42{{/foo}}', '{{#foo 1 2}}42{{/foo}}'];
+
+  for (const template of nonBlockTemplates) {
+    expectTemplate(template)
+      .withInput({
+        foo: toNotHaveProperties,
+      })
+      .toCompileTo('42');
+
+    expectTemplate(template).withHelper('foo', toNotHaveProperties).toCompileTo('42');
+  }
+
+  for (const template of blockTemplates) {
+    expectTemplate(template)
+      .withInput({
+        foo: toHaveProperties,
+      })
+      .toCompileTo('42');
+
+    expectTemplate(template).withHelper('foo', toHaveProperties).toCompileTo('42');
+  }
+
+  expect(toNotHaveProperties.calls).toEqual(nonBlockTemplates.length * 2 * 2);
+  expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * 2);
+});
+
 test('Handlebars.registerHelpers', () => {
   expectTemplate(
     'https://elastic.co/{{lookup (split value ",") 0 }}&{{lookup (split value ",") 1 }}'
