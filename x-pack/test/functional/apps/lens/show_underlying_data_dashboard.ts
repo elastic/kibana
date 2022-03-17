@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBarService = getService('filterBar');
+  const queryBar = getService('queryBar');
   const browser = getService('browser');
   const retry = getService('retry');
 
@@ -45,12 +46,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // // await browser.switchToWindow(lensWindowHandler);
     });
 
-    it('should bring both dashboard filters and visualization filters to discover', async () => {
+    it('should bring both dashboard context and visualization context to discover', async () => {
       await browser.goBack();
 
       await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.clickEdit();
 
+      await queryBar.switchQueryLanguage('lucene');
+      await queryBar.setQuery('host.keyword www.elastic.co');
+      await queryBar.submitQuery();
       await filterBarService.addFilter('geo.src', 'is', 'AF');
 
       await retry.waitFor('filter to be added', async () => {
@@ -59,6 +63,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.saveAndReturn();
 
+      await queryBar.switchQueryLanguage('kql');
+      await queryBar.setQuery('request.keyword : "/apm"');
+      await queryBar.submitQuery();
       await filterBarService.addFilter(
         'host.raw',
         'is',
@@ -73,10 +80,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
 
-      expect(await filterBarService.getFilterCount()).to.be(2);
-      const filterLabels = await filterBarService.getFiltersLabel();
-      expect(filterLabels).to.contain('host.raw: cdn.theacademyofperformingartsandscience.org');
-      expect(filterLabels).to.contain('geo.src: AF');
+      expect(await filterBarService.getFilterCount()).to.be(3);
+      expect(
+        await filterBarService.hasFilter('host.raw', 'cdn.theacademyofperformingartsandscience.org')
+      ).to.be.ok();
+      expect(await filterBarService.hasFilter('geo.src', 'AF')).to.be.ok();
+      expect(await filterBarService.getFiltersLabel()).to.contain('Lens context (lucene)');
+      expect(await queryBar.getQueryString()).to.be('request.keyword : "/apm"');
     });
   });
 }

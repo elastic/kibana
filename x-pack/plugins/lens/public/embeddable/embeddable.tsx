@@ -172,7 +172,7 @@ function getViewUnderlyingDataArgs({
   activeData: TableInspectorAdapter | undefined;
   dataViews: DataViewBase[] | undefined;
   capabilities: LensEmbeddableDeps['capabilities'];
-  query: Query | undefined;
+  query: ExecutionContextSearch['query'];
   filters: Filter[];
   timeRange: TimeRange;
 }) {
@@ -702,7 +702,7 @@ export class Embeddable
       activeData: this.activeDataInfo.activeData,
       dataViews: this.indexPatterns,
       capabilities: this.deps.capabilities,
-      query: this.savedVis?.state.query, // TODO merge with container query!
+      query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],
       timeRange: mergedSearchContext.timeRange,
     });
