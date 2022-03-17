@@ -345,6 +345,7 @@ export const generateEnqueueFunctionInput = () => ({
   params: {
     foo: true,
   },
+  consumer: 'bar',
   relatedSavedObjects: [
     {
       id: '1',
