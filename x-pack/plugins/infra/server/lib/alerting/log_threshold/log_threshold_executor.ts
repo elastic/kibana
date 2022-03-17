@@ -325,6 +325,7 @@ export const processUngroupedRatioResults = (
       timeUnit
     );
     const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value);
+    console.log("here", kibanaBaseUrl);
     const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
     alertUpdater(alert, AlertStates.ALERT, [
       {
@@ -506,10 +507,9 @@ const getViewInAppUrl = (kibanaBaseUrl: string | undefined, indexedStartedAt: st
   // Need to extract the kibana base path if exists (server.basePath) to concatenate it correctly using the URL Api.
   const kibanaBasePath = kibanaBaseUrl ? new URL(kibanaBaseUrl).pathname : '';
   const relativeViewInAppUrl = getAlertLink(new Date(indexedStartedAt).getTime());
-  const fullViewInAppUrl = kibanaBaseUrl
-    ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBasePath)
+  return kibanaBaseUrl
+    ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl)
     : relativeViewInAppUrl;
-  return fullViewInAppUrl
 }
 
 export const buildFiltersFromCriteria = (
