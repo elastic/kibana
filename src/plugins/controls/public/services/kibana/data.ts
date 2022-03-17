@@ -9,20 +9,86 @@
 import { ControlsDataService } from '../data';
 import { ControlsPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
+import { DataViewField } from 'src/plugins/data_views/common';
+import { AggConfig } from 'src/plugins/data/public';
+import { isEqual, get } from 'lodash';
 
 export type DataServiceFactory = KibanaPluginServiceFactory<
   ControlsDataService,
   ControlsPluginStartDeps
 >;
 
+const minMaxAgg = (field?: DataViewField) => {
+  const aggBody: AggConfig = {};
+  //const aggBody = {};
+  if (field) {
+    if (field.scripted) {
+      aggBody.script = {
+        source: field.script,
+        lang: field.lang,
+      };
+    } else {
+      aggBody.field = field.name;
+    }
+  }
+
+  return {
+    maxAgg: {
+      max: aggBody,
+    },
+    minAgg: {
+      min: aggBody,
+    },
+  };
+};
+
 export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
   const {
-    data: { query, search, autocomplete },
+    data: { query: queryPlugin, search, autocomplete },
   } = startPlugins;
+  const { data } = startPlugins;
   return {
+    fetchFieldRange: async (dataView, fieldName, input) => {
+      const { ignoreParentSettings, query, timeRange } = input;
+      let { filters = [] } = input;
+
+      const field = dataView.getFieldByName(fieldName);
+
+      if (!field) {
+        throw new Error('Field Missing Error');
+      }
+
+      if (timeRange) {
+        const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
+        if (timeFilter) {
+          filters = filters.concat(timeFilter);
+        }
+      }
+
+      const searchSource = await data.search.searchSource.create();
+      searchSource.setField('size', 0);
+      searchSource.setField('index', dataView);
+
+      const aggs = minMaxAgg(field);
+      searchSource.setField('aggs', aggs);
+
+      searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? [] : filters);
+      searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? undefined : query);
+
+      const resp = await searchSource.fetch$().toPromise();
+
+      const min = get(resp, 'rawResponse.aggregations.minAgg.value', undefined);
+      const max = get(resp, 'rawResponse.aggregations.maxAgg.value', undefined);
+
+      return {
+        min: min === null ? undefined : min,
+        max: max === null ? undefined : max,
+      };
+    },
+    getDataView: data.dataViews.get,
     autocomplete,
-    query,
+    query: queryPlugin,
     searchSource: search.searchSource,
-    timefilter: query.timefilter.timefilter,
+    timefilter: queryPlugin.timefilter.timefilter,
   };
 };

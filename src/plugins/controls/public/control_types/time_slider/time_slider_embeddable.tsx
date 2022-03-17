@@ -13,6 +13,7 @@ import {
   buildRangeFilter,
   buildPhraseFilter,
   buildPhrasesFilter,
+  RangeFilterParams,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -33,21 +34,16 @@ import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/
 import { ControlsDataService } from '../../services/data';
 import { DataView, DataViewField } from '../../../../data_views/public';
 import { ControlInput, ControlOutput } from '../..';
-import { pluginServices } from '../../services';
+import { ControlsServices, pluginServices } from '../../services';
 
-//import { TimeSlider } from './time_slider.component';
 import { TimeSlider as TimeSliderComponent, TimeSliderSubjectState } from './time_slider';
 import { TimeRange } from 'src/plugins/data/public';
 import { timeSliderReducers } from './time_slider_reducers';
 
-//interface TimesliderControlEmbeddableInput extends EmbeddableInput {
-//  timerange: TimeRange;//
-//}
-
 export interface TimeSliderControlEmbeddableInput extends ControlInput {
   fieldName: string;
   dataViewId: string;
-  value: [number, number];
+  value?: [number | undefined, number | undefined];
 }
 
 const TimeSliderControlReduxWrapper = withSuspense<
@@ -63,221 +59,189 @@ const diffDataFetchProps = (current?: any, last?: any) => {
   return true;
 };
 
-export class TimeSliderControlEmbeddable extends Embeddable<
-  TimeSliderControlEmbeddableInput,
-  ControlOutput
-> {
-  public readonly type = 'TIME_SLIDER';
-  public deferEmbeddableLoad = true;
+export const TimeSliderControlEmbeddableBuilder = ({
+  fetchRange,
+  getDataView,
+}: {
+  fetchRange: ControlsDataService['fetchFieldRange'];
+  getDataView: ControlsDataService['getDataView'];
+}) => {
+  class TimeSliderControlEmbeddable extends Embeddable<
+    TimeSliderControlEmbeddableInput,
+    ControlOutput
+  > {
+    public readonly type = 'TIME_SLIDER';
+    public deferEmbeddableLoad = true;
 
-  private subscriptions: Subscription = new Subscription();
-  private node?: HTMLElement;
+    private subscriptions: Subscription = new Subscription();
+    private node?: HTMLElement;
 
-  // Controls services
-  private dataService: ControlsDataService;
-  private dataViewsService: ControlsDataViewsService;
+    // Internal data fetching state for this input control.
+    private dataView?: DataView;
 
-  // Internal data fetching state for this input control.
-  //private typeaheadSubject: Subject<string> = new Subject<string>();
-  private dataView?: DataView;
-  //private searchString = '';
-
-  // State to be passed down to component
-  private componentState: any; //OptionsListComponentState;
-  private componentStateSubject$ = new BehaviorSubject<TimeSliderSubjectState>({
-    min: 0,
-    max: 1,
-  });
-
-  constructor(input: TimeSliderControlEmbeddableInput, output: ControlOutput, parent?: IContainer) {
-    super(input, output, parent); // get filters for initial output...
-
-    console.log(input);
-
-    // Destructure controls services
-    ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
-
-    this.componentState = { loading: true };
-    this.updateComponentState(this.componentState);
-
-    this.initialize();
-  }
-
-  private setupSubscriptions() {
-    const dataFetchPipe = this.getInput$().pipe(
-      map((newInput) => ({
-        lastReloadRequestTime: newInput.lastReloadRequestTime,
-        dataViewId: newInput.dataViewId,
-        fieldName: newInput.fieldName,
-        timeRange: newInput.timeRange,
-        filters: newInput.filters,
-        query: newInput.query,
-      })),
-      distinctUntilChanged(diffDataFetchProps)
-    );
-
-    this.subscriptions.add(dataFetchPipe.subscribe(this.fetchAvailableTimerange));
-
-    // build filters when value change
-    this.subscriptions.add(
-      this.getInput$()
-        .pipe(
-          debounceTime(400),
-          distinctUntilChanged((a, b) => isEqual(a.value, b.value)),
-          skip(1) // skip the first input update because initial filters will be built by initialize.
-        )
-        .subscribe(() => this.buildFilter())
-    );
-  }
-
-  private buildFilter = async () => {
-    console.log('building filter');
-    const {
-      fieldName,
-      value: [min, max],
-    } = this.getInput();
-    // TODO: double check that this is correct
-    if (
-      [min, max, this.componentState.min, this.componentState.max].some(
-        (value) => value === undefined
-      )
-    ) {
-      this.updateOutput({ filters: [] });
-      return;
-    }
-    const dataView = await this.getCurrentDataView();
-    const field = dataView.getFieldByName(this.getInput().fieldName);
-
-    //if (!field) throw fieldMissingError(fieldName);
-
-    const rangeFilter = buildRangeFilter(
-      field!,
-      {
-        gte: Math.max(Number(min), this.componentState.min!),
-        lte: Math.min(Number(max), this.componentState.max!),
-      },
-      dataView
-    );
-
-    rangeFilter.meta.key = field?.name;
-
-    console.log(rangeFilter);
-    this.updateOutput({ filters: [rangeFilter] });
-  };
-
-  private updateComponentState(changes: Partial<TimeSliderSubjectState>) {
-    this.componentState = {
-      ...this.componentState,
-      ...changes,
-    };
-    this.componentStateSubject$.next(this.componentState);
-  }
-
-  private getCurrentDataView = async (): Promise<DataView> => {
-    const { dataViewId } = this.getInput();
-    if (this.dataView && this.dataView.id === dataViewId) return this.dataView;
-    this.dataView = await this.dataViewsService.get(dataViewId);
-    if (this.dataView === undefined) {
-      this.onFatalError(new Error('some error'));
-    }
-    this.updateOutput({ dataViews: [this.dataView] });
-    return this.dataView;
-  };
-
-  private minMaxAgg = (field?: DataViewField) => {
-    const aggBody: any = {};
-    if (field) {
-      if (field.scripted) {
-        aggBody.script = {
-          source: field.script,
-          lang: field.lang,
-        };
-      } else {
-        aggBody.field = field.name;
-      }
-    }
-
-    return {
-      maxAgg: {
-        max: aggBody,
-      },
-      minAgg: {
-        min: aggBody,
-      },
-    };
-  };
-
-  private fetchAvailableTimerange = async () => {
-    console.log('fetch available time frames');
-    this.updateComponentState({ loading: true });
-
-    const embeddableInput = this.getInput();
-    const { ignoreParentSettings, fieldName, query, timeRange } = embeddableInput;
-    let { filters = [] } = embeddableInput;
-    const dataView = await this.getCurrentDataView();
-    const field = dataView.getFieldByName(fieldName);
-
-    if (!field) {
-      this.updateComponentState({ loading: false });
-      throw new Error('asdf');
-      //throw fieldMissingError(fieldName);
-    }
-
-    if (timeRange) {
-      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
-      if (timeFilter) {
-        filters = filters.concat(timeFilter);
-      }
-    }
-
-    const searchSource = await this.dataService.searchSource.create();
-    searchSource.setField('size', 0);
-    searchSource.setField('index', dataView);
-
-    const aggs = this.minMaxAgg(field);
-    searchSource.setField('aggs', aggs);
-
-    searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? [] : filters);
-    searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? undefined : query);
-
-    const resp = await searchSource.fetch$().toPromise();
-
-    const min = get(resp, 'rawResponse.aggregations.minAgg.value', undefined);
-    const max = get(resp, 'rawResponse.aggregations.maxAgg.value', undefined);
-
-    this.updateComponentState({
-      min: min === null ? undefined : min,
-      max: max === null ? undefined : max,
+    private componentState: TimeSliderSubjectState;
+    private componentStateSubject$ = new BehaviorSubject<TimeSliderSubjectState>({
+      min: undefined,
+      max: undefined,
       loading: false,
     });
-  };
 
-  private initialize() {
-    this.fetchAvailableTimerange();
-    this.setInitializationFinished();
-    this.setupSubscriptions();
+    constructor(
+      input: TimeSliderControlEmbeddableInput,
+      output: ControlOutput,
+      parent?: IContainer
+    ) {
+      super(input, output, parent); // get filters for initial output...
+
+      this.componentState = { loading: true };
+      this.updateComponentState(this.componentState);
+
+      this.initialize();
+    }
+
+    private initialize() {
+      //this.fetchAvailableTimerange();
+      this.setInitializationFinished();
+      this.setupSubscriptions();
+    }
+
+    private setupSubscriptions() {
+      const dataFetchPipe = this.getInput$().pipe(
+        map((newInput) => ({
+          lastReloadRequestTime: newInput.lastReloadRequestTime,
+          dataViewId: newInput.dataViewId,
+          fieldName: newInput.fieldName,
+          timeRange: newInput.timeRange,
+          filters: newInput.filters,
+          query: newInput.query,
+        })),
+        distinctUntilChanged(diffDataFetchProps)
+      );
+
+      this.subscriptions.add(dataFetchPipe.subscribe(this.fetchAvailableTimerange));
+
+      // build filters when value change or when component state range changes
+      const availableRangePipe = this.componentStateSubject$.pipe(
+        map((state) => ({
+          min: state.min,
+          max: state.max,
+        })),
+        distinctUntilChanged((a, b) => isEqual(a, b))
+      );
+
+      this.subscriptions.add(
+        merge(
+          this.getInput$().pipe(distinctUntilChanged((a, b) => isEqual(a.value, b.value))),
+          availableRangePipe
+        ).subscribe(() => this.buildFilter())
+      );
+    }
+
+    private buildFilter = async () => {
+      const { fieldName, value } = this.getInput();
+
+      const min = value ? value[0] : undefined;
+      const max = value ? value[1] : undefined;
+
+      const dataView = await this.getCurrentDataView();
+      const field = dataView.getFieldByName(fieldName);
+
+      //if (!field) throw fieldMissingError(fieldName);
+
+      // If we have a value or a range use the min/max of those, otherwise undefined
+      let filterMin: number | undefined;
+      let filterMax: number | undefined;
+
+      if (min !== undefined || this.componentState.min !== undefined) {
+        filterMin = Math.max(min || 0, this.componentState.min || 0);
+      }
+
+      if (max || this.componentState.max) {
+        filterMax = Math.min(
+          max || Number.MAX_SAFE_INTEGER,
+          this.componentState.max || Number.MAX_SAFE_INTEGER
+        );
+      }
+
+      const range: RangeFilterParams = {};
+      if (filterMin !== undefined) {
+        range.gte = filterMin;
+      }
+      if (filterMax !== undefined) {
+        range.lte = filterMax;
+      }
+
+      const rangeFilter = buildRangeFilter(field!, range, dataView);
+      rangeFilter.meta.key = field?.name;
+
+      this.updateOutput({ filters: [rangeFilter] });
+    };
+
+    private updateComponentState(changes: Partial<TimeSliderSubjectState>) {
+      this.componentState = {
+        ...this.componentState,
+        ...changes,
+      };
+      this.componentStateSubject$.next(this.componentState);
+    }
+
+    private getCurrentDataView = async (): Promise<DataView> => {
+      const { dataViewId } = this.getInput();
+      if (this.dataView && this.dataView.id === dataViewId) return this.dataView;
+      this.dataView = await getDataView(dataViewId);
+      if (this.dataView === undefined) {
+        this.onFatalError(new Error('some error'));
+      }
+      this.updateOutput({ dataViews: [this.dataView] });
+      return this.dataView;
+    };
+
+    private fetchAvailableTimerange = async () => {
+      this.updateComponentState({ loading: true });
+
+      const { fieldName, ...input } = this.getInput();
+      const dataView = await this.getCurrentDataView();
+
+      try {
+        const { min, max } = await fetchRange(dataView, fieldName, input);
+
+        this.updateComponentState({
+          min: min === null ? undefined : min,
+          max: max === null ? undefined : max,
+          loading: false,
+        });
+      } catch (e) {
+        this.updateComponentState({ loading: false });
+      }
+    };
+
+    public getComponentState$ = () => {
+      return this.componentStateSubject$;
+    };
+
+    public destroy = () => {
+      super.destroy();
+      this.subscriptions.unsubscribe();
+    };
+
+    public reload = () => {
+      this.fetchAvailableTimerange();
+    };
+
+    public render = (node: HTMLElement) => {
+      if (this.node) {
+        ReactDOM.unmountComponentAtNode(this.node);
+      }
+      this.node = node;
+
+      ReactDOM.render(
+        <TimeSliderControlReduxWrapper embeddable={this} reducers={timeSliderReducers}>
+          <TimeSliderComponent componentStateSubject={this.componentStateSubject$} />
+        </TimeSliderControlReduxWrapper>,
+        node
+      );
+    };
   }
 
-  public destroy = () => {
-    super.destroy();
-    this.subscriptions.unsubscribe();
-  };
-
-  public reload = () => {
-    this.fetchAvailableTimerange();
-  };
-
-  public render = (node: HTMLElement) => {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
-    }
-    this.node = node;
-
-    ReactDOM.render(
-      <TimeSliderControlReduxWrapper embeddable={this} reducers={timeSliderReducers}>
-        <TimeSliderComponent componentStateSubject={this.componentStateSubject$} />
-      </TimeSliderControlReduxWrapper>,
-      node
-    );
-  };
-}
+  return TimeSliderControlEmbeddable;
+};

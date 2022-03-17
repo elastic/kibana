@@ -11,13 +11,14 @@ import deepEqual from 'fast-deep-equal';
 //import { OptionsListEditor } from './options_list_editor';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 //import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
+import { Embeddable, EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
 import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/control_types/options_list/options_list_persistable_state';
 import { TimeSliderEditor } from './time_slider_editor';
 import { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
+import { pluginServices } from '../../services';
 
 export class TimesliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<TimeSliderControlEmbeddableInput>
@@ -25,10 +26,24 @@ export class TimesliderEmbeddableFactory
   public type = 'TIME_SLIDER';
   public canCreateNew = () => false;
 
+  private EmbeddableClass?: Embeddable;
+
   constructor() {}
 
   public async create(initialInput: TimeSliderControlEmbeddableInput, parent?: IContainer) {
-    const { TimeSliderControlEmbeddable } = await import('./time_slider_embeddable');
+    if (!this.EmbeddableClass) {
+      const { TimeSliderControlEmbeddableBuilder } = await import('./time_slider_embeddable');
+      const {
+        data: { fetchFieldRange, getDataView },
+      } = pluginServices.getServices();
+      this.EmbeddableClass = TimeSliderControlEmbeddableBuilder({
+        fetchRange: fetchFieldRange,
+        getDataView,
+      });
+    }
+
+    return new this.EmbeddableClass!(initialInput, {}, parent);
+
     return Promise.resolve(new TimeSliderControlEmbeddable(initialInput, {}, parent));
   }
 

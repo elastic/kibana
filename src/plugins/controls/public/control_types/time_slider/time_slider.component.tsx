@@ -98,24 +98,27 @@ export function epochToKbnDateFormat(epoch: number): string {
 }
 
 export const TimeSlider: FC<TimeSliderProps> = (props) => {
+  const { range, value, isLoading } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen, setIsPopoverOpen]);
-  const [lowerBound, upperBound] = props.range;
-  const [lowerValue, upperValue] = props.value;
+  const [lowerBound, upperBound] = range;
+  const [lowerValue, upperValue] = value;
 
   const button = (
     <EuiFilterButton
-      isLoading={false}
+      isLoading={isLoading}
       data-test-subj={``}
       onClick={togglePopover}
       isSelected={true}
     >
-      <EuiText>
-        {epochToKbnDateFormat(lowerValue < lowerBound ? lowerBound : lowerValue)} →{' '}
-        {epochToKbnDateFormat(upperValue > upperBound ? upperBound : upperValue)}
-      </EuiText>
+      {!isLoading ? (
+        <EuiText>
+          {epochToKbnDateFormat(lowerValue < lowerBound ? lowerBound : lowerValue)} →{' '}
+          {epochToKbnDateFormat(upperValue > upperBound ? upperBound : upperValue)}
+        </EuiText>
+      ) : null}
     </EuiFilterButton>
   );
 
@@ -142,6 +145,7 @@ export interface TimeSliderProps {
   range: [number, number];
   value: [number, number];
   onChange: EuiDualRangeProps['onChange'];
+  isLoading: boolean;
 }
 
 export const TimeSliderComponent: FC<TimeSliderProps> = ({ range, value, onChange }) => {

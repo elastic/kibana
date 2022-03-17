@@ -30,6 +30,14 @@ const TimeSliderWrapper: FC<Omit<TimeSliderProps, 'onChange'>> = (props) => {
   return <TimeSlider {...props} onChange={onChange} value={value} />;
 };
 
+export const TimeSliderLoading = () => {
+  return <TimeSliderWrapper range={[1643985198009, 1644589998009]} isLoading={true} />;
+};
+
+export const TimeSliderNoValuesOrRange = () => {
+  return <TimeSliderWrapper range={[undefined, undefined]}
+}
+
 export const TimeSliderStory = () => {
   return <TimeSliderWrapper range={[1643985198009, 1644589998009]} />;
 };

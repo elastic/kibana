@@ -35,7 +35,6 @@ import {   TimesliderEmbeddableFactory,
 } from './control_types/time_slider';
 import { controlsService } from './services/kibana/controls';
 import { EmbeddableFactory } from '../../embeddable/public';
-import { TimeSliderControlEmbeddable } from './control_types/time_slider/time_slider_embeddable';
 
 export class ControlsPlugin
   implements

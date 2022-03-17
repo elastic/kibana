@@ -24,6 +24,7 @@ import {
 export interface TimeSliderSubjectState {
   min?: number;
   max?: number;
+  loading: boolean;
 }
 
 interface TimeSliderProps {
@@ -38,20 +39,22 @@ export const TimeSlider: FC<TimeSliderProps> = ({ componentStateSubject }) => {
   } = useReduxEmbeddableContext<TimeSliderControlEmbeddableInput, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
 
-  const { min, max } = useStateObservable<TimeSliderSubjectState>(
+  const { min, max, loading } = useStateObservable<TimeSliderSubjectState>(
     componentStateSubject,
     componentStateSubject.getValue()
   );
 
   const { value } = useEmbeddableSelector((state) => state);
 
-  const [selectedValue, setSelectedValue] = useState<[number, number]>(value || [min, max]);
+  const [selectedValue, setSelectedValue] = useState<[number | undefined, number | undefined]>(
+    value || [undefined, undefined]
+  );
 
   const dispatchChange = useCallback(
     (range: [number, number]) => {
       dispatch(selectRange(range));
     },
-    [dispatch]
+    [dispatch, selectRange]
   );
 
   const debouncedDispatchChange = useCallback(debounce(dispatchChange, 500), [dispatchChange]);
@@ -60,13 +63,17 @@ export const TimeSlider: FC<TimeSliderProps> = ({ componentStateSubject }) => {
     (range: [string, string]) => {
       const numberRange = range.map((num: string) => Number(num)) as [number, number];
       debouncedDispatchChange(numberRange);
-      //dispatch(selectRange(numberRange));
       setSelectedValue(numberRange);
     },
-    [selectRange, setSelectedValue, debouncedDispatchChange]
+    [setSelectedValue, debouncedDispatchChange]
   );
 
   return (
-    <Component onChange={onChangeComplete} value={selectedValue} range={[min || 0, max || 0]} />
+    <Component
+      onChange={onChangeComplete}
+      value={selectedValue}
+      range={[min, max]}
+      isLoading={loading}
+    />
   );
 };
