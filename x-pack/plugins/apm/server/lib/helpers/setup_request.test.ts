@@ -117,7 +117,7 @@ describe('setupRequest', () => {
         {
           index: ['apm-*'],
           body: {
-            foo: 'bar',
+            size: 10,
             query: {
               bool: {
                 filter: [{ terms: { 'processor.event': ['transaction'] } }],
