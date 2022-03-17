@@ -12,8 +12,7 @@ import userEvent from '@testing-library/user-event';
 
 import { EditConnector, EditConnectorProps } from './index';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
-import { connectorsMock } from '../../containers/configure/mock';
-import { basicCase, basicPush, caseUserActions } from '../../containers/mock';
+import { basicCase, basicPush, caseUserActions, connectorsMock } from '../../containers/mock';
 import { CaseConnector } from '../../containers/configure/types';
 
 const onSubmit = jest.fn();

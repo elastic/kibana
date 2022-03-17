@@ -7,8 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useConnectors, UseConnectorsResponse } from './use_connectors';
-import { connectorsMock } from './mock';
 import * as api from './api';
+import { connectorsMock } from '../mock';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');

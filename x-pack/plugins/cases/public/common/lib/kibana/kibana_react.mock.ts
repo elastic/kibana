@@ -19,6 +19,8 @@ import { securityMock } from '../../../../../security/public/mocks';
 import { spacesPluginMock } from '../../../../../spaces/public/mocks';
 import { triggersActionsUiMock } from '../../../../../triggers_actions_ui/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
+import { connectorsMock } from '../../mock/connectors';
 
 export const createStartServicesMock = (): StartServices => {
   const services = {
@@ -42,6 +44,11 @@ export const createStartServicesMock = (): StartServices => {
     actionTypeTitle: '.servicenow',
     iconClass: 'logoSecurity',
   });
+
+  registerConnectorsToMockActionRegistry(
+    services.triggersActionsUi.actionTypeRegistry,
+    connectorsMock
+  );
 
   services.application.capabilities = {
     ...services.application.capabilities,

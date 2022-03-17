@@ -21,10 +21,7 @@ import { schema, FormProps } from './schema';
 import { TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { useKibana } from '../../common/lib/kibana';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
-jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/servicenow/use_get_choices');
@@ -34,7 +31,6 @@ const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const useGetIncidentTypesResponse = {
   isLoading: false,
@@ -73,12 +69,6 @@ describe('Connector', () => {
 
     return <Form form={form}>{children}</Form>;
   };
-
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
-  beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
-  });
 
   beforeEach(() => {
     jest.clearAllMocks();

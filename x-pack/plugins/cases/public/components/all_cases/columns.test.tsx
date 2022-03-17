@@ -11,20 +11,9 @@ import { mount } from 'enzyme';
 import '../../common/mock/match_media';
 import { ExternalServiceColumn } from './columns';
 import { useGetCasesMockState } from '../../containers/mock';
-import { useKibana } from '../../common/lib/kibana';
 import { connectors } from '../configure_cases/__mock__';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
-
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('ExternalServiceColumn ', () => {
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
-  beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
-  });
-
   it('Not pushed render', () => {
     const wrapper = mount(
       <ExternalServiceColumn theCase={useGetCasesMockState.data.cases[0]} connectors={connectors} />
