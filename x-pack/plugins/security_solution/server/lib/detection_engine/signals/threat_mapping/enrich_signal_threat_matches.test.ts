@@ -806,7 +806,7 @@ describe('getSignalMatchesFromThreatList', () => {
     expect(signalMatches).toEqual([]);
   });
 
-  it('return signal mathces from threat indicators with swapped field and value in query', () => {
+  it('return signal mathces from threat indicators', () => {
     const signalMatches = getSignalMatchesFromThreatList([
       getThreatListItemMock({
         _id: 'threatId',
@@ -833,8 +833,8 @@ describe('getSignalMatchesFromThreatList', () => {
 
     const queries = [
       {
-        field: 'threat.indicator.domain',
-        value: 'event.domain',
+        field: 'event.domain',
+        value: 'threat.indicator.domain',
         index: 'threat_index',
         id: 'threatId',
       },
@@ -875,8 +875,8 @@ describe('getSignalMatchesFromThreatList', () => {
     ]);
 
     const query = {
-      field: 'threat.indicator.domain',
-      value: 'event.domain',
+      field: 'event.domain',
+      value: 'threat.indicator.domain',
       index: 'threat_index',
       id: 'threatId',
     };
