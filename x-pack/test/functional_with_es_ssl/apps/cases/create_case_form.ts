@@ -10,13 +10,18 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  describe('Create and edit case ', function () {
+  describe('Create case ', function () {
     const common = getPageObject('common');
     const find = getService('find');
     const casesApp = getService('casesApp');
+    const casesAppApi = getService('casesAppApi');
 
     before(async () => {
       await common.navigateToApp('casesStackManagement');
+    });
+
+    after(async () => {
+      casesAppApi.deleteAllCases();
     });
 
     describe('creating a case', () => {

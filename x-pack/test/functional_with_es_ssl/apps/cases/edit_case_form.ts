@@ -15,6 +15,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const casesApp = getService('casesApp');
+  const casesAppApi = getService('casesAppApi');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
@@ -23,6 +24,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     before(async () => {
       await common.navigateToApp('casesStackManagement');
       await casesApp.createCaseFromCreateCasePage();
+    });
+
+    after(async () => {
+      casesAppApi.deleteAllCases();
     });
 
     beforeEach(async () => {

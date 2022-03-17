@@ -25,6 +25,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await casesAppApi.deleteAllCases();
     });
 
+    after(async () => {
+      casesAppApi.deleteAllCases();
+    });
+
     beforeEach(async () => {
       await common.navigateToApp('casesStackManagement');
     });

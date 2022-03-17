@@ -50,7 +50,7 @@ export function CasesAppServiceProvider({ getService, getPageObject }: FtrProvid
       await descriptionArea.type('Test description');
 
       // save
-      testSubjects.click('create-case-submit');
+      await testSubjects.click('create-case-submit');
 
       await testSubjects.existOrFail('case-view-title');
     },
