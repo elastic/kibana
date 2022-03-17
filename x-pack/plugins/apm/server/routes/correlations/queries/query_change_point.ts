@@ -30,20 +30,24 @@ export const getChangePointRequest = (
     params,
   });
 
-  const filter = query.bool.filter.filter((d) => Object.keys(d)[0] !== 'range');
+  let filter: estypes.QueryDslQueryContainer[] = [];
 
-  query.bool.filter = [
-    ...filter,
-    {
-      range: {
-        '@timestamp': {
-          gte: windowParameters.deviationMin,
-          lt: windowParameters.deviationMax,
-          format: 'epoch_millis',
+  if (Array.isArray(query.bool.filter)) {
+    filter = query.bool.filter.filter((d) => Object.keys(d)[0] !== 'range');
+
+    query.bool.filter = [
+      ...filter,
+      {
+        range: {
+          '@timestamp': {
+            gte: windowParameters.deviationMin,
+            lt: windowParameters.deviationMax,
+            format: 'epoch_millis',
+          },
         },
       },
-    },
-  ];
+    ];
+  }
 
   const body = {
     query,

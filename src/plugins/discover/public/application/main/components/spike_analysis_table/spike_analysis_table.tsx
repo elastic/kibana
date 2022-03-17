@@ -53,6 +53,10 @@ enum FETCH_STATUS {
   NOT_INITIATED = 'not_initiated',
 }
 
+type EuiTreeViewProps = React.ComponentProps<typeof EuiTreeView>;
+type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never;
+type EuiTreeViewNode = ArrayElement<EuiTreeViewProps['items']>;
+
 interface SpikeAnalysisTableProps extends BaseSpikeAnalysisTableProps {
   spikeSelection: WindowParameters;
 }
@@ -292,7 +296,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   const treeItems = useMemo(() => {
     let id = 1;
-    const mapL = (d: ItemSetTreeNode) => {
+    const mapL = (d: ItemSetTreeNode): EuiTreeViewNode => {
       id = id + 1;
       return {
         label: Object.entries(d.itemSet.items)
