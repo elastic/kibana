@@ -206,11 +206,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     const actionExecutor = new ActionExecutor({
       isESOCanEncrypt: this.isESOCanEncrypt,
-      inMemoryMetrics: this.inMemoryMetrics,
     });
 
     // get executions count
-    const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
+    const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {

@@ -923,6 +923,8 @@ export class TaskRunner<
     };
     eventLogger.logEvent(event);
 
+    this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
+
     // Update the rule saved object with execution status
     const executionStatus: AlertExecutionStatus = {
       lastExecutionDate: new Date(),

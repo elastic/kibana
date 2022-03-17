@@ -16,11 +16,8 @@ import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_
 import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
-import { IN_MEMORY_METRICS } from '../monitoring';
-import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
-const inMemoryMetrics = inMemoryMetricsMock.create();
-const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true, inMemoryMetrics });
+const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
 
 const actionsClient = actionsClientMock.create();
@@ -463,7 +460,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
 });
 
 test('throws an error when passing isESOCanEncrypt with value of false', async () => {
-  const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false, inMemoryMetrics });
+  const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
   customActionExecutor.initialize({
     logger: loggingSystemMock.create().get(),
     spaces: spacesMock,
@@ -627,24 +624,6 @@ test('writes to event log for execute and execute start', async () => {
     },
     message: 'action executed: test:1: action-1',
   });
-});
-
-test('increments monitoring metrics after execution', async () => {
-  const executorMockSuccess = setupActionExecutorMock();
-  executorMockSuccess.mockResolvedValue({
-    actionId: '1',
-    status: 'ok',
-  });
-  await actionExecutor.execute(executeParams);
-
-  const executorMockFailure = setupActionExecutorMock();
-  executorMockFailure.mockRejectedValue(new Error('this action execution is intended to fail'));
-  await actionExecutor.execute(executeParams);
-
-  expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(3);
-  expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
-  expect(inMemoryMetrics.increment.mock.calls[1][0]).toBe(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
-  expect(inMemoryMetrics.increment.mock.calls[2][0]).toBe(IN_MEMORY_METRICS.ACTION_FAILURES);
 });
 
 function setupActionExecutorMock() {

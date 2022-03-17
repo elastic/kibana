@@ -57,8 +57,8 @@ describe('registerClusterCollector()', () => {
 
     const result = (await metrics.cluster_actions.fetch()) as ClusterActionsMetric;
     expect(result.overdue.count).toBe(docs.length);
-    expect(result.overdue.duration.p50).toBe(1000);
-    expect(result.overdue.duration.p99).toBe(1000);
+    expect(result.overdue.delay.p50).toBe(1000);
+    expect(result.overdue.delay.p99).toBe(1000);
     expect(taskManagerFetch).toHaveBeenCalledWith({
       query: {
         bool: {
@@ -77,17 +77,14 @@ describe('registerClusterCollector()', () => {
                     bool: {
                       must: [
                         {
-                          range: {
-                            'task.runAt': {
-                              format: 'epoch_millis',
-                              lt: nowInMs,
-                            },
+                          term: {
+                            'task.status': 'idle',
                           },
                         },
                         {
-                          term: {
-                            'task.status': {
-                              value: 'idle',
+                          range: {
+                            'task.runAt': {
+                              lte: 'now',
                             },
                           },
                         },
@@ -98,31 +95,26 @@ describe('registerClusterCollector()', () => {
                     bool: {
                       must: [
                         {
-                          range: {
-                            'task.retryAt': {
-                              format: 'epoch_millis',
-                              lt: nowInMs,
-                            },
-                          },
-                        },
-                        {
                           bool: {
                             should: [
                               {
                                 term: {
-                                  'task.status': {
-                                    value: 'running',
-                                  },
+                                  'task.status': 'running',
                                 },
                               },
                               {
                                 term: {
-                                  'task.status': {
-                                    value: 'claimed',
-                                  },
+                                  'task.status': 'claiming',
                                 },
                               },
                             ],
+                          },
+                        },
+                        {
+                          range: {
+                            'task.retryAt': {
+                              lte: 'now',
+                            },
                           },
                         },
                       ],
@@ -160,7 +152,7 @@ describe('registerClusterCollector()', () => {
 
     const result = (await metrics.cluster_actions.fetch()) as ClusterActionsMetric;
     expect(result.overdue.count).toBe(docs.length);
-    expect(result.overdue.duration.p50).toBe(3000);
-    expect(result.overdue.duration.p99).toBe(40000);
+    expect(result.overdue.delay.p50).toBe(3000);
+    expect(result.overdue.delay.p99).toBe(40000);
   });
 });

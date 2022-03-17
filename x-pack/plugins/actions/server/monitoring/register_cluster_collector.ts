@@ -6,6 +6,10 @@
  */
 import stats from 'stats-lite';
 import { MonitoringCollectionSetup } from '../../../monitoring_collection/server';
+import {
+  IdleTaskWithExpiredRunAt,
+  RunningOrClaimingTaskWithExpiredRetryAt,
+} from '../../../task_manager/server';
 import { CoreSetup } from '../../../../../src/core/server';
 import { ActionsPluginsStart } from '../plugin';
 import { ClusterActionsMetric } from './types';
@@ -24,7 +28,7 @@ export function registerClusterCollector({
         count: {
           type: 'long',
         },
-        duration: {
+        delay: {
           p50: {
             type: 'long',
           },
@@ -35,9 +39,9 @@ export function registerClusterCollector({
       },
     },
     fetch: async () => {
-      const services = await core.getStartServices();
+      const [_, pluginStart] = await core.getStartServices();
       const nowInMs = +new Date();
-      const { docs: overdueTasks } = await services[1].taskManager.fetch({
+      const { docs: overdueTasks } = await pluginStart.taskManager.fetch({
         query: {
           bool: {
             must: [
@@ -50,63 +54,7 @@ export function registerClusterCollector({
               },
               {
                 bool: {
-                  should: [
-                    {
-                      bool: {
-                        must: [
-                          {
-                            range: {
-                              'task.runAt': {
-                                format: 'epoch_millis',
-                                lt: nowInMs,
-                              },
-                            },
-                          },
-                          {
-                            term: {
-                              'task.status': {
-                                value: 'idle',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          {
-                            range: {
-                              'task.retryAt': {
-                                format: 'epoch_millis',
-                                lt: nowInMs,
-                              },
-                            },
-                          },
-                          {
-                            bool: {
-                              should: [
-                                {
-                                  term: {
-                                    'task.status': {
-                                      value: 'running',
-                                    },
-                                  },
-                                },
-                                {
-                                  term: {
-                                    'task.status': {
-                                      value: 'claimed',
-                                    },
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                  should: [IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt],
                 },
               },
             ],
@@ -114,26 +62,26 @@ export function registerClusterCollector({
         },
       });
 
-      const overdueTasksDurations = overdueTasks.map(
+      const overdueTasksDelay = overdueTasks.map(
         (overdueTask) => nowInMs - +new Date(overdueTask.runAt || overdueTask.retryAt)
       );
 
       const metrics: ClusterActionsMetric = {
         overdue: {
           count: overdueTasks.length,
-          duration: {
-            p50: stats.percentile(overdueTasksDurations, 0.5),
-            p99: stats.percentile(overdueTasksDurations, 0.99),
+          delay: {
+            p50: stats.percentile(overdueTasksDelay, 0.5),
+            p99: stats.percentile(overdueTasksDelay, 0.99),
           },
         },
       };
 
-      if (isNaN(metrics.overdue.duration.p50)) {
-        metrics.overdue.duration.p50 = 0;
+      if (isNaN(metrics.overdue.delay.p50)) {
+        metrics.overdue.delay.p50 = 0;
       }
 
-      if (isNaN(metrics.overdue.duration.p99)) {
-        metrics.overdue.duration.p99 = 0;
+      if (isNaN(metrics.overdue.delay.p99)) {
+        metrics.overdue.delay.p99 = 0;
       }
 
       return metrics;
