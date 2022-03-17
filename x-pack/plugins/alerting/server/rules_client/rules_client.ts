@@ -1493,6 +1493,12 @@ export class RulesClient {
     id: string;
     snoozeEndTime: string | -1;
   }): Promise<void> {
+    if (typeof snoozeEndTime === 'string') {
+      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
+      if (snoozeDateValidationMsg) {
+        throw new RuleMutedError(snoozeDateValidationMsg);
+      }
+    }
     return await retryIfConflicts(
       this.logger,
       `rulesClient.snooze('${id}', ${snoozeEndTime})`,
@@ -1501,13 +1507,6 @@ export class RulesClient {
   }
 
   private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
-    if (typeof snoozeEndTime === 'string') {
-      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
-      if (snoozeDateValidationMsg) {
-        throw new RuleMutedError(snoozeDateValidationMsg);
-      }
-    }
-
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
