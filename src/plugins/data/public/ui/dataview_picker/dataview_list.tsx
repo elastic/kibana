@@ -48,7 +48,9 @@ export function DataViewsList({
         const choice = choices.find(({ checked }) => checked) as unknown as {
           value: string;
         };
-        onChangeDataView(choice.value);
+        if (choice.value !== currentDataViewId) {
+          onChangeDataView(choice.value);
+        }
       }}
       searchProps={{
         id: searchListInputId,

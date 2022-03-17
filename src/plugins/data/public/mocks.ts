@@ -51,7 +51,6 @@ const createStartContract = (): Start => {
     }),
     get: jest.fn().mockReturnValue(Promise.resolve({})),
     clearCache: jest.fn(),
-    getIdsWithTitle: jest.fn(),
   } as unknown as DataViewsContract;
 
   return {

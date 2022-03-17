@@ -40,8 +40,16 @@ describe('DataView component', () => {
   };
 
   function wrapDataViewComponentInContext(testProps: DataViewPickerProps, storageValue: boolean) {
+    let dataMock = dataPluginMock.createStartContract();
+    dataMock = {
+      ...dataMock,
+      dataViews: {
+        ...dataMock.dataViews,
+        getIdsWithTitle: jest.fn(),
+      },
+    };
     const services = {
-      data: dataPluginMock.createStartContract(),
+      data: dataMock,
       storage: getStorage(storageValue),
     };
 
