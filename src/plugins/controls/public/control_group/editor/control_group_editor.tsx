@@ -68,12 +68,13 @@ export const ControlGroupEditor = ({
           <h2>{ControlGroupStrings.management.getFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="control-group-settings-flyout">
         <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
           <EuiButtonGroup
             color="primary"
             idSelected={currentControlStyle}
             legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
+            data-test-subj="control-group-layout-options"
             options={CONTROL_LAYOUT_OPTIONS}
             onChange={(newControlStyle: string) => {
               setCurrentControlStyle(newControlStyle as ControlStyle);
@@ -86,6 +87,7 @@ export const ControlGroupEditor = ({
             color="primary"
             idSelected={currentWidth}
             legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+            data-test-subj="control-group-default-size-options"
             options={CONTROL_WIDTH_OPTIONS}
             onChange={(newWidth: string) => {
               setCurrentWidth(newWidth as ControlWidth);
@@ -97,6 +99,7 @@ export const ControlGroupEditor = ({
             <EuiSpacer size="s" />
             <EuiCheckbox
               id="editControls_setAllSizesCheckbox"
+              data-test-subj="set-all-control-sizes-checkbox"
               label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
               checked={applyToAll}
               onChange={(e) => {
@@ -107,6 +110,7 @@ export const ControlGroupEditor = ({
             <EuiButtonEmpty
               onClick={onCancel}
               aria-label={'delete-all'}
+              data-test-subj="delete-all-controls-button"
               iconType="trash"
               color="danger"
               flush="left"
@@ -135,6 +139,7 @@ export const ControlGroupEditor = ({
               aria-label={`save-group`}
               iconType="check"
               color="primary"
+              data-test-subj="control-group-editor-save"
               onClick={() => {
                 if (currentControlStyle && currentControlStyle !== controlStyle) {
                   updateControlStyle(currentControlStyle);

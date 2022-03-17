@@ -87,7 +87,7 @@ export const EditControlGroup = ({
       closePopover();
     },
     icon: 'gear',
-    'data-test-subj': 'controls-sorting-button',
+    'data-test-subj': 'controls-settings-button',
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
