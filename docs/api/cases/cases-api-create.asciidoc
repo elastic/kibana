@@ -40,7 +40,7 @@ individual field, specify `null` as its value.
 For {sn-itsm} connectors, refer to <<servicenow-action-configuration>>. For
 example:
 
-* `urgency`: The extent to which the incident resolution can delay.
+* `urgency`: The extent to which the incident resolution can be delayed.
 * `severity`: The severity of the incident.
 * `impact`: The effect an incident had on business.
 * `category`: The category of the incident.
@@ -205,5 +205,5 @@ the case identifier, version, and creation time. For example:
 <1> The case identifier is also its saved object ID (`savedObjectId`), which is
 used when pushing cases to external systems.
 <2> The default connector used to push cases to external services.
-<3> The `external_service` object stores information when the case is pushed to
-external systems.
+<3> The `external_service` object stores information about the incident after it
+is pushed to an external incident management system.

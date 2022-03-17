@@ -46,9 +46,9 @@ field, specify `null` as its value.
 For {sn-itsm} connectors, refer to <<servicenow-action-configuration>>. For
 example:
 
-* `urgency`: The urgency of the incident.
+* `urgency`: The extent to which the incident resolution can be delayed.
 * `severity`: The severity of the incident.
-* `impact`: The impact of the incident.
+* `impact`: The effect an incident had on business.
 * `category`: The category of the incident.
 * `subcategory`: The subcategory of the incident.
 
@@ -146,6 +146,8 @@ PATCH api/cases
 {
   "cases": [
     {
+      "id": "a18b38a0-71b0-11ea-a0b2-c51ea50a58e2",
+      "version": "WzIzLDFd",
       "connector": {
         "id": "131d4448-abe0-4789-939d-8ef60680b498",
         "name": "My connector",
@@ -156,7 +158,6 @@ PATCH api/cases
           "parent": null
         }
       },
-      "id": "a18b38a0-71b0-11ea-a0b2-c51ea50a58e2",
       "description": "James Bond clicked on a highly suspicious email
       banner advertising cheap holidays for underpaid civil servants.
       Operation bubblegum is active. Repeat - operation bubblegum is
@@ -168,8 +169,7 @@ PATCH api/cases
       ],
       "settings": {
         "syncAlerts": true
-      },
-      "version": "WzIzLDFd"
+      }
     }
   ]
 }
