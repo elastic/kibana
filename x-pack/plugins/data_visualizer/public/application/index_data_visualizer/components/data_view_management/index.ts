@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DataVisualizerIndexPatternManagement } from './index_pattern_management';
+export { DataVisualizerDataViewManagement } from './data_view_management';
