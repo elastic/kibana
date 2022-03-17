@@ -22,7 +22,8 @@ describe('transform connector for export', () => {
     licensing: licensingMock.createSetup(),
     taskManager: taskManagerMock.createSetup(),
     taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true, inMemoryMetrics })
+      new ActionExecutor({ isESOCanEncrypt: true }),
+      inMemoryMetrics
     ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: licenseStateMock.create(),
