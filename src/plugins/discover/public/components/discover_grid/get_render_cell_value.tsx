@@ -101,16 +101,23 @@ export const getRenderCellValueFn =
           )
         : formatHit(row, dataView, fieldsToShow, maxEntries, fieldFormats);
 
+      const appendWbr = (value: string) => {
+        const wbr = '<wbr/>';
+        return value + wbr;
+      };
+
       return (
         <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
           {pairs.map(([key, value]) => (
             <Fragment key={key}>
-              <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                {key}
+                <wbr />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
                 className="dscDiscoverGrid__descriptionListDescription"
-                dangerouslySetInnerHTML={{ __html: value }}
+                dangerouslySetInnerHTML={{ __html: appendWbr(value) }}
               />
-              <wbr />
             </Fragment>
           ))}
         </EuiDescriptionList>
