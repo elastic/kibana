@@ -255,6 +255,29 @@ describe('basic context', () => {
       .toCompileTo('inner 1');
   });
 
+  it('pathed block functions without context argument', () => {
+    expectTemplate('{{#foo.awesome}}inner{{/foo.awesome}}')
+      .withInput({
+        foo: {
+          awesome() {
+            return this;
+          },
+        },
+      })
+      .toCompileTo('inner');
+  });
+
+  it('depthed block functions without context argument', () => {
+    expectTemplate('{{#with value}}{{#../awesome}}inner{{/../awesome}}{{/with}}')
+      .withInput({
+        value: true,
+        awesome() {
+          return this;
+        },
+      })
+      .toCompileTo('inner');
+  });
+
   it('paths with hyphens', () => {
     expectTemplate('{{foo-bar}}').withInput({ 'foo-bar': 'baz' }).toCompileTo('baz');
 

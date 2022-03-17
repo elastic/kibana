@@ -216,7 +216,33 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   private simpleSexpr(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
     const path = sexpr.path;
-    this.accept(path);
+    const isBlock = 'program' in sexpr || 'inverse' in sexpr;
+
+    if (isBlock) {
+      const currentOutput = this.output;
+      this.output = [];
+      this.accept(path);
+      const result = this.output[0];
+      this.output = currentOutput;
+
+      const lambdaResult = this.container.lambda(result, this.scopes[0]);
+      this.blockValue(sexpr, lambdaResult);
+    } else {
+      this.accept(path);
+    }
+  }
+
+  // The purpose of this opcode is to take a block of the form
+  // `{{#this.foo}}...{{/this.foo}}`, resolve the value of `foo`, and
+  // replace it on the stack with the result of properly
+  // invoking blockHelperMissing.
+  private blockValue(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, context: any) {
+    const name = sexpr.path.original;
+    const options = this.setupParams(sexpr, name);
+
+    const result = this.container.hooks.blockHelperMissing!.call(sexpr, context, options);
+
+    this.output.push(result);
   }
 
   private helperSexpr(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
