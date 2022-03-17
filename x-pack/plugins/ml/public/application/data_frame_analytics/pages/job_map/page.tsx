@@ -7,26 +7,28 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { OutlierExploration } from './components/outlier_exploration';
-import { RegressionExploration } from './components/regression_exploration';
-import { ClassificationExploration } from './components/classification_exploration';
-
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
+import { useUrlState } from '../../../util/url_state';
+import { NodeAvailableWarning } from '../../../components/node_available_warning';
+import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
+import { UpgradeWarning } from '../../../components/upgrade';
+import { JobMap } from '../job_map';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
+import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
 import { AnalyticsIdSelector, AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
-export const Page: FC<{
-  jobId: string;
-  analysisType: DataFrameAnalysisConfigType;
-}> = ({ jobId, analysisType }) => {
-  const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
+export const Page: FC = () => {
+  const [globalState] = useUrlState('_g');
+  const [isLoading, setIsLoading] = useState(false);
   const [jobsExist, setJobsExist] = useState(true);
+  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
+  const mapJobId = globalState?.ml?.jobId;
+  const mapModelId = globalState?.ml?.modelId;
+  const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -34,8 +36,6 @@ export const Page: FC<{
     dataFrameAnalytics: { getDataFrameAnalytics },
   } = useMlApiContext();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
-  const jobIdToUse = jobId ?? analyticsId?.job_id;
-  const analysisTypeToUse = analysisType || analyticsId?.analysis_type;
 
   const checkJobsExist = async () => {
     try {
@@ -74,37 +74,55 @@ export const Page: FC<{
     );
   };
 
+  const jobId = mapJobId ?? analyticsId?.job_id;
+  const modelId = mapModelId ?? analyticsId?.model_id;
+
   return (
     <>
-      {jobIdToUse !== undefined && (
+      {jobId === undefined && modelId === undefined ? (
         <MlPageHeader>
           <FormattedMessage
-            id="xpack.ml.dataframe.analyticsExploration.titleWithId"
-            defaultMessage="Explore results for job ID {id}"
-            values={{ id: jobIdToUse }}
+            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
+            id="xpack.ml.dataframe.analyticsMap.title"
+            defaultMessage="Map for Analytics"
           />
         </MlPageHeader>
-      )}
-      {jobIdToUse === undefined && (
+      ) : null}
+      {jobId !== undefined ? (
         <MlPageHeader>
           <FormattedMessage
-            id="xpack.ml.dataframe.analyticsExploration.title"
-            defaultMessage="Explore results"
+            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
+            id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"
+            defaultMessage="Map for job ID {jobId}"
+            values={{ jobId }}
           />
         </MlPageHeader>
-      )}
-      {jobIdToUse && analysisTypeToUse ? (
-        <div data-test-subj="mlPageDataFrameAnalyticsExploration">
-          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
-            <OutlierExploration jobId={jobIdToUse} />
-          )}
-          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionExploration jobId={jobIdToUse} />
-          )}
-          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-            <ClassificationExploration jobId={jobIdToUse} />
-          )}
-        </div>
+      ) : null}
+      {modelId !== undefined ? (
+        <MlPageHeader>
+          <FormattedMessage
+            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
+            id="xpack.ml.dataframe.analyticsMap.modelIdTitle"
+            defaultMessage="Map for trained model ID {modelId}"
+            values={{ modelId }}
+          />
+        </MlPageHeader>
+      ) : null}
+
+      <NodeAvailableWarning />
+
+      <SavedObjectsWarning
+        jobType="data-frame-analytics"
+        onCloseFlyout={refresh}
+        forceRefresh={isLoading}
+      />
+      <UpgradeWarning />
+
+      {mapJobId || mapModelId || analyticsId ? (
+        <JobMap
+          analyticsId={mapJobId || analyticsId?.job_id}
+          modelId={mapModelId || analyticsId?.model_id}
+        />
       ) : (
         getEmptyState()
       )}
