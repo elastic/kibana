@@ -21484,8 +21484,6 @@
     "xpack.reporting.exportTypes.common.failedToDecryptReportJobDataErrorMessage": "レポートジョブデータの解読に失敗しました。{encryptionKey}が設定されていることを確認してこのレポートを再生成してください。{err}",
     "xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage": "ジョブヘッダーがありません",
     "xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues": "CSVには、値がエスケープされた式が含まれる場合があります",
-    "xpack.reporting.exportTypes.printablePdf.logoDescription": "Elastic 提供",
-    "xpack.reporting.exportTypes.printablePdf.pagingDescription": "{pageCount} ページ中 {currentPage} ページ目",
     "xpack.reporting.jobCreatedBy.unknownUserPlaceholderText": "不明",
     "xpack.reporting.jobsQuery.deleteError": "レポートを削除できません：{error}",
     "xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage": "{jobType}情報を表示する権限がありません",
