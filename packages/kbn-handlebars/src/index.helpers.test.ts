@@ -28,7 +28,52 @@ describe('helpers', () => {
       .toCompileTo('<a href="/root/goodbye">Goodbye</a>');
   });
 
+  it('helper for raw block gets raw content', () => {
+    expectTemplate('{{{{raw}}}} {{test}} {{{{/raw}}}}')
+      .withInput({ test: 'hello' })
+      .withHelper('raw', function (options) {
+        return options.fn();
+      })
+      .toCompileTo(' {{test}} ');
+  });
+
+  it('helper for raw block gets parameters', () => {
+    expectTemplate('{{{{raw 1 2 3}}}} {{test}} {{{{/raw}}}}')
+      .withInput({ test: 'hello' })
+      .withHelper('raw', function (a, b, c, options) {
+        const ret = options.fn() + a + b + c;
+        return ret;
+      })
+      .toCompileTo(' {{test}} 123');
+  });
+
   describe('raw block parsing (with identity helper-function)', () => {
+    function runWithIdentityHelper(template: string, expected: string) {
+      expectTemplate(template)
+        .withHelper('identity', function (options) {
+          return options.fn();
+        })
+        .toCompileTo(expected);
+    }
+
+    it('helper for nested raw block gets raw content', () => {
+      runWithIdentityHelper(
+        '{{{{identity}}}} {{{{b}}}} {{{{/b}}}} {{{{/identity}}}}',
+        ' {{{{b}}}} {{{{/b}}}} '
+      );
+    });
+
+    it('helper for nested raw block works with empty content', () => {
+      runWithIdentityHelper('{{{{identity}}}}{{{{/identity}}}}', '');
+    });
+
+    it('helper for nested raw block closes after first matching close', () => {
+      runWithIdentityHelper(
+        '{{{{identity}}}}abc{{{{/identity}}}} {{{{identity}}}}abc{{{{/identity}}}}',
+        'abc abc'
+      );
+    });
+
     it('helper for nested raw block throw exception when with missing closing braces', () => {
       const string = '{{{{a}}}} {{{{/a';
       expectTemplate(string).toThrow();
@@ -47,6 +92,15 @@ describe('helpers', () => {
         nothere() {},
       })
       .toCompileTo(' ');
+  });
+
+  it('block helper', () => {
+    expectTemplate('{{#goodbyes}}{{text}}! {{/goodbyes}}cruel {{world}}!')
+      .withInput({ world: 'world' })
+      .withHelper('goodbyes', function (options) {
+        return options.fn({ text: 'GOODBYE' });
+      })
+      .toCompileTo('GOODBYE! cruel world!');
   });
 
   it('block helper for undefined value', () => {
@@ -258,8 +312,6 @@ describe('helpers', () => {
     });
   });
 
-  // The `knownHelpers` compile option ins't supported by @kbn/handlebars because it's a compile optimization flag
-  // and hence isn't needed by @kbn/handlebars as we don't compile in the "eval" sense of the word
   describe('knownHelpers', () => {
     it('Known helper should render helper', () => {
       expectTemplate('{{hello}}')
@@ -311,8 +363,6 @@ describe('helpers', () => {
     });
   });
 
-  // The `blockHelperMissing` helper is only used if the `strict` compile option isn't set to `true`.
-  // We do not support setting `strict: false` in @kbn/handlebars
   describe('blockHelperMissing', () => {
     it('lambdas are resolved by blockHelperMissing, not handlebars proper', () => {
       expectTemplate('{{#truthy}}yep{{/truthy}}')
