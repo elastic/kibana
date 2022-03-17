@@ -11,7 +11,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "static/**/*"
+    "static/**/*",
+    ".storybook/**/*"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
