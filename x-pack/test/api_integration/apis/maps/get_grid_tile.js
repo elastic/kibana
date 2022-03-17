@@ -31,7 +31,7 @@ export default function ({ getService }) {
       expect(resp.headers['content-type']).to.be('application/x-protobuf');
       expect(resp.headers['cache-control']).to.be('public, max-age=3600');
     });
-    
+
     it('should return vector tile containing clusters when renderAs is "point"', async () => {
       const resp = await supertest
         .get(URL + '&renderAs=point')
@@ -147,7 +147,7 @@ export default function ({ getService }) {
           { x: 83, y: 664 },
           { x: 86, y: 674 },
           { x: 96, y: 676 },
-          { x: 102, y: 669 }
+          { x: 102, y: 669 },
         ],
       ]);
     });
