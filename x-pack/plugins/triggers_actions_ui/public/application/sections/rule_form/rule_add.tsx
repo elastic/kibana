@@ -33,8 +33,9 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { getInitialInterval } from './get_initial_interval';
 
 const RuleAdd = ({
   consumer,
@@ -58,7 +59,7 @@ const RuleAdd = ({
       consumer,
       ruleTypeId,
       schedule: {
-        interval: DEFAULT_ALERT_INTERVAL,
+        interval: DEFAULT_RULE_INTERVAL,
       },
       actions: [],
       tags: [],
@@ -78,7 +79,6 @@ const RuleAdd = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
-  const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -148,18 +148,26 @@ const RuleAdd = ({
 
   useEffect(() => {
     if (rule.ruleTypeId && ruleTypeIndex) {
+      // rule type selected
       const type = ruleTypeIndex.get(rule.ruleTypeId);
-      if (type?.defaultScheduleInterval && !changedFromDefaultInterval) {
+      if (type?.defaultScheduleInterval) {
         setRuleProperty('schedule', { interval: type.defaultScheduleInterval });
       }
+    } else {
+      // no rule type selection and no initial value set; set schedule to global default or configured minimum, whichever is larger
+      if (!initialValues?.schedule?.interval) {
+        setRuleProperty('schedule', {
+          interval: getInitialInterval(config.minimumScheduleInterval?.value),
+        });
+      }
     }
-  }, [rule.ruleTypeId, ruleTypeIndex, rule.schedule.interval, changedFromDefaultInterval]);
-
-  useEffect(() => {
-    if (rule.schedule.interval !== DEFAULT_ALERT_INTERVAL && !changedFromDefaultInterval) {
-      setChangedFromDefaultInterval(true);
-    }
-  }, [rule.schedule.interval, changedFromDefaultInterval]);
+  }, [
+    initialValues,
+    rule.ruleTypeId,
+    ruleTypeIndex,
+    rule.schedule.interval,
+    config.minimumScheduleInterval,
+  ]);
 
   const checkForChangesAndCloseFlyout = () => {
     if (

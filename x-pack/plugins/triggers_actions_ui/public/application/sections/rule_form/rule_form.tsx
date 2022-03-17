@@ -74,8 +74,8 @@ import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
-import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
+import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
 
@@ -97,9 +97,6 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   filteredSolutions?: string[] | undefined;
 }
-
-const defaultScheduleInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
-const defaultScheduleIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL);
 
 export const RuleForm = ({
   rule,
@@ -126,6 +123,10 @@ export const RuleForm = ({
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
+
+  const defaultRuleInterval = getInitialInterval(config.minimumScheduleInterval?.value);
+  const defaultScheduleInterval = getDurationNumberInItsUnit(defaultRuleInterval);
+  const defaultScheduleIntervalUnit = getDurationUnitValue(defaultRuleInterval);
 
   const [ruleInterval, setRuleInterval] = useState<number | undefined>(
     rule.schedule.interval
@@ -239,15 +240,10 @@ export const RuleForm = ({
     if (rule.schedule.interval) {
       const interval = getDurationNumberInItsUnit(rule.schedule.interval);
       const intervalUnit = getDurationUnitValue(rule.schedule.interval);
-
-      if (interval !== defaultScheduleInterval) {
-        setRuleInterval(interval);
-      }
-      if (intervalUnit !== defaultScheduleIntervalUnit) {
-        setRuleIntervalUnit(intervalUnit);
-      }
+      setRuleInterval(interval);
+      setRuleIntervalUnit(intervalUnit);
     }
-  }, [rule.schedule.interval]);
+  }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
 
   const setRuleProperty = useCallback(
     <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
