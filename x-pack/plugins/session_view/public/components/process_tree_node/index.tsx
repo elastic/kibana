@@ -125,18 +125,21 @@ export function ProcessTreeNode({
     setAlertsExpanded(!alertsExpanded);
   }, [alertsExpanded]);
 
-  const onProcessClicked = (e: MouseEvent) => {
-    e.stopPropagation();
+  const onProcessClicked = useCallback(
+    (e: MouseEvent) => {
+      e.stopPropagation();
 
-    const selection = window.getSelection();
+      const selection = window.getSelection();
 
-    // do not select the command if the user was just selecting text for copy.
-    if (selection && selection.type === 'Range') {
-      return;
-    }
+      // do not select the command if the user was just selecting text for copy.
+      if (selection && selection.type === 'Range') {
+        return;
+      }
 
-    onProcessSelected?.(process);
-  };
+      onProcessSelected?.(process);
+    },
+    [onProcessSelected, process]
+  );
 
   const processDetails = process.getDetails();
 

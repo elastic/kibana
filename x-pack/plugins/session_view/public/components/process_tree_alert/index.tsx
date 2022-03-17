@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { getBadgeColorFromAlertStatus } from './helpers';
@@ -33,24 +33,28 @@ export const ProcessTreeAlert = ({
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
 
   useEffect(() => {
-    if (isInvestigated && isSelected && uuid) {
+    if (isInvestigated && uuid) {
       selectAlert(uuid);
     }
-  }, [isInvestigated, isSelected, uuid, selectAlert]);
+  }, [isInvestigated, uuid, selectAlert]);
 
-  if (!(alert.kibana && rule && uuid)) {
+  const handleExpandClick = useCallback(() => {
+    if (alertsFlyoutCallback && uuid) {
+      alertsFlyoutCallback(uuid);
+    }
+  }, [alertsFlyoutCallback, uuid]);
+
+  const handleClick = useCallback(() => {
+    if (alert.kibana?.alert) {
+      onClick(alert.kibana.alert);
+    }
+  }, [alert.kibana?.alert, onClick]);
+
+  if (!(alert.kibana && rule)) {
     return null;
   }
 
   const { name } = rule;
-
-  const handleClick = () => {
-    onClick(alert.kibana?.alert ?? null);
-  };
-
-  const handleExpandClick = () => {
-    alertsFlyoutCallback?.(uuid);
-  };
 
   return (
     <EuiText

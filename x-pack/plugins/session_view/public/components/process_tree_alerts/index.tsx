@@ -59,14 +59,17 @@ export function ProcessTreeAlerts({
     }
   }, []);
 
+  const handleAlertClick = useCallback(
+    (alert: ProcessEventAlert | null) => {
+      onAlertSelected(MOUSE_EVENT_PLACEHOLDER);
+      setSelectedAlert(alert);
+    },
+    [onAlertSelected]
+  );
+
   if (alerts.length === 0) {
     return null;
   }
-
-  const handleAlertClick = (alert: ProcessEventAlert | null) => {
-    onAlertSelected(MOUSE_EVENT_PLACEHOLDER);
-    setSelectedAlert(alert);
-  };
 
   return (
     <div
