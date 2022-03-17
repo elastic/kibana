@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiButtonGroup,
 } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -28,16 +29,24 @@ import {
   SelectOption,
   PalettePicker,
   LongLegendOptions,
+  LegendSizeSettings,
 } from '../../../../../vis_default_editor/public';
 import { VisEditorOptionsProps } from '../../../../../visualizations/public';
 import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../../charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
+import { PieTypeProps } from '../../types';
+import {
+  PartitionVisParams,
+  LabelPositions,
+  ValueFormats,
+  LegendDisplay,
+} from '../../../../../chart_expressions/expression_partition_vis/common';
+
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
 
-export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
+export interface PieOptionsProps extends VisEditorOptionsProps<PartitionVisParams>, PieTypeProps {}
 
 const emptySizeRatioLabel = i18n.translate('visTypePie.editors.pie.emptySizeRatioLabel', {
   defaultMessage: 'Inner area size',
@@ -76,18 +85,23 @@ function DecimalSlider<ParamName extends string>({
 
 const PieOptions = (props: PieOptionsProps) => {
   const { stateParams, setValue, aggs } = props;
-  const setLabels = <T extends keyof PieVisParams['labels']>(
+  const setLabels = <T extends keyof PartitionVisParams['labels']>(
     paramName: T,
-    value: PieVisParams['labels'][T]
+    value: PartitionVisParams['labels'][T]
   ) => setValue('labels', { ...stateParams.labels, [paramName]: value });
   const legendUiStateValue = props.uiState?.get('vis.legendOpen');
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);
   const [legendVisibility, setLegendVisibility] = useState<boolean>(() => {
-    const bwcLegendStateDefault = stateParams.addLegend == null ? false : stateParams.addLegend;
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+    const bwcLegendStateDefault = stateParams.legendDisplay === LegendDisplay.SHOW;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault);
   });
   const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
+
+  const getLegendDisplay = useCallback(
+    (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),
+    []
+  );
 
   useEffect(() => {
     setLegendVisibility(legendUiStateValue);
@@ -107,6 +121,23 @@ const PieOptions = (props: PieOptionsProps) => {
       setValue('emptySizeRatio', emptySizeRatio);
     },
     [setValue]
+  );
+
+  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
+
+  const handleLegendDisplayChange = useCallback(
+    (name: keyof PartitionVisParams, show: boolean) => {
+      setLegendVisibility(show);
+
+      const legendDisplay = getLegendDisplay(show);
+      if (legendDisplay === stateParams[name]) {
+        setValue(name, getLegendDisplay(!show));
+      }
+      setValue(name, legendDisplay);
+
+      props.uiState?.set('vis.legendOpen', show);
+    },
+    [getLegendDisplay, props.uiState, setValue, stateParams]
   );
 
   return (
@@ -174,15 +205,12 @@ const PieOptions = (props: PieOptionsProps) => {
               </EuiFlexGroup>
             </EuiFormRow>
             <SwitchOption
-              label={i18n.translate('visTypePie.editors.pie.addLegendLabel', {
+              label={i18n.translate('visTypePie.editors.pie.legendDisplayLabel', {
                 defaultMessage: 'Show legend',
               })}
-              paramName="addLegend"
+              paramName="legendDisplay"
               value={legendVisibility}
-              setValue={(paramName, value) => {
-                setLegendVisibility(value);
-                setValue(paramName, value);
-              }}
+              setValue={handleLegendDisplayChange}
               data-test-subj="visTypePieAddLegendSwitch"
             />
             <SwitchOption
@@ -191,7 +219,7 @@ const PieOptions = (props: PieOptionsProps) => {
               })}
               paramName="nestedLegend"
               value={stateParams.nestedLegend}
-              disabled={!stateParams.addLegend}
+              disabled={stateParams.legendDisplay === LegendDisplay.HIDE}
               setValue={(paramName, value) => {
                 if (props.trackUiMetric) {
                   props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');
@@ -205,6 +233,14 @@ const PieOptions = (props: PieOptionsProps) => {
               truncateLegend={stateParams.truncateLegend ?? true}
               maxLegendLines={stateParams.maxLegendLines ?? 1}
               setValue={setValue}
+            />
+            <LegendSizeSettings
+              legendSize={stateParams.legendSize}
+              onLegendSizeChange={handleLegendSizeChange}
+              isVerticalLegend={
+                stateParams.legendPosition === Position.Left ||
+                stateParams.legendPosition === Position.Right
+              }
             />
           </>
         )}

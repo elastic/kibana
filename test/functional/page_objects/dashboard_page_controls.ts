@@ -7,8 +7,7 @@
  */
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-import { OPTIONS_LIST_CONTROL } from '../../../src/plugins/presentation_util/common/controls/';
-import { ControlWidth } from '../../../src/plugins/presentation_util/public/components/controls';
+import { OPTIONS_LIST_CONTROL, ControlWidth } from '../../../src/plugins/controls/common';
 
 import { FtrService } from '../ftr_provider_context';
 
@@ -65,10 +64,8 @@ export class DashboardPageControls extends FtrService {
 
   public async openCreateControlFlyout(type: string) {
     this.log.debug(`Opening flyout for ${type} control`);
-    await this.testSubjects.click('controls-create-button');
-    if (await this.testSubjects.exists('control-type-picker')) {
-      await this.testSubjects.click(`create-${type}-control`);
-    }
+    await this.testSubjects.click('dashboardControlsMenuButton');
+    await this.testSubjects.click(`create-${type}-control`);
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });

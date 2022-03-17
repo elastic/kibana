@@ -21,6 +21,8 @@ import type {
   FieldFormatsSetup,
 } from '../../../../../src/plugins/field_formats/public';
 
+export type { PersistedIndexPatternLayer, IndexPattern, FormulaPublicApi } from './types';
+
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
   fieldFormats: FieldFormatsSetup;

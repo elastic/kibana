@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Logger } from 'kibana/server';
 import { ReportingCore } from '..';
-import { LevelLogger } from '../lib';
-import { registerDeprecationsRoutes } from './deprecations';
+import { registerDeprecationsRoutes } from './deprecations/deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';
 import {
   registerGenerateCsvFromSavedObjectImmediate,
@@ -15,7 +15,7 @@ import {
 } from './generate';
 import { registerJobInfoRoutes } from './management';
 
-export function registerRoutes(reporting: ReportingCore, logger: LevelLogger) {
+export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDeprecationsRoutes(reporting, logger);
   registerDiagnosticRoutes(reporting, logger);
   registerGenerateCsvFromSavedObjectImmediate(reporting, logger);

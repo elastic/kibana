@@ -95,6 +95,14 @@ const indexPattern1 = {
       esTypes: ['keyword'],
     },
     {
+      name: 'geo.src',
+      displayName: 'geo.src',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    {
       name: 'scripted',
       displayName: 'Scripted',
       type: 'string',
@@ -498,6 +506,58 @@ describe('loader', () => {
       });
     });
 
+    it('should use the indexPatternId of the visualize trigger chart context, if provided', async () => {
+      const storage = createMockStorage();
+      const state = await loadInitialState({
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        initialContext: {
+          layers: [
+            {
+              indexPatternId: '1',
+              timeFieldName: 'timestamp',
+              chartType: 'area',
+              axisPosition: 'left',
+              metrics: [],
+              timeInterval: 'auto',
+            },
+          ],
+          type: 'lnsXY',
+          configuration: {
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: true,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+          },
+          savedObjectId: '',
+          isVisualizeAction: true,
+        },
+        options: { isFullEditor: true },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: '1',
+        indexPatternRefs: [
+          { id: '1', title: sampleIndexPatterns['1'].title },
+          { id: '2', title: sampleIndexPatterns['2'].title },
+        ],
+        indexPatterns: {
+          '1': sampleIndexPatterns['1'],
+        },
+        layers: {},
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: '1',
+      });
+    });
+
     it('should initialize all the embeddable references without local storage', async () => {
       const savedState: IndexPatternPersistedState = {
         layers: {
@@ -794,7 +854,9 @@ describe('loader', () => {
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
-      expect(setState.mock.calls[0][0](state)).toMatchObject({
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
+      expect(fn(state)).toMatchObject({
         currentIndexPatternId: '1',
         indexPatterns: {
           '1': {
@@ -1011,7 +1073,8 @@ describe('loader', () => {
       expect(fetchJson).toHaveBeenCalledTimes(3);
       expect(setState).toHaveBeenCalledTimes(1);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},
@@ -1095,7 +1158,8 @@ describe('loader', () => {
 
       await syncExistingFields(args);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},
@@ -1144,7 +1208,8 @@ describe('loader', () => {
 
       await syncExistingFields(args);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},

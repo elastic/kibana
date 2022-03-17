@@ -9,7 +9,12 @@ import { of } from 'rxjs';
 import React, { ReactElement } from 'react';
 import { stringify } from 'query-string';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
+import {
+  render as reactTestLibRender,
+  RenderOptions,
+  Nullish,
+  MatcherFunction,
+} from '@testing-library/react';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
@@ -22,8 +27,8 @@ import {
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { lensPluginMock } from '../../../../../lens/public/mocks';
-import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
-import { IndexPatternContext, IndexPatternContextProvider } from './hooks/use_app_index_pattern';
+import * as useAppDataViewHook from './hooks/use_app_data_view';
+import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
 import {
   AllSeries,
   reportTypeKey,
@@ -36,14 +41,18 @@ import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
 
-import indexPatternData from './configurations/test_data/test_index_pattern.json';
+import dataViewData from './configurations/test_data/test_data_view.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
-import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
+import type {
+  DataView,
+  DataViewsContract,
+} from '../../../../../../../src/plugins/data_views/common';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
-import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
+import { createStubDataView } from '../../../../../../../src/plugins/data_views/common/stubs';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from '../../../../../../../src/plugins/data_views/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { casesPluginMock } from '../../../../../cases/public/mocks';
@@ -128,6 +137,7 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    dataViews: dataViewPluginMocks.createStartContract(),
     cases: casesPluginMock.createStartContract(),
   };
 
@@ -140,18 +150,18 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   core,
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
-  const indexPattern = mockIndexPattern;
+  const dataView = mockDataView;
 
   setIndexPatterns({
-    ...[indexPattern],
-    get: async () => indexPattern,
-  } as unknown as IndexPatternsContract);
+    ...[dataView],
+    get: async () => dataView,
+  } as unknown as DataViewsContract);
 
   return (
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
       <EuiThemeProvider darkMode={false}>
         <I18nProvider>
-          <IndexPatternContextProvider>{children}</IndexPatternContextProvider>
+          <DataViewContextProvider>{children}</DataViewContextProvider>
         </I18nProvider>
       </EuiThemeProvider>
     </KibanaContextProvider>
@@ -204,7 +214,7 @@ export function render<ExtraCore>(
         <ExploratoryViewContextProvider
           reportTypes={reportTypesList}
           dataTypes={dataTypes}
-          indexPatterns={{}}
+          dataViews={{}}
           reportConfigMap={obsvReportConfigMap}
           setHeaderActionMenu={jest.fn()}
           theme$={themeServiceMock.createTheme$()}
@@ -250,19 +260,19 @@ export const mockUseHasData = () => {
   return { spy, onRefreshTimeRange };
 };
 
-export const mockAppIndexPattern = (props?: Partial<IndexPatternContext>) => {
-  const loadIndexPattern = jest.fn();
-  const spy = jest.spyOn(useAppIndexPatternHook, 'useAppIndexPatternContext').mockReturnValue({
-    indexPattern: mockIndexPattern,
+export const mockAppDataView = (props?: Partial<DataViewContext>) => {
+  const loadDataView = jest.fn();
+  const spy = jest.spyOn(useAppDataViewHook, 'useAppDataViewContext').mockReturnValue({
+    dataView: mockDataView,
     hasData: true,
     loading: false,
     hasAppData: { ux: true } as any,
-    loadIndexPattern,
-    indexPatterns: { ux: mockIndexPattern } as unknown as Record<AppDataType, IndexPattern>,
-    indexPatternErrors: {} as any,
+    loadDataView,
+    dataViews: { ux: mockDataView } as unknown as Record<AppDataType, DataView>,
+    dataViewErrors: {} as any,
     ...(props || {}),
   });
-  return { spy, loadIndexPattern };
+  return { spy, loadDataView };
 };
 
 export const mockUseValuesList = (values?: ListItem[]) => {
@@ -362,11 +372,26 @@ export const mockHistory = {
   },
 };
 
-export const mockIndexPattern = createStubIndexPattern({
+export const mockDataView = createStubDataView({
   spec: {
     id: 'apm-*',
     title: 'apm-*',
     timeFieldName: '@timestamp',
-    fields: JSON.parse(indexPatternData.attributes.fields),
+    fields: JSON.parse(dataViewData.attributes.fields),
   },
 });
+
+// This function allows us to query for the nearest button with test
+// no matter whether it has nested tags or not (as EuiButton elements do).
+export const forNearestButton =
+  (getByText: (f: MatcherFunction) => HTMLElement | null) =>
+  (text: string): HTMLElement | null =>
+    getByText((_content: string, node: Nullish<Element>) => {
+      if (!node) return false;
+      const noOtherButtonHasText = Array.from(node.children).every(
+        (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== 'button')
+      );
+      return (
+        noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === 'button'
+      );
+    });

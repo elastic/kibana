@@ -8,7 +8,7 @@
 import { existsSync } from 'fs';
 import del from 'del';
 import type { Logger } from 'src/core/server';
-import type { ChromiumArchivePaths } from '../chromium';
+import type { ChromiumArchivePaths, PackageInfo } from '../chromium';
 import { md5 } from './checksum';
 import { fetch } from './fetch';
 
@@ -19,7 +19,7 @@ import { fetch } from './fetch';
  * @param  {BrowserSpec} browsers
  * @return {Promise<undefined>}
  */
-export async function download(paths: ChromiumArchivePaths, logger?: Logger) {
+export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, logger?: Logger) {
   const removedFiles = await del(`${paths.archivesPath}/**/*`, {
     force: true,
     onlyFiles: true,
@@ -29,57 +29,49 @@ export async function download(paths: ChromiumArchivePaths, logger?: Logger) {
   removedFiles.forEach((path) => logger?.warn(`Deleting unexpected file ${path}`));
 
   const invalidChecksums: string[] = [];
-  await Promise.all(
-    paths.packages.map(async (path) => {
-      const { archiveFilename, archiveChecksum } = path;
-      if (!archiveFilename || !archiveChecksum) {
-        return;
-      }
 
-      const resolvedPath = paths.resolvePath(path);
-      const pathExists = existsSync(resolvedPath);
+  const { archiveFilename, archiveChecksum } = pkg;
+  if (!archiveFilename || !archiveChecksum) {
+    return;
+  }
 
-      let foundChecksum = 'MISSING';
-      try {
-        foundChecksum = await md5(resolvedPath);
-        // eslint-disable-next-line no-empty
-      } catch {}
+  const resolvedPath = paths.resolvePath(pkg);
+  const foundChecksum = await md5(resolvedPath).catch(() => 'MISSING');
 
-      if (pathExists && foundChecksum === archiveChecksum) {
-        logger?.debug(
-          `Browser archive for ${path.platform}/${path.architecture} found in ${resolvedPath}.`
-        );
-        return;
-      }
+  const pathExists = existsSync(resolvedPath);
+  if (pathExists && foundChecksum === archiveChecksum) {
+    logger?.debug(
+      `Browser archive for ${pkg.platform}/${pkg.architecture} already found in ${resolvedPath}.`
+    );
+    return;
+  }
 
-      if (!pathExists) {
-        logger?.warn(
-          `Browser archive for ${path.platform}/${path.architecture} not found in ${resolvedPath}.`
-        );
-      }
+  if (!pathExists) {
+    logger?.warn(
+      `Browser archive for ${pkg.platform}/${pkg.architecture} not found in ${resolvedPath}.`
+    );
+  }
 
-      if (foundChecksum !== archiveChecksum) {
-        logger?.warn(
-          `Browser archive checksum for ${path.platform}/${path.architecture} ` +
-            `is ${foundChecksum} but ${archiveChecksum} was expected.`
-        );
-      }
+  if (foundChecksum !== archiveChecksum) {
+    logger?.warn(
+      `Browser archive checksum for ${pkg.platform}/${pkg.architecture} ` +
+        `is ${foundChecksum} but ${archiveChecksum} was expected.`
+    );
+  }
 
-      const url = paths.getDownloadUrl(path);
-      try {
-        const downloadedChecksum = await fetch(url, resolvedPath, logger);
-        if (downloadedChecksum !== archiveChecksum) {
-          logger?.warn(
-            `Invalid checksum for ${path.platform}/${path.architecture}: ` +
-              `expected ${archiveChecksum} got ${downloadedChecksum}`
-          );
-          invalidChecksums.push(`${url} => ${resolvedPath}`);
-        }
-      } catch (error) {
-        throw new Error(`Failed to download ${url}: ${error}`);
-      }
-    })
-  );
+  const url = paths.getDownloadUrl(pkg);
+  try {
+    const downloadedChecksum = await fetch(url, resolvedPath, logger);
+    if (downloadedChecksum !== archiveChecksum) {
+      logger?.warn(
+        `Invalid checksum for ${pkg.platform}/${pkg.architecture}: ` +
+          `expected ${archiveChecksum} got ${downloadedChecksum}`
+      );
+      invalidChecksums.push(`${url} => ${resolvedPath}`);
+    }
+  } catch (error) {
+    throw new Error(`Failed to download ${url}: ${error}`);
+  }
 
   if (invalidChecksums.length) {
     const error = new Error(

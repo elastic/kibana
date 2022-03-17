@@ -31,8 +31,11 @@ import {
   isRisonSerializationRequired,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { DataView } from '../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../src/plugins/data_views/public';
 import { ResultLink } from '../common/components/results_links';
+import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
+import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
+import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
@@ -41,41 +44,118 @@ export interface DataVisualizerUrlStateContextProviderProps {
   additionalLinks: ResultLink[];
 }
 
+export const getLocatorParams = (params: {
+  dataViewId?: string;
+  savedSearchId?: string;
+  urlSearchString: string;
+  searchSessionId?: string;
+  shouldRestoreSearchSession: boolean;
+}): IndexDataVisualizerLocatorParams => {
+  const urlState = parseUrlState(params.urlSearchString);
+
+  let locatorParams: IndexDataVisualizerLocatorParams = {
+    dataViewId: urlState.index,
+    searchSessionId: params.searchSessionId,
+  };
+
+  if (params.savedSearchId) locatorParams.savedSearchId = params.savedSearchId;
+  if (urlState) {
+    if (urlState._g) {
+      const { time, refreshInterval } = urlState._g;
+
+      locatorParams.timeRange = time;
+      locatorParams.refreshInterval = refreshInterval;
+    }
+
+    if (urlState._a && urlState._a[DATA_VISUALIZER_INDEX_VIEWER]) {
+      locatorParams = { ...locatorParams, ...urlState._a[DATA_VISUALIZER_INDEX_VIEWER] };
+    }
+  }
+  return locatorParams;
+};
+
 export const DataVisualizerUrlStateContextProvider: FC<
   DataVisualizerUrlStateContextProviderProps
 > = ({ IndexDataVisualizerComponent, additionalLinks }) => {
+  const { services } = useDataVisualizerKibana();
   const {
-    services: {
-      data: { indexPatterns },
-      savedObjects: { client: savedObjectsClient },
-      notifications: { toasts },
-    },
-  } = useDataVisualizerKibana();
-  const history = useHistory();
-  const { search: searchString } = useLocation();
+    data: { dataViews, search },
+    savedObjects: { client: savedObjectsClient },
+    notifications: { toasts },
+  } = services;
 
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(undefined);
+  const history = useHistory();
+  const { search: urlSearchString } = useLocation();
+
+  const [currentDataView, setCurrentDataView] = useState<DataView | undefined>(undefined);
   const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
     null
   );
 
+  const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(undefined);
+
   useEffect(() => {
-    const prevSearchString = searchString;
+    const urlState = parseUrlState(urlSearchString);
+
+    if (search.session) {
+      search.session.enableStorage({
+        getName: async () => {
+          // return the name you want to give the saved Search Session
+          return INDEX_DATA_VISUALIZER_NAME;
+        },
+        getLocatorData: async () => {
+          return {
+            id: DATA_VISUALIZER_APP_LOCATOR,
+            initialState: getLocatorParams({
+              ...services,
+              urlSearchString,
+              dataViewId: currentDataView?.id,
+              savedSearchId: currentSavedSearch?.id,
+              shouldRestoreSearchSession: false,
+              searchSessionId: search.session.getSessionId(),
+            }),
+            restoreState: getLocatorParams({
+              ...services,
+              urlSearchString,
+              dataViewId: currentDataView?.id,
+              savedSearchId: currentSavedSearch?.id,
+              shouldRestoreSearchSession: true,
+              searchSessionId: search.session.getSessionId(),
+            }),
+          };
+        },
+      });
+    }
+
+    if (urlState.searchSessionId !== undefined && urlState.searchSessionId !== currentSessionId) {
+      search.session?.restore(urlState.searchSessionId);
+      setCurrentSessionId(urlState.searchSessionId);
+    } else {
+      const newSessionId = search.session?.start();
+      setCurrentSessionId(newSessionId);
+    }
+    return () => {
+      search.session.clear();
+    };
+    // urlSearchString already includes all the other dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.session, urlSearchString]);
+
+  useEffect(() => {
+    const prevSearchString = urlSearchString;
     const parsedQueryString = parse(prevSearchString, { sort: false });
 
-    const getIndexPattern = async () => {
+    const getDataView = async () => {
       if (typeof parsedQueryString?.savedSearchId === 'string') {
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
           const savedSearch = await savedObjectsClient.get('search', savedSearchId);
-          const indexPatternId = savedSearch.references.find(
-            (ref) => ref.type === 'index-pattern'
-          )?.id;
-          if (indexPatternId !== undefined && savedSearch) {
+          const dataViewId = savedSearch.references.find((ref) => ref.type === 'index-pattern')?.id;
+          if (dataViewId !== undefined && savedSearch) {
             try {
-              const indexPattern = await indexPatterns.get(indexPatternId);
+              const dataView = await dataViews.get(dataViewId);
               setCurrentSavedSearch(savedSearch);
-              setCurrentIndexPattern(indexPattern);
+              setCurrentDataView(dataView);
             } catch (e) {
               toasts.addError(e, {
                 title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
@@ -95,13 +175,12 @@ export const DataVisualizerUrlStateContextProvider: FC<
       }
 
       if (typeof parsedQueryString?.index === 'string') {
-        const indexPattern = await indexPatterns.get(parsedQueryString.index);
-        setCurrentIndexPattern(indexPattern);
+        const dataView = await dataViews.get(parsedQueryString.index);
+        setCurrentDataView(dataView);
       }
     };
-    getIndexPattern();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savedObjectsClient, toasts, indexPatterns]);
+    getDataView();
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -110,7 +189,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
       value?: any,
       replaceState?: boolean
     ) => {
-      const prevSearchString = searchString;
+      const prevSearchString = urlSearchString;
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
@@ -162,16 +241,17 @@ export const DataVisualizerUrlStateContextProvider: FC<
         console.error('Could not save url state', error);
       }
     },
-    [history, searchString]
+    [history, urlSearchString]
   );
 
   return (
-    <UrlStateContextProvider value={{ searchString, setUrlState }}>
-      {currentIndexPattern ? (
+    <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
+      {currentDataView ? (
         <IndexDataVisualizerComponent
-          currentIndexPattern={currentIndexPattern}
+          currentDataView={currentDataView}
           currentSavedSearch={currentSavedSearch}
           additionalLinks={additionalLinks}
+          currentSessionId={currentSessionId}
         />
       ) : (
         <div />
@@ -186,6 +266,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     data,
     maps,
     embeddable,
+    discover,
     share,
     security,
     fileUpload,
@@ -198,6 +279,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     data,
     maps,
     embeddable,
+    discover,
     share,
     security,
     fileUpload,

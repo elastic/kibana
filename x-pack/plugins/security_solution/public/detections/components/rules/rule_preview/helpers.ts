@@ -24,7 +24,7 @@ import { ESQuery } from '../../../../../common/typed_json';
  */
 export const isNoisy = (hits: number, timeframe: Unit): boolean => {
   if (timeframe === 'h') {
-    return hits > 20;
+    return hits > 1;
   } else if (timeframe === 'd') {
     return hits / 24 > 1;
   } else if (timeframe === 'w') {

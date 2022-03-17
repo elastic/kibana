@@ -21,8 +21,8 @@ import { transformOutput } from './transforms';
 
 const emptyPreviewRule: PreviewResponse = {
   previewId: undefined,
-  errors: [],
-  warnings: [],
+  logs: [],
+  isAborted: false,
 };
 
 export const usePreviewRule = (timeframe: Unit = 'h') => {

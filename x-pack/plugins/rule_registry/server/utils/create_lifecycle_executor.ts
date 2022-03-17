@@ -10,9 +10,10 @@ import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { v4 } from 'uuid';
+import { difference } from 'lodash';
 import {
   AlertExecutorOptions,
-  AlertInstance,
+  Alert,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
@@ -24,7 +25,6 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_INSTANCE_ID,
-  ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -33,11 +33,13 @@ import {
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
+  TAGS,
   TIMESTAMP,
   VERSION,
 } from '../../common/technical_rule_data_field_names';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
+import { fetchExistingAlerts } from './fetch_existing_alerts';
 import {
   CommonAlertFieldName,
   CommonAlertIdFieldName,
@@ -60,7 +62,7 @@ export type LifecycleAlertService<
 > = (alert: {
   id: string;
   fields: ExplicitAlertFields;
-}) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+}) => Alert<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
   InstanceState extends AlertInstanceState = never,
@@ -68,6 +70,7 @@ export interface LifecycleAlertServices<
   ActionGroupIds extends string = never
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
+  getAlertStartedDate: (alertId: string) => string | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -141,7 +144,7 @@ export const createLifecycleExecutor =
     >
   ): Promise<WrappedLifecycleRuleState<State>> => {
     const {
-      services: { alertInstanceFactory, shouldWriteAlerts },
+      services: { alertFactory, shouldWriteAlerts },
       state: previousState,
     } = options;
 
@@ -163,8 +166,9 @@ export const createLifecycleExecutor =
     > = {
       alertWithLifecycle: ({ id, fields }) => {
         currentAlerts[id] = fields;
-        return alertInstanceFactory(id);
+        return alertFactory.create(id);
       },
+      getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
     };
 
     const nextWrappedState = await wrappedExecutor({
@@ -178,13 +182,13 @@ export const createLifecycleExecutor =
 
     const currentAlertIds = Object.keys(currentAlerts);
     const trackedAlertIds = Object.keys(state.trackedAlerts);
-    const newAlertIds = currentAlertIds.filter((alertId) => !trackedAlertIds.includes(alertId));
+    const newAlertIds = difference(currentAlertIds, trackedAlertIds);
     const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
     const trackedAlertStates = Object.values(state.trackedAlerts);
 
     logger.debug(
-      `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
+      `[Rule Registry] Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
     );
 
     const trackedAlertsDataMap: Record<
@@ -193,40 +197,14 @@ export const createLifecycleExecutor =
     > = {};
 
     if (trackedAlertStates.length) {
-      const { hits } = await ruleDataClient.getReader().search({
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    [ALERT_RULE_UUID]: commonRuleFields[ALERT_RULE_UUID],
-                  },
-                },
-                {
-                  terms: {
-                    [ALERT_UUID]: trackedAlertStates.map(
-                      (trackedAlertState) => trackedAlertState.alertUuid
-                    ),
-                  },
-                },
-              ],
-            },
-          },
-          size: trackedAlertStates.length,
-          collapse: {
-            field: ALERT_UUID,
-          },
-          sort: {
-            [TIMESTAMP]: 'desc' as const,
-          },
-        },
-        allow_no_indices: true,
-      });
-
-      hits.hits.forEach((hit) => {
-        const alertId = hit._source[ALERT_INSTANCE_ID];
-        if (alertId) {
+      const result = await fetchExistingAlerts(
+        ruleDataClient,
+        trackedAlertStates,
+        commonRuleFields
+      );
+      result.forEach((hit) => {
+        const alertId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
+        if (alertId && hit._source) {
           trackedAlertsDataMap[alertId] = {
             indexName: hit._index,
             fields: hit._source,
@@ -241,7 +219,7 @@ export const createLifecycleExecutor =
         const currentAlertData = currentAlerts[alertId];
 
         if (!alertData) {
-          logger.warn(`Could not find alert data for ${alertId}`);
+          logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
         }
 
         const isNew = !state.trackedAlerts[alertId];
@@ -267,6 +245,7 @@ export const createLifecycleExecutor =
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [VERSION]: ruleDataClient.kibanaVersion,
+          [TAGS]: options.tags,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 
@@ -289,7 +268,7 @@ export const createLifecycleExecutor =
     const writeAlerts = ruleDataClient.isWriteEnabled() && shouldWriteAlerts();
 
     if (allEventsToIndex.length > 0 && writeAlerts) {
-      logger.debug(`Preparing to index ${allEventsToIndex.length} alerts.`);
+      logger.debug(`[Rule Registry] Preparing to index ${allEventsToIndex.length} alerts.`);
 
       await ruleDataClient.getWriter().bulk({
         body: allEventsToIndex.flatMap(({ event, indexName }) => [

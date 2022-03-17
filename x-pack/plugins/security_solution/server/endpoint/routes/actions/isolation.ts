@@ -83,7 +83,8 @@ const createFailedActionResponseEntry = async ({
   doc: LogsEndpointActionResponse;
   logger: Logger;
 }): Promise<void> => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  // 8.0+ requires internal user to write to system indices
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await esClient.index<LogsEndpointActionResponse>({
       index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
@@ -110,6 +111,7 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
+    endpointContext.service.getFeatureUsageService().notifyUsage('HOST_ISOLATION');
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
 
     // fetch the Agent IDs to send the commands to
@@ -174,17 +176,23 @@ export const isolationRequestHandler = function (
       logger,
       dataStreamName: ENDPOINT_ACTIONS_DS,
     });
+
+    // 8.0+ requires internal user to write to system indices
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+
     // if the new endpoint indices/data streams exists
-    // write the action request to the new index as the current user
+    // write the action request to the new endpoint index
     if (doesLogsEndpointActionsDsExist) {
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-        logsEndpointActionsResult = await esClient.index<LogsEndpointAction>({
-          index: `${ENDPOINT_ACTIONS_DS}-default`,
-          body: {
-            ...doc,
+        logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
+          {
+            index: `${ENDPOINT_ACTIONS_DS}-default`,
+            body: {
+              ...doc,
+            },
           },
-        });
+          { meta: true }
+        );
         if (logsEndpointActionsResult.statusCode !== 201) {
           return res.customError({
             statusCode: 500,
@@ -201,20 +209,21 @@ export const isolationRequestHandler = function (
       }
     }
 
+    // write actions to .fleet-actions index
     try {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
-      // write as the internal user if the new indices do not exist
-      // 8.0+ requires internal user to write to system indices
-      fleetActionIndexResult = await esClient.index<EndpointAction>({
-        index: AGENT_ACTIONS_INDEX,
-        body: {
-          ...doc.EndpointActions,
-          '@timestamp': doc['@timestamp'],
-          agents,
-          timeout: 300, // 5 minutes
-          user_id: doc.user.id,
+      fleetActionIndexResult = await esClient.index<EndpointAction>(
+        {
+          index: AGENT_ACTIONS_INDEX,
+          body: {
+            ...doc.EndpointActions,
+            '@timestamp': doc['@timestamp'],
+            agents,
+            timeout: 300, // 5 minutes
+            user_id: doc.user.id,
+          },
         },
-      });
+        { meta: true }
+      );
 
       if (fleetActionIndexResult.statusCode !== 201) {
         return res.customError({

@@ -21,14 +21,14 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
-  searchAfterSortIds: estypes.SearchSortResults | undefined;
+  searchAfterSortIds: estypes.SortResults | undefined;
   index: string[];
   from: string;
   to: string;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
   filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
@@ -72,8 +72,9 @@ export const singleSearchAfter = async ({
 
       const start = performance.now();
       const { body: nextSearchAfterResult } =
-        await services.search.asCurrentUser.search<SignalSource>(
-          searchAfterQuery as estypes.SearchRequest
+        await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+          searchAfterQuery as estypes.SearchRequest,
+          { meta: true }
         );
       const end = performance.now();
 

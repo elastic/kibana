@@ -39,7 +39,7 @@ import {
 export interface SimpleQuery {
   query_string: {
     query: string;
-    default_operator?: estypes.DefaultOperator;
+    default_operator?: estypes.QueryDslOperator;
   };
 }
 
@@ -219,6 +219,10 @@ export const getCreateTransformRequestBody = (
     : {}),
   dest: {
     index: transformDetailsState.destinationIndex,
+    // conditionally add optional ingest pipeline
+    ...(transformDetailsState.destinationIngestPipeline !== ''
+      ? { pipeline: transformDetailsState.destinationIngestPipeline }
+      : {}),
   },
   // conditionally add continuous mode config
   ...(transformDetailsState.isContinuousModeEnabled

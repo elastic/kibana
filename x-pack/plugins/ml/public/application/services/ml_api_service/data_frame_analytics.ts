@@ -16,6 +16,7 @@ import {
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
 import { NewJobCapsResponse } from '../../../../common/types/fields';
+import { JobMessage } from '../../../../common/types/audit_message';
 import {
   DeleteDataFrameAnalyticsWithIndexStatus,
   AnalyticsMapReturnType,
@@ -54,12 +55,12 @@ export interface JobsExistsResponse {
 }
 
 export const dataFrameAnalytics = {
-  getDataFrameAnalytics(analyticsId?: string, excludeGenerated?: boolean) {
+  getDataFrameAnalytics(analyticsId?: string, excludeGenerated?: boolean, size?: number) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
     return http<GetDataFrameAnalyticsResponse>({
       path: `${basePath()}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
-      ...(excludeGenerated ? { query: { excludeGenerated } } : {}),
+      ...(excludeGenerated ? { query: { excludeGenerated, size } } : {}),
     });
   },
   getDataFrameAnalyticsStats(analyticsId?: string) {
@@ -161,7 +162,7 @@ export const dataFrameAnalytics = {
     });
   },
   getAnalyticsAuditMessages(analyticsId: string) {
-    return http<any>({
+    return http<JobMessage[]>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
     });

@@ -31,7 +31,11 @@ import {
   buildSiemResponse,
 } from '../utils';
 
-import { getTupleDuplicateErrorsAndUniqueRules, getInvalidConnectors } from './utils';
+import {
+  getTupleDuplicateErrorsAndUniqueRules,
+  getInvalidConnectors,
+  migrateLegacyActionsIds,
+} from './utils';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
@@ -74,6 +78,9 @@ export const importRulesRoute = (
         const rulesClient = context.alerting.getRulesClient();
         const actionsClient = context.actions.getActionsClient();
         const esClient = context.core.elasticsearch.client;
+        const actionSOClient = context.core.savedObjects.getClient({
+          includedHiddenTypes: ['action'],
+        });
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
         const exceptionsClient = context.lists?.getExceptionListClient();
@@ -85,7 +92,6 @@ export const importRulesRoute = (
           savedObjectsClient,
         });
 
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const { filename } = (request.body.file as HapiReadableStream).hapi;
         const fileExtension = extname(filename).toLowerCase();
         if (fileExtension !== '.ndjson') {
@@ -127,8 +133,13 @@ export const importRulesRoute = (
         const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
           getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
 
-        const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
+        const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
           parsedObjectsWithoutDuplicateErrors,
+          actionSOClient
+        );
+
+        const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
+          migratedParsedObjectsWithoutDuplicateErrors,
           actionsClient
         );
 
@@ -146,7 +157,6 @@ export const importRulesRoute = (
           mlAuthz,
           overwriteRules: request.query.overwrite,
           rulesClient,
-          ruleStatusClient,
           savedObjectsClient,
           exceptionsClient,
           isRuleRegistryEnabled,

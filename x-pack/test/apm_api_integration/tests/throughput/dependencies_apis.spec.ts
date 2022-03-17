@@ -8,7 +8,6 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { BackendNode, ServiceNode } from '../../../../plugins/apm/common/connections';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -84,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let throughputValues: PromiseReturnType<typeof getThroughputValues>;
+  let throughputValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
   registry.when(
     'Dependencies throughput value',
@@ -102,10 +101,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .instance('instance-c');
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoProdInstance
                   .transaction('GET /api/product/list')
                   .duration(1000)
@@ -133,10 +132,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   )
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(JAVA_PROD_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceJavaInstance
                   .transaction('POST /api/product/buy')
                   .duration(1000)

@@ -5,16 +5,20 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { useTrackPageview } from '../..';
 import { DatePicker } from '../../components/shared/date_picker';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useTimeRange } from '../../hooks/use_time_range';
+import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
+import { ObservabilityStatus } from '../../components/app/observability_status';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../application/types';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -31,9 +35,12 @@ export function OverviewPage({ routeParams }: Props) {
     },
   ]);
 
-  const { core, ObservabilityPageTemplate } = usePluginContext();
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const { relativeStart, relativeEnd } = useTimeRange();
+  const { docLinks, http } = useKibana<ObservabilityAppServices>().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
+
+  const { relativeStart, relativeEnd } = useDatePickerContext();
 
   const relativeTime = { start: relativeStart, end: relativeEnd };
 
@@ -47,8 +54,8 @@ export function OverviewPage({ routeParams }: Props) {
 
   const noDataConfig = getNoDataConfig({
     hasData,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
@@ -72,7 +79,28 @@ export function OverviewPage({ routeParams }: Props) {
           : undefined
       }
     >
-      {hasData && <div>New observability content goes here</div>}
+      {hasData && (
+        <>
+          <EuiButton onClick={() => setIsFlyoutVisible(true)}>Show observability status</EuiButton>
+          {isFlyoutVisible && (
+            <EuiFlyout
+              size="s"
+              ownFocus
+              onClose={() => setIsFlyoutVisible(false)}
+              aria-labelledby="flyout-id"
+            >
+              <EuiFlyoutHeader hasBorder>
+                <EuiTitle size="m">
+                  <h2 id="flyout-id">Status</h2>
+                </EuiTitle>
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody>
+                <ObservabilityStatus />
+              </EuiFlyoutBody>
+            </EuiFlyout>
+          )}
+        </>
+      )}
     </ObservabilityPageTemplate>
   );
 }

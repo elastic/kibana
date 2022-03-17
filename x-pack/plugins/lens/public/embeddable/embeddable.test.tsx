@@ -17,7 +17,7 @@ import {
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { spacesPluginMock } from '../../../spaces/public/mocks';
 import { Filter } from '@kbn/es-query';
-import { Query, TimeRange, IndexPatternsContract } from 'src/plugins/data/public';
+import { Query, TimeRange, IndexPatternsContract, FilterManager } from 'src/plugins/data/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public/embeddable';
@@ -70,6 +70,16 @@ const options = {
   saveMethod: defaultSaveMethod,
   unwrapMethod: defaultUnwrapMethod,
   checkForDuplicateTitle: defaultCheckForDuplicateTitle,
+};
+
+const mockInjectFilterReferences: FilterManager['inject'] = (filters, references) => {
+  return filters.map((filter) => ({
+    ...filter,
+    meta: {
+      ...filter.meta,
+      index: 'injected!',
+    },
+  }));
 };
 
 const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
@@ -139,6 +149,7 @@ describe('embeddable', () => {
         getTrigger,
         theme: themeServiceMock.createStartContract(),
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -180,6 +191,7 @@ describe('embeddable', () => {
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -226,6 +238,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -283,6 +296,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -304,6 +318,52 @@ describe('embeddable', () => {
     expect(spacesPluginStart.ui.components.getEmbeddableLegacyUrlConflict).toHaveBeenCalled();
   });
 
+  it('should not render if timeRange prop is not passed when a referenced data view is time based', async () => {
+    attributeService = attributeServiceMockFromSavedVis({
+      ...savedVis,
+      references: [
+        { type: 'index-pattern', id: '123', name: 'abc' },
+        { type: 'index-pattern', id: '123', name: 'def' },
+        { type: 'index-pattern', id: '456', name: 'ghi' },
+      ],
+    });
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        inspector: inspectorPluginMock.createStartContract(),
+        indexPatternService: {
+          get: (id: string) => Promise.resolve({ id, isTimeBased: jest.fn(() => true) }),
+        } as unknown as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
+        theme: themeServiceMock.createStartContract(),
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      {} as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
+  });
+
   it('should initialize output with deduped list of index patterns', async () => {
     attributeService = attributeServiceMockFromSavedVis({
       ...savedVis,
@@ -321,7 +381,7 @@ describe('embeddable', () => {
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {
-          get: (id: string) => Promise.resolve({ id }),
+          get: (id: string) => Promise.resolve({ id, isTimeBased: () => false }),
         } as unknown as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -329,6 +389,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -370,6 +431,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -414,6 +476,7 @@ describe('embeddable', () => {
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -465,6 +528,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -514,6 +578,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -570,6 +635,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -592,7 +658,7 @@ describe('embeddable', () => {
       expect.objectContaining({
         timeRange,
         query: [query, savedVis.state.query],
-        filters,
+        filters: mockInjectFilterReferences(filters, []),
       })
     );
 
@@ -627,6 +693,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -663,9 +730,7 @@ describe('embeddable', () => {
       state: {
         ...savedVis.state,
         query: { language: 'kquery', query: 'saved filter' },
-        filters: [
-          { meta: { alias: 'test', negate: false, disabled: false, indexRefName: 'filter-0' } },
-        ],
+        filters: [{ meta: { alias: 'test', negate: false, disabled: false, index: 'filter-0' } }],
       },
       references: [{ type: 'index-pattern', name: 'filter-0', id: 'my-index-pattern-id' }],
     };
@@ -687,6 +752,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -708,11 +774,14 @@ describe('embeddable', () => {
     expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
       timeRange,
       query: [query, { language: 'kquery', query: 'saved filter' }],
-      filters: [
-        filters[0],
-        // actual index pattern id gets injected
-        { meta: { alias: 'test', negate: false, disabled: false, index: 'my-index-pattern-id' } },
-      ],
+      // actual index pattern id gets injected
+      filters: mockInjectFilterReferences(
+        [
+          filters[0],
+          { meta: { alias: 'test', negate: false, disabled: false, index: 'injected!' } },
+        ],
+        []
+      ),
     });
   });
 
@@ -731,6 +800,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -751,12 +821,15 @@ describe('embeddable', () => {
 
     const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
 
-    const eventData = {};
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
     onEvent({ name: 'brush', data: eventData });
 
     expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
     expect(trigger.exec).toHaveBeenCalledWith(
-      expect.objectContaining({ data: eventData, embeddable: expect.anything() })
+      expect.objectContaining({
+        data: { ...eventData, timeFieldName: undefined },
+        embeddable: expect.anything(),
+      })
     );
   });
 
@@ -775,6 +848,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -819,6 +893,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -878,6 +953,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -933,7 +1009,10 @@ describe('embeddable', () => {
 
     expressionRenderer = jest.fn(({ onEvent }) => {
       setTimeout(() => {
-        onEvent?.({ name: 'filter', data: { pings: false } });
+        onEvent?.({
+          name: 'filter',
+          data: { pings: false, table: { rows: [], columns: [] }, column: 0 },
+        });
       }, 10);
 
       return null;
@@ -953,6 +1032,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -974,7 +1054,7 @@ describe('embeddable', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 20));
 
-    expect(onFilter).toHaveBeenCalledWith({ pings: false });
+    expect(onFilter).toHaveBeenCalledWith(expect.objectContaining({ pings: false }));
     expect(onFilter).toHaveBeenCalledTimes(1);
   });
 
@@ -983,7 +1063,10 @@ describe('embeddable', () => {
 
     expressionRenderer = jest.fn(({ onEvent }) => {
       setTimeout(() => {
-        onEvent?.({ name: 'brush', data: { range: [0, 1] } });
+        onEvent?.({
+          name: 'brush',
+          data: { range: [0, 1], table: { rows: [], columns: [] }, column: 0 },
+        });
       }, 10);
 
       return null;
@@ -1003,6 +1086,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -1024,7 +1108,7 @@ describe('embeddable', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 20));
 
-    expect(onBrushEnd).toHaveBeenCalledWith({ range: [0, 1] });
+    expect(onBrushEnd).toHaveBeenCalledWith(expect.objectContaining({ range: [0, 1] }));
     expect(onBrushEnd).toHaveBeenCalledTimes(1);
   });
 
@@ -1053,6 +1137,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -1124,6 +1209,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         theme: themeServiceMock.createStartContract(),
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         visualizationMap: {
           [visDocument.visualizationType as string]: {
             onEditAction: onEditActionMock,

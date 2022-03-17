@@ -162,7 +162,6 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
     ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
       const errors = {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'subActionParams.incident.short_description': new Array<string>(),
       };
       const validationResult = {
@@ -202,7 +201,6 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
     ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
       const errors = {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'subActionParams.incident.short_description': new Array<string>(),
       };
       const validationResult = {

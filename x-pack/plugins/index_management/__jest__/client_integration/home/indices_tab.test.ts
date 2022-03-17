@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH } from '../../../common';
 import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
@@ -43,7 +43,7 @@ jest.mock('../../../public/application/lib/ace.js', () => {
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import { stubWebWorker } from '@kbn/test/jest';
+import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { createMemoryHistory } from 'history';
 stubWebWorker();
 
@@ -100,6 +100,18 @@ describe('<IndexManagementHome />', () => {
           name: 'data-stream-index',
           data_stream: 'dataStream1',
         },
+        {
+          health: '',
+          status: '',
+          primary: '',
+          replica: '',
+          documents: '',
+          documents_deleted: '',
+          size: '',
+          primary_size: '',
+          name: 'no-data-stream-index',
+          data_stream: null,
+        },
       ]);
 
       // The detail panel should still appear even if there are no data streams.
@@ -125,13 +137,22 @@ describe('<IndexManagementHome />', () => {
       const {
         findDataStreamDetailPanel,
         findDataStreamDetailPanelTitle,
-        actions: { clickDataStreamAt },
+        actions: { clickDataStreamAt, dataStreamLinkExistsAt },
       } = testBed;
 
+      expect(dataStreamLinkExistsAt(0)).toBeTruthy();
       await clickDataStreamAt(0);
 
       expect(findDataStreamDetailPanel().length).toBe(1);
       expect(findDataStreamDetailPanelTitle()).toBe('dataStream1');
+    });
+
+    test(`doesn't show data stream link if the index doesn't have a data stream`, () => {
+      const {
+        actions: { dataStreamLinkExistsAt },
+      } = testBed;
+
+      expect(dataStreamLinkExistsAt(1)).toBeFalsy();
     });
   });
 
@@ -261,7 +282,7 @@ describe('<IndexManagementHome />', () => {
 
     test("should be able to clear an index's cache", async () => {
       const { actions } = testBed;
-      actions.clickManageContextMenuButton();
+      await actions.clickManageContextMenuButton();
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('clearCacheIndexMenuButton');
@@ -290,6 +311,26 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       // The unfreeze action should not be present anymore
       expect(exists('unfreezeIndexMenuButton')).toBe(false);
+    });
+
+    test('should be able to force merge an index', async () => {
+      const { actions, exists } = testBed;
+
+      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMockA, isFrozen: false }]);
+
+      // Open context menu
+      await actions.clickManageContextMenuButton();
+      // Check that the force merge action exists for the current index and merge it
+      expect(exists('forcemergeIndexMenuButton')).toBe(true);
+      await actions.clickContextMenuOption('forcemergeIndexMenuButton');
+
+      await actions.clickModalConfirm();
+
+      const requestsCount = server.requests.length;
+      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/forcemerge`);
+      // After the index is force merged, we immediately do a reload. So we need to expect to see
+      // a reload server call also.
+      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
     });
   });
 

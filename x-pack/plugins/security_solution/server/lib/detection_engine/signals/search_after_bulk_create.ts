@@ -47,7 +47,7 @@ export const searchAfterAndBulkCreate = async ({
     let toReturn = createSearchAfterReturnType();
 
     // sortId tells us where to start our next consecutive search_after query
-    let sortIds: estypes.SearchSortResults | undefined;
+    let sortIds: estypes.SortResults | undefined;
     let hasSortId = true; // default to true so we execute the search on initial run
 
     // signalsCreatedCount keeps track of how many signals we have created,
@@ -176,7 +176,13 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.hits.hits.length}`)
           );
 
-          sendAlertTelemetryEvents(logger, eventsTelemetry, enrichedEvents, buildRuleMessage);
+          sendAlertTelemetryEvents(
+            logger,
+            eventsTelemetry,
+            enrichedEvents,
+            createdItems,
+            buildRuleMessage
+          );
         }
 
         if (!hasSortId) {

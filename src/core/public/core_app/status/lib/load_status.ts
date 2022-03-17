@@ -7,7 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UnwrapPromise } from '@kbn/utility-types';
 import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';
@@ -230,4 +229,4 @@ export async function loadStatus({
   };
 }
 
-export type ProcessedServerResponse = UnwrapPromise<ReturnType<typeof loadStatus>>;
+export type ProcessedServerResponse = Awaited<ReturnType<typeof loadStatus>>;

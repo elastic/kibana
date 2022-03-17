@@ -11,11 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import type { IndexPattern } from '../../../../data/common';
+import type { DataView } from '../../../../data_views/public';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
+import { buildCopyColumnNameButton } from './copy_column_name_button';
 
 export function getLeadControlColumns() {
   return [
@@ -53,7 +54,7 @@ export function getLeadControlColumns() {
 export function buildEuiGridColumn(
   columnName: string,
   columnWidth: number | undefined = 0,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   defaultColumns: boolean,
   isSortEnabled: boolean
 ) {
@@ -80,6 +81,7 @@ export function buildEuiGridColumn(
             },
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
+      additional: columnName === '_source' ? undefined : [buildCopyColumnNameButton(columnName)],
     },
     cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
   };
@@ -118,7 +120,7 @@ export function buildEuiGridColumn(
 export function getEuiGridColumns(
   columns: string[],
   settings: DiscoverGridSettings | undefined,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   showTimeCol: boolean,
   defaultColumns: boolean,
   isSortEnabled: boolean
@@ -138,11 +140,7 @@ export function getEuiGridColumns(
   );
 }
 
-export function getVisibleColumns(
-  columns: string[],
-  indexPattern: IndexPattern,
-  showTimeCol: boolean
-) {
+export function getVisibleColumns(columns: string[], indexPattern: DataView, showTimeCol: boolean) {
   const timeFieldName = indexPattern.timeFieldName;
 
   if (showTimeCol && !columns.find((col) => col === timeFieldName)) {

@@ -11,17 +11,25 @@ import {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   UpdateCommentsArrayOrUndefined,
+  UpdateExceptionListItemSchema,
   exceptionListItemType,
   exceptionListType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../../schemas/saved_objects';
+import {
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from '../exception_list_client_types';
+
+export { validateData } from './validate_data';
 
 export const transformSavedObjectToExceptionList = ({
   savedObject,
@@ -239,6 +247,7 @@ export const transformSavedObjectsToFoundExceptionListItem = ({
     ),
     page: savedObjectsFindResponse.page,
     per_page: savedObjectsFindResponse.per_page,
+    pit: savedObjectsFindResponse.pit_id,
     total: savedObjectsFindResponse.total,
   };
 };
@@ -254,6 +263,7 @@ export const transformSavedObjectsToFoundExceptionList = ({
     ),
     page: savedObjectsFindResponse.page,
     per_page: savedObjectsFindResponse.per_page,
+    pit: savedObjectsFindResponse.pit_id,
     total: savedObjectsFindResponse.total,
   };
 };
@@ -291,4 +301,43 @@ export const transformCreateCommentsToComments = ({
     created_by: user,
     id: uuid.v4(),
   }));
+};
+
+export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema = ({
+  listId,
+  itemId,
+  namespaceType,
+  osTypes,
+  ...rest
+}: CreateExceptionListItemOptions): CreateExceptionListItemSchema => {
+  return {
+    ...rest,
+    item_id: itemId,
+    list_id: listId,
+    namespace_type: namespaceType,
+    os_types: osTypes,
+  };
+};
+
+export const transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema = ({
+  itemId,
+  namespaceType,
+  osTypes,
+  // The `UpdateExceptionListItemOptions` type differs from the schema in that some properties are
+  // marked as having `undefined` as a valid value, where the schema, however, requires it.
+  // So we assign defaults here
+  description = '',
+  name = '',
+  type = 'simple',
+  ...rest
+}: UpdateExceptionListItemOptions): UpdateExceptionListItemSchema => {
+  return {
+    ...rest,
+    description,
+    item_id: itemId,
+    name,
+    namespace_type: namespaceType,
+    os_types: osTypes,
+    type,
+  };
 };

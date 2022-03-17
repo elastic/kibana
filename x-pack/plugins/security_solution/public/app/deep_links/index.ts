@@ -24,10 +24,12 @@ import {
   NETWORK,
   TIMELINES,
   MANAGE,
-  UEBA,
+  USERS,
   HOST_ISOLATION_EXCEPTIONS,
   EVENT_FILTERS,
+  BLOCKLIST,
   TRUSTED_APPLICATIONS,
+  POLICIES,
   ENDPOINTS,
 } from '../translations';
 import {
@@ -40,12 +42,14 @@ import {
   TIMELINES_PATH,
   CASES_PATH,
   ENDPOINTS_PATH,
+  POLICIES_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
-  UEBA_PATH,
+  BLOCKLIST_PATH,
   CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   SERVER_APP_ID,
+  USERS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -122,7 +126,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         navLinkStatus: AppNavLinkStatus.hidden,
         keywords: [
           i18n.translate('xpack.securitySolution.search.exceptions', {
-            defaultMessage: 'Exceptions',
+            defaultMessage: 'Exception lists',
           }),
         ],
         searchable: true,
@@ -240,21 +244,38 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           },
         ],
       },
+      {
+        id: SecurityPageName.users,
+        title: USERS,
+        path: USERS_PATH,
+        navLinkStatus: AppNavLinkStatus.visible,
+        experimentalKey: 'usersEnabled',
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.users', {
+            defaultMessage: 'Users',
+          }),
+        ],
+        order: 9004,
+        deepLinks: [
+          {
+            id: SecurityPageName.usersAnomalies,
+            title: i18n.translate('xpack.securitySolution.search.users.anomalies', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: `${USERS_PATH}/anomalies`,
+            isPremium: true,
+          },
+          {
+            id: SecurityPageName.usersRisk,
+            title: i18n.translate('xpack.securitySolution.search.users.risk', {
+              defaultMessage: 'Risk',
+            }),
+            path: `${USERS_PATH}/userRisk`,
+            isPremium: true,
+          },
+        ],
+      },
     ],
-  },
-  {
-    id: SecurityPageName.ueba,
-    title: UEBA,
-    path: UEBA_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
-    features: [FEATURE.general],
-    experimentalKey: 'uebaEnabled',
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.ueba', {
-        defaultMessage: 'Users & Entities',
-      }),
-    ],
-    order: 9004,
   },
   {
     id: SecurityPageName.investigate,
@@ -328,6 +349,12 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         path: ENDPOINTS_PATH,
       },
       {
+        id: SecurityPageName.policies,
+        title: POLICIES,
+        path: POLICIES_PATH,
+        experimentalKey: 'policyListEnabled',
+      },
+      {
         id: SecurityPageName.trustedApps,
         title: TRUSTED_APPLICATIONS,
         path: TRUSTED_APPS_PATH,
@@ -341,6 +368,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.hostIsolationExceptions,
         title: HOST_ISOLATION_EXCEPTIONS,
         path: HOST_ISOLATION_EXCEPTIONS_PATH,
+      },
+      {
+        id: SecurityPageName.blocklist,
+        title: BLOCKLIST,
+        path: BLOCKLIST_PATH,
       },
     ],
   },

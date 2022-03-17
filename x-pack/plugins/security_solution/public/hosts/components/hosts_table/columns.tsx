@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import {
   DragEffects,
@@ -17,17 +17,18 @@ import { HostDetailsLink } from '../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import {
-  AddFilterToGlobalSearchBar,
-  createFilter,
-} from '../../../common/components/add_filter_to_global_search_bar';
+import { DefaultDraggable } from '../../../common/components/draggables';
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
-import { HostRiskSeverity, Maybe } from '../../../../common/search_strategy';
-import { HostRiskScore } from '../common/host_risk_score';
+import { Maybe, RiskSeverity } from '../../../../common/search_strategy';
+import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
+import { RiskScore } from '../../../common/components/severity/common';
 
-export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
+export const getHostsColumns = (
+  showRiskColumn: boolean,
+  dispatchSeverityUpdate: (s: RiskSeverity) => void
+): HostsTableColumns => {
   const columns: HostsTableColumns = [
     {
       field: 'node.host.name',
@@ -91,16 +92,27 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
     },
     {
       field: 'node.host.os.name',
-      name: i18n.OS,
+      name: (
+        <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
+          <>
+            {i18n.OS} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
       render: (hostOsName) => {
         if (hostOsName != null) {
           return (
-            <AddFilterToGlobalSearchBar filter={createFilter('host.os.name', hostOsName)}>
-              <>{hostOsName}</>
-            </AddFilterToGlobalSearchBar>
+            <DefaultDraggable
+              id={`host-page-draggable-host.os.name-${hostOsName[0]}`}
+              field={'host.os.name'}
+              value={hostOsName[0]}
+              isDraggable={false}
+              hideTopN={true}
+              tooltipContent={null}
+            />
           );
         }
         return getEmptyTagValue();
@@ -115,9 +127,14 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
       render: (hostOsVersion) => {
         if (hostOsVersion != null) {
           return (
-            <AddFilterToGlobalSearchBar filter={createFilter('host.os.version', hostOsVersion)}>
-              <>{hostOsVersion}</>
-            </AddFilterToGlobalSearchBar>
+            <DefaultDraggable
+              id={`host-page-draggable-host.os.version-${hostOsVersion[0]}`}
+              field={'host.os.version'}
+              value={hostOsVersion[0]}
+              isDraggable={false}
+              hideTopN={true}
+              tooltipContent={null}
+            />
           );
         }
         return getEmptyTagValue();
@@ -138,9 +155,18 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
-      render: (riskScore: HostRiskSeverity) => {
+      render: (riskScore: RiskSeverity) => {
         if (riskScore != null) {
-          return <HostRiskScore severity={riskScore} />;
+          return (
+            <RiskScore
+              toolTipContent={
+                <EuiLink onClick={() => dispatchSeverityUpdate(riskScore)}>
+                  <EuiText size="xs">{VIEW_HOSTS_BY_SEVERITY(riskScore.toLowerCase())}</EuiText>
+                </EuiLink>
+              }
+              severity={riskScore}
+            />
+          );
         }
         return getEmptyTagValue();
       },

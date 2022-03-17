@@ -6,13 +6,14 @@
  */
 
 import moment from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Query, TimefilterContract } from 'src/plugins/data/public';
+import { TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { DataView } from '../../../../../../../../src/plugins/data_views/public';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { getTimeFieldRange } from '../../services/time_field_range';
 import { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
+import { addExcludeFrozenToQuery } from '../../utils/query_utils';
 
 export interface TimeRange {
   from: number;
@@ -21,15 +22,15 @@ export interface TimeRange {
 
 export async function setFullTimeRange(
   timefilter: TimefilterContract,
-  indexPattern: IndexPattern,
-  query?: Query
+  dataView: DataView,
+  query?: QueryDslQueryContainer,
+  excludeFrozenData?: boolean
 ): Promise<GetTimeFieldRangeResponse> {
-  const runtimeMappings = indexPattern.getComputedFields()
-    .runtimeFields as estypes.MappingRuntimeFields;
+  const runtimeMappings = dataView.getRuntimeMappings();
   const resp = await getTimeFieldRange({
-    index: indexPattern.title,
-    timeFieldName: indexPattern.timeFieldName,
-    query,
+    index: dataView.title,
+    timeFieldName: dataView.timeFieldName,
+    query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
     ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
   });
   timefilter.setTime({

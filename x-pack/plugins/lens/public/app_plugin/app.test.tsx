@@ -24,12 +24,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
-import {
-  esFilters,
-  FilterManager,
-  IndexPattern,
-  Query,
-} from '../../../../../src/plugins/data/public';
+import { FilterManager, IndexPattern, Query } from '../../../../../src/plugins/data/public';
+import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '../../../../../src/plugins/data/common';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { LensByValueInput } from '../embeddable/embeddable';
@@ -85,6 +81,7 @@ describe('Lens App', () => {
       setHeaderActionMenu: jest.fn(),
       datasourceMap,
       visualizationMap,
+      topNavMenuEntryGenerators: [],
     };
   }
 
@@ -126,11 +123,13 @@ describe('Lens App', () => {
     defaultSavedObjectId = '1234';
     defaultDoc = {
       savedObjectId: defaultSavedObjectId,
+      visualizationType: 'testVis',
+      type: 'lens',
       title: 'An extremely cool default document!',
       expression: 'definitely a valid expression',
       state: {
         query: 'lucene',
-        filters: [{ query: { match_phrase: { src: 'test' } } }],
+        filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
     } as unknown as Document;
@@ -145,7 +144,7 @@ describe('Lens App', () => {
     const services = makeDefaultServicesForApp();
     const indexPattern = { id: 'index1' } as unknown as IndexPattern;
     const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-    const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
+    const pinnedFilter = buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
       return [];
     });
@@ -167,6 +166,87 @@ describe('Lens App', () => {
     });
 
     expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
+  });
+
+  describe('extra nav menu entries', () => {
+    it('shows custom menu entry', async () => {
+      const runFn = jest.fn();
+      const { instance, services } = await mountWith({
+        props: {
+          ...makeDefaultProps(),
+          topNavMenuEntryGenerators: [
+            () => ({
+              label: 'My entry',
+              run: runFn,
+            }),
+          ],
+        },
+      });
+
+      const extraEntry = instance.find(services.navigation.ui.TopNavMenu).prop('config')[0];
+      expect(extraEntry.label).toEqual('My entry');
+      expect(extraEntry.run).toBe(runFn);
+    });
+
+    it('passes current state, filter, query timerange and initial context into getter', async () => {
+      const getterFn = jest.fn();
+      const preloadedState = {
+        visualization: {
+          activeId: 'lensXY',
+          state: {
+            visState: true,
+          },
+        },
+        activeDatasourceId: 'testDatasource',
+        datasourceStates: {
+          testDatasource: {
+            isLoading: false,
+            state: { datasourceState: true },
+          },
+        },
+        query: {
+          language: 'kuery',
+          query: 'A: B',
+        },
+        filters: [
+          {
+            meta: {
+              key: 'abc',
+            },
+          },
+        ],
+      };
+      await mountWith({
+        props: {
+          ...makeDefaultProps(),
+          topNavMenuEntryGenerators: [getterFn],
+          initialContext: {
+            fieldName: 'a',
+            indexPatternId: '1',
+          },
+        },
+        preloadedState,
+      });
+
+      expect(getterFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          initialContext: {
+            fieldName: 'a',
+            indexPatternId: '1',
+          },
+          visualizationState: preloadedState.visualization.state,
+          visualizationId: preloadedState.visualization.activeId,
+          query: preloadedState.query,
+          filters: preloadedState.filters,
+          datasourceStates: {
+            testDatasource: {
+              isLoading: false,
+              state: preloadedState.datasourceStates.testDatasource.state,
+            },
+          },
+        })
+      );
+    });
   });
 
   describe('breadcrumbs', () => {
@@ -555,6 +635,18 @@ describe('Lens App', () => {
         );
       });
 
+      it('applies all changes on-save', async () => {
+        const { lensStore } = await save({
+          initialSavedObjectId: undefined,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+          preloadedState: {
+            applyChangesCounter: 0,
+          },
+        });
+        expect(lensStore.getState().lens.applyChangesCounter).toBe(1);
+      });
+
       it('adds to the recently accessed list on save', async () => {
         const { services } = await save({
           initialSavedObjectId: undefined,
@@ -666,10 +758,10 @@ describe('Lens App', () => {
         const indexPattern = { id: 'index1' } as unknown as IndexPattern;
         const field = { name: 'myfield' } as unknown as FieldSpec;
         const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-        const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-        const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
+        const unpinned = buildExistsFilter(field, indexPattern);
+        const pinned = buildExistsFilter(pinnedField, indexPattern);
         await act(async () => {
-          FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+          FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
         });
         const { services } = await save({
           initialSavedObjectId: defaultSavedObjectId,
@@ -680,13 +772,14 @@ describe('Lens App', () => {
             filters: [pinned, unpinned],
           },
         });
+
+        const { state: expectedFilters } = services.data.query.filterManager.extract([unpinned]);
+
         expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
           expect.objectContaining({
             savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
-            state: expect.objectContaining({
-              filters: [unpinned],
-            }),
+            state: expect.objectContaining({ filters: expectedFilters }),
           }),
           true,
           { id: '5678', savedObjectId: defaultSavedObjectId }
@@ -880,14 +973,12 @@ describe('Lens App', () => {
         }),
       });
       act(() =>
-        services.data.query.filterManager.setFilters([
-          esFilters.buildExistsFilter(field, indexPattern),
-        ])
+        services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
       );
       instance.update();
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+          filters: [buildExistsFilter(field, indexPattern)],
         }),
       });
     });
@@ -930,9 +1021,7 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       act(() =>
-        services.data.query.filterManager.setFilters([
-          esFilters.buildExistsFilter(field, indexPattern),
-        ])
+        services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
       );
       instance.update();
       expect(lensStore.getState()).toEqual({
@@ -1065,9 +1154,9 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
-      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      const unpinned = buildExistsFilter(field, indexPattern);
+      const pinned = buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       instance.update();
       act(() => instance.find(services.navigation.ui.TopNavMenu).prop('onClearSavedQuery')!());
@@ -1122,9 +1211,9 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
-      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      const unpinned = buildExistsFilter(field, indexPattern);
+      const pinned = buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       instance.update();
       act(() => instance.find(services.navigation.ui.TopNavMenu).prop('onClearSavedQuery')!());
@@ -1251,25 +1340,105 @@ describe('Lens App', () => {
       expect(defaultLeave).not.toHaveBeenCalled();
     });
 
-    it('should not confirm when changes are saved', async () => {
-      const { props } = await mountWith({
-        preloadedState: {
-          persistedDoc: {
-            ...defaultDoc,
-            state: {
-              ...defaultDoc.state,
-              datasourceStates: { testDatasource: {} },
-              visualization: {},
+    it('should confirm when leaving from a context initial doc with changes made in lens', async () => {
+      const initialProps = {
+        ...makeDefaultProps(),
+        contextOriginatingApp: 'TSVB',
+        initialContext: {
+          layers: [
+            {
+              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              timeFieldName: 'order_date',
+              chartType: 'area',
+              axisPosition: 'left',
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+              metrics: [
+                {
+                  agg: 'count',
+                  isFullReference: false,
+                  fieldName: 'document',
+                  params: {},
+                  color: '#68BC00',
+                },
+              ],
+              timeInterval: 'auto',
+            },
+          ],
+          type: 'lnsXY',
+          configuration: {
+            fill: 0.5,
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: 1,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            extents: {
+              yLeftExtent: {
+                mode: 'full',
+              },
+              yRightExtent: {
+                mode: 'full',
+              },
             },
           },
-          isSaveable: true,
-          ...(defaultDoc.state as Partial<LensAppState>),
+          savedObjectId: '',
+          vizEditorOriginatingAppUrl: '#/tsvb-link',
+          isVisualizeAction: true,
+        },
+      };
+
+      const mountedApp = await mountWith({
+        props: initialProps as unknown as jest.Mocked<LensAppProps>,
+        preloadedState: {
+          persistedDoc: defaultDoc,
           visualization: {
             activeId: 'testVis',
             state: {},
           },
+          isSaveable: true,
         },
       });
+      const lastCall =
+        mountedApp.props.onAppLeave.mock.calls[
+          mountedApp.props.onAppLeave.mock.calls.length - 1
+        ][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(defaultLeave).not.toHaveBeenCalled();
+      expect(confirmLeave).toHaveBeenCalled();
+    });
+
+    it('should not confirm when changes are saved', async () => {
+      const preloadedState = {
+        persistedDoc: {
+          ...defaultDoc,
+          state: {
+            ...defaultDoc.state,
+            datasourceStates: { testDatasource: {} },
+            visualization: {},
+          },
+        },
+        isSaveable: true,
+        ...(defaultDoc.state as Partial<LensAppState>),
+        visualization: {
+          activeId: 'testVis',
+          state: {},
+        },
+      };
+
+      const customProps = makeDefaultProps();
+      customProps.datasourceMap.testDatasource.isEqual = () => true; // if this returns false, the documents won't be accounted equal
+
+      const { props } = await mountWith({ preloadedState, props: customProps });
+
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();

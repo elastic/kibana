@@ -11,16 +11,22 @@ import { Position } from '@elastic/charts';
 import { AggGroupNames } from '../../../../data/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common';
-import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
+import { PieTypeProps } from '../types';
+import {
+  PartitionVisParams,
+  LabelPositions,
+  ValueFormats,
+  EmptySizeRatios,
+  LegendDisplay,
+} from '../../../../chart_expressions/expression_partition_vis/common';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
-import { EMPTY_SIZE_RATIOS } from '../editor/constants';
 
 export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
   trackUiMetric,
-}: PieTypeProps): VisTypeDefinition<PieVisParams> => ({
+}: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
@@ -33,14 +39,14 @@ export const getPieVisTypeDefinition = ({
     defaults: {
       type: 'pie',
       addTooltip: true,
-      addLegend: !showElasticChartsOptions,
+      legendDisplay: !showElasticChartsOptions ? LegendDisplay.SHOW : LegendDisplay.HIDE,
       legendPosition: Position.Right,
       nestedLegend: false,
       truncateLegend: true,
       maxLegendLines: 1,
       distinctColors: false,
       isDonut: true,
-      emptySizeRatio: EMPTY_SIZE_RATIOS.SMALL,
+      emptySizeRatio: EmptySizeRatios.SMALL,
       palette: {
         type: 'palette',
         name: 'default',
@@ -88,7 +94,9 @@ export const getPieVisTypeDefinition = ({
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -106,7 +114,9 @@ export const getPieVisTypeDefinition = ({
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],

@@ -26,7 +26,7 @@ export const getHeatmapVisTypeDefinition = ({
   title: i18n.translate('visTypeHeatmap.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
   icon: 'heatmap',
   description: i18n.translate('visTypeHeatmap.heatmap.heatmapDescription', {
-    defaultMessage: 'Shade data in cells in a matrix.',
+    defaultMessage: 'Display values as colors in a matrix.',
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
@@ -104,7 +104,9 @@ export const getHeatmapVisTypeDefinition = ({
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -119,7 +121,9 @@ export const getHeatmapVisTypeDefinition = ({
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -141,7 +145,9 @@ export const getHeatmapVisTypeDefinition = ({
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],
