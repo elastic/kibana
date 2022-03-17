@@ -58,21 +58,23 @@ export const getXyChartRenderer = ({
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
         <I18nProvider>
-          <XYChartReportable
-            {...config}
-            formatFactory={deps.formatFactory}
-            chartsActiveCursorService={deps.activeCursor}
-            chartsThemeService={deps.theme}
-            paletteService={deps.paletteService}
-            timeZone={deps.timeZone}
-            useLegacyTimeAxis={deps.useLegacyTimeAxis}
-            minInterval={calculateMinInterval(config)}
-            interactive={handlers.isInteractive()}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-            renderMode={handlers.getRenderMode()}
-            syncColors={handlers.isSyncColorsEnabled()}
-          />
+          <div style={{ width: '100%', height: '100%' }} data-test-subj="xyVisChart">
+            <XYChartReportable
+              {...config}
+              formatFactory={deps.formatFactory}
+              chartsActiveCursorService={deps.activeCursor}
+              chartsThemeService={deps.theme}
+              paletteService={deps.paletteService}
+              timeZone={deps.timeZone}
+              useLegacyTimeAxis={deps.useLegacyTimeAxis}
+              minInterval={calculateMinInterval(config)}
+              interactive={handlers.isInteractive()}
+              onClickValue={onClickValue}
+              onSelectRange={onSelectRange}
+              renderMode={handlers.getRenderMode()}
+              syncColors={handlers.isSyncColorsEnabled()}
+            />
+          </div>{' '}
         </I18nProvider>
       </KibanaThemeProvider>,
       domNode,
