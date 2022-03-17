@@ -14,3 +14,4 @@ export * from './datatable';
 export * from './xy_chart';
 
 export * from './expression_types';
+export { logDataTable } from './expressions_utils';
