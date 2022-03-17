@@ -120,7 +120,7 @@ export class HasData {
   // Data Views
 
   private getHasDataViews = async ({ http }: { http: HttpStart }): Promise<HasDataViewsResponse> =>
-    http.get<HasDataViewsResponse>(`/internal/index_patterns/has_data_views`);
+    http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`);
 
   private findDataViews = (http: HttpStart): Promise<boolean> => {
     return this.getHasDataViews({ http })

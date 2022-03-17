@@ -12,7 +12,7 @@ import { getIndexPattern, hasUserIndexPattern } from '../has_user_index_pattern'
 export const registerHasDataViewsRoute = (router: IRouter): void => {
   router.get(
     {
-      path: '/internal/index_patterns/has_data_views',
+      path: '/internal/data_views/has_data_views',
       validate: {},
     },
     async (ctx, req, res) => {
