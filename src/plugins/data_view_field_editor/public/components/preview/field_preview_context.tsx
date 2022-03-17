@@ -385,7 +385,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
     console.log('getFieldPreview');
     const response = await getFieldPreview({
-      index: currentDocIndex!,
+      index: dataView.title,
       document: document!,
       context: `${type!}_field` as PainlessExecuteContext,
       script: script!,
@@ -434,7 +434,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     type,
     script,
     document,
-    currentDocIndex,
     currentDocId,
     getFieldPreview,
     notifications.toasts,
@@ -443,6 +442,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     hasSomeParamsChanged,
     updateSingleFieldPreview,
     updateCompositeFieldPreview,
+    dataView.title,
   ]);
 
   const goToNextDoc = useCallback(() => {

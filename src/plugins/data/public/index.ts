@@ -18,7 +18,7 @@ export * from './deprecated';
  * Filters:
  */
 
-export { getEsQueryConfig } from '../common';
+export { getEsQueryConfig, FilterStateStore } from '../common';
 export { FilterLabel, FilterItem } from './ui';
 export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
 
@@ -202,13 +202,13 @@ export {
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
   isEsError,
+  SearchSource,
   SearchSessionState,
   SortDirection,
   handleResponse,
 } from './search';
 
 export type {
-  SearchSource,
   // TODO: remove these when data_enhanced is merged into data
   ISessionService,
   SearchSessionInfoProvider,
@@ -295,7 +295,9 @@ export type { AggsStart } from './search/aggs';
 
 export { getTime } from '../common';
 
-export { isTimeRange, isQuery } from '../common';
+export type { SavedObject } from '../common';
+
+export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
 export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
