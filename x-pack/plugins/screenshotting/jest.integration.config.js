@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { DataVisualizerIndexPatternManagement } from './index_pattern_management';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/screenshotting'],
+};
