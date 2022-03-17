@@ -32,6 +32,7 @@ export const ServiceLocationCodec = t.interface({
 export const MonitorServiceLocationCodec = t.intersection([
   t.interface({
     id: t.string,
+    isServiceManaged: t.boolean,
   }),
   t.partial({
     label: t.string,
