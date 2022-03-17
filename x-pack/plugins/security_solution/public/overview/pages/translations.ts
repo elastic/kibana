@@ -61,10 +61,10 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
   }
 );
 
-export const UPDATING = i18n.translate('xpack.timelines.lastUpdated.updating', {
+export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
   defaultMessage: 'Updating...',
 });
 
-export const UPDATED = i18n.translate('xpack.timelines.lastUpdated.updated', {
+export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
   defaultMessage: 'Updated',
 });
