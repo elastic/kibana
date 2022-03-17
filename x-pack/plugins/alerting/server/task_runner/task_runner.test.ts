@@ -41,7 +41,6 @@ import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
-import { IN_MEMORY_METRICS, getAllInMemoryMetrics } from '../monitoring';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import moment from 'moment';
 import {

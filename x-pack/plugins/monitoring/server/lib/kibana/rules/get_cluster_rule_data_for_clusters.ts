@@ -73,8 +73,10 @@ export async function getClusterRuleDataForClusters(
       return {
         overdue: {
           count: response.aggregations?.overdue_count?.value,
-          delayP50: response.aggregations?.overdue_delay_p50?.value,
-          delayP99: response.aggregations?.overdue_delay_p99?.value,
+          delay: {
+            p50: response.aggregations?.overdue_delay_p50?.value,
+            p99: response.aggregations?.overdue_delay_p99?.value,
+          },
         },
         clusterUuid,
       };
