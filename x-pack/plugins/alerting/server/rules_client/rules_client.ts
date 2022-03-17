@@ -40,12 +40,7 @@ import {
   PartialAlertWithLegacyId as PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
 } from '../types';
-import {
-  validateRuleTypeParams,
-  ruleExecutionStatusFromRaw,
-  getAlertNotifyWhenType,
-  RuleMutedError,
-} from '../lib';
+import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -90,6 +85,8 @@ import {
   getModifiedSearch,
   modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
+import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { RuleMutedError } from '../lib/errors/rule_muted';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -212,6 +209,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
+    | 'snoozeEndTime'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -383,7 +381,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      snoozeEndTime: data.snoozeEndTime ? new Date(data.snoozeEndTime).toISOString() : null,
+      snoozeEndTime: null,
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -1503,6 +1501,13 @@ export class RulesClient {
   }
 
   private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
+    if (typeof snoozeEndTime === 'string') {
+      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
+      if (snoozeDateValidationMsg) {
+        throw new RuleMutedError(snoozeDateValidationMsg);
+      }
+    }
+
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
@@ -1518,11 +1523,6 @@ export class RulesClient {
 
       if (attributes.actions.length) {
         await this.actionsAuthorization.ensureAuthorized('execute');
-      }
-
-      const currentRule = await this.get({ id });
-      if (currentRule.muteAll) {
-        throw new RuleMutedError('Cannot snooze a rule that is already muted');
       }
     } catch (error) {
       this.auditLogger?.log(
