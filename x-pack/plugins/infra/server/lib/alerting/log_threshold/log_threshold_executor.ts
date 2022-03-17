@@ -294,7 +294,7 @@ export const processUngroupedResults = (
           group: null,
           isRatio: false,
           reason: reasonMessage,
-          viewInAppUrl
+          viewInAppUrl,
         },
       },
     ]);
@@ -408,7 +408,6 @@ export const processGroupByResults = (
       );
       const alert = alertFactory(group.name, reasonMessage, documentCount, count.value);
       const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
-      console.log("viewInAppUrl", viewInAppUrl);
       alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -418,7 +417,7 @@ export const processGroupByResults = (
             group: group.name,
             isRatio: false,
             reason: reasonMessage,
-            viewInAppUrl
+            viewInAppUrl,
           },
         },
       ]);
@@ -507,11 +506,10 @@ const getViewInAppUrl = (kibanaBaseUrl: string | undefined, indexedStartedAt: st
   // Need to extract the kibana base path if exists (server.basePath) to concatenate it correctly using the URL Api.
   const kibanaBasePath = kibanaBaseUrl ? new URL(kibanaBaseUrl).pathname : '';
   const relativeViewInAppUrl = getAlertLink(new Date(indexedStartedAt).getTime());
-  console.log("relativeViewInAppUrl", relativeViewInAppUrl)
   return kibanaBaseUrl
     ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl).toString()
     : relativeViewInAppUrl;
-}
+};
 
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
