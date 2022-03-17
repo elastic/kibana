@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('returns 426 for GET /reindex/{indexName}', async () => {
           await supertest
-            .post(`${API_BASE_PATH}/reindex/test_index`)
+            .get(`${API_BASE_PATH}/reindex/test_index`)
             .set('kbn-xsrf', 'xxx')
             .expect(426);
         });

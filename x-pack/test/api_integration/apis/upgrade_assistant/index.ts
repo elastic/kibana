@@ -17,5 +17,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./remote_clusters'));
     loadTestFile(require.resolve('./cluster_settings'));
     loadTestFile(require.resolve('./version_precheck'));
+    loadTestFile(require.resolve('./node_disk_space'));
   });
 }
