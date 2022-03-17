@@ -10,11 +10,11 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
 import { monitorManagementListSelector } from '../../../state/selectors';
-import { ServiceLocation } from '../../../../common/runtime_types';
+import { MonitorServiceLocations } from '../../../../common/runtime_types';
 
 interface Props {
-  selectedLocations: ServiceLocation[];
-  setLocations: React.Dispatch<React.SetStateAction<ServiceLocation[]>>;
+  selectedLocations: MonitorServiceLocations;
+  setLocations: React.Dispatch<React.SetStateAction<MonitorServiceLocations>>;
   isInvalid: boolean;
   onBlur?: () => void;
 }

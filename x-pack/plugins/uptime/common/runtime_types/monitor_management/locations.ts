@@ -8,7 +8,7 @@
 import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
-const LocationGeoCodec = t.interface({
+export const LocationGeoCodec = t.interface({
   lat: t.number,
   lon: t.number,
 });
@@ -22,7 +22,14 @@ export const ManifestLocationCodec = t.interface({
   status: t.string,
 });
 
-export const ServiceLocationCodec = t.intersection([
+export const ServiceLocationCodec = t.interface({
+  id: t.string,
+  label: t.string,
+  geo: LocationGeoCodec,
+  url: t.string,
+});
+
+export const MonitorServiceLocationCodec = t.intersection([
   t.interface({
     id: t.string,
   }),
@@ -54,6 +61,7 @@ export const ServiceLocationErrors = t.array(
 );
 
 export const ServiceLocationsCodec = t.array(ServiceLocationCodec);
+export const MonitorServiceLocationsCodec = t.array(MonitorServiceLocationCodec);
 
 export const LocationCodec = t.intersection([
   ServiceLocationCodec,
@@ -62,8 +70,8 @@ export const LocationCodec = t.intersection([
 
 export const LocationsCodec = t.array(LocationCodec);
 
-export const isServiceLocationInvalid = (location: ServiceLocation) =>
-  isLeft(ServiceLocationCodec.decode(location));
+export const isServiceLocationInvalid = (location: MonitorServiceLocation) =>
+  isLeft(MonitorServiceLocationCodec.decode(location));
 
 export const ServiceLocationsApiResponseCodec = t.interface({
   locations: ServiceLocationsCodec,
@@ -72,6 +80,8 @@ export const ServiceLocationsApiResponseCodec = t.interface({
 export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
 export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
 export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
+export type MonitorServiceLocation = t.TypeOf<typeof MonitorServiceLocationCodec>;
+export type MonitorServiceLocations = t.TypeOf<typeof MonitorServiceLocationsCodec>;
 export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;
 export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;
 export type Locations = t.TypeOf<typeof LocationsCodec>;
