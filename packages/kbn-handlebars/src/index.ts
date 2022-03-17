@@ -371,13 +371,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     };
 
     if (isBlock) {
-      options.fn = (nextContext: any) => {
-        this.scopes.unshift(nextContext);
-        const result = this.resolveNode(block.program).join('');
-        this.scopes.shift();
-        return result;
+      const generateProgramFunction = (program: hbs.AST.Program) => {
+        return (nextContext: any) => {
+          this.scopes.unshift(nextContext);
+          const result = this.resolveNode(program).join('');
+          this.scopes.shift();
+          return result;
+        };
       };
-      options.inverse = noop;
+      options.fn = generateProgramFunction(block.program);
+      options.inverse = generateProgramFunction(block.inverse);
     }
 
     return Object.assign(options, this.defaultHelperOptions);
@@ -463,10 +466,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     return result;
   }
-}
-
-function noop() {
-  return '';
 }
 
 function getHash(statement: { hash?: hbs.AST.Hash }) {

@@ -218,6 +218,44 @@ describe('helpers', () => {
       .toCompileTo('<form><p>Yehuda</p><a href="Yehuda">Hello</a></form>');
   });
 
+  it('block helper inverted sections', () => {
+    const string = "{{#list people}}{{name}}{{^}}<em>Nobody's here</em>{{/list}}";
+    function list(this: any, context: any, options: HelperOptions) {
+      if (context.length > 0) {
+        let out = '<ul>';
+        for (let i = 0, j = context.length; i < j; i++) {
+          out += '<li>';
+          out += options.fn(context[i]);
+          out += '</li>';
+        }
+        out += '</ul>';
+        return out;
+      } else {
+        return '<p>' + options.inverse(this) + '</p>';
+      }
+    }
+
+    // the meaning here may be kind of hard to catch, but list.not is always called,
+    // so we should see the output of both
+    expectTemplate(string)
+      .withInput({ people: [{ name: 'Alan' }, { name: 'Yehuda' }] })
+      .withHelpers({ list })
+      .toCompileTo('<ul><li>Alan</li><li>Yehuda</li></ul>');
+
+    expectTemplate(string)
+      .withInput({ people: [] })
+      .withHelpers({ list })
+      .toCompileTo("<p><em>Nobody's here</em></p>");
+
+    expectTemplate('{{#list people}}Hello{{^}}{{message}}{{/list}}')
+      .withInput({
+        people: [],
+        message: "Nobody's here",
+      })
+      .withHelpers({ list })
+      .toCompileTo('<p>Nobody&#x27;s here</p>');
+  });
+
   describe('helpers hash', () => {
     it('providing a helpers hash', () => {
       expectTemplate('Goodbye {{cruel}} {{world}}!')
