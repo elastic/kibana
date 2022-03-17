@@ -144,7 +144,7 @@ export function EmptyStatusBox({
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink external color="primary" href={learnMoreLink}>
+          <EuiLink color="primary" href={learnMoreLink} target="_blank">
             <FormattedMessage
               id="xpack.observability.status.learnMoreButton"
               defaultMessage="Learn more"

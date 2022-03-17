@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup, DocLinksStart } from 'kibana/public';
 import { ObservabilityFetchDataPlugins } from '../../../typings/fetch_overview_data';
 
 export interface ObservabilityStatusContent {
@@ -19,7 +19,10 @@ export interface ObservabilityStatusContent {
   goToAppLink: string;
 }
 
-export const getContent = ({ http }: { http: HttpSetup }): ObservabilityStatusContent[] => {
+export const getContent = (
+  http: HttpSetup,
+  docLinks: DocLinksStart
+): ObservabilityStatusContent[] => {
   return [
     {
       id: 'infra_logs',
@@ -34,7 +37,7 @@ export const getContent = ({ http }: { http: HttpSetup }): ObservabilityStatusCo
         defaultMessage: 'Add integrations',
       }),
       addLink: http.basePath.prepend('/app/integrations/browse?q=logs'),
-      learnMoreLink: 'https://www.elastic.co/guide/en/observability/current/monitor-logs.html',
+      learnMoreLink: docLinks.links.observability.monitorLogs,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.logs.goToAppTitle', {
         defaultMessage: 'Show log stream',
       }),
@@ -53,7 +56,7 @@ export const getContent = ({ http }: { http: HttpSetup }): ObservabilityStatusCo
         defaultMessage: 'Add data',
       }),
       addLink: http.basePath.prepend('/app/home#/tutorial/apm'),
-      learnMoreLink: 'https://www.elastic.co/guide/en/apm/guide/current/apm-overview.html',
+      learnMoreLink: docLinks.links.apm.overview,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
         defaultMessage: 'Show services inventory',
       }),
@@ -71,7 +74,7 @@ export const getContent = ({ http }: { http: HttpSetup }): ObservabilityStatusCo
         defaultMessage: 'Add integrations',
       }),
       addLink: http.basePath.prepend('/app/integrations/browse?q=metrics'),
-      learnMoreLink: 'https://www.elastic.co/guide/en/observability/current/analyze-metrics.html',
+      learnMoreLink: docLinks.links.observability.analyzeMetrics,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
         defaultMessage: 'Show inventory',
       }),
@@ -89,8 +92,7 @@ export const getContent = ({ http }: { http: HttpSetup }): ObservabilityStatusCo
         defaultMessage: 'Add monitors',
       }),
       addLink: http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
-      learnMoreLink:
-        'https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html',
+      learnMoreLink: docLinks.links.observability.monitorUptimeSynthetics,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
         defaultMessage: 'Show monitors ',
       }),
@@ -109,7 +111,7 @@ export const getContent = ({ http }: { http: HttpSetup }): ObservabilityStatusCo
         defaultMessage: 'Add data',
       }),
       addLink: http.basePath.prepend('/app/home#/tutorial/apm'),
-      learnMoreLink: 'https://www.elastic.co/guide/en/observability/current/user-experience.html',
+      learnMoreLink: docLinks.links.observability.userExperience,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
         defaultMessage: 'Show dashboard',
       }),
@@ -128,7 +130,7 @@ export const getContent = ({ http }: { http: HttpSetup }): ObservabilityStatusCo
         defaultMessage: 'Create rules',
       }),
       addLink: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules'),
-      learnMoreLink: 'https://www.elastic.co/guide/en/observability/current/create-alerts.html',
+      learnMoreLink: docLinks.links.observability.createAlerts,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
         defaultMessage: 'Show alerts',
       }),

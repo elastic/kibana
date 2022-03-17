@@ -31,6 +31,7 @@ export interface DocLinks {
     readonly droppedTransactionSpans: string;
     readonly upgrading: string;
     readonly metaData: string;
+    readonly overview: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -289,6 +290,11 @@ export interface DocLinks {
     monitorUptime: string;
     tlsCertificate: string;
     uptimeDurationAnomaly: string;
+    monitorLogs: string;
+    analyzeMetrics: string;
+    monitorUptimeSynthetics: string;
+    userExperience: string;
+    createAlerts: string;
   }>;
   readonly alerting: Record<string, string>;
   readonly maps: Readonly<{

@@ -13,10 +13,10 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { ObservabilityAppServices } from '../../../application/types';
 
 export function ObservabilityStatus() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const { http, docLinks } = useKibana<ObservabilityAppServices>().services;
   const { hasDataMap } = useHasData();
 
-  const content = getContent({ http });
+  const content = getContent(http, docLinks);
 
   const boxes = content.map((app) => {
     return {
