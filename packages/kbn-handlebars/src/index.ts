@@ -416,11 +416,11 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   UndefinedLiteral() {
-    this.output.push('undefined');
+    this.output.push(undefined);
   }
 
   NullLiteral() {
-    this.output.push('null');
+    this.output.push(null);
   }
 
   private getParams(block: { params: hbs.AST.Expression[] }): any[] {

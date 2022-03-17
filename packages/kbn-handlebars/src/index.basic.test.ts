@@ -122,6 +122,14 @@ describe('basic context', () => {
   });
 
   it('should handle undefined and null', () => {
+    expectTemplate('{{awesome undefined null}}')
+      .withInput({
+        awesome(_undefined: any, _null: any, options: any) {
+          return (_undefined === undefined) + ' ' + (_null === null) + ' ' + typeof options;
+        },
+      })
+      .toCompileTo('true true object');
+
     expectTemplate('{{undefined}}')
       .withInput({
         undefined() {
