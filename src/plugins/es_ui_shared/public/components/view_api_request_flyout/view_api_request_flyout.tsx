@@ -7,7 +7,9 @@
  */
 // We want to allow both right-clicking to open in a new tab and clicking through
 // the "Open in Console" link. We could use `RedirectAppLinks` at the top level
-// but that inserts a div which messes up the layout of the flyout.
+// but that inserts a div which messes up the layout of the flyout. Adding the
+// `RedirectAppLinks` would also mean that we need to add another application
+// dependency to the component.
 /* eslint-disable @elastic/eui/href-or-on-click */
 
 import React, { useCallback } from 'react';
@@ -16,6 +18,7 @@ import { compressToEncodedURIComponent } from 'lz-string';
 
 import {
   EuiFlyout,
+  EuiFlyoutProps,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -24,18 +27,18 @@ import {
   EuiText,
   EuiSpacer,
   EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiCopy,
 } from '@elastic/eui';
 import { ApplicationStart } from 'src/core/public';
 import type { UrlService } from 'src/plugins/share/common/url_service';
 
+type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;
 interface ViewApiRequestFlyoutProps {
   title: string;
   description: string;
   request: string;
   closeFlyout: () => void;
+  flyoutProps?: FlyoutProps;
   navigateToUrl?: ApplicationStart['navigateToUrl'];
   urlService?: UrlService;
   canShowDevtools?: boolean;
@@ -46,6 +49,7 @@ export const ViewApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutP
   description,
   request,
   closeFlyout,
+  flyoutProps,
   navigateToUrl,
   urlService,
   canShowDevtools,
@@ -71,7 +75,7 @@ export const ViewApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutP
   const shouldShowDevToolsLink = canShowDevtools && consolePreviewLink !== undefined;
 
   return (
-    <EuiFlyout maxWidth={480} onClose={closeFlyout} data-test-subj="apiRequestFlyout">
+    <EuiFlyout onClose={closeFlyout} data-test-subj="apiRequestFlyout" {...flyoutProps}>
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="apiRequestFlyoutTitle">{title}</h2>
@@ -84,55 +88,44 @@ export const ViewApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutP
         </EuiText>
         <EuiSpacer />
 
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="s"
-          wrap={false}
-          responsive={false}
-          className="insRequestCodeViewer"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-            <div className="eui-textRight">
-              <EuiCopy textToCopy={request}>
-                {(copy) => (
-                  <EuiButtonEmpty
-                    size="xs"
-                    flush="right"
-                    iconType="copyClipboard"
-                    onClick={copy}
-                    data-test-subj="apiRequestFlyoutCopyClipboardButton"
-                  >
-                    <FormattedMessage
-                      id="esUi.viewApiRequest.copyToClipboardButton"
-                      defaultMessage="Copy to clipboard"
-                    />
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
-              {shouldShowDevToolsLink && (
-                <EuiButtonEmpty
-                  size="xs"
-                  flush="right"
-                  iconType="wrench"
-                  href={consolePreviewLink}
-                  onClick={consolePreviewClick}
-                  data-test-subj="apiRequestFlyoutOpenInConsoleButton"
-                >
-                  <FormattedMessage
-                    id="esUi.viewApiRequest.openInConsoleButton"
-                    defaultMessage="Open in Console"
-                  />
-                </EuiButtonEmpty>
-              )}
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiCodeBlock language="json" data-test-subj="apiRequestFlyoutBody">
-              {request}
-            </EuiCodeBlock>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <div className="eui-textRight">
+          <EuiCopy textToCopy={request}>
+            {(copy) => (
+              <EuiButtonEmpty
+                size="xs"
+                flush="right"
+                iconType="copyClipboard"
+                onClick={copy}
+                data-test-subj="apiRequestFlyoutCopyClipboardButton"
+              >
+                <FormattedMessage
+                  id="esUi.viewApiRequest.copyToClipboardButton"
+                  defaultMessage="Copy to clipboard"
+                />
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
+          {shouldShowDevToolsLink && (
+            <EuiButtonEmpty
+              size="xs"
+              flush="right"
+              iconType="wrench"
+              href={consolePreviewLink}
+              onClick={consolePreviewClick}
+              data-test-subj="apiRequestFlyoutOpenInConsoleButton"
+            >
+              <FormattedMessage
+                id="esUi.viewApiRequest.openInConsoleButton"
+                defaultMessage="Open in Console"
+              />
+            </EuiButtonEmpty>
+          )}
+        </div>
+        <EuiSpacer size="s" />
+        <EuiCodeBlock language="json" data-test-subj="apiRequestFlyoutBody">
+          {request}
+        </EuiCodeBlock>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
