@@ -13,7 +13,7 @@ import { ACTIVE_PANEL } from '../event_details';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BrowserFields, TimelineEventsDetailsItem } from '../../../../../../timelines/common';
-import { HostRisk } from '../../../../common/containers/hosts_risk/types';
+import { HostRisk } from '../../../../risk_score/containers';
 
 const OsqueryActionWrapper = styled.div`
   padding: 8px;

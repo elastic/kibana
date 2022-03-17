@@ -89,7 +89,7 @@ describe('SuperUser - Packs', () => {
     });
 
     it('should trigger validation when saved query is being chosen', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       findAndClickButton('Edit');
       findAndClickButton('Add query');
       cy.contains('Attach next query');
