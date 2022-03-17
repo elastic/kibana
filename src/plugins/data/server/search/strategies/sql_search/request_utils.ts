@@ -13,12 +13,10 @@ import { SearchSessionsConfigSchema } from '../../../../config';
 /**
  @internal
  */
-export async function getDefaultAsyncSubmitParams(
+export function getDefaultAsyncSubmitParams(
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Promise<
-  Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'>
-> {
+): Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'> {
   const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
 
   const keepAlive = useSearchSessions

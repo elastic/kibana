@@ -25,7 +25,7 @@ describe('request utils', () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
       });
-      const params = await getDefaultAsyncSubmitParams(mockConfig, {});
+      const params = getDefaultAsyncSubmitParams(mockConfig, {});
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
@@ -33,7 +33,7 @@ describe('request utils', () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
       });
-      const params = await getDefaultAsyncSubmitParams(mockConfig, {
+      const params = getDefaultAsyncSubmitParams(mockConfig, {
         sessionId: 'foo',
       });
       expect(params).toHaveProperty('keep_alive', '259200000ms');
@@ -44,7 +44,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = await getDefaultAsyncSubmitParams(mockConfig, {
+      const params = getDefaultAsyncSubmitParams(mockConfig, {
         sessionId: 'foo',
       });
       expect(params).toHaveProperty('keep_alive', '1m');
@@ -52,7 +52,7 @@ describe('request utils', () => {
 
     test('Uses `keep_on_completion` if enabled', async () => {
       const mockConfig = getMockSearchSessionsConfig({});
-      const params = await getDefaultAsyncSubmitParams(mockConfig, {
+      const params = getDefaultAsyncSubmitParams(mockConfig, {
         sessionId: 'foo',
       });
       expect(params).toHaveProperty('keep_on_completion', true);
@@ -63,7 +63,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = await getDefaultAsyncSubmitParams(mockConfig, {
+      const params = getDefaultAsyncSubmitParams(mockConfig, {
         sessionId: 'foo',
       });
       expect(params).toHaveProperty('keep_on_completion', false);

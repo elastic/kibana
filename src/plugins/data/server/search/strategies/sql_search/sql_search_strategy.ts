@@ -62,8 +62,8 @@ export const sqlSearchStrategyProvider = (
       } else {
         const params: SqlQueryRequest = {
           format: request.params?.format ?? 'json',
+          ...getDefaultAsyncSubmitParams(sessionConfig, options),
           ...request.params,
-          ...(await getDefaultAsyncSubmitParams(sessionConfig, options)),
         };
 
         const { headers, body } = await client.sql.query(params, {
