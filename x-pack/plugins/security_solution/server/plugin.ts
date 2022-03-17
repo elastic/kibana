@@ -89,6 +89,7 @@ import type {
   SecuritySolutionPluginStart,
   PluginInitializerContext,
 } from './plugin_contract';
+import { registerAlertsIndexPrivilegeDeprecations } from './deprecations/alerts_as_data_privileges';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -340,6 +341,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       deprecationsService: core.deprecations,
       getKibanaRoles: plugins.security?.privilegeDeprecationsService.getKibanaRoles,
       packageInfo: this.pluginContext.env.packageInfo,
+    });
+    registerAlertsIndexPrivilegeDeprecations({
+      deprecationsService: core.deprecations,
+      getKibanaRoles: plugins.security?.privilegeDeprecationsService.getKibanaRoles,
     });
 
     return {};
