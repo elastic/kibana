@@ -153,7 +153,7 @@ export function getColumns({
             'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
             {
               defaultMessage:
-                'The percentage of failed transactions for the selected service. HTTP transactions from the HTTP server perspective do not consider a 4xx status code (client error) a failure because the failure was caused by the caller, not the server.',
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
             }
           )}
         >

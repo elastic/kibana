@@ -53,7 +53,7 @@ export function TransactionBreakdownChart({
                 'xpack.apm.transactionBreakdown.chartHelp',
                 {
                   defaultMessage:
-                    'The average duration of each span type. "app" indicates that something was happening within the service. This could signal that the agent does not have auto-instrumentation for whatever was happening during that time or that the time was spent in the application code and not in database or external requests.',
+                    'The average duration of each span type. "app" indicates something was happening within the service—this could mean that the time was spent in application code and not in database or external requests, or that APM agent auto-instrumentation doesn\'t cover the executed code.',
                 }
               )}
               position="right"
