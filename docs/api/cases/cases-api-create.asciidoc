@@ -10,6 +10,12 @@ Creates a case.
 
 `POST <kibana host>:<port>/api/cases`
 
+=== Prerequisite
+
+You must have `all` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
 === Request body
 
 `connector`::
@@ -22,58 +28,66 @@ Creates a case.
 (Required, object) An object containing the connector fields.
 +
 --
-For {sn-itsm} connectors, refer to <<servicenow-action-configuration>>. For example:
+To create a case without a connector, specify `null`. If you want to omit any
+individual field, specify `null` as its value.
 
-* `urgency` (string \| null): The extent to which the incident resolution can delay.
-* `severity` (string \| null): The severity of the incident.
-* `impact` (string \| null): The effect an incident had on business.
-* `category` (string \| null): The category of the incident.
-* `subcategory` (string \| null): The subcategory of the incident.
+For {sn-itsm} connectors, refer to <<servicenow-action-configuration>>. For
+example:
+
+* `urgency`: The extent to which the incident resolution can delay.
+* `severity`: The severity of the incident.
+* `impact`: The effect an incident had on business.
+* `category`: The category of the incident.
+* `subcategory`: The subcategory of the incident.
 
 For {sn-sir} connectors, refer to <<servicenow-sir-action-configuration>>. For example:
 
 ////
 //TBD: Are these valid? They don't appear in the action docs
-* `destIp` (string \| null): A comma separated list of destination IPs.
-* `malwareHash` (string \| null): A comma separated list of malware hashes.
-* `malwareUrl` (string \| null): A comma separated list of malware URLs.
-* `sourceIp` (string \| null): A comma separated list of source IPs.
+* `destIp`: A comma separated list of destination IPs.
+* `malwareHash`: A comma separated list of malware hashes.
+* `malwareUrl`: A comma separated list of malware URLs.
+* `sourceIp`: A comma separated list of source IPs.
 ////
-* `priority` (string \| null): The priority of the incident.
-* `category` (string \| null): The category of the incident.
-* `subcategory` (string \| null): The subcategory of the incident.
+* `priority`: The priority of the incident.
+* `category`: The category of the incident.
+* `subcategory`: The subcategory of the incident.
 
 For {jira} connectors, refer to <<jira-action-configuration>>. For example:
 
-* `issueType` (string): The type of the issue.
-* `priority` (string \| null): The priority of the issue.
-* `parent` (string \| null): The key of the parent issue (Valid when the issue type is `Sub-task`).
+* `issueType`: The type of the issue.
+* `priority`: The priority of the issue.
+* `parent`: The key of the parent issue (Valid when the issue type is `Sub-task`).
 
 For {ibm-r} connectors, refer to <<resilient-action-configuration>>. For example:
 
-* `issueTypes` (number[]): The type of the incident.
-* `severityCode` (number): The severity code of the incident.
+* `issueTypes`: The type of the incident.
+* `severityCode`: The severity code of the incident.
 
-For {swimlane} connectors, refer to <<swimlane-action-configuration>>. For example:
+For {swimlane} connectors, refer to <<swimlane-action-configuration>>. For
+example:
 
-* `caseId` (string \| null): The case ID.
+* `caseId`: The case ID.
 //TBD: Is this correct or should it be comments and severity?
 --
 
 `id`::
-(Required, string) The identifier for the connector.
+(Required, string) The identifier for the connector. To create a case without a
+connector, use `none`.
 //To retrieve connector IDs, use <<cases-api-find-connectors>>).
 
 `name`::
-(Required, string) The name of the connector.
+(Required, string) The name of the connector. To create a case without a
+connector, use `none`.
 
 `type`::
 (Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
-`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`. To create a case
+without a connector, use `.none`.
 ====
 
 `description`::
-(Required, string) The case's description.
+(Required, string) The description for the case.
 
 `owner`::
 (Required, string) The application that owns the case. Valid values are:
@@ -124,6 +138,7 @@ POST api/cases
     "fields": {
       "issueType": "10006",
       "priority": "High",
+      "parent": null
     }
   },
   "settings": {
@@ -134,37 +149,10 @@ POST api/cases
 --------------------------------------------------
 // KIBANA
 
-Creates a case with no connector:
-
-[source,sh]
---------------------------------------------------
-POST api/cases
-{
-  "description": "James Bond clicked on a highly suspicious email
-  banner advertising cheap holidays for underpaid civil servants.",
-  "title": "This case will self-destruct in 5 seconds",
-  "tags": [
-    "phishing",
-    "social engineering"
-  ],
-  "connector": {
-    "id": "none",
-    "name": "none",
-    "type": ".none",
-    "fields": null
-  },
-  "settings": {
-    "syncAlerts": true
-  },
-  "owner": "securitySolution"
-}
---------------------------------------------------
-// KIBANA
-
-The API returns an JSON object that includes the user who created the case and
-the case's ID, version, and creation time. The case's ID is also its saved
-object ID (`savedObjectId`), used when pushing cases to external systems. For
-example:
+The API returns a JSON object that includes the user who created the case and
+the case identifier, version, and creation time. The case ID is also its saved
+object ID (`savedObjectId`), which is used when pushing cases to external
+systems. For example:
 
 [source,json]
 --------------------------------------------------
@@ -173,41 +161,43 @@ example:
   "version": "WzUzMiwxXQ==",
   "comments": [],
   "totalComment": 0,
+  "totalAlerts": 0,
   "title": "This case will self-destruct in 5 seconds",
-  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active",
   "tags": [
     "phishing",
     "social engineering",
     "bubblegum"
   ],
+  "settings": {
+    "syncAlerts": true
+  },
+  "owner": "securitySolution",
+  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active",
   "closed_at": null,
   "closed_by": null,
-  "created_at": "2020-05-13T09:16:17.416Z",
+  "created_at": "2022-05-13T09:16:17.416Z",
   "created_by": {
     "email": "ahunley@imf.usa.gov",
     "full_name": "Alan Hunley",
     "username": "ahunley"
   },
-  "external_service": null, <1>
   "status": "open",
   "updated_at": null,
   "updated_by": null,
   "connector": {
-    "id": "131d4448-abe0-4789-939d-8ef60680b498", <2>
+    "id": "131d4448-abe0-4789-939d-8ef60680b498", <1>
     "name": "My connector",
     "type": ".jira",
     "fields": {
       "issueType": "10006",
-      "priority": "High",
+      "parent": null,
+      "priority": "High"
     }
   },
-  "settings": {
-    "syncAlerts": true
-  },
-  "owner": "securitySolution",
+  "external_service": null <2>
 }
 --------------------------------------------------
 
-<1> The `external_service` object stores information when the case is pushed to
+<1> The default connector used to push cases to external services.
+<2> The `external_service` object stores information when the case is pushed to
 external systems.
-<2> The default connector used to push cases to external services.
