@@ -538,7 +538,6 @@ export class DiscoverPageObject extends FtrService {
    * Check if Discover app is currently rendered on the screen.
    */
   public async isDiscoverAppOnScreen(): Promise<boolean> {
-    await this.unifiedSearch.closeTourPopover();
     const result = await this.find.allByCssSelector('.dscPage');
     return result.length === 1;
   }
@@ -550,6 +549,7 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('Discover app on screen', async () => {
       return await this.isDiscoverAppOnScreen();
     });
+    await this.unifiedSearch.closeTourPopover();
   }
 
   public async showAllFilterActions() {

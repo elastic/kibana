@@ -44,7 +44,7 @@ export class DashboardVisualizationsService extends FtrService {
   }) {
     this.log.debug(`createSavedSearch(${name})`);
     await this.header.clickDiscover(true);
-    await this.unifiedSearch.closeTour();
+    await this.unifiedSearch.closeTourPopover();
     await this.timePicker.setHistoricalDataRange();
 
     if (query) {

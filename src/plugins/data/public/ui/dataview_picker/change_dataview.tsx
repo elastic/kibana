@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import {
   EuiPopover,
   EuiHorizontalRule,
-  EuiSelectableProps,
   EuiButton,
   EuiContextMenuPanel,
   EuiContextMenuItem,
@@ -26,7 +25,7 @@ import {
 import type { DataViewListItem } from 'src/plugins/data_views/public';
 import { IDataPluginServices } from '../../';
 import { useKibana } from '../../../../kibana_react/public';
-import type { ChangeDataViewTriggerProps } from './index';
+import type { DataViewPickerProps } from './index';
 import { DataViewsList } from './dataview_list';
 import { ChangeDataViewStyles } from './change_dataview.styles';
 
@@ -54,16 +53,7 @@ export function ChangeDataView({
   trigger,
   selectableProps,
   showNewMenuTour = false,
-}: {
-  trigger: ChangeDataViewTriggerProps;
-  isMissingCurrent?: boolean;
-  onChangeDataView: (newId: string) => void;
-  onAddField?: () => void;
-  onDataViewCreated?: () => void;
-  currentDataViewId?: string;
-  selectableProps?: EuiSelectableProps;
-  showNewMenuTour?: boolean;
-}) {
+}: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
