@@ -68,6 +68,7 @@ describe('validateMonitor', () => {
             lat: 33.4354332,
             lon: 73.4453553,
           },
+          isServiceManaged: true,
           url: 'https://test-url.com',
         },
       ],
