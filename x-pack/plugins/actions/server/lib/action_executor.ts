@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import {
   validateParams,
@@ -202,21 +202,8 @@ export class ActionExecutor {
               relation: SAVED_OBJECT_REL_PRIMARY,
             },
           ],
+          relatedSavedObjects,
         });
-
-        for (const relatedSavedObject of relatedSavedObjects || []) {
-          const ruleTypeId = relatedSavedObject.type === 'alert' ? relatedSavedObject.typeId : null;
-          if (ruleTypeId) {
-            set(event, 'kibana.alert.rule.rule_type_id', ruleTypeId);
-          }
-          event.kibana?.saved_objects?.push({
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: relatedSavedObject.type,
-            id: relatedSavedObject.id,
-            type_id: relatedSavedObject.typeId,
-            namespace: relatedSavedObject.namespace,
-          });
-        }
 
         eventLogger.startTiming(event);
 
@@ -353,21 +340,9 @@ export class ActionExecutor {
           relation: SAVED_OBJECT_REL_PRIMARY,
         },
       ],
+      relatedSavedObjects,
     });
 
-    for (const relatedSavedObject of (relatedSavedObjects || []) as RelatedSavedObjects) {
-      const ruleTypeId = relatedSavedObject.type === 'alert' ? relatedSavedObject.typeId : null;
-      if (ruleTypeId) {
-        set(event, 'kibana.alert.rule.rule_type_id', ruleTypeId);
-      }
-      event.kibana?.saved_objects?.push({
-        rel: SAVED_OBJECT_REL_PRIMARY,
-        type: relatedSavedObject.type,
-        id: relatedSavedObject.id,
-        type_id: relatedSavedObject.typeId,
-        namespace: relatedSavedObject.namespace,
-      });
-    }
     eventLogger.logEvent(event);
   }
 }

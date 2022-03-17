@@ -155,4 +155,66 @@ describe('createActionEventLogRecordObject', () => {
       },
     });
   });
+
+  test('created action event "execute" with related saved object', async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        executionId: '123abc',
+        consumer: 'test-consumer',
+        savedObjects: [
+          {
+            id: '2',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+        relatedSavedObjects: [
+          {
+            type: 'alert',
+            typeId: '.rule-type',
+            id: '123',
+          },
+        ],
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
+            rule_type_id: '.rule-type',
+          },
+        },
+        saved_objects: [
+          {
+            id: '2',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+          },
+          {
+            id: '123',
+            rel: 'primary',
+            type: 'alert',
+            namespace: undefined,
+            type_id: '.rule-type',
+          },
+        ],
+      },
+      message: 'action execution start',
+    });
+  });
 });
