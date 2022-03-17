@@ -68,9 +68,11 @@ export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }:
     };
   }, [onKeyDown, toggleChrome, setIsFullscreen]);
 
-  if (!isMounted() && toggleChrome) {
-    setIsFullscreen(true);
-  }
+  useEffect(() => {
+    if (!isMounted() && toggleChrome) {
+      setIsFullscreen(true);
+    }
+  }, [isMounted, setIsFullscreen, toggleChrome]);
 
   // override the z-index: 1 applied to all non-eui elements that are in :focus via kui
   // see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
