@@ -85,6 +85,25 @@ export class ServiceAPIClient {
     return this.callAPI('POST', { ...data, runOnce: true });
   }
 
+  async checkIfAccountAllowed(url: string) {
+    try {
+      const { data } = await axios({
+        method: 'GET',
+        url: url + '/allowed',
+        headers:
+          process.env.NODE_ENV !== 'production' && this.authorization
+            ? {
+                Authorization: this.authorization,
+              }
+            : undefined,
+        httpsAgent: this.getHttpsAgent(),
+      });
+      this.logger.info(JSON.stringify(data));
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
     { monitors: allMonitors, output, runOnce }: ServiceData
@@ -99,6 +118,8 @@ export class ServiceAPIClient {
       const monitorsStreams = monitors.map(({ locations, ...rest }) =>
         convertToDataStreamFormat(rest)
       );
+
+      this.checkIfAccountAllowed(url);
 
       return axios({
         method,
