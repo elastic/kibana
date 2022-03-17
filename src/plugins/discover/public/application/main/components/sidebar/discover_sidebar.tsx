@@ -37,7 +37,7 @@ import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-import { DataViewField } from '../../../../../../data_views/common';
+import { DataViewField } from '../../../../../../data_views/public';
 
 /**
  * Default number of available fields displayed and added on scroll

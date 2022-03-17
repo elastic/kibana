@@ -71,8 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('Generating signals from source indexes', () => {
+  describe('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await createSignalsIndex(supertest, log);
@@ -693,6 +692,18 @@ export default ({ getService }: FtrProviderContext) => {
           expect(shellSignals.length).eql(100);
           expect(buildingBlocks.length).eql(200);
         });
+
+        it('generates signals when an index name contains special characters to encode', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['auditbeat-*', '<my-index-{now/d}*>']),
+            query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(1);
+        });
       });
 
       describe('Threshold Rules', () => {
@@ -1160,7 +1171,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Signal deduplication', async () => {
+    describe('Signal deduplication', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });

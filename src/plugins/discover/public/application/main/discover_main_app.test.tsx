@@ -12,7 +12,7 @@ import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { SavedObject } from '../../../../../core/types';
-import { IndexPatternAttributes } from '../../../../data/common';
+import type { DataViewAttributes } from '../../../../data_views/public';
 import { setHeaderActionMenuMounter } from '../../kibana_services';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -25,7 +25,7 @@ describe('DiscoverMainApp', () => {
   test('renders', () => {
     const indexPatternList = [indexPatternMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
+    }) as unknown as Array<SavedObject<DataViewAttributes>>;
     const props = {
       indexPatternList,
       savedSearch: savedSearchMock,
