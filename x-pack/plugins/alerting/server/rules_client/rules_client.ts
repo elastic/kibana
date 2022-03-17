@@ -356,7 +356,7 @@ export class RulesClient {
       } else {
         // just log warning but allow rule to be created
         this.logger.warn(
-          `Rule schedule interval ${data.schedule.interval} is below the configured minimum of ${this.minimumScheduleInterval.value}. Running rules at below the configured minimum may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
         );
       }
     }
@@ -1040,7 +1040,7 @@ export class RulesClient {
       } else {
         // just log warning but allow rule to be updated
         this.logger.warn(
-          `Rule schedule interval ${data.schedule.interval} is below the configured minimum of ${this.minimumScheduleInterval.value}. Running rules at below the configured minimum may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
         );
       }
     }
