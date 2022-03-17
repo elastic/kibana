@@ -46,7 +46,7 @@ Popover.displayName = 'Popover';
 
 export interface UtilityBarActionProps extends LinkIconProps {
   popoverContent?: (closePopover: () => void) => React.ReactNode;
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
   ownFocus?: boolean;
 }
 
@@ -54,7 +54,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
   ({
     children,
     color,
-    dataTestSubj,
+    'data-test-subj': dataTestSubj,
     disabled,
     href,
     iconSide,

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function CasesAppServiceProvider({ getService }: FtrProviderContext) {
+export function CasesAppServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const header = getPageObject('header');
   return {
     /**
      * Opens the create case page pressing the "create case" button.
@@ -34,7 +36,7 @@ export function CasesAppServiceProvider({ getService }: FtrProviderContext) {
      * Doesn't do navigation. Only works if you are already inside a cases app page.
      * Does not work with the cases flyout.
      */
-    async createCaseFromCreateCasePage(caseTitle: string = 'test' + uuid.v4()) {
+    async createCaseFromCreateCasePage(caseTitle: string = 'test-' + uuid.v4()) {
       await this.openCreateCasePage();
 
       // case name
@@ -120,6 +122,25 @@ export function CasesAppServiceProvider({ getService }: FtrProviderContext) {
           '[data-test-subj="header-page-supplements"] [data-test-subj="status-badge-open"]'
         )
       );
+    },
+
+    async deleteAllBulkListAction() {
+      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
+      const button = await find.byCssSelector('[data-test-subj="case-table-bulk-actions"] button');
+      await button.click();
+      await testSubjects.click('cases-bulk-delete-button');
+      await testSubjects.click('confirmModalConfirmButton');
+    },
+
+    async deleteAllCasesFromList() {
+      let rows: WebElementWrapper[];
+      do {
+        rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+        if (rows.length > 0) {
+          await this.deleteAllBulkListAction();
+          await header.waitUntilLoadingHasFinished();
+        }
+      } while (rows.length > 0);
     },
   };
 }
