@@ -31,7 +31,7 @@ export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 
 interface Props {
   timefilter: TimefilterContract;
-  indexPattern: DataView;
+  dataView: DataView;
   disabled: boolean;
   query?: QueryDslQueryContainer;
   callback?: (a: any) => void;
@@ -48,7 +48,7 @@ type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TI
 // to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
 export const FullTimeRangeSelector: FC<Props> = ({
   timefilter,
-  indexPattern,
+  dataView,
   query,
   disabled,
   callback,
@@ -61,31 +61,24 @@ export const FullTimeRangeSelector: FC<Props> = ({
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(
-    async (q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
+    async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
       try {
-        const fullTimeRange = await setFullTimeRange(
-          timefilter,
-          indexPattern,
-          q,
-          excludeFrozenData,
-          toasts
-        );
+        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData, toasts);
         if (typeof callback === 'function') {
           callback(fullTimeRange);
         }
       } catch (e) {
-        toasts.addError(e, {
-          title: i18n.translate(
+        toasts.addDanger(
+          i18n.translate(
             'xpack.dataVisualizer.index.fullTimeRangeSelector.errorSettingTimeRangeNotification',
             {
               defaultMessage: 'An error occurred setting the time range.',
             }
-          ),
-        });
+          )
+        );
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [callback, timefilter, toasts, indexPattern.id]
+    [callback, timefilter, toasts]
   );
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -99,10 +92,10 @@ export const FullTimeRangeSelector: FC<Props> = ({
   const setPreference = useCallback(
     (id: string) => {
       setFrozenDataPreference(id as FrozenTierPreference);
-      setRange(query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
+      setRange(dataView, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
       closePopover();
     },
-    [query, setFrozenDataPreference, setRange]
+    [dataView, query, setFrozenDataPreference, setRange]
   );
 
   const onButtonClick = () => {
@@ -171,7 +164,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
       <EuiToolTip content={buttonTooltip}>
         <EuiButton
           isDisabled={disabled}
-          onClick={() => setRange(query, true)}
+          onClick={() => setRange(dataView, query, true)}
           data-test-subj="dataVisualizerButtonUseFullData"
         >
           <FormattedMessage

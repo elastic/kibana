@@ -8,10 +8,10 @@
 import moment from 'moment';
 import { TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from 'kibana/public';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../../src/plugins/data_views/public';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { getTimeFieldRange } from '../../services/time_field_range';
 import type { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
@@ -24,16 +24,15 @@ export interface TimeRange {
 
 export async function setFullTimeRange(
   timefilter: TimefilterContract,
-  indexPattern: IndexPattern,
+  dataView: DataView,
   query?: QueryDslQueryContainer,
   excludeFrozenData?: boolean,
   toasts?: ToastsStart
 ): Promise<GetTimeFieldRangeResponse> {
-  const runtimeMappings = indexPattern.getRuntimeMappings();
-
+  const runtimeMappings = dataView.getRuntimeMappings();
   const resp = await getTimeFieldRange({
-    index: indexPattern.title,
-    timeFieldName: indexPattern.timeFieldName,
+    index: dataView.title,
+    timeFieldName: dataView.timeFieldName,
     query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
     ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
   });
