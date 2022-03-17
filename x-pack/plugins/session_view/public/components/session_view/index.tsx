@@ -87,10 +87,10 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   return (
     <>
-      <EuiFlexGroup>
+      <div css={styles.nonGrowGroup}>
         <EuiFlexItem
           data-test-subj="sessionView:sessionViewProcessEventsSearch"
-          css={{ position: 'relative' }}
+          css={{ position: 'relative', flexGrow: 1 }}
         >
           <SessionViewSearchBar
             searchQuery={searchQuery}
@@ -112,7 +112,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
             />
           </EuiButton>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </div>
       <EuiResizableContainer>
         {(EuiResizablePanel, EuiResizableButton) => (
           <>

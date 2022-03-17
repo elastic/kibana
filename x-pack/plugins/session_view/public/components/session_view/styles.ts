@@ -26,9 +26,16 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       height: `${height}px`,
     };
 
+    const nonGrowGroup: CSSObject = {
+      display: 'flex',
+      flexGrow: 0,
+      alignItems: 'stretch',
+    };
+
     return {
       processTree,
       detailPanel,
+      nonGrowGroup,
     };
   }, [height, euiTheme]);
 

@@ -25,7 +25,7 @@ export const useStyles = () => {
       borderWidth: border.width.thin,
       borderRadius: border.radius.medium,
       maxWidth: 800,
-      backgroundColor: 'white',
+      backgroundColor: colors.mediumShade,
       '&>div': {
         borderTop: border.thin,
         marginTop: size.m,
