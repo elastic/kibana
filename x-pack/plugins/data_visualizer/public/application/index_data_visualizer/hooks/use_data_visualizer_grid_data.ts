@@ -526,6 +526,7 @@ export const useDataVisualizerGridData = (
     searchQuery,
     extendedColumns,
     documentCountStats: overallStats.documentCountStats,
+    documentCountStatsRandom: overallStats.documentCountStatsRandom,
     metricsStats,
     overallStats,
     timefilter,

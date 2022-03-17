@@ -242,6 +242,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     overallStats,
     searchQuery,
     documentCountStats,
+    documentCountStatsRandom,
     metricsStats,
     timefilter,
     setLastRefresh,
@@ -444,6 +445,16 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     />
                   </EuiFlexItem>
                 )}
+                {overallStats?.totalCount !== undefined && (
+                  <EuiFlexItem grow={true}>
+                    <DocumentCountContent
+                      random={true}
+                      documentCountStats={documentCountStatsRandom}
+                      totalCount={overallStats.totalCount}
+                    />
+                  </EuiFlexItem>
+                )}
+
                 <SearchPanel
                   indexPattern={currentIndexPattern}
                   searchString={searchString}

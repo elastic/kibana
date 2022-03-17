@@ -14,7 +14,10 @@ import type {
   OverallStatsSearchStrategyParams,
 } from '../../../../../common/types/field_stats';
 
-export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
+export const getDocumentCountStatsRequest = (
+  params: OverallStatsSearchStrategyParams,
+  random = false
+) => {
   const {
     index,
     timeFieldName,
@@ -28,18 +31,37 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
-  // Don't use the sampler aggregation as this can lead to some potentially
-  // confusing date histogram results depending on the date range of data amongst shards.
-
-  const aggs = {
-    eventRate: {
-      date_histogram: {
-        field: timeFieldName,
-        fixed_interval: `${intervalMs}ms`,
-        min_doc_count: 1,
+  let aggs;
+  if (random) {
+    aggs = {
+      sampling: {
+        random_sampler: {
+          probability: 0.1,
+        },
+        aggs: {
+          eventRate: {
+            date_histogram: {
+              field: timeFieldName,
+              fixed_interval: `${intervalMs}ms`,
+              min_doc_count: 1,
+            },
+          },
+        },
       },
-    },
-  };
+    };
+  } else {
+    // Don't use the sampler aggregation as this can lead to some potentially
+    // confusing date histogram results depending on the date range of data amongst shards.
+    aggs = {
+      eventRate: {
+        date_histogram: {
+          field: timeFieldName,
+          fixed_interval: `${intervalMs}ms`,
+          min_doc_count: 1,
+        },
+      },
+    };
+  }
 
   const searchBody = {
     query: {
@@ -73,6 +95,37 @@ export const processDocumentCountStats = (
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
     body,
     ['aggregations', 'eventRate', 'buckets'],
+    []
+  );
+  each(dataByTimeBucket, (dataForTime) => {
+    const time = dataForTime.key;
+    buckets[time] = dataForTime.doc_count;
+  });
+
+  return {
+    interval: params.intervalMs,
+    buckets,
+    timeRangeEarliest: params.earliest,
+    timeRangeLatest: params.latest,
+  };
+};
+
+export const processDocumentCountRandomStats = (
+  body: estypes.SearchResponse | undefined,
+  params: OverallStatsSearchStrategyParams
+): DocumentCountStats | undefined => {
+  if (
+    !body ||
+    params.intervalMs === undefined ||
+    params.earliest === undefined ||
+    params.latest === undefined
+  ) {
+    return undefined;
+  }
+  const buckets: { [key: string]: number } = {};
+  const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
+    body,
+    ['aggregations', 'sampling', 'eventRate', 'buckets'],
     []
   );
   each(dataByTimeBucket, (dataForTime) => {

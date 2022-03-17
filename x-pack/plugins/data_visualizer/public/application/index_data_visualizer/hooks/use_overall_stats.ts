@@ -34,6 +34,7 @@ import type {
 } from '../../../../common/types/field_stats';
 import {
   getDocumentCountStatsRequest,
+  processDocumentCountRandomStats,
   processDocumentCountStats,
 } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
@@ -209,10 +210,25 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           )
         : of(undefined);
 
+    const documentCountStatsRandom$ =
+      !fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
+        ? data.search.search(
+            {
+              params: getDocumentCountStatsRequest(searchStrategyParams, true),
+            },
+            searchOptions
+          )
+        : of(undefined);
+
     const sub = rateLimitingForkJoin<
       AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
     >(
-      [documentCountStats$, ...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs],
+      [
+        documentCountStats$,
+        documentCountStatsRandom$,
+        ...aggregatableOverallStatsObs,
+        ...nonAggregatableFieldsObs,
+      ],
       MAX_CONCURRENT_REQUESTS
     );
 
@@ -222,6 +238,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
           const nonAggregatableOverallStatsResp: IKibanaSearchResponse[] = [];
           const documentCountStatsResp = value[0];
+          const documentCountStatsRandomResp = value[1];
+          // @todo: remove
+          console.log('documentCountStatsRandomResp', documentCountStatsRandomResp);
 
           value.forEach((resp, idx) => {
             if (!resp) return;
@@ -248,6 +267,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
               documentCountStatsResp?.rawResponse,
               searchStrategyParams
             ),
+            documentCountStatsRandom: processDocumentCountRandomStats(
+              documentCountStatsRandomResp?.rawResponse,
+              searchStrategyParams
+            ),
+
             ...nonAggregatableOverallStats,
             ...aggregatableOverallStats,
           });
