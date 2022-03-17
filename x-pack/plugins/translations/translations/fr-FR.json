@@ -780,7 +780,6 @@
     "xpack.lens.xyChart.splitSeries": "Répartir par",
     "xpack.lens.xyChart.tickLabels": "Étiquettes de graduation",
     "expressionXY.xyVis.tickLabelsVisibilitySettings.help": "Afficher les étiquettes de graduation des axes X et Y",
-    "xpack.lens.xyChart.title.help": "Titre de l'axe",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "Ce paramètre s'applique uniquement lorsque l'axe du haut est activé.",
     "xpack.lens.xyChart.topAxisLabel": "Axe du haut",
     "xpack.lens.xyChart.upperBoundLabel": "Limite supérieure",

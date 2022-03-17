@@ -935,7 +935,6 @@
     "xpack.lens.xyChart.splitSeries": "细分方式",
     "xpack.lens.xyChart.tickLabels": "刻度标签",
     "expressionXY.xyVis.tickLabelsVisibilitySettings.help": "显示 x 和 y 轴刻度标签",
-    "xpack.lens.xyChart.title.help": "轴标题",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "此设置仅在启用顶轴时应用。",
     "xpack.lens.xyChart.topAxisLabel": "顶轴",
     "xpack.lens.xyChart.upperBoundLabel": "上边界",

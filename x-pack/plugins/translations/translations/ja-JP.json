@@ -931,7 +931,6 @@
     "xpack.lens.xyChart.splitSeries": "内訳の基準",
     "xpack.lens.xyChart.tickLabels": "目盛ラベル",
     "expressionXY.xyVis.tickLabelsVisibilitySettings.help": "xおよびy軸の目盛ラベルを表示",
-    "xpack.lens.xyChart.title.help": "軸のタイトル",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "この設定は、上の軸が有効であるときにのみ適用されます。",
     "xpack.lens.xyChart.topAxisLabel": "上の軸",
     "xpack.lens.xyChart.upperBoundLabel": "上界",
