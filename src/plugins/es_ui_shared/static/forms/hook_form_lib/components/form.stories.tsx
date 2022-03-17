@@ -36,7 +36,7 @@ export default {
 
 type Args = Pick<FormProps, 'children' | 'FormWrapper'>;
 
-const { Validation, DeSerializer } = formStories;
+const { DefaultValue, Validation, DeSerializer } = formStories;
 
 /**
  * Validate the form and return its data.
@@ -78,22 +78,6 @@ export const Simple = (args: Args) => {
   );
 };
 
-// --- DEFAULT VALUE
-
-// The defaultValue would probably come from an HTTP request
-const formDefaultValue = { title: 'Title of the post' };
-
-export const DefaultValue = (args: Args) => {
-  const { form } = useForm({ defaultValue: formDefaultValue });
-
-  return (
-    <Form form={form} {...args}>
-      <UseField<string> path="title" component={TextField} config={{ ...titleConfigBase }} />
-      <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
-    </Form>
-  );
-};
-
 // --- FORM SCHEMA
 
 const formSchema = {
@@ -115,7 +99,7 @@ export const Schema = (args: Args) => {
   );
 };
 
-export { Validation, DeSerializer };
+export { DefaultValue, Validation, DeSerializer };
 
 // --- CHANGE LISTENERS
 
