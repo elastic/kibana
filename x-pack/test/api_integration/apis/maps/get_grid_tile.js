@@ -13,16 +13,15 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('getGridTile', () => {
-    it('should return vector tile with expected headers', async () => {
-      const resp = await supertest
-        .get(
-          `/api/maps/mvt/getGridTile/3/2/3.pbf\
+    const URL = `/api/maps/mvt/getGridTile/3/2/3.pbf\
 ?geometryFieldName=geo.coordinates\
 &index=logstash-*\
 &gridPrecision=8\
-&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&renderAs=point`
-        )
+&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))`;
+
+    it('should return vector tile with expected headers', async () => {
+      const resp = await supertest
+        .get(URL + '&renderAs=point')
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -35,14 +34,7 @@ export default function ({ getService }) {
     
     it('should return vector tile containing clusters when renderAs is "point"', async () => {
       const resp = await supertest
-        .get(
-          `/api/maps/mvt/getGridTile/3/2/3.pbf\
-?geometryFieldName=geo.coordinates\
-&index=logstash-*\
-&gridPrecision=8\
-&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&renderAs=point`
-        )
+        .get(URL + '&renderAs=point')
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -68,14 +60,7 @@ export default function ({ getService }) {
 
     it('should return vector tile containing clusters with renderAs is "heatmap"', async () => {
       const resp = await supertest
-        .get(
-          `/api/maps/mvt/getGridTile/3/2/3.pbf\
-?geometryFieldName=geo.coordinates\
-&index=logstash-*\
-&gridPrecision=8\
-&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&renderAs=heatmap`
-        )
+        .get(URL + '&renderAs=heatmap')
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -101,14 +86,7 @@ export default function ({ getService }) {
 
     it('should return vector tile containing grid features when renderAs is "grid"', async () => {
       const resp = await supertest
-        .get(
-          `/api/maps/mvt/getGridTile/3/2/3.pbf\
-?geometryFieldName=geo.coordinates\
-&index=logstash-*\
-&gridPrecision=8\
-&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&renderAs=grid`
-        )
+        .get(URL + '&renderAs=grid')
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -141,14 +119,7 @@ export default function ({ getService }) {
 
     it('should return vector tile containing hexegon features when renderAs is "hex"', async () => {
       const resp = await supertest
-        .get(
-          `/api/maps/mvt/getGridTile/3/2/3.pbf\
-?geometryFieldName=geo.coordinates\
-&index=logstash-*\
-&gridPrecision=8\
-&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&renderAs=hex`
-        )
+        .get(URL + '&renderAs=hex')
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
@@ -166,7 +137,7 @@ export default function ({ getService }) {
         _key: '85264a33fffffff',
         'avg_of_bytes.value': 9252,
       });
-      
+
       // assert feature geometry is hex
       expect(gridFeature.loadGeometry()).to.eql([
         [
@@ -183,14 +154,7 @@ export default function ({ getService }) {
 
     it('should return vector tile with meta layer', async () => {
       const resp = await supertest
-        .get(
-          `/api/maps/mvt/getGridTile/3/2/3.pbf\
-?geometryFieldName=geo.coordinates\
-&index=logstash-*\
-&gridPrecision=8\
-&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&renderAs=point`
-        )
+        .get(URL + '&renderAs=point')
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
