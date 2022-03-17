@@ -229,7 +229,16 @@ export const IndexingRulesTable: React.FC = () => {
         clearFlashMessages();
       }}
       title=""
-      bottomRows={[<EuiText size="s">Include everything else from this source</EuiText>]}
+      bottomRows={[
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.sources.indexingRulesTable.includeEverythingMessage',
+            {
+              defaultMessage: 'Include everything else from this source',
+            }
+          )}
+        </EuiText>,
+      ]}
       canRemoveLastItem
       showRowIndex
     />
