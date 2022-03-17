@@ -51,8 +51,8 @@ export class SavedObjectNotFound extends KbnError {
 }
 
 /**
- * Checks whether the given error is a SavedObjectNotFoundError
- * @param {boolean} error - whether the error is a SavedObjectNotFoundError
+ * Checks whether the given error is a SavedObjectNotFound error
+ * @param {boolean} error - true iif the error is a SavedObjectNotFound error
  */
 export function isSavedObjectNotFoundError(error: Error | undefined): error is SavedObjectNotFound {
   // we can't check "error instanceof SavedObjectNotFound" since this class can live in a separate bundle
