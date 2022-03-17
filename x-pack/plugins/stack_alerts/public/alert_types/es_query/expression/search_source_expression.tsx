@@ -123,7 +123,7 @@ export const SearchSourceExpression = ({
         title={
           <FormattedMessage
             id="xpack.stackAlerts.searchThreshold.ui.notEditable"
-            defaultMessage="The data view, query, and filter are initialized in Discover cannot be edited subsequently."
+            defaultMessage="The data view, query, and filter are initialized in Discover and cannot be edited."
           />
         }
         iconType="iInCircle"
