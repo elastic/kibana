@@ -77,6 +77,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
       onSubmit(newTitle);
     }
     setEditMode(false);
+    setErrors([]);
   }, [newTitle, onSubmit, title]);
 
   const handleOnChange = useCallback(
@@ -99,6 +100,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
           <EuiForm isInvalid={hasErrors} error={errors}>
             <EuiFormRow label="Case name">
               <EuiFieldText
+                fullWidth={true}
                 onChange={handleOnChange}
                 value={`${newTitle}`}
                 data-test-subj="editable-title-input-field"
@@ -107,10 +109,22 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
           </EuiForm>
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="editable-title-cancel-btn" onClick={onCancel}>
+          <EuiButtonEmpty
+            data-test-subj="editable-title-cancel-btn"
+            iconType="cross"
+            onClick={onCancel}
+            size="s"
+          >
             {i18n.CANCEL}
           </EuiButtonEmpty>
-          <EuiButton data-test-subj="editable-title-submit-btn" fill onClick={onClickSubmit}>
+          <EuiButton
+            color="success"
+            data-test-subj="editable-title-submit-btn"
+            fill
+            iconType="save"
+            onClick={onClickSubmit}
+            size="s"
+          >
             {i18n.SAVE}
           </EuiButton>
         </EuiModalFooter>

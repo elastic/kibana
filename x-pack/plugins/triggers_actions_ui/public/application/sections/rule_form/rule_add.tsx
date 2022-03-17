@@ -18,6 +18,7 @@ import {
   IErrorObject,
   RuleAddProps,
   RuleTypeIndex,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
@@ -33,6 +34,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 
 const RuleAdd = ({
   consumer,
@@ -45,6 +47,7 @@ const RuleAdd = ({
   reloadRules,
   onSave,
   metadata,
+  filteredSolutions,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -67,6 +70,7 @@ const RuleAdd = ({
   const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
     rule: initialRule,
   });
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
   const [initialRuleParams, setInitialRuleParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
@@ -91,6 +95,12 @@ const RuleAdd = ({
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
 
   useEffect(() => {
     if (ruleTypeId) {
@@ -178,7 +188,7 @@ const RuleAdd = ({
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
     rule as Rule,
     ruleType,
-    rule.ruleTypeId ? ruleTypeIndex?.get(rule.ruleTypeId) : undefined
+    config
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
@@ -230,6 +240,7 @@ const RuleAdd = ({
             <EuiFlyoutBody>
               <RuleForm
                 rule={rule}
+                config={config}
                 dispatch={dispatch}
                 errors={ruleErrors}
                 canChangeTrigger={canChangeTrigger}
@@ -242,6 +253,7 @@ const RuleAdd = ({
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
+                filteredSolutions={filteredSolutions}
               />
             </EuiFlyoutBody>
             <RuleAddFooter

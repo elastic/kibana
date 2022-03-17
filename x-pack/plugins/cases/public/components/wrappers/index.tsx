@@ -14,3 +14,8 @@ export const ContentWrapper = styled.div`
       padding: 0 0 ${gutterTimeline} 0;
     `};
 `;
+
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;

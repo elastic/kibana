@@ -234,7 +234,6 @@ export interface RuleType<
     | 'defaultActionGroupId'
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
-    | 'minimumScheduleInterval'
     | 'doesSetRecoveryContext'
   > {
   actionVariables: ActionVariables;
@@ -340,10 +339,15 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
+  filteredSolutions?: string[] | undefined;
 }
 
 export enum Percentiles {
   P50 = 'P50',
   P95 = 'P95',
   P99 = 'P99',
+}
+
+export interface TriggersActionsUiConfig {
+  minimumScheduleInterval?: string;
 }
