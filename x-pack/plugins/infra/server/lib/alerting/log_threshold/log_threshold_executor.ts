@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { join } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import {
@@ -283,12 +284,7 @@ export const processUngroupedResults = (
 
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
     const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value);
-
-    const relativeAlertLink = getAlertLink(new Date(indexedStartedAt).getTime());
-    const fullAlertLink = kibanaBaseUrl
-      ? new URL(relativeAlertLink, kibanaBaseUrl)
-      : relativeAlertLink;
-
+    const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
     alertUpdater(alert, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -298,7 +294,7 @@ export const processUngroupedResults = (
           group: null,
           isRatio: false,
           reason: reasonMessage,
-          viewInAppUrl: fullAlertLink,
+          viewInAppUrl
         },
       },
     ]);
@@ -329,12 +325,7 @@ export const processUngroupedRatioResults = (
       timeUnit
     );
     const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value);
-
-    const relativeAlertLink = getAlertLink(new Date(indexedStartedAt).getTime());
-    const fullAlertLink = kibanaBaseUrl
-      ? new URL(relativeAlertLink, kibanaBaseUrl)
-      : relativeAlertLink;
-
+    const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
     alertUpdater(alert, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -345,7 +336,7 @@ export const processUngroupedRatioResults = (
           group: null,
           isRatio: true,
           reason: reasonMessage,
-          viewInAppUrl: fullAlertLink,
+          viewInAppUrl,
         },
       },
     ]);
@@ -416,12 +407,7 @@ export const processGroupByResults = (
         timeUnit
       );
       const alert = alertFactory(group.name, reasonMessage, documentCount, count.value);
-
-      const relativeAlertLink = getAlertLink(new Date(indexedStartedAt).getTime());
-      const fullAlertLink = kibanaBaseUrl
-        ? new URL(relativeAlertLink, kibanaBaseUrl)
-        : relativeAlertLink;
-
+      const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
       alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -431,7 +417,7 @@ export const processGroupByResults = (
             group: group.name,
             isRatio: false,
             reason: reasonMessage,
-            viewInAppUrl: fullAlertLink,
+            viewInAppUrl
           },
         },
       ]);
@@ -475,12 +461,7 @@ export const processGroupByRatioResults = (
         timeUnit
       );
       const alert = alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value);
-
-      const relativeAlertLink = getAlertLink(new Date(indexedStartedAt).getTime());
-      const fullAlertLink = kibanaBaseUrl
-        ? new URL(relativeAlertLink, kibanaBaseUrl)
-        : relativeAlertLink;
-
+      const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
       alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -491,7 +472,7 @@ export const processGroupByRatioResults = (
             group: numeratorGroup.name,
             isRatio: true,
             reason: reasonMessage,
-            viewInAppUrl: fullAlertLink,
+            viewInAppUrl,
           },
         },
       ]);
@@ -520,6 +501,16 @@ export const updateAlert: AlertUpdater = (alert, state, actions) => {
     alertState: state,
   });
 };
+
+const getViewInAppUrl = (kibanaBaseUrl: string | undefined, indexedStartedAt: string) => {
+  // Need to extract the kibana base path if exists (server.basePath) to concatenate it correctly using the URL Api.
+  const kibanaBasePath = kibanaBaseUrl ? new URL(kibanaBaseUrl).pathname : '';
+  const relativeViewInAppUrl = getAlertLink(new Date(indexedStartedAt).getTime());
+  const fullViewInAppUrl = kibanaBaseUrl
+    ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBasePath)
+    : relativeViewInAppUrl;
+  return fullViewInAppUrl
+}
 
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
