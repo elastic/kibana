@@ -51,10 +51,13 @@ function joinQueries(queries: Query[][]) {
 interface LayerMetaInfo {
   id: string;
   columns: string[];
-  filters: {
-    kuery: Query[][] | undefined;
-    lucene: Query[][] | undefined;
-  };
+  filters: Record<
+    'enabled' | 'disabled',
+    {
+      kuery: Query[][] | undefined;
+      lucene: Query[][] | undefined;
+    }
+  >;
 }
 
 export function getLayerMetaInfo(
@@ -133,6 +136,15 @@ export function getLayerMetaInfo(
 // This enforces on assignment time that the two props are not the same
 type QueryLanguage = 'lucene' | 'kuery';
 
+/**
+ * Translates an arbitrarily-large set of @type {Query}s (including those supplied in @type {LayerMetaInfo})
+ * and existing Kibana @type {Filter}s into a single query and a new set of @type {Filter}s. This allows them to
+ * function as an equivalent context in Discover.
+ *
+ * If some of the queries are in KQL and some in Lucene, all the queries in one language will be merged into
+ * a large query to be shown in the query bar, while the queries in the other language will be encoded as an
+ * extra filter pill.
+ */
 export function combineQueryAndFilters(
   query: Query | Query[] | undefined,
   filters: Filter[],
@@ -162,7 +174,7 @@ export function combineQueryAndFilters(
     language: queryLanguage,
     query: joinQueries([
       ...queries[queryLanguage].map((q) => [q]),
-      ...(meta.filters[queryLanguage] || []),
+      ...(meta.filters.enabled[queryLanguage] || []),
     ]),
   };
 
@@ -172,24 +184,21 @@ export function combineQueryAndFilters(
   const newFilters = [...filters];
 
   const hasQueriesInFiltersLanguage = Boolean(
-    meta.filters[filtersLanguage]?.length || queries[filtersLanguage].length
+    meta.filters.enabled[filtersLanguage]?.length || queries[filtersLanguage].length
   );
 
+  const dataView = dataViews?.find(({ id }) => id === meta.id);
   if (hasQueriesInFiltersLanguage) {
     const queryExpression = joinQueries([
       ...queries[filtersLanguage].map((q) => [q]),
-      ...(meta.filters[filtersLanguage] || []),
+      ...(meta.filters.enabled[filtersLanguage] || []),
     ]);
 
     // Create new filter to encode the rest of the query information
     newFilters.push(
       buildCustomFilter(
         meta.id!,
-        buildEsQuery(
-          dataViews?.find(({ id }) => id === meta.id),
-          { language: filtersLanguage, query: queryExpression },
-          []
-        ),
+        buildEsQuery(dataView, { language: filtersLanguage, query: queryExpression }, []),
         false,
         false,
         i18n.translate('xpack.lens.app.lensContext', {
@@ -200,5 +209,28 @@ export function combineQueryAndFilters(
       )
     );
   }
+
+  // for each disabled filter create a new custom filter and disable it
+  // note that both languages go into the filter bar
+  for (const language of ['lucene', 'kuery'] as const) {
+    const [disabledQueries] = meta.filters.disabled[language] || [];
+    for (const disabledQuery of disabledQueries || []) {
+      let label = disabledQuery.query as string;
+      if (language === 'lucene') {
+        label += ` (${language})`;
+      }
+      newFilters.push(
+        buildCustomFilter(
+          meta.id!,
+          buildEsQuery(dataView, disabledQuery, []),
+          true,
+          false,
+          label,
+          FilterStateStore.APP_STATE
+        )
+      );
+    }
+  }
+
   return { filters: newFilters, query: newQuery };
 }
