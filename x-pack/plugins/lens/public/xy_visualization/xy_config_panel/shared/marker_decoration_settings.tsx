@@ -19,6 +19,19 @@ interface LabelConfigurationOptions {
   axisMode?: YAxisMode;
 }
 
+const topLabel = i18n.translate('xpack.lens.xyChart.markerPosition.above', {
+  defaultMessage: 'Top',
+});
+const bottomLabel = i18n.translate('xpack.lens.xyChart.markerPosition.below', {
+  defaultMessage: 'Bottom',
+});
+const leftLabel = i18n.translate('xpack.lens.xyChart.markerPosition.left', {
+  defaultMessage: 'Left',
+});
+const rightLabel = i18n.translate('xpack.lens.xyChart.markerPosition.right', {
+  defaultMessage: 'Right',
+});
+
 function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
   const autoOption = {
     id: `${idPrefix}auto`,
@@ -28,18 +41,6 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
     'data-test-subj': 'lnsXY_markerPosition_auto',
   };
 
-  const topLabel = i18n.translate('xpack.lens.xyChart.markerPosition.above', {
-    defaultMessage: 'Top',
-  });
-  const bottomLabel = i18n.translate('xpack.lens.xyChart.markerPosition.below', {
-    defaultMessage: 'Bottom',
-  });
-  const leftLabel = i18n.translate('xpack.lens.xyChart.markerPosition.left', {
-    defaultMessage: 'Left',
-  });
-  const rightLabel = i18n.translate('xpack.lens.xyChart.markerPosition.right', {
-    defaultMessage: 'Right',
-  });
   if (axisMode === 'bottom') {
     return [
       {

@@ -16,53 +16,35 @@ export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
 }
 
-export function getAnnotationService(): EventAnnotationServiceType {
+export function getEventAnnotationService(): EventAnnotationServiceType {
   return {
     toExpression: ({
       label,
       isHidden,
-      id,
       color,
       lineStyle,
       lineWidth,
       icon,
       iconPosition,
       textVisibility,
-      key,
+      time,
     }) => {
       return {
         type: 'expression',
         chain: [
           {
             type: 'function',
-            function: 'annotation_config',
+            function: 'manual_event_annotation',
             arguments: {
-              annotationType: ['manual'],
-              key: [
-                {
-                  type: 'expression',
-                  chain: [
-                    {
-                      type: 'function',
-                      function: 'annotation_key',
-                      arguments: {
-                        keyType: ['point_in_time'],
-                        timestamp: [key.timestamp],
-                      },
-                    },
-                  ],
-                },
-              ],
+              time: [time],
               label: [label],
               color: [color || defaultAnnotationColor],
               lineWidth: [lineWidth || 1],
               lineStyle: [lineStyle || 'solid'],
-              id: [id],
               icon: hasIcon(icon) ? [icon] : ['empty'],
               iconPosition: hasIcon(icon) || textVisibility ? [iconPosition || 'auto'] : ['auto'],
               textVisibility: [textVisibility || false],
               isHidden: [Boolean(isHidden)],
-              axisMode: ['bottom'],
             },
           },
         ],

@@ -5,30 +5,39 @@
  * 2.0.
  */
 
-import { AnnotationConfig } from '../../../../../../../src/plugins/event_annotation/common';
+import {
+  EventAnnotationArgs,
+  EventAnnotationConfig,
+} from '../../../../../../../src/plugins/event_annotation/common';
 import type { ExpressionFunctionDefinition } from '../../../../../../../src/plugins/expressions/common';
 import { layerTypes } from '../../../constants';
 
 export interface XYAnnotationLayerConfig {
   layerId: string;
   layerType: typeof layerTypes.ANNOTATIONS;
-  config: AnnotationConfig[];
+  config: EventAnnotationConfig[];
   hide?: boolean;
 }
 
-export interface XYAnnotationLayerConfigResult {
+export interface AnnotationLayerArgs {
+  layerId: string;
+  layerType: typeof layerTypes.ANNOTATIONS;
+  config: EventAnnotationArgs[];
+  hide?: boolean;
+}
+export interface XYAnnotationLayerArgsResult {
   layerId: string;
   layerType: typeof layerTypes.ANNOTATIONS;
   type: 'lens_xy_annotation_layer';
-  config: AnnotationConfig[];
+  config: EventAnnotationArgs[];
   hide?: boolean;
 }
 
 export const annotationLayerConfig: ExpressionFunctionDefinition<
   'lens_xy_annotation_layer',
   null,
-  XYAnnotationLayerConfig,
-  XYAnnotationLayerConfigResult
+  AnnotationLayerArgs,
+  XYAnnotationLayerArgsResult
 > = {
   name: 'lens_xy_annotation_layer',
   aliases: [],
@@ -48,12 +57,12 @@ export const annotationLayerConfig: ExpressionFunctionDefinition<
     },
     config: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['annotation_config' as any],
+      types: ['manual_event_annotation' as any],
       help: 'Additional configuration for y axes',
       multi: true,
     },
   },
-  fn: function fn(input: unknown, args: XYAnnotationLayerConfig) {
+  fn: function fn(input: unknown, args: AnnotationLayerArgs) {
     return {
       type: 'lens_xy_annotation_layer',
       ...args,

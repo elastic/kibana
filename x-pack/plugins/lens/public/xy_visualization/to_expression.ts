@@ -421,10 +421,7 @@ const annotationLayerToExpression = (
             ? layer.config.map(
                 (config): Ast =>
                   eventAnnotationService.toExpression({
-                    id: config.id,
-                    annotationType: config.annotationType,
-                    key: config.key,
-                    axisMode: 'bottom',
+                    time: config.key.timestamp,
                     label: config.label || defaultAnnotationLabel,
                     textVisibility: config.textVisibility,
                     icon: config.icon,

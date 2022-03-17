@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { annotationConfig, annotationKeyConfig } from './annotation_expression';
-export type { AnnotationConfig } from './types';
+export { manualEventAnnotation } from './annotation_expression';
+export type { EventAnnotationConfig, EventAnnotationArgs } from './types';

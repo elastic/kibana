@@ -123,11 +123,8 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
       ...(newLayer.config || []),
       {
         label: defaultAnnotationLabel,
-        annotationType: 'manual',
-        axisMode: 'bottom',
         key: {
-          keyType: 'point_in_time',
-          type: 'annotation_key',
+          type: 'point_in_time',
           timestamp: newTimestamp,
         },
         icon: 'triangle',

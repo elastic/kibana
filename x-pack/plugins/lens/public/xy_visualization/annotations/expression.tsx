@@ -7,6 +7,7 @@
 
 import './expression.scss';
 import React from 'react';
+import { snakeCase } from 'lodash';
 import {
   AnnotationDomainType,
   AnnotationTooltipFormatter,
@@ -14,9 +15,9 @@ import {
   Position,
 } from '@elastic/charts';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
-import { AnnotationConfig } from 'src/plugins/event_annotation/common';
+import { EventAnnotationArgs } from 'src/plugins/event_annotation/common';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-import type { IconPosition, XYAnnotationLayerConfig } from '../../../common/expressions';
+import type { AnnotationLayerArgs, IconPosition } from '../../../common/expressions';
 import { hasIcon } from '../xy_config_panel/shared/icon_select';
 import {
   getBaseIconPlacement,
@@ -48,22 +49,23 @@ export interface AnnotationsProps {
   hide?: boolean;
 }
 
-interface CollectiveConfig extends AnnotationConfig {
+interface CollectiveConfig extends EventAnnotationArgs {
   roundedTimestamp: number;
+  axisMode: 'bottom';
   customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }
 
 const groupVisibleConfigsByInterval = (
-  layers: XYAnnotationLayerConfig[],
+  layers: AnnotationLayerArgs[],
   minInterval?: number,
   firstTimestamp?: number,
   isBarChart?: boolean,
 ) => {
   return layers
     .flatMap(({ config: configs }) => configs.filter((config) => !config.isHidden))
-    .reduce<Record<string, AnnotationConfig[]>>((acc, current) => {
+    .reduce<Record<string, EventAnnotationArgs[]>>((acc, current) => {
       const roundedTimestamp = getRoundedTimestamp(
-        Number(current.key.timestamp),
+        Number(current.time),
         firstTimestamp,
         minInterval,
         isBarChart
@@ -76,18 +78,18 @@ const groupVisibleConfigsByInterval = (
 };
 
 const createCustomTooltipDetails =
-  (config: AnnotationConfig[], formatter?: FieldFormat): AnnotationTooltipFormatter | undefined =>
+  (config: EventAnnotationArgs[], formatter?: FieldFormat): AnnotationTooltipFormatter | undefined =>
   () => {
     return (
       <div>
-        {config.map(({ icon, label, key, color }) => (
+        {config.map(({ icon, label, time, color }) => (
           <div className="echTooltip__item--container">
             <span className="echTooltip__label">
               {hasIcon(icon) ? <AnnotationIcon type={icon} color={color} /> : null}
               {label}
             </span>
             <span className="echTooltip__value">
-              {formatter?.convert(key.timestamp) || String(key.timestamp)}
+              {formatter?.convert(time) || String(time)}
             </span>
           </div>
         ))}
@@ -95,8 +97,8 @@ const createCustomTooltipDetails =
     );
   };
 
-function getCommonProperty<T, K extends keyof AnnotationConfig>(
-  configArr: AnnotationConfig[],
+function getCommonProperty<T, K extends keyof EventAnnotationArgs>(
+  configArr: EventAnnotationArgs[],
   propertyName: K,
   fallbackValue: T
 ) {
@@ -107,9 +109,9 @@ function getCommonProperty<T, K extends keyof AnnotationConfig>(
   return fallbackValue;
 }
 
-const getCommonStyles = (configArr: AnnotationConfig[]) => {
+const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
   return {
-    color: getCommonProperty<AnnotationConfig['color'], 'color'>(
+    color: getCommonProperty<EventAnnotationArgs['color'], 'color'>(
       configArr,
       'color',
       defaultAnnotationColor
@@ -123,7 +125,7 @@ const getCommonStyles = (configArr: AnnotationConfig[]) => {
 };
 
 export const getCollectiveConfigsByInterval = (
-  layers: XYAnnotationLayerConfig[],
+  layers: AnnotationLayerArgs[],
   minInterval?: number,
   firstTimestamp?: number,
   isBarChart?: boolean,
@@ -137,7 +139,7 @@ export const getCollectiveConfigsByInterval = (
   );
   let collectiveConfig: CollectiveConfig;
   return Object.entries(visibleGroupedConfigs).map(([roundedTimestamp, configArr]) => {
-    collectiveConfig = { ...configArr[0], roundedTimestamp: Number(roundedTimestamp) };
+    collectiveConfig = { ...configArr[0], roundedTimestamp: Number(roundedTimestamp), axisMode: 'bottom' };
     if (configArr.length > 1) {
       const commonStyles = getCommonStyles(configArr);
       collectiveConfig = {
@@ -164,7 +166,8 @@ export const Annotations = ({
         const { roundedTimestamp } = config;
         const markerPositionVertical = getBaseIconPlacement(config.iconPosition);
         const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
-        const id = `${config.id}-line`;
+        const id = snakeCase(config.label)
+        
         return (
           <LineAnnotation
             id={id}

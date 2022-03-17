@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAnnotationService } from './event_annotation_service/service';
+import { getEventAnnotationService } from './event_annotation_service/service';
 
 // not really mocking but avoiding async loading
-export const eventAnnotationServiceMock = getAnnotationService();
+export const eventAnnotationServiceMock = getEventAnnotationService();

@@ -11,9 +11,12 @@ import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../ty
 import { State, visualizationTypes, XYState } from './types';
 import { isHorizontalChart } from './state_helpers';
 import {
+  AnnotationLayerArgs,
+  DataLayerArgs,
   SeriesType,
   XYAnnotationLayerConfig,
   XYDataLayerConfig,
+  XYLayerArgs,
   XYLayerConfig,
   XYReferenceLineLayerConfig,
 } from '../../common/expressions';
@@ -134,6 +137,9 @@ export const isDataLayer = (layer: Pick<XYLayerConfig, 'layerType'>): layer is X
 export const getDataLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
 
+export const getDataLayersArgs = (layers: XYLayerArgs[]) =>
+  (layers || []).filter((layer): layer is DataLayerArgs => isDataLayer(layer));
+
 export const getFirstDataLayer = (layers: XYLayerConfig[]) =>
   (layers || []).find((layer): layer is XYDataLayerConfig => isDataLayer(layer));
 
@@ -141,15 +147,18 @@ export const isReferenceLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYReferenceLineLayerConfig => layer.layerType === layerTypes.REFERENCELINE;
 
-export const getReferenceLayers = (layers: XYLayerConfig[]) =>
+export const getReferenceLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
 
-export const getAnnotationsLayers = (layers: XYLayerConfig[]) =>
+export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
+
+export const getAnnotationsLayersArgs = (layers: XYLayerArgs[]) =>
+  (layers || []).filter((layer): layer is AnnotationLayerArgs => isAnnotationsLayer(layer));
 
 export interface LayerTypeToLayer {
   [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;

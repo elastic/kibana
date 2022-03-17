@@ -10,14 +10,9 @@ export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type IconPosition = 'auto' | 'left' | 'right' | 'above' | 'below';
 export type AnnotationType = 'manual';
 export type KeyType = 'point_in_time';
-export type YAxisMode = 'auto' | 'bottom' | 'left' | 'right';
 
-export interface AnnotationConfig {
-  id: string;
-  key: AnnotationKeyResult;
-  annotationType: AnnotationType;
+interface StyleProps {
   label: string;
-  message?: string;
   color?: string;
   icon?: string;
   lineWidth?: number;
@@ -25,14 +20,18 @@ export interface AnnotationConfig {
   iconPosition?: IconPosition;
   textVisibility?: boolean;
   isHidden?: boolean;
-  axisMode: YAxisMode;
 }
 
-export type AnnotationResult = AnnotationConfig & { type: 'annotation_config' };
+export type EventAnnotationConfig = {
+  id: string;
+  key: {
+    type: KeyType;
+    timestamp: number;
+  };
+} & StyleProps;
 
-export interface AnnotationKey {
-  keyType: KeyType;
-  timestamp: number;
-}
+export type EventAnnotationArgs = {
+  time: number;
+} & StyleProps;
 
-export type AnnotationKeyResult = AnnotationKey & { type: 'annotation_key' };
+export type EventAnnotationOutput = EventAnnotationArgs & { type: 'manual_event_annotation' };

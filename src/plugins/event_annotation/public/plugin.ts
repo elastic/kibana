@@ -8,7 +8,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 import { ExpressionsSetup } from '../../expressions/public';
-import { annotationConfig, annotationKeyConfig } from '../common';
+import { manualEventAnnotation } from '../common';
 import { EventAnnotationService } from './event_annotation_service';
 
 interface SetupDependencies {
@@ -25,15 +25,14 @@ export type EventAnnotationPluginStart = EventAnnotationService;
 export class EventAnnotationPlugin
   implements Plugin<EventAnnotationPluginSetup, EventAnnotationPluginStart>
 {
-  private readonly annotationService = new EventAnnotationService();
+  private readonly eventAnnotationService = new EventAnnotationService();
 
   public setup(core: CoreSetup, dependencies: SetupDependencies): EventAnnotationPluginSetup {
-    dependencies.expressions.registerFunction(annotationConfig);
-    dependencies.expressions.registerFunction(annotationKeyConfig);
-    return this.annotationService;
+    dependencies.expressions.registerFunction(manualEventAnnotation);
+    return this.eventAnnotationService;
   }
 
   public start(): EventAnnotationPluginStart {
-    return this.annotationService!;
+    return this.eventAnnotationService!;
   }
 }

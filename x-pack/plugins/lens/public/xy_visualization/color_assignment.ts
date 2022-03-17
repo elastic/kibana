@@ -13,7 +13,7 @@ import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory, LayerType } from '../../common';
 import type { XYLayerConfig } from '../../common/expressions';
-import { isReferenceLayer, isAnnotationsLayer, getDataLayers } from './visualization_helpers';
+import { isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import { getReferenceLineAccessorColorConfig } from './reference_line_helpers';
 
@@ -44,7 +44,7 @@ export function getColorAssignments(
 ): ColorAssignments {
   const layersPerPalette: Record<string, LayerColorConfig[]> = {};
 
-  getDataLayers(layers).forEach((layer) => {
+  layers.forEach((layer) => {
     const palette = layer.palette?.name || 'default';
     if (!layersPerPalette[palette]) {
       layersPerPalette[palette] = [];

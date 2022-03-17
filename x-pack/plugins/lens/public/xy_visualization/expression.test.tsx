@@ -548,7 +548,7 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
+          args={{ ...args, layers: [{ ...(args.layers[0] as DataLayerArgs), seriesType: 'line' }] }}
         />
       );
       expect(component).toMatchSnapshot();
@@ -615,7 +615,9 @@ describe('xy_expression', () => {
             }}
             args={{
               ...args,
-              layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'time' }],
+              layers: [
+                { ...(args.layers[0] as DataLayerArgs), seriesType: 'line', xScaleType: 'time' },
+              ],
             }}
             minInterval={undefined}
           />
@@ -804,7 +806,7 @@ describe('xy_expression', () => {
           ...args,
           layers: [
             {
-              ...args.layers[0],
+              ...(args.layers[0] as DataLayerArgs),
               seriesType: 'line',
               xScaleType: 'time',
               isHistogram: true,
@@ -880,7 +882,7 @@ describe('xy_expression', () => {
                 ...args,
                 layers: [
                   {
-                    ...args.layers[0],
+                    ...(args.layers[0] as DataLayerArgs),
                     seriesType: 'bar',
                     xScaleType: 'time',
                     isHistogram: true,
@@ -977,7 +979,7 @@ describe('xy_expression', () => {
               },
               layers: [
                 {
-                  ...args.layers[0],
+                  ...(args.layers[0] as DataLayerArgs),
                   seriesType: 'area',
                 },
               ],
@@ -1008,7 +1010,7 @@ describe('xy_expression', () => {
               },
               layers: [
                 {
-                  ...args.layers[0],
+                  ...(args.layers[0] as DataLayerArgs),
                   seriesType: 'bar',
                 },
               ],
@@ -1085,7 +1087,9 @@ describe('xy_expression', () => {
           }}
           args={{
             ...args,
-            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'linear' }],
+            layers: [
+              { ...(args.layers[0] as DataLayerArgs), seriesType: 'line', xScaleType: 'linear' },
+            ],
           }}
         />
       );
@@ -1104,7 +1108,12 @@ describe('xy_expression', () => {
           args={{
             ...args,
             layers: [
-              { ...args.layers[0], seriesType: 'line', xScaleType: 'linear', isHistogram: true },
+              {
+                ...(args.layers[0] as DataLayerArgs),
+                seriesType: 'line',
+                xScaleType: 'linear',
+                isHistogram: true,
+              },
             ],
           }}
         />
@@ -1152,7 +1161,7 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
+          args={{ ...args, layers: [{ ...(args.layers[0] as DataLayerArgs), seriesType: 'bar' }] }}
         />
       );
       expect(component).toMatchSnapshot();
@@ -1167,7 +1176,7 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
+          args={{ ...args, layers: [{ ...(args.layers[0] as DataLayerArgs), seriesType: 'area' }] }}
         />
       );
       expect(component).toMatchSnapshot();
@@ -1182,7 +1191,10 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_horizontal' }] }}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerArgs), seriesType: 'bar_horizontal' }],
+          }}
         />
       );
       expect(component).toMatchSnapshot();
@@ -1680,7 +1692,10 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerArgs), seriesType: 'bar_stacked' }],
+          }}
         />
       );
       expect(component).toMatchSnapshot();
@@ -1695,7 +1710,10 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerArgs), seriesType: 'area_stacked' }],
+          }}
         />
       );
       expect(component).toMatchSnapshot();
@@ -1712,7 +1730,9 @@ describe('xy_expression', () => {
           data={data}
           args={{
             ...args,
-            layers: [{ ...args.layers[0], seriesType: 'bar_horizontal_stacked' }],
+            layers: [
+              { ...(args.layers[0] as DataLayerArgs), seriesType: 'bar_horizontal_stacked' },
+            ],
           }}
         />
       );
@@ -1734,7 +1754,7 @@ describe('xy_expression', () => {
             ...args,
             layers: [
               {
-                ...args.layers[0],
+                ...(args.layers[0] as DataLayerArgs),
                 xAccessor: undefined,
                 splitAccessor: 'e',
                 seriesType: 'bar_stacked',
@@ -1764,7 +1784,7 @@ describe('xy_expression', () => {
         accessors: ['b'],
         seriesType: 'bar',
         isHistogram: true,
-      };
+      } as DataLayerArgs;
       delete firstLayer.splitAccessor;
       const component = shallow(
         <XYChart {...defaultProps} data={data} args={{ ...args, layers: [firstLayer] }} />
@@ -1774,7 +1794,11 @@ describe('xy_expression', () => {
 
     test('it does not apply histogram mode to more than one bar series for unstacked bar chart', () => {
       const { data, args } = sampleArgs();
-      const firstLayer: DataLayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
+      const firstLayer: DataLayerArgs = {
+        ...args.layers[0],
+        seriesType: 'bar',
+        isHistogram: true,
+      } as DataLayerArgs;
       delete firstLayer.splitAccessor;
       const component = shallow(
         <XYChart {...defaultProps} data={data} args={{ ...args, layers: [firstLayer] }} />
@@ -1789,13 +1813,13 @@ describe('xy_expression', () => {
         ...args.layers[0],
         seriesType: 'line',
         isHistogram: true,
-      };
+      } as DataLayerArgs;
       delete firstLayer.splitAccessor;
       const secondLayer: DataLayerArgs = {
         ...args.layers[0],
         seriesType: 'line',
         isHistogram: true,
-      };
+      } as DataLayerArgs;
       delete secondLayer.splitAccessor;
       const component = shallow(
         <XYChart
@@ -1818,7 +1842,7 @@ describe('xy_expression', () => {
             ...args,
             layers: [
               {
-                ...args.layers[0],
+                ...(args.layers[0] as DataLayerArgs),
                 seriesType: 'bar_stacked',
                 isHistogram: true,
               },
@@ -1838,7 +1862,9 @@ describe('xy_expression', () => {
           data={data}
           args={{
             ...args,
-            layers: [{ ...args.layers[0], seriesType: 'bar', isHistogram: true }],
+            layers: [
+              { ...(args.layers[0] as DataLayerArgs), seriesType: 'bar', isHistogram: true },
+            ],
           }}
         />
       );
@@ -2234,7 +2260,10 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], xScaleType: 'ordinal' }] }}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerArgs), xScaleType: 'ordinal' }],
+          }}
         />
       );
       expect(component.find(LineSeries).at(0).prop('xScaleType')).toEqual(ScaleType.Ordinal);
@@ -2248,7 +2277,7 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], yScaleType: 'sqrt' }] }}
+          args={{ ...args, layers: [{ ...(args.layers[0] as DataLayerArgs), yScaleType: 'sqrt' }] }}
         />
       );
       expect(component.find(LineSeries).at(0).prop('yScaleType')).toEqual(ScaleType.Sqrt);
@@ -2270,7 +2299,7 @@ describe('xy_expression', () => {
         <XYChart
           {...defaultProps}
           data={{ ...data }}
-          args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
+          args={{ ...args, layers: [{ ...(args.layers[0] as DataLayerArgs), accessors: ['a'] }] }}
         />
       );
       expect(getFormatSpy).toHaveBeenCalledWith({
@@ -2680,7 +2709,9 @@ describe('xy_expression', () => {
           data={{ ...data }}
           args={{
             ...args,
-            layers: [{ ...args.layers[0], accessors: ['a'], splitAccessor: undefined }],
+            layers: [
+              { ...(args.layers[0] as DataLayerArgs), accessors: ['a'], splitAccessor: undefined },
+            ],
             legend: { ...args.legend, isVisible: true, showSingleSeries: true },
           }}
         />
@@ -2698,7 +2729,13 @@ describe('xy_expression', () => {
           data={{ ...data }}
           args={{
             ...args,
-            layers: [{ ...args.layers[0], accessors: ['a'], splitAccessor: undefined }],
+            layers: [
+              {
+                ...(args.layers[0] as DataLayerArgs),
+                accessors: ['a'],
+                splitAccessor: undefined,
+              },
+            ],
             legend: { ...args.legend, isVisible: true, isInside: true },
           }}
         />
@@ -2784,7 +2821,7 @@ describe('xy_expression', () => {
     test('it should apply None fitting function if not specified', () => {
       const { data, args } = sampleArgs();
 
-      args.layers[0].accessors = ['a'];
+      (args.layers[0] as DataLayerArgs).accessors = ['a'];
 
       const component = shallow(
         <XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />
@@ -2929,7 +2966,7 @@ describe('xy_expression', () => {
 
     beforeEach(() => {
       xyProps = sampleArgs();
-      xyProps.args.layers[0].xScaleType = 'time';
+      (xyProps.args.layers[0] as DataLayerArgs).xScaleType = 'time';
     });
     it('should use first valid layer and determine interval', async () => {
       xyProps.data.tables.first.columns[2].meta.source = 'esaggs';
@@ -2944,7 +2981,7 @@ describe('xy_expression', () => {
     });
 
     it('should return interval of number histogram if available on first x axis columns', async () => {
-      xyProps.args.layers[0].xScaleType = 'linear';
+      (xyProps.args.layers[0] as DataLayerArgs).xScaleType = 'linear';
       xyProps.data.tables.first.columns[2].meta = {
         source: 'esaggs',
         type: 'number',
@@ -2986,7 +3023,7 @@ describe('xy_expression', () => {
     });
 
     it('should return undefined if x axis is not a date', async () => {
-      xyProps.args.layers[0].xScaleType = 'ordinal';
+      (xyProps.args.layers[0] as DataLayerArgs).xScaleType = 'ordinal';
       xyProps.data.tables.first.columns.splice(2, 1);
       const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);

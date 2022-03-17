@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, Plugin } from 'kibana/server';
-import { annotationKeyConfig, annotationConfig } from '../common';
+import { manualEventAnnotation } from '../common';
 import { ExpressionsServerSetup } from '../../expressions/server';
 
 interface SetupDependencies {
@@ -16,8 +16,7 @@ interface SetupDependencies {
 
 export class EventAnnotationServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup, dependencies: SetupDependencies) {
-    dependencies.expressions.registerFunction(annotationConfig);
-    dependencies.expressions.registerFunction(annotationKeyConfig);
+    dependencies.expressions.registerFunction(manualEventAnnotation);
 
     return {};
   }

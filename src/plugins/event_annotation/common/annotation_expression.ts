@@ -7,43 +7,31 @@
  */
 
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AnnotationConfig, AnnotationResult, AnnotationKey, AnnotationKeyResult } from './types';
+import { EventAnnotationArgs, EventAnnotationOutput } from './types';
 
-export const annotationConfig: ExpressionFunctionDefinition<
-  'annotation_config',
+export const manualEventAnnotation: ExpressionFunctionDefinition<
+  'manual_event_annotation',
   null,
-  AnnotationConfig,
-  AnnotationResult
+  EventAnnotationArgs,
+  EventAnnotationOutput
 > = {
-  name: 'annotation_config',
+  name: 'manual_event_annotation',
   aliases: [],
-  type: 'annotation_config',
-  help: `Configure annotation`,
+  type: 'manual_event_annotation',
+  help: `Configure manual annotation`,
   inputTypes: ['null'],
   args: {
-    annotationType: {
-      types: ['string'],
-      help: 'Annotation type manual or query based',
-    },
-    key: {
-      types: ['annotation_key'],
-      help: 'Type specific config',
-    },
-    id: {
-      types: ['string'],
-      help: 'The accessor this configuration is for',
-    },
-    color: {
-      types: ['string'],
-      help: 'The color of the series',
+    time: {
+      types: ['number'],
+      help: 'The name',
     },
     label: {
       types: ['string'],
       help: 'The name',
     },
-    isHidden: {
-      types: ['boolean'],
-      help: 'is hidden?',
+    color: {
+      types: ['string'],
+      help: 'The color of the series',
     },
     lineStyle: {
       types: ['string'],
@@ -67,49 +55,14 @@ export const annotationConfig: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: 'Visibility of the label on the annotation line',
     },
-    message: {
-      types: ['string'],
-      help: 'The tooltip message',
-    },
-    axisMode: {
-      types: ['string'],
-      options: ['bottom', 'auto', 'right', 'left'],
-      help: 'Axis mode',
+    isHidden: {
+      types: ['boolean'],
+      help: 'is hidden?',
     },
   },
-  fn: function fn(input: unknown, args: AnnotationConfig) {
+  fn: function fn(input: unknown, args: EventAnnotationArgs) {
     return {
-      type: 'annotation_config',
-      ...args,
-    };
-  },
-};
-
-export const annotationKeyConfig: ExpressionFunctionDefinition<
-  'annotation_key',
-  null,
-  AnnotationKey,
-  AnnotationKeyResult
-> = {
-  name: 'annotation_key',
-  aliases: [],
-  type: 'annotation_key',
-  help: `Configure annotation`,
-  inputTypes: ['null'],
-  args: {
-    keyType: {
-      types: ['string'],
-      options: ['point_in_time'],
-      help: '',
-    },
-    timestamp: {
-      types: ['number'],
-      help: '',
-    },
-  },
-  fn: function fn(input: unknown, args: AnnotationKey) {
-    return {
-      type: 'annotation_key',
+      type: 'manual_event_annotation',
       ...args,
     };
   },

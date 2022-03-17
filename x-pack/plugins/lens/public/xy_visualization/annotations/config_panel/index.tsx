@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import moment from 'moment';
-import { AnnotationConfig } from 'src/plugins/event_annotation/common/types';
+import { EventAnnotationConfig } from 'src/plugins/event_annotation/common/types';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState } from '../../types';
 import { FormatFactory } from '../../../../common';
@@ -49,7 +49,7 @@ export const AnnotationsPanel = (
   const currentConfig = localLayer.config?.find((c) => c.id === accessor);
 
   const setConfig = useCallback(
-    (config: Partial<AnnotationConfig> | undefined) => {
+    (config: Partial<EventAnnotationConfig> | undefined) => {
       if (config == null) {
         return;
       }
@@ -73,8 +73,7 @@ export const AnnotationsPanel = (
           if (date) {
             setConfig({
               key: {
-                ...(currentConfig?.key || { keyType: 'point_in_time' }),
-                type: 'annotation_key',
+                ...(currentConfig?.key || { type: 'point_in_time' }),
                 timestamp: date?.valueOf(),
               },
             });
@@ -94,7 +93,10 @@ export const AnnotationsPanel = (
       <MarkerDecorationSettings
         isHorizontal={isHorizontal}
         setConfig={setConfig}
-        currentConfig={currentConfig}
+        currentConfig={{
+          axisMode: 'bottom',
+          ...currentConfig
+        }}
         customIconSet={annotationsIconSet}
       />
       <LineStyleSettings

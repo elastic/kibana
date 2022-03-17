@@ -54,7 +54,12 @@ import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
-import type { DataLayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
+import type {
+  DataLayerArgs,
+  SeriesType,
+  XYChartProps,
+  XYLayerArgs,
+} from '../../common/expressions';
 import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
@@ -78,7 +83,11 @@ import { computeChartMargins, getLinesCausedPaddings } from './annotations_helpe
 
 import { Annotations, getCollectiveConfigsByInterval } from './annotations/expression';
 import { computeOverallDataDomain } from './reference_line_helpers';
-import { getReferenceLayers, isDataLayer, getAnnotationsLayers } from './visualization_helpers';
+import {
+  getReferenceLayers,
+  getDataLayersArgs,
+  getAnnotationsLayersArgs,
+} from './visualization_helpers';
 
 declare global {
   interface Window {
@@ -266,7 +275,9 @@ export function XYChart({
   });
 
   if (filteredLayers.length === 0) {
-    const icon: IconType = getIconForSeriesType(layers?.[0]?.seriesType || 'bar');
+    const icon: IconType = getIconForSeriesType(
+      getDataLayersArgs(layers)?.[0]?.seriesType || 'bar'
+    );
     return <EmptyPlaceholder icon={icon} />;
   }
 
@@ -354,7 +365,7 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const annotationsLayers = getAnnotationsLayers(layers);
+  const annotationsLayers = getAnnotationsLayersArgs(layers);
 
   const firstTable = data.tables[filteredLayers[0].layerId];
 
@@ -477,7 +488,7 @@ export function XYChart({
   const valueLabelsStyling =
     shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
 
-  const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
+  const colorAssignments = getColorAssignments(getDataLayersArgs(args.layers), data, formatFactory);
 
   const clickHandler: ElementClickListener = ([[geometry, series]]) => {
     // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
@@ -1020,22 +1031,19 @@ export function XYChart({
   );
 }
 
-function getFilteredLayers(layers: DataLayerArgs[], data: LensMultiTable) {
-  return layers.filter((layer) => {
+function getFilteredLayers(layers: XYLayerArgs[], data: LensMultiTable) {
+  return getDataLayersArgs(layers).filter((layer) => {
     const { layerId, xAccessor, accessors, splitAccessor } = layer;
-    return (
-      isDataLayer(layer) &&
-      !(
-        !accessors.length ||
-        !data.tables[layerId] ||
-        data.tables[layerId].rows.length === 0 ||
-        (xAccessor &&
-          data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-        // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-        (!xAccessor &&
-          splitAccessor &&
-          data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
-      )
+    return !(
+      !accessors.length ||
+      !data.tables[layerId] ||
+      data.tables[layerId].rows.length === 0 ||
+      (xAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+      (!xAccessor &&
+        splitAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
     );
   });
 }
