@@ -33,6 +33,8 @@ describe('ALL - Live Query', () => {
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
+    cy.contains('View in Discover').should('exist');
+    cy.contains('View in Lens').should('exist');
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.days.number', index: 1 },
     });

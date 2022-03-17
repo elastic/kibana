@@ -50,6 +50,14 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     cy.contains(PACK_NAME).click();
     cy.contains(`${PACK_NAME} details`);
     cy.contains('Edit').should('be.disabled');
+    cy.react('CustomItemAction', {
+      props: { index: 0, item: { id: SAVED_QUERY_ID } },
+      options: { timeout: 3000 },
+    }).should('not.exist');
+    cy.react('CustomItemAction', {
+      props: { index: 1, item: { id: SAVED_QUERY_ID } },
+      options: { timeout: 3000 },
+    }).should('not.exist');
   });
 
   it('should run query and enable ecs mapping', () => {
@@ -61,6 +69,8 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
+    cy.contains('View in Discover').should('not.exist');
+    cy.contains('View in Lens').should('not.exist');
     cy.react('EuiDataGridHeaderCellWrapper', {
       props: { id: 'osquery.days.number', index: 1 },
     });

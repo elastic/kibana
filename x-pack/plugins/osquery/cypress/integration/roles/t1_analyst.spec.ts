@@ -40,6 +40,8 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('select * from uptime;');
     submitQuery();
     checkResults();
+    cy.contains('View in Discover').should('not.exist');
+    cy.contains('View in Lens').should('not.exist');
   });
   it('should be able to play in live queries history', () => {
     navigateTo('/app/osquery/live_queries');
@@ -78,6 +80,14 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains(PACK_NAME).click();
     cy.contains(`${PACK_NAME} details`);
     cy.contains('Edit').should('be.disabled');
+    cy.react('CustomItemAction', {
+      props: { index: 0, item: { id: SAVED_QUERY_ID } },
+      options: { timeout: 3000 },
+    }).should('not.exist');
+    cy.react('CustomItemAction', {
+      props: { index: 1, item: { id: SAVED_QUERY_ID } },
+      options: { timeout: 3000 },
+    }).should('not.exist');
   });
   it('should not be able to create new liveQuery from scratch', () => {
     navigateTo('/app/osquery');

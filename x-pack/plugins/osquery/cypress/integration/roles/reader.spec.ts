@@ -68,5 +68,13 @@ describe('Reader - only READ', () => {
     cy.contains(PACK_NAME).click();
     cy.contains(`${PACK_NAME} details`);
     cy.contains('Edit').should('be.disabled');
+    cy.react('CustomItemAction', {
+      props: { index: 0, item: { id: SAVED_QUERY_ID } },
+      options: { timeout: 3000 },
+    }).should('not.exist');
+    cy.react('CustomItemAction', {
+      props: { index: 1, item: { id: SAVED_QUERY_ID } },
+      options: { timeout: 3000 },
+    }).should('not.exist');
   });
 });
