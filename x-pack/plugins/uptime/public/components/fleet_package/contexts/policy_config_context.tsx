@@ -7,7 +7,13 @@
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
-import { ScheduleUnit, ServiceLocations } from '../../../../common/runtime_types';
+import {
+  ScheduleUnit,
+  ServiceLocations,
+  ThrottlingOptions,
+  BandwidthLimitKey,
+  DEFAULT_BANDWIDTH_LIMIT,
+} from '../../../../common/runtime_types';
 import { DataStream } from '../types';
 
 interface IPolicyConfigContext {
@@ -32,6 +38,7 @@ interface IPolicyConfigContext {
   allowedScheduleUnits?: ScheduleUnit[];
   defaultNamespace?: string;
   namespace?: string;
+  throttling: ThrottlingOptions;
 }
 
 export interface IPolicyConfigContextProvider {
@@ -45,11 +52,12 @@ export interface IPolicyConfigContextProvider {
   isEditable?: boolean;
   isZipUrlSourceEnabled?: boolean;
   allowedScheduleUnits?: ScheduleUnit[];
+  throttling?: ThrottlingOptions;
 }
 
 export const initialValue = DataStream.HTTP;
 
-const defaultContext: IPolicyConfigContext = {
+export const defaultContext: IPolicyConfigContext = {
   setMonitorType: (_monitorType: React.SetStateAction<DataStream>) => {
     throw new Error('setMonitorType was not initialized, set it when you invoke the context');
   },
@@ -80,12 +88,22 @@ const defaultContext: IPolicyConfigContext = {
   isZipUrlSourceEnabled: true,
   allowedScheduleUnits: [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
   defaultNamespace: DEFAULT_NAMESPACE_STRING,
+  throttling: {
+    [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
+    [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
+    [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
+  },
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
 
 export function PolicyConfigContextProvider<ExtraFields = unknown>({
   children,
+  throttling = {
+    [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
+    [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
+    [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
+  },
   defaultMonitorType = initialValue,
   defaultIsTLSEnabled = false,
   defaultIsZipUrlTLSEnabled = false,
@@ -125,6 +143,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
       allowedScheduleUnits,
       namespace,
       setNamespace,
+      throttling,
     } as IPolicyConfigContext;
   }, [
     monitorType,
@@ -141,6 +160,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
     defaultLocations,
     allowedScheduleUnits,
     namespace,
+    throttling,
   ]);
 
   return <PolicyConfigContext.Provider value={value} children={children} />;

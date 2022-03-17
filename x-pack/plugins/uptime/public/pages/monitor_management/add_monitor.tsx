@@ -19,7 +19,7 @@ export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
-  const { error, loading, locations } = useLocations();
+  const { error, loading, locations, throttling } = useLocations();
 
   useMonitorManagementBreadcrumbs({ isAddMonitor: true });
 
@@ -33,6 +33,7 @@ export const AddMonitorPage: React.FC = () => {
     >
       <SyntheticsProviders
         policyDefaultValues={{
+          throttling,
           isZipUrlSourceEnabled: false,
           allowedScheduleUnits: [ScheduleUnit.MINUTES],
         }}

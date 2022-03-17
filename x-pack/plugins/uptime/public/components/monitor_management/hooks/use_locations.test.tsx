@@ -14,6 +14,8 @@ import { useLocations } from './use_locations';
 import * as reactRedux from 'react-redux';
 import { getServiceLocations } from '../../../state/actions';
 
+import { BandwidthLimitKey, DEFAULT_BANDWIDTH_LIMIT } from '../../../../common/runtime_types';
+
 describe('useExpViewTimeRange', function () {
   const dispatch = jest.fn();
   jest.spyOn(reactRedux, 'useDispatch').mockReturnValue(dispatch);
@@ -26,10 +28,17 @@ describe('useExpViewTimeRange', function () {
   });
 
   it('returns loading and error from redux store', async function () {
+    const throttling = {
+      [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
+      [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
+      [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
+    };
+
     const error = new Error('error');
     const loading = true;
     const state = {
       monitorManagementList: {
+        throttling,
         list: {
           perPage: 10,
           page: 1,
@@ -58,6 +67,6 @@ describe('useExpViewTimeRange', function () {
       wrapper: Wrapper,
     });
 
-    expect(result.current).toEqual({ loading, error, locations: [] });
+    expect(result.current).toEqual({ loading, error, throttling, locations: [] });
   });
 });

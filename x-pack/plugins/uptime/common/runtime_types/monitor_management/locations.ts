@@ -7,6 +7,26 @@
 
 import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { tEnum } from '../../utils/t_enum';
+
+export enum BandwidthLimitKey {
+  DOWNLOAD = 'download',
+  UPLOAD = 'upload',
+  LATENCY = 'latency',
+}
+
+export const DEFAULT_BANDWIDTH_LIMIT = {
+  [BandwidthLimitKey.DOWNLOAD]: 100,
+  [BandwidthLimitKey.UPLOAD]: 30,
+  [BandwidthLimitKey.LATENCY]: 1000,
+};
+
+export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
+  'BandwidthLimitKey',
+  BandwidthLimitKey
+);
+
+export type BandwidthLimitKeyType = t.TypeOf<typeof BandwidthLimitKeyCodec>;
 
 const LocationGeoCodec = t.interface({
   lat: t.number,
@@ -61,7 +81,14 @@ export const LocationsCodec = t.array(LocationCodec);
 export const isServiceLocationInvalid = (location: ServiceLocation) =>
   isLeft(ServiceLocationCodec.decode(location));
 
+export const ThrottlingOptionsCodec = t.interface({
+  [BandwidthLimitKey.DOWNLOAD]: t.number,
+  [BandwidthLimitKey.UPLOAD]: t.number,
+  [BandwidthLimitKey.LATENCY]: t.number,
+});
+
 export const ServiceLocationsApiResponseCodec = t.interface({
+  throttling: t.union([ThrottlingOptionsCodec, t.undefined]),
   locations: ServiceLocationsCodec,
 });
 
@@ -70,4 +97,5 @@ export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
 export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
 export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;
 export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;
+export type ThrottlingOptions = t.TypeOf<typeof ThrottlingOptionsCodec>;
 export type Locations = t.TypeOf<typeof LocationsCodec>;

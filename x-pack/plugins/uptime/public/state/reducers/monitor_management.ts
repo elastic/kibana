@@ -16,8 +16,16 @@ import {
   getServiceLocationsFailure,
   getSyntheticsServiceAllowed,
 } from '../actions';
-import { MonitorManagementListResult, ServiceLocations } from '../../../common/runtime_types';
+
 import { SyntheticsServiceAllowed } from '../../../common/types';
+
+import {
+  MonitorManagementListResult,
+  ServiceLocations,
+  ThrottlingOptions,
+  BandwidthLimitKey,
+  DEFAULT_BANDWIDTH_LIMIT,
+} from '../../../common/runtime_types';
 
 export interface MonitorManagementList {
   error: Record<'monitorList' | 'serviceLocations', Error | null>;
@@ -25,7 +33,14 @@ export interface MonitorManagementList {
   list: MonitorManagementListResult;
   locations: ServiceLocations;
   syntheticsService: { isAllowed?: boolean; loading: boolean };
+  throttling: ThrottlingOptions;
 }
+
+const defaultThrottling = {
+  [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
+  [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
+  [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
+};
 
 export const initialState: MonitorManagementList = {
   list: {
@@ -46,6 +61,7 @@ export const initialState: MonitorManagementList = {
   syntheticsService: {
     loading: false,
   },
+  throttling: defaultThrottling,
 };
 
 export const monitorManagementListReducer = createReducer(initialState, (builder) => {
@@ -98,7 +114,13 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
     }))
     .addCase(
       getServiceLocationsSuccess,
-      (state: WritableDraft<MonitorManagementList>, action: PayloadAction<ServiceLocations>) => ({
+      (
+        state: WritableDraft<MonitorManagementList>,
+        action: PayloadAction<{
+          throttling: ThrottlingOptions | undefined;
+          locations: ServiceLocations;
+        }>
+      ) => ({
         ...state,
         loading: {
           ...state.loading,
@@ -108,7 +130,8 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
           ...state.error,
           serviceLocations: null,
         },
-        locations: action.payload,
+        locations: action.payload.locations,
+        throttling: action.payload.throttling || defaultThrottling,
       })
     )
     .addCase(
