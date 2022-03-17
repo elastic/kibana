@@ -274,15 +274,19 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         return {
           ...cp,
           data:
-            cp?.histogram?.map((h, i) => {
+            response?.overallTimeSeries?.map((o, i) => {
+              const current = cp.histogram.find((d) => d.key_as_string === o.key_as_string) ?? {
+                doc_count: 0,
+              };
               return {
-                ...h,
-                other: Math.max(0, barSeries[i].doc_count - h.doc_count),
+                ...o,
+                doc_count: current.doc_count,
+                other: Math.max(0, o.doc_count - current.doc_count),
               };
             }) ?? [],
         };
       }) ?? [],
-    [barSeries, response.changePoints]
+    [response.changePoints, response.overallTimeSeries]
   );
 
   const treeItems = useMemo(() => {

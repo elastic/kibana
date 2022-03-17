@@ -47,6 +47,9 @@ export interface Field {
 export interface HistogramField {
   fieldName: string;
   type: string;
+  interval: number;
+  min: number;
+  max: number;
 }
 
 interface Distribution {
@@ -186,6 +189,14 @@ const getAggIntervals = async (
   samplerShardSize: number,
   runtimeMappings?: RuntimeMappings
 ): Promise<NumericColumnStatsMap> => {
+  if (fields[0].interval !== undefined) {
+    return fields.reduce((p, field) => {
+      const { interval, min, max, fieldName } = field;
+      p[stringHash(fieldName)] = { interval, min, max };
+
+      return p;
+    }, {} as NumericColumnStatsMap);
+  }
   const numericColumns = fields.filter((field) => {
     return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
   });

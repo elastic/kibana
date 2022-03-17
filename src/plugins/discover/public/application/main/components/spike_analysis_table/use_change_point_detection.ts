@@ -99,7 +99,11 @@ export interface ChangePointsResponse {
   };
 }
 
-type HistogramResponse = Array<{ data: HistogramItem[] }>;
+type HistogramResponse = Array<{
+  data: HistogramItem[];
+  interval: number;
+  stats: [number, number];
+}>;
 
 export type Items = Record<string, string[]>;
 interface ItemsMeta {
@@ -217,7 +221,6 @@ export function useChangePointDetection(
       const changePoints: ChangePoint[] = [];
       const fieldsToSample = new Set<string>();
       const chunkSize = 10;
-      let chunkLoadCounter = 0;
 
       const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
@@ -241,7 +244,6 @@ export function useChangePointDetection(
           responseUpdate.changePoints = getChangePointsSortedByScore([...changePoints]);
         }
 
-        chunkLoadCounter++;
         loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
         setResponse({
           ...responseUpdate,
@@ -316,7 +318,15 @@ export function useChangePointDetection(
 
             const hBody = JSON.stringify({
               query: histogramQuery,
-              fields: [{ fieldName: '@timestamp', type: 'date' }],
+              fields: [
+                {
+                  fieldName: '@timestamp',
+                  type: 'date',
+                  interval: overallTimeSeries[0].interval,
+                  min: overallTimeSeries[0].stats[0],
+                  max: overallTimeSeries[0].stats[1],
+                },
+              ],
               samplerShardSize: -1,
             });
 
