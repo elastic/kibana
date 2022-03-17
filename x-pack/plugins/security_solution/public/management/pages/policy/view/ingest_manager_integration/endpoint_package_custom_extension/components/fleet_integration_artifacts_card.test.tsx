@@ -50,6 +50,7 @@ describe('Fleet integration policy endpoint security event filters card', () => 
             getArtifactsPath={getPolicyEventFiltersPath}
             labels={EVENT_FILTERS_LABELS}
             privileges={externalPrivileges}
+            data-test-subj="artifacts"
           />
         );
         await waitFor(() =>
