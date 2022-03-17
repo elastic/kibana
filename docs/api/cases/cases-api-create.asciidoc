@@ -8,13 +8,19 @@ Creates a case.
 
 === Request
 
-`POST <kibana host>:<port>/api/cases`
+`POST <kibana host>:<port>/s/<space_id>/api/cases`
 
 === Prerequisite
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
+
+=== Path parameters
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
 
 === Request body
 
@@ -150,14 +156,12 @@ POST api/cases
 // KIBANA
 
 The API returns a JSON object that includes the user who created the case and
-the case identifier, version, and creation time. The case ID is also its saved
-object ID (`savedObjectId`), which is used when pushing cases to external
-systems. For example:
+the case identifier, version, and creation time. For example:
 
 [source,json]
 --------------------------------------------------
 {
-  "id": "66b9aa00-94fa-11ea-9f74-e7e108796192",
+  "id": "66b9aa00-94fa-11ea-9f74-e7e108796192", <1>
   "version": "WzUzMiwxXQ==",
   "comments": [],
   "totalComment": 0,
@@ -185,7 +189,7 @@ systems. For example:
   "updated_at": null,
   "updated_by": null,
   "connector": {
-    "id": "131d4448-abe0-4789-939d-8ef60680b498", <1>
+    "id": "131d4448-abe0-4789-939d-8ef60680b498", <2>
     "name": "My connector",
     "type": ".jira",
     "fields": {
@@ -194,10 +198,12 @@ systems. For example:
       "priority": "High"
     }
   },
-  "external_service": null <2>
+  "external_service": null <3>
 }
 --------------------------------------------------
 
-<1> The default connector used to push cases to external services.
-<2> The `external_service` object stores information when the case is pushed to
+<1> The case identifier is also its saved object ID (`savedObjectId`), which is
+used when pushing cases to external systems.
+<2> The default connector used to push cases to external services.
+<3> The `external_service` object stores information when the case is pushed to
 external systems.
