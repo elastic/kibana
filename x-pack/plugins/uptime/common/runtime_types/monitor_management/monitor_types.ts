@@ -241,6 +241,11 @@ export const BrowserSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.SYNTHETICS_ARGS]: t.array(t.string),
 });
 
+export const BrowserAdvancedsCodec = t.intersection([
+  BrowserAdvancedFieldsCodec,
+  BrowserSensitiveAdvancedFieldsCodec,
+]);
+
 export const EncryptedBrowserFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
   BrowserAdvancedFieldsCodec,
@@ -254,7 +259,7 @@ export const BrowserFieldsCodec = t.intersection([
 
 export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
 export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
-export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
+export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedsCodec>;
 
 // MonitorFields, represents any possible monitor type
 export const MonitorFieldsCodec = t.intersection([
@@ -309,7 +314,7 @@ export const MonitorManagementListResultCodec = t.type({
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 
 export const SyntheticsMonitorWithSecretsCodec = t.intersection([
-  SyntheticsMonitorCodec,
+  EncryptedSyntheticsMonitorCodec,
   t.interface({
     secrets: t.string,
   }),
