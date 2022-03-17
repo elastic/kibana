@@ -23,8 +23,14 @@ import { layerTypes } from '../../common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
-import { isDataLayer, isAnnotationsLayer, getLayerTypeOptions } from './visualization_helpers';
+import {
+  getLayerTypeOptions,
+  getDataLayers,
+  getReferenceLayers,
+  getAnnotationsLayers,
+} from './visualization_helpers';
 import { defaultAnnotationLabel } from './annotations/config_panel';
+import { getUniqueLabels } from './annotations/helpers';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,
@@ -155,23 +161,32 @@ export const buildExpression = (
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
-  const validLayers = state.layers
-    .filter((layer): layer is ValidLayer =>
-      isAnnotationsLayer(layer) ? Boolean(layer.config.length) : Boolean(layer.accessors.length)
-    )
-    .map((layer) => {
-      if (!datasourceLayers?.[layer.layerId]) {
-        return layer;
-      }
-      const sortedAccessors = getSortedAccessors(datasourceLayers[layer.layerId], layer);
+  const validDataLayers = getDataLayers(state.layers)
+    .filter((layer): layer is ValidLayer => Boolean(layer.accessors.length))
+    .map((layer) => ({
+      ...layer,
+      accessors: getSortedAccessors(datasourceLayers[layer.layerId], layer),
+    }));
 
+  // sorting doesn't change anything so we don't sort reference layers (TODO: should we make it work?)
+  const validReferenceLayers = getReferenceLayers(state.layers).filter((layer) =>
+    Boolean(layer.accessors.length)
+  );
+
+  const uniqueLabels = getUniqueLabels(state.layers);
+  const validAnnotationsLayers = getAnnotationsLayers(state.layers)
+    .filter((layer) => Boolean(layer.config.length))
+    .map((layer) => {
       return {
         ...layer,
-        accessors: sortedAccessors,
+        config: layer.config.map((c) => ({
+          ...c,
+          label: uniqueLabels[c.id],
+        })),
       };
     });
 
-  if (!validLayers.length) {
+  if (!validDataLayers.length) {
     return null;
   }
 
@@ -337,23 +352,25 @@ export const buildExpression = (
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
-          layers: validLayers.map((layer) => {
-            if (isDataLayer(layer)) {
-              return dataLayerToExpression(
+          layers: [
+            ...validDataLayers.map((layer) =>
+              dataLayerToExpression(
                 layer,
                 datasourceLayers[layer.layerId],
                 metadata,
                 paletteService
-              );
-            }
-            if (isAnnotationsLayer(layer)) {
-              return annotationLayerToExpression(layer, eventAnnotationService);
-            }
-            return referenceLineLayerToExpression(
-              layer,
-              datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId]
-            );
-          }),
+              )
+            ),
+            ...validReferenceLayers.map((layer) =>
+              referenceLineLayerToExpression(
+                layer,
+                datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId]
+              )
+            ),
+            ...validAnnotationsLayers.map((layer) =>
+              annotationLayerToExpression(layer, eventAnnotationService)
+            ),
+          ],
         },
       },
     ],

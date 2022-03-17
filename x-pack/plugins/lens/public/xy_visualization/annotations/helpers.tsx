@@ -17,7 +17,7 @@ import { isHorizontalChart } from '../state_helpers';
 import type { XYState } from '../types';
 import {
   checkScaleOperation,
-  getAnnotationsLayer,
+  getAnnotationsLayers,
   getAxisName,
   getDataLayers,
   isAnnotationsLayer,
@@ -192,7 +192,7 @@ export const getAnnotationsConfiguration = ({
 };
 
 export const getUniqueLabels = (layers: XYLayerConfig[]) => {
-  const annotationLayers = getAnnotationsLayer(layers);
+  const annotationLayers = getAnnotationsLayers(layers);
   const columnLabelMap = {} as Record<string, string>;
   const counts = {} as Record<string, number>;
 
@@ -201,7 +201,7 @@ export const getUniqueLabels = (layers: XYLayerConfig[]) => {
 
     while (counts[uniqueLabel] >= 0) {
       const num = ++counts[uniqueLabel];
-      uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
+      uniqueLabel = i18n.translate('xpack.lens.uniqueLabel', {
         defaultMessage: '{label} [{num}]',
         values: { label, num },
       });

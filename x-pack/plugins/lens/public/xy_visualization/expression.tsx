@@ -78,7 +78,7 @@ import { computeChartMargins, getLinesCausedPaddings } from './annotations_helpe
 
 import { Annotations, getCollectiveConfigsByInterval } from './annotations/expression';
 import { computeOverallDataDomain } from './reference_line_helpers';
-import { getReferenceLayers, isDataLayer, getAnnotationsLayer } from './visualization_helpers';
+import { getReferenceLayers, isDataLayer, getAnnotationsLayers } from './visualization_helpers';
 
 declare global {
   interface Window {
@@ -354,7 +354,7 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const annotationsLayers = getAnnotationsLayer(layers);
+  const annotationsLayers = getAnnotationsLayers(layers);
 
   const firstTable = data.tables[filteredLayers[0].layerId];
 

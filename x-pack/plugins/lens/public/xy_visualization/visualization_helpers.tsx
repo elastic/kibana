@@ -148,7 +148,7 @@ export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
 
-export const getAnnotationsLayer = (layers: XYLayerConfig[]) =>
+export const getAnnotationsLayers = (layers: XYLayerConfig[]) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
 
 export interface LayerTypeToLayer {
