@@ -37,7 +37,9 @@ export const TLSSensitiveFieldsCodec = t.partial({
   [ConfigKey.TLS_KEY_PASSPHRASE]: t.string,
 });
 
-export type TLSFields = t.TypeOf<typeof TLSFieldsCodec>;
+export const TLSCodec = t.intersection([TLSFieldsCodec, TLSSensitiveFieldsCodec]);
+
+export type TLSFields = t.TypeOf<typeof TLSCodec>;
 
 // ZipUrlTLSFields
 export const ZipUrlTLSFieldsCodec = t.partial({
@@ -47,10 +49,12 @@ export const ZipUrlTLSFieldsCodec = t.partial({
   [ConfigKey.ZIP_URL_TLS_VERSION]: t.array(TLSVersionCodec),
 });
 
-export const ZipUrlSensitiveTLSFieldsCodec = t.partial({
+export const ZipUrlTLSSensitiveFieldsCodec = t.partial({
   [ConfigKey.ZIP_URL_TLS_KEY]: t.string,
   [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: t.string,
 });
+
+export const ZipUrlTLSCodec = t.intersection([ZipUrlTLSFieldsCodec, ZipUrlTLSSensitiveFieldsCodec]);
 
 export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
 
@@ -96,7 +100,12 @@ export const TCPSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.REQUEST_SEND_CHECK]: t.string,
 });
 
-export type TCPAdvancedFields = t.TypeOf<typeof TCPAdvancedFieldsCodec>;
+export const TCPAdvancedCodec = t.intersection([
+  TCPAdvancedFieldsCodec,
+  TCPSensitiveAdvancedFieldsCodec,
+]);
+
+export type TCPAdvancedFields = t.TypeOf<typeof TCPAdvancedCodec>;
 
 // TCPFields
 export const EncryptedTCPFieldsCodec = t.intersection([
@@ -156,7 +165,12 @@ export const HTTPSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.USERNAME]: t.string,
 });
 
-export type HTTPAdvancedFields = t.TypeOf<typeof HTTPAdvancedFieldsCodec>;
+export const HTTPAdvancedCodec = t.intersection([
+  HTTPAdvancedFieldsCodec,
+  HTTPSensitiveAdvancedFieldsCodec,
+]);
+
+export type HTTPAdvancedFields = t.TypeOf<typeof HTTPAdvancedCodec>;
 
 // HTTPFields
 export const EncryptedHTTPFieldsCodec = t.intersection([
@@ -190,7 +204,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
     [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
   }),
   ZipUrlTLSFieldsCodec,
-  ZipUrlSensitiveTLSFieldsCodec,
+  ZipUrlTLSSensitiveFieldsCodec,
   CommonFieldsCodec,
 ]);
 
@@ -220,7 +234,7 @@ export const BrowserAdvancedFieldsCodec = t.interface({
 export const BrowserSimpleFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
   BrowserSensitiveSimpleFieldsCodec,
-  ZipUrlSensitiveTLSFieldsCodec,
+  ZipUrlTLSSensitiveFieldsCodec,
 ]);
 
 export const BrowserSensitiveAdvancedFieldsCodec = t.interface({
@@ -273,7 +287,17 @@ export const SyntheticsMonitorWithIdCodec = t.intersection([
   SyntheticsMonitorCodec,
   t.interface({ id: t.string }),
 ]);
+
+export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
+  EncryptedSyntheticsMonitorCodec,
+  t.interface({ id: t.string }),
+]);
+
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
+
+export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
+  typeof EncryptedSyntheticsMonitorWithIdCodec
+>;
 
 export const MonitorManagementListResultCodec = t.type({
   monitors: t.array(t.interface({ id: t.string, attributes: EncryptedSyntheticsMonitorCodec })),

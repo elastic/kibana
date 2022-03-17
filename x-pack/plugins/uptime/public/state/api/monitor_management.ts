@@ -12,6 +12,7 @@ import {
   MonitorManagementListResult,
   ServiceLocations,
   SyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
   ServiceLocationsApiResponseCodec,
   ServiceLocationErrors,
 } from '../../../common/runtime_types';
@@ -22,7 +23,7 @@ export const setMonitor = async ({
   monitor,
   id,
 }: {
-  monitor: SyntheticsMonitor;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id?: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {

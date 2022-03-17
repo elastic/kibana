@@ -16,7 +16,10 @@ import {
 } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import {
+  syntheticsMonitorType,
+  syntheticsMonitor,
+} from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from './service_errors';
 import {
@@ -35,7 +38,13 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     }),
     body: schema.any(),
   },
-  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    savedObjectsClient,
+    server: { encryptedSavedObjects, syntheticsService, logger, telemetry, kibanaVersion },
+  }): Promise<any> => {
+    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     const monitor = request.body as SyntheticsMonitor;
 
     const validationResult = validateMonitor(monitor as MonitorFields);
@@ -47,12 +56,24 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const { monitorId } = request.params;
 
-    const { syntheticsService } = server;
-
     try {
       const previousMonitor: SavedObject<SyntheticsMonitorWithSecrets> =
         await savedObjectsClient.get(syntheticsMonitorType, monitorId);
+
+      /* Decrypting the previous monitor before editing ensures that all existing fields remain
+       * on the object, even in flows where decryption does not take place, such as the enabled tab
+       * on the monitor list table. We do not decrypt monitors in bulk for the monitor list table */
+      const decryptedPreviousMonitor =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+          syntheticsMonitor.name,
+          monitorId,
+          {
+            namespace: previousMonitor.namespaces?.[0],
+          }
+        );
+
       const monitorWithRevision = formatSecrets({
+        ...decryptedPreviousMonitor,
         ...monitor,
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       });
@@ -76,9 +97,9 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       ]);
 
       sendTelemetryEvents(
-        server.logger,
-        server.telemetry,
-        formatTelemetryUpdateEvent(editMonitor, previousMonitor, server.kibanaVersion, errors)
+        logger,
+        telemetry,
+        formatTelemetryUpdateEvent(editMonitor, previousMonitor, kibanaVersion, errors)
       );
 
       // Return service sync errors in OK response
