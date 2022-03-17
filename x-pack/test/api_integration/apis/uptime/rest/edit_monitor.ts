@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       // Delete a required property to make payload invalid
-      const toUpdate = { ...savedMonitor, 'check.request.headers': undefined };
+      const toUpdate = { ...savedMonitor, 'check.request.headers': null };
 
       const apiResponse = await supertest
         .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
