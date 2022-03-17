@@ -162,7 +162,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     },
     commonLabel: {
       types: ['string'],
-      help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
+      help: i18n.translate('expressionGauge.functions.gauge.args.commonLabel.help', {
         defaultMessage: 'Specifies the common label outside the chart',
       }),
     },
