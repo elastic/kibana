@@ -19,7 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services,
 
     junit: {
-      reportName: 'Kibana CCS Tests',
+      reportName: 'X-Pack CCS Tests',
     },
 
     security: {
