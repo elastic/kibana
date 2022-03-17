@@ -101,7 +101,7 @@ describe('Multi Terms Agg', () => {
                       Object {
                         "arguments": Object {
                           "emptyAsNull": Array [
-                            true,
+                            false,
                           ],
                           "enabled": Array [
                             true,
