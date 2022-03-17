@@ -47,3 +47,11 @@ export const Validation = (args: FormArgs) => {
     </Form>
   );
 };
+
+Validation.parameters = {
+  docs: {
+    source: {
+      type: 'code',
+    },
+  },
+};
