@@ -9,10 +9,8 @@
 import Handlebars, { HelperOptions } from '.';
 import { expectTemplate } from './__jest__/test_bench';
 
-let handlebarsEnv: typeof Handlebars;
-
 beforeEach(() => {
-  handlebarsEnv = Handlebars.create();
+  global.handlebarsEnv = Handlebars.create();
 });
 
 describe('helpers', () => {
@@ -307,6 +305,21 @@ describe('helpers', () => {
         })
         .toCompileTo('helper');
     });
+
+    it('the helper hash should augment the global hash', () => {
+      handlebarsEnv!.registerHelper('test_helper', function () {
+        return 'found it!';
+      });
+
+      expectTemplate('{{test_helper}} {{#if cruel}}Goodbye {{cruel}} {{world}}!{{/if}}')
+        .withInput({ cruel: 'cruel' })
+        .withHelpers({
+          world() {
+            return 'world!';
+          },
+        })
+        .toCompileTo('found it! Goodbye cruel world!!');
+    });
   });
 
   describe('registration', () => {
@@ -319,6 +332,25 @@ describe('helpers', () => {
       expect(handlebarsEnv!.helpers.foo).toBeDefined();
       handlebarsEnv!.unregisterHelper('foo');
       expect(handlebarsEnv!.helpers.foo).toBeUndefined();
+    });
+
+    it('allows multiple globals', () => {
+      const ifHelper = handlebarsEnv!.helpers.if;
+      deleteAllKeys(handlebarsEnv!.helpers);
+
+      handlebarsEnv!.registerHelper({
+        if: ifHelper,
+        world() {
+          return 'world!';
+        },
+        testHelper() {
+          return 'found it!';
+        },
+      });
+
+      expectTemplate('{{testHelper}} {{#if cruel}}Goodbye {{cruel}} {{world}}!{{/if}}')
+        .withInput({ cruel: 'cruel' })
+        .toCompileTo('found it! Goodbye cruel world!!');
     });
 
     it('fails with multiple and args', () => {
@@ -591,6 +623,15 @@ describe('helpers', () => {
           knownHelpersOnly: true,
         })
         .withInput({ foo: 'baz' })
+        .toCompileTo('bar');
+    });
+
+    it('Invert blocks work in knownHelpers only mode', () => {
+      expectTemplate('{{^foo}}bar{{/foo}}')
+        .withCompileOptions({
+          knownHelpersOnly: true,
+        })
+        .withInput({ foo: false })
         .toCompileTo('bar');
     });
 
