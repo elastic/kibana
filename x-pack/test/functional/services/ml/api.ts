@@ -39,7 +39,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
-    assertResponseStatusCode(actualStatus: number, expectedStatus: number, responseBody: object) {
+    assertResponseStatusCode(expectedStatus: number, actualStatus: number, responseBody: object) {
       expect(actualStatus).to.eql(
         expectedStatus,
         `Expected status code ${expectedStatus}, got ${actualStatus} with body '${JSON.stringify(
