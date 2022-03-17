@@ -9,6 +9,7 @@
 import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
+import { NoDataViewsComponent } from '@kbn/shared-ux-components';
 import { useKibana } from '../../shared_imports';
 
 import { MatchedItem, ResolveIndexResponseItemAlias, DataViewEditorContext } from '../../types';
@@ -16,7 +17,6 @@ import { MatchedItem, ResolveIndexResponseItemAlias, DataViewEditorContext } fro
 import { getIndices } from '../../lib';
 
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../../../data/common';
 
@@ -95,10 +95,11 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       // first time
       return (
         <>
-          <EmptyIndexPatternPrompt
-            goToCreate={() => setGoToForm(true)}
-            indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
-            canSaveIndexPattern={dataViews.getCanSaveSync()}
+          <NoDataViewsComponent
+            onClickCreate={() => setGoToForm(true)}
+            canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
+            dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+            emptyPromptColor={'subdued'}
           />
           <PromptFooter onCancel={onCancel} />
         </>
