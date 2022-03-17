@@ -140,8 +140,8 @@ export const formatFilterString = async (
       libs?.requests?.getIndexPattern
         ? libs?.requests?.getIndexPattern({ uptimeEsClient })
         : getUptimeIndexPattern({
-          uptimeEsClient,
-        }),
+            uptimeEsClient,
+          }),
     filters,
     search
   );
@@ -293,7 +293,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     rule: {
       schedule: { interval },
     },
-    startedAt
+    startedAt,
   }) {
     const {
       filters,
@@ -360,7 +360,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         const statusMessage = getStatusMessage(monitorStatusMessageParams);
         const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
         const alertId = getInstanceId(monitorInfo, monitorLoc.location);
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();;
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
         const alert = alertWithLifecycle({
           id: alertId,
           fields: getMonitorAlertDocument(monitorSummary),
@@ -433,8 +433,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         availability
       );
       const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
-      const alertId = getInstanceId(monitorInfo, monIdByLoc)
-      const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();;
+      const alertId = getInstanceId(monitorInfo, monIdByLoc);
+      const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
       const alert = alertWithLifecycle({
         id: alertId,
         fields: getMonitorAlertDocument(monitorSummary),
@@ -459,7 +459,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
       alert.scheduleActions(MONITOR_STATUS.id, {
         [ALERT_REASON_MSG]: monitorSummary.reason,
-        [VIEW_IN_APP_URL]: fullViewInAppUrl
+        [VIEW_IN_APP_URL]: fullViewInAppUrl,
       });
     });
     return updateState(state, downMonitorsByLocation.length > 0);
