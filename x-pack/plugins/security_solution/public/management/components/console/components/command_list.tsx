@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandDefinition } from '../types';
 
 export interface CommandListProps {
@@ -14,6 +15,18 @@ export interface CommandListProps {
 }
 
 export const CommandList = memo<CommandListProps>(({ commands }) => {
+  const footerMessage = useMemo(() => {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandList.footerText"
+        defaultMessage="For more details on the commands above use the {helpOption} argument. Example: {cmdExample}"
+        values={{
+          helpOption: '--help',
+          cmdExample: <code>{'some-command --help'}</code>,
+        }}
+      />
+    );
+  }, []);
   return (
     <>
       <EuiFlexGroup wrap gutterSize="xs">
@@ -25,12 +38,7 @@ export const CommandList = memo<CommandListProps>(({ commands }) => {
           );
         })}
       </EuiFlexGroup>
-      <EuiText>
-        {`For more details on the commands above use the `}
-        <code>{`--help`}</code>
-        {` argument. Example: `}
-        <code>{'some-command --help'}</code>
-      </EuiText>
+      <EuiText>{footerMessage}</EuiText>
     </>
   );
 });

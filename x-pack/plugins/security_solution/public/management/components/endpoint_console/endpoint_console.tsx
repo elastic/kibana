@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { Console } from '../console';
-import { EndpointConsoleService } from './endpoint_console_service';
+import { EndpointConsoleCommandService } from './endpoint_console_service';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 
 export interface EndpointConsoleProps {
@@ -16,7 +16,7 @@ export interface EndpointConsoleProps {
 
 export const EndpointConsole = memo<EndpointConsoleProps>(({ endpoint }) => {
   const consoleService = useMemo(() => {
-    return new EndpointConsoleService(endpoint);
+    return new EndpointConsoleCommandService(endpoint);
   }, [endpoint]);
 
   return (

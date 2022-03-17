@@ -8,6 +8,8 @@
 import React, { memo, ReactNode, useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandExecutionFailure } from './command_execution_failure';
 import { UserCommandInput } from './user_command_input';
 import { Command } from '../types';
@@ -75,9 +77,18 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
             color="text"
             size="s"
             onClick={handleRunInBackgroundClick}
-            title="Command response is taking a bit long. Click here to run it in the background and be notified when a response is received"
+            title={i18n.translate(
+              'xpack.securitySolution.console.commandOutput.runInBackgroundMsg',
+              {
+                defaultMessage:
+                  'Command response is taking a bit long. Click here to run it in the background and be notified when a response is received',
+              }
+            )}
           >
-            {'Run in background'}
+            <FormattedMessage
+              id="xpack.securitySolution.console.commandOutput.runInBackgroundButtonLabel"
+              defaultMessage="Run in background"
+            />
           </EuiButton>
         </div>
       )}

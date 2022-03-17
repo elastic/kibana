@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { usageFromCommandDefinition } from '../service/usage_from_command_definition';
 import { CommandDefinition } from '../types';
 
@@ -39,10 +40,16 @@ export const CommandUsage = memo<CommandUsageProps>(({ command }) => {
       <EuiSpacer />
       <p>
         <EuiText>
-          {'Options:'}
+          <FormattedMessage
+            id="xpack.securitySolution.console.commandUsage.optionsLabel"
+            defaultMessage="Options:"
+          />
           {command.mustHaveArgs && command.args && hasArgs && (
             <EuiText size="s" color="subdued">
-              {'Note: at least one option must be used'}
+              <FormattedMessage
+                id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
+                defaultMessage="Note: at least one option must be used"
+              />
             </EuiText>
           )}
         </EuiText>

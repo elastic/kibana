@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import { HistoryItem } from '../../history_item';
@@ -89,8 +90,12 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           ...state.commandHistory,
           <HistoryItem>
             <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-              {/* FIXME: i18n this */}
-              {'command does not support any arguments'}
+              {i18n.translate(
+                'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
+                {
+                  defaultMessage: 'command does not support any arguments',
+                }
+              )}
             </BadArgument>
           </HistoryItem>,
         ],
@@ -105,8 +110,12 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           ...state.commandHistory,
           <HistoryItem>
             <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-              {/* FIXME: i18n this */}
-              {`unknown argument(s): ${parsedInput.unknownArgs.join(', ')}`}
+              {i18n.translate('xpack.securitySolution.console.commandValidation.unknownArgument', {
+                defaultMessage: 'unknown argument(s): {unknownArgs}',
+                values: {
+                  unknownArgs: parsedInput.unknownArgs.join(', '),
+                },
+              })}
             </BadArgument>
           </HistoryItem>,
         ],
@@ -122,8 +131,10 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             ...state.commandHistory,
             <HistoryItem>
               <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-                {/* FIXME: i18n this */}
-                {`unsupported argument: ${argName}`}
+                {i18n.translate('xpack.securitySolution.console.commandValidation.unsupportedArg', {
+                  defaultMessage: 'unsupported argument: {argName}',
+                  values: { argName },
+                })}
               </BadArgument>
             </HistoryItem>,
           ],
@@ -143,8 +154,9 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         ...state.commandHistory,
         <HistoryItem>
           <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-            {/* FIXME: i18n this */}
-            {'at least 1 argument must be used'}
+            {i18n.translate('xpack.securitySolution.console.commandValidation.oneArgIsRequred', {
+              defaultMessage: 'at least one argument must be used',
+            })}
           </BadArgument>
         </HistoryItem>,
       ],

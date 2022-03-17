@@ -54,8 +54,6 @@ export interface CommandInputProps extends CommonProps {
 
 export const CommandInput = memo<CommandInputProps>(
   ({ prompt = '>', focusRef, ...commonProps }) => {
-    // TODO:PT Support having a "console not focused" mode where the cursor will not blink
-
     const dispatch = useConsoleStateDispatch();
     const [textEntered, setTextEntered] = useState<string>('');
     const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
@@ -72,8 +70,6 @@ export const CommandInput = memo<CommandInputProps>(
 
     const handleTypingAreaClick = useCallback<MouseEventHandler>(
       (ev) => {
-        // FIXME:PT move this to the entire console window, so that clicking it focuses the cursor
-
         if (keyCaptureFocusRef.current) {
           keyCaptureFocusRef.current();
         }

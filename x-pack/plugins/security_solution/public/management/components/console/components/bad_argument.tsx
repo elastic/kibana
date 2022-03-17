@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UserCommandInput } from './user_command_input';
 import { ParsedCommandInput } from '../service/parsed_command_input';
 import { usageFromCommandDefinition } from '../service/usage_from_command_definition';
@@ -19,6 +20,10 @@ export type BadArgumentProps = PropsWithChildren<{
 
 export const BadArgument = memo<BadArgumentProps>(
   ({ parsedInput, commandDefinition, children = null }) => {
+    const usageHelp = useMemo(() => {
+      return usageFromCommandDefinition(commandDefinition);
+    }, [commandDefinition]);
+
     return (
       <>
         <div>
@@ -27,8 +32,13 @@ export const BadArgument = memo<BadArgumentProps>(
         <EuiCallOut color="danger">
           {children}
           <EuiText size="xs">
-            {'Usage: '}
-            <code>{usageFromCommandDefinition(commandDefinition)}</code>
+            {/* FIXME:PT should look to collapse this below the <CommandUsage/> */}
+
+            <FormattedMessage
+              id="xpack.securitySolution.console.usageLabel"
+              defaultMessage="Usage: "
+            />
+            <code>{usageHelp}</code>
           </EuiText>
         </EuiCallOut>
       </>

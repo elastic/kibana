@@ -54,6 +54,11 @@ export interface KeyCaptureProps {
   focusRef?: MutableRefObject<((force?: boolean) => void) | null>;
 }
 
+/**
+ * Key Capture is an invisible INPUT field that we set focus to when the user clicks inside of
+ * the console. It sole purpose is to capture what the user types, which is then pass along to be
+ * displayed in a more UX friendly way
+ */
 export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateChange }) => {
   const [, setLastInput] = useState('');
 

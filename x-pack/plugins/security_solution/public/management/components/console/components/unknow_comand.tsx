@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UserCommandInput } from './user_command_input';
 
 export interface UnknownCommand {
@@ -19,10 +20,20 @@ export const UnknownCommand = memo<UnknownCommand>(({ input }) => {
         <UserCommandInput input={input} />
       </div>
       <EuiCallOut color="danger">
-        {`Unknown command`}
+        <EuiText>
+          <FormattedMessage
+            id="xpack.securitySolution.console.unknownCommand.title"
+            defaultMessage="Unknown command"
+          />
+        </EuiText>
         <EuiText size="xs">
-          {'For a list of available command, enter: '}
-          <code>{'help'}</code>
+          <FormattedMessage
+            id="xpack.securitySolution.console.unknownCommand.helpMessage"
+            defaultMessage="For a list of available command, enter: {helpCmd}"
+            values={{
+              helpCmd: <code>{'help'}</code>,
+            }}
+          />
         </EuiText>
       </EuiCallOut>
     </>

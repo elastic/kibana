@@ -14,7 +14,7 @@ import { GetHostPolicyResponse, HostMetadata } from '../../../../common/endpoint
 import { KibanaServices } from '../../../common/lib/kibana';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
 
-export class EndpointConsoleService implements CommandServiceInterface {
+export class EndpointConsoleCommandService implements CommandServiceInterface {
   constructor(private readonly endpoint: HostMetadata) {}
 
   getCommandList(): CommandDefinition[] {

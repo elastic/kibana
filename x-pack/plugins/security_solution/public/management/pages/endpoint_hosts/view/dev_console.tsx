@@ -6,10 +6,64 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { EuiCode } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUrlParams } from '../../../components/hooks/use_url_params';
-import { EndpointConsole } from '../../../components/endpoint_console';
-import { HostMetadata } from '../../../../../common/endpoint/types';
+import {
+  Command,
+  CommandDefinition,
+  CommandServiceInterface,
+  Console,
+} from '../../../components/console';
+
+const delay = async (ms: number = 4000) => new Promise((r) => setTimeout(r, ms));
+
+class DevCommandService implements CommandServiceInterface {
+  getCommandList(): CommandDefinition[] {
+    return [
+      {
+        name: 'cmd1',
+        about: 'Runs cmd1',
+      },
+      {
+        name: 'cmd2',
+        about: 'runs cmd 2',
+        args: {
+          file: {
+            required: true,
+            allowMultiples: false,
+            about: 'Includes file in the run',
+            validate: () => {
+              return true;
+            },
+          },
+        },
+      },
+      {
+        name: 'cmd-long-delay',
+        about: 'runs cmd 2',
+      },
+    ];
+  }
+
+  async executeCommand(command: Command): Promise<{ result: React.ReactNode }> {
+    await delay();
+
+    if (command.commandDefinition.name === 'cmd-long-delay') {
+      await delay(20000);
+    }
+
+    return {
+      result: (
+        <div>
+          <div>{`${command.commandDefinition.name}`}</div>
+          <div>{`command input: ${command.input}`}</div>
+          <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
+        </div>
+      ),
+    };
+  }
+}
 
 // ------------------------------------------------------------
 // FOR DEV PURPOSES ONLY
@@ -17,62 +71,18 @@ import { HostMetadata } from '../../../../../common/endpoint/types';
 // ------------------------------------------------------------
 export const DevConsole = memo(() => {
   const isConsoleEnabled = useIsExperimentalFeatureEnabled('responseActionsConsoleEnabled');
+
+  const consoleService = useMemo(() => {
+    return new DevCommandService();
+  }, []);
+
   const {
     urlParams: { showConsole = false },
   } = useUrlParams();
-  const endpoint = useMemo(() => {
-    return {
-      '@timestamp': 1647442828174,
-      event: {
-        created: 1647442828174,
-        id: 'ddf6570b-9175-4a6d-b288-61a09771c647',
-        kind: 'metric',
-        category: ['host'],
-        type: ['info'],
-        module: 'endpoint',
-        action: 'endpoint_metadata',
-        dataset: 'endpoint.metadata',
-      },
-      agent: {
-        version: '7.0.13',
-        id: '0dc3661d-6e67-46b0-af39-6f12b025fcb0',
-        type: 'endpoint',
-      },
-      elastic: { agent: { id: '6db499e5-4927-4350-abb8-d8318e7d0eec' } },
-      host: {
-        id: '82ef2781-44d8-4915-869c-3c484c86b57d',
-        hostname: 'Host-ku5jy6j0pw',
-        name: 'Host-ku5jy6j0pw',
-        architecture: '1u6tiyo7sc',
-        ip: ['10.209.45.18', '10.2.118.145', '10.195.166.215'],
-        mac: ['d7-82-82-bc-e4-13'],
-        os: {
-          name: 'Windows',
-          full: 'Windows Server 2016',
-          version: '10.0',
-          platform: 'Windows',
-          family: 'windows',
-          Ext: [Object],
-        },
-      },
-      Endpoint: {
-        status: 'enrolled',
-        policy: { applied: [Object] },
-        configuration: { isolation: false },
-        state: { isolation: false },
-        capabilities: [],
-      },
-      data_stream: {
-        type: 'metrics',
-        dataset: 'endpoint.metadata',
-        namespace: 'default',
-      },
-    } as unknown as HostMetadata;
-  }, []);
 
   return isConsoleEnabled && showConsole ? (
     <div style={{ height: '400px' }}>
-      <EndpointConsole endpoint={endpoint} />
+      <Console prompt="$$>" consoleService={consoleService} />
     </div>
   ) : null;
 });
