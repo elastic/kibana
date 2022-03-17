@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.securityUI.loginAsMlPowerUser();
       await ml.testResources.cleanMLSavedObjects();
+      await ml.api.initSavedObjects();
     });
 
     after(async () => {
@@ -42,22 +43,24 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
-    it('should have one missing trained model initially, for built-in lang ident model', async () => {
+    it('should have nothing to sync initially', async () => {
+      // no sync required warning displayed
       await ml.navigation.navigateToMl();
+      await ml.overviewPage.assertJobSyncRequiredWarningNotExists();
 
-      // one missing saved object is reported initially
+      // object counts in sync flyout are all 0, sync button is disabled
       await ml.navigation.navigateToStackManagement();
       await ml.navigation.navigateToStackManagementJobsListPage();
       await ml.stackManagementJobs.openSyncFlyout();
       await ml.stackManagementJobs.assertSyncFlyoutObjectCounts(
         new Map([
-          ['MissingObjects', 1],
+          ['MissingObjects', 0],
           ['UnmatchedObjects', 0],
           ['ObjectsMissingDatafeed', 0],
           ['ObjectsUnmatchedDatafeed', 0],
         ])
       );
-      await ml.stackManagementJobs.assertSyncFlyoutSyncButtonEnabled(true);
+      await ml.stackManagementJobs.assertSyncFlyoutSyncButtonEnabled(false);
     });
 
     it('should prepare test data', async () => {
@@ -109,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.stackManagementJobs.openSyncFlyout();
       await ml.stackManagementJobs.assertSyncFlyoutObjectCounts(
         new Map([
-          ['MissingObjects', 3],
+          ['MissingObjects', 2],
           ['UnmatchedObjects', 2],
           ['ObjectsMissingDatafeed', 1],
           ['ObjectsUnmatchedDatafeed', 1],

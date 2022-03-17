@@ -1069,6 +1069,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
+    async initSavedObjects(simulate: boolean = false, space?: string) {
+      const { body } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/initialize?simulate=${simulate}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+      return body;
+    },
+
     async createTrainedModel(modelId: string, body: PutTrainedModelConfig, space?: string) {
       log.debug(`Creating trained model with id "${modelId}"`);
       const model = await kbnSupertest

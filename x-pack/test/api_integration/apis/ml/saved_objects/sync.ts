@@ -50,6 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GET saved_objects/sync', () => {
     beforeEach(async () => {
+      await ml.api.initSavedObjects();
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
@@ -123,11 +124,6 @@ export default ({ getService }: FtrProviderContext) => {
           'anomaly-detector': {
             [adJobIdES]: { success: true },
           },
-          'trained-model': {
-            lang_ident_model_1: {
-              success: true,
-            },
-          },
         },
         savedObjectsDeleted: {
           'anomaly-detector': { [adJobId1]: { success: true } },
@@ -169,13 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
           'anomaly-detector': { [adJobId1]: { success: true } },
         },
         datafeedsRemoved: {},
-        savedObjectsCreated: {
-          'trained-model': {
-            lang_ident_model_1: {
-              success: true,
-            },
-          },
-        },
+        savedObjectsCreated: {},
         savedObjectsDeleted: {},
       });
 
