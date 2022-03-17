@@ -749,7 +749,7 @@ export const OnPremInstructions: React.FC = () => {
         className="eui-textLeft"
         steps={[
           AgentPolicySelectionStep({ policyId, setPolicyId }),
-          DownloadStep(true, '', ''),
+          DownloadStep(true),
           deploymentModeStep({ deploymentMode, setDeploymentMode }),
           addFleetServerHostStep({ addFleetServerHost }),
           ServiceTokenStep({

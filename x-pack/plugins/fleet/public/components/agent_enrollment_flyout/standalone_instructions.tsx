@@ -190,7 +190,7 @@ export const StandaloneInstructions = React.memo<InstructionProps>(
             refreshAgentPolicies,
           })
         : undefined,
-      DownloadStep(false, '', ''),
+      DownloadStep(false),
       {
         title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigureAgentTitle', {
           defaultMessage: 'Configure the agent',

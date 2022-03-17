@@ -219,28 +219,28 @@ export const getFullAgentPolicy: FleetRequestHandler<
   const soClient = context.fleet.epm.internalSoClient;
 
   if (request.query.kubernetes === true) {
-      try {
-        const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
-          soClient,
-          request.params.agentPolicyId,
-          { standalone: request.query.standalone === true }
-        );
-        if (fullAgentConfigMap) {
-          const body: GetFullAgentConfigMapResponse = {
-            item: fullAgentConfigMap,
-          };
-          return response.ok({
-            body,
-          });
-        } else {
-          return response.customError({
-            statusCode: 404,
-            body: { message: 'Agent config map not found' },
-          });
-        }
-      } catch (error) {
-        return defaultIngestErrorHandler({ error, response });
+    try {
+      const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
+        soClient,
+        request.params.agentPolicyId,
+        { standalone: request.query.standalone === true }
+      );
+      if (fullAgentConfigMap) {
+        const body: GetFullAgentConfigMapResponse = {
+          item: fullAgentConfigMap,
+        };
+        return response.ok({
+          body,
+        });
+      } else {
+        return response.customError({
+          statusCode: 404,
+          body: { message: 'Agent config map not found' },
+        });
       }
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
+    }
   } else {
     try {
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
@@ -330,6 +330,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
 };
 
 export const getK8sManifest: FleetRequestHandler<
+  undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
   try {
@@ -355,6 +356,7 @@ export const getK8sManifest: FleetRequestHandler<
 };
 
 export const downloadK8sManifest: FleetRequestHandler<
+  undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
   try {
