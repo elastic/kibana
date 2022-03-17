@@ -27,6 +27,7 @@ export const ServiceLocationCodec = t.interface({
   label: t.string,
   geo: LocationGeoCodec,
   url: t.string,
+  isServiceManaged: t.boolean,
 });
 
 export const MonitorServiceLocationCodec = t.intersection([
