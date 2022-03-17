@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibanaVersion } from '../../../../../hooks';
 
-import type { useQuickStartCreateForm } from '../../../hooks';
+import type { QuickStartCreateForm } from '../../../hooks';
 
 // TODO: Relocate this file to a more common location
 import { PlatformSelector } from '../../../../enrollment_instructions/manual/platform_selector';
@@ -26,7 +26,7 @@ export function getInstallFleetServerStep({
   quickStartCreateForm,
 }: {
   isFleetServerReady: boolean;
-  quickStartCreateForm: ReturnType<typeof useQuickStartCreateForm>;
+  quickStartCreateForm: QuickStartCreateForm;
 }): EuiStepProps {
   return {
     title: i18n.translate('xpack.fleet.fleetServerFlyout.installFleetServerTitle', {
@@ -43,7 +43,7 @@ export function getInstallFleetServerStep({
 }
 
 const InstallFleetServerStepContent: React.FunctionComponent<{
-  quickStartCreateForm: ReturnType<typeof useQuickStartCreateForm>;
+  quickStartCreateForm: QuickStartCreateForm;
 }> = ({ quickStartCreateForm }) => {
   const kibanaVersion = useKibanaVersion();
 

@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink } from '../../../../../hooks';
 
-import type { useQuickStartCreateForm } from '../../../hooks';
+import type { QuickStartCreateForm } from '../../../hooks';
 
 export function getGettingStartedStep({
   fleetServerHost,
@@ -35,7 +35,7 @@ export function getGettingStartedStep({
 }: {
   fleetServerHost: string;
   onFleetServerHostChange: (value: string) => void;
-  quickStartCreateForm: ReturnType<typeof useQuickStartCreateForm>;
+  quickStartCreateForm: QuickStartCreateForm;
 }): EuiStepProps {
   return {
     title: i18n.translate('xpack.fleet.fleetServerFlyout.getStartedTitle', {
@@ -55,7 +55,7 @@ export function getGettingStartedStep({
 const GettingStartedStepContent: React.FunctionComponent<{
   fleetServerHost: string;
   onFleetServerHostChange: (value: string) => void;
-  quickStartCreateForm: ReturnType<typeof useQuickStartCreateForm>;
+  quickStartCreateForm: QuickStartCreateForm;
 }> = ({ fleetServerHost, onFleetServerHostChange, quickStartCreateForm }) => {
   const { getHref } = useLink();
 

@@ -104,8 +104,8 @@ export const ManagedInstructions = React.memo<InstructionProps>(
       } = fleetServerInstructions;
 
       return [
-        addFleetServerHostStep({ addFleetServerHost }),
-        deploymentModeStep({ deploymentMode, setDeploymentMode }),
+        addFleetServerHostStep({ addFleetServerHost, disabled: false }),
+        deploymentModeStep({ deploymentMode, setDeploymentMode, disabled: false }),
         ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
         FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
       ];

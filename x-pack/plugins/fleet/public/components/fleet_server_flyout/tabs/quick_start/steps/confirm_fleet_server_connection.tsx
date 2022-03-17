@@ -13,13 +13,13 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { useQuickStartCreateForm } from '../../../hooks';
+import type { QuickStartCreateForm } from '../../../hooks';
 
 export function getConfirmFleetServerConnectionStep({
   quickStartCreateForm,
   isFleetServerReady,
 }: {
-  quickStartCreateForm: ReturnType<typeof useQuickStartCreateForm>;
+  quickStartCreateForm: QuickStartCreateForm;
   isFleetServerReady: boolean;
 }): EuiStepProps {
   return {
@@ -43,7 +43,7 @@ export function getConfirmFleetServerConnectionStep({
 }
 
 const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
-  quickStartCreateForm: ReturnType<typeof useQuickStartCreateForm>;
+  quickStartCreateForm: QuickStartCreateForm;
   isFleetServerReady: boolean;
 }> = ({ quickStartCreateForm, isFleetServerReady }) => {
   if (quickStartCreateForm.status !== 'success') {

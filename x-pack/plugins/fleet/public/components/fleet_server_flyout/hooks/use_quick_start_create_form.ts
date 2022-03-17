@@ -19,13 +19,21 @@ import { policyHasFleetServer } from '../../../services';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 
+export type QuickStartCreateFormStatus = 'initial' | 'loading' | 'error' | 'success';
+export interface QuickStartCreateForm {
+  status: QuickStartCreateFormStatus;
+  error?: string;
+  submit: (fleetServerHost: string) => void;
+  serviceToken?: string;
+}
+
 /**
  * Provides a unified interface that combines the following operations:
  * 1. Setting a Fleet Server host in Fleet's settings
  * 2. Creating an agent policy that contains the `fleet_server` integration
  * 3. Generating a service token used by Fleet Server
  */
-export const useQuickStartCreateForm = () => {
+export const useQuickStartCreateForm = (): QuickStartCreateForm => {
   const [status, setStatus] = useState<'initial' | 'loading' | 'error' | 'success'>('initial');
   const [error, setError] = useState<string | undefined>();
 
@@ -33,7 +41,7 @@ export const useQuickStartCreateForm = () => {
   const [fleetServerPolicyId, setFleetServerPolicyId] = useState<string | undefined>();
 
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
-  const { data: agentPoliciesData, resendRequest: refreshAgentPolicies } = useGetAgentPolicies({
+  const { data: agentPoliciesData } = useGetAgentPolicies({
     full: true,
   });
 
