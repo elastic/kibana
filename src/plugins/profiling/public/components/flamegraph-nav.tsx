@@ -75,9 +75,6 @@ export const FlameGraphNavigation = ({ getter, setter }) => {
     if (selectedTime.isInvalid) {
       return;
     }
-    if (timeRange.start === selectedTime.start && timeRange.end === selectedTime.end) {
-      return;
-    }
 
     const tr = buildTimeRange(selectedTime.start, selectedTime.end);
     setTimeRange(tr);
