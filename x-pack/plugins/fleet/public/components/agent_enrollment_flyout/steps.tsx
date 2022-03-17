@@ -32,7 +32,11 @@ import { sendGetK8sManifest } from '../../hooks/use_request/k8s';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 import { SelectCreateAgentPolicy } from './agent_policy_select_create';
 
-export const DownloadStep = (hasFleetServer: boolean, isK8s?: string, enrollmentAPIKey?: string) => {
+export const DownloadStep = (
+  hasFleetServer: boolean,
+  isK8s?: string,
+  enrollmentAPIKey?: string
+) => {
   const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
   const settings = useGetSettings();
