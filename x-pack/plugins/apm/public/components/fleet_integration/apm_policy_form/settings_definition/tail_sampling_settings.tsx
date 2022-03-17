@@ -70,7 +70,7 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
                 'Policies map trace events to a sample rate. Each policy must specify a sample rate. Trace events are matched to policies in the order specified. All policy conditions must be true for a trace event to match. Each policy list should conclude with a policy that only specifies a sample rate. This final policy is used to catch remaining trace events that don’t match a stricter policy.',
             }
           ),
-          helpText: (
+          helpText: docsLinks && (
             <FormattedMessage
               id="xpack.apm.fleet_integration.settings.tailSamplingDocsHelpText"
               defaultMessage="Learn more about tail sampling policies in our {link}."
