@@ -8,7 +8,7 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { FC } from 'react';
+import { SharedUxServices } from '@kbn/shared-ux-services';
 import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
 
 /** @internal */
@@ -20,9 +20,9 @@ export interface SharedUXPluginSetup {}
  */
 export interface SharedUXPluginStart {
   /**
-   * A React component that provides a pre-wired `React.Context` which connects components to Shared UX services.
+   * A set of pre-wired services for use with `SharedUxServicesProvider`.
    */
-  ServicesContext: FC<{}>;
+  getContextServices: () => SharedUxServices;
 }
 
 /** @internal */
