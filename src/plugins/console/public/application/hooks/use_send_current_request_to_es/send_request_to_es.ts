@@ -85,7 +85,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
         if (response) {
           const isSuccess =
             // Things like DELETE index where the index is not there are OK.
-            ((response.status >= 200 && response.status < 300) || response.status === 404);
+            (response.status >= 200 && response.status < 300) || response.status === 404;
 
           if (isSuccess) {
             let value = JSON.stringify(body, null, 2);
