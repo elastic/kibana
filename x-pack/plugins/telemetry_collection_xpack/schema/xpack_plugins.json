@@ -5818,22 +5818,6 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -5859,6 +5843,22 @@
                 }
               }
             },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -5876,6 +5876,22 @@
                       "type": "long"
                     }
                   }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
                 }
               }
             }
@@ -5892,22 +5908,6 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -5929,6 +5929,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -5952,6 +5968,22 @@
                   }
                 }
               }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -5965,22 +5997,6 @@
             },
             "deprecated": {
               "type": "long"
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
             },
             "sizes": {
               "properties": {
@@ -6003,6 +6019,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -6040,6 +6072,31 @@
                       "type": "long"
                     }
                   }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                },
+                "browser_could_not_launch_error": {
+                  "type": "long"
+                },
+                "browser_unexpectedly_closed_error": {
+                  "type": "long"
+                },
+                "browser_screenshot_error": {
+                  "type": "long"
                 }
               }
             }
@@ -6056,22 +6113,6 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -6093,6 +6134,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -6132,6 +6189,31 @@
                   }
                 }
               }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                },
+                "browser_could_not_launch_error": {
+                  "type": "long"
+                },
+                "browser_unexpectedly_closed_error": {
+                  "type": "long"
+                },
+                "browser_screenshot_error": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -6145,22 +6227,6 @@
             },
             "deprecated": {
               "type": "long"
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
             },
             "sizes": {
               "properties": {
@@ -6183,6 +6249,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -6249,6 +6331,34 @@
                       "type": "long"
                     }
                   }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "pdf_worker_out_of_memory_error": {
+                  "type": "long"
+                },
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                },
+                "browser_could_not_launch_error": {
+                  "type": "long"
+                },
+                "browser_unexpectedly_closed_error": {
+                  "type": "long"
+                },
+                "browser_screenshot_error": {
+                  "type": "long"
                 }
               }
             }
@@ -6265,22 +6375,6 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
             "sizes": {
               "properties": {
                 "1.0": {
@@ -6302,6 +6396,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -6368,6 +6478,34 @@
                       "type": "long"
                     }
                   }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "pdf_worker_out_of_memory_error": {
+                  "type": "long"
+                },
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                },
+                "browser_could_not_launch_error": {
+                  "type": "long"
+                },
+                "browser_unexpectedly_closed_error": {
+                  "type": "long"
+                },
+                "browser_screenshot_error": {
+                  "type": "long"
                 }
               }
             }
@@ -6924,6 +7062,12 @@
             }
           }
         },
+        "available": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
         "last7Days": {
           "properties": {
             "csv_searchsource": {
@@ -6936,22 +7080,6 @@
                 },
                 "deprecated": {
                   "type": "long"
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
                 },
                 "sizes": {
                   "properties": {
@@ -6978,6 +7106,22 @@
                     }
                   }
                 },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "csv_rows": {
@@ -6995,6 +7139,22 @@
                           "type": "long"
                         }
                       }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -7011,22 +7171,6 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "sizes": {
                   "properties": {
                     "1.0": {
@@ -7048,6 +7192,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7071,6 +7231,22 @@
                       }
                     }
                   }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -7084,22 +7260,6 @@
                 },
                 "deprecated": {
                   "type": "long"
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
                 },
                 "sizes": {
                   "properties": {
@@ -7122,6 +7282,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7159,6 +7335,31 @@
                           "type": "long"
                         }
                       }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    },
+                    "browser_could_not_launch_error": {
+                      "type": "long"
+                    },
+                    "browser_unexpectedly_closed_error": {
+                      "type": "long"
+                    },
+                    "browser_screenshot_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -7175,22 +7376,6 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "sizes": {
                   "properties": {
                     "1.0": {
@@ -7212,6 +7397,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7251,6 +7452,31 @@
                       }
                     }
                   }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    },
+                    "browser_could_not_launch_error": {
+                      "type": "long"
+                    },
+                    "browser_unexpectedly_closed_error": {
+                      "type": "long"
+                    },
+                    "browser_screenshot_error": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -7264,22 +7490,6 @@
                 },
                 "deprecated": {
                   "type": "long"
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
                 },
                 "sizes": {
                   "properties": {
@@ -7302,6 +7512,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7368,6 +7594,34 @@
                           "type": "long"
                         }
                       }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "pdf_worker_out_of_memory_error": {
+                      "type": "long"
+                    },
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    },
+                    "browser_could_not_launch_error": {
+                      "type": "long"
+                    },
+                    "browser_unexpectedly_closed_error": {
+                      "type": "long"
+                    },
+                    "browser_screenshot_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -7384,22 +7638,6 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "sizes": {
                   "properties": {
                     "1.0": {
@@ -7421,6 +7659,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7487,6 +7741,34 @@
                           "type": "long"
                         }
                       }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "pdf_worker_out_of_memory_error": {
+                      "type": "long"
+                    },
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    },
+                    "browser_could_not_launch_error": {
+                      "type": "long"
+                    },
+                    "browser_unexpectedly_closed_error": {
+                      "type": "long"
+                    },
+                    "browser_screenshot_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -8044,12 +8326,6 @@
               }
             }
           }
-        },
-        "available": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
         }
       }
     },

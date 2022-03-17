@@ -82,6 +82,7 @@ test('Model of jobTypes', () => {
         sizes: sizesAggResponse,
         app: { dashboard: 0, visualization: 3, 'canvas workpad': 0 },
         metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+        error_codes: {},
       },
       printable_pdf: {
         available: true,
@@ -90,6 +91,7 @@ test('Model of jobTypes', () => {
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
         layout: { preserve_layout: 3, print: 0, canvas: 0 },
         metrics: { pdf_cpu: {}, pdf_memory: {}, pdf_pages: {} } as MetricsStats,
+        error_codes: {},
       },
       csv_searchsource: {
         available: true,
@@ -97,6 +99,7 @@ test('Model of jobTypes', () => {
         app: { search: 3 },
         sizes: sizesAggResponse,
         metrics: { csv_rows: {} } as MetricsStats,
+        error_codes: {},
       },
     },
     featureMap,
@@ -113,6 +116,7 @@ test('Model of jobTypes', () => {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
@@ -140,6 +144,7 @@ test('Model of jobTypes', () => {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
       "layout": undefined,
       "metrics": Object {
         "csv_rows": Object {},
@@ -166,6 +171,7 @@ test('Model of jobTypes', () => {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 3,
@@ -200,6 +206,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         sizes: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 0 },
         metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+        error_codes: {},
       },
     },
     featureMap,
@@ -215,6 +222,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       },
       "available": true,
       "deprecated": 5,
+      "error_codes": undefined,
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
@@ -246,6 +254,7 @@ test('Incorporate metric stats', () => {
           png_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
           png_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
         },
+        error_codes: {},
       },
       printable_pdf_v2: {
         available: true,
@@ -258,6 +267,7 @@ test('Incorporate metric stats', () => {
         },
         app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
         layout: { preserve_layout: 3, print: 0, canvas: 0 },
+        error_codes: {},
       },
     },
     featureMap,
@@ -273,6 +283,7 @@ test('Incorporate metric stats', () => {
       },
       "available": false,
       "deprecated": 0,
+      "error_codes": undefined,
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {
@@ -310,6 +321,7 @@ test('Incorporate metric stats', () => {
       },
       "available": false,
       "deprecated": 0,
+      "error_codes": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 3,
