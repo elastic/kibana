@@ -228,7 +228,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             ),
           },
           {
-            title: <DetailPanelListItem>process.pid</DetailPanelListItem>,
+            title: <DetailPanelListItem>pid</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={processDetail.pid}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
