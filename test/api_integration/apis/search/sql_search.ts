@@ -8,8 +8,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { painlessErrReq } from './painless_err_req';
-import { verifyErrorResponse } from './verify_error';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
