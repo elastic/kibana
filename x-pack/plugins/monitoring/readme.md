@@ -16,7 +16,7 @@ This plugin provides the Stack Monitoring kibana application.
 
 ## Tooling
 - [Debugging logging](dev_docs/how_to/debug_logging.md) (WIP)
-- [APM tracing](dev_docs/how_to/apm_tracing.md) (WIP)
+- [APM tracing](dev_docs/how_to/apm_tracing.md)
 
 ## Troubleshooting
 - [Diagnostic queries](dev_docs/runbook/diagnostic_queries.md)
