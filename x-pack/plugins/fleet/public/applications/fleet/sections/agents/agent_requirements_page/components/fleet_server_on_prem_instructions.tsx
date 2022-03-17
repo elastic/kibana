@@ -21,7 +21,6 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormErrorText,
-  EuiButtonGroup,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
@@ -34,7 +33,6 @@ import {
   useDefaultOutput,
   sendGenerateServiceToken,
   usePlatform,
-  PLATFORM_OPTIONS,
   useGetAgentPolicies,
   useGetSettings,
   sendPutSettings,
@@ -47,6 +45,9 @@ import type { AgentPolicy } from '../../../../types';
 
 import { policyHasFleetServer } from '../../../../services';
 
+import { PlatformSelector } from '../../../../../../components/enrollment_instructions/manual/platform_selector';
+
+import type { CommandsByPlatform } from './install_command_utils';
 import { getInstallCommandForPlatform } from './install_command_utils';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
@@ -161,7 +162,7 @@ export const FleetServerCommandStep = ({
   setPlatform,
 }: {
   serviceToken?: string;
-  installCommand: string;
+  installCommand: CommandsByPlatform;
   platform: string;
   setPlatform: (platform: PLATFORM_TYPE) => void;
 }): EuiStepProps => {
@@ -195,41 +196,15 @@ export const FleetServerCommandStep = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiButtonGroup
-          options={PLATFORM_OPTIONS}
-          idSelected={platform}
-          onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
-          legend={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
-            defaultMessage: 'Platform',
-          })}
+        <PlatformSelector
+          linuxCommand={installCommand.linux}
+          macCommand={installCommand.mac}
+          windowsCommand={installCommand.windows}
+          linuxDebCommand={installCommand.deb}
+          linuxRpmCommand={installCommand.rpm}
+          troubleshootLink={docLinks.links.fleet.troubleshooting}
+          isK8s={false}
         />
-        <EuiSpacer size="s" />
-        <EuiCodeBlock
-          fontSize="m"
-          isCopyable={true}
-          paddingSize="m"
-          language="console"
-          whiteSpace="pre-wrap"
-        >
-          <CommandCode>{installCommand}</CommandCode>
-        </EuiCodeBlock>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.enrollmentInstructions.troubleshootingText"
-            defaultMessage="If you are having trouble connecting, see our {link}."
-            values={{
-              link: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.troubleshooting}>
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                    defaultMessage="troubleshooting guide"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
       </>
     ) : null,
   };
@@ -247,9 +222,15 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const esHost = output?.hosts?.[0];
   const sslCATrustedFingerprint: string | undefined = output?.ca_trusted_fingerprint;
 
-  const installCommand = useMemo((): string => {
+  const installCommand = useMemo((): CommandsByPlatform => {
     if (!serviceToken || !esHost) {
-      return '';
+      return {
+        linux: '',
+        mac: '',
+        windows: '',
+        deb: '',
+        rpm: '',
+      };
     }
 
     return getInstallCommandForPlatform(

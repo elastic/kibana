@@ -7,7 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiText, EuiSpacer, EuiCodeBlock, EuiButtonGroup } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiCodeBlock, EuiButtonGroup, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -15,11 +15,12 @@ import type { PLATFORM_TYPE } from '../../../hooks';
 import { PLATFORM_OPTIONS, usePlatform } from '../../../hooks';
 
 interface Props {
-  macOsCommand: string;
   linuxCommand: string;
-  debCommand: string;
-  rpmCommand: string;
+  macCommand: string;
   windowsCommand: string;
+  linuxDebCommand: string;
+  linuxRpmCommand: string;
+  troubleshootLink: string;
   isK8s: boolean;
 }
 
@@ -29,14 +30,26 @@ const CommandCode = styled.pre({
 });
 
 export const PlatformSelector: React.FunctionComponent<Props> = ({
-  macOsCommand,
   linuxCommand,
-  debCommand,
-  rpmCommand,
+  macCommand,
   windowsCommand,
+  linuxDebCommand,
+  linuxRpmCommand,
+  troubleshootLink,
   isK8s,
 }) => {
   const { platform, setPlatform } = usePlatform();
+
+  const systemPackageCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.callout', {
+        defaultMessage:
+          'We recommend using the installers (TAR/ZIP) over system packages (RPM/DEB) because they provide the ability to upgrade your agent with Fleet.',
+      })}
+      color="warning"
+      iconType="alert"
+    />
+  );
 
   return (
     <>
@@ -69,14 +82,14 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             })}
           />
           <EuiSpacer size="s" />
-          {platform === 'macos' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{macOsCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
           {platform === 'linux' && (
             <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
               <CommandCode>{linuxCommand}</CommandCode>
+            </EuiCodeBlock>
+          )}
+          {platform === 'mac' && (
+            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+              <CommandCode>{macCommand}</CommandCode>
             </EuiCodeBlock>
           )}
           {platform === 'windows' && (
@@ -85,14 +98,22 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             </EuiCodeBlock>
           )}
           {platform === 'deb' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{debCommand}</CommandCode>
-            </EuiCodeBlock>
+            <>
+              {systemPackageCallout}
+              <EuiSpacer size="m" />
+              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+                <CommandCode>{linuxDebCommand}</CommandCode>
+              </EuiCodeBlock>
+            </>
           )}
           {platform === 'rpm' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{rpmCommand}</CommandCode>
-            </EuiCodeBlock>
+            <>
+              {systemPackageCallout}
+              <EuiSpacer size="m" />
+              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+                <CommandCode>{linuxRpmCommand}</CommandCode>
+              </EuiCodeBlock>
+            </>
           )}
         </>
       )}
