@@ -7,7 +7,6 @@
 
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import type { LensMultiTable } from '../../../../lens/common';
-import { logDataTable } from '../../../../lens/common';
 import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
 import { RENDERER_ID } from './expression_renderer';
 
@@ -57,10 +56,7 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
     },
   },
   inputTypes: ['lens_multitable'],
-  fn(data, args, handlers) {
-    if (handlers?.inspectorAdapters?.tables) {
-      logDataTable(handlers.inspectorAdapters.tables, data.tables);
-    }
+  fn(data, args) {
     return {
       type: 'render',
       as: RENDERER_ID,
