@@ -59,6 +59,11 @@ export async function getInstanceRuleDataForClusters(
                 field: 'kibana_node_rules.failures',
               },
             },
+            timeouts: {
+              max: {
+                field: 'kibana_node_rules.timeouts',
+              },
+            },
           },
         },
       };
@@ -68,6 +73,7 @@ export async function getInstanceRuleDataForClusters(
       return {
         failures: response.aggregations?.failures?.value,
         executions: response.aggregations?.executions?.value,
+        timeouts: response.aggregations?.timeouts?.value,
         clusterUuid,
       };
     })

@@ -54,14 +54,14 @@ export async function getClusterRuleDataForClusters(
                 field: 'kibana_cluster_rules.overdue.count',
               },
             },
-            overdue_duration_p50: {
+            overdue_delay_p50: {
               max: {
-                field: 'kibana_cluster_rules.overdue.duration.p50',
+                field: 'kibana_cluster_rules.overdue.delay.p50',
               },
             },
-            overdue_duration_p99: {
+            overdue_delay_p99: {
               max: {
-                field: 'kibana_cluster_rules.overdue.duration.p99',
+                field: 'kibana_cluster_rules.overdue.delay.p99',
               },
             },
           },
@@ -73,8 +73,8 @@ export async function getClusterRuleDataForClusters(
       return {
         overdue: {
           count: response.aggregations?.overdue_count?.value,
-          durationP50: response.aggregations?.overdue_duration_p50?.value,
-          durationP99: response.aggregations?.overdue_duration_p99?.value,
+          delayP50: response.aggregations?.overdue_delay_p50?.value,
+          delayP99: response.aggregations?.overdue_delay_p99?.value,
         },
         clusterUuid,
       };

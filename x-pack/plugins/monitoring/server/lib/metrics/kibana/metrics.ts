@@ -342,14 +342,14 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_rule_overdue_p50: new KibanaClusterRuleMetric({
-    field: 'kibana_cluster_rules.overdue.duration.p50',
+    field: 'kibana_cluster_rules.overdue.delay.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Label', {
-      defaultMessage: 'Average Rule Overdue Duration',
+      defaultMessage: 'Average Rule Overdue Delay',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Description',
       {
-        defaultMessage: 'Average duration of all overdue rules across the entire cluster.',
+        defaultMessage: 'Average delay of all overdue rules across the entire cluster.',
       }
     ),
     format: SMALL_FLOAT,
@@ -357,14 +357,14 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
-    field: 'kibana_cluster_rules.overdue.duration.p99',
+    field: 'kibana_cluster_rules.overdue.delay.p99',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP99Label', {
-      defaultMessage: 'Worst Rule Overdue Duration',
+      defaultMessage: 'Worst Rule Overdue Delay',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP99Description',
       {
-        defaultMessage: 'Worst duration of all overdue rules across the entire cluster.',
+        defaultMessage: 'Worst delay of all overdue rules across the entire cluster.',
       }
     ),
     format: SMALL_FLOAT,
@@ -390,14 +390,14 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_action_overdue_p50: new KibanaClusterActionMetric({
-    field: 'kibana_cluster_actions.overdue.duration.p50',
+    field: 'kibana_cluster_actions.overdue.delay.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP50Label', {
-      defaultMessage: 'Average Action Overdue Duration',
+      defaultMessage: 'Average Action Overdue Delay',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP50Description',
       {
-        defaultMessage: 'Average duration of all overdue actions across the entire cluster.',
+        defaultMessage: 'Average delay of all overdue actions across the entire cluster.',
       }
     ),
     format: SMALL_FLOAT,
@@ -405,14 +405,14 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_action_overdue_p99: new KibanaClusterActionMetric({
-    field: 'kibana_cluster_actions.overdue.duration.p99',
+    field: 'kibana_cluster_actions.overdue.delay.p99',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP99Label', {
-      defaultMessage: 'Worst Action Overdue Duration',
+      defaultMessage: 'Worst Action Overdue Delay',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP99Description',
       {
-        defaultMessage: 'Worst duration of all overdue actions across the entire cluster.',
+        defaultMessage: 'Worst delay of all overdue actions across the entire cluster.',
       }
     ),
     format: SMALL_FLOAT,
