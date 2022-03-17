@@ -20,7 +20,10 @@ interface QueryParams {
   params: CorrelationsParams;
   termFilters?: FieldValuePair[];
 }
-export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
+export const getQueryWithParams = ({
+  params,
+  termFilters,
+}: QueryParams): { bool: estypes.QueryDslBoolQuery } => {
   const {
     environment,
     kuery,

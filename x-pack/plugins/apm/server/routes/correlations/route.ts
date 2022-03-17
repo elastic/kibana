@@ -451,6 +451,10 @@ const changePointFrequentItemsRoute = createApmServerRoute({
             fieldValue: t.union([t.string, t.number]),
           })
         ),
+        baselineMin: toNumberRt,
+        baselineMax: toNumberRt,
+        deviationMin: toNumberRt,
+        deviationMax: toNumberRt,
       }),
     ]),
   }),
@@ -464,8 +468,15 @@ const changePointFrequentItemsRoute = createApmServerRoute({
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
-    const { fieldCandidates, indexPatternTitle, ...params } =
-      resources.params.body;
+    const {
+      fieldCandidates,
+      baselineMin,
+      baselineMax,
+      deviationMin,
+      deviationMax,
+      indexPatternTitle,
+      ...params
+    } = resources.params.body;
 
     const paramsWithIndex = {
       ...params,
@@ -474,11 +485,12 @@ const changePointFrequentItemsRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_change_point_frequent_items',
-      async (): Promise<{ frequentItems: FrequentItemsAggs }> =>
+      async (): Promise<{ frequentItems: FrequentItems }> =>
         await fetchSpikeAnalysisFrequentItems(
           esClient,
           paramsWithIndex,
-          fieldCandidates
+          fieldCandidates,
+          { baselineMin, baselineMax, deviationMin, deviationMax }
         )
     );
   },

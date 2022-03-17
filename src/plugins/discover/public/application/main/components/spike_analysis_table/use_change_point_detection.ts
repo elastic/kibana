@@ -101,12 +101,11 @@ export interface ChangePointsResponse {
 
 type HistogramResponse = Array<{ data: HistogramItem[] }>;
 
-interface ItemsMeta {
-  doc_count: number;
-  support: number;
-}
 export type Items = Record<string, string[]>;
-export type FrequentItems = ItemsMeta & Items;
+interface ItemsMeta {
+  buckets: Array<{ key: Items; doc_count: number; support: number }>;
+}
+export type FrequentItems = ItemsMeta;
 
 export const DEBOUNCE_INTERVAL = 100;
 
@@ -168,6 +167,7 @@ export function useChangePointDetection(
       error: undefined,
       changePoints: undefined,
       fieldStats: undefined,
+      tree: undefined,
     });
     setResponse.flush();
 
@@ -205,7 +205,6 @@ export function useChangePointDetection(
       //     },
       //   }
       // );
-      // console.log('fieldCandidates', fieldCandidates);
 
       if (abortCtrl.current.signal.aborted) {
         return;
@@ -282,34 +281,6 @@ export function useChangePointDetection(
 
       responseUpdate.overallTimeSeries = overallTimeSeries[0].data;
 
-      const frequentItemsFieldCandidates = responseUpdate.changePoints
-        ?.map(({ fieldName, fieldValue }) => ({ fieldName, fieldValue }))
-        .filter(
-          (d) =>
-            d.fieldName !== 'clientip' &&
-            d.fieldName !== 'ip' &&
-            d.fieldName !== 'extension.keyword'
-        );
-
-      const { frequentItems, totalDocCount } = await http.post<{
-        frequentItems: { frequent_sets: FrequentItems[] };
-        totalDocCount: number;
-      }>('/internal/apm/correlations/change_point_frequent_items', {
-        signal: abortCtrl.current.signal,
-        body: JSON.stringify({
-          ...fetchParams,
-          fieldCandidates: frequentItemsFieldCandidates,
-        }),
-      });
-
-      const tree = generateItemsets(
-        frequentItems.frequent_sets,
-        responseUpdate.changePoints ?? [],
-        totalDocCount
-      );
-
-      responseUpdate.tree = tree;
-
       // time series filtered by fields
       if (responseUpdate.changePoints) {
         await asyncForEach(responseUpdate.changePoints, async (cp, index) => {
@@ -337,14 +308,53 @@ export function useChangePointDetection(
             });
 
             responseUpdate.changePoints[index].histogram = cpTimeSeries[0].data;
-            setResponse({
-              ...responseUpdate,
-              loaded: 0.99,
-              isRunning: true,
-            });
           }
         });
+        setResponse({
+          ...responseUpdate,
+          loaded: 0.99,
+          isRunning: true,
+        });
       }
+
+      const frequentItemsFieldCandidates = responseUpdate.changePoints
+        ?.map(({ fieldName, fieldValue }) => ({ fieldName, fieldValue }))
+        .filter(
+          (d) =>
+            d.fieldName !== 'clientip' &&
+            d.fieldName !== 'ip' &&
+            d.fieldName !== 'extension.keyword'
+        );
+
+      if (frequentItemsFieldCandidates === undefined) {
+        setResponse({
+          ...responseUpdate,
+          loaded: LOADED_DONE,
+          isRunning: false,
+        });
+        setResponse.flush();
+        return;
+      }
+
+      const { frequentItems, totalDocCount } = await http.post<{
+        frequentItems: FrequentItems;
+        totalDocCount: number;
+      }>('/internal/apm/correlations/change_point_frequent_items', {
+        signal: abortCtrl.current.signal,
+        body: JSON.stringify({
+          ...fetchParams,
+          fieldCandidates: frequentItemsFieldCandidates,
+          ...searchStrategyParams,
+        }),
+      });
+
+      const tree = generateItemsets(
+        frequentItems,
+        responseUpdate.changePoints ?? [],
+        totalDocCount
+      );
+
+      responseUpdate.tree = tree;
 
       setResponse({
         ...responseUpdate,

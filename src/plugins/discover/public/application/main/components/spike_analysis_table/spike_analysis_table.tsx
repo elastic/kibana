@@ -20,7 +20,6 @@ import {
   EuiTabbedContent,
   EuiIcon,
   EuiTreeView,
-  EuiToken,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -310,8 +309,6 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     return (response?.tree && response?.tree.root.children.map(mapL)) ?? [];
   }, [response?.tree]);
 
-  console.log('treeItems', treeItems);
-
   const tabs = [
     {
       id: 'saTable',
@@ -424,14 +421,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   return (
     <EuiFlexItem grow={false} style={{ height: '100%', overflow: 'hidden' }}>
       <div style={{ padding: '16px', overflow: 'scroll' }}>
-        <EuiTabbedContent
-          tabs={tabs}
-          initialSelectedTab={tabs[1]}
-          autoFocus="selected"
-          // onTabClick={(tab) => {
-          //   console.log('clicked tab', tab);
-          // }}
-        />
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} autoFocus="selected" />
       </div>
     </EuiFlexItem>
   );

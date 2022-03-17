@@ -13,16 +13,45 @@ import { getRequestBase } from './get_request_base';
 
 export const getSpikeAnalysisFrequentItemsRequest = (
   params: CorrelationsParams,
-  fieldCandidates: Array<{ fieldName: string; fieldValue: string | number }>
+  fieldCandidates: Array<{ fieldName: string; fieldValue: string | number }>,
+  windowParameters: {
+    baselineMin: number;
+    baselineMax: number;
+    deviationMin: number;
+    deviationMax: number;
+  }
 ): estypes.SearchRequest => {
-  const fieldNames = fieldCandidates.map(({ fieldName }) => fieldName);
+  const fieldNames = [
+    ...new Set(fieldCandidates.map(({ fieldName }) => fieldName)),
+  ];
+
   const query = getQueryWithParams({
     params,
   });
 
+  if (Array.isArray(query.bool.filter)) {
+    const filters = query.bool.filter.filter(
+      (d) => Object.keys(d)[0] !== 'range'
+    );
+
+    query.bool.filter = [
+      ...filters,
+      {
+        range: {
+          '@timestamp': {
+            gte: windowParameters.deviationMin,
+            lt: windowParameters.deviationMax,
+            format: 'epoch_millis',
+          },
+        },
+      },
+    ];
+  }
+
   query.bool.should = fieldCandidates.map((fc) => ({
     term: { [fc.fieldName]: fc.fieldValue },
   }));
+
   query.bool.minimum_should_match = 2;
 
   const body = {
@@ -48,14 +77,20 @@ export const getSpikeAnalysisFrequentItemsRequest = (
 export const fetchSpikeAnalysisFrequentItems = async (
   esClient: ElasticsearchClient,
   params: CorrelationsParams,
-  fieldCandidates: Array<{ fieldName: string; fieldValue: string | number }>
+  fieldCandidates: Array<{ fieldName: string; fieldValue: string | number }>,
+  windowParameters: {
+    baselineMin: number;
+    baselineMax: number;
+    deviationMin: number;
+    deviationMax: number;
+  }
 ) => {
   const resp = await esClient.search<unknown, { fi: FrequentItems }>(
-    getSpikeAnalysisFrequentItemsRequest(params, fieldCandidates)
-  );
-  console.log(
-    'resp',
-    (typeof resp?.hits?.total !== 'number' && resp?.hits?.total?.value) ?? 0
+    getSpikeAnalysisFrequentItemsRequest(
+      params,
+      fieldCandidates,
+      windowParameters
+    )
   );
   const totalDocCount =
     (typeof resp?.hits?.total !== 'number' && resp?.hits?.total?.value) ?? 0;
@@ -66,7 +101,5 @@ export const fetchSpikeAnalysisFrequentItems = async (
     );
   }
 
-  const overallResult = resp.aggregations.fi;
-
-  return { frequentItems: overallResult, totalDocCount };
+  return { frequentItems: resp.aggregations.fi, totalDocCount };
 };
