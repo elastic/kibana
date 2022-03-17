@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { LayerTypes, REFERENCE_LINE_LAYER, Y_CONFIG } from '../constants';
 import { ReferenceLineLayerArgs, ReferenceLineLayerConfigResult } from '../types';
@@ -19,26 +20,36 @@ export const referenceLineLayerConfigFunction: ExpressionFunctionDefinition<
   name: REFERENCE_LINE_LAYER,
   aliases: [],
   type: REFERENCE_LINE_LAYER,
-  help: `Configure a layer in the xy chart`,
+  help: i18n.translate('expressionXY.referenceLineLayer.help', {
+    defaultMessage: `Configure a reference line in the xy chart`,
+  }),
   inputTypes: ['null'],
   args: {
     layerId: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('expressionXY.referenceLineLayer.layerId.help', {
+        defaultMessage: `Layer ID`,
+      }),
     },
     accessors: {
       types: ['string'],
-      help: 'The columns to display on the y axis.',
+      help: i18n.translate('expressionXY.referenceLineLayer.accessors.help', {
+        defaultMessage: 'The columns to display on the y axis.',
+      }),
       multi: true,
     },
     yConfig: {
       types: [Y_CONFIG],
-      help: 'Additional configuration for y axes',
+      help: i18n.translate('expressionXY.referenceLineLayer.yConfig.help', {
+        defaultMessage: 'Additional configuration for y axes',
+      }),
       multi: true,
     },
     columnToLabel: {
       types: ['string'],
-      help: 'JSON key-value pairs of column ID to label',
+      help: i18n.translate('expressionXY.referenceLineLayer.columnToLabel.help', {
+        defaultMessage: 'JSON key-value pairs of column ID to label',
+      }),
     },
   },
   fn(input, args) {

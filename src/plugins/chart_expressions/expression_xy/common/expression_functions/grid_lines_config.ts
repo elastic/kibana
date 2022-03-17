@@ -20,24 +20,26 @@ export const gridlinesConfigFunction: ExpressionFunctionDefinition<
   name: GRID_LINES_CONFIG,
   aliases: [],
   type: GRID_LINES_CONFIG,
-  help: `Configure the xy chart's gridlines appearance`,
+  help: i18n.translate('expressionXY.gridlinesConfig.help', {
+    defaultMessage: `Configure the xy chart's gridlines appearance`,
+  }),
   inputTypes: ['null'],
   args: {
     x: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.xAxisGridlines.help', {
+      help: i18n.translate('expressionXY.gridlinesConfig.x.help', {
         defaultMessage: 'Specifies whether or not the gridlines of the x-axis are visible.',
       }),
     },
     yLeft: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yLeftAxisgridlines.help', {
+      help: i18n.translate('expressionXY.gridlinesConfig.yLeft.help', {
         defaultMessage: 'Specifies whether or not the gridlines of the left y-axis are visible.',
       }),
     },
     yRight: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yRightAxisgridlines.help', {
+      help: i18n.translate('expressionXY.gridlinesConfig.yRight.help', {
         defaultMessage: 'Specifies whether or not the gridlines of the right y-axis are visible.',
       }),
     },

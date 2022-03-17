@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import { i18n } from '@kbn/i18n';
+import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { DataLayerArgs, DataLayerConfigResult } from '../types';
 import {
   DATA_LAYER,
@@ -26,64 +27,89 @@ export const dataLayerConfigFunction: ExpressionFunctionDefinition<
   name: DATA_LAYER,
   aliases: [],
   type: DATA_LAYER,
-  help: `Configure a layer in the xy chart`,
+  help: i18n.translate('expressionXY.dataLayer.help', {
+    defaultMessage: `Configure a layer in the xy chart`,
+  }),
   inputTypes: ['null'],
   args: {
     hide: {
       types: ['boolean'],
       default: false,
-      help: 'Show / hide axis',
+      help: i18n.translate('expressionXY.dataLayer.hide.help', {
+        defaultMessage: 'Show / hide axis',
+      }),
     },
     layerId: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('expressionXY.dataLayer.layerId.help', {
+        defaultMessage: 'Layer ID',
+      }),
     },
     xAccessor: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('expressionXY.dataLayer.xAccessor.help', {
+        defaultMessage: 'X-axis',
+      }),
     },
     seriesType: {
       types: ['string'],
       options: [...Object.values(SeriesTypes)],
-      help: 'The type of chart to display.',
+      help: i18n.translate('expressionXY.dataLayer.seriesType.help', {
+        defaultMessage: 'The type of chart to display.',
+      }),
     },
     xScaleType: {
       options: [...Object.values(XScaleTypes)],
-      help: 'The scale type of the x axis',
+      help: i18n.translate('expressionXY.dataLayer.xScaleType.help', {
+        defaultMessage: 'The scale type of the x axis',
+      }),
       default: XScaleTypes.ORDINAL,
     },
     isHistogram: {
       types: ['boolean'],
       default: false,
-      help: 'Whether to layout the chart as a histogram',
+      help: i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+        defaultMessage: 'Whether to layout the chart as a histogram',
+      }),
     },
     yScaleType: {
       options: [...Object.values(YScaleTypes)],
-      help: 'The scale type of the y axes',
+      help: i18n.translate('expressionXY.dataLayer.yScaleType.help', {
+        defaultMessage: 'The scale type of the y axes',
+      }),
       default: YScaleTypes.LINEAR,
     },
     splitAccessor: {
       types: ['string'],
-      help: 'The column to split by',
-      multi: false,
+      help: i18n.translate('expressionXY.dataLayer.splitAccessor.help', {
+        defaultMessage: 'The column to split by',
+      }),
     },
     accessors: {
       types: ['string'],
-      help: 'The columns to display on the y axis.',
+      help: i18n.translate('expressionXY.dataLayer.accessors.help', {
+        defaultMessage: 'The columns to display on the y axis.',
+      }),
       multi: true,
     },
     yConfig: {
       types: [Y_CONFIG],
-      help: 'Additional configuration for y axes',
+      help: i18n.translate('expressionXY.dataLayer.yConfig.help', {
+        defaultMessage: 'Additional configuration for y axes',
+      }),
       multi: true,
     },
     columnToLabel: {
       types: ['string'],
-      help: 'JSON key-value pairs of column ID to label',
+      help: i18n.translate('expressionXY.dataLayer.columnToLabel.help', {
+        defaultMessage: 'JSON key-value pairs of column ID to label',
+      }),
     },
     palette: {
       default: `{theme "palette" default={system_palette name="default"} }`,
-      help: '',
+      help: i18n.translate('expressionXY.dataLayer.palette.help', {
+        defaultMessage: 'Palette',
+      }),
       types: ['palette'],
     },
   },

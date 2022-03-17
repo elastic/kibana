@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { AXIS_TITLES_VISIBILITY_CONFIG } from '../constants';
 import { AxesSettingsConfig, AxisTitlesVisibilityConfigResult } from '../types';
 
@@ -20,24 +20,26 @@ export const axisTitlesVisibilityConfigFunction: ExpressionFunctionDefinition<
   name: AXIS_TITLES_VISIBILITY_CONFIG,
   aliases: [],
   type: AXIS_TITLES_VISIBILITY_CONFIG,
-  help: `Configure the xy chart's axis titles appearance`,
+  help: i18n.translate('expressionXY.axisTitlesVisibilityConfig.help', {
+    defaultMessage: `Configure the xy chart's axis titles appearance`,
+  }),
   inputTypes: ['null'],
   args: {
     x: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.xAxisTitle.help', {
+      help: i18n.translate('expressionXY.axisTitlesVisibilityConfig.x.help', {
         defaultMessage: 'Specifies whether or not the title of the x-axis are visible.',
       }),
     },
     yLeft: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yLeftAxisTitle.help', {
+      help: i18n.translate('expressionXY.axisTitlesVisibilityConfig.yLeft.help', {
         defaultMessage: 'Specifies whether or not the title of the left y-axis are visible.',
       }),
     },
     yRight: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yRightAxisTitle.help', {
+      help: i18n.translate('expressionXY.axisTitlesVisibilityConfig.yRight.help', {
         defaultMessage: 'Specifies whether or not the title of the right y-axis are visible.',
       }),
     },

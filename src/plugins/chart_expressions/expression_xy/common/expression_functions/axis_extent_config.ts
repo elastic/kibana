@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { AxisExtentConfig, AxisExtentConfigResult } from '../types';
 import { AxisExtentModes, AXIS_EXTENT_CONFIG } from '../constants';
 
@@ -20,26 +20,28 @@ export const axisExtentConfigFunction: ExpressionFunctionDefinition<
   name: AXIS_EXTENT_CONFIG,
   aliases: [],
   type: AXIS_EXTENT_CONFIG,
-  help: `Configure the xy chart's axis extents`,
+  help: i18n.translate('expressionXY.axisExtentConfig.help', {
+    defaultMessage: `Configure the xy chart's axis extents`,
+  }),
   inputTypes: ['null'],
   args: {
     mode: {
       types: ['string'],
       options: [...Object.values(AxisExtentModes)],
-      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
+      help: i18n.translate('expressionXY.axisExtentConfig.extentMode.help', {
         defaultMessage: 'The extent mode',
       }),
     },
     lowerBound: {
       types: ['number'],
-      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
-        defaultMessage: 'The extent mode',
+      help: i18n.translate('expressionXY.axisExtentConfig.lowerBound.help', {
+        defaultMessage: 'Lower bound',
       }),
     },
     upperBound: {
       types: ['number'],
-      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
-        defaultMessage: 'The extent mode',
+      help: i18n.translate('expressionXY.axisExtentConfig.upperBound.help', {
+        defaultMessage: 'Upper bound',
       }),
     },
   },

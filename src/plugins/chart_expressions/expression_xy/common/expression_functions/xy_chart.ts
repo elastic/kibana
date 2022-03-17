@@ -46,7 +46,7 @@ export const xyChartFunction: ExpressionFunctionDefinition<
   name: XY_CHART,
   type: 'render',
   inputTypes: [MULTITABLE],
-  help: i18n.translate('xpack.lens.xyChart.help', {
+  help: i18n.translate('expressionXY.xyVis.help', {
     defaultMessage: 'An X/Y chart',
   }),
   args: {
@@ -60,111 +60,115 @@ export const xyChartFunction: ExpressionFunctionDefinition<
     },
     xTitle: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.xyChart.xTitle.help', {
+      help: i18n.translate('expressionXY.xyVis.xTitle.help', {
         defaultMessage: 'X axis title',
       }),
     },
     yTitle: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.xyChart.yLeftTitle.help', {
+      help: i18n.translate('expressionXY.xyVis.yLeftTitle.help', {
         defaultMessage: 'Y left axis title',
       }),
     },
     yRightTitle: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.xyChart.yRightTitle.help', {
+      help: i18n.translate('expressionXY.xyVis.yRightTitle.help', {
         defaultMessage: 'Y right axis title',
       }),
     },
     yLeftExtent: {
       types: [AXIS_EXTENT_CONFIG],
-      help: i18n.translate('xpack.lens.xyChart.yLeftExtent.help', {
+      help: i18n.translate('expressionXY.xyVis.yLeftExtent.help', {
         defaultMessage: 'Y left axis extents',
       }),
     },
     yRightExtent: {
       types: [AXIS_EXTENT_CONFIG],
-      help: i18n.translate('xpack.lens.xyChart.yRightExtent.help', {
+      help: i18n.translate('expressionXY.xyVis.yRightExtent.help', {
         defaultMessage: 'Y right axis extents',
       }),
     },
     legend: {
       types: [LEGEND_CONFIG],
-      help: i18n.translate('xpack.lens.xyChart.legend.help', {
+      help: i18n.translate('expressionXY.xyVis.legend.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
     },
     fittingFunction: {
       types: ['string'],
       options: [...Object.values(FittingFunctions)],
-      help: i18n.translate('xpack.lens.xyChart.fittingFunction.help', {
+      help: i18n.translate('expressionXY.xyVis.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
       }),
     },
     valueLabels: {
       types: ['string'],
       options: [...Object.values(ValueLabelModes)],
-      help: '',
+      help: i18n.translate('expressionXY.xyVis.valueLabels.help', {
+        defaultMessage: 'Value labels mode',
+      }),
     },
     tickLabelsVisibilitySettings: {
       types: [TICK_LABELS_CONFIG],
-      help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
+      help: i18n.translate('expressionXY.xyVis.tickLabelsVisibilitySettings.help', {
         defaultMessage: 'Show x and y axes tick labels',
       }),
     },
     labelsOrientation: {
       types: [LABELS_ORIENTATION_CONFIG],
-      help: i18n.translate('xpack.lens.xyChart.labelsOrientation.help', {
+      help: i18n.translate('expressionXY.xyVis.labelsOrientation.help', {
         defaultMessage: 'Defines the rotation of the axis labels',
       }),
     },
     gridlinesVisibilitySettings: {
       types: [GRID_LINES_CONFIG],
-      help: i18n.translate('xpack.lens.xyChart.gridlinesSettings.help', {
+      help: i18n.translate('expressionXY.xyVis.gridlinesVisibilitySettings.help', {
         defaultMessage: 'Show x and y axes gridlines',
       }),
     },
     axisTitlesVisibilitySettings: {
       types: [AXIS_TITLES_VISIBILITY_CONFIG],
-      help: i18n.translate('xpack.lens.xyChart.axisTitlesSettings.help', {
+      help: i18n.translate('expressionXY.xyVis.axisTitlesVisibilitySettings.help', {
         defaultMessage: 'Show x and y axes titles',
       }),
     },
     layers: {
       types: [DATA_LAYER, REFERENCE_LINE_LAYER],
-      help: 'Layers of visual series',
+      help: i18n.translate('expressionXY.xyVis.layers.help', {
+        defaultMessage: 'Layers of visual series',
+      }),
       multi: true,
     },
     curveType: {
       types: ['string'],
       options: [...Object.values(XYCurveTypes)],
-      help: i18n.translate('xpack.lens.xyChart.curveType.help', {
+      help: i18n.translate('expressionXY.xyVis.curveType.help', {
         defaultMessage: 'Define how curve type is rendered for a line chart',
       }),
     },
     fillOpacity: {
       types: ['number'],
-      help: i18n.translate('xpack.lens.xyChart.fillOpacity.help', {
+      help: i18n.translate('expressionXY.xyVis.fillOpacity.help', {
         defaultMessage: 'Define the area chart fill opacity',
       }),
     },
     hideEndzones: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('xpack.lens.xyChart.hideEndzones.help', {
+      help: i18n.translate('expressionXY.xyVis.hideEndzones.help', {
         defaultMessage: 'Hide endzone markers for partial data',
       }),
     },
     valuesInLegend: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('xpack.lens.xyChart.valuesInLegend.help', {
+      help: i18n.translate('expressionXY.xyVis.valuesInLegend.help', {
         defaultMessage: 'Show values in legend',
       }),
     },
     ariaLabel: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.xyChart.ariaLabel.help', {
+      help: i18n.translate('expressionXY.xyVis.ariaLabel.help', {
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
       required: false,

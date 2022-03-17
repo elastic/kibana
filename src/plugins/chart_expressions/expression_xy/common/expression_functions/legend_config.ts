@@ -21,38 +21,40 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
   name: LEGEND_CONFIG,
   aliases: [],
   type: LEGEND_CONFIG,
-  help: `Configure the xy chart's legend`,
+  help: i18n.translate('expressionXY.legendConfig.help', {
+    defaultMessage: `Configure the xy chart's legend`,
+  }),
   inputTypes: ['null'],
   args: {
     isVisible: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.isVisible.help', {
+      help: i18n.translate('expressionXY.legendConfig.isVisible.help', {
         defaultMessage: 'Specifies whether or not the legend is visible.',
       }),
     },
     position: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: i18n.translate('xpack.lens.xyChart.position.help', {
+      help: i18n.translate('expressionXY.legendConfig.position.help', {
         defaultMessage: 'Specifies the legend position.',
       }),
     },
     showSingleSeries: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.showSingleSeries.help', {
+      help: i18n.translate('expressionXY.legendConfig.showSingleSeries.help', {
         defaultMessage: 'Specifies whether a legend with just a single entry should be shown',
       }),
     },
     isInside: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.isInside.help', {
+      help: i18n.translate('expressionXY.legendConfig.isInside.help', {
         defaultMessage: 'Specifies whether a legend is inside the chart',
       }),
     },
     horizontalAlignment: {
       types: ['string'],
       options: [HorizontalAlignment.Right, HorizontalAlignment.Left],
-      help: i18n.translate('xpack.lens.xyChart.horizontalAlignment.help', {
+      help: i18n.translate('expressionXY.legendConfig.horizontalAlignment.help', {
         defaultMessage:
           'Specifies the horizontal alignment of the legend when it is displayed inside chart.',
       }),
@@ -60,33 +62,33 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
     verticalAlignment: {
       types: ['string'],
       options: [VerticalAlignment.Top, VerticalAlignment.Bottom],
-      help: i18n.translate('xpack.lens.xyChart.verticalAlignment.help', {
+      help: i18n.translate('expressionXY.legendConfig.verticalAlignment.help', {
         defaultMessage:
           'Specifies the vertical alignment of the legend when it is displayed inside chart.',
       }),
     },
     floatingColumns: {
       types: ['number'],
-      help: i18n.translate('xpack.lens.xyChart.floatingColumns.help', {
+      help: i18n.translate('expressionXY.legendConfig.floatingColumns.help', {
         defaultMessage: 'Specifies the number of columns when legend is displayed inside chart.',
       }),
     },
     maxLines: {
       types: ['number'],
-      help: i18n.translate('xpack.lens.xyChart.maxLines.help', {
+      help: i18n.translate('expressionXY.legendConfig.maxLines.help', {
         defaultMessage: 'Specifies the number of lines per legend item.',
       }),
     },
     shouldTruncate: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('xpack.lens.xyChart.shouldTruncate.help', {
+      help: i18n.translate('expressionXY.legendConfig.shouldTruncate.help', {
         defaultMessage: 'Specifies whether the legend items will be truncated or not',
       }),
     },
     legendSize: {
       types: ['number'],
-      help: i18n.translate('xpack.lens.xyChart.legendSize.help', {
+      help: i18n.translate('expressionXY.legendConfig.legendSize.help', {
         defaultMessage: 'Specifies the legend size in pixels.',
       }),
     },

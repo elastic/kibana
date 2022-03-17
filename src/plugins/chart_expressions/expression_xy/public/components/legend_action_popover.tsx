@@ -40,7 +40,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       title: label,
       items: [
         {
-          name: i18n.translate('xpack.lens.shared.legend.filterForValueButtonAriaLabel', {
+          name: i18n.translate('expressionXY.legend.filterForValueButtonAriaLabel', {
             defaultMessage: 'Filter for value',
           }),
           'data-test-subj': `legend-${label}-filterIn`,
@@ -51,7 +51,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           },
         },
         {
-          name: i18n.translate('xpack.lens.shared.legend.filterOutValueButtonAriaLabel', {
+          name: i18n.translate('expressionXY.legend.filterOutValueButtonAriaLabel', {
             defaultMessage: 'Filter out value',
           }),
           'data-test-subj': `legend-${label}-filterOut`,
@@ -97,7 +97,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       }}
       panelPaddingSize="none"
       anchorPosition="upLeft"
-      title={i18n.translate('xpack.lens.shared.legend.filterOptionsLegend', {
+      title={i18n.translate('expressionXY.legend.filterOptionsLegend', {
         defaultMessage: '{legendDataLabel}, filter options',
         values: { legendDataLabel: label },
       })}

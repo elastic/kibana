@@ -20,24 +20,26 @@ export const tickLabelsConfigFunction: ExpressionFunctionDefinition<
   name: TICK_LABELS_CONFIG,
   aliases: [],
   type: TICK_LABELS_CONFIG,
-  help: `Configure the xy chart's tick labels appearance`,
+  help: i18n.translate('expressionXY.tickLabelsConfig.help', {
+    defaultMessage: `Configure the xy chart's tick labels appearance`,
+  }),
   inputTypes: ['null'],
   args: {
     x: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.xAxisTickLabels.help', {
+      help: i18n.translate('expressionXY.tickLabelsConfig.x.help', {
         defaultMessage: 'Specifies whether or not the tick labels of the x-axis are visible.',
       }),
     },
     yLeft: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yLeftAxisTickLabels.help', {
+      help: i18n.translate('expressionXY.tickLabelsConfig.yLeft.help', {
         defaultMessage: 'Specifies whether or not the tick labels of the left y-axis are visible.',
       }),
     },
     yRight: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.yRightAxisTickLabels.help', {
+      help: i18n.translate('expressionXY.tickLabelsConfig.yRight.help', {
         defaultMessage: 'Specifies whether or not the tick labels of the right y-axis are visible.',
       }),
     },

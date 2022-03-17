@@ -20,27 +20,29 @@ export const labelsOrientationConfigFunction: ExpressionFunctionDefinition<
   name: LABELS_ORIENTATION_CONFIG,
   aliases: [],
   type: LABELS_ORIENTATION_CONFIG,
-  help: `Configure the xy chart's tick labels orientation`,
+  help: i18n.translate('expressionXY.labelsOrientationConfig.help', {
+    defaultMessage: `Configure the xy chart's tick labels orientation`,
+  }),
   inputTypes: ['null'],
   args: {
     x: {
       types: ['number'],
       options: [0, -90, -45],
-      help: i18n.translate('xpack.lens.xyChart.xAxisLabelsOrientation.help', {
+      help: i18n.translate('expressionXY.labelsOrientationConfig.x.help', {
         defaultMessage: 'Specifies the labels orientation of the x-axis.',
       }),
     },
     yLeft: {
       types: ['number'],
       options: [0, -90, -45],
-      help: i18n.translate('xpack.lens.xyChart.yLeftAxisLabelsOrientation.help', {
+      help: i18n.translate('expressionXY.labelsOrientationConfig.yLeft.help', {
         defaultMessage: 'Specifies the labels orientation of the left y-axis.',
       }),
     },
     yRight: {
       types: ['number'],
       options: [0, -90, -45],
-      help: i18n.translate('xpack.lens.xyChart.yRightAxisLabelsOrientation.help', {
+      help: i18n.translate('expressionXY.labelsOrientationConfig.yRight.help', {
         defaultMessage: 'Specifies the labels orientation of the right y-axis.',
       }),
     },

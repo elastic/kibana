@@ -38,7 +38,7 @@ export const getXyChartRenderer = ({
 }: XyChartRendererDeps): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'xyVis',
   displayName: 'XY chart',
-  help: i18n.translate('xpack.lens.xyChart.renderer.help', {
+  help: i18n.translate('expressionXY.xyVis.renderer.help', {
     defaultMessage: 'X/Y chart renderer',
   }),
   validate: () => undefined,

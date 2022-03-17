@@ -715,7 +715,7 @@ export function XYChart({
 
             if (!xAccessor) {
               rows.forEach((row) => {
-                row.unifiedX = i18n.translate('xpack.lens.xyChart.emptyXLabel', {
+                row.unifiedX = i18n.translate('expressionXY.xyChart.emptyXLabel', {
                   defaultMessage: '(empty)',
                 });
               });
