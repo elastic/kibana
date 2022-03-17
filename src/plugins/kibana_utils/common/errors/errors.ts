@@ -51,6 +51,18 @@ export class SavedObjectNotFound extends KbnError {
 }
 
 /**
+ * Checks whether the given error is a SavedObjectNotFoundError
+ * @param {boolean} error - whether the error is a SavedObjectNotFoundError
+ */
+export function isSavedObjectNotFoundError(error: Error | undefined): error is SavedObjectNotFound {
+  // we can't check "error instanceof SavedObjectNotFound" since this class can live in a separate bundle
+  // and the error will be an instance of other class with the same interface
+  // (actually the copy of SavedObjectNotFound class)
+  const savedObjectError = error as unknown as SavedObjectNotFound;
+  return savedObjectError ? savedObjectError.isSavedObjectNotFoundError : false;
+}
+
+/**
  * A saved field doesn't exist anymore
  */
 export class SavedFieldNotFound extends KbnError {

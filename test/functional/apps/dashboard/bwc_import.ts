@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'settings', 'savedObjects', 'common']);
   const dashboardExpect = getService('dashboardExpect');
 
-  // https://github.com/elastic/kibana/issues/114053
   describe('bwc import', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
