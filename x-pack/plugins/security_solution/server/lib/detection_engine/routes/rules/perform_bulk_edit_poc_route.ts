@@ -73,8 +73,17 @@ export const performBulkEditPOCRoute = (
         if (body.action === BulkAction.edit) {
           const { ruleParamsModifierActions, rulesClientActions } = splitBulkEditActions(body.edit);
 
+          let query = body.query !== '' ? body.query : undefined;
+
+          if (body.ids) {
+            if (body.query) {
+              throw Error('no ids and query at the same time');
+            }
+            query = body.ids.map((id) => `alert.id:"alert:${id}"`).join(' OR ');
+          }
+
           results = await rulesClient.bulkEdit({
-            filter: body.query !== '' ? body.query : undefined,
+            filter: query,
             actions: rulesClientActions.map(actionAdapterForRulesClient),
             paramsModifier: (ruleParams) =>
               ruleParamsModifier(ruleParams as RuleAlertType['params'], ruleParamsModifierActions),
