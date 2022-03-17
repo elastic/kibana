@@ -7,4 +7,5 @@
  */
 
 export { EventAnnotationArgs, manualEventAnnotation } from './manual_event_annotation';
+export { eventAnnotationGroup, EventAnnotationGroupArgs } from './event_annotation_group';
 export type { EventAnnotationConfig } from './types';
