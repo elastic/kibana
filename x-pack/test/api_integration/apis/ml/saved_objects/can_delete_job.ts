@@ -28,16 +28,13 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     space?: string
   ) {
-    const { body } = await supertest
-      .post(
-        `${
-          space ? `/s/${space}` : ''
-        }/api/ml/saved_objects/can_delete_ml_space_aware_item/${jobType}`
-      )
+    const { body, status } = await supertest
+      .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/can_delete_ml_space_aware_item/${jobType}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ ids })
-      .expect(expectedStatusCode);
+      .send({ ids });
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
+
     return body;
   }
 

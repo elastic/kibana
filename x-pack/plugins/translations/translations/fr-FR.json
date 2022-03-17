@@ -18633,8 +18633,6 @@
     "xpack.reporting.exportTypes.common.failedToDecryptReportJobDataErrorMessage": "Impossible de déchiffrer les données de la tâche de reporting. Veuillez vous assurer que {encryptionKey} est défini et générez à nouveau ce rapport. {err}",
     "xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage": "Les en-têtes de tâche sont manquants",
     "xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues": "Le CSV peut contenir des formules dont les valeurs sont précédées d'un caractère d'échappement",
-    "xpack.reporting.exportTypes.printablePdf.logoDescription": "Propulsé par Elastic",
-    "xpack.reporting.exportTypes.printablePdf.pagingDescription": "Page {currentPage} sur {pageCount}",
     "xpack.reporting.jobsQuery.deleteError": "Impossible de supprimer le rapport : {error}",
     "xpack.reporting.jobStatusDetail.attemptXofY": "Tentative {attempts} sur {max_attempts}.",
     "xpack.reporting.jobStatusDetail.deprecatedText": "Il s'agit d'un type d'exportation déclassé. L'automatisation de ce rapport devra être à nouveau créée pour une question de compatibilité avec les futures versions de Kibana.",

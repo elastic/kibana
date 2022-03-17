@@ -24,11 +24,11 @@ export default ({ getService }: FtrProviderContext) => {
   const idSpace1 = 'space1';
 
   async function runSyncRequest(user: USER, expectedStatusCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/s/${idSpace1}/api/ml/saved_objects/sync`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
@@ -38,13 +38,13 @@ export default ({ getService }: FtrProviderContext) => {
     mlSavedObjectType: JobType | TrainedModelType,
     expectedStatusCode: number
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/s/${idSpace1}/api/ml/saved_objects/sync_check`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ mlSavedObjectType })
-      .expect(expectedStatusCode);
-
+      .send({ mlSavedObjectType });
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
+      
     return body;
   }
 
