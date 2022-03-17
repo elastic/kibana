@@ -39,7 +39,14 @@ export const BodyRow = <Item extends object>({
             {leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
             {rowIdentifier && (
               <Cell {...DRAGGABLE_UX_STYLE} flexBasis="24px">
-                <EuiToken size="m" iconType={() => <EuiText size="s">{rowIdentifier}</EuiText>} />
+                <EuiToken
+                  size="m"
+                  iconType={() => (
+                    <EuiText size="xs">
+                      <strong>{rowIdentifier}</strong>
+                    </EuiText>
+                  )}
+                />
               </Cell>
             )}
             {columns.map((column, columnIndex) => (
