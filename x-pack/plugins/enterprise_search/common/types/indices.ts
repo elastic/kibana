@@ -10,8 +10,14 @@ export interface ElasticsearchIndex {
   status?: string;
   name: string;
   uuid?: string;
-  documents: number;
-  documents_deleted: number;
-  size: string;
+  total: {
+    docs: {
+      count: number;
+      deleted: number;
+    };
+    store: {
+      size_in_bytes: string;
+    };
+  };
   aliases: string | string[];
 }

@@ -40,14 +40,28 @@ export const fetchIndices = async (client: IScopedClusterClient): Promise<Elasti
     const indexData = indices[indexName];
     const indexStats = indicesStats[indexName];
     const aliases = Object.keys(indexData.aliases!);
+    const size_in_bytes = new ByteSizeValue(
+      indexStats?.total?.store?.size_in_bytes ?? 0
+    ).toString();
+
+    const docCount = indexStats?.total?.docs?.count ?? 0;
+    const docDeleted = indexStats?.total?.docs?.deleted ?? 0;
+    const total = {
+      docs: {
+        count: docCount,
+        deleted: docDeleted,
+      },
+      store: {
+        size_in_bytes,
+      },
+    };
+
     return {
       health: indexStats?.health,
       status: indexStats?.status,
       name: indexName,
       uuid: indexStats?.uuid,
-      documents: indexStats?.total?.docs?.count ?? 0,
-      documents_deleted: indexStats?.total?.docs?.deleted ?? 0,
-      size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
+      total,
       aliases: aliases.length ? aliases : 'none',
     };
   });
