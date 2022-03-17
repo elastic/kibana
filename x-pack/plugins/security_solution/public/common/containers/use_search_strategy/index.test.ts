@@ -9,6 +9,7 @@ import { useSearchStrategy } from './index';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
+import { FactoryQueryTypes } from '../../../../common/search_strategy';
 
 jest.mock('../../../transforms/containers/use_transforms', () => ({
   useTransforms: jest.fn(() => ({
@@ -34,7 +35,7 @@ const useObservableHookResult = {
 };
 
 const userSearchStrategyProps = {
-  factoryQueryType: 'testFactoryQueryType',
+  factoryQueryType: 'testFactoryQueryType' as FactoryQueryTypes,
   initialResult: {},
   errorMessage: 'testErrorMessage',
 };
@@ -45,22 +46,20 @@ describe('useSearchStrategy', () => {
     (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
 
     const { result } = renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>({ ...userSearchStrategyProps, initialResult })
+      useSearchStrategy<FactoryQueryTypes>({ ...userSearchStrategyProps, initialResult })
     );
 
     expect(result.current.result).toBe(initialResult);
   });
 
   it('calls start with the given factoryQueryType', () => {
-    const factoryQueryType = 'fakeQueryType';
+    const factoryQueryType = 'fakeQueryType' as FactoryQueryTypes;
     const start = jest.fn();
 
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result } = renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>({
+      useSearchStrategy<FactoryQueryTypes>({
         ...userSearchStrategyProps,
         factoryQueryType,
       })
@@ -85,8 +84,7 @@ describe('useSearchStrategy', () => {
     });
 
     const { result } = renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>(userSearchStrategyProps)
+      useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
     expect(result.current.inspect).toEqual({
@@ -104,8 +102,7 @@ describe('useSearchStrategy', () => {
     });
 
     renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>({ ...userSearchStrategyProps, errorMessage })
+      useSearchStrategy<FactoryQueryTypes>({ ...userSearchStrategyProps, errorMessage })
     );
 
     expect(mockAddToastError).toBeCalledWith(error, { title: errorMessage });
@@ -118,8 +115,7 @@ describe('useSearchStrategy', () => {
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result } = renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>(userSearchStrategyProps)
+      useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
     result.current.search(searchParams);
@@ -134,8 +130,7 @@ describe('useSearchStrategy', () => {
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result, rerender } = renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>(userSearchStrategyProps)
+      useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
     result.current.search(searchParams);
@@ -158,8 +153,7 @@ describe('useSearchStrategy', () => {
     (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
 
     const { result } = renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>(userSearchStrategyProps)
+      useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
     result.current.search(searchParams);
@@ -178,8 +172,7 @@ describe('useSearchStrategy', () => {
     (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
 
     const { result, unmount } = renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>(userSearchStrategyProps)
+      useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
     result.current.search(searchParams);
@@ -189,7 +182,7 @@ describe('useSearchStrategy', () => {
   });
 
   it('calls start with the AbortController signal', () => {
-    const factoryQueryType = 'fakeQueryType';
+    const factoryQueryType = 'fakeQueryType' as FactoryQueryTypes;
     const start = jest.fn();
     const signal = new AbortController().signal;
     jest.spyOn(window, 'AbortController').mockReturnValue({ abort: jest.fn(), signal });
@@ -197,8 +190,7 @@ describe('useSearchStrategy', () => {
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result } = renderHook(() =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      useSearchStrategy<any>({
+      useSearchStrategy<FactoryQueryTypes>({
         ...userSearchStrategyProps,
         factoryQueryType,
       })

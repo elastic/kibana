@@ -87,6 +87,11 @@ const searchComplete = <ResponseType extends IKibanaSearchResponse>(
   );
 };
 
+const EMPTY_INSPECT = {
+  dsl: [],
+  response: [],
+};
+
 export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   factoryQueryType,
   initialResult,
@@ -151,18 +156,17 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
 
   const [formatedResult, inspect] = useMemo(
     () => [
-      omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result),
-      getInspectResponse(result, {
-        dsl: [],
-        response: [],
-      }),
+      result
+        ? omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result)
+        : initialResult,
+      result ? getInspectResponse(result, EMPTY_INSPECT) : EMPTY_INSPECT,
     ],
-    [result]
+    [result, initialResult]
   );
 
   return {
     loading,
-    result: result ? formatedResult : initialResult,
+    result: formatedResult,
     error,
     search: searchCb,
     refetch: refetch.current,
