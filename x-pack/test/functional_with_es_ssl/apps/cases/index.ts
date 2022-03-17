@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe.only('Cases stack management', function () {
+  describe('Cases stack management', function () {
     before(async () => {});
 
     after(async () => {});

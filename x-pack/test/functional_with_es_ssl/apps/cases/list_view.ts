@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -14,11 +15,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const casesApp = getService('casesApp');
+  const casesAppApi = getService('casesAppApi');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   describe('cases list', () => {
     before(async () => {
       await common.navigateToApp('casesStackManagement');
-      await casesApp.deleteAllCasesFromList();
+      await casesAppApi.deleteAllCases();
     });
 
     beforeEach(async () => {
@@ -31,29 +35,65 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('lists cases correctly', async () => {
       const NUMBER_CASES = 2;
-      // create two cases
-      for (let i = 0; i < NUMBER_CASES; i++) {
-        await common.navigateToApp('casesStackManagement');
-        await casesApp.createCaseFromCreateCasePage();
-      }
+      await casesAppApi.createNthRandomCases(NUMBER_CASES);
       await common.navigateToApp('casesStackManagement');
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
       expect(rows.length).equal(NUMBER_CASES);
     });
 
     it('deletes a case correctly from the list', async () => {
-      await casesApp.createCaseFromCreateCasePage();
+      await casesAppApi.createNthRandomCases(1);
       await common.navigateToApp('casesStackManagement');
       await testSubjects.click('action-delete');
       await testSubjects.click('confirmModalConfirmButton');
       await testSubjects.existOrFail('euiToastHeader');
     });
 
+    it('filters cases from the list with partial match', async () => {
+      await casesAppApi.createNthRandomCases(5);
+      const id = uuid.v4();
+      const caseTitle = 'test-' + id;
+      await casesAppApi.createCaseWithData({ title: caseTitle });
+      await common.navigateToApp('casesStackManagement');
+
+      // search
+      const input = await testSubjects.find('search-cases');
+      await input.type(caseTitle);
+      await input.pressKeys(browser.keys.ENTER);
+
+      await retry.tryForTime(5000, async () => {
+        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
+        expect(rows.length).equal(1);
+      });
+    });
+
+    it('paginates cases correctly', async () => {
+      await casesAppApi.deleteAllCases();
+      await casesAppApi.createNthRandomCases(8);
+      await common.navigateToApp('casesStackManagement');
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click('tablePagination-5-rows');
+      await testSubjects.isEnabled('pagination-button-1');
+      await testSubjects.click('pagination-button-1');
+      await testSubjects.isEnabled('pagination-button-0');
+    });
+
+    it('bulk delete cases from the list', async () => {
+      // deletes them from the API
+      await casesAppApi.deleteAllCases();
+      await casesAppApi.createNthRandomCases(8);
+      await common.navigateToApp('casesStackManagement');
+      // deletes them from the UI
+      await casesApp.deleteAllCasesFromListUi();
+      const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+      expect(rows.length).equal(0);
+    });
+
     describe('changes status from the list', () => {
       before(async () => {
         await common.navigateToApp('casesStackManagement');
-        await casesApp.deleteAllCasesFromList();
-        await casesApp.createCaseFromCreateCasePage();
+        await casesAppApi.deleteAllCases();
+        await casesAppApi.createNthRandomCases(1);
         await common.navigateToApp('casesStackManagement');
       });
 
