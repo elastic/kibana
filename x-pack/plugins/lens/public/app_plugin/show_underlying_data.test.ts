@@ -547,6 +547,73 @@ describe('combineQueryAndFilters', () => {
     ]);
   });
 
+  it('should ignore all empty queries', () => {
+    const emptyQueryAndFilters = {
+      filters: [],
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+    };
+
+    expect(
+      combineQueryAndFilters(
+        [{ language: 'lucene', query: '' }],
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            enabled: {
+              kuery: [[{ language: 'kuery', query: '' }]],
+              lucene: [],
+            },
+            disabled: { kuery: [], lucene: [] },
+          },
+        },
+        undefined
+      )
+    ).toEqual(emptyQueryAndFilters);
+
+    expect(
+      combineQueryAndFilters(
+        { language: 'lucene', query: '' },
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            enabled: {
+              kuery: [[{ language: 'kuery', query: '' }]],
+              lucene: [],
+            },
+            disabled: { kuery: [], lucene: [] },
+          },
+        },
+        undefined
+      )
+    ).toEqual(emptyQueryAndFilters);
+
+    expect(
+      combineQueryAndFilters(
+        undefined,
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            enabled: {
+              kuery: [[{ language: 'kuery', query: '' }]],
+              lucene: [],
+            },
+            disabled: { kuery: [], lucene: [] },
+          },
+        },
+        undefined
+      )
+    ).toEqual(emptyQueryAndFilters);
+  });
+
   it('should work for complex cases of nested meta filters', () => {
     // scenario overview:
     // A kuery query
