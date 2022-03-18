@@ -556,6 +556,7 @@ Array [
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          refetchFlyoutData={[Function]}
           timelineId="test"
         >
           <Memo()
@@ -573,6 +574,7 @@ Array [
             isHostIsolationPanelOpen={false}
             loadingEventDetails={true}
             onAddIsolationStatusClick={[Function]}
+            refetchFlyoutData={[Function]}
             timelineId="test"
             timelineQuery={
               Object {
@@ -844,6 +846,7 @@ Array [
         isHostIsolationPanelOpen={false}
         loadingEventDetails={true}
         onAddIsolationStatusClick={[Function]}
+        refetchFlyoutData={[Function]}
         timelineId="test"
       >
         <Memo()
@@ -861,6 +864,7 @@ Array [
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          refetchFlyoutData={[Function]}
           timelineId="test"
           timelineQuery={
             Object {

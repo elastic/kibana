@@ -34,9 +34,10 @@ export const RelatedCases: React.FC<Props> = React.memo(({ data, isAlert }) => {
   const getRelatedCases = useCallback(async () => {
     let relatedCaseList: RelatedCaseList = [];
     try {
-      relatedCaseList = await cases.api.getRelatedCases(alertId, {
-        owner: APP_ID,
-      });
+      relatedCaseList =
+        (await cases.api.getRelatedCases(alertId, {
+          owner: APP_ID,
+        })) ?? [];
     } catch {
       // TODO: Show an error toaster here?
     }
@@ -64,11 +65,11 @@ export const RelatedCases: React.FC<Props> = React.memo(({ data, isAlert }) => {
             defaultMessage="{caseCount} {caseCount, plural, =0 {cases.} =1 {case:} other {cases:}}"
             id="xpack.securitySolution.alertDetails.overview.relatedCasesCount"
             values={{
-              caseCount: relatedCases.length,
+              caseCount: relatedCases?.length ?? 0,
             }}
           />
         </strong>
-        {relatedCases.map(({ id, title }, index) =>
+        {relatedCases?.map(({ id, title }, index) =>
           id && title ? (
             <span key={id}>
               {' '}
