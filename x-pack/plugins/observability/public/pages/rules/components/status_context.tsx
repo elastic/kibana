@@ -18,6 +18,7 @@ import { statusMap } from '../config';
 
 export function StatusContext({
   item,
+  disabled = false,
   onStatusChanged,
   enableRule,
   disableRule,
@@ -29,8 +30,8 @@ export function StatusContext({
 
   const currentStatus = item.enabled ? RuleStatus.enabled : RuleStatus.disabled;
   const popOverButton = useMemo(
-    () => <Status type={currentStatus} onClick={togglePopover} />,
-    [currentStatus, togglePopover]
+    () => <Status disabled={disabled} type={currentStatus} onClick={togglePopover} />,
+    [disabled, currentStatus, togglePopover]
   );
 
   const onContextMenuItemClick = useCallback(

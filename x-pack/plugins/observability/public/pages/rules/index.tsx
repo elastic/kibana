@@ -145,6 +145,7 @@ export function RulesPage() {
         render: (_enabled: boolean, item: RuleTableItem) => {
           return (
             <StatusContext
+              disabled={!item.isEditable}
               item={item}
               onStatusChanged={() => reload()}
               enableRule={async () => await enableRule({ http, id: item.id })}

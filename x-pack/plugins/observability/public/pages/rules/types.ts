@@ -9,6 +9,7 @@ import { AlertExecutionStatus } from '../../../../alerting/common';
 import { RuleTableItem, Rule } from '../../../../triggers_actions_ui/public';
 export interface StatusProps {
   type: RuleStatus;
+  disabled: boolean;
   onClick: () => void;
 }
 
@@ -27,6 +28,7 @@ export type Status = Record<
 
 export interface StatusContextProps {
   item: RuleTableItem;
+  disabled: boolean;
   onStatusChanged: (status: RuleStatus) => void;
   enableRule: (rule: Rule) => Promise<void>;
   disableRule: (rule: Rule) => Promise<void>;
