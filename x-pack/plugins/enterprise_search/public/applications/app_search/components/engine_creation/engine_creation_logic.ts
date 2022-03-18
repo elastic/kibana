@@ -103,6 +103,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       '',
       {
         setSelectedIndex: (_, { selectedIndexName }) => selectedIndexName,
+        onSubmitError: () => '',
       },
     ],
     engineType: [
