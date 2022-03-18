@@ -43,43 +43,70 @@ default space is used.
 To remove the connector, specify `null`. If you want to omit any individual
 field, specify `null` as its value.
 
-For {sn-itsm} connectors, refer to <<servicenow-action-configuration>>. For
-example:
+For {ibm-r} connectors, specify:
 
-* `urgency`: The extent to which the incident resolution can be delayed.
-* `severity`: The severity of the incident.
-* `impact`: The effect an incident had on business.
-* `category`: The category of the incident.
-* `subcategory`: The subcategory of the incident.
+`issueTypes`:::
+(Required, array of numbers) The issue types of the issue.
 
-For {sn-sir} connectors, refer to <<servicenow-sir-action-configuration>>. For example:
+`severityCode`:::
+(Required, number) The severity code of the issue.
 
-////
-//TBD: Are these valid? They don't appear in the action docs
-* `destIp`: A comma separated list of destination IPs.
-* `malwareHash`: A comma separated list of malware hashes.
-* `malwareUrl`: A comma separated list of malware URLs.
-* `sourceIp`: A comma separated list of source IPs.
-////
-* `priority`: The priority of the incident.
-* `category`: The category of the incident.
-* `subcategory`: The subcategory of the incident.
+For {jira} connectors, specify:
 
-For {jira} connectors, refer to <<jira-action-configuration>>. For example:
+`issueType`:::
+(Required, string) The issue type of the issue.
 
-* `issueType`: The issue type of the issue.
-* `priority`: The priority of the issue.
-* `parent`: The key of the parent issue (Valid when the issue type is `Sub-task`).
+`parent`:::
+(Required, string) The key of the parent issue, when the issue type is
+`Sub-task`.
 
-For {ibm-r} connectors, refer to <<resilient-action-configuration>>. For example:
+`priority`:::
+(Required, string) The priority of the issue.
 
-* `issueTypes`: The issue types of the issue.
-* `severityCode`: The severity code of the issue.
+For {sn-itsm} connectors, specify:
 
-For {swimlane} connectors, refer to <<swimlane-action-configuration>>. For example:
+`category`:::
+(Required, string) The category of the incident.
 
-* `caseId`: The case ID.
-//TBD: Is this correct or should it be comments and severity?
+`impact`:::
+(Required, string) The effect an incident had on business.
+
+`severity`:::
+(Required, string) The severity of the incident.
+
+`subcategory`:::
+(Required, string) The subcategory of the incident.
+
+`urgency`:::
+(Required, string) The extent to which the incident resolution can be delayed.
+
+For {sn-sir} connectors, specify:
+
+`category`:::
+(Required, string) The category of the incident.
+
+`destIp`:::
+(Required, string) A comma separated list of destination IPs.
+
+`malwareHash`:::
+(Required, string) A comma separated list of malware hashes.
+
+`malwareUrl`:::
+(Required, string) A comma separated list of malware URLs.
+
+`priority`:::
+(Required, string) The priority of the incident.
+
+`sourceIp`:::
+(Required, string) A comma separated list of source IPs.
+
+`subcategory`:::
+(Required, string) The subcategory of the incident.
+
+For {swimlane} connectors, specify:
+
+`caseId`:::
+(Required, string) The identifier for the case.
 --
 
 `id`::
