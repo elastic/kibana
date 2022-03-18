@@ -70,7 +70,7 @@ const SessionsTableComponent: React.FC<Props> = ({
   pageFilters = [],
 }) => {
   const sessionsFilter = useMemo(() => [...defaultSessionsFilters, ...pageFilters], [pageFilters]);
-  const ACTION_BUTTON_COUNT = 4;
+  const ACTION_BUTTON_COUNT = 5;
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
