@@ -367,6 +367,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       }),
     };
 
+    const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
+
     const fieldGroupDefinitions: FieldGroups = {
       SpecialFields: {
         fields: groupedFields.specialFields,
@@ -390,10 +392,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           : i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
               defaultMessage: 'Available fields',
             }),
-        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
-          defaultMessage:
-            'Available fields have data in the first 500 documents that match your filters. To view all fields, expand Empty fields. Some field types cannot be visualized in Lens, including full text and geographic fields.',
-        }),
+        helpText: isUsingSampling
+          ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
+              defaultMessage:
+                'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+              defaultMessage:
+                'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+            }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         // Show details on timeout but not failure
@@ -446,6 +453,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return fieldGroupDefinitions;
   }, [
     allFields,
+    core.uiSettings,
     fieldInfoUnavailable,
     filters.length,
     existenceFetchTimeout,
