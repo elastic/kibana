@@ -62,7 +62,6 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
-import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 import { createWrappedScopedClusterClientFactory } from '../lib';
 import { getRecoveredAlerts } from '../lib';
 import {
@@ -339,6 +338,7 @@ export class TaskRunner<
         spaceId,
       },
       logger: this.logger,
+      abortController: this.searchAbortController,
     });
 
     let updatedRuleTypeState: void | Record<string, unknown>;
@@ -375,10 +375,6 @@ export class TaskRunner<
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
-            search: createAbortableEsClientFactory({
-              scopedClusterClient,
-              abortController: this.searchAbortController,
-            }),
           },
           params,
           state: alertTypeState as State,
@@ -670,7 +666,7 @@ export class TaskRunner<
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
-    const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
+    const scheduleDelay = runDate.getTime() - this.taskInstance.scheduledAt.getTime();
 
     const event = createAlertEventLogRecordObject({
       ruleId,
@@ -679,7 +675,7 @@ export class TaskRunner<
       namespace,
       executionId: this.executionId,
       task: {
-        scheduled: this.taskInstance.runAt.toISOString(),
+        scheduled: this.taskInstance.scheduledAt.toISOString(),
         scheduleDelay: Millis2Nanos * scheduleDelay,
       },
       savedObjects: [
