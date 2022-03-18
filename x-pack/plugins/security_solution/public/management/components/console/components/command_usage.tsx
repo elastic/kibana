@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -18,6 +18,33 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usageFromCommandDefinition } from '../service/usage_from_command_definition';
 import { CommandDefinition } from '../types';
 
+export const CommandInputUsage = memo<Pick<CommandUsageProps, 'command'>>(({ command }) => {
+  const usageHelp = useMemo(() => {
+    return usageFromCommandDefinition(command);
+  }, [command]);
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.securitySolution.console.commandUsage.inputUsage"
+            defaultMessage="Usage:"
+          />
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        <code>
+          <EuiText>
+            <code>{usageHelp}</code>
+          </EuiText>
+        </code>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
+CommandInputUsage.displayName = 'CommandInputUsage';
+
 export interface CommandUsageProps {
   command: CommandDefinition;
 }
@@ -27,16 +54,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ command }) => {
 
   return (
     <EuiPanel color="transparent">
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiText>{'Usage:'}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <code>
-            <EuiText>{usageFromCommandDefinition(command)}</EuiText>
-          </code>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <CommandInputUsage command={command} />
       <EuiSpacer />
       <p>
         <EuiText>
