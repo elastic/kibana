@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.unifiedSearch.closeTourPopover();
+      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
     });
 
     after(async () => {

@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Navigate to discover app
       await appsMenu.clickLink('Discover');
-      await PageObjects.unifiedSearch.closeTourPopover();
+      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       const discoverUrl = await browser.getCurrentUrl();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();

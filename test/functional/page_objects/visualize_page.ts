@@ -154,7 +154,7 @@ export class VisualizePageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
 
     if (type === 'lens') {
-      await this.unifiedSearch.closeTourPopover();
+      await this.unifiedSearch.closeTour();
     }
   }
 

@@ -10,8 +10,16 @@ import { FtrService } from '../ftr_provider_context';
 
 export class UnifiedSearchPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  public async closeTourPopover() {
+  public async closeTour() {
+    const tourPopoverIsOpen = await this.testSubjects.exists('dataViewPickerTourLink');
+    if (tourPopoverIsOpen) {
+      await this.testSubjects.click('dataViewPickerTourLink');
+    }
+  }
+
+  public async closeTourPopoverByLocalStorage() {
     await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
     await this.browser.refresh();
   }

@@ -68,7 +68,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await PageObjects.canvas.deleteSelectedElement();
         const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
         await PageObjects.canvas.createNewVis('lens');
-        await PageObjects.unifiedSearch.closeTourPopover();
+        await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
         await PageObjects.lens.goToTimeRange();
         await PageObjects.lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

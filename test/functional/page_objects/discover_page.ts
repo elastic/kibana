@@ -549,7 +549,7 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('Discover app on screen', async () => {
       return await this.isDiscoverAppOnScreen();
     });
-    await this.unifiedSearch.closeTourPopover();
+    await this.unifiedSearch.closeTourPopoverByLocalStorage();
   }
 
   public async showAllFilterActions() {

@@ -890,7 +890,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await testSubjects.click('transformWizardCardDiscover');
         await PageObjects.discover.isDiscoverAppOnScreen();
       });
-      await PageObjects.unifiedSearch.closeTourPopover();
+      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
     },
 
     async setDiscoverTimeRange(fromTime: string, toTime: string) {
