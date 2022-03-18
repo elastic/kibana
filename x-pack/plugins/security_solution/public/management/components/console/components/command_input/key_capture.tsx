@@ -58,7 +58,7 @@ export interface KeyCaptureProps {
 
 /**
  * Key Capture is an invisible INPUT field that we set focus to when the user clicks inside of
- * the console. It sole purpose is to capture what the user types, which is then pass along to be
+ * the console. It's sole purpose is to capture what the user types, which is then pass along to be
  * displayed in a more UX friendly way
  */
 export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateChange }) => {
@@ -124,6 +124,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     focusRef.current = setFocus;
   }
 
+  // FIXME:PT probably need to add `aria-` type properties to the input?
   return (
     <KeyCaptureContainer>
       <input
