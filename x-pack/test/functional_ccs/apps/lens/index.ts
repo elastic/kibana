@@ -14,7 +14,8 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
   const PageObjects = getPageObjects(['timePicker']);
   const remoteEsArchiver = getService('remoteEsArchiver');
 
-  describe('lens app', () => {
+  describe('CCS lens app', () => {
+    this.tags(['ciGroup3', 'skipFirefox']);
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
@@ -31,6 +32,8 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/default_ccs'
       );
+
+      loadTestFile(require.resolve('./smokescreen_ccs'));
     });
 
     after(async () => {
@@ -42,11 +45,6 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
       );
-    });
-
-    describe('', function () {
-      this.tags(['ciGroup3', 'skipFirefox']);
-      loadTestFile(require.resolve('./smokescreen_ccs'));
     });
   });
 }
