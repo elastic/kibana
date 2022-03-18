@@ -403,7 +403,6 @@ describe('create()', () => {
           "error": null,
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
-          "warning": null,
         },
         "legacyId": null,
         "meta": Object {
@@ -605,7 +604,6 @@ describe('create()', () => {
           "error": null,
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
-          "warning": null,
         },
         "legacyId": "123",
         "meta": Object {
@@ -1032,7 +1030,6 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
@@ -1159,11 +1156,6 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1235,7 +1227,6 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
@@ -1331,11 +1322,6 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1407,7 +1393,6 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
@@ -1582,7 +1567,6 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
-          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -1712,7 +1696,6 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
-          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -1842,7 +1825,6 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
-          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -1987,7 +1969,6 @@ describe('create()', () => {
           status: 'pending',
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
-          warning: null,
         },
         monitoring: {
           execution: {
@@ -2081,11 +2062,6 @@ describe('create()', () => {
       isExportable: true,
       async executor() {},
       producer: 'alerts',
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -2362,7 +2338,6 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
-          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -2463,7 +2438,6 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
-          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -2542,11 +2516,6 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
-      },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
       },
     }));
 
