@@ -14,13 +14,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const a11y = getService('a11y');
   const flyout = getService('flyout');
+  const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/91939
-  describe.skip('Accessibility Search Profiler Editor', () => {
+  describe('Accessibility Search Profiler Editor', () => {
     before(async () => {
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await PageObjects.common.navigateToApp('searchProfiler');
       await a11y.testAppSnapshot();
       expect(await testSubjects.exists('searchProfilerEditor')).to.be(true);
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     it('input the JSON in the aceeditor', async () => {
@@ -62,6 +67,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('click on the dropdown link', async () => {
       const viewShardDetailslink = await testSubjects.findAll('viewShardDetails');
       await viewShardDetailslink[0].click();
+      await a11y.testAppSnapshot();
+    });
+
+    it('close the flyout', async () => {
+      await testSubjects.click('euiFlyoutCloseButton');
       await a11y.testAppSnapshot();
     });
 
