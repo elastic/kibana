@@ -6,12 +6,13 @@
  */
 
 import React, { memo, useCallback, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { HistoryOutput } from './components/history_output';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { CommandServiceInterface } from './types';
 import { ConsoleStateProvider } from './components/console_state';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 // FIXME:PT implement dark mode for the console or light mode switch
 
@@ -42,13 +43,14 @@ const ConsoleWindow = styled.div`
   }
 `;
 
-export interface ConsoleProps extends Pick<CommandInputProps, 'prompt'> {
+export interface ConsoleProps extends CommonProps, Pick<CommandInputProps, 'prompt'> {
   consoleService: CommandServiceInterface;
 }
 
-export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
+export const Console = memo<ConsoleProps>(({ prompt, consoleService, ...commonProps }) => {
   const consoleWindowRef = useRef<HTMLDivElement | null>(null);
   const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
+  const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
 
   const scrollToBottom = useCallback(() => {
     // We need the `setTimeout` here because in some cases, the command output
@@ -70,15 +72,23 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService }) => {
   }, []);
 
   return (
-    <ConsoleWindow onClick={handleConsoleClick}>
+    <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
       <ConsoleStateProvider commandService={consoleService} scrollToBottom={scrollToBottom}>
-        <EuiPanel className="ui-panel" panelRef={consoleWindowRef}>
+        <EuiPanel
+          className="ui-panel"
+          panelRef={consoleWindowRef}
+          data-test-subj={getTestId('mainPanel')}
+        >
           <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={true} data-test-subj={getTestId('historyOutput')}>
               <HistoryOutput />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+              <CommandInput
+                prompt={prompt}
+                focusRef={inputFocusRef}
+                data-test-subj={getTestId('cmdInput')}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

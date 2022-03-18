@@ -17,6 +17,8 @@ import React, {
 import { pick } from 'lodash';
 import styled from 'styled-components';
 
+const NOOP = () => undefined;
+
 const KeyCaptureContainer = styled.span`
   display: inline-block;
   position: relative;
@@ -132,6 +134,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         onKeyUp={handleOnKeyUp}
         onBlur={handleBlurAndFocus}
         onFocus={handleBlurAndFocus}
+        onChange={NOOP} // this just silences Jest output warnings
         ref={inputRef}
       />
     </KeyCaptureContainer>
