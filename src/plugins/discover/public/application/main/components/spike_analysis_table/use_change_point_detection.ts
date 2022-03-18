@@ -175,6 +175,7 @@ export function useChangePointDetection(
       loadingState: 'Loading ...',
       changePoints: undefined,
       fieldStats: undefined,
+      overallTimeSeries: undefined,
       tree: undefined,
     });
     setResponse.flush();

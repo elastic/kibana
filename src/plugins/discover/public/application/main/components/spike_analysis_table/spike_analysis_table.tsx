@@ -15,7 +15,6 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiProgress,
   EuiSplitPanel,
   EuiStat,
   EuiTabbedContent,
@@ -32,6 +31,7 @@ import { ImpactBar } from './impact_bar';
 import { useChangePointDetection, ChangePoint } from './use_change_point_detection';
 import type { BaseSpikeAnalysisTableProps } from './spike_analysis_table_embeddable';
 import type { ItemSetTreeNode } from './itemset_tree';
+import { ProgressControls } from './progress_controls';
 
 const loadingText = i18n.translate('xpack.apm.correlations.correlationsTable.loadingText', {
   defaultMessage: 'Loading...',
@@ -69,6 +69,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   const { theme } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const failedTransactionsCorrelationsColumns: Array<EuiBasicTableColumn<ChangePoint>> =
     useMemo(() => {
@@ -220,14 +221,18 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       ] as Array<EuiBasicTableColumn<ChangePoint>>;
     }, []);
 
-  const { progress, response, startFetch } = useChangePointDetection(indexPattern, spikeSelection);
+  const { progress, response, startFetch, cancelFetch } = useChangePointDetection(
+    indexPattern,
+    spikeSelection
+  );
   const status = progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS;
 
   useEffect(() => {
-    if (spikeSelection) {
+    if (spikeSelection && !isInitialized) {
       startFetch();
+      setIsInitialized(true);
     }
-  }, [spikeSelection, startFetch]);
+  }, [isInitialized, spikeSelection, startFetch]);
 
   const significantTerms = useMemo(
     () => orderBy(response.changePoints, 'normalizedScore', 'desc'),
@@ -296,11 +301,11 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         icon: <EuiIcon size="s" type="folderClosed" />,
         iconWhenExpanded: <EuiIcon size="s" type="folderOpen" />,
         isExpanded: true,
-        children: d.children.map(mapL),
+        children: d.children().map(mapL),
       };
     };
 
-    return (response?.tree && response?.tree.root.children.map(mapL)) ?? [];
+    return (response?.tree && response?.tree.root.children().map(mapL)) ?? [];
   }, [response?.tree]);
 
   const tabs = [
@@ -415,16 +420,12 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   return (
     <EuiFlexItem grow={false} style={{ height: '100%', overflow: 'hidden' }}>
       <div style={{ padding: '16px', overflow: 'scroll' }}>
-        <div style={{ padding: '4px 0 8px 0' }}>
-          <small>{progress.loadingState}</small>
-        </div>
-        <EuiProgress
-          aria-label={i18n.translate('xpack.apm.correlations.progressAriaLabel', {
-            defaultMessage: 'Progress',
-          })}
-          value={Math.round(progress.loaded * 100)}
-          max={100}
-          size="m"
+        <ProgressControls
+          progress={progress.loaded}
+          progressMessage={progress.loadingState ?? ''}
+          isRunning={progress.isRunning}
+          onRefresh={startFetch}
+          onCancel={cancelFetch}
         />
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} autoFocus="selected" />
       </div>

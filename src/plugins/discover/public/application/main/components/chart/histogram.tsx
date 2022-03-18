@@ -99,13 +99,13 @@ export function DiscoverHistogram({
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
-      if (!x) {
+      if (!x || viewMode === VIEW_MODE.SPIKE_LEVEL) {
         return;
       }
       const [from, to] = x;
       timefilterUpdateHandler({ from, to });
     },
-    [timefilterUpdateHandler]
+    [timefilterUpdateHandler, viewMode]
   );
 
   const onElementClick = useCallback(

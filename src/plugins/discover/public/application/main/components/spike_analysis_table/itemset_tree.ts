@@ -79,23 +79,63 @@ type ItemSet = ReturnType<typeof ItemSetFactory>;
 
 export interface ItemSetTreeNode {
   itemSet: ItemSet;
-  children: ItemSetTreeNode[];
   edges: ItemSetTreeNode[];
   parent: ItemSetTreeNode | null;
-  quality: number;
   selectedCluster: boolean;
+  children: () => ItemSetTreeNode[];
+  computeQuality: () => number;
   couldAdd: (otherItemSet: ItemSet) => boolean;
+  dominated: () => boolean;
   addChild: (otherItemSet: ItemSet) => ItemSetTreeNode;
   addEdge: (node: ItemSetTreeNode) => void;
+  allLeaves: () => ItemSetTreeNode[];
+  quality: () => number;
+  removeChild: (node: ItemSetTreeNode) => void;
+  removeLowQualityNodes: (minQualityRatio: number) => void;
+  removeChildrenBelowQualityThreshold: (minQualityRation: number) => void;
   similarity: (otherItemSet: ItemSet) => number;
 }
 
 function ItemSetTreeNodeFactory(itemSet: ItemSet): ItemSetTreeNode {
-  const children: ItemSetTreeNode[] = [];
+  let children: ItemSetTreeNode[] = [];
   const edges: ItemSetTreeNode[] = [];
   const parent = null;
-  const quality = itemSet.quality;
-  const selectedCluster = false;
+  let quality = itemSet.quality;
+  let selectedCluster = false;
+
+  // Get all leaves of the branch rooted at this node.
+  function allLeaves(): ItemSetTreeNode[] {
+    const result: ItemSetTreeNode[] = [];
+
+    if (isLeaf()) {
+      result.push(getThisNode());
+    }
+
+    for (const child of children) {
+      result.push(...child.allLeaves());
+    }
+
+    return result;
+  }
+
+  // A node is dominated by another if it contains that node's item set
+  // and its quality is lower.
+  function dominated() {
+    // Here we traverse the DAG view to find all candidates.
+    const workingSet = edges;
+
+    while (workingSet.length > 0) {
+      const node = workingSet.pop();
+      if (node !== undefined) {
+        if (node?.quality() > quality) {
+          return true;
+        }
+        workingSet.push(...node.edges);
+      }
+    }
+
+    return false;
+  }
 
   function similarity(otherItemSet: ItemSet) {
     return itemSet.similarity(otherItemSet);
@@ -124,21 +164,118 @@ function ItemSetTreeNodeFactory(itemSet: ItemSet): ItemSetTreeNode {
     return children[children.length - 1];
   }
 
+  function removeChild(node: ItemSetTreeNode) {
+    children = children.filter((child) => child !== node);
+  }
+
   function addEdge(node: ItemSetTreeNode) {
     edges.push(node);
   }
 
-  function getThisNode() {
+  function isLeaf() {
+    return children.length === 0;
+  }
+
+  function isRoot() {
+    return parent === null && itemSet.size === 0;
+  }
+
+  // We use a post order depth first traversal of the tree.
+  //
+  // At each point we keep track of the quality of the best representation
+  // (highest quality) we've found so far and compare to collapsing to a
+  // common ancestor.
+  //
+  // This is essentially a dynamic program to find the collection of item
+  // sets which represents the global minimum of the quality function.
+  function computeQuality() {
+    if (isLeaf()) {
+      return quality;
+    }
+
+    // We use a weighted average of the child qualities. This means that we
+    // select for the case any child accounts for the majority of the node's
+    // documents.
+
+    let currentBestRepresentationQuality = 0;
+    let extra = itemSet.count;
+
+    for (const child of children) {
+      extra -= child.itemSet.count;
+    }
+
+    extra = Math.max(extra, 0);
+
+    let Z = 0;
+
+    for (const child of children) {
+      currentBestRepresentationQuality += (child.itemSet.count + extra) * child.computeQuality();
+      Z += child.itemSet.count + extra;
+    }
+
+    currentBestRepresentationQuality /= Z;
+
+    if (quality < currentBestRepresentationQuality) {
+      quality = currentBestRepresentationQuality;
+    } else {
+      selectedCluster = isRoot() === false;
+    }
+
+    return quality;
+  }
+
+  // We use two conditions here:
+  // 1. The node quality is less than k * parent quality
+  // 2. The node is a leaf and is dominated by another node in the tree.
+  function removeLowQualityNodes(minQualityRatio: number) {
+    removeChildrenBelowQualityThreshold(minQualityRatio);
+    removeDominatedLeaves();
+  }
+
+  function removeChildrenBelowQualityThreshold(minQualityRatio: number) {
+    children = children.filter((child) => {
+      return child.quality() > minQualityRatio * quality;
+    });
+    for (const child of children) {
+      child.removeChildrenBelowQualityThreshold(minQualityRatio);
+    }
+  }
+
+  function removeDominatedLeaves() {
+    while (true) {
+      const workingSet = allLeaves();
+      let finished = true;
+
+      for (const node of workingSet) {
+        if (node.parent !== null && node.dominated()) {
+          node.parent.removeChild(node);
+          finished = false;
+        }
+      }
+
+      if (finished) {
+        break;
+      }
+    }
+  }
+
+  function getThisNode(): ItemSetTreeNode {
     return {
       itemSet,
-      children,
+      children: () => children,
       edges,
       parent,
-      quality,
+      quality: () => quality,
       selectedCluster,
+      computeQuality,
       couldAdd,
+      dominated,
       addChild,
       addEdge,
+      allLeaves,
+      removeChild,
+      removeLowQualityNodes,
+      removeChildrenBelowQualityThreshold,
       similarity,
     };
   }
@@ -175,9 +312,7 @@ export function ItemSetTreeFactory(
     for (const itemSet of itemSets) {
       const candidateNodes: ItemSetTreeNode[] = [];
 
-      // console.log('workingNodes', workingNodes.length);
       for (const node of workingNodes) {
-        // console.log('couldAdd', node.couldAdd(itemSet), node.itemSet.items, itemSet.items);
         if (node.couldAdd(itemSet)) {
           candidateNodes.push(node);
         }
@@ -187,9 +322,9 @@ export function ItemSetTreeFactory(
         // Order the candidate parent nodes by suitability.
         candidateNodes.sort((a, b) => {
           const av =
-            parentSimilarityWeight * a.similarity(itemSet) + parentQualityWeight * a.quality;
+            parentSimilarityWeight * a.similarity(itemSet) + parentQualityWeight * a.quality();
           const bv =
-            parentSimilarityWeight * b.similarity(itemSet) + parentQualityWeight * b.quality;
+            parentSimilarityWeight * b.similarity(itemSet) + parentQualityWeight * b.quality();
 
           return bv - av;
         });
@@ -203,6 +338,10 @@ export function ItemSetTreeFactory(
         }
       }
     }
+
+    root.computeQuality();
+    root.removeLowQualityNodes(minQualityRatio);
+    root.computeQuality();
   }
 
   buildTree();
