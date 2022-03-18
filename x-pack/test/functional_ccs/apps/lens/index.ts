@@ -7,14 +7,15 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
+export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['timePicker']);
   const remoteEsArchiver = getService('remoteEsArchiver');
 
-  describe('CCS lens app', () => {
+  describe('CCS lens app', function () {
+    this.tags(['ciGroup3', 'skipFirefox']);
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
@@ -46,4 +47,4 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       );
     });
   });
-}
+};
