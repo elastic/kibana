@@ -1180,7 +1180,10 @@ export class RulesClient {
     filter,
     actions = [],
     paramsModifier,
-  }: BulkEditOptions<Params>) {
+  }: BulkEditOptions<Params>): Promise<{
+    rules: Array<SanitizedRule<Params>>;
+    errors: BulkEditError[];
+  }> {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
