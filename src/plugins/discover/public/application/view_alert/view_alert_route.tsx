@@ -104,7 +104,7 @@ export function ViewAlertRoute() {
         );
       } catch (error) {
         const errorTitle = i18n.translate('discover.viewAlert.alertRuleFetchErrorTitle', {
-          defaultMessage: 'Alert rule fetch error',
+          defaultMessage: 'Error fetching alert rule',
         });
         displayError(errorTitle, error.message, toastNotifications);
       }
@@ -115,7 +115,7 @@ export function ViewAlertRoute() {
         return await data.search.searchSource.create(fetchedAlert.params.searchConfiguration);
       } catch (error) {
         const errorTitle = i18n.translate('discover.viewAlert.searchSourceErrorTitle', {
-          defaultMessage: 'Search source fetch error',
+          defaultMessage: 'Error fetching search source',
         });
         displayError(errorTitle, error.message, toastNotifications);
       }
@@ -123,7 +123,7 @@ export function ViewAlertRoute() {
 
     const showDataViewFetchError = (alertId: string) => {
       const errorTitle = i18n.translate('discover.viewAlert.dataViewErrorTitle', {
-        defaultMessage: 'Data view fetch error',
+        defaultMessage: 'Error fetching data view',
       });
       displayError(
         errorTitle,

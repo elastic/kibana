@@ -116,13 +116,6 @@ export function getAlertType(
     }
   );
 
-  const actionVariableSearchTypeLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextSearchTypeLabel',
-    {
-      defaultMessage: 'The type of search.',
-    }
-  );
-
   const actionVariableSearchConfigurationLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextSearchConfigurationLabel',
     {
@@ -134,8 +127,8 @@ export function getAlertType(
   const actionVariableContextLinkLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
     {
-      defaultMessage: `If the alert rule was created in Discover, the link will navigate
-       to Discover showing the records that triggered this alert. In the other case the link will navigate to the rule's status page.`,
+      defaultMessage: `Navigate to Discover and show the records that triggered
+       the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.`,
     }
   );
 
@@ -161,7 +154,6 @@ export function getAlertType(
         { name: 'size', description: actionVariableContextSizeLabel },
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
-        { name: 'searchType', description: actionVariableSearchTypeLabel },
         { name: 'searchConfiguration', description: actionVariableSearchConfigurationLabel },
         { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'index', description: actionVariableContextIndexLabel },
