@@ -9,14 +9,14 @@ Given a saved object type and id, generates the compound id that is stored in th
 <b>Signature:</b>
 
 ```typescript
-generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string;
+generateRawLegacyUrlAliasId(namespace: string | undefined, type: string, id: string): string;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  namespace | string | The namespace of the saved object |
+|  namespace | string \| undefined | The namespace of the saved object |
 |  type | string | The saved object type |
 |  id | string | The id of the saved object |
 

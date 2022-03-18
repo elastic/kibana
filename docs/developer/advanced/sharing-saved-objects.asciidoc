@@ -158,12 +158,13 @@ TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#use
 
 The
 https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
-interface] has three fields, summarized below:
+interface] has four fields, summarized below:
 
 * `saved_object` - The saved object that was found.
 * `outcome` - One of the following values: `'exactMatch' | 'aliasMatch' | 'conflict'`
 * `alias_target_id` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It means that a legacy URL alias with this ID points
   to an object with a _different_ ID.
+* `alias_purpose` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It describes why the legacy URL alis was created.
 
 The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
 custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `alias_target_id` fields need to be
@@ -236,12 +237,18 @@ if (spacesApi && resolveResult.outcome === 'aliasMatch') {
   // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
   const newObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'aliasMatch'
   const newPath = `/this/page/${newObjectId}${window.location.hash}`; // Use the *local* path within this app (do not include the "/app/appId" prefix)
-  await spacesApi.ui.redirectLegacyUrl(newPath, OBJECT_NOUN);
+  await spacesApi.ui.redirectLegacyUrl({
+    path: newPath,
+    aliasPurpose: resolveResult.alias_purpose, <1>
+    objectNoun: OBJECT_NOUN <2>
+  });
   return;
 }
 ```
-_Note that `OBJECT_NOUN` is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say
-"dashboard" or "index pattern" instead!_
+<1> The `aliasPurpose` field is required as of 8.2, because the API response now includes the reason the alias was created to inform the
+    client whether a toast should be shown or not.
+<2> The `objectNoun` field is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say
+    "dashboard" or "index pattern" instead!
 
 5. And finally, in your deep link page, add a function that will create a callout in the case of a `'conflict'` outcome:
 +

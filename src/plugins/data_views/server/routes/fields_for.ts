@@ -12,9 +12,9 @@ import {
   StartServicesAccessor,
   RequestHandler,
   RouteValidatorFullConfig,
-} from '../../../core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
-import { IndexPatternsFetcher } from './fetcher';
+} from '../../../../core/server';
+import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
+import { IndexPatternsFetcher } from '../fetcher';
 
 const parseMetaFields = (metaFields: string | string[]) => {
   let parsedFields: string[] = [];

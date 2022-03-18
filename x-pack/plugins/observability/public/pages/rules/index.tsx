@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -16,6 +16,8 @@ import {
   EuiHorizontalRule,
   EuiAutoRefreshButton,
   EuiTableSortingType,
+  EuiFieldSearch,
+  OnRefreshChangeProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -59,7 +61,11 @@ import {
   RULES_BREADCRUMB_TEXT,
   RULES_SINGLE_TITLE,
   RULES_PLURAL_TITLE,
+  SEARCH_PLACEHOLDER,
 } from './translations';
+import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+
+const ENTER_KEY = 13;
 
 export function RulesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -75,6 +81,10 @@ export function RulesPage() {
     field: 'name',
     direction: 'asc',
   });
+  const [inputText, setInputText] = useState<string | undefined>();
+  const [searchText, setSearchText] = useState<string | undefined>();
+  const [refreshInterval, setRefreshInterval] = useState(60000);
+  const [isPaused, setIsPaused] = useState(false);
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -84,13 +94,31 @@ export function RulesPage() {
     setCurrentRuleToEdit(ruleItem);
   };
 
+  const onRefreshChange = ({
+    isPaused: isPausedChanged,
+    refreshInterval: refreshIntervalChanged,
+  }: OnRefreshChangeProps) => {
+    setIsPaused(isPausedChanged);
+    setRefreshInterval(refreshIntervalChanged);
+  };
+
   const { rulesState, setRulesState, reload } = useFetchRules({
+    searchText,
     ruleLastResponseFilter,
     page,
     sort,
   });
   const { data: rules, totalItemCount, error } = rulesState;
   const { ruleTypeIndex } = useLoadRuleTypes({ filteredSolutions: OBSERVABILITY_SOLUTIONS });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isPaused) {
+        reload();
+      }
+    }, refreshInterval);
+    return () => clearInterval(interval);
+  }, [refreshInterval, reload, isPaused]);
 
   useBreadcrumbs([
     {
@@ -198,7 +226,11 @@ export function RulesPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <>{RULES_PAGE_TITLE} </>,
+        pageTitle: (
+          <>
+            {RULES_PAGE_TITLE} <ExperimentalBadge />
+          </>
+        ),
         rightSideItems: [
           <EuiButton
             iconType="plusInCircle"
@@ -250,12 +282,46 @@ export function RulesPage() {
         }}
       />
       <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            fullWidth
+            isClearable
+            data-test-subj="ruleSearchField"
+            onChange={(e) => {
+              setInputText(e.target.value);
+              if (e.target.value === '') {
+                setSearchText(e.target.value);
+              }
+            }}
+            onKeyUp={(e) => {
+              if (e.keyCode === ENTER_KEY) {
+                setSearchText(inputText);
+              }
+            }}
+            placeholder={SEARCH_PLACEHOLDER}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LastResponseFilter
             key="rule-lastResponse-filter"
             selectedStatuses={ruleLastResponseFilter}
             onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="refreshRulesButton"
+            iconType="refresh"
+            onClick={reload}
+            name="refresh"
+            color="primary"
+          >
+            <FormattedMessage
+              id="xpack.observability.rules.refreshRulesButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButton>
+          ,
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup>
@@ -273,9 +339,9 @@ export function RulesPage() {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiAutoRefreshButton
-            isPaused={false}
-            refreshInterval={3000}
-            onRefreshChange={() => {}}
+            isPaused={isPaused}
+            refreshInterval={refreshInterval}
+            onRefreshChange={onRefreshChange}
             shortHand
           />
         </EuiFlexItem>

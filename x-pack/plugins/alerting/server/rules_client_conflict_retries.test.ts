@@ -295,7 +295,7 @@ function setupRawAlertMocks(
 
   // splitting this out as it's easier to set a breakpoint :-)
   // eslint-disable-next-line prettier/prettier
-  unsecuredSavedObjectsClient.get.mockImplementation(async () => 
+  unsecuredSavedObjectsClient.get.mockImplementation(async () =>
     cloneDeep(rawAlert)
   );
 

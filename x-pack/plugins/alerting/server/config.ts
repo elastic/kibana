@@ -8,6 +8,28 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { validateDurationSchema } from './lib';
 
+const ruleTypeSchema = schema.object({
+  id: schema.string(),
+  timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
+});
+
+const rulesSchema = schema.object({
+  minimumScheduleInterval: schema.object({
+    value: schema.string({
+      validate: validateDurationSchema,
+      defaultValue: '1m',
+    }),
+    enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
+  }),
+  execution: schema.object({
+    timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
+    actions: schema.object({
+      max: schema.number({ defaultValue: 100000 }),
+    }),
+    ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
+  }),
+});
+
 export const DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT = 10;
 export const configSchema = schema.object({
   healthCheck: schema.object({
@@ -22,16 +44,10 @@ export const configSchema = schema.object({
   }),
   defaultRuleTaskTimeout: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
-  rules: schema.object({
-    minimumScheduleInterval: schema.object({
-      value: schema.string({
-        validate: validateDurationSchema,
-        defaultValue: '1m',
-      }),
-      enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
-    }),
-  }),
+  rules: rulesSchema,
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
+export type RulesConfig = TypeOf<typeof rulesSchema>;
+export type RuleTypeConfig = Omit<RulesConfig, 'ruleTypeOverrides'>;
 export type AlertingRulesConfig = AlertingConfig['rules'];

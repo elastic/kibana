@@ -10,8 +10,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { nodeTypes } from '@kbn/es-query';
-import { esKuery } from '../../../../../../src/plugins/data/server';
+import { nodeTypes, fromKueryExpression } from '@kbn/es-query';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
@@ -291,7 +290,7 @@ describe('find()', () => {
   });
 
   test('should translate filter/sort/search on params to mapped_params', async () => {
-    const filter = esKuery.fromKueryExpression(
+    const filter = fromKueryExpression(
       '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
     );
     authorization.getFindAuthorizationFilter.mockResolvedValue({
@@ -650,7 +649,7 @@ describe('find()', () => {
 
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
-      const filter = esKuery.fromKueryExpression(
+      const filter = fromKueryExpression(
         '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
       );
       authorization.getFindAuthorizationFilter.mockResolvedValue({
@@ -663,7 +662,7 @@ describe('find()', () => {
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
       expect(options.filter).toEqual(
-        nodeTypes.function.buildNode('and', [esKuery.fromKueryExpression('someTerm'), filter])
+        nodeTypes.function.buildNode('and', [fromKueryExpression('someTerm'), filter])
       );
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });

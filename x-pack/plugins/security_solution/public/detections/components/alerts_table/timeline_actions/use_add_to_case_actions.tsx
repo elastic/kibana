@@ -21,6 +21,7 @@ export interface UseAddToCaseActions {
   ariaLabel?: string;
   ecsData?: Ecs;
   nonEcsData?: TimelineNonEcsData[];
+  onSuccess?: () => Promise<void>;
   timelineId: string;
 }
 
@@ -29,6 +30,7 @@ export const useAddToCaseActions = ({
   ariaLabel,
   ecsData,
   nonEcsData,
+  onSuccess,
   timelineId,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
@@ -52,11 +54,13 @@ export const useAddToCaseActions = ({
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     attachments: caseAttachments,
     onClose: onMenuItemClick,
+    onSuccess,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
     attachments: caseAttachments,
     onClose: onMenuItemClick,
+    onRowClick: onSuccess,
   });
 
   const handleAddToNewCaseClick = useCallback(() => {
