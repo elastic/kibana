@@ -654,7 +654,7 @@ describe('artifacts lists', () => {
             field: 'process.executable.caseless',
             operator: 'included',
             type: 'wildcard',
-            value: '/usr/bin/*.md',
+            value: '/usr/bi*/donotadd.md',
           },
           {
             field: 'process.name',
@@ -677,7 +677,7 @@ describe('artifacts lists', () => {
               field: 'process.executable',
               operator: 'included',
               type: 'wildcard_cased',
-              value: '/usr/bin/*.md',
+              value: '/usr/bi*/donotadd.md',
             },
             {
               field: 'process.name',
@@ -758,7 +758,7 @@ describe('artifacts lists', () => {
             field: 'file.path.text',
             operator: 'included',
             type: 'wildcard',
-            value: '/usr/bin/*.md',
+            value: '/usr/b*/donotadd.md',
           },
           {
             field: 'file.name',
@@ -781,7 +781,7 @@ describe('artifacts lists', () => {
               field: 'file.path.text',
               operator: 'included',
               type: 'wildcard_cased',
-              value: '/usr/bin/*.md',
+              value: '/usr/b*/donotadd.md',
             },
             {
               field: 'file.name',
@@ -955,7 +955,7 @@ describe('artifacts lists', () => {
 
       test('it should not add process.name entry when process.name entry already exists', async () => {
         const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
-        const value = os === 'windows' ? 'C:\\My Doc*\\*.md' : '/usr/bin/*.md';
+        const value = os === 'windows' ? 'C:\\My Doc*\\donotadd.md' : '/usr/bin/donotadd.md';
 
         const testEntries: EntriesArray = [
           {
@@ -1062,7 +1062,7 @@ describe('artifacts lists', () => {
 
       test('it should not add file.name entry when file.name entry already exists', async () => {
         const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
-        const value = os === 'windows' ? 'C:\\My Doc*\\*.md' : '/usr/bin/*.md';
+        const value = os === 'windows' ? 'C:\\My Doc*\\donotadd.md' : '/usr/bin/donotadd.md';
 
         const testEntries: EntriesArray = [
           {

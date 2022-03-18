@@ -228,7 +228,7 @@ function translateItem(
   const itemSet = new Set();
   const getEntries = (): TranslatedExceptionListItem['entries'] => {
     return item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
-      const translatedEntry = translateEntry(schemaVersion, entry, item.os_types[0]);
+      const translatedEntry = translateEntry(schemaVersion, item.entries, entry, item.os_types[0]);
 
       if (translatedEntry !== undefined) {
         if (translatedEntryType.is(translatedEntry)) {
@@ -262,11 +262,10 @@ function translateItem(
 }
 
 function appendOptimizedEntryForEndpoint({
-  wildcardProcessEntry,
   entry,
   os,
+  wildcardProcessEntry,
 }: {
-  wildcardProcessEntry: TranslatedEntryMatchWildcard;
   entry: {
     field: string;
     operator: 'excluded' | 'included';
@@ -274,6 +273,7 @@ function appendOptimizedEntryForEndpoint({
     value: string;
   };
   os: ExceptionListItemSchema['os_types'][number];
+  wildcardProcessEntry: TranslatedEntryMatchWildcard;
 }): TranslatedPerformantEntries {
   const entries: TranslatedPerformantEntries = [
     wildcardProcessEntry,
@@ -299,6 +299,7 @@ function appendOptimizedEntryForEndpoint({
 
 function translateEntry(
   schemaVersion: string,
+  exceptionListItemEntries: ExceptionListItemSchema['entries'],
   entry: Entry | EntryNested,
   os: ExceptionListItemSchema['os_types'][number]
 ): TranslatedEntry | TranslatedPerformantEntries | undefined {
@@ -306,7 +307,12 @@ function translateEntry(
     case 'nested': {
       const nestedEntries = entry.entries.reduce<TranslatedEntryNestedEntry[]>(
         (entries, nestedEntry) => {
-          const translatedEntry = translateEntry(schemaVersion, nestedEntry, os);
+          const translatedEntry = translateEntry(
+            schemaVersion,
+            exceptionListItemEntries,
+            nestedEntry,
+            os
+          );
           if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
             entries.push(translatedEntry);
           }
@@ -362,11 +368,21 @@ function translateEntry(
             type: entry.type,
             value: entry.value,
           });
-          if (hasExecutableName) {
+
+          const existingFields = exceptionListItemEntries.map((e) => e.field);
+          const doAddPerformantEntries = !(
+            existingFields.includes('process.name') || existingFields.includes('file.name')
+          );
+
+          if (hasExecutableName && doAddPerformantEntries) {
             // when path has a full executable name
             // append a process.name entry based on os
             // `exact_cased` for linux and `exact_caseless` for others
-            return appendOptimizedEntryForEndpoint({ entry, os, wildcardProcessEntry });
+            return appendOptimizedEntryForEndpoint({
+              entry,
+              os,
+              wildcardProcessEntry,
+            });
           } else {
             return wildcardProcessEntry;
           }
