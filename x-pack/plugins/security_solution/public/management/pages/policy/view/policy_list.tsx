@@ -30,7 +30,7 @@ import {
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
 import { AgentPolicy } from '../../../../../../fleet/common';
-import { PolicyEndpointListLink } from '../../../components/policy_endpoint_list_link';
+import { PolicyToEndpointListLink } from '../../../components/policy_endpoint_list_link';
 import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreatePackagePolicyRouteState } from '../../../../../../fleet/public';
@@ -71,6 +71,46 @@ export const PolicyList = memo(() => {
 
   const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
 
+  const policyListPath = useMemo(() => getPoliciesPath(search), [search]);
+
+  const backLink: PolicyDetailsRouteState['backLink'] = useMemo(() => {
+    return {
+      navigateTo: [
+        APP_UI_ID,
+        {
+          path: policyListPath,
+        },
+      ],
+      label: i18n.translate('xpack.securitySolution.policy.backToPolicyList', {
+        defaultMessage: 'Back to policy list',
+      }),
+      href: getAppUrl({ path: policyListPath }),
+    };
+  }, [getAppUrl, policyListPath]);
+
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
+    'fleet',
+    {
+      path: `/integrations/${
+        endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : ''
+      }/add-integration`,
+      state: {
+        onCancelNavigateTo: [
+          APP_UI_ID,
+          {
+            path: policyListPath,
+          },
+        ],
+        onCancelUrl: getAppUrl({ path: getPoliciesPath() }),
+        onSaveNavigateTo: [
+          APP_UI_ID,
+          {
+            path: policyListPath,
+          },
+        ],
+      },
+    }
+  );
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
       defaultMessage: 'Last Updated',
@@ -174,14 +214,16 @@ export const PolicyList = memo(() => {
         dataType: 'number',
         width: '8%',
         render: (policy: PolicyData) => {
+          const count = policyIdToEndpointCount.get(policy.id);
           return (
-            <PolicyEndpointListLink
+            <PolicyToEndpointListLink
               className="eui-textTruncate"
               data-test-subj="policyEndpointCountLink"
               policyId={policy.id}
+              endpointCount={count ?? 0}
             >
-              {policyIdToEndpointCount.get(policy.id)}
-            </PolicyEndpointListLink>
+              {count}
+            </PolicyToEndpointListLink>
           );
         },
       },
@@ -192,7 +234,7 @@ export const PolicyList = memo(() => {
         }),
       },
     ];
-  }, [policyIdToEndpointCount]);
+  }, [policyIdToEndpointCount, backLink]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {
@@ -216,47 +258,6 @@ export const PolicyList = memo(() => {
   const policyListErrorMessage = i18n.translate('xpack.securitySolution.policy.list.errorMessage', {
     defaultMessage: 'Error while retrieving list of policies',
   });
-
-  const policyListPath = useMemo(() => getPoliciesPath(search), [search]);
-
-  const backLink: PolicyDetailsRouteState['backLink'] = useMemo(() => {
-    return {
-      navigateTo: [
-        APP_UI_ID,
-        {
-          path: policyListPath,
-        },
-      ],
-      label: i18n.translate('xpack.securitySolution.policy.backToPolicyList', {
-        defaultMessage: 'Back to policy list',
-      }),
-      href: getAppUrl({ path: policyListPath }),
-    };
-  }, [getAppUrl, policyListPath]);
-
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    'fleet',
-    {
-      path: `/integrations/${
-        endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : ''
-      }/add-integration`,
-      state: {
-        onCancelNavigateTo: [
-          APP_UI_ID,
-          {
-            path: policyListPath,
-          },
-        ],
-        onCancelUrl: getAppUrl({ path: getPoliciesPath() }),
-        onSaveNavigateTo: [
-          APP_UI_ID,
-          {
-            path: policyListPath,
-          },
-        ],
-      },
-    }
-  );
 
   return (
     <AdministrationListPage

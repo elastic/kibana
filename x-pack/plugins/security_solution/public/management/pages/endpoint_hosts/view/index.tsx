@@ -523,7 +523,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {

@@ -13,7 +13,7 @@ import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../../fle
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getEndpointListPath, getPolicyDetailPath } from '../../../common/routing';
+import { getEndpointListPath, getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
 import { getHostIsolationExceptionItems } from '../../host_isolation_exceptions/service';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
@@ -28,6 +28,7 @@ const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jes
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
   const endpointListPath = getEndpointListPath({ name: 'endpointList' });
+  const policyListPath = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
@@ -125,14 +126,14 @@ describe('Policy Details', () => {
       expect(policyView.find('flyoutOverlay')).toHaveLength(0);
     });
 
-    it('should display back to list button and policy title', async () => {
+    it('should display back to policy list button and policy title', async () => {
       policyView = render();
       await asyncActions;
       policyView.update();
 
       const backToListLink = policyView.find('BackToExternalAppButton');
-      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${endpointListPath}`);
-      expect(backToListLink.text()).toBe('View all endpoints');
+      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${policyListPath}`);
+      expect(backToListLink.text()).toBe('Back to policy list');
 
       const pageTitle = policyView.find('span[data-test-subj="header-page-title"]');
       expect(pageTitle).toHaveLength(1);
@@ -147,7 +148,7 @@ describe('Policy Details', () => {
       const backToListLink = policyView.find('a[data-test-subj="policyDetailsBackLink"]');
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       backToListLink.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(endpointListPath);
+      expect(history.location.pathname).toEqual(policyListPath);
     });
 
     it('should display agent stats', async () => {
