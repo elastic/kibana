@@ -6,6 +6,7 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+import { Observable } from 'rxjs';
 import {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
@@ -20,8 +21,12 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
-import { MLAnomalyDoc } from '../../../../common/types/anomalies';
+import { Influencer, MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { EntityField } from '../../../../common/util/anomaly_utils';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import type { SeriesConfigWithMetadata } from '../anomaly_explorer_charts_service';
+
+export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
@@ -159,6 +164,35 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
     return httpService.http<GetDatafeedResultsChartDataResult>({
       path: `${basePath()}/results/datafeed_results_chart`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getAnomalyCharts$(
+    jobIds: string[],
+    influencers: Influencer[],
+    threshold: number,
+    earliestMs: number,
+    latestMs: number,
+    timeBounds: { min?: number; max?: number },
+    maxResults: number,
+    numberOfPoints: number,
+    influencersFilterQuery?: InfluencersFilterQuery
+  ): Observable<SeriesConfigWithMetadata> {
+    const body = JSON.stringify({
+      jobIds,
+      influencers,
+      threshold,
+      earliestMs,
+      latestMs,
+      maxResults,
+      influencersFilterQuery,
+      numberOfPoints,
+      timeBounds,
+    });
+    return httpService.http$<SeriesConfigWithMetadata>({
+      path: `${basePath()}/results/anomaly_charts`,
       method: 'POST',
       body,
     });

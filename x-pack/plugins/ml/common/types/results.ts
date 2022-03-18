@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
+import { ErrorType } from '../util/errors';
 
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;
@@ -38,3 +39,9 @@ export const defaultSearchQuery: estypes.QueryDslQueryContainer = {
     ],
   },
 };
+
+export interface MetricData {
+  results: Record<string, number>;
+  success: boolean;
+  error?: ErrorType;
+}

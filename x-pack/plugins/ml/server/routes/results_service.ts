@@ -15,6 +15,7 @@ import {
   maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
   anomalySearchSchema,
+  getAnomalyChartsSchema,
 } from './schemas/results_service_schema';
 import { resultsServiceProvider } from '../models/results_service';
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
@@ -379,6 +380,30 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       try {
         const { getDatafeedResultsChartData } = resultsServiceProvider(mlClient, client);
         const resp = await getDatafeedResultsChartData(request.body);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/ml/results/anomaly_charts',
+      validate: {
+        body: getAnomalyChartsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { getAnomalyChartsData } = resultsServiceProvider(mlClient, client);
+        const resp = await getAnomalyChartsData(request.body);
 
         return response.ok({
           body: resp,

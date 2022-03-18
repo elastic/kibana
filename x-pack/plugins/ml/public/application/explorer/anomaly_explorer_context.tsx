@@ -12,11 +12,13 @@ import { useMlKibana, useTimefilter } from '../contexts/kibana';
 import { mlResultsServiceProvider } from '../services/results_service';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
+import { AnomalyChartsStateService } from './anomaly_charts_state_service';
 
 export type AnomalyExplorerContextValue =
   | {
       anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService;
       anomalyTimelineStateService: AnomalyTimelineStateService;
+      chartsStateService: AnomalyChartsStateService;
     }
   | undefined;
 
@@ -66,13 +68,23 @@ export function useAnomalyExplorerContextValue(
       anomalyExplorerUrlStateService
     );
 
+    const anomalyTimelineStateService = new AnomalyTimelineStateService(
+      anomalyExplorerCommonStateService,
+      anomalyTimelineService,
+      timefilter
+    );
+
+    const chartsStateService = new AnomalyChartsStateService(
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService,
+      mlApiServices.results,
+      timefilter
+    );
+
     return {
       anomalyExplorerCommonStateService,
-      anomalyTimelineStateService: new AnomalyTimelineStateService(
-        anomalyExplorerCommonStateService,
-        anomalyTimelineService,
-        timefilter
-      ),
+      anomalyTimelineStateService,
+      chartsStateService,
     };
   }, []);
 }

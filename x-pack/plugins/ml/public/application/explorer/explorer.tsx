@@ -149,7 +149,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   overallSwimlaneData,
 }) => {
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
-  const { anomalyTimelineStateService, anomalyExplorerCommonStateService } =
+  const { anomalyTimelineStateService, anomalyExplorerCommonStateService, chartsStateService } =
     useAnomalyExplorerContext();
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
@@ -254,6 +254,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
     noInfluencersConfigured,
     tableData,
   } = explorerState;
+
+  const chartsData2 = useObservable(chartsStateService.getChartsData$());
 
   const { filterActive, queryString } = filterSettings;
 
@@ -522,6 +524,22 @@ export const Explorer: FC<ExplorerUIProps> = ({
                   <ExplorerChartsContainer
                     {...{
                       ...chartsData,
+                      severity,
+                      timefilter,
+                      mlLocator,
+                      timeBuckets,
+                      onSelectEntity: applyFilter,
+                      chartsService,
+                    }}
+                  />
+                ) : null}
+              </div>
+
+              <div style={{ backgroundColor: 'grey' }}>
+                {showCharts && chartsData2 ? (
+                  <ExplorerChartsContainer
+                    {...{
+                      ...chartsData2,
                       severity,
                       timefilter,
                       mlLocator,

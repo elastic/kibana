@@ -388,6 +388,7 @@ export class AnomalyExplorerChartsService {
 
     return fullSeriesConfig;
   }
+
   public async getCombinedJobs(jobIds: string[]): Promise<CombinedJob[]> {
     const combinedResults = await Promise.all(
       // Getting only necessary job config and datafeed config without the stats
@@ -819,6 +820,7 @@ export class AnomalyExplorerChartsService {
         ])
       );
     });
+
     function processChartData(
       response: [MetricData, RecordsForCriteria, ScheduledEventsByBucket, any],
       seriesIndex: number
