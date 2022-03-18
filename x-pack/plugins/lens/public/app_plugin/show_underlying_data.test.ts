@@ -236,6 +236,7 @@ describe('combineQueryAndFilters', () => {
       filters: [],
     });
   });
+
   it('should assign kuery meta filters to app filters if existing query is using lucene language', () => {
     expect(
       combineQueryAndFilters(
@@ -291,6 +292,7 @@ describe('combineQueryAndFilters', () => {
       ],
     });
   });
+
   it('should append lucene meta filters to app filters even if existing filters are using kuery', () => {
     expect(
       combineQueryAndFilters(
@@ -405,6 +407,7 @@ describe('combineQueryAndFilters', () => {
       },
     });
   });
+
   it('should append lucene meta filters to an existing lucene query', () => {
     expect(
       combineQueryAndFilters(
@@ -463,6 +466,87 @@ describe('combineQueryAndFilters', () => {
       },
     });
   });
+
+  it('should accept multiple queries (and play nice with meta filters)', () => {
+    const { query, filters } = combineQueryAndFilters(
+      [
+        { language: 'lucene', query: 'myFirstField' },
+        { language: 'lucene', query: 'mySecondField' },
+        { language: 'kuery', query: 'myThirdField : *' },
+      ],
+      [],
+      {
+        id: 'testDatasource',
+        columns: [],
+        filters: {
+          enabled: {
+            kuery: [[{ language: 'kuery', query: 'myFourthField : *' }]],
+            lucene: [[{ language: 'lucene', query: 'myFifthField' }]],
+          },
+          disabled: { kuery: [], lucene: [] },
+        },
+      },
+      undefined
+    );
+
+    expect(query).toEqual({
+      language: 'lucene',
+      query: '( ( myFirstField ) AND ( mySecondField ) AND ( myFifthField ) )',
+    });
+
+    expect(filters).toEqual([
+      {
+        $state: {
+          store: 'appState',
+        },
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          exists: {
+                            field: 'myThirdField',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          exists: {
+                            field: 'myFourthField',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+        meta: {
+          alias: 'Lens context (kuery)',
+          disabled: false,
+          index: 'testDatasource',
+          negate: false,
+          type: 'custom',
+        },
+      },
+    ]);
+  });
+
   it('should work for complex cases of nested meta filters', () => {
     // scenario overview:
     // A kuery query
