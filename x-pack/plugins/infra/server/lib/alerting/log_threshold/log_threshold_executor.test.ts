@@ -421,7 +421,7 @@ describe('Log threshold executor', () => {
         } as UngroupedSearchQueryResponse;
 
         const indexedStartedAt = '2022-03-17T11:26:11.843Z';
-        const kibanaBaseUrl = undefined; // Test when server.rewriteBasePath: in not provided.
+        const kibanaBaseUrl = undefined; // Test when server.rewriteBasePath is not provided.
         processUngroupedResults(
           results,
           ruleParams,
