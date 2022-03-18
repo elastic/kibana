@@ -15,7 +15,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const remoteEsArchiver = getService('remoteEsArchiver');
 
   describe('CCS lens app', function () {
-    this.tags(['ciGroup3', 'skipFirefox']);
+    this.tags(['ciGroup5', 'skipFirefox']);
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
@@ -32,9 +32,9 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/default_ccs'
       );
-
-      loadTestFile(require.resolve('./smokescreen_ccs'));
     });
+
+    loadTestFile(require.resolve('./smokescreen_ccs'));
 
     after(async () => {
       await remoteEsArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
