@@ -8,7 +8,7 @@
 import { RESULTS_TABLE_BUTTON } from '../screens/live_query';
 import {
   checkResults,
-  DEFAULT_QUERY,
+  BIG_QUERY,
   deleteAndConfirm,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -27,7 +27,7 @@ export const getSavedQueriesComplexTest = () =>
     () => {
       cy.contains('New live query').click();
       selectAllAgents();
-      inputQuery(DEFAULT_QUERY);
+      inputQuery(BIG_QUERY);
       submitQuery();
       checkResults();
       // enter fullscreen

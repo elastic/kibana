@@ -8,6 +8,7 @@
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 
 export const DEFAULT_QUERY = 'select * from processes;';
+export const BIG_QUERY = 'select * from processes, users;';
 
 export const selectAllAgents = () => {
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type('All agents');
