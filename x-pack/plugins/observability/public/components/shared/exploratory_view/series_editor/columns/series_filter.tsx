@@ -45,17 +45,15 @@ export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
     });
 
   const hasUrlFilter = useMemo(() => {
-    return (
-      seriesConfig.filterFields.find((field) => {
-        if (typeof field === 'string') {
-          return field === TRANSACTION_URL;
-        } else if (field.field !== undefined) {
-          return field.field === TRANSACTION_URL;
-        } else {
-          return false;
-        }
-      }) !== undefined
-    );
+    return seriesConfig.filterFields.some((field) => {
+      if (typeof field === 'string') {
+        return field === TRANSACTION_URL;
+      } else if (field.field !== undefined) {
+        return field.field === TRANSACTION_URL;
+      } else {
+        return false;
+      }
+    });
   }, [seriesConfig]);
 
   return (
