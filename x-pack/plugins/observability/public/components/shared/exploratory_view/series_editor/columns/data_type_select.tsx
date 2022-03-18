@@ -47,7 +47,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
     }
   };
 
-  const { dataTypes, reportConfigMap } = useExploratoryView();
+  const { dataTypes } = useExploratoryView();
 
   const options = dataTypes
     .filter(({ id }) => {
