@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
+import { ConsoleDataAction, ConsoleDataState, ConsoleStoreReducer } from '../types';
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import { HistoryItem } from '../../history_item';
 import { UnknownCommand } from '../../unknow_comand';
@@ -29,6 +29,16 @@ const getRequiredArguments = (argDefinitions: CommandDefinition['args']): string
   return Object.entries(argDefinitions)
     .filter(([_, argDef]) => argDef.required)
     .map(([argName]) => argName);
+};
+
+const updateStateWithNewCommandHistory = (
+  state: ConsoleDataState,
+  newHistoryItem: ConsoleDataState['commandHistory'][number]
+): ConsoleDataState => {
+  return {
+    ...state,
+    commandHistory: [...state.commandHistory, newHistoryItem],
+  };
 };
 
 export const handleExecuteCommand: ConsoleStoreReducer<
@@ -53,10 +63,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       };
     }
 
-    return {
-      ...state,
-      commandHistory: [...state.commandHistory, commandOutput.result],
-    };
+    return updateStateWithNewCommandHistory(state, commandOutput.result);
   }
 
   // ----------------------------------------------------
@@ -68,16 +75,12 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   // Unknown command
   if (!commandDefinition) {
-    return {
-      ...state,
-      commandHistory: [
-        ...state.commandHistory,
-
-        <HistoryItem>
-          <UnknownCommand input={parsedInput.input} />
-        </HistoryItem>,
-      ],
-    };
+    return updateStateWithNewCommandHistory(
+      state,
+      <HistoryItem>
+        <UnknownCommand input={parsedInput.input} />
+      </HistoryItem>
+    );
   }
 
   const requiredArgs = getRequiredArguments(commandDefinition.args);
@@ -85,83 +88,71 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   // If args were entered, then validate them
   if (parsedInput.hasArgs()) {
     if (parsedInput.hasArg('help')) {
-      return {
-        ...state,
-        commandHistory: [
-          ...state.commandHistory,
-          <HistoryItem>
-            <HelpOutput input={parsedInput.input} title={`${parsedInput.name} command`}>
-              {(commandService.getCommandUsage || builtinCommandService.getCommandUsage)(
-                commandDefinition
-              )}
-            </HelpOutput>
-          </HistoryItem>,
-        ],
-      };
+      return updateStateWithNewCommandHistory(
+        state,
+        <HistoryItem>
+          <HelpOutput input={parsedInput.input} title={`${parsedInput.name} command`}>
+            {(commandService.getCommandUsage || builtinCommandService.getCommandUsage)(
+              commandDefinition
+            )}
+          </HelpOutput>
+        </HistoryItem>
+      );
     }
 
-    // Command support no arguments
+    // Command supports no arguments
     if (!commandDefinition.args) {
-      return {
-        ...state,
-        commandHistory: [
-          ...state.commandHistory,
-          <HistoryItem>
-            <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-              {i18n.translate(
-                'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
-                {
-                  defaultMessage: 'command does not support any arguments',
-                }
-              )}
-            </BadArgument>
-          </HistoryItem>,
-        ],
-      };
+      return updateStateWithNewCommandHistory(
+        state,
+        <HistoryItem>
+          <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+            {i18n.translate(
+              'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
+              {
+                defaultMessage: 'command does not support any arguments',
+              }
+            )}
+          </BadArgument>
+        </HistoryItem>
+      );
     }
 
     // unknown arguments?
     if (parsedInput.unknownArgs && parsedInput.unknownArgs.length) {
-      return {
-        ...state,
-        commandHistory: [
-          ...state.commandHistory,
-          <HistoryItem>
-            <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-              {i18n.translate('xpack.securitySolution.console.commandValidation.unknownArgument', {
-                defaultMessage: 'unknown argument(s): {unknownArgs}',
-                values: {
-                  unknownArgs: parsedInput.unknownArgs.join(', '),
-                },
-              })}
-            </BadArgument>
-          </HistoryItem>,
-        ],
-      };
+      return updateStateWithNewCommandHistory(
+        state,
+        <HistoryItem>
+          <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+            {i18n.translate('xpack.securitySolution.console.commandValidation.unknownArgument', {
+              defaultMessage: 'unknown argument(s): {unknownArgs}',
+              values: {
+                unknownArgs: parsedInput.unknownArgs.join(', '),
+              },
+            })}
+          </BadArgument>
+        </HistoryItem>
+      );
     }
 
     // Missing required Arguments
     for (const requiredArg of requiredArgs) {
       if (!parsedInput.args[requiredArg]) {
-        return {
-          ...state,
-          commandHistory: [
-            ...state.commandHistory,
-            <HistoryItem>
-              <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-                {i18n.translate(
-                  'xpack.securitySolution.console.commandValidation.missingRequiredArg',
-                  {
-                    defaultMessage: 'missing required argument: {argName}',
-                    values: {
-                      argName: toCliArgumentOption(parsedInput.name),
-                    },
-                  }
-                )}
-              </BadArgument>
-            </HistoryItem>,
-          ],
-        };
+        return updateStateWithNewCommandHistory(
+          state,
+          <HistoryItem>
+            <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+              {i18n.translate(
+                'xpack.securitySolution.console.commandValidation.missingRequiredArg',
+                {
+                  defaultMessage: 'missing required argument: {argName}',
+                  values: {
+                    argName: toCliArgumentOption(parsedInput.name),
+                  },
+                }
+              )}
+            </BadArgument>
+          </HistoryItem>
+        );
       }
     }
 
@@ -172,20 +163,17 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
       // Unknown argument
       if (!argDefinition) {
-        return {
-          ...state,
-          commandHistory: [
-            ...state.commandHistory,
-            <HistoryItem>
-              <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-                {i18n.translate('xpack.securitySolution.console.commandValidation.unsupportedArg', {
-                  defaultMessage: 'unsupported argument: {argName}',
-                  values: { argName: toCliArgumentOption(argName) },
-                })}
-              </BadArgument>
-            </HistoryItem>,
-          ],
-        };
+        return updateStateWithNewCommandHistory(
+          state,
+          <HistoryItem>
+            <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+              {i18n.translate('xpack.securitySolution.console.commandValidation.unsupportedArg', {
+                defaultMessage: 'unsupported argument: {argName}',
+                values: { argName: toCliArgumentOption(argName) },
+              })}
+            </BadArgument>
+          </HistoryItem>
+        );
       }
 
       // does not allow multiple values
@@ -194,98 +182,81 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         Array.isArray(argInput.values) &&
         argInput.values.length > 0
       ) {
-        return {
-          ...state,
-          commandHistory: [
-            ...state.commandHistory,
-            <HistoryItem>
-              <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-                {i18n.translate(
-                  'xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce',
-                  {
-                    defaultMessage: 'argument can only be used once: {argName}',
-                    values: { argName: toCliArgumentOption(argName) },
-                  }
-                )}
-              </BadArgument>
-            </HistoryItem>,
-          ],
-        };
+        return updateStateWithNewCommandHistory(
+          state,
+          <HistoryItem>
+            <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+              {i18n.translate(
+                'xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce',
+                {
+                  defaultMessage: 'argument can only be used once: {argName}',
+                  values: { argName: toCliArgumentOption(argName) },
+                }
+              )}
+            </BadArgument>
+          </HistoryItem>
+        );
       }
 
       if (argDefinition.validate) {
         const validationResult = argDefinition.validate(argInput);
 
         if (validationResult !== true) {
-          return {
-            ...state,
-            commandHistory: [
-              ...state.commandHistory,
-              <HistoryItem>
-                <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-                  {i18n.translate(
-                    'xpack.securitySolution.console.commandValidation.invalidArgValue',
-                    {
-                      defaultMessage: 'invalid argument value: {argName}. {error}',
-                      values: { argName: toCliArgumentOption(argName), error: validationResult },
-                    }
-                  )}
-                </BadArgument>
-              </HistoryItem>,
-            ],
-          };
+          return updateStateWithNewCommandHistory(
+            state,
+            <HistoryItem>
+              <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+                {i18n.translate(
+                  'xpack.securitySolution.console.commandValidation.invalidArgValue',
+                  {
+                    defaultMessage: 'invalid argument value: {argName}. {error}',
+                    values: { argName: toCliArgumentOption(argName), error: validationResult },
+                  }
+                )}
+              </BadArgument>
+            </HistoryItem>
+          );
         }
       }
     }
   } else if (requiredArgs.length > 0) {
-    return {
-      ...state,
-      commandHistory: [
-        ...state.commandHistory,
-        <HistoryItem>
-          <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-            {i18n.translate('xpack.securitySolution.console.commandValidation.mustHaveArgs', {
-              defaultMessage: 'missing required arguments: {requiredArgs}',
-              values: {
-                requiredArgs: requiredArgs
-                  .map((argName) => toCliArgumentOption(argName))
-                  .join(', '),
-              },
-            })}
-          </BadArgument>
-        </HistoryItem>,
-      ],
-    };
+    return updateStateWithNewCommandHistory(
+      state,
+      <HistoryItem>
+        <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+          {i18n.translate('xpack.securitySolution.console.commandValidation.mustHaveArgs', {
+            defaultMessage: 'missing required arguments: {requiredArgs}',
+            values: {
+              requiredArgs: requiredArgs.map((argName) => toCliArgumentOption(argName)).join(', '),
+            },
+          })}
+        </BadArgument>
+      </HistoryItem>
+    );
   } else if (commandDefinition.mustHaveArgs) {
-    return {
-      ...state,
-      commandHistory: [
-        ...state.commandHistory,
-        <HistoryItem>
-          <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
-            {i18n.translate('xpack.securitySolution.console.commandValidation.oneArgIsRequired', {
-              defaultMessage: 'at least one argument must be used',
-            })}
-          </BadArgument>
-        </HistoryItem>,
-      ],
-    };
+    return updateStateWithNewCommandHistory(
+      state,
+      <HistoryItem>
+        <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+          {i18n.translate('xpack.securitySolution.console.commandValidation.oneArgIsRequired', {
+            defaultMessage: 'at least one argument must be used',
+          })}
+        </BadArgument>
+      </HistoryItem>
+    );
   }
 
   // All is good. Execute the command
-  return {
-    ...state,
-    commandHistory: [
-      ...state.commandHistory,
-      <HistoryItem>
-        <CommandExecutionOutput
-          command={{
-            input: parsedInput.input,
-            args: parsedInput,
-            commandDefinition,
-          }}
-        />
-      </HistoryItem>,
-    ],
-  };
+  return updateStateWithNewCommandHistory(
+    state,
+    <HistoryItem>
+      <CommandExecutionOutput
+        command={{
+          input: parsedInput.input,
+          args: parsedInput,
+          commandDefinition,
+        }}
+      />
+    </HistoryItem>
+  );
 };

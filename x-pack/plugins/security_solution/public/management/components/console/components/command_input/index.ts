@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { CommandInputProps, CommandInput } from './command_input';
+export { CommandInput } from './command_input';
+export type { CommandInputProps } from './command_input';
