@@ -34,21 +34,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
 
-      // // const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
-      // // await browser.switchToWindow(discoverWindowHandle);
+      const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['ip', '@timestamp', 'bytes']);
-      // // await browser.closeCurrentWindow();
-      // // await browser.switchToWindow(lensWindowHandler);
+
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(dashboardWindowHandle);
     });
 
     it('should bring both dashboard context and visualization context to discover', async () => {
-      await browser.goBack();
-
       await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.clickEdit();
 
@@ -74,11 +73,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.clickQuickSave();
 
+      // make sure Open in Discover is also available in edit mode
+      await dashboardPanelActions.openContextMenuMorePanel();
+      await testSubjects.existOrFail('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+
       await PageObjects.dashboard.clickCancelOutOfEditMode();
 
       await dashboardPanelActions.openContextMenuMorePanel();
 
       await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+
+      const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
 
       expect(await filterBarService.getFilterCount()).to.be(3);
       expect(
@@ -87,6 +93,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBarService.hasFilter('geo.src', 'AF')).to.be.ok();
       expect(await filterBarService.getFiltersLabel()).to.contain('Lens context (lucene)');
       expect(await queryBar.getQueryString()).to.be('request.keyword : "/apm"');
+
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(dashboardWindowHandle);
     });
   });
 }

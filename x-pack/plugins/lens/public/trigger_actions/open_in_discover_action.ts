@@ -32,8 +32,9 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart) =>
     },
     execute: async (context: { embeddable: Embeddable }) => {
       const args = context.embeddable.getViewUnderlyingDataArgs()!;
-      discover.locator?.navigate({
+      const discoverUrl = discover.locator?.getRedirectUrl({
         ...args,
       });
+      window.open(discoverUrl, '_blank');
     },
   });
