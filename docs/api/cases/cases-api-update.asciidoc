@@ -8,13 +8,16 @@ Updates one or more cases.
 
 === Request
 
+`PATCH <kibana host>:<port>/api/cases`
+
 `PATCH <kibana host>:<port>/s/<space_id>/api/cases`
 
 === Prerequisite
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>.
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're updating.
 
 === Path parameters
 
