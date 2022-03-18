@@ -8,11 +8,11 @@
 
 import { mount as enzymeMount } from 'enzyme';
 import React from 'react';
-import { ToolbarButton } from '../primary/primary';
+import { AddFromLibraryButton } from './add_from_library';
 
 describe('<ToolbarButton />', () => {
   test('is rendered', () => {
-    const component = enzymeMount(<ToolbarButton iconType="folderOpen" label="Add from library" />);
+    const component = enzymeMount(<AddFromLibraryButton />);
 
     expect(component).toMatchSnapshot();
   });

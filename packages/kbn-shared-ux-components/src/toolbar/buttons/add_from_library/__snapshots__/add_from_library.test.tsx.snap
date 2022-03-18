@@ -1,72 +1,74 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ToolbarButton /> is rendered 1`] = `
-<ToolbarButton
-  iconType="folderOpen"
-  label="Add from library"
->
-  <EuiButton
-    color="primary"
-    fill={true}
+<AddFromLibraryButton>
+  <ToolbarButton
     iconType="folderOpen"
-    size="m"
+    label="Add from library"
   >
-    <EuiButtonDisplay
-      baseClassName="euiButton"
+    <EuiButton
       color="primary"
-      disabled={false}
-      element="button"
       fill={true}
       iconType="folderOpen"
-      isDisabled={false}
       size="m"
-      type="button"
     >
-      <button
-        className="euiButton euiButton--primary euiButton--fill"
+      <EuiButtonDisplay
+        baseClassName="euiButton"
+        color="primary"
         disabled={false}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
+        element="button"
+        fill={true}
+        iconType="folderOpen"
+        isDisabled={false}
+        size="m"
         type="button"
       >
-        <EuiButtonContent
-          className="euiButton__content"
-          iconSide="left"
-          iconType="folderOpen"
-          textProps={
+        <button
+          className="euiButton euiButton--primary euiButton--fill"
+          disabled={false}
+          style={
             Object {
-              "className": "euiButton__text",
+              "minWidth": undefined,
             }
           }
+          type="button"
         >
-          <span
-            className="euiButtonContent euiButton__content"
+          <EuiButtonContent
+            className="euiButton__content"
+            iconSide="left"
+            iconType="folderOpen"
+            textProps={
+              Object {
+                "className": "euiButton__text",
+              }
+            }
           >
-            <EuiIcon
-              className="euiButtonContent__icon"
-              color="inherit"
-              size="m"
-              type="folderOpen"
+            <span
+              className="euiButtonContent euiButton__content"
             >
-              <span
+              <EuiIcon
                 className="euiButtonContent__icon"
                 color="inherit"
-                data-euiicon-type="folderOpen"
                 size="m"
-              />
-            </EuiIcon>
-            <span
-              className="euiButton__text"
-            >
-              Add from library
+                type="folderOpen"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  color="inherit"
+                  data-euiicon-type="folderOpen"
+                  size="m"
+                />
+              </EuiIcon>
+              <span
+                className="euiButton__text"
+              >
+                Add from library
+              </span>
             </span>
-          </span>
-        </EuiButtonContent>
-      </button>
-    </EuiButtonDisplay>
-  </EuiButton>
-</ToolbarButton>
+          </EuiButtonContent>
+        </button>
+      </EuiButtonDisplay>
+    </EuiButton>
+  </ToolbarButton>
+</AddFromLibraryButton>
 `;
