@@ -347,6 +347,7 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
+  filteredSolutions?: string[] | undefined;
 }
 
 export enum Percentiles {
