@@ -8,14 +8,16 @@
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import type { State, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
+import type {
+  State,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  ValidLayer,
+  YLensConfig as YConfig,
+  LensReferenceLineLayerConfigResult as ReferenceLineLayerConfigResult,
+} from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type {
-  ReferenceLineLayerConfigResult,
-  ValidLayer,
-  YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';

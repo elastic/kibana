@@ -20,12 +20,17 @@ import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
-import { State, visualizationTypes, XYSuggestion, XYLayerConfig } from './types';
+import {
+  State,
+  visualizationTypes,
+  XYSuggestion,
+  XYLayerConfig,
+  YLensConfig as YConfig,
+} from './types';
 import {
   FillStyle,
   SeriesType,
   YAxisMode,
-  YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';

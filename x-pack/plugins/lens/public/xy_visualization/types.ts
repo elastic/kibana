@@ -26,34 +26,66 @@ import type {
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
+  DataLayerConfigResult,
   DataLayerArgs,
   LayerType,
   ReferenceLineLayerArgs,
+  ReferenceLineLayerConfigResult,
   YConfig,
   XScaleType,
   YScaleType,
+  YConfigResult,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type { ValueLabelConfig } from '../../common/types';
 
+export interface YLensConfig extends Omit<YConfig, 'forAccessor'> {
+  forAccessor: string;
+}
+
+export type YLensConfigResult = YConfigResult & { forAccessor: string };
 export interface XYDataLayerConfig
-  extends Omit<DataLayerArgs, 'yConfig' | 'palette' | 'isHistogram' | 'xScaleType' | 'yScaleType'> {
+  extends Omit<
+    DataLayerArgs,
+    | 'yConfig'
+    | 'palette'
+    | 'isHistogram'
+    | 'xScaleType'
+    | 'yScaleType'
+    | 'xAccessor'
+    | 'accessors'
+    | 'splitAccessor'
+  > {
   layerType: LayerType;
-  yConfig?: YConfig[];
+  yConfig?: YLensConfig[];
   palette?: PaletteOutput;
   yScaleType?: YScaleType;
   xScaleType?: XScaleType;
   isHistogram?: boolean;
+  splitAccessor?: string;
+  accessors: string[];
+  xAccessor?: string;
 }
-
 export interface XYReferenceLineLayerConfig
-  extends Omit<ReferenceLineLayerArgs, 'yConfig' | 'palette'> {
+  extends Omit<ReferenceLineLayerArgs, 'yConfig' | 'palette' | 'accessors'> {
+  accessors: string[];
   layerType: LayerType;
-  yConfig?: YConfig[];
+  yConfig?: YLensConfig[];
   palette?: PaletteOutput;
 }
 
+export type LensDataLayerConfigResult = DataLayerConfigResult & XYDataLayerConfig;
+export type LensReferenceLineLayerConfigResult = Omit<ReferenceLineLayerConfigResult, 'yConfig'> &
+  XYReferenceLineLayerConfig;
+
 export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
+
+export interface ValidLayer extends DataLayerConfigResult {
+  xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
+  splitAccessor?: string;
+  accessors: string[];
+  yConfig?: YLensConfigResult[];
+}
 
 // Persisted parts of the state
 export interface XYState {

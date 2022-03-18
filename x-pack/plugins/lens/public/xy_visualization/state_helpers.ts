@@ -7,16 +7,14 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type {
-  SeriesType,
-  YConfig,
-  ValidLayer,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   visualizationTypes,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
+  ValidLayer,
+  YLensConfig as YConfig,
 } from './types';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
