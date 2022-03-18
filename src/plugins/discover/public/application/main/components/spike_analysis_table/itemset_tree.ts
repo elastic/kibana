@@ -81,7 +81,7 @@ export interface ItemSetTreeNode {
   itemSet: ItemSet;
   edges: ItemSetTreeNode[];
   parent: ItemSetTreeNode | null;
-  selectedCluster: boolean;
+  selectedCluster: () => boolean;
   children: () => ItemSetTreeNode[];
   computeQuality: () => number;
   couldAdd: (otherItemSet: ItemSet) => boolean;
@@ -274,7 +274,7 @@ function ItemSetTreeNodeFactory(itemSet: ItemSet): ItemSetTreeNode {
       edges,
       parent,
       quality: () => quality,
-      selectedCluster,
+      selectedCluster: () => selectedCluster,
       computeQuality,
       couldAdd,
       dominated,

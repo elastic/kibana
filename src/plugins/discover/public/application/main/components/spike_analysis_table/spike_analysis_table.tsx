@@ -296,6 +296,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       return {
         label:
           `(q:${Math.round(d.quality() * 10000) / 10000})` +
+          `(s:${d.selectedCluster()})` +
           Object.entries(d.itemSet.items)
             .map(([key, value]) => `${key}:${value.join('/')}`)
             .join(),
