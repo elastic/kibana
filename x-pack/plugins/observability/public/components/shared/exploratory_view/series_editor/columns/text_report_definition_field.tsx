@@ -32,7 +32,6 @@ export function TextReportDefinitionField({ series, field, seriesConfig, onChang
         })}
         value={selectedTextReportDefinitions?.[field]}
         onChange={(e) => onChange(field, e.target.value)}
-        aria-label={label}
         compressed={false}
       />
     </EuiFormRow>
