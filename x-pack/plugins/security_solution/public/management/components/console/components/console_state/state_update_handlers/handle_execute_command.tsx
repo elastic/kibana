@@ -31,7 +31,7 @@ const getRequiredArguments = (argDefinitions: CommandDefinition['args']): string
     .map(([argName]) => argName);
 };
 
-const updateStateWithNewCommandHistory = (
+const updateStateWithNewCommandHistoryItem = (
   state: ConsoleDataState,
   newHistoryItem: ConsoleDataState['commandHistory'][number]
 ): ConsoleDataState => {
@@ -63,7 +63,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       };
     }
 
-    return updateStateWithNewCommandHistory(state, commandOutput.result);
+    return updateStateWithNewCommandHistoryItem(state, commandOutput.result);
   }
 
   // ----------------------------------------------------
@@ -75,7 +75,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   // Unknown command
   if (!commandDefinition) {
-    return updateStateWithNewCommandHistory(
+    return updateStateWithNewCommandHistoryItem(
       state,
       <HistoryItem>
         <UnknownCommand input={parsedInput.input} />
@@ -87,11 +87,18 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs()) {
+    // Show command help
     if (parsedInput.hasArg('help')) {
-      return updateStateWithNewCommandHistory(
+      return updateStateWithNewCommandHistoryItem(
         state,
         <HistoryItem>
-          <HelpOutput input={parsedInput.input} title={`${parsedInput.name} command`}>
+          <HelpOutput
+            input={parsedInput.input}
+            title={i18n.translate('xpack.securitySolution.console.commandValidation.cmdHelpTitle', {
+              defaultMessage: '{cmdName} command',
+              values: { cmdName: parsedInput.name },
+            })}
+          >
             {(commandService.getCommandUsage || builtinCommandService.getCommandUsage)(
               commandDefinition
             )}
@@ -102,7 +109,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
     // Command supports no arguments
     if (!commandDefinition.args) {
-      return updateStateWithNewCommandHistory(
+      return updateStateWithNewCommandHistoryItem(
         state,
         <HistoryItem>
           <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
@@ -119,7 +126,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
     // unknown arguments?
     if (parsedInput.unknownArgs && parsedInput.unknownArgs.length) {
-      return updateStateWithNewCommandHistory(
+      return updateStateWithNewCommandHistoryItem(
         state,
         <HistoryItem>
           <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
@@ -137,7 +144,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     // Missing required Arguments
     for (const requiredArg of requiredArgs) {
       if (!parsedInput.args[requiredArg]) {
-        return updateStateWithNewCommandHistory(
+        return updateStateWithNewCommandHistoryItem(
           state,
           <HistoryItem>
             <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
@@ -163,7 +170,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
       // Unknown argument
       if (!argDefinition) {
-        return updateStateWithNewCommandHistory(
+        return updateStateWithNewCommandHistoryItem(
           state,
           <HistoryItem>
             <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
@@ -182,7 +189,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         Array.isArray(argInput.values) &&
         argInput.values.length > 0
       ) {
-        return updateStateWithNewCommandHistory(
+        return updateStateWithNewCommandHistoryItem(
           state,
           <HistoryItem>
             <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
@@ -202,7 +209,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         const validationResult = argDefinition.validate(argInput);
 
         if (validationResult !== true) {
-          return updateStateWithNewCommandHistory(
+          return updateStateWithNewCommandHistoryItem(
             state,
             <HistoryItem>
               <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
@@ -220,7 +227,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       }
     }
   } else if (requiredArgs.length > 0) {
-    return updateStateWithNewCommandHistory(
+    return updateStateWithNewCommandHistoryItem(
       state,
       <HistoryItem>
         <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
@@ -234,7 +241,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       </HistoryItem>
     );
   } else if (commandDefinition.mustHaveArgs) {
-    return updateStateWithNewCommandHistory(
+    return updateStateWithNewCommandHistoryItem(
       state,
       <HistoryItem>
         <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
@@ -247,7 +254,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   }
 
   // All is good. Execute the command
-  return updateStateWithNewCommandHistory(
+  return updateStateWithNewCommandHistoryItem(
     state,
     <HistoryItem>
       <CommandExecutionOutput
