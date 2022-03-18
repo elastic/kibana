@@ -987,17 +987,6 @@ export const RulesList: React.FunctionComponent = () => {
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription"
-              defaultMessage="Warning: {totalStatusesWarning}"
-              values={{
-                totalStatusesWarning: rulesStatusesTotal.warning,
-              }}
-            />
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.totalStatusesOkDescription"

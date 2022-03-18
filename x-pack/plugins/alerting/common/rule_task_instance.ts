@@ -10,6 +10,13 @@ import { rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
 import { IntervalSchedule, RuleMonitoring } from './alert';
 
+const actionSchema = t.partial({
+  group: t.string,
+  id: t.string,
+  actionTypeId: t.string,
+  params: t.record(t.string, t.unknown),
+});
+
 export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
@@ -22,16 +29,11 @@ const ruleExecutionMetricsSchema = t.partial({
   esSearchDurationMs: t.number,
 });
 
-const alertExecutionStore = t.partial({
-  numberOfTriggeredActions: t.number,
-  triggeredActionsStatus: t.string,
-});
-
 export type RuleExecutionMetrics = t.TypeOf<typeof ruleExecutionMetricsSchema>;
 export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
 export type RuleExecutionState = RuleTaskState & {
   metrics: RuleExecutionMetrics;
-  alertExecutionStore: t.TypeOf<typeof alertExecutionStore>;
+  triggeredActions: Array<t.TypeOf<typeof actionSchema>>;
 };
 
 export const ruleParamsSchema = t.intersection([
