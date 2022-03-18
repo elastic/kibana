@@ -187,11 +187,16 @@ function getMatcherFunction({
   matchAny?: boolean;
   os: ExceptionListItemSchema['os_types'][number];
 }): TranslatedEntryMatcher {
+  const doesFieldEndWith: boolean =
+    field.endsWith('.caseless') || field.endsWith('.name') || field.endsWith('.text');
+
   return matchAny
-    ? field.endsWith('.caseless') && os !== 'linux'
-      ? 'exact_caseless_any'
+    ? doesFieldEndWith
+      ? os === 'linux'
+        ? 'exact_cased_any'
+        : 'exact_caseless_any'
       : 'exact_cased_any'
-    : field.endsWith('.caseless')
+    : doesFieldEndWith
     ? os === 'linux'
       ? 'exact_cased'
       : 'exact_caseless'

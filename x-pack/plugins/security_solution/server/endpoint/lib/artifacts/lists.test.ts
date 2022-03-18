@@ -612,7 +612,7 @@ describe('artifacts lists', () => {
         const os = 'linux';
         const testEntries: EntriesArray = [
           {
-            field: 'process.executable',
+            field: 'process.executable.caseless',
             operator: 'included',
             type: 'wildcard',
             value: '/usr/bin/*.md',
@@ -651,7 +651,7 @@ describe('artifacts lists', () => {
         const os = 'linux';
         const testEntries: EntriesArray = [
           {
-            field: 'process.executable',
+            field: 'process.executable.caseless',
             operator: 'included',
             type: 'wildcard',
             value: '/usr/bin/*.md',
@@ -661,6 +661,12 @@ describe('artifacts lists', () => {
             operator: 'included',
             type: 'match',
             value: 'appname.exe',
+          },
+          {
+            field: 'process.name',
+            operator: 'included',
+            type: 'match_any',
+            value: ['one.exe', 'two.exe'],
           },
         ];
 
@@ -678,6 +684,12 @@ describe('artifacts lists', () => {
               operator: 'included',
               type: 'exact_cased',
               value: 'appname.exe',
+            },
+            {
+              field: 'process.name',
+              operator: 'included',
+              type: 'exact_cased_any',
+              value: ['one.exe', 'two.exe'],
             },
           ],
         };
@@ -754,6 +766,12 @@ describe('artifacts lists', () => {
             type: 'match',
             value: 'filename.app',
           },
+          {
+            field: 'file.name',
+            operator: 'included',
+            type: 'match_any',
+            value: ['one.app', 'two.app'],
+          },
         ];
 
         const expectedEndpointExceptions = {
@@ -770,6 +788,12 @@ describe('artifacts lists', () => {
               operator: 'included',
               type: 'exact_cased',
               value: 'filename.app',
+            },
+            {
+              field: 'file.name',
+              operator: 'included',
+              type: 'exact_cased_any',
+              value: ['one.app', 'two.app'],
             },
           ],
         };
@@ -946,6 +970,12 @@ describe('artifacts lists', () => {
             type: 'match',
             value: 'appname.exe',
           },
+          {
+            field: 'process.name',
+            operator: 'included',
+            type: 'match_any',
+            value: ['one.exe', 'two.exe'],
+          },
         ];
 
         const expectedEndpointExceptions = {
@@ -960,8 +990,14 @@ describe('artifacts lists', () => {
             {
               field: 'process.name',
               operator: 'included',
-              type: 'exact_cased',
+              type: 'exact_caseless',
               value: 'appname.exe',
+            },
+            {
+              field: 'process.name',
+              operator: 'included',
+              type: 'exact_caseless_any',
+              value: ['one.exe', 'two.exe'],
             },
           ],
         };
@@ -1041,6 +1077,12 @@ describe('artifacts lists', () => {
             type: 'match',
             value: 'filename.app',
           },
+          {
+            field: 'file.name',
+            operator: 'included',
+            type: 'match_any',
+            value: ['one.app', 'two.app'],
+          },
         ];
 
         const expectedEndpointExceptions = {
@@ -1055,8 +1097,14 @@ describe('artifacts lists', () => {
             {
               field: 'file.name',
               operator: 'included',
-              type: 'exact_cased',
+              type: 'exact_caseless',
               value: 'filename.app',
+            },
+            {
+              field: 'file.name',
+              operator: 'included',
+              type: 'exact_caseless_any',
+              value: ['one.app', 'two.app'],
             },
           ],
         };
