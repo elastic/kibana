@@ -98,6 +98,7 @@ const GettingStartedStepContent: React.FunctionComponent<{
         <FormattedMessage
           id="xpack.fleet.fleetServerFlyout.getStartedInstructions"
           defaultMessage="First, set the public IP or host name and port that agents will use to reach Fleet Server. It uses port {port} by default. We'll then generate a policy for you automatically."
+          values={{ port: <EuiCode>8220</EuiCode> }}
         />
       </EuiText>
 
