@@ -433,7 +433,7 @@ describe('Log threshold executor', () => {
         // First call, second argument
         expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
         // First call, third argument
-        expect(alertUpdaterMock.mock.calls[0][2]).toEqual([
+        expect(alertUpdaterMock.mock.calls[0][3]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
@@ -500,7 +500,7 @@ describe('Log threshold executor', () => {
         // First call, second argument
         expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
         // First call, third argument
-        expect(alertUpdaterMock.mock.calls[0][2]).toEqual([
+        expect(alertUpdaterMock.mock.calls[0][3]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
@@ -517,7 +517,7 @@ describe('Log threshold executor', () => {
         // Second call, second argument
         expect(alertUpdaterMock.mock.calls[1][1]).toBe(AlertStates.ALERT);
         // Second call, third argument
-        expect(alertUpdaterMock.mock.calls[1][2]).toEqual([
+        expect(alertUpdaterMock.mock.calls[1][3]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
