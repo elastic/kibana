@@ -16,7 +16,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
-import { OutputUnauthorizedError } from '../errors';
+import { OutputUnauthorizedError, OutputInvalidError } from '../errors';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
@@ -78,7 +78,7 @@ async function validateLogstashOutputNotUsedInAPMPolicy(
   });
   for (const agentPolicy of agentPolicySO.items) {
     if (agentPolicyService.hasAPMIntegration(agentPolicy)) {
-      throw new Error('Logstash output cannot be used with APM integration.');
+      throw new OutputInvalidError('Logstash output cannot be used with APM integration.');
     }
   }
 }

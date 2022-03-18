@@ -109,7 +109,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   ): Promise<PackagePolicy> {
     const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
 
-    // TODO throw if no agent policy
     if (agentPolicy && packagePolicy.package?.name === FLEET_APM_PACKAGE) {
       const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
       if (dataOutput.type === outputType.Logstash) {

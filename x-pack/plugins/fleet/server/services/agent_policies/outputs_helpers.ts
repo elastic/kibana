@@ -11,6 +11,7 @@ import type { AgentPolicySOAttributes } from '../../types';
 import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common';
 import { appContextService } from '..';
 import { outputService } from '../output';
+import { OutputInvalidError, OutputLicenceError } from '../../errors';
 
 /**
  * Get the data output for a given agent policy
@@ -52,12 +53,13 @@ export async function validateOutputForPolicy(
 
   const data = { ...existingData, ...newData };
 
-  //  TODO test
   if (isPolicyUsingAPM) {
     const dataOutput = await getDataOutputForAgentPolicy(soClient, data);
 
     if (dataOutput.type === outputType.Logstash) {
-      throw new Error('Logstash output is not usable with policy using the APM integration.');
+      throw new OutputInvalidError(
+        'Logstash output is not usable with policy using the APM integration.'
+      );
     }
   }
 
@@ -75,7 +77,7 @@ export async function validateOutputForPolicy(
     .hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT);
 
   if (!hasLicence) {
-    throw new Error(
+    throw new OutputLicenceError(
       `Invalid licence to set per policy output, you need ${LICENCE_FOR_PER_POLICY_OUTPUT} licence`
     );
   }

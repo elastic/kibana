@@ -8,12 +8,15 @@
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { appContextService } from '..';
+import { outputService } from '../output';
 
 import { validateOutputForPolicy } from '.';
 
 jest.mock('../app_context');
+jest.mock('../output');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 function mockHasLicence(res: boolean) {
   mockedAppContextService.getSecurityLicense.mockReturnValue({
@@ -184,6 +187,58 @@ describe('validateOutputForPolicy', () => {
           monitoring_output_id: 'test1',
         },
         { data_output_id: 'test1', monitoring_output_id: 'test1' }
+      );
+    });
+
+    it('should not allow APM for a logstash output', async () => {
+      mockHasLicence(true);
+      mockedOutputService.get.mockResolvedValue({
+        type: 'logstash',
+      } as any);
+      await expect(
+        validateOutputForPolicy(
+          savedObjectsClientMock.create(),
+          {
+            data_output_id: 'test1',
+            monitoring_output_id: 'test1',
+          },
+          { data_output_id: 'newdataoutput', monitoring_output_id: 'test1' },
+          true // hasAPM
+        )
+      ).rejects.toThrow(/Logstash output is not usable with policy using the APM integration./);
+    });
+
+    it('should allow APM for an elasticsearch output', async () => {
+      mockHasLicence(true);
+      mockedOutputService.get.mockResolvedValue({
+        type: 'elasticsearch',
+      } as any);
+
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        {
+          data_output_id: 'test1',
+          monitoring_output_id: 'test1',
+        },
+        { data_output_id: 'newdataoutput', monitoring_output_id: 'test1' },
+        true // hasAPM
+      );
+    });
+
+    it('should allow logstash output for a policy not using APM', async () => {
+      mockHasLicence(true);
+      mockedOutputService.get.mockResolvedValue({
+        type: 'logstash',
+      } as any);
+
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        {
+          data_output_id: 'test1',
+          monitoring_output_id: 'test1',
+        },
+        { data_output_id: 'newdataoutput', monitoring_output_id: 'test1' },
+        false // do not have APM
       );
     });
   });
