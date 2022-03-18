@@ -390,6 +390,15 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     })
   );
 
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/anomaly_charts Get data for anomaly charts
+   * @apiName GetAnomalyChartsData
+   * @apiDescription Returns anomaly charts data
+   *
+   * @apiSchema (body) getAnomalyChartsSchema
+   */
   router.post(
     {
       path: '/api/ml/results/anomaly_charts',

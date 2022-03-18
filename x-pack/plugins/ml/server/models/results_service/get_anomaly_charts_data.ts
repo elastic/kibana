@@ -1827,7 +1827,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       threshold,
       earliestMs,
       latestMs,
-      maxResults,
+      500,
       influencersFilterQuery
     );
 
