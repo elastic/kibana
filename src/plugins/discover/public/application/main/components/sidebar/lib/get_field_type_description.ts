@@ -12,11 +12,11 @@ export function getFieldTypeDescription(type: string) {
   switch (type) {
     case 'boolean':
       return i18n.translate('discover.fieldNameDescription.booleanField', {
-        defaultMessage: 'Boolean field',
+        defaultMessage: 'True and false values.',
       });
     case 'conflict':
       return i18n.translate('discover.fieldNameDescription.conflictField', {
-        defaultMessage: 'Conflicting field',
+        defaultMessage: 'Field has values of different types. Resolve in Management > Data Views.',
       });
     case 'date':
       return i18n.translate('discover.fieldNameDescription.dateField', {
@@ -28,15 +28,15 @@ export function getFieldTypeDescription(type: string) {
       });
     case 'geo_shape':
       return i18n.translate('discover.fieldNameDescription.geoShapeField', {
-        defaultMessage: 'Geo shape field',
+        defaultMessage: 'Complex shapes, such as polygons.',
       });
     case 'ip':
       return i18n.translate('discover.fieldNameDescription.ipAddressField', {
-        defaultMessage: 'IP address field',
+        defaultMessage: 'IPv4 and IPv6 addresses.',
       });
     case 'murmur3':
       return i18n.translate('discover.fieldNameDescription.murmur3Field', {
-        defaultMessage: 'Murmur3 field',
+        defaultMessage: 'Field that computes and stores hashes of values.',
       });
     case 'number':
       return i18n.translate('discover.fieldNameDescription.numberField', {
@@ -45,7 +45,7 @@ export function getFieldTypeDescription(type: string) {
     case 'source':
       // Note that this type is currently not provided, type for _source is undefined
       return i18n.translate('discover.fieldNameDescription.sourceField', {
-        defaultMessage: 'Source field',
+        defaultMessage: 'Original JSON body provided during indexing.',
       });
     case 'string':
       return i18n.translate('discover.fieldNameDescription.stringField', {
@@ -53,7 +53,7 @@ export function getFieldTypeDescription(type: string) {
       });
     case 'text':
       return i18n.translate('discover.fieldNameDescription.textField', {
-        defaultMessage: 'Text field',
+        defaultMessage: 'Full text such as the body of an email or a product description.',
       });
     case 'keyword':
       return i18n.translate('discover.fieldNameDescription.keywordField', {
@@ -63,11 +63,11 @@ export function getFieldTypeDescription(type: string) {
 
     case 'nested':
       return i18n.translate('discover.fieldNameDescription.nestedField', {
-        defaultMessage: 'Nested field',
+        defaultMessage: 'JSON object that preserves the relationship between its subfields.',
       });
     case 'version':
       return i18n.translate('discover.fieldNameDescription.versionField', {
-        defaultMessage: 'Version field',
+        defaultMessage: 'Software versions. Supports Semantic Versioning precedence rules.',
       });
     default:
       return i18n.translate('discover.fieldNameDescription.unknownField', {
