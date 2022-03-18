@@ -64,6 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((link) => link.text)).to.eql([
           'Overview',
           'Alerts',
+          'Rules',
           'APM',
           'User Experience',
           'Stack Management',
