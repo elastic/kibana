@@ -39,6 +39,7 @@ export interface SearchIndexSelectableOption {
       size_in_bytes: string;
     };
   };
+  checked?: 'on';
 }
 
 const healthColorsMap = {
@@ -100,7 +101,12 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
 
 export const SearchIndexSelectable: React.FC = () => {
   const { indicesFormatted, isLoadingIndices } = useValues(EngineCreationLogic);
-  const { loadIndices } = useActions(EngineCreationLogic);
+  const { loadIndices, setSelectedIndex } = useActions(EngineCreationLogic);
+
+  const onChange = (options: SearchIndexSelectableOption[]) => {
+    const selected = options.find((option) => option.checked === 'on');
+    setSelectedIndex(selected?.label ?? '');
+  };
 
   useEffect(() => {
     loadIndices();
@@ -131,7 +137,7 @@ export const SearchIndexSelectable: React.FC = () => {
           )}
           isLoading={isLoadingIndices}
           listProps={{ bordered: true, rowHeight: 56 }}
-          onChange={() => {}}
+          onChange={onChange}
           loadingMessage={i18n.translate(
             'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.selectable.loading',
             {

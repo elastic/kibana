@@ -56,10 +56,13 @@ export const EngineCreation: React.FC = () => {
   const { method } = parseQueryParams(search);
 
   const [engineType, setEngineType] = useState('appSearch');
-  const { name, rawName, language, isLoading } = useValues(EngineCreationLogic);
+  const { name, rawName, language, isLoading, selectedIndex } = useValues(EngineCreationLogic);
   const { setIngestionMethod, setLanguage, setRawName, submitEngine } =
     useActions(EngineCreationLogic);
 
+  const isSubmitDisabled =
+    (name.length === 0 && engineType !== 'elasticsearch') ||
+    ((name.length === 0 || selectedIndex.length === 0) && engineType === 'elasticsearch');
   useEffect(() => {
     if (typeof method === 'string') {
       setIngestionMethod(method);
@@ -236,7 +239,7 @@ export const EngineCreation: React.FC = () => {
           </EuiPanel>
           <EuiSpacer />
           <EuiButton
-            disabled={name.length === 0}
+            disabled={isSubmitDisabled}
             isLoading={isLoading}
             type="submit"
             data-test-subj="NewEngineSubmitButton"

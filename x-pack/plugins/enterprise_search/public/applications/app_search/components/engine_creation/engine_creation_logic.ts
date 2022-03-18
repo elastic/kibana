@@ -15,7 +15,7 @@ import { formatApiName } from '../../utils/format_api_name';
 
 import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 import { SearchIndexSelectableOption } from './search_index_selectable';
-import { getRedirectToAfterEngineCreation, formatIndexToSelectable } from './utils';
+import { getRedirectToAfterEngineCreation, formatIndicesToSelectable } from './utils';
 
 interface EngineCreationActions {
   onEngineCreationSuccess(): void;
@@ -26,6 +26,7 @@ interface EngineCreationActions {
   onSubmitError(): void;
   loadIndices(): void;
   onLoadIndicesSuccess(indices: ElasticsearchIndex[]): { indices: ElasticsearchIndex[] };
+  setSelectedIndex(selectedIndexName: string): { selectedIndexName: string };
 }
 
 interface EngineCreationValues {
@@ -37,6 +38,7 @@ interface EngineCreationValues {
   isLoadingIndices: boolean;
   indices: ElasticsearchIndex[];
   indicesFormatted: SearchIndexSelectableOption[];
+  selectedIndex: string;
 }
 
 export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
@@ -50,6 +52,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     onSubmitError: true,
     loadIndices: true,
     onLoadIndicesSuccess: (indices) => ({ indices }),
+    setSelectedIndex: (selectedIndexName) => ({ selectedIndexName }),
   },
   reducers: {
     ingestionMethod: [
@@ -91,12 +94,19 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         onLoadIndicesSuccess: (_, { indices }) => indices,
       },
     ],
+    selectedIndex: [
+      '',
+      {
+        setSelectedIndex: (_, { selectedIndexName }) => selectedIndexName,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
     indicesFormatted: [
-      () => [selectors.indices],
-      (indices: ElasticsearchIndex[]) => indices.map(formatIndexToSelectable),
+      () => [selectors.indices, selectors.selectedIndex],
+      (indices: ElasticsearchIndex[], selectedIndexName) =>
+        formatIndicesToSelectable(indices, selectedIndexName),
     ],
   }),
   listeners: ({ values, actions }) => ({

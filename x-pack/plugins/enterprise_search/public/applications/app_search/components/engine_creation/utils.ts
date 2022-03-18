@@ -31,11 +31,15 @@ export const getRedirectToAfterEngineCreation = ({
   return enginePath;
 };
 
-export const formatIndexToSelectable = (index: ElasticsearchIndex): SearchIndexSelectableOption => {
-  return {
+export const formatIndicesToSelectable = (
+  indices: ElasticsearchIndex[],
+  selectedIndexName: string
+): SearchIndexSelectableOption[] => {
+  return indices.map((index) => ({
+    ...(selectedIndexName === index.name ? { checked: 'on' } : {}),
     label: index.name,
     health: (index.health as HealthStrings) ?? 'unavailable',
     status: index.status,
     total: index.total,
-  };
+  }));
 };
