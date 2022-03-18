@@ -25,8 +25,11 @@ export interface FormChangesProps {
    * useEffect(() => report(isEqual), [isEqual]);
    * ```
    */
-  report(isEqual: boolean): undefined | (() => void);
+  report: ReportFunction;
 }
+
+export type ReportFunction = (isEqual: boolean) => undefined | RevertFunction;
+export type RevertFunction = () => void;
 
 /**
  * Custom React hook that allows tracking changes within a form.
@@ -41,7 +44,7 @@ export const useFormChanges = (): FormChangesProps => {
 
   return {
     count,
-    report: (isEqual: boolean) => {
+    report: (isEqual) => {
       if (!isEqual) {
         setCount((c) => c + 1);
         return () => setCount((c) => c - 1);
@@ -57,7 +60,7 @@ export const FormChangesProvider = FormChangesContext.Provider;
 /**
  * Custom React hook that returns all @see FormChangesProps state from context.
  *
- * @throws Error when called within a component that isn't a child of a <FormChanges> component.
+ * @throws Error if called within a component that isn't a child of a `<FormChanges>` component.
  */
 export function useFormChangesContext() {
   const value = useContext(FormChangesContext);

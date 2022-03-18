@@ -8,9 +8,10 @@
 import { EuiFieldText } from '@elastic/eui';
 import { useField } from 'formik';
 import type { FieldValidator } from 'formik';
+import type { ComponentPropsWithoutRef, ElementType } from 'react';
 import React from 'react';
 
-export interface FormFieldProps<T extends React.ElementType> {
+export interface FormFieldProps<T extends ElementType> {
   as?: T;
   name: string;
   validate?: FieldValidator | ValidateOptions;
@@ -19,27 +20,33 @@ export interface FormFieldProps<T extends React.ElementType> {
 /**
  * Polymorphic component that renders a form field with all state required for inline validation.
  *
- * @example Render a text field with validation rule:
+ * @example Text field with validation rule:
  * ```typescript
- * <FormField name="initials" validate={{ required: 'Enter initials.' }} />
+ * <Formik>
+ *   <FormField name="initials" validate={{ required: 'Enter initials.' }} />
+ * </Formik>
  * ```
  *
- * @example Render a color picker using non-standard value prop and change handler:
+ * @example Color picker using non-standard value prop and change handler:
  * ```typescript
- * <FormField
- *   as={EuiColorPicker}
- *   name="color"
- *   color={formik.values.color}
- *   onChange={(value) => formik.setFieldValue('color', value)}
- * />
+ * <Formik>
+ *   <FormField
+ *     as={EuiColorPicker}
+ *     name="color"
+ *     color={formik.values.color}
+ *     onChange={(value) => formik.setFieldValue('color', value)}
+ *   />
+ * </Formik>
  * ```
+ *
+ * @throws Error if not a child of a `<Formik>` component.
  */
-export function FormField<T extends React.ElementType = typeof EuiFieldText>({
+export function FormField<T extends ElementType = typeof EuiFieldText>({
   as,
   validate,
   onBlur,
   ...rest
-}: FormFieldProps<T> & Omit<React.ComponentPropsWithoutRef<T>, keyof FormFieldProps<T>>) {
+}: FormFieldProps<T> & Omit<ComponentPropsWithoutRef<T>, keyof FormFieldProps<T>>) {
   const Component = as || EuiFieldText;
 
   const [field, meta, helpers] = useField({
@@ -53,8 +60,8 @@ export function FormField<T extends React.ElementType = typeof EuiFieldText>({
       {...field}
       {...rest}
       onBlur={(event) => {
+        helpers.setTouched(true); // Marking as touched manually here since some EUI components don't pass on the native blur event which is required by `field.onBlur()`.
         onBlur?.(event);
-        helpers.setTouched(true); // Marking as touched manually here since some EUI fields don't pass on the correct `event` argument causing errors when `field.onBlur(event)` is called as a result of spreading `field` props above.
       }}
     />
   );
@@ -62,6 +69,10 @@ export function FormField<T extends React.ElementType = typeof EuiFieldText>({
 
 export interface ValidateOptions {
   required?: string;
+  pattern?: {
+    value: RegExp;
+    message: string;
+  };
   minLength?: {
     value: number;
     message: string;
@@ -78,31 +89,37 @@ export interface ValidateOptions {
     value: number;
     message: string;
   };
-  pattern?: {
-    value: RegExp;
-    message: string;
-  };
 }
 
 export function createFieldValidator(options: ValidateOptions): FieldValidator {
   return (value: any) => {
-    if (options.required && !value) {
+    if (options.required && typeof value !== 'number' && !value) {
       return options.required;
-    }
-    if (options.minLength && typeof value === 'object' && value.length < options.minLength.value) {
-      return options.minLength.message;
-    }
-    if (options.maxLength && typeof value === 'object' && value.length > options.maxLength.value) {
-      return options.maxLength.message;
-    }
-    if (options.min && typeof value === 'number' && value < options.min.value) {
-      return options.min.message;
-    }
-    if (options.max && typeof value === 'number' && value > options.max.value) {
-      return options.max.message;
     }
     if (options.pattern && !options.pattern.value.test(value)) {
       return options.pattern.message;
+    }
+    if (
+      options.minLength &&
+      (!value ||
+        ((typeof value === 'object' || typeof value === 'string') &&
+          value.length < options.minLength.value))
+    ) {
+      return options.minLength.message;
+    }
+    if (
+      options.maxLength &&
+      value &&
+      (typeof value === 'object' || typeof value === 'string') &&
+      value.length > options.maxLength.value
+    ) {
+      return options.maxLength.message;
+    }
+    if (options.min && (isNaN(value) || value < options.min.value)) {
+      return options.min.message;
+    }
+    if (options.max && (isNaN(value) || value > options.max.value)) {
+      return options.max.message;
     }
   };
 }

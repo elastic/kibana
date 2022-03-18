@@ -27,12 +27,15 @@ export interface FormRowProps {
  *
  * @example
  * ```typescript
- * <FormRow label="Email">
- *   <FormField name="email" />
- * </FormRow>
+ * <Formik>
+ *   <FormRow label="Email">
+ *     <FormField name="email" />
+ *   </FormRow>
+ * </Formik>
  * ```
  *
- * @throws Error if name hasn't been provided and can't be inferred.
+ * @throws Error if not a child of a `<Formik>` component.
+ * @throws Error if `name` prop is not set and can't be inferred from its child element.
  */
 export const FormRow: FunctionComponent<EuiFormRowProps & FormRowProps> = (props) => {
   const formik = useFormikContext();

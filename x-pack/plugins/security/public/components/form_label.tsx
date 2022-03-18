@@ -24,9 +24,17 @@ export interface FormLabelProps {
  *
  * @example Renders a dot next to "Email" label when field value changes.
  * ```typescript
- * <FormLabel for="email">Email</FormLabel>
- * <FormField name="email" />
+ * <Formik>
+ *   <FormChanges>
+ *     <FormRow label={<FormLabel for="email">Email</FormLabel>}>
+ *       <FormField name="email" />
+ *     </FormRow>
+ *   </FormChanges>
+ * </Formik>
  * ```
+ *
+ * @throws Error if not a child of a `<Formik>` component.
+ * @throws Error if not a child of a `<FormChanges>` component.
  */
 export const FormLabel: FunctionComponent<FormLabelProps> = (props) => {
   const formik = useFormikContext();
