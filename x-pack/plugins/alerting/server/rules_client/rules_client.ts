@@ -88,7 +88,6 @@ import {
 import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
-  getNumExecutions,
   IExecutionLogResult,
 } from '../lib/get_execution_log_aggregation';
 
@@ -700,10 +699,6 @@ export class RulesClient {
         end: parsedDateEnd.toISOString(),
         filter,
         aggs: getExecutionLogAggregation({
-          // determine the number of executions to request
-          // based on the date interval and the rule schedule interval
-          // this value is capped by the max number of terms allowed in a term aggregation
-          numExecutions: getNumExecutions(parsedDateStart, parsedDateEnd, rule.schedule.interval),
           page,
           perPage,
           sort,

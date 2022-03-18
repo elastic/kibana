@@ -77,7 +77,6 @@ describe('getExecutionLogAggregation', () => {
   test('should throw error when given bad sort field', () => {
     expect(() => {
       getExecutionLogAggregation({
-        numExecutions: 5,
         page: 1,
         perPage: 10,
         sort: [{ notsortable: { order: 'asc' } }],
@@ -90,7 +89,6 @@ describe('getExecutionLogAggregation', () => {
   test('should throw error when given one bad sort field', () => {
     expect(() => {
       getExecutionLogAggregation({
-        numExecutions: 5,
         page: 1,
         perPage: 10,
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
@@ -103,7 +101,6 @@ describe('getExecutionLogAggregation', () => {
   test('should throw error when given bad page field', () => {
     expect(() => {
       getExecutionLogAggregation({
-        numExecutions: 5,
         page: 0,
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }],
@@ -111,23 +108,9 @@ describe('getExecutionLogAggregation', () => {
     }).toThrowErrorMatchingInlineSnapshot(`"Invalid page field \\"0\\" - must be greater than 0"`);
   });
 
-  test('should throw error when given bad numExecutions field', () => {
-    expect(() => {
-      getExecutionLogAggregation({
-        numExecutions: 1001,
-        page: 1,
-        perPage: 10,
-        sort: [{ timestamp: { order: 'asc' } }],
-      });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid numExecutions requested \\"1001\\" - must be less than 1000"`
-    );
-  });
-
   test('should throw error when given bad perPage field', () => {
     expect(() => {
       getExecutionLogAggregation({
-        numExecutions: 5,
         page: 1,
         perPage: 0,
         sort: [{ timestamp: { order: 'asc' } }],
@@ -140,7 +123,6 @@ describe('getExecutionLogAggregation', () => {
   test('should correctly generate aggregation', () => {
     expect(
       getExecutionLogAggregation({
-        numExecutions: 5,
         page: 2,
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }, { execution_duration: { order: 'desc' } }],
@@ -150,7 +132,7 @@ describe('getExecutionLogAggregation', () => {
       executionUuid: {
         terms: {
           field: 'kibana.alert.rule.execution.uuid',
-          size: 5,
+          size: 1000,
           order: [
             { 'ruleExecution>executeStartTime': 'asc' },
             { 'ruleExecution>executionDuration': 'desc' },
@@ -165,6 +147,7 @@ describe('getExecutionLogAggregation', () => {
               ],
               from: 10,
               size: 10,
+              gap_policy: 'insert_zeros',
             },
           },
           alertCounts: {

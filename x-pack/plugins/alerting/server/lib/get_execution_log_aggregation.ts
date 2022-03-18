@@ -86,7 +86,6 @@ interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
   buckets: TBucket[];
 }
 export interface IExecutionLogAggOptions {
-  numExecutions: number;
   page: number;
   perPage: number;
   sort: estypes.Sort;
@@ -101,12 +100,7 @@ const ExecutionLogSortFields: Record<string, string> = {
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
 };
 
-export function getExecutionLogAggregation({
-  numExecutions,
-  page,
-  perPage,
-  sort,
-}: IExecutionLogAggOptions) {
+export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
   // Check if valid sort fields
   const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
   for (const field of sortFields) {
@@ -129,13 +123,6 @@ export function getExecutionLogAggregation({
     throw Boom.badRequest(`Invalid perPage field "${perPage}" - must be greater than 0`);
   }
 
-  // Check if valid num executions
-  if (numExecutions > DEFAULT_MAX_BUCKETS_LIMIT) {
-    throw Boom.badRequest(
-      `Invalid numExecutions requested "${numExecutions}" - must be less than ${DEFAULT_MAX_BUCKETS_LIMIT}`
-    );
-  }
-
   return {
     // Get total number of executions
     executionUuidCardinality: {
@@ -147,7 +134,7 @@ export function getExecutionLogAggregation({
       // Bucket by execution UUID
       terms: {
         field: EXECUTION_UUID_FIELD,
-        size: numExecutions,
+        size: DEFAULT_MAX_BUCKETS_LIMIT,
         order: formatSortForTermSort(sort),
       },
       aggs: {
@@ -157,6 +144,7 @@ export function getExecutionLogAggregation({
             sort: formatSortForBucketSort(sort),
             from: (page - 1) * perPage,
             size: perPage,
+            gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
           },
         },
         // Get counts for types of alerts and whether there was an execution timeout
