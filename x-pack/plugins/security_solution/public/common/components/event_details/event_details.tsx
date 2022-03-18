@@ -41,6 +41,7 @@ import { Reason } from './reason';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { HostRisk } from '../../../risk_score/containers';
+import { RelatedCases } from './related_cases';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -170,6 +171,8 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 <EuiSpacer size="l" />
                 <Reason eventId={id} data={data} />
+                <EuiSpacer size="m" />
+                <RelatedCases data={data} isAlert={isAlert} />
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{
