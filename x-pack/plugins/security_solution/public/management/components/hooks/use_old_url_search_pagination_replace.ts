@@ -11,6 +11,8 @@ import { useUrlParams } from './use_url_params';
 
 /**
  * Replaces old page_index and page_size url params by the new ones, page and pageSize
+ *
+ * NOTE: This hook will also increment the `page_index` by 1 since `page` is now one-based
  */
 export const useOldUrlSearchPaginationReplace = (): void => {
   const history = useHistory();
