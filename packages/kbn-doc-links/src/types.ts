@@ -365,4 +365,7 @@ export interface DocLinks {
   readonly endpoints: {
     readonly troubleshooting: string;
   };
+  readonly legal: {
+    readonly privacyStatement: string;
+  };
 }
