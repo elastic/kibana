@@ -44,6 +44,7 @@ import {
   DEFAULT_SEARCH_PAGE_SIZE,
   convertRulesToTableItems,
   OBSERVABILITY_SOLUTIONS,
+  hasExecuteActionsCapability,
 } from './config';
 import {
   LAST_RESPONSE_COLUMN_TITLE,
@@ -67,9 +68,11 @@ export function RulesPage() {
     http,
     docLinks,
     triggersActionsUi,
+    application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
-
+  const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [sort, setSort] = useState<EuiTableSortingType<RuleTableItem>['sort']>({
     field: 'name',
@@ -79,6 +82,9 @@ export function RulesPage() {
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
+
+  const isRuleTypeEditableInContext = (ruleTypeId: string) =>
+    ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setCurrentRuleToEdit(ruleItem);
@@ -90,8 +96,14 @@ export function RulesPage() {
     sort,
   });
   const { data: rules, totalItemCount, error } = rulesState;
-  const { ruleTypeIndex } = useLoadRuleTypes({ filteredSolutions: OBSERVABILITY_SOLUTIONS });
+  const { ruleTypeIndex, ruleTypes } = useLoadRuleTypes({
+    filteredSolutions: OBSERVABILITY_SOLUTIONS,
+  });
+  const authorizedRuleTypes = [...ruleTypes.values()];
 
+  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
+    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+  );
   useBreadcrumbs([
     {
       text: RULES_BREADCRUMB_TEXT,
@@ -152,6 +164,9 @@ export function RulesPage() {
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                   <EuiFlexItem grow={false} data-test-subj="ruleSidebarEditAction">
                     <EuiButtonIcon
+                      isDisabled={
+                        !(item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId))
+                      }
                       color={'primary'}
                       title={EDIT_ACTION_TOOLTIP}
                       className="ruleSidebarItem__action"
@@ -163,6 +178,7 @@ export function RulesPage() {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} data-test-subj="ruleSidebarDeleteAction">
                     <EuiButtonIcon
+                      isDisabled={!item.isEditable}
                       color={'danger'}
                       title={DELETE_ACTION_TOOLTIP}
                       className="ruleSidebarItem__action"
@@ -200,18 +216,20 @@ export function RulesPage() {
       pageHeader={{
         pageTitle: <>{RULES_PAGE_TITLE} </>,
         rightSideItems: [
-          <EuiButton
-            iconType="plusInCircle"
-            key="create-alert"
-            data-test-subj="createRuleButton"
-            fill
-            onClick={() => setCreateRuleFlyoutVisibility(true)}
-          >
-            <FormattedMessage
-              id="xpack.observability.rules.addRuleButtonLabel"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
+          authorizedToCreateAnyRules && (
+            <EuiButton
+              iconType="plusInCircle"
+              key="create-alert"
+              data-test-subj="createRuleButton"
+              fill
+              onClick={() => setCreateRuleFlyoutVisibility(true)}
+            >
+              <FormattedMessage
+                id="xpack.observability.rules.addRuleButtonLabel"
+                defaultMessage="Create rule"
+              />
+            </EuiButton>
+          ),
           <EuiButtonEmpty
             href={docLinks.links.alerting.guide}
             target="_blank"
@@ -285,7 +303,7 @@ export function RulesPage() {
         <EuiFlexItem>
           <RulesTable
             columns={getRulesTableColumns()}
-            rules={convertRulesToTableItems(rules, ruleTypeIndex, true)} // TODO add canExecuteActions and remove hardcoded true value
+            rules={convertRulesToTableItems(rules, ruleTypeIndex, canExecuteActions)}
             isLoading={rulesState.isLoading}
             page={page}
             totalItemCount={totalItemCount}

@@ -91,3 +91,8 @@ export function convertRulesToTableItems(
     enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
   }));
 }
+
+type Capabilities = Record<string, any>;
+
+export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.execute;
