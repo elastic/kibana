@@ -247,13 +247,14 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   return (
     <>
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem style={{ minWidth: '65%' }}>
+        <EuiFlexItem grow={true}>
           <ExecutionLogSearchBar
             onSearch={onSearchCallback}
             onStatusFilterChange={onStatusFilterChangeCallback}
+            onlyShowFilters={true}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem style={{ maxWidth: '582px' }}>
           <EuiSuperDatePicker
             start={start}
             end={end}

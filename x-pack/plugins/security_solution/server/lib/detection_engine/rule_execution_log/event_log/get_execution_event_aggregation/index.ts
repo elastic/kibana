@@ -116,6 +116,7 @@ export const getExecutionEventAggregation = ({
             sort: formatSortForBucketSort(sort),
             from: page * perPage,
             size: perPage,
+            gap_policy: 'insert_zeros',
           },
         },
         // Filter by action execute doc to retrieve action outcomes (successful/failed)

@@ -58,8 +58,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
     async getAggregateExecutionEvents(
       args: GetAggregateExecutionEventsArgs
     ): Promise<GetAggregateRuleExecutionEventsResponse> {
-      const { ruleId, start, end, queryText, statusFilters, page, perPage, sortField, sortOrder } =
-        args;
+      const { ruleId, start, end, statusFilters, page, perPage, sortField, sortOrder } = args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
 
@@ -68,7 +67,8 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       // TODO: See: https://github.com/elastic/kibana/pull/127339/files#r825240516
       // First fetch execution uuid's by status filter if provided
       let statusIds: string[] = [];
-      if (statusFilters.length) {
+      // If 0 or 3 statuses are selected we can search for all statuses and don't need this pre-filter by ID
+      if (statusFilters.length > 0 && statusFilters.length < 3) {
         const statusResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
           start,
           end,
@@ -94,49 +94,9 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         }
       }
 
-      // Now fetch execution uuid's with user provided filter and constraining to statusId's
-      let filterIds: string[] = [];
-      if (queryText.length) {
-        const queryTextFilter = statusFilters.length
-          ? `${queryText} AND kibana.alert.rule.execution.uuid:(${statusIds.join(' OR ')})`
-          : queryText;
-        const filteredResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
-          start,
-          end,
-          filter: queryTextFilter,
-          aggs: {
-            filteredExecutionUUIDs: {
-              terms: {
-                field: 'kibana.alert.rule.execution.uuid',
-                size: MAX_EXECUTION_EVENTS_DISPLAYED,
-              },
-            },
-          },
-        });
-        const filteredExecutionUUIDs = filteredResults.aggregations
-          ?.filteredExecutionUUIDs as ExecutionUuidAggResult;
-        filterIds = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
-        // Early return if no results based on queryText filter
-        if (filterIds.length === 0) {
-          return {
-            total: 0,
-            events: [],
-          };
-        }
-      }
-
-      // Early return if no results based on both status and queryText filter
-      const statusAndFilterIds = Array.from(new Set([...statusIds, ...filterIds]));
-      if ((statusFilters.length || queryText.length) && statusAndFilterIds.length === 0) {
-        return {
-          total: 0,
-          events: [],
-        };
-      }
-
-      // Finally, query for aggregate events, and pass any ID's as filters as determined from the above status/queryText results
-      const idsFilter = statusAndFilterIds.length
-        ? `kibana.alert.rule.execution.uuid:(${statusAndFilterIds.join(' OR ')})`
+      // Now query for aggregate events, and pass any ID's as filters as determined from the above status/queryText results
+      const idsFilter = statusIds.length
+        ? `kibana.alert.rule.execution.uuid:(${statusIds.join(' OR ')})`
         : '';
       const results = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
         start,

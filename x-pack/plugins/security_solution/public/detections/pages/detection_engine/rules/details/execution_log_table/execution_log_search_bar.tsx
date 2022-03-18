@@ -54,12 +54,13 @@ const statusFilters = statuses.map((status) => ({
 }));
 
 interface ExecutionLogTableSearchProps {
+  onlyShowFilters: true;
   onSearch: (queryText: string) => void;
   onStatusFilterChange: (statusFilters: string[]) => void;
 }
 
 export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
-  ({ onSearch, onStatusFilterChange }) => {
+  ({ onlyShowFilters, onSearch, onStatusFilterChange }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<RuleExecutionStatus[]>([]);
 
@@ -101,14 +102,16 @@ export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
     return (
       <EuiFlexGroup gutterSize={'s'}>
         <EuiFlexItem grow={true}>
-          <EuiFieldSearch
-            data-test-subj="executionLogSearch"
-            aria-label={i18n.RULE_EXECUTION_LOG_SEARCH_PLACEHOLDER}
-            placeholder={i18n.RULE_EXECUTION_LOG_SEARCH_PLACEHOLDER}
-            onSearch={onSearchCallback}
-            isClearable={true}
-            fullWidth={true}
-          />
+          {!onlyShowFilters && (
+            <EuiFieldSearch
+              data-test-subj="executionLogSearch"
+              aria-label={i18n.RULE_EXECUTION_LOG_SEARCH_PLACEHOLDER}
+              placeholder={i18n.RULE_EXECUTION_LOG_SEARCH_PLACEHOLDER}
+              onSearch={onSearchCallback}
+              isClearable={true}
+              fullWidth={true}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>

@@ -8,7 +8,6 @@
 import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
   duration: number;
@@ -35,24 +34,14 @@ const RuleDurationFormatComponent = (props: Props) => {
   const { duration, allowZero = true } = props;
 
   const formattedDuration = useMemo(() => {
-    if (allowZero || typeof duration === 'number') {
+    // Durations can be buggy and return negative
+    if (allowZero && duration >= 0) {
       return getFormattedDuration(duration);
     }
     return 'N/A';
   }, [duration, allowZero]);
 
-  const formattedTooltip = useMemo(() => {
-    if (allowZero || typeof duration === 'number') {
-      return getFormattedMilliseconds(duration);
-    }
-    return 'N/A';
-  }, [duration, allowZero]);
-
-  return (
-    <EuiToolTip data-test-subj="rule-duration-format-tooltip" content={formattedTooltip}>
-      <span data-test-subj="rule-duration-format-value">{formattedDuration}</span>
-    </EuiToolTip>
-  );
+  return <span data-test-subj="rule-duration-format-value">{formattedDuration}</span>;
 };
 
 export const RuleDurationFormat = React.memo(RuleDurationFormatComponent);
