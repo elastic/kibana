@@ -291,7 +291,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           hasBorder
           paddingSize={paddingSize}
           data-test-subj="alerts-histogram-panel"
-          toggleStatus={toggleStatus}
+          $toggleStatus={toggleStatus}
         >
           <HeaderSection
             id={uniqueQueryId}

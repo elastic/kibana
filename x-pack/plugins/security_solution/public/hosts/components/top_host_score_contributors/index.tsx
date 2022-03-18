@@ -152,7 +152,11 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
         </EuiFlexGroup>
 
         {toggleStatus && (
-          <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexGroup
+            data-test-subj="topHostScoreContributors-table"
+            gutterSize="none"
+            direction="column"
+          >
             <EuiFlexItem grow={1}>
               <EuiInMemoryTable
                 items={items}

@@ -12,20 +12,20 @@ import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
 import { useStackByFields } from './hooks';
 import * as i18n from './translations';
 
-export const KpiPanel = styled(EuiPanel)<{ height?: number; toggleStatus: boolean }>`
+export const KpiPanel = styled(EuiPanel)<{ height?: number; $toggleStatus: boolean }>`
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    ${({ toggleStatus }) =>
-      toggleStatus &&
+    ${({ $toggleStatus }) =>
+      $toggleStatus &&
       `
     height: ${PANEL_HEIGHT}px;
   `}
   }
-  ${({ toggleStatus }) =>
-    toggleStatus &&
+  ${({ $toggleStatus }) =>
+    $toggleStatus &&
     `
     height: ${MOBILE_PANEL_HEIGHT}px;
   `}
