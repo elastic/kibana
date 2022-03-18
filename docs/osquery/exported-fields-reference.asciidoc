@@ -1,0 +1,2 @@
+[[exported-fields-osquery]]
+== Exported fields reference
