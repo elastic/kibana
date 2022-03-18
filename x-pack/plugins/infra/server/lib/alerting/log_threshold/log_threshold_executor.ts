@@ -99,7 +99,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     const { alertWithLifecycle, savedObjectsClient, scopedClusterClient, getAlertStartedDate } =
       services;
     const { sources, kibanaBaseUrl } = libs;
-    let indexedStartedAt: string | null = startedAt.toISOString();
+    let indexedStartedAt: string = startedAt.toISOString();
     const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold) => {
       indexedStartedAt = getAlertStartedDate(id) ?? indexedStartedAt;
       return alertWithLifecycle({
@@ -111,7 +111,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         },
       });
     };
-
+    const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
       sourceConfiguration.configuration,
@@ -132,8 +132,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
           alertFactory,
-          indexedStartedAt,
-          kibanaBaseUrl
+          viewInAppUrl
         );
       } else {
         await executeRatioAlert(
@@ -143,8 +142,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
           alertFactory,
-          indexedStartedAt,
-          kibanaBaseUrl
+          viewInAppUrl
         );
       }
     } catch (e) {
@@ -159,8 +157,7 @@ async function executeAlert(
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory,
-  indexedStartedAt: string,
-  kibanaBaseUrl: string | undefined
+  viewInAppUrl: string
 ) {
   const query = getESQuery(ruleParams, timestampField, indexPattern, runtimeMappings);
 
@@ -174,8 +171,7 @@ async function executeAlert(
       ruleParams,
       alertFactory,
       updateAlert,
-      indexedStartedAt,
-      kibanaBaseUrl
+      viewInAppUrl
     );
   } else {
     processUngroupedResults(
@@ -183,8 +179,7 @@ async function executeAlert(
       ruleParams,
       alertFactory,
       updateAlert,
-      indexedStartedAt,
-      kibanaBaseUrl
+      viewInAppUrl
     );
   }
 }
@@ -196,8 +191,7 @@ async function executeRatioAlert(
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory,
-  indexedStartedAt: string,
-  kibanaBaseUrl: string | undefined
+  viewInAppUrl: string
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: RuleParams = {
@@ -233,8 +227,7 @@ async function executeRatioAlert(
       ruleParams,
       alertFactory,
       updateAlert,
-      indexedStartedAt,
-      kibanaBaseUrl
+      viewInAppUrl
     );
   } else {
     const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
@@ -247,8 +240,7 @@ async function executeRatioAlert(
       ruleParams,
       alertFactory,
       updateAlert,
-      indexedStartedAt,
-      kibanaBaseUrl
+      viewInAppUrl
     );
   }
 }
@@ -269,8 +261,7 @@ export const processUngroupedResults = (
   params: CountRuleParams,
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater,
-  indexedStartedAt: string,
-  kibanaBaseUrl: string | undefined
+  viewInAppUrl: string
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
@@ -284,7 +275,6 @@ export const processUngroupedResults = (
 
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
     const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value);
-    const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
     alertUpdater(alert, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -307,8 +297,7 @@ export const processUngroupedRatioResults = (
   params: RatioRuleParams,
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater,
-  indexedStartedAt: string,
-  kibanaBaseUrl: string | undefined
+  viewInAppUrl: string
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -325,7 +314,6 @@ export const processUngroupedRatioResults = (
       timeUnit
     );
     const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value);
-    const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
     alertUpdater(alert, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -387,8 +375,7 @@ export const processGroupByResults = (
   params: CountRuleParams,
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater,
-  indexedStartedAt: string,
-  kibanaBaseUrl: string | undefined
+  viewInAppUrl: string
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -407,7 +394,6 @@ export const processGroupByResults = (
         timeUnit
       );
       const alert = alertFactory(group.name, reasonMessage, documentCount, count.value);
-      const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
       alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -431,8 +417,7 @@ export const processGroupByRatioResults = (
   params: RatioRuleParams,
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater,
-  indexedStartedAt: string,
-  kibanaBaseUrl: string | undefined
+  viewInAppUrl: string
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -461,7 +446,6 @@ export const processGroupByRatioResults = (
         timeUnit
       );
       const alert = alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value);
-      const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
       alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
