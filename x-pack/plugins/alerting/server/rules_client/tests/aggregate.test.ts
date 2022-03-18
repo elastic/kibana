@@ -86,7 +86,6 @@ describe('aggregate()', () => {
             { key: 'ok', doc_count: 10 },
             { key: 'pending', doc_count: 4 },
             { key: 'unknown', doc_count: 2 },
-            { key: 'warning', doc_count: 1 },
           ],
         },
         enabled: {
@@ -136,7 +135,6 @@ describe('aggregate()', () => {
           "ok": 10,
           "pending": 4,
           "unknown": 2,
-          "warning": 1,
         },
         "ruleEnabledStatus": Object {
           "disabled": 2,

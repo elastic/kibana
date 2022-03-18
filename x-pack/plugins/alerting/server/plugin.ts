@@ -64,7 +64,6 @@ import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
-import { getRulesConfig } from './lib/get_rules_config';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -280,8 +279,7 @@ export class AlertingPlugin {
       encryptedSavedObjects: plugins.encryptedSavedObjects,
     });
 
-    const alertingConfig: AlertingConfig = this.config;
-
+    const alertingConfig = this.config;
     return {
       registerType<
         Params extends AlertTypeParams = AlertTypeParams,
@@ -305,10 +303,7 @@ export class AlertingPlugin {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
-        ruleType.config = getRulesConfig({
-          config: alertingConfig.rules,
-          ruleTypeId: ruleType.id,
-        });
+
         ruleType.ruleTaskTimeout =
           ruleType.ruleTaskTimeout ?? alertingConfig.defaultRuleTaskTimeout;
         ruleType.cancelAlertsOnRuleTimeout =
