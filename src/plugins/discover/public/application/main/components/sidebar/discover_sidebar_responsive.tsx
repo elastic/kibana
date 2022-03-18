@@ -91,10 +91,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   /**
-   * Shows index pattern and a button that displays the sidebar in a flyout
-   */
-  useFlyout?: boolean;
-  /**
    * Read from the Fields API
    */
   useNewFieldsApi?: boolean;
