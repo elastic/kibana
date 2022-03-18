@@ -40,5 +40,5 @@ function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClien
 export const encryptedSavedObjectsMock = {
   createSetup: createEncryptedSavedObjectsSetupMock,
   createStart: createEncryptedSavedObjectsStartMock,
-  createClient: createEncryptedSavedObjectsClienttMock,
+  createClient: createEncryptedSavedObjectsClientMock,
 };
