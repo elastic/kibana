@@ -297,6 +297,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
           ) : (
             <>
               <BasicTable
+                data-test-subj="paginated-basic-table"
                 columns={columns}
                 items={pageOfItems}
                 onChange={onChange}

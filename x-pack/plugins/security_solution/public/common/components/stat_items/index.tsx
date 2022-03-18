@@ -214,7 +214,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     grow,
     id,
     loading = false,
-    showInspectButton,
+    showInspectButton = true,
     index,
     narrowDateRange,
     statKey = 'item',
@@ -260,6 +260,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+                    data-test-subj="query-toggle-stat"
                     color="text"
                     display="empty"
                     iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
