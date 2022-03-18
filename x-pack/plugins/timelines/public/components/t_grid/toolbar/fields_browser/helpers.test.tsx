@@ -259,7 +259,7 @@ describe('helpers', () => {
   describe('filterSelectedBrowserFields', () => {
     const columnHeaders = [
       { id: 'agent.ephemeral_id' },
-      { id: 'agent.name' },
+      { id: 'agent.id' },
       { id: 'container.id' },
     ] as ColumnHeaderOptions[];
 
