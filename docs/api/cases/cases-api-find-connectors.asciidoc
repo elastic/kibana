@@ -12,6 +12,8 @@ returned. Refer to the list of supported external incident management systems in
 
 === Request
 
+`GET <kibana host>:<port>/api/cases/configure/connectors/_find`
+
 `GET <kibana host>:<port>/s/<space_id>/api/cases/configure/connectors/_find`
 
 === Prerequisite

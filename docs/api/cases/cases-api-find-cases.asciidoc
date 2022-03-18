@@ -4,10 +4,11 @@
 <titleabbrev>Find cases</titleabbrev>
 ++++
 
-Retrieves a paginated subset of cases. By default, the first page is returned
-with 20 results per page.
+Retrieves a paginated subset of cases.
 
 === Request
+
+`GET <kibana host>:<port>/api/cases/_find`
 
 `GET <kibana host>:<port>/s/<space_id>/api/cases/_find`
 
@@ -28,6 +29,7 @@ default space is used.
 
 `defaultSearchOperator`::
 (Optional, string) The default operator to use for the `simple_query_string`.
+Defaults to `OR`.
 
 `fields`::
 (Optional, array of strings) The fields in the entity to return in the response.
@@ -39,10 +41,10 @@ and `securitySolution`. If this parameter is omitted, the response contains all
 cases that the user has access to read.
 
 `page`::
-(Optional, integer) The page number to return.
+(Optional, integer) The page number to return. Defaults to `1`.
 
 `perPage`::
-(Optional, integer) The number of rules to return per page.
+(Optional, integer) The number of rules to return per page. Defaults to `20`.
 
 `reporters`::
 (Optional, string or array of strings) Filters the returned cases by the
@@ -59,7 +61,7 @@ filters the objects in the response.
 
 `sortField`::
 (Optional, string) Determines which field is used to sort the results,
-`createdAt` or `updatedAt`.
+`createdAt` or `updatedAt`. Defaults to `createdAt`.
 +
 NOTE: Even though the JSON case object uses `created_at` and `updated_at`
 fields, you must use `createdAt` and `updatedAt` fields in the URL
@@ -67,6 +69,7 @@ query.
 
 `sortOrder`::
 (Optional, string) Determines the sort order, which can be `desc` or `asc`.
+Defaults to `desc`.
 
 `status`::
 (Optional, string) Filters the returned cases by state, which can be  `open`,
