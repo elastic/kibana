@@ -188,6 +188,55 @@ export const ControlGroupStrings = {
           defaultMessage: 'Cancel',
         }),
     },
+    validateSelections: {
+      getValidateSelectionsTitle: () =>
+        i18n.translate('controls.controlGroup.management.validate.title', {
+          defaultMessage: 'Validate user selections',
+        }),
+      getValidateSelectionsSubTitle: () =>
+        i18n.translate('controls.controlGroup.management.validate.subtitle', {
+          defaultMessage:
+            'Automatically ignore any control selection that would result in no data.',
+        }),
+    },
+    controlChaining: {
+      getHierarchyTitle: () =>
+        i18n.translate('controls.controlGroup.management.hierarchy.title', {
+          defaultMessage: 'Chain controls',
+        }),
+      getHierarchySubTitle: () =>
+        i18n.translate('controls.controlGroup.management.hierarchy.subtitle', {
+          defaultMessage:
+            'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
+        }),
+    },
+    querySync: {
+      getQuerySettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.searchSettingsTitle', {
+          defaultMessage: 'Sync with query bar',
+        }),
+      getQuerySettingsSubtitle: () =>
+        i18n.translate('controls.controlGroup.management.query.useAllSearchSettingsTitle', {
+          defaultMessage:
+            'Keeps the control group in sync with the query bar by applying time range, filter pills, and queries from the query bar',
+        }),
+      getAdvancedSettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.advancedSettings', {
+          defaultMessage: 'Advanced',
+        }),
+      getIgnoreTimerangeTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreTimerange', {
+          defaultMessage: 'Ignore timerange',
+        }),
+      getIgnoreQueryTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreQuery', {
+          defaultMessage: 'Ignore query bar',
+        }),
+      getIgnoreFilterPillsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreFilterPills', {
+          defaultMessage: 'Ignore filter pills',
+        }),
+    },
   },
   floatingActions: {
     getEditButtonTitle: () =>

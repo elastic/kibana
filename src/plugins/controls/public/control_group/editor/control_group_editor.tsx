@@ -14,7 +14,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import { omit } from 'lodash';
+import fastIsEqual from 'fast-deep-equal';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlyoutHeader,
   EuiButtonGroup,
@@ -28,36 +30,99 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiCheckbox,
+  EuiForm,
+  EuiAccordion,
+  useGeneratedHtmlId,
+  EuiSwitch,
+  EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
+import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlStyle, ControlWidth } from '../../types';
-import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import { ParentIgnoreSettings } from '../..';
+import { ControlsPanels } from '../types';
+import { ControlGroupInput } from '..';
+import {
+  DEFAULT_CONTROL_WIDTH,
+  getDefaultControlGroupInput,
+} from '../../../common/control_group/control_group_constants';
 
 interface EditControlGroupProps {
-  width: ControlWidth;
-  controlStyle: ControlStyle;
-  setAllWidths: boolean;
-  updateControlStyle: (controlStyle: ControlStyle) => void;
-  updateWidth: (newWidth: ControlWidth) => void;
-  updateAllControlWidths: (newWidth: ControlWidth) => void;
-  onCancel: () => void;
+  initialInput: ControlGroupInput;
+  updateInput: (input: Partial<ControlGroupInput>) => void;
+  onDeleteAll: () => void;
   onClose: () => void;
 }
 
+type EditorControlGroupInput = ControlGroupInput &
+  Required<Pick<ControlGroupInput, 'defaultControlWidth'>>;
+
+const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInput) =>
+  fastIsEqual(a, b);
+
 export const ControlGroupEditor = ({
-  width,
-  controlStyle,
-  setAllWidths,
-  updateControlStyle,
-  updateWidth,
-  updateAllControlWidths,
-  onCancel,
+  initialInput,
+  updateInput,
+  onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
-  const [currentControlStyle, setCurrentControlStyle] = useState(controlStyle);
-  const [currentWidth, setCurrentWidth] = useState(width);
-  const [applyToAll, setApplyToAll] = useState(setAllWidths);
+  const [resetAllWidths, setResetAllWidths] = useState(false);
+  const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
+
+  const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
+    defaultControlWidth: DEFAULT_CONTROL_WIDTH,
+    ...getDefaultControlGroupInput(),
+    ...initialInput,
+  });
+
+  const updateControlGroupEditorSetting = useCallback(
+    (newSettings: Partial<ControlGroupInput>) => {
+      setControlGroupEditorState({
+        ...controlGroupEditorState,
+        ...newSettings,
+      });
+    },
+    [controlGroupEditorState]
+  );
+
+  const updateIgnoreSetting = useCallback(
+    (newSettings: Partial<ParentIgnoreSettings>) => {
+      setControlGroupEditorState({
+        ...controlGroupEditorState,
+        ignoreParentSettings: {
+          ...(controlGroupEditorState.ignoreParentSettings ?? {}),
+          ...newSettings,
+        },
+      });
+    },
+    [controlGroupEditorState]
+  );
+
+  const fullQuerySyncActive = useMemo(
+    () =>
+      !Object.values(omit(controlGroupEditorState.ignoreParentSettings, 'ignoreValidations')).some(
+        Boolean
+      ),
+    [controlGroupEditorState]
+  );
+
+  const applyChangesToInput = useCallback(() => {
+    const inputToApply = { ...controlGroupEditorState };
+    if (resetAllWidths) {
+      const newPanels = {} as ControlsPanels;
+      Object.entries(initialInput.panels).forEach(
+        ([id, panel]) =>
+          (newPanels[id] = {
+            ...panel,
+            width: inputToApply.defaultControlWidth,
+          })
+      );
+      inputToApply.panels = newPanels;
+    }
+    if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
+  }, [controlGroupEditorState, resetAllWidths, initialInput, updateInput]);
 
   return (
     <>
@@ -67,50 +132,169 @@ export const ControlGroupEditor = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
-          <EuiButtonGroup
-            color="primary"
-            idSelected={currentControlStyle}
-            legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
-            options={CONTROL_LAYOUT_OPTIONS}
-            onChange={(newControlStyle: string) => {
-              setCurrentControlStyle(newControlStyle as ControlStyle);
-            }}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-        <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
-          <EuiButtonGroup
-            color="primary"
-            idSelected={currentWidth}
-            legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-            options={CONTROL_WIDTH_OPTIONS}
-            onChange={(newWidth: string) => {
-              setCurrentWidth(newWidth as ControlWidth);
-            }}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="s" />
-        <EuiCheckbox
-          id="editControls_setAllSizesCheckbox"
-          label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-          checked={applyToAll}
-          onChange={(e) => {
-            setApplyToAll(e.target.checked);
-          }}
-        />
-        <EuiSpacer size="l" />
-
-        <EuiButtonEmpty
-          onClick={onCancel}
-          aria-label={'delete-all'}
-          iconType="trash"
-          color="danger"
-          flush="left"
-          size="s"
-        >
-          {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-        </EuiButtonEmpty>
+        <EuiForm>
+          <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
+            <EuiButtonGroup
+              color="primary"
+              idSelected={controlGroupEditorState.controlStyle}
+              legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
+              options={CONTROL_LAYOUT_OPTIONS}
+              onChange={(newControlStyle: string) => {
+                updateControlGroupEditorSetting({ controlStyle: newControlStyle as ControlStyle });
+              }}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
+            <>
+              <EuiButtonGroup
+                color="primary"
+                idSelected={controlGroupEditorState.defaultControlWidth}
+                legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+                options={CONTROL_WIDTH_OPTIONS}
+                onChange={(newWidth: string) => {
+                  updateControlGroupEditorSetting({
+                    defaultControlWidth: newWidth as ControlWidth,
+                  });
+                }}
+              />
+              <EuiSpacer size="s" />
+              <EuiCheckbox
+                id="editControls_setAllSizesCheckbox"
+                label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
+                checked={resetAllWidths}
+                onChange={(e) => {
+                  setResetAllWidths(e.target.checked);
+                }}
+              />
+            </>
+          </EuiFormRow>
+          <EuiHorizontalRule />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={ControlGroupStrings.management.querySync.getQuerySettingsTitle()}
+                showLabel={false}
+                checked={fullQuerySyncActive}
+                onChange={(e) => {
+                  const newSetting = !e.target.checked;
+                  updateIgnoreSetting({
+                    ignoreFilters: newSetting,
+                    ignoreTimerange: newSetting,
+                    ignoreQuery: newSetting,
+                  });
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>{ControlGroupStrings.management.querySync.getQuerySettingsTitle()}</h3>
+              </EuiTitle>
+              <EuiText>
+                <p>{ControlGroupStrings.management.querySync.getQuerySettingsSubtitle()}</p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiAccordion
+                id={advancedSettingsAccordionId}
+                initialIsOpen={!fullQuerySyncActive}
+                buttonContent={ControlGroupStrings.management.querySync.getAdvancedSettingsTitle()}
+              >
+                <EuiSpacer size="s" />
+                <EuiFormRow
+                  label={ControlGroupStrings.management.querySync.getIgnoreTimerangeTitle()}
+                  display="columnCompressedSwitch"
+                >
+                  <EuiSwitch
+                    label={ControlGroupStrings.management.querySync.getIgnoreTimerangeTitle()}
+                    showLabel={false}
+                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreTimerange)}
+                    onChange={(e) => updateIgnoreSetting({ ignoreTimerange: e.target.checked })}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={ControlGroupStrings.management.querySync.getIgnoreQueryTitle()}
+                  display="columnCompressedSwitch"
+                >
+                  <EuiSwitch
+                    label={ControlGroupStrings.management.querySync.getIgnoreQueryTitle()}
+                    showLabel={false}
+                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreQuery)}
+                    onChange={(e) => updateIgnoreSetting({ ignoreQuery: e.target.checked })}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={ControlGroupStrings.management.querySync.getIgnoreFilterPillsTitle()}
+                  display="columnCompressedSwitch"
+                >
+                  <EuiSwitch
+                    label={ControlGroupStrings.management.querySync.getIgnoreFilterPillsTitle()}
+                    showLabel={false}
+                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreFilters)}
+                    onChange={(e) => updateIgnoreSetting({ ignoreFilters: e.target.checked })}
+                  />
+                </EuiFormRow>
+              </EuiAccordion>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
+                showLabel={false}
+                checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
+                onChange={(e) => updateIgnoreSetting({ ignoreValidations: !e.target.checked })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>
+                  {ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
+                </h3>
+              </EuiTitle>
+              <EuiText>
+                <p>
+                  {ControlGroupStrings.management.validateSelections.getValidateSelectionsSubTitle()}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
+                showLabel={false}
+                checked={controlGroupEditorState.chainingSytem === 'HIERARCHICAL'}
+                onChange={(e) =>
+                  updateControlGroupEditorSetting({
+                    chainingSytem: e.target.checked ? 'HIERARCHICAL' : 'NONE',
+                  })
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>{ControlGroupStrings.management.controlChaining.getHierarchyTitle()}</h3>
+              </EuiTitle>
+              <EuiText>
+                <p>{ControlGroupStrings.management.controlChaining.getHierarchySubTitle()}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule />
+          <EuiSpacer size="l" />
+          <EuiButtonEmpty
+            onClick={onDeleteAll}
+            aria-label={'delete-all'}
+            iconType="trash"
+            color="danger"
+            flush="left"
+            size="s"
+          >
+            {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+          </EuiButtonEmpty>
+        </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
@@ -131,15 +315,7 @@ export const ControlGroupEditor = ({
               iconType="check"
               color="primary"
               onClick={() => {
-                if (currentControlStyle && currentControlStyle !== controlStyle) {
-                  updateControlStyle(currentControlStyle);
-                }
-                if (currentWidth && currentWidth !== width) {
-                  updateWidth(currentWidth);
-                }
-                if (applyToAll) {
-                  updateAllControlWidths(currentWidth);
-                }
+                applyChangesToInput();
                 onClose();
               }}
             >
