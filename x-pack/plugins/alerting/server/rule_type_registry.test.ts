@@ -577,8 +577,8 @@ describe('Create Lifecycle', () => {
             },
           },
           "minimumScheduleInterval": Object {
-            "value": "1m",
             "enforce": false,
+            "value": "1m",
           },
         },
         "defaultActionGroupId": "default",

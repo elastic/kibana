@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
+import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
@@ -311,7 +312,7 @@ export class AlertingPlugin {
         );
       },
       getConfig: () => {
-        return alertingConfig.rules;
+        return pick(alertingConfig.rules, 'minimumScheduleInterval');
       },
     };
   }

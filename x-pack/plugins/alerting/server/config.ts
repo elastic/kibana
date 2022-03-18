@@ -50,4 +50,4 @@ export const configSchema = schema.object({
 export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type RuleTypeConfig = Omit<RulesConfig, 'ruleTypeOverrides'>;
-export type AlertingRulesConfig = AlertingConfig['rules'];
+export type AlertingRulesConfig = Pick<AlertingConfig['rules'], 'minimumScheduleInterval'>;
