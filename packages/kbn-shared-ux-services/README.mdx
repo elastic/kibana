@@ -191,8 +191,8 @@ From there, the pattern is the same: invoke the service factory with the require
 
 // plugin.tsx
 public start(coreStart: CoreStart, startPlugins: SharedUXPluginStartDeps): SharedUXPluginStart {
-  const service = fooServiceFactory({ coreStart, startPlugins });
-  const Context = <SharedUxServicesProvider value={service}>{children}</SharedUxServicesProvider>;
+  const fooService = fooServiceFactory({ coreStart, startPlugins });
+  const Context = <SharedUxServicesProvider services={{ fooService }}>{children}</SharedUxServicesProvider>;
   
   // ...wrap React content with the context..
 }
@@ -200,4 +200,4 @@ public start(coreStart: CoreStart, startPlugins: SharedUXPluginStartDeps): Share
 
 ## Use in Kibana plugins
 
-In order to make consumption of these services easy by Kibana plugins, `src/plugins/shared_ux` provides a pre-wired `SharedUxServicesProvider` component as part of the `start` lifecycle.  Plugins can simply make `sharedUX` a dependency and wrap their solution root or any component.  See the documentation for `sharedUX` for more details.
+In order to make consumption of these services easy by Kibana plugins, `src/plugins/shared_ux` provides a pre-wired set of services as part of the `start` lifecycle.  Plugins can simply make `sharedUX` a dependency, import `SharedUsServicesProvider` and wrap their solution root (or any component).  See the documentation for `sharedUX` for more details.
