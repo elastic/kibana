@@ -17,7 +17,7 @@ export interface Context<T extends FormData = FormData, I extends FormData = T> 
 }
 
 /**
- * Context required for the "useFormData()"" hook in order to access the form data
+ * Context required for the "useFormData()" hook in order to access the form data
  * observable and the getFormData() handler which serializes the form data
  */
 const FormDataContext = createContext<Context<any> | undefined>(undefined);

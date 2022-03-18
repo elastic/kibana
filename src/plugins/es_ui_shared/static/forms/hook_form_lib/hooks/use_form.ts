@@ -248,7 +248,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         // When we submit() the form we set the "isSubmitted" state to "true" and all fields are marked as "isValidated: true".
         // If a **new** field is added and and its "isValidated" is "false" it means that we have swapped fields and added new ones:
         // --> we have a new form in front of us with different set of fields. We need to reset the "isSubmitted" state.
-        // (e.g. In the mappings editor when the user swithc the field "type" it brings a whole new set of settings)
+        // (e.g. In the mappings editor when the user switches the field "type" it brings a whole new set of settings)
         setIsSubmitted(false);
       }
     },
@@ -349,7 +349,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       const areAllFieldsValidated = formFieldsValidity.every((field) => field.isValidated);
       const areSomeFieldValidating = formFieldsValidity.some((field) => field.isValidating);
 
-      // If *not* all the fiels have been validated, the validity of the form is unknown, thus still "undefined"
+      // If *not* all the fields have been validated, the validity of the form is unknown, thus still "undefined"
       const isFormValid =
         areAllFieldsValidated && areSomeFieldValidating === false
           ? formFieldsValidity.every((field) => field.isValid)
@@ -488,9 +488,9 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       }
 
       Object.entries(fieldsRefs.current).forEach(([path, field]) => {
-        // By resetting the form and changing field values, some field might be unmounted
+        // By resetting the form and changing field values, some fields might be unmounted
         // (e.g. a toggle might be set back to "false" and some fields removed from the UI as a consequence).
-        // We make sure that that the field still exists before resetting it.
+        // We make sure that the field still exists before resetting it.
         const isFieldMounted = fieldsRefs.current[path] !== undefined;
         if (isFieldMounted) {
           const fieldDefaultValue = getFieldDefaultValue(path);
