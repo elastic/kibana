@@ -20,11 +20,11 @@ import {
   EuiLink,
   EuiPanel,
   EuiHorizontalRule,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { LicensingLogic } from '../../../../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../../app_logic';
 import { API_KEY_LABEL } from '../../../../../constants';
@@ -33,17 +33,13 @@ import { SOURCES_PATH, getSourcesPath, API_KEYS_PATH } from '../../../../../rout
 import { SourceIdentifier } from '../../source_identifier';
 
 import { AddSourceHeader } from '../add_source_header';
-import {
-  SAVE_CUSTOM_BODY1 as READY_TO_ACCEPT_REQUESTS_LABEL,
-  SAVE_CUSTOM_RETURN_BUTTON,
-} from '../constants';
+import { SAVE_CUSTOM_BODY1 as READY_TO_ACCEPT_REQUESTS_LABEL } from '../constants';
 
 import { AddCustomSourceLogic } from './add_custom_source_logic';
 
 export const SaveCustom: React.FC = () => {
   const { newCustomSource, sourceData } = useValues(AddCustomSourceLogic);
   const { isOrganization } = useValues(AppLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const {
     serviceType,
     configuration: { githubRepository, documentationUrl },
@@ -137,7 +133,7 @@ export const SaveCustom: React.FC = () => {
                 </>
               ) : (
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.deploymentInstructions"
+                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentationHelpText"
                   defaultMessage="Review the {documentationLink} to learn how to build and deploy your own connector on the self managed on the infrastructure of your choice."
                   values={{
                     documentationLink: (
@@ -153,7 +149,7 @@ export const SaveCustom: React.FC = () => {
               )}
               <EuiSpacer size="s" />
               <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.sources.identifier.helpText"
+                id="xpack.enterpriseSearch.workplaceSearch.sources.saveCustom.sourceIdentifierHelpText"
                 defaultMessage="Specify the following Source Identifier along with an {apiKeyLink} in the deployed connector's config file to sync documents."
                 values={{
                   apiKeyLink: (
@@ -169,6 +165,31 @@ export const SaveCustom: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {serviceType !== 'custom' && (
+        <>
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                size="s"
+                title={
+                  <EuiLinkTo
+                    target="_blank"
+                    to={''} // TODO Add to link to feedback page
+                  >
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.workplaceSearch.sources.feedbackLinkLabel"
+                      defaultMessage="Have feedback about deploying a {name} connector? Let us know."
+                      values={{ name }}
+                    />
+                  </EuiLinkTo>
+                }
+                iconType="email"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };
