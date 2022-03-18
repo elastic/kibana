@@ -44,6 +44,7 @@ class DocLinks {
   public workplaceSearchCustomSourcePermissions: string;
   public workplaceSearchDocumentPermissions: string;
   public workplaceSearchDropbox: string;
+  public workplaceSearchExternalSharePointOnline: string;
   public workplaceSearchExternalIdentities: string;
   public workplaceSearchGettingStarted: string;
   public workplaceSearchGitHub: string;
@@ -99,6 +100,7 @@ class DocLinks {
     this.workplaceSearchCustomSourcePermissions = '';
     this.workplaceSearchDocumentPermissions = '';
     this.workplaceSearchDropbox = '';
+    this.workplaceSearchExternalSharePointOnline = '';
     this.workplaceSearchExternalIdentities = '';
     this.workplaceSearchGettingStarted = '';
     this.workplaceSearchGitHub = '';
@@ -156,6 +158,8 @@ class DocLinks {
       docLinks.links.workplaceSearch.customSourcePermissions;
     this.workplaceSearchDocumentPermissions = docLinks.links.workplaceSearch.documentPermissions;
     this.workplaceSearchDropbox = docLinks.links.workplaceSearch.dropbox;
+    this.workplaceSearchExternalSharePointOnline =
+      docLinks.links.workplaceSearch.externalSharePointOnline;
     this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
     this.workplaceSearchGettingStarted = docLinks.links.workplaceSearch.gettingStarted;
     this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
