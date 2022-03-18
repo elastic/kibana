@@ -134,7 +134,7 @@ export const SaveCustom: React.FC = () => {
               ) : (
                 <FormattedMessage
                   id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentationHelpText"
-                  defaultMessage="Review the {documentationLink} to learn how to build and deploy your own connector on the self managed on the infrastructure of your choice."
+                  defaultMessage="Review the {documentationLink} to learn how to build and deploy your own connector on the self managed infrastructure of your choice."
                   values={{
                     documentationLink: (
                       <EuiLink target="_blank" href={documentationUrl}>
