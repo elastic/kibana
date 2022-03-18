@@ -170,6 +170,7 @@ export class InfraServerPlugin
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
       getStartServices: () => core.getStartServices(),
+      logger: this.logger,
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);

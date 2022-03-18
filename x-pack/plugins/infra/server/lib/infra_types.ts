@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginCoreSetup } from '../types';
@@ -30,4 +31,5 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
   getStartServices: InfraPluginCoreSetup['getStartServices'];
+  logger: Logger;
 }
