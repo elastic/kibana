@@ -33,12 +33,10 @@ export function AlertsPopover(props: AlertsPopoverProps) {
   const searchSource = props.searchSource;
   const services = useDiscoverServices();
   const { triggersActionsUi } = services;
-  const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+  const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
 
-  const onCloseAlertFlyout = useCallback(
-    () => setAlertFlyoutVisibility(false),
-    [setAlertFlyoutVisibility]
-  );
+  const onCloseAlertFlyout = useCallback(() => props.onClose(), [props]);
+
   /**
    * Provides the default parameters used to initialize the new rule
    */
