@@ -12,6 +12,12 @@ import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common';
 import { appContextService } from '..';
 import { outputService } from '../output';
 
+/**
+ * Get the data output for a given agent policy
+ * @param soClient
+ * @param agentPolicy
+ * @returns
+ */
 export async function getDataOutputForAgentPolicy(
   soClient: SavedObjectsClientContract,
   agentPolicy: Partial<AgentPolicySOAttributes>

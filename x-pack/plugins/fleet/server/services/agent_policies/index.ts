@@ -10,7 +10,4 @@ export {
   storedPackagePolicyToAgentInputs,
   storedPackagePoliciesToAgentInputs,
 } from './package_policies_to_agent_inputs';
-export {
-  getDataOutputForAgentPolicy,
-  validateOutputForPolicy,
-} from './validate_outputs_for_policy';
+export { getDataOutputForAgentPolicy, validateOutputForPolicy } from './outputs_helpers';

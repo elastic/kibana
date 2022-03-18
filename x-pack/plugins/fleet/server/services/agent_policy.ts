@@ -309,8 +309,9 @@ class AgentPolicyService {
       }
     }
 
-    const agentPolicies = await Promise.all(
-      agentPoliciesSO.saved_objects.map(async (agentPolicySO) => {
+    const agentPolicies = await pMap(
+      agentPoliciesSO.saved_objects,
+      async (agentPolicySO) => {
         const agentPolicy = {
           id: agentPolicySO.id,
           ...agentPolicySO.attributes,
@@ -326,7 +327,8 @@ class AgentPolicyService {
           }
         }
         return agentPolicy;
-      })
+      },
+      { concurrency: 50 }
     );
 
     return {
