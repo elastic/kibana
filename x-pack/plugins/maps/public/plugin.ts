@@ -79,7 +79,6 @@ import type { LensPublicSetup } from '../../lens/public';
 
 import { setupLensChoroplethChart } from './lens';
 
-
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;

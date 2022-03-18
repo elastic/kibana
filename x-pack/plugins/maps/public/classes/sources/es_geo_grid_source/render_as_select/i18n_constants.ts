@@ -19,5 +19,5 @@ export const GRID_LABEL = i18n.translate(
 );
 
 export const HEX_LABEL = i18n.translate('xpack.maps.source.esGeoGrid.hexDropdownOption', {
-  defaultMessage: 'Hexbins',
+  defaultMessage: 'Hexagons',
 });

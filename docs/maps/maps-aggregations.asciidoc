@@ -42,9 +42,11 @@ image::maps/images/grid_to_docs.gif[]
 
 [role="xpack"]
 [[maps-grid-aggregation]]
-=== Grid aggregation
+=== Clusters
 
-Symbolize grid aggregation metrics as:
+Clusters use {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] or {ref}/search-aggregations-bucket-geohexgrid-aggregation.html[Geohex grid aggregation] to group your documents into grids. You can calculate metrics for each gridded cell.
+
+Symbolize cluster metrics as:
 
 *Clusters*:: Uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] to group your documents into grids. Creates a <<vector-layer, vector layer>> with a cluster symbol for each gridded cell.
 The cluster location is the weighted centroid for all documents in the gridded cell.
@@ -55,7 +57,7 @@ The cluster location is the weighted centroid for all documents in the gridded c
 
 *Hexbins*:: Uses {ref}/search-aggregations-bucket-geohexgrid-aggregation.html[Geohex grid aggregation] to group your documents into H3 hexagon grids. Creates a <<vector-layer, vector layer>> with a hexagon polygon for each gridded cell.
 
-To enable a grid aggregation layer:
+To enable a clusters layer:
 
 . Click *Add layer*, then select the *Clusters* or *Heat map* layer.
 

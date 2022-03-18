@@ -26,7 +26,7 @@ export function ShowAsLabel(props: Props) {
               <p>
                 <FormattedMessage
                   id="xpack.maps.source.esGeoGrid.clusterDescription"
-                  defaultMessage="Groups documents into grids with a weighted center for each grid cell."
+                  defaultMessage="Group documents into grids with a weighted center for each grid cell."
                 />
               </p>
             </dd>
@@ -36,7 +36,7 @@ export function ShowAsLabel(props: Props) {
               <p>
                 <FormattedMessage
                   id="xpack.maps.source.esGeoGrid.gridDescription"
-                  defaultMessage="Groups documents into grids with a polygon for each grid cell."
+                  defaultMessage="Group documents into grids."
                 />
               </p>
             </dd>
@@ -46,7 +46,7 @@ export function ShowAsLabel(props: Props) {
               <p>
                 <FormattedMessage
                   id="xpack.maps.source.esGeoGrid.hexDescription"
-                  defaultMessage="Groups documents into H3 hexagon grids with a hexagon for each cell."
+                  defaultMessage="Group documents into hexagons."
                 />
               </p>
               {props.isHexDisabled ? <em>{props.hexDisabledReason}</em> : null}

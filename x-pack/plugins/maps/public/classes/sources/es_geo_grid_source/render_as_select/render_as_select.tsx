@@ -31,12 +31,14 @@ export function RenderAsSelect(props: Props) {
   if (!getIsCloud() && !getIsGoldPlus()) {
     isHexDisabled = true;
     hexDisabledReason = i18n.translate('xpack.maps.hexbin.license.disabledReason', {
-      defaultMessage: 'Hexbins require a Gold license.',
+      defaultMessage: '{hexLabel} require a Gold license.',
+      value: { hexLabel: HEX_LABEL },
     });
   } else if (props.geoFieldType !== ES_GEO_FIELD_TYPE.GEO_POINT) {
     isHexDisabled = true;
     hexDisabledReason = i18n.translate('xpack.maps.hexbin.geoShape.disabledReason', {
-      defaultMessage: `Hexbins require 'geo_point' clustering field.`,
+      defaultMessage: `{hexLabel} require 'geo_point' clustering field.`,
+      values: { hexLabel: HEX_LABEL },
     });
   }
 
