@@ -94,6 +94,7 @@ export interface ItemSetTreeNode {
   removeLowQualityNodes: (minQualityRatio: number) => void;
   removeChildrenBelowQualityThreshold: (minQualityRation: number) => void;
   similarity: (otherItemSet: ItemSet) => number;
+  sortByQuality: () => void;
 }
 
 function ItemSetTreeNodeFactory(itemSet: ItemSet): ItemSetTreeNode {
@@ -178,6 +179,13 @@ function ItemSetTreeNodeFactory(itemSet: ItemSet): ItemSetTreeNode {
 
   function isRoot() {
     return parent === null && itemSet.size === 0;
+  }
+
+  function sortByQuality() {
+    children = children.sort((a, b) => b.quality() - a.quality());
+    for (const child of children) {
+      child.sortByQuality();
+    }
   }
 
   // We use a post order depth first traversal of the tree.
@@ -277,6 +285,7 @@ function ItemSetTreeNodeFactory(itemSet: ItemSet): ItemSetTreeNode {
       removeLowQualityNodes,
       removeChildrenBelowQualityThreshold,
       similarity,
+      sortByQuality,
     };
   }
 
@@ -342,6 +351,7 @@ export function ItemSetTreeFactory(
     root.computeQuality();
     root.removeLowQualityNodes(minQualityRatio);
     root.computeQuality();
+    root.sortByQuality();
   }
 
   buildTree();

@@ -294,9 +294,11 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     const mapL = (d: ItemSetTreeNode): EuiTreeViewNode => {
       id = id + 1;
       return {
-        label: Object.entries(d.itemSet.items)
-          .map(([key, value]) => `${key}:${value.join('/')}`)
-          .join(),
+        label:
+          `(q:${Math.round(d.quality() * 10000) / 10000})` +
+          Object.entries(d.itemSet.items)
+            .map(([key, value]) => `${key}:${value.join('/')}`)
+            .join(),
         id: `item_${id}`,
         icon: <EuiIcon size="s" type="folderClosed" />,
         iconWhenExpanded: <EuiIcon size="s" type="folderOpen" />,
@@ -411,7 +413,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: 'Tree',
       content: (
         <div style={{ width: '100%' }}>
-          <EuiTreeView items={treeItems} aria-label="Sample Folder Tree" />
+          <EuiTreeView items={treeItems} aria-label="Sample Folder Tree" display="compressed" />
         </div>
       ),
     },
