@@ -7,6 +7,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { BandFillColorAccessorInput, Chart, Color, Goal, Settings } from '@elastic/charts';
+import { GoalSubtype } from '@elastic/charts/dist/chart_types/goal_chart/specs/constants';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 // import { useGlobalTime } from '../../common/containers/use_global_time';
@@ -20,6 +22,8 @@ import { HeaderPage } from '../../common/components/header_page';
 import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
+import { DonutChart } from '../../common/components/donut_chart';
+import { alertsData } from './mock_data';
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -44,7 +48,6 @@ const DetectionResponseComponent = () => {
   );
 
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-
   return (
     <>
       {indicesExist ? (
@@ -72,12 +75,25 @@ const DetectionResponseComponent = () => {
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    {hasIndexRead && hasKibanaREAD && <>{'[alerts charts]'}</>}
+                    {hasIndexRead && hasKibanaREAD && (
+                      <EuiFlexGroup>
+                        {alertsData().map((data) => (
+                          <EuiFlexItem key={`alerts-status-${data.key}`}>
+                            <DonutChart
+                              height={90}
+                              {...data.statusBySeverity.buckets.reduce((acc, curr) => {
+                                return { ...acc, name: data.key, [curr.key]: curr.doc_count };
+                              }, {})}
+                            />
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    )}
                   </EuiFlexItem>
-                  <EuiFlexItem>{'[cases chart]'}</EuiFlexItem>
+                  <EuiFlexItem />
                 </EuiFlexGroup>
               </EuiFlexItem>
-
+              <EuiFlexItem>{'[cases chart]'}</EuiFlexItem>
               <EuiFlexItem>{'[rules table]'}</EuiFlexItem>
               <EuiFlexItem>{'[cases table]'}</EuiFlexItem>
               <EuiFlexItem>
