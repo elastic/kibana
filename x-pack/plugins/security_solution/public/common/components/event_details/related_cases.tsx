@@ -12,6 +12,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { getFieldValue } from '../../../detections/components/host_isolation/helpers';
 import { CaseDetailsLink } from '../links';
+import { APP_ID } from '../../../../common/constants';
 
 interface Props {
   data: TimelineEventsDetailsItem[];
@@ -33,12 +34,9 @@ export const RelatedCases: React.FC<Props> = React.memo(({ data, isAlert }) => {
   const getRelatedCases = useCallback(async () => {
     let relatedCaseList: RelatedCaseList = [];
     try {
-      const relatedCasesResponse = await cases.api.getRelatedCases(alertId, {
-        owner: 'securitySolution',
+      relatedCaseList = await cases.api.getRelatedCases(alertId, {
+        owner: APP_ID,
       });
-      if (Array.isArray(relatedCasesResponse)) {
-        relatedCaseList = relatedCasesResponse;
-      }
     } catch {
       // TODO: Show an error toaster here?
     }
