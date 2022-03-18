@@ -79,3 +79,13 @@ export const UserForm = () => {
 Great! We have our first working form. No state to worry about, just a simple declarative way to build our fields.
 
 Those of you who are attentive might have noticed that the above form _does_ render the fields in the UI although we said earlier that the core of the form lib is not responsible for any UI rendering. This is because the `<UseField />` has a fallback mechanism to render an `<input type="text" />` and hook to the field `value` and `onChange`. Unless you have styled your `input` elements and don't require other field types like `checkbox` or `select`, you will probably want to <DocLink id="formLibExampleStyleFields" text="customize"/> how the the `<UseField />` renders. We will see that in a future section.
+
+## Field value change sequence diagram
+
+<!-- 
+The elastic docs system does not support yet rendering mermaid in .mdx
+I've asked the docs engineers on how to enable it. For now we will use the
+Whimsical image.
+-->
+
+[!Field value change sequence diagram](./form_lib_field_value_change.png)
