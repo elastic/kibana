@@ -24,6 +24,7 @@ import { getBufferExtractor } from './extract';
 export * from './cache';
 export { getBufferExtractor, untarBuffer, unzipBuffer } from './extract';
 export { generatePackageInfoFromArchiveBuffer } from './parse';
+export { validateZipBufferWithPackageSpec } from './validation/validate';
 
 export interface ArchiveEntry {
   path: string;
