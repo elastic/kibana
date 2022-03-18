@@ -88,6 +88,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
         />
         {toggleStatus && (
           <BasicTable
+            data-test-subj="network-anomalies-table"
             // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
             columns={columns}
             items={networks}

@@ -95,6 +95,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
 
         {toggleStatus && (
           <BasicTable
+            data-test-subj="user-anomalies-table"
             // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
             columns={columns}
             items={users}
