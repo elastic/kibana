@@ -35,14 +35,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runSyncCheckRequest(
     user: USER,
-    mlSavedObjectType: JobType | TrainedModelType,
+    jobType: JobType | TrainedModelType,
     expectedStatusCode: number
   ) {
     const { body, status } = await supertest
       .post(`/s/${idSpace1}/api/ml/saved_objects/sync_check`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ mlSavedObjectType });
+      .send({ jobType });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
