@@ -76,27 +76,32 @@ export function ServiceGroupsCard({
     href,
   };
 
-  const Card = <EuiCard layout="vertical" {...cardProps} />;
-  const component = withTour ? (
-    <ServiceGroupsTour
-      type="serviceGroupCard"
-      title={i18n.translate(
-        'xpack.apm.serviceGroups.tour.serviceGroups.title',
-        { defaultMessage: 'All services group' }
-      )}
-      content={i18n.translate(
-        'xpack.apm.serviceGroups.tour.serviceGroups.content',
-        {
-          defaultMessage:
-            "Now that you've created a service group, your All services inventory has moved here. This group cannot be edited or removed.",
-        }
-      )}
-    >
-      {Card}
-    </ServiceGroupsTour>
-  ) : (
-    Card
-  );
+  if (withTour) {
+    return (
+      <EuiFlexItem key={serviceGroup.groupName}>
+        <ServiceGroupsTour
+          type="serviceGroupCard"
+          title={i18n.translate(
+            'xpack.apm.serviceGroups.tour.serviceGroups.title',
+            { defaultMessage: 'All services group' }
+          )}
+          content={i18n.translate(
+            'xpack.apm.serviceGroups.tour.serviceGroups.content',
+            {
+              defaultMessage:
+                "Now that you've created a service group, your All services inventory has moved here. This group cannot be edited or removed.",
+            }
+          )}
+        >
+          <EuiCard layout="vertical" {...cardProps} />
+        </ServiceGroupsTour>
+      </EuiFlexItem>
+    );
+  }
 
-  return <EuiFlexItem key={serviceGroup.groupName}>{component}</EuiFlexItem>;
+  return (
+    <EuiFlexItem key={serviceGroup.groupName}>
+      <EuiCard layout="vertical" {...cardProps} />
+    </EuiFlexItem>
+  );
 }
