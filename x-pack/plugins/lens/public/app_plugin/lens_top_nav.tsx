@@ -18,7 +18,8 @@ import {
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
+import { exporters } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   setState,
@@ -216,7 +217,7 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
 
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const {
