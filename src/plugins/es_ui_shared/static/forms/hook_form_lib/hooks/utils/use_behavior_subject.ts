@@ -9,8 +9,8 @@ import { useCallback, useRef, useMemo } from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
- * Utiliy to create an observable with a handler to update its value.
- * Usefull for validations when dynamic data needs to be passed through the
+ * Utility to create an observable with a handler to update its value.
+ * Useful for validations when dynamic data needs to be passed through the
  * "validationDataProvider" prop **and** this dynamic data arrives _after_ the
  * field value has changed (e.g. when the field value changes it triggers an HTTP requests and
  * the field validators needs the response to be able to validate the field).
@@ -52,7 +52,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
     }, [indexName]);
 
     // Whenever the indexName changes we fetch the indices
-    useEffet(() => {
+    useEffect(() => {
       fetchIndices();
     }, [fetchIndices]);
 
