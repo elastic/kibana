@@ -53,15 +53,7 @@ export const RULE_ACTIONS = [
   },
 ];
 
-export const generateSavedObjectParams = ({
-  error = null,
-  warning = null,
-  status = 'ok',
-}: {
-  error?: null | { reason: string; message: string };
-  warning?: null | { reason: string; message: string };
-  status?: string;
-}) => [
+export const SAVED_OBJECT_UPDATE_PARAMS = [
   'alert',
   '1',
   {
@@ -79,11 +71,10 @@ export const generateSavedObjectParams = ({
       },
     },
     executionStatus: {
-      error,
+      error: null,
       lastDuration: 0,
       lastExecutionDate: '1970-01-01T00:00:00.000Z',
-      status,
-      warning,
+      status: 'ok',
     },
   },
   { refresh: false, namespace: undefined },
@@ -101,11 +92,6 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
-  config: {
-    execution: {
-      actions: { max: 1000 },
-    },
-  },
 };
 
 export const mockRunNowResponse = {
@@ -203,7 +189,6 @@ export const generateEventLog = ({
   instanceId,
   actionSubgroup,
   actionGroupId,
-  actionId,
   status,
   numberOfTriggeredActions,
   savedObjects = [generateAlertSO('1')],
@@ -251,19 +236,11 @@ export const generateEventLog = ({
     ...(task && {
       task: {
         schedule_delay: 0,
-        scheduled: DATE_1970,
+        scheduled: '1970-01-01T00:00:00.000Z',
       },
     }),
   },
-  message: generateMessage({
-    action,
-    instanceId,
-    actionGroupId,
-    actionSubgroup,
-    reason,
-    status,
-    actionId,
-  }),
+  message: generateMessage({ action, instanceId, actionGroupId, actionSubgroup, reason, status }),
   rule: {
     category: 'test',
     id: '1',
@@ -278,7 +255,6 @@ const generateMessage = ({
   instanceId,
   actionGroupId,
   actionSubgroup,
-  actionId,
   reason,
   status,
 }: GeneratorParams) => {
@@ -303,9 +279,9 @@ const generateMessage = ({
 
   if (action === EVENT_LOG_ACTIONS.executeAction) {
     if (actionSubgroup) {
-      return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup(subgroup): 'default(${actionSubgroup})' action: action:${actionId}`;
+      return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup(subgroup): 'default(${actionSubgroup})' action: action:${instanceId}`;
     }
-    return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
+    return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${instanceId}`;
   }
 
   if (action === EVENT_LOG_ACTIONS.execute) {
@@ -316,7 +292,7 @@ const generateMessage = ({
       return `${RULE_TYPE_ID}:${RULE_ID}: execution failed`;
     }
     if (actionGroupId === 'recovered') {
-      return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
+      return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${instanceId}`;
     }
     return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
   }
@@ -334,7 +310,6 @@ export const generateRunnerResult = ({
   history = Array(false),
   state = false,
   interval = '10s',
-  alertInstances = {},
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -350,7 +325,7 @@ export const generateRunnerResult = ({
       interval,
     },
     state: {
-      ...(state && { alertInstances }),
+      ...(state && { alertInstances: {} }),
       ...(state && { alertTypeState: undefined }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
     },
