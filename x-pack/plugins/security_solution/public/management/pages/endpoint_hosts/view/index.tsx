@@ -197,7 +197,7 @@ export const EndpointList = () => {
       pageSize,
       totalItemCount: maxPageCount,
       pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-      hidePerPageOptions: false,
+      showPerPageOptions: true,
     };
   }, [pageIndex, pageSize, maxPageCount]);
 

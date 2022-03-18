@@ -9,6 +9,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Logger,
@@ -19,7 +20,6 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
 } from '../../../../../src/core/server';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
   Alert as Rule,
@@ -71,7 +71,6 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField, validateOperationOnAttributes } from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
@@ -652,7 +651,7 @@ export class RulesClient {
     }
 
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-    const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
+    const filterKueryNode = options.filter ? fromKueryExpression(options.filter) : null;
     let sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
       try {
@@ -768,7 +767,7 @@ export class RulesClient {
       ...options,
       filter:
         (authorizationFilter && filter
-          ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+          ? nodeBuilder.and([fromKueryExpression(filter), authorizationFilter as KueryNode])
           : authorizationFilter) ?? filter,
       page: 1,
       perPage: 0,
@@ -1306,6 +1305,7 @@ export class RulesClient {
           lastDuration: 0,
           lastExecutionDate: new Date().toISOString(),
           error: null,
+          warning: null,
         },
       });
       try {
