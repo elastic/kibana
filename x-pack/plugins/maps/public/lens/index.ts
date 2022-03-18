@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { PdfMaker } from './pdfmaker';
+export { setupLensChoroplethChart } from './choropleth_chart';
