@@ -87,6 +87,8 @@ export const useRequestProfile = () => {
         return { data: null, error: resp.err.msg };
       }
 
+      // If a user attempts to run Search Profiler without any indices,
+      // _shards=0 and a "profile" output will not be returned
       if (resp.resp._shards.total === 0) {
         notifications.addDanger({
           'data-test-subj': 'noShardsNotification',
