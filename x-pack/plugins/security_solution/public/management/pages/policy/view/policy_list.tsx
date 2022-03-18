@@ -22,7 +22,7 @@ import { useLocation } from 'react-router-dom';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
-import { PolicyData } from '../../../../../common/endpoint/types';
+import { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
 import {
   useGetAgentCountForPolicy,
@@ -69,7 +69,7 @@ export const PolicyList = memo(() => {
     return map;
   }, [endpointCount]);
 
-  const totalItemCount = data?.total ?? 0;
+  const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
 
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
@@ -92,6 +92,7 @@ export const PolicyList = memo(() => {
                 policyId={policy.id}
                 className="eui-textTruncate"
                 data-test-subj="policyNameCellLink"
+                backLink={backLink}
               >
                 {policy.name}
               </EndpointPolicyLink>
@@ -216,7 +217,23 @@ export const PolicyList = memo(() => {
     defaultMessage: 'Error while retrieving list of policies',
   });
 
-  const policyListPath = getPoliciesPath(search);
+  const policyListPath = useMemo(() => getPoliciesPath(search), [search]);
+
+  const backLink: PolicyDetailsRouteState['backLink'] = useMemo(() => {
+    return {
+      navigateTo: [
+        APP_UI_ID,
+        {
+          path: policyListPath,
+        },
+      ],
+      label: i18n.translate('xpack.securitySolution.policy.backToPolicyList', {
+        defaultMessage: 'Back to policy list',
+      }),
+      href: getAppUrl({ path: policyListPath }),
+    };
+  }, [getAppUrl, policyListPath]);
+
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
