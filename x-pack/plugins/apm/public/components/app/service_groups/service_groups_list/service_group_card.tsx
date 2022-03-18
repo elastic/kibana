@@ -18,12 +18,14 @@ import {
   ServiceGroup,
   SERVICE_GROUP_COLOR_DEFAULT,
 } from '../../../../../common/service_groups';
+import { ServiceGroupsTour } from '../service_groups_tour';
 
 interface Props {
   serviceGroup: ServiceGroup;
   hideServiceCount?: boolean;
   onClick?: () => void;
   href?: string;
+  withTour?: boolean;
 }
 
 export function ServiceGroupsCard({
@@ -31,6 +33,7 @@ export function ServiceGroupsCard({
   hideServiceCount = false,
   onClick,
   href,
+  withTour,
 }: Props) {
   const cardProps: EuiCardProps = {
     style: { width: 286, height: 186 },
@@ -73,9 +76,27 @@ export function ServiceGroupsCard({
     href,
   };
 
-  return (
-    <EuiFlexItem key={serviceGroup.groupName}>
-      <EuiCard layout="vertical" {...cardProps} />
-    </EuiFlexItem>
+  const Card = <EuiCard layout="vertical" {...cardProps} />;
+  const component = withTour ? (
+    <ServiceGroupsTour
+      type="serviceGroupCard"
+      title={i18n.translate(
+        'xpack.apm.serviceGroups.tour.serviceGroups.title',
+        { defaultMessage: 'All services group' }
+      )}
+      content={i18n.translate(
+        'xpack.apm.serviceGroups.tour.serviceGroups.content',
+        {
+          defaultMessage:
+            "Now that you've created a service group, your All services inventory has moved here. This group cannot be edited or removed.",
+        }
+      )}
+    >
+      {Card}
+    </ServiceGroupsTour>
+  ) : (
+    Card
   );
+
+  return <EuiFlexItem key={serviceGroup.groupName}>{component}</EuiFlexItem>;
 }
