@@ -32,7 +32,7 @@ export const referenceLineLayerConfigFunction: ExpressionFunctionDefinition<
       }),
     },
     accessors: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionXY.referenceLineLayer.accessors.help', {
         defaultMessage: 'The columns to display on the y axis.',
       }),

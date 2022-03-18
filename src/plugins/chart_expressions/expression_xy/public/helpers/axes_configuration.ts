@@ -9,6 +9,10 @@
 import { FormatFactory } from '../types';
 import { AxisExtentConfig, DataLayerConfigResult } from '../../common';
 import { Datatable } from '../../../../../plugins/expressions/public';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../../plugins/visualizations/common/utils';
 import type {
   IFieldFormat,
   SerializedFieldFormat,
@@ -53,11 +57,18 @@ export function groupAxesByType(
   layers?.forEach((layer) => {
     const table = tables?.[layer.layerId];
     layer.accessors.forEach((accessor) => {
+      const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
       const mode =
-        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
-        'auto';
-      let formatter: SerializedFieldFormat = table?.columns.find((column) => column.id === accessor)
-        ?.meta?.params || { id: 'number' };
+        layer.yConfig?.find(
+          (yAxisConfig) =>
+            getAccessorByDimension(yAxisConfig.forAccessor, table?.columns || []) === yAccessor
+        )?.axisMode || 'auto';
+      let formatter: SerializedFieldFormat = getFormatByAccessor(
+        accessor,
+        table?.columns || []
+      ) || {
+        id: 'number',
+      };
       if (layer.seriesType.includes('percentage') && formatter.id !== 'percent') {
         formatter = {
           id: 'percent',
@@ -68,7 +79,7 @@ export function groupAxesByType(
       }
       series[mode].push({
         layer: layer.layerId,
-        accessor,
+        accessor: yAccessor,
         fieldFormat: formatter,
       });
     });

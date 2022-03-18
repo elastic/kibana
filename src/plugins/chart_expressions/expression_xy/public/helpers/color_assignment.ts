@@ -9,6 +9,10 @@
 import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { Datatable } from '../../../../expressions';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../../plugins/visualizations/common/utils';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { DataLayerConfigResult, XYLayerConfigResult } from '../../common';
@@ -47,9 +51,14 @@ export function getColorAssignments(
       if (!layer.splitAccessor) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
-      const splitAccessor = layer.splitAccessor;
+      const splitAccessor = getAccessorByDimension(
+        layer.splitAccessor,
+        data.tables[layer.layerId]?.columns
+      );
       const column = data.tables[layer.layerId]?.columns.find(({ id }) => id === splitAccessor);
-      const columnFormatter = column && formatFactory(column.meta.params);
+      const columnFormatter = formatFactory(
+        getFormatByAccessor(layer.splitAccessor, data.tables[layer.layerId]?.columns)
+      );
       const splits =
         !column || !data.tables[layer.layerId]
           ? []
@@ -85,7 +94,11 @@ export function getColorAssignments(
           (sortedLayer.splitAccessor && splitRank !== -1
             ? splitRank * sortedLayer.accessors.length
             : 0) +
-          sortedLayer.accessors.indexOf(yAccessor)
+          sortedLayer.accessors.findIndex(
+            (accessor) =>
+              getAccessorByDimension(accessor, data.tables[sortedLayer.layerId]?.columns) ===
+              yAccessor
+          )
         );
       },
     };

@@ -13,6 +13,10 @@ import { groupBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../../plugins/visualizations/common/utils';
 import type { FieldFormat } from '../../../../field_formats/common';
 import type { ReferenceLineLayerConfigResult, IconPosition, YAxisMode } from '../../common';
 import type { LensMultiTable } from '../../common/types';
@@ -219,7 +223,9 @@ export const ReferenceLineAnnotations = ({
         const row = table.rows[0];
 
         const yConfigByValue = yConfigs.sort(
-          ({ forAccessor: idA }, { forAccessor: idB }) => row[idA] - row[idB]
+          ({ forAccessor: idA }, { forAccessor: idB }) =>
+            row[getAccessorByDimension(idA, table.columns)] -
+            row[getAccessorByDimension(idB, table.columns)]
         );
 
         const groupedByDirection = groupBy(yConfigByValue, 'fill');
@@ -235,6 +241,8 @@ export const ReferenceLineAnnotations = ({
               : yConfig.axisMode === 'right'
               ? 'right'
               : 'left';
+
+          const forAccessor = getAccessorByDimension(yConfig.forAccessor, table.columns);
 
           const formatter = formatters[groupId || 'bottom'];
 
@@ -254,13 +262,13 @@ export const ReferenceLineAnnotations = ({
             groupId,
             marker: getMarkerToShow(
               yConfig,
-              columnToLabelMap[yConfig.forAccessor],
+              columnToLabelMap[forAccessor],
               isHorizontal,
               hasReducedPadding
             ),
             markerBody: getMarkerBody(
               yConfig.textVisibility && !hasReducedPadding
-                ? columnToLabelMap[yConfig.forAccessor]
+                ? columnToLabelMap[forAccessor]
                 : undefined,
               (!isHorizontal && yConfig.axisMode === 'bottom') ||
                 (isHorizontal && yConfig.axisMode !== 'bottom')
@@ -288,12 +296,12 @@ export const ReferenceLineAnnotations = ({
           annotations.push(
             <LineAnnotation
               {...props}
-              id={`${layerId}-${yConfig.forAccessor}-line`}
-              key={`${layerId}-${yConfig.forAccessor}-line`}
+              id={`${layerId}-${forAccessor}-line`}
+              key={`${layerId}-${forAccessor}-line`}
               dataValues={table.rows.map(() => ({
-                dataValue: row[yConfig.forAccessor],
-                header: columnToLabelMap[yConfig.forAccessor],
-                details: formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
+                dataValue: row[forAccessor],
+                header: columnToLabelMap[forAccessor],
+                details: formatter?.convert(row[forAccessor]) || row[forAccessor],
               }))}
               domainType={
                 yConfig.axisMode === 'bottom'
@@ -312,42 +320,46 @@ export const ReferenceLineAnnotations = ({
           if (yConfig.fill && yConfig.fill !== 'none') {
             const isFillAbove = yConfig.fill === 'above';
             const indexFromSameType = groupedByDirection[yConfig.fill].findIndex(
-              ({ forAccessor }) => forAccessor === yConfig.forAccessor
+              (yConfigResult) =>
+                getAccessorByDimension(yConfigResult.forAccessor, table.columns) === forAccessor
             );
             const shouldCheckNextReferenceLine =
               indexFromSameType < groupedByDirection[yConfig.fill].length - 1;
             annotations.push(
               <RectAnnotation
                 {...props}
-                id={`${layerId}-${yConfig.forAccessor}-rect`}
-                key={`${layerId}-${yConfig.forAccessor}-rect`}
+                id={`${layerId}-${forAccessor}-rect`}
+                key={`${layerId}-${forAccessor}-rect`}
                 dataValues={table.rows.map(() => {
                   const nextValue = shouldCheckNextReferenceLine
-                    ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
+                    ? row[
+                        getAccessorByDimension(
+                          groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor,
+                          table.columns
+                        )
+                      ]
                     : undefined;
                   if (yConfig.axisMode === 'bottom') {
                     return {
                       coordinates: {
-                        x0: isFillAbove ? row[yConfig.forAccessor] : nextValue,
+                        x0: isFillAbove ? row[forAccessor] : nextValue,
                         y0: undefined,
-                        x1: isFillAbove ? nextValue : row[yConfig.forAccessor],
+                        x1: isFillAbove ? nextValue : row[forAccessor],
                         y1: undefined,
                       },
-                      header: columnToLabelMap[yConfig.forAccessor],
-                      details:
-                        formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
+                      header: columnToLabelMap[forAccessor],
+                      details: formatter?.convert(row[forAccessor]) || row[forAccessor],
                     };
                   }
                   return {
                     coordinates: {
                       x0: undefined,
-                      y0: isFillAbove ? row[yConfig.forAccessor] : nextValue,
+                      y0: isFillAbove ? row[forAccessor] : nextValue,
                       x1: undefined,
-                      y1: isFillAbove ? nextValue : row[yConfig.forAccessor],
+                      y1: isFillAbove ? nextValue : row[forAccessor],
                     },
-                    header: columnToLabelMap[yConfig.forAccessor],
-                    details:
-                      formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
+                    header: columnToLabelMap[forAccessor],
+                    details: formatter?.convert(row[forAccessor]) || row[forAccessor],
                   };
                 })}
                 style={{

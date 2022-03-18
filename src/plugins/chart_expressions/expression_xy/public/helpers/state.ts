@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
+import type { Datatable } from '../../../../expressions/public';
 import type { SeriesType, XYLayerConfigResult, YConfig } from '../../common';
 import { getDataLayers, isDataLayer } from './visualization';
 
@@ -25,11 +27,13 @@ export function isHorizontalChart(layers: XYLayerConfigResult[]) {
   return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
 }
 
-export const getSeriesColor = (layer: XYLayerConfigResult, accessor: string) => {
+export const getSeriesColor = (layer: XYLayerConfigResult, accessor: string, table: Datatable) => {
   if (isDataLayer(layer) && layer.splitAccessor) {
     return null;
   }
   return (
-    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
+    layer?.yConfig?.find(
+      (yConfig: YConfig) => getAccessorByDimension(yConfig.forAccessor, table.columns) === accessor
+    )?.color || null
   );
 };

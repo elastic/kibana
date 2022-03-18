@@ -10,6 +10,7 @@ import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/chart
 import { $Values } from '@kbn/utility-types';
 import { Datatable } from '../../../../expressions';
 import { PaletteOutput } from '../../../../charts/common';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import {
   AxisExtentModes,
   FillStyles,
@@ -66,7 +67,7 @@ export interface AxisConfig {
 }
 
 export interface YConfig {
-  forAccessor: string;
+  forAccessor: string | ExpressionValueVisDimension;
   axisMode?: YAxisMode;
   color?: string;
   icon?: string;
@@ -79,12 +80,12 @@ export interface YConfig {
 
 export interface XYDataLayerConfig {
   layerId: string;
-  accessors: string[];
+  accessors: Array<string | ExpressionValueVisDimension>;
   seriesType: SeriesType;
-  xAccessor?: string;
+  xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
   yConfig?: YConfigResult[];
-  splitAccessor?: string;
+  splitAccessor?: string | ExpressionValueVisDimension;
   palette?: PaletteOutput;
 }
 export interface ValidLayer extends DataLayerConfigResult {
@@ -178,7 +179,7 @@ export interface XYArgs {
 
 export interface XYReferenceLineLayerConfig {
   layerId: string;
-  accessors: string[];
+  accessors: Array<string | ExpressionValueVisDimension>;
   yConfig?: YConfigResult[];
 }
 

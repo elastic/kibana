@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { getColumnByAccessor } from '../../../../../plugins/visualizations/common/utils';
 import { search } from '../../../../data/public';
 import { XYChartProps } from '../../common';
 import { getFilteredLayers } from './layers';
@@ -15,9 +16,13 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time');
-  const xColumn = data.tables[filteredLayers[0].layerId].columns.find(
-    (column) => isDataLayer(filteredLayers[0]) && column.id === filteredLayers[0].xAccessor
-  );
+  const xColumn =
+    isDataLayer(filteredLayers[0]) &&
+    filteredLayers[0].xAccessor &&
+    getColumnByAccessor(
+      filteredLayers[0].xAccessor,
+      data.tables[filteredLayers[0].layerId].columns
+    );
 
   if (!xColumn) return;
   if (!isTimeViz) {

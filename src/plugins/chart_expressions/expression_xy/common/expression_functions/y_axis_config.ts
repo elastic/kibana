@@ -26,7 +26,7 @@ export const yAxisConfigFunction: ExpressionFunctionDefinition<
   inputTypes: ['null'],
   args: {
     forAccessor: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionXY.yConfig.forAccessor.help', {
         defaultMessage: 'The accessor this configuration is for',
       }),

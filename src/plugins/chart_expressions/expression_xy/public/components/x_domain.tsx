@@ -12,6 +12,10 @@ import moment from 'moment';
 import { Endzones } from '../../../../../plugins/charts/public';
 import type { LensMultiTable, DataLayerArgs } from '../../common';
 import { search } from '../../../../../plugins/data/public';
+import {
+  getColumnByAccessor,
+  getAccessorByDimension,
+} from '../../../../../plugins/visualizations/common/utils';
 
 export interface XDomain {
   min?: number;
@@ -23,7 +27,9 @@ export const getAppliedTimeRange = (layers: DataLayerArgs[], data: LensMultiTabl
   return Object.entries(data.tables)
     .map(([tableId, table]) => {
       const layer = layers.find((l) => l.layerId === tableId);
-      const xColumn = table.columns.find((col) => col.id === layer?.xAccessor);
+      const xColumn = layer?.xAccessor
+        ? getColumnByAccessor(layer?.xAccessor, table.columns)
+        : null;
       const timeRange =
         xColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.timeRange;
       if (timeRange) {
@@ -59,9 +65,12 @@ export const getXDomain = (
   if (isHistogram && isFullyQualified(baseDomain)) {
     const xValues = uniq(
       layers
-        .flatMap((layer) =>
-          data.tables[layer.layerId].rows.map((row) => row[layer.xAccessor!].valueOf() as number)
-        )
+        .flatMap((layer) => {
+          const xAccessor =
+            layer.xAccessor &&
+            getAccessorByDimension(layer.xAccessor, data.tables[layer.layerId].columns);
+          return data.tables[layer.layerId].rows.map((row) => row[xAccessor!].valueOf() as number);
+        })
         .sort()
     );
 
