@@ -9,6 +9,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues, set, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import pMap from 'p-map';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { withSpan } from '@kbn/apm-utils';
@@ -80,7 +81,6 @@ import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField, validateOperationOnAttributes } from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
@@ -216,9 +216,9 @@ export type BulkEditActionRule =
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Params;
 
 export interface BulkEditOptions<Params extends RuleTypeParams> {
-  filter?: string;
+  filter: string | KueryNode;
+  actions: BulkEditActionRule[];
   paramsModifier?: RuleParamsModifier<Params>;
-  actions?: BulkEditActionRule[];
 }
 
 export interface BulkEditError {
@@ -1178,7 +1178,7 @@ export class RulesClient {
 
   public async bulkEdit<Params extends RuleTypeParams>({
     filter,
-    actions = [],
+    actions,
     paramsModifier,
   }: BulkEditOptions<Params>): Promise<{
     rules: Array<SanitizedRule<Params>>;
@@ -1202,7 +1202,10 @@ export class RulesClient {
     const { filter: authorizationFilter } = authorizationTuple;
     const qNodeFilter =
       (authorizationFilter && filter
-        ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+        ? nodeBuilder.and([
+            typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter,
+            authorizationFilter as KueryNode,
+          ])
         : authorizationFilter) ?? filter;
 
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
