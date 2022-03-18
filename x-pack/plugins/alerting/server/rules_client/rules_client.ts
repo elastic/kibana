@@ -9,6 +9,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Logger,
@@ -19,7 +20,6 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
 } from '../../../../../src/core/server';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
   Alert as Rule,
@@ -71,13 +71,19 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField, validateOperationOnAttributes } from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
+import {
+  getMappedParams,
+  getModifiedField,
+  getModifiedSearchFields,
+  getModifiedSearch,
+  modifyFilterKueryNode,
+} from './lib/mapped_params_utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -120,6 +126,7 @@ export interface ConstructorOptions {
   authorization: AlertingAuthorization;
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
+  minimumScheduleInterval: string;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
@@ -240,6 +247,8 @@ export class RulesClient {
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertingAuthorization;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private readonly minimumScheduleInterval: string;
+  private readonly minimumScheduleIntervalInMs: number;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
@@ -248,10 +257,14 @@ export class RulesClient {
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
   private readonly eventLogger?: IEventLogger;
-  private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = ['monitoring'];
+  private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
+    'monitoring',
+    'mapped_params',
+  ];
 
   constructor({
     ruleTypeRegistry,
+    minimumScheduleInterval,
     unsecuredSavedObjectsClient,
     authorization,
     taskManager,
@@ -274,6 +287,8 @@ export class RulesClient {
     this.namespace = namespace;
     this.taskManager = taskManager;
     this.ruleTypeRegistry = ruleTypeRegistry;
+    this.minimumScheduleInterval = minimumScheduleInterval;
+    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval);
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
@@ -329,15 +344,12 @@ export class RulesClient {
 
     await this.validateActions(ruleType, data.actions);
 
-    // Validate intervals, if configured
-    if (ruleType.minimumScheduleInterval) {
-      const intervalInMs = parseDuration(data.schedule.interval);
-      const minimumScheduleIntervalInMs = parseDuration(ruleType.minimumScheduleInterval);
-      if (intervalInMs < minimumScheduleIntervalInMs) {
-        throw Boom.badRequest(
-          `Error updating rule: the interval is less than the minimum interval of ${ruleType.minimumScheduleInterval}`
-        );
-      }
+    // Validate that schedule interval is not less than configured minimum
+    const intervalInMs = parseDuration(data.schedule.interval);
+    if (intervalInMs < this.minimumScheduleIntervalInMs) {
+      throw Boom.badRequest(
+        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
+      );
     }
 
     // Extract saved object references for this rule
@@ -367,6 +379,12 @@ export class RulesClient {
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
       monitoring: getDefaultRuleMonitoring(),
     };
+
+    const mappedParams = getMappedParams(updatedParams);
+
+    if (Object.keys(mappedParams).length) {
+      rawRule.mapped_params = mappedParams;
+    }
 
     this.auditLogger?.log(
       ruleAuditEvent({
@@ -575,7 +593,7 @@ export class RulesClient {
             page: 1,
             per_page: 10000,
             start: parsedDateStart.toISOString(),
-            sort_order: 'desc',
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
             end: dateNow.toISOString(),
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined
@@ -587,7 +605,7 @@ export class RulesClient {
             page: 1,
             per_page: numberOfExecutions ?? 60,
             filter: 'event.provider: alerting AND event.action:execute',
-            sort_order: 'desc',
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
             end: dateNow.toISOString(),
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined
@@ -631,9 +649,10 @@ export class RulesClient {
       );
       throw error;
     }
+
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-    const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
-    const sortField = mapSortField(options.sortField);
+    const filterKueryNode = options.filter ? fromKueryExpression(options.filter) : null;
+    let sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
       try {
         validateOperationOnAttributes(
@@ -645,6 +664,24 @@ export class RulesClient {
       } catch (error) {
         throw Boom.badRequest(`Error find rules: ${error.message}`);
       }
+    }
+
+    sortField = mapSortField(getModifiedField(options.sortField));
+
+    // Generate new modified search and search fields, translating certain params properties
+    // to mapped_params. Thus, allowing for sort/search/filtering on params.
+    // We do the modifcation after the validate check to make sure the public API does not
+    // use the mapped_params in their queries.
+    options = {
+      ...options,
+      ...(options.searchFields && { searchFields: getModifiedSearchFields(options.searchFields) }),
+      ...(options.search && { search: getModifiedSearch(options.searchFields, options.search) }),
+    };
+
+    // Modifies kuery node AST to translate params filter and the filter value to mapped_params.
+    // This translation is done in place, and therefore is not a pure function.
+    if (filterKueryNode) {
+      modifyFilterKueryNode({ astFilter: filterKueryNode });
     }
 
     const {
@@ -730,7 +767,7 @@ export class RulesClient {
       ...options,
       filter:
         (authorizationFilter && filter
-          ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+          ? nodeBuilder.and([fromKueryExpression(filter), authorizationFilter as KueryNode])
           : authorizationFilter) ?? filter,
       page: 1,
       perPage: 0,
@@ -984,15 +1021,12 @@ export class RulesClient {
     const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
     await this.validateActions(ruleType, data.actions);
 
-    // Validate intervals, if configured
-    if (ruleType.minimumScheduleInterval) {
-      const intervalInMs = parseDuration(data.schedule.interval);
-      const minimumScheduleIntervalInMs = parseDuration(ruleType.minimumScheduleInterval);
-      if (intervalInMs < minimumScheduleIntervalInMs) {
-        throw Boom.badRequest(
-          `Error updating rule: the interval is less than the minimum interval of ${ruleType.minimumScheduleInterval}`
-        );
-      }
+    // Validate that schedule interval is not less than configured minimum
+    const intervalInMs = parseDuration(data.schedule.interval);
+    if (intervalInMs < this.minimumScheduleIntervalInMs) {
+      throw Boom.badRequest(
+        `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
+      );
     }
 
     // Extract saved object references for this rule
@@ -1027,6 +1061,13 @@ export class RulesClient {
       updatedBy: username,
       updatedAt: new Date().toISOString(),
     });
+
+    const mappedParams = getMappedParams(updatedParams);
+
+    if (Object.keys(mappedParams).length) {
+      createAttributes.mapped_params = mappedParams;
+    }
+
     try {
       updatedObject = await this.unsecuredSavedObjectsClient.create<RawRule>(
         'alert',
@@ -1337,7 +1378,7 @@ export class RulesClient {
 
         const recoveredAlertInstances = mapValues<Record<string, RawAlert>, Alert>(
           state.alertInstances ?? {},
-          (rawAlertInstance) => new Alert(rawAlertInstance)
+          (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
         );
         const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 

@@ -19,21 +19,16 @@ import {
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
+type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
+
 export interface CasesContextFeatures {
-  alerts: { sync: boolean };
+  alerts: { sync?: boolean; enabled?: boolean };
   metrics: CaseMetricsFeature[];
 }
 
-export type CasesFeatures = Partial<CasesContextFeatures>;
+export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 
-export interface CasesContextValue {
-  owner: string[];
-  appId: string;
-  appTitle: string;
-  userCanCrud: boolean;
-  basePath: string;
-  features: CasesContextFeatures;
-}
+export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesUiConfigType {
   markdownPlugins: {
@@ -194,7 +189,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];

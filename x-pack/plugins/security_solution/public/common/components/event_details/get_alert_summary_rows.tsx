@@ -6,7 +6,7 @@
  */
 
 import { find, isEmpty, uniqBy } from 'lodash/fp';
-import { ALERT_RULE_NAMESPACE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -14,12 +14,11 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
-  ALERTS_HEADERS_TARGET_IMPORT_HASH,
   ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { getEnrichedFieldInfo, SummaryRow } from './helpers';
+import { getEnrichedFieldInfo, AlertSummaryRow } from './helpers';
 import { EventSummaryField, EnrichedFieldInfo } from './types';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
@@ -63,10 +62,9 @@ function getFieldsByCategory({
         { id: 'destination.port' },
         { id: 'source.address' },
         { id: 'source.port' },
+        { id: 'dns.question.name' },
         { id: 'process.name' },
       ];
-    case EventCategory.DNS:
-      return [{ id: 'dns.question.name' }, { id: 'process.name' }];
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
     case EventCategory.MALWARE:
@@ -112,15 +110,16 @@ function getFieldsByEventCode(
       return [
         { id: 'Target.process.executable' },
         {
-          id: 'Target.process.thread.Ext.start_address_detaiuls.memory_pe.imphash',
-          label: ALERTS_HEADERS_TARGET_IMPORT_HASH,
-        },
-        {
           id: 'Memory_protection.unique_key_v1',
         },
       ];
-    case EventCode.MEMORY_SIGNATURE:
     case EventCode.RANSOMWARE:
+      return [
+        { id: 'Ransomware.feature' },
+        { id: 'process.hash.sha256' },
+        ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
+      ];
+    case EventCode.MEMORY_SIGNATURE:
       // Resolve more fields based on the source event
       return getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined });
     default:
@@ -145,19 +144,23 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
     case 'machine_learning':
       return [
         {
-          id: `${ALERT_RULE_NAMESPACE}.machine_learning_job_id`,
+          id: `${ALERT_RULE_PARAMETERS}.machine_learning_job_id`,
+          legacyId: 'signal.rule.machine_learning_job_id',
         },
         {
-          id: `${ALERT_RULE_NAMESPACE}.anomaly_threshold`,
+          id: `${ALERT_RULE_PARAMETERS}.anomaly_threshold`,
+          legacyId: 'signal.rule.anomaly_threshold',
         },
       ];
     case 'threat_match':
       return [
         {
-          id: `${ALERT_RULE_NAMESPACE}.threat_index`,
+          id: `${ALERT_RULE_PARAMETERS}.threat_index`,
+          legacyId: 'signal.rule.threat_index',
         },
         {
-          id: `${ALERT_RULE_NAMESPACE}.index`,
+          id: `${ALERT_RULE_PARAMETERS}.threat_query`,
+          legacyId: 'signal.rule.threat_query',
         },
       ];
     default:
@@ -250,10 +253,17 @@ export const getSummaryRows = ({
   });
 
   return data != null
-    ? tableFields.reduce<SummaryRow[]>((acc, field) => {
-        const item = data.find((d) => d.field === field.id);
-        if (!item || isEmpty(item?.values)) {
+    ? tableFields.reduce<AlertSummaryRow[]>((acc, field) => {
+        const item = data.find(
+          (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
+        );
+        if (!item || isEmpty(item.values)) {
           return acc;
+        }
+
+        // If we found the data by its legacy id we swap the ids to display the correct one
+        if (item.field === field.legacyId) {
+          field.id = field.legacyId;
         }
 
         const linkValueField =
