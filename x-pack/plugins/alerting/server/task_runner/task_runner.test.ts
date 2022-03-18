@@ -2499,7 +2499,6 @@ describe('Task Runner', () => {
     expect(runnerResult.monitoring?.execution.history.length).toBe(200);
   });
 
-
   test('increments monitoring metrics after execution', async () => {
     const taskRunner = new TaskRunner(
       ruleType,
@@ -2564,7 +2563,6 @@ describe('Task Runner', () => {
 
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-
 
     ruleType.executor.mockImplementation(
       async ({
