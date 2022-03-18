@@ -7,13 +7,13 @@
  */
 
 import OriginalHandlebars from 'handlebars';
-// @ts-expect-error Could not find a declaration file for module
+// @ts-expect-error: Could not find a declaration file for module
 import { resultIsAllowed } from 'handlebars/dist/cjs/handlebars/internal/proto-access';
-// @ts-expect-error Could not find a declaration file for module
+// @ts-expect-error: Could not find a declaration file for module
 import AST from 'handlebars/dist/cjs/handlebars/compiler/ast';
-// @ts-expect-error Could not find a declaration file for module
+// @ts-expect-error: Could not find a declaration file for module
 import { indexOf } from 'handlebars/dist/cjs/handlebars/utils';
-// @ts-expect-error Could not find a declaration file for module
+// @ts-expect-error: Could not find a declaration file for module
 import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 import get from 'lodash/get';
 
@@ -39,6 +39,9 @@ const kHelper = Symbol('helper');
 const kAmbiguous = Symbol('ambiguous');
 const kSimple = Symbol('simple');
 type NodeType = typeof kHelper | typeof kAmbiguous | typeof kSimple;
+
+type ProcessableNode = hbs.AST.MustacheStatement | hbs.AST.BlockStatement | hbs.AST.SubExpression;
+type ProcessableNodeWithPathParts = ProcessableNode & { path: hbs.AST.PathExpression };
 
 // I've not been able to successfully re-export all of Handlebars, so for now we just re-export the features that we use.
 // The handlebars module uses `export =`, so it can't be re-exported using `export *`. However, because of Babel, we're not allowed to use `export =` ourselves.
@@ -170,16 +173,15 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // ********************************************** //
 
   MustacheStatement(mustache: hbs.AST.MustacheStatement) {
-    // @ts-expect-error Calling SubExpression with a MustacheStatement doesn't seem right, but it's what handlebars does, so we do too
-    this.SubExpression(mustache);
-  }
-
-  SubExpression(sexpr: hbs.AST.SubExpression) {
-    this.processSexprOrBlock(sexpr);
+    this.processStatementOrExpression(mustache);
   }
 
   BlockStatement(block: hbs.AST.BlockStatement) {
-    this.processSexprOrBlock(block);
+    this.processStatementOrExpression(block);
+  }
+
+  SubExpression(sexpr: hbs.AST.SubExpression) {
+    this.processStatementOrExpression(sexpr);
   }
 
   PathExpression(path: hbs.AST.PathExpression) {
@@ -221,18 +223,18 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // ***      Visitor AST Helper Functions      *** //
   // ********************************************** //
 
-  private processSexprOrBlock(node: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
+  private processStatementOrExpression(node: ProcessableNode) {
     transformLiteralToPath(node);
 
-    switch (this.classifyNode(node)) {
+    switch (this.classifyNode(node as ProcessableNodeWithPathParts)) {
       case kHelper:
-        this.helperSexpr(node);
+        this.helperSexpr(node as ProcessableNodeWithPathParts);
         break;
       case kSimple:
-        this.simpleSexpr(node);
+        this.simpleSexpr(node as ProcessableNodeWithPathParts);
         break;
       case kAmbiguous:
-        this.ambiguousSexpr(node);
+        this.ambiguousSexpr(node as ProcessableNodeWithPathParts);
         break;
     }
   }
@@ -271,7 +273,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
   }
 
-  private simpleSexpr(node: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
+  private simpleSexpr(node: ProcessableNodeWithPathParts) {
     const path = node.path;
 
     if (isBlock(node)) {
@@ -287,14 +289,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // `{{#this.foo}}...{{/this.foo}}`, resolve the value of `foo`, and
   // replace it on the stack with the result of properly
   // invoking blockHelperMissing.
-  private blockValue(node: hbs.AST.SubExpression | hbs.AST.BlockStatement, context: any) {
+  private blockValue(node: hbs.AST.BlockStatement, context: any) {
     const name = node.path.original;
     const options = this.setupParams(node, name);
     const result = this.container.hooks.blockHelperMissing!.call(node, context, options);
     this.output.push(result);
   }
 
-  private helperSexpr(node: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
+  private helperSexpr(node: ProcessableNodeWithPathParts) {
     const path = node.path;
     const name = path.parts[0];
 
@@ -312,7 +314,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   // This operation is used when the helper is known to exist,
   // so a `helperMissing` fallback is not required.
-  private invokeKnownHelper(node: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
+  private invokeKnownHelper(node: ProcessableNodeWithPathParts, name: string) {
     const helper = this.setupHelper(node, name);
     const result = helper.fn.apply(helper.context, helper.params);
     this.output.push(result);
@@ -322,7 +324,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // and pushes the helper's return value onto the stack.
   //
   // If the helper is not found, `helperMissing` is called.
-  private invokeHelper(node: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
+  private invokeHelper(node: ProcessableNodeWithPathParts, name: string) {
     const helper = this.setupHelper(node, name);
 
     if (!helper.fn) {
@@ -338,12 +340,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output.push(result);
   }
 
-  private ambiguousSexpr(node: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
+  private ambiguousSexpr(node: ProcessableNodeWithPathParts) {
     const name = node.path.parts[0];
     const invokeResult = this.invokeAmbiguous(node, name);
 
     if (isBlock(node)) {
-      const result = this.ambiguousBlockValue(node as hbs.AST.BlockStatement, invokeResult);
+      const result = this.ambiguousBlockValue(node, invokeResult);
       if (result != null) {
         this.output.push(result);
       }
@@ -363,7 +365,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // This operation emits more code than the other options,
   // and can be avoided by passing the `knownHelpers` and
   // `knownHelpersOnly` flags at compile-time.
-  private invokeAmbiguous(node: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
+  private invokeAmbiguous(node: ProcessableNodeWithPathParts, name: string) {
     const helper = this.setupHelper(node, name);
 
     if (!helper.fn) {
@@ -384,7 +386,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private setupHelper(
-    node: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    node: ProcessableNodeWithPathParts,
     helperName: string,
     blockHelper: boolean = false
   ) {
@@ -396,7 +398,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private setupHelperArgs(
-    node: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    node: ProcessableNodeWithPathParts,
     helperName: string,
     blockHelper: boolean = false
   ): [...any[], Handlebars.HelperOptions] {
@@ -407,19 +409,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private setupParams(
-    node: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    node: ProcessableNodeWithPathParts,
     helperName: string
   ): Handlebars.HelperOptions {
     const options: Handlebars.HelperOptions = {
-      // @ts-expect-error name should be on there, but the offical types doesn't know this
+      // @ts-expect-error: Name should be on there, but the offical types doesn't know this
       name: helperName,
       hash: getHash(node),
     };
 
     if (isBlock(node)) {
-      // @ts-expect-error hack to ensure TypeScript doesn't complain about block.program/inverse usage below
-      declare let node: hbs.AST.BlockStatement; // eslint-disable-line @typescript-eslint/no-shadow
-
       const generateProgramFunction = (program: hbs.AST.Program) => {
         return (nextContext: any) => {
           this.scopes.unshift(nextContext);
@@ -470,7 +469,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 // ***            Utilily Functions           *** //
 // ********************************************** //
 
-function isBlock(node: hbs.AST.Node) {
+function isBlock(node: hbs.AST.Node): node is hbs.AST.BlockStatement {
   return 'program' in node || 'inverse' in node;
 }
 
@@ -490,17 +489,21 @@ function getHash(statement: { hash?: hbs.AST.Hash }) {
 }
 
 // liftet from handlebars lib/handlebars/compiler/compiler.js
-function transformLiteralToPath(sexpr: { path: hbs.AST.PathExpression }) {
-  if (!sexpr.path.parts) {
-    const literal = sexpr.path;
+function transformLiteralToPath(node: { path: hbs.AST.PathExpression | hbs.AST.Literal }) {
+  const pathIsLiteral = 'parts' in node.path === false;
+
+  if (pathIsLiteral) {
+    const literal = node.path;
+    // @ts-expect-error: Not all `hbs.AST.Literal` sub-types has an `original` property, but that's ok, in that case we just want `undefined`
+    const original = literal.original;
     // Casting to string here to make false and 0 literal values play nicely with the rest
     // of the system.
-    sexpr.path = {
+    node.path = {
       type: 'PathExpression',
       data: false,
       depth: 0,
-      parts: [literal.original + ''],
-      original: literal.original + '',
+      parts: [original + ''],
+      original: original + '',
       loc: literal.loc,
     };
   }
