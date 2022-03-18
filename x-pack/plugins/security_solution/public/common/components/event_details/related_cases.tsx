@@ -42,7 +42,7 @@ export const RelatedCases: React.FC<Props> = React.memo(({ eventId }) => {
     } catch (error) {
       setHasError(true);
       toasts.addWarning(
-        i18n.translate('xpack.securitySolution.alertDetails.overview.relatedCasesFailure.title', {
+        i18n.translate('xpack.securitySolution.alertDetails.overview.relatedCasesFailure', {
           defaultMessage: 'Unable to load related cases: "{error}"',
           values: { error },
         })
