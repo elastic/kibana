@@ -3029,6 +3029,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-page-template@link:bazel-bin/packages/kbn-observability-page-template":
+  version "0.0.0"
+  uid ""
+
 "@kbn/optimizer@link:bazel-bin/packages/kbn-optimizer":
   version "0.0.0"
   uid ""
@@ -6008,6 +6012,10 @@
   uid ""
 
 "@types/kbn__monaco@link:bazel-bin/packages/kbn-monaco/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__observability-page-template@link:bazel-bin/packages/kbn-observability-page-template/npm_module_types":
   version "0.0.0"
   uid ""
 
