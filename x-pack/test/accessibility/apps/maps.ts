@@ -10,55 +10,28 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
-  const { common } = getPageObjects(['maps', 'common']);
+  const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'maps']);
 
-  const kibanaServer = getService('kibanaServer');
-
-  describe('Maps', () => {
+  describe('Maps app meets ally validations', () => {
     before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-      );
-      await common.navigateToApp('maps');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.home.addSampleDataSet('flights');
+      await PageObjects.common.navigateToApp('maps');
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-      );
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.home.removeSampleDataSet('flights');
     });
 
     it('loads  maps workpads', async function () {
-      await retry.waitFor(
-        'maps workpads visible',
-        async () => await testSubjects.exists('itemsInMemTable')
-      );
-      await a11y.testAppSnapshot();
-    });
-
-    it('provides bulk selection', async function () {
-      await testSubjects.click('checkboxSelectAll');
-      await a11y.testAppSnapshot();
-    });
-
-    it('provides bulk delete', async function () {
-      await testSubjects.click('deleteSelectedItems');
-      await a11y.testAppSnapshot();
-    });
-
-    it('single delete modal', async function () {
-      await testSubjects.click('confirmModalConfirmButton');
-      await a11y.testAppSnapshot();
-    });
-
-    it('single cancel modal', async function () {
-      await testSubjects.click('confirmModalCancelButton');
-      await a11y.testAppSnapshot();
-    });
-
-    it('create new map', async function () {
-      await testSubjects.click('newItemButton');
+      await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
       await a11y.testAppSnapshot();
     });
 
@@ -92,6 +65,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    it('map inspector view chooser requests', async function () {
+      await PageObjects.maps.openInspectorMapView();
+      await a11y.testAppSnapshot();
+    });
+
     it('map inspector close', async function () {
       await testSubjects.click('euiFlyoutCloseButton');
       await a11y.testAppSnapshot();
@@ -104,6 +82,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('displays exit full screen logo button', async () => {
       await testSubjects.click('exitFullScreenModeLogo');
+      await a11y.testAppSnapshot();
+    });
+
+    it(`allows a map to be created`, async () => {
+      await PageObjects.maps.openNewMap();
+      await a11y.testAppSnapshot();
+      await PageObjects.maps.expectExistAddLayerButton();
+      await a11y.testAppSnapshot();
+      await PageObjects.maps.saveMap('my test map');
       await a11y.testAppSnapshot();
     });
   });
