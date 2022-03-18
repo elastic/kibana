@@ -32,7 +32,7 @@ export function RenderAsSelect(props: Props) {
     isHexDisabled = true;
     hexDisabledReason = i18n.translate('xpack.maps.hexbin.license.disabledReason', {
       defaultMessage: '{hexLabel} require a Gold license.',
-      value: { hexLabel: HEX_LABEL },
+      values: { hexLabel: HEX_LABEL },
     });
   } else if (props.geoFieldType !== ES_GEO_FIELD_TYPE.GEO_POINT) {
     isHexDisabled = true;
