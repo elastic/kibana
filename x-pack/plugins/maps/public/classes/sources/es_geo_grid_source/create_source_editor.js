@@ -90,7 +90,7 @@ export class CreateSourceEditor extends Component {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.esGeoGrid.geofieldLabel', {
-          defaultMessage: 'Clustering field',
+          defaultMessage: 'Cluster field',
         })}
       >
         <SingleFieldSelect

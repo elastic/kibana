@@ -125,7 +125,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
-          defaultMessage: 'Clustering field',
+          defaultMessage: 'Cluster field',
         }),
         value: this._descriptor.geoField,
       },
