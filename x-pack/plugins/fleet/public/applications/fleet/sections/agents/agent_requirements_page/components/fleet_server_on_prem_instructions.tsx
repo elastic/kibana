@@ -27,6 +27,10 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { CommandsByPlatform } from '../../../../../../components/fleet_server_flyout/utils';
+
+import { getInstallCommandForPlatform } from '../../../../../../components/fleet_server_flyout/utils';
+
 import { SelectCreateAgentPolicy } from '../../../../components';
 import {
   useStartServices,
@@ -46,9 +50,6 @@ import type { AgentPolicy } from '../../../../types';
 import { policyHasFleetServer } from '../../../../services';
 
 import { PlatformSelector } from '../../../../../../components/enrollment_instructions/manual/platform_selector';
-
-import type { CommandsByPlatform } from './install_command_utils';
-import { getInstallCommandForPlatform } from './install_command_utils';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 const REFRESH_INTERVAL = 10000;
@@ -202,7 +203,6 @@ export const FleetServerCommandStep = ({
           windowsCommand={installCommand.windows}
           linuxDebCommand={installCommand.deb}
           linuxRpmCommand={installCommand.rpm}
-          troubleshootLink={docLinks.links.fleet.troubleshooting}
           isK8s={false}
         />
       </>
@@ -233,24 +233,23 @@ export const useFleetServerInstructions = (policyId?: string) => {
       };
     }
 
-    return getInstallCommandForPlatform(
-      platform,
-      esHost,
-      serviceToken,
-      policyId,
-      fleetServerHost,
-      deploymentMode === 'production',
-      sslCATrustedFingerprint
+    return (['linux', 'mac', 'windows', 'deb', 'rpm'] as PLATFORM_TYPE[]).reduce(
+      (acc, platformType) => {
+        acc[platformType] = getInstallCommandForPlatform(
+          platformType,
+          esHost,
+          serviceToken,
+          policyId,
+          fleetServerHost,
+          deploymentMode === 'production',
+          sslCATrustedFingerprint
+        );
+
+        return acc;
+      },
+      {} as Record<PLATFORM_TYPE, string>
     );
-  }, [
-    serviceToken,
-    esHost,
-    platform,
-    policyId,
-    fleetServerHost,
-    deploymentMode,
-    sslCATrustedFingerprint,
-  ]);
+  }, [serviceToken, esHost, policyId, fleetServerHost, deploymentMode, sslCATrustedFingerprint]);
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);

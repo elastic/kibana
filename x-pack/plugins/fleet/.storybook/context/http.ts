@@ -88,7 +88,9 @@ export const getHttp = (basepath = BASE_PATH) => {
       }
 
       if (path.match('/api/fleet/outputs')) {
-        return { items: [] };
+        return {
+          items: [{ name: 'Default Output', is_default: true, hosts: ['https://test.es:9200'] }],
+        };
       }
 
       action(path)(`UNSUPPORTED ROUTE: GET ${path}`);

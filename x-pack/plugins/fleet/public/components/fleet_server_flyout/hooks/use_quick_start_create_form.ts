@@ -24,6 +24,8 @@ export interface QuickStartCreateForm {
   status: QuickStartCreateFormStatus;
   error?: string;
   submit: (fleetServerHost: string) => void;
+  fleetServerHost?: string;
+  fleetServerPolicyId?: string;
   serviceToken?: string;
 }
 
@@ -39,6 +41,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const [serviceToken, setServiceToken] = useState<string>();
   const [fleetServerPolicyId, setFleetServerPolicyId] = useState<string | undefined>();
+  const [fleetServerHost, setFleetServerHost] = useState<string | undefined>();
 
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
   const { data: agentPoliciesData } = useGetAgentPolicies({
@@ -111,14 +114,15 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
   }, [notifications.toasts]);
 
   const submit = useCallback(
-    async (fleetServerHost: string) => {
+    async (host: string) => {
       try {
         setStatus('loading');
 
-        if (validateHostUrl(fleetServerHost)) {
-          await addFleetServerHost(fleetServerHost);
+        if (validateHostUrl(host)) {
+          await addFleetServerHost(host);
           await generateServiceToken();
 
+          setFleetServerHost(host);
           setStatus('success');
         }
       } catch (err) {
@@ -136,5 +140,5 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     [addFleetServerHost, generateServiceToken, notifications.toasts, validateHostUrl]
   );
 
-  return { status, error, submit, serviceToken };
+  return { status, error, submit, fleetServerPolicyId, fleetServerHost, serviceToken };
 };

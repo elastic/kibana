@@ -20,7 +20,6 @@ interface Props {
   windowsCommand: string;
   linuxDebCommand: string;
   linuxRpmCommand: string;
-  troubleshootLink: string;
   isK8s: boolean;
 }
 
@@ -35,7 +34,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   windowsCommand,
   linuxDebCommand,
   linuxRpmCommand,
-  troubleshootLink,
   isK8s,
 }) => {
   const { platform, setPlatform } = usePlatform();

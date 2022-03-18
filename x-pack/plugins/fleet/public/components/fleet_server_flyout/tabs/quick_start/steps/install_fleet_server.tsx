@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useKibanaVersion } from '../../../../../hooks';
+import type { PLATFORM_TYPE } from '../../../../../hooks';
+import { useDefaultOutput, useKibanaVersion } from '../../../../../hooks';
 
 import type { QuickStartCreateForm } from '../../../hooks';
 
-// TODO: Relocate this file to a more common location
 import { PlatformSelector } from '../../../../enrollment_instructions/manual/platform_selector';
 
-const ARTIFACT_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent';
+import { getInstallCommandForPlatform } from '../../../utils';
 
 export function getInstallFleetServerStep({
   isFleetServerReady,
@@ -46,22 +46,24 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
   quickStartCreateForm: QuickStartCreateForm;
 }> = ({ quickStartCreateForm }) => {
   const kibanaVersion = useKibanaVersion();
+  const { output } = useDefaultOutput();
 
-  const commands = useMemo(
-    () => ({
-      macos: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-        `tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-        `sudo ./elastic-agent install \\
---fleet-server-es=http://192.0.2.0:9200 \\
---fleet-server-service-token=${quickStartCreateForm.serviceToken}`,
-      ].join('\n'),
-      linux: 'To-Do',
-      windows: 'To-Do',
-      deb: 'To-Do',
-      rpm: 'To-Do',
-    }),
-    [kibanaVersion, quickStartCreateForm.serviceToken]
+  const installCommands = (['linux', 'mac', 'windows', 'deb', 'rpm'] as PLATFORM_TYPE[]).reduce(
+    (acc, platform) => {
+      acc[platform] = getInstallCommandForPlatform(
+        platform,
+        output?.hosts?.[0] ?? '',
+        quickStartCreateForm.serviceToken ?? '',
+        quickStartCreateForm.fleetServerPolicyId,
+        quickStartCreateForm.fleetServerHost,
+        false,
+        output?.ca_trusted_fingerprint,
+        kibanaVersion
+      );
+
+      return acc;
+    },
+    {} as Record<PLATFORM_TYPE, string>
   );
 
   if (quickStartCreateForm.status !== 'success') {
@@ -80,11 +82,11 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
       <EuiSpacer size="l" />
 
       <PlatformSelector
-        macOsCommand={commands.macos}
-        linuxCommand={commands.linux}
-        windowsCommand={commands.windows}
-        debCommand={commands.deb}
-        rpmCommand={commands.rpm}
+        linuxCommand={installCommands.linux}
+        macCommand={installCommands.mac}
+        windowsCommand={installCommands.windows}
+        linuxDebCommand={installCommands.deb}
+        linuxRpmCommand={installCommands.rpm}
         isK8s={false}
       />
     </>

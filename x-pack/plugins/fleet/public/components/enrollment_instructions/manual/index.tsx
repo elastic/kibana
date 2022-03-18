@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useStartServices, useKibanaVersion } from '../../../hooks';
+import { useKibanaVersion } from '../../../hooks';
 import type { EnrollmentAPIKey } from '../../../types';
 
 import { PlatformSelector } from './platform_selector';
@@ -25,7 +25,6 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   apiKey,
   fleetServerHosts,
 }) => {
-  const { docLinks } = useStartServices();
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
   const kibanaVersion = useKibanaVersion();
 
@@ -58,7 +57,6 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
       windowsCommand={windowsCommand}
       linuxDebCommand={linuxDebCommand}
       linuxRpmCommand={linuxRpmCommand}
-      troubleshootLink={docLinks.links.fleet.troubleshooting}
       isK8s={false}
     />
   );

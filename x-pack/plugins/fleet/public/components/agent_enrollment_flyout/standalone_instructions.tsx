@@ -82,8 +82,6 @@ sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm \nsudo systemctl enable e
     const windowsCommand =
       isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_WINDOWS;
 
-    const { docLinks } = useStartServices();
-
     useEffect(() => {
       async function checkifK8s() {
         if (!selectedPolicyId) {
@@ -255,7 +253,6 @@ sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm \nsudo systemctl enable e
             windowsCommand={windowsCommand}
             linuxDebCommand={linuxDebCommand}
             linuxRpmCommand={linuxRpmCommand}
-            troubleshootLink={docLinks.links.fleet.troubleshooting}
             isK8s={isK8s === 'IS_KUBERNETES'}
           />
         ),
