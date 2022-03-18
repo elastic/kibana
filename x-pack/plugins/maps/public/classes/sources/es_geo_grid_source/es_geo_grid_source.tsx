@@ -170,6 +170,27 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   _getGeoGridPrecisionResolutionDelta() {
+    // Hexagon resolutions do not scale evenly to zoom levels.
+    // zoomX and zoomX + 1 may result in the same hexagon resolution.
+    // To avoid FINE and MOST_FINE providing potenitally the same resolution,
+    // use 3 level resoltuion system that increases zoom + 3 per resolution step.
+    if (this._descriptor.requestType === RENDER_AS.HEX) {
+      if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
+        return 2;
+      }
+
+      if (
+        this._descriptor.resolution === GRID_RESOLUTION.FINE ||
+        this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE
+      ) {
+        return 5;
+      }
+
+      if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+        return 8;
+      }
+    }
+
     if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
       return 2;
     }
