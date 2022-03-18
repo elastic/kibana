@@ -32,13 +32,13 @@ export const getSavedQueriesComplexTest = () =>
       checkResults();
       // enter fullscreen
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
-      cy.contains(/Full screen$/).should('exist');
-      cy.contains('Exit full screen').should('not.exist');
+      cy.contains(/Enter fullscreen$/).should('exist');
+      cy.contains('Exit fullscreen').should('not.exist');
       cy.getBySel(RESULTS_TABLE_BUTTON).click();
 
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
-      cy.contains(/Full screen$/).should('not.exist');
-      cy.contains('Exit full screen').should('exist');
+      cy.contains(/Enter Fullscreen$/).should('not.exist');
+      cy.contains('Exit fullscreen').should('exist');
 
       // hidden columns
       cy.react('EuiDataGridHeaderCellWrapper', { props: { id: 'osquery.cmdline' } }).click();
@@ -53,8 +53,8 @@ export const getSavedQueriesComplexTest = () =>
       cy.contains('2 columns hidden').should('exist');
 
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
-      cy.contains(/Full screen$/).should('not.exist');
-      cy.contains('Exit full screen').should('exist');
+      cy.contains(/Enter fullscreen$/).should('not.exist');
+      cy.contains('Exit fullscreen').should('exist');
       cy.getBySel(RESULTS_TABLE_BUTTON).click();
 
       // sorting
@@ -64,7 +64,7 @@ export const getSavedQueriesComplexTest = () =>
       cy.contains(/Sort A-Z$/).click();
       cy.contains('2 columns hidden').should('exist');
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
-      cy.contains(/Full screen$/).should('exist');
+      cy.contains(/Enter fullscreen$/).should('exist');
 
       // save new query
       cy.contains('Exit full screen').should('not.exist');
