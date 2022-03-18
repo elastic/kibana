@@ -28,6 +28,12 @@ Ideally, most types of objects in {kib} will eventually be _shareable_; however,
 <<sharing-saved-objects-faq-share-capable-vs-shareable,_share-capable_ objects>> as a stepping stone for plugin developers to fully support
 this feature.
 
+Implementing a shareable saved object type is done in two phases:
+
+- **Phase 1**: Convert an existing isolated object type into a share-capable one. Keep reading!
+- **Phase 2**: Switch an existing share-capable object type into a shareable one, _or_ create a new shareable object type. Jump to the
+  <<sharing-saved-objects-phase-2>>!
+
 [[sharing-saved-objects-breaking-changes]]
 === Breaking changes
 
@@ -49,21 +55,21 @@ change the IDs of any existing objects that are not in the Default space. Changi
 TIP: External plugins can also convert their objects, but <<sharing-saved-objects-faq-external-plugins,they don't have to do so before the
 8.0 release>>.
 
-[[sharing-saved-objects-dev-flowchart]]
-=== Developer Flowchart
+[[sharing-saved-objects-phase-1]]
+=== Phase 1 Developer Flowchart
 
 If you're still reading this page, you're probably developing a {kib} plugin that registers an object type, and you want to know what steps
 you need to take to prepare for the 8.0 release and mitigate any breaking changes! Depending on how you are using saved objects, you may
 need to take up to 5 steps, which are detailed in separate sections below. Refer to this flowchart:
 
-image::images/sharing-saved-objects-dev-flowchart.png["Sharing Saved Objects developer flowchart"]
+image::images/sharing-saved-objects-phase-1-dev-flowchart.png["Sharing Saved Objects phase 1 - developer flowchart"]
 
 TIP: There is a proof-of-concept (POC) pull request to demonstrate these changes. It first adds a simple test plugin that allows users to
 create and view notes. Then, it goes through the steps of the flowchart to convert the isolated "note" objects to become share-capable. As
 you read this guide, you can https://github.com/elastic/kibana/pull/107256[follow along in the POC] to see exactly how to take these steps.
 
 [[sharing-saved-objects-q1]]
-=== Question 1
+==== Question 1
 
 > *Do these objects contain links to other objects?*
 
@@ -71,7 +77,7 @@ If your objects store _any_ links to other objects (with an object type/ID), you
 continue functioning after the 8.0 upgrade.
 
 [[sharing-saved-objects-step-1]]
-=== Step 1
+==== Step 1
 
 ⚠️ This step *must* be completed no later than the 7.16 release. ⚠️
 
@@ -117,7 +123,7 @@ migrations: {
 NOTE: Reminder, don't forget to add unit tests and integration tests!
 
 [[sharing-saved-objects-q2]]
-=== Question 2
+==== Question 2
 
 > *Are there any "deep links" to these objects?*
 
@@ -130,7 +136,7 @@ Note that some URLs may contain <<sharing-saved-objects-faq-multiple-deep-link-o
 Dashboard _and_ a filter for an Index Pattern.
 
 [[sharing-saved-objects-step-2]]
-=== Step 2
+==== Step 2
 
 ⚠️ This step will preferably be completed in the 7.16 release; it *must* be completed no later than the 8.0 release. ⚠️
 
@@ -173,7 +179,7 @@ NOTE: You don't need to use `resolve()` everywhere, <<sharing-saved-objects-faq-
 links>>!
 
 [[sharing-saved-objects-step-3]]
-=== Step 3
+==== Step 3
 
 ⚠️ This step will preferably be completed in the 7.16 release; it *must* be completed no later than the 8.0 release. ⚠️
 
@@ -205,7 +211,7 @@ TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#use
 ]
 ```
 
-3. Update your Plugin class implementation to depend on the Core HTTP service and Spaces plugin API:
+3. Update your Plugin class implementation to depend on the Spaces plugin API:
 +
 ```ts
 interface PluginStartDeps {
@@ -217,11 +223,10 @@ export class MyPlugin implements Plugin<{}, {}, {}, PluginStartDeps> {
     core.application.register({
       ...
       async mount(appMountParams: AppMountParameters) {
-        const [coreStart, pluginStartDeps] = await core.getStartServices();
-        const { http } = coreStart;
+        const [, pluginStartDeps] = await core.getStartServices();
         const { spaces: spacesApi } = pluginStartDeps;
         ...
-        // pass `http` and `spacesApi` to your app when you render it
+        // pass `spacesApi` to your app when you render it
       },
     });
     ...
@@ -286,7 +291,7 @@ different outcomes.]
 NOTE: Reminder, don't forget to add unit tests and functional tests!
 
 [[sharing-saved-objects-step-4]]
-=== Step 4
+==== Step 4
 
 ⚠️ This step *must* be completed in the 8.0 release (no earlier and no later). ⚠️
 
@@ -308,7 +313,7 @@ TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#use
 NOTE: Reminder, don't forget to add integration tests!
 
 [[sharing-saved-objects-q3]]
-=== Question 3
+==== Question 3
 
 > *Are these objects encrypted?*
 
@@ -316,7 +321,7 @@ Saved objects can optionally be <<xpack-security-secure-saved-objects,encrypted>
 object types are encrypted, so most plugin developers will not be affected.
 
 [[sharing-saved-objects-step-5]]
-=== Step 5
+==== Step 5
 
 ⚠️ This step *must* be completed in the 8.0 release (no earlier and no later). ⚠️
 
@@ -334,12 +339,56 @@ image::images/sharing-saved-objects-step-5.png["Sharing Saved Objects ESO migrat
 
 NOTE: Reminder, don't forget to add unit tests and integration tests!
 
+[[sharing-saved-objects-phase-2]]
+=== Phase 2 Developer Flowchart
+
+This section covers switching a share-capable object type into a shareable one _or_ creating a new shareable saved object type. Refer to
+this flowchart:
+
+image::images/sharing-saved-objects-phase-2-dev-flowchart.png["Sharing Saved Objects phase 2 - developer flowchart"]
+
 [[sharing-saved-objects-step-6]]
-=== Step 6
+==== Step 6
 
-> *Update your code to make your objects shareable*
+> *Update your _server-side code_ to mark these objects as "shareable"*
 
-_This is not required for the 8.0 release; this additional information will be added in the near future!_
+When you register your object, you need to set the proper `namespaceType`. If you have an existing object type that is "share-capable", you
+can simply change it:
+
+image::images/sharing-saved-objects-step-6.png["Sharing Saved Objects registration (shareable)"]
+
+[TIP]
+====
+You can also mark your object as
+https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectstypemanagementdefinition.md[importable and exportable]:
+
+```json
+management: { isImportableAndExportable: true },
+```
+
+If you do this, then your objects will be visible in the <<managing-saved-objects,Saved Objects Management page>>, where users can assign
+them to multiple spaces.
+====
+
+[[sharing-saved-objects-step-7]]
+==== Step 7
+
+> *Update saved object delete API usage to handle multiple spaces*
+
+WIP
+
+- Change usage of saved object delete API, and notify users of affected spaces and include the `force: true` option
+
+[[sharing-saved-objects-step-8]]
+==== Step 8
+
+> *Update your _client-side code_ to add reusable components*
+
+WIP
+
+- Spaces list
+- Share to space flyout
+- Nothing else?
 
 [[sharing-saved-objects-faq]]
 === Frequently asked questions (FAQ)
