@@ -246,7 +246,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   const {
     annotations,
-    chartsData,
     filterPlaceHolder,
     indexPattern,
     influencers,
@@ -255,7 +254,10 @@ export const Explorer: FC<ExplorerUIProps> = ({
     tableData,
   } = explorerState;
 
-  const chartsData2 = useObservable(chartsStateService.getChartsData$());
+  const chartsData = useObservable(
+    chartsStateService.getChartsData$(),
+    chartsStateService.getChartsData()
+  );
 
   const { filterActive, queryString } = filterSettings;
 
@@ -524,22 +526,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
                   <ExplorerChartsContainer
                     {...{
                       ...chartsData,
-                      severity,
-                      timefilter,
-                      mlLocator,
-                      timeBuckets,
-                      onSelectEntity: applyFilter,
-                      chartsService,
-                    }}
-                  />
-                ) : null}
-              </div>
-
-              <div style={{ backgroundColor: 'grey' }}>
-                {showCharts && chartsData2 ? (
-                  <ExplorerChartsContainer
-                    {...{
-                      ...chartsData2,
                       severity,
                       timefilter,
                       mlLocator,

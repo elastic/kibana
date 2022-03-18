@@ -10,10 +10,9 @@ import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
 import { forkJoin, of, Observable, Subject } from 'rxjs';
-import { switchMap, tap, map } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
-import { explorerService } from '../explorer_dashboard_service';
 import {
   getDateFormatTz,
   getSelectionInfluencers,
@@ -33,9 +32,7 @@ import { AnomalyTimelineService } from '../../services/anomaly_timeline_service'
 import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
-import type { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { mlJobService } from '../../services/job_service';
 import type { TimeBucketsInterval, TimeRangeBounds } from '../../util/time_buckets';
 
 // Memoize the data fetching methods.
@@ -99,11 +96,6 @@ const loadExplorerDataProvider = (
   anomalyExplorerChartsService: AnomalyExplorerChartsService,
   timefilter: TimefilterContract
 ) => {
-  const memoizedAnomalyDataChange = memoize(
-    anomalyExplorerChartsService.getAnomalyData,
-    anomalyExplorerChartsService
-  );
-
   return (config: LoadExplorerDataConfig): Observable<Partial<ExplorerState>> => {
     if (!isLoadExplorerDataConfig(config)) {
       return of({});
@@ -119,12 +111,7 @@ const loadExplorerDataProvider = (
       tableInterval,
       tableSeverity,
       viewBySwimlaneFieldName,
-      swimlaneContainerWidth,
     } = config;
-
-    const combinedJobRecords: Record<string, CombinedJob> = selectedJobs.reduce((acc, job) => {
-      return { ...acc, [job.id]: mlJobService.getJob(job.id) };
-    }, {});
 
     const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
@@ -191,21 +178,6 @@ const loadExplorerDataProvider = (
         influencersFilterQuery
       ),
     }).pipe(
-      tap(({ anomalyChartRecords }) => {
-        memoizedAnomalyDataChange(
-          lastRefresh,
-          explorerService,
-          combinedJobRecords,
-          swimlaneContainerWidth,
-          selectedCells !== undefined && Array.isArray(anomalyChartRecords)
-            ? anomalyChartRecords
-            : [],
-          timerange.earliestMs,
-          timerange.latestMs,
-          timefilter,
-          tableSeverity
-        );
-      }),
       switchMap(
         ({ overallAnnotations, anomalyChartRecords, influencers, annotationsData, tableData }) =>
           forkJoin({

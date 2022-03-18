@@ -218,11 +218,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$()
   );
 
-  const swimlaneContainerWidth = useObservable(
-    anomalyExplorerContext.anomalyTimelineStateService.getContainerWidth$(),
-    anomalyExplorerContext.anomalyTimelineStateService.getContainerWidth()
-  );
-
   const viewByFieldName = useObservable(
     anomalyExplorerContext.anomalyTimelineStateService.getViewBySwimlaneFieldName$()
   );
@@ -253,7 +248,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           tableInterval: tableInterval.val,
           tableSeverity: tableSeverity.val,
           viewBySwimlaneFieldName: viewByFieldName,
-          swimlaneContainerWidth,
         }
       : undefined;
 
@@ -267,9 +261,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   );
 
   useEffect(() => {
-    if (explorerState && loadExplorerDataConfig?.swimlaneContainerWidth! > 0) {
-      loadExplorerData(loadExplorerDataConfig);
-    }
+    loadExplorerData(loadExplorerDataConfig);
   }, [JSON.stringify(loadExplorerDataConfig)]);
 
   const overallSwimlaneData = useObservable(

@@ -21,7 +21,7 @@ const MAX_CHARTS_PER_ROW = 4;
 
 export class AnomalyChartsStateService extends StateService {
   private _isChartsDataLoading$ = new BehaviorSubject<boolean>(false);
-  private _chartsData$ = new BehaviorSubject<ExplorerChartsData | undefined>(undefined);
+  private _chartsData$ = new BehaviorSubject<ExplorerChartsData>(getDefaultChartsData());
 
   constructor(
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
@@ -83,7 +83,11 @@ export class AnomalyChartsStateService extends StateService {
       });
   }
 
-  public getChartsData$(): Observable<ExplorerChartsData | undefined> {
+  public getChartsData$(): Observable<ExplorerChartsData> {
     return this._chartsData$.asObservable();
+  }
+
+  public getChartsData(): ExplorerChartsData {
+    return this._chartsData$.getValue();
   }
 }
