@@ -12,6 +12,7 @@ import {
   RULE_STATUS_ERROR,
   RULE_STATUS_PENDING,
   RULE_STATUS_UNKNOWN,
+  RULE_STATUS_WARNING,
 } from './translations';
 import { AlertExecutionStatuses } from '../../../../alerting/common';
 import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/public';
@@ -50,6 +51,7 @@ export const rulesStatusesTranslationsMapping = {
   error: RULE_STATUS_ERROR,
   pending: RULE_STATUS_PENDING,
   unknown: RULE_STATUS_UNKNOWN,
+  warning: RULE_STATUS_WARNING,
 };
 
 export const OBSERVABILITY_RULE_TYPES = [

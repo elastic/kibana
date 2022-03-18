@@ -29,6 +29,7 @@ import { muteAlertRoute } from './mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
+import { snoozeRuleRoute } from './snooze_rule';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -61,4 +62,5 @@ export function defineRoutes(opts: RouteOptions) {
   unmuteAllRuleRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
+  snoozeRuleRoute(router, licenseState);
 }
