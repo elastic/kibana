@@ -77,7 +77,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'snooze',
+                  'muteAll',
                   'test.noop',
                   'alertsFixture'
                 ),
@@ -145,7 +145,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'snooze',
+                  'muteAll',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
                 ),
@@ -202,7 +202,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'snooze',
+                  'muteAll',
                   'test.unrestricted-noop',
                   'alertsFixture'
                 ),
@@ -215,7 +215,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getProducerUnauthorizedErrorMessage(
-                  'snooze',
+                  'muteAll',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'
                 ),
@@ -271,7 +271,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'snooze',
+                  'muteAll',
                   'test.restricted-noop',
                   'alerts'
                 ),
@@ -285,7 +285,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getProducerUnauthorizedErrorMessage(
-                  'snooze',
+                  'muteAll',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
                 ),
@@ -358,7 +358,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'snooze',
+                  'muteAll',
                   'test.noop',
                   'alertsFixture'
                 ),
