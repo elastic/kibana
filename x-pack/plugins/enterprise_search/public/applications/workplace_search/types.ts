@@ -87,6 +87,7 @@ export interface SourceDataItem {
   internalConnectorAvailable?: boolean;
   externalConnectorAvailable?: boolean;
   customConnectorAvailable?: boolean;
+  isBeta?: boolean;
 }
 
 export interface ContentSource {

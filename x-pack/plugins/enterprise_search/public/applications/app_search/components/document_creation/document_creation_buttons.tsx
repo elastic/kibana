@@ -69,7 +69,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({
     <p>
       {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.helperText', {
         defaultMessage:
-          'There are four ways to send documents to your engine for indexing. You can paste or upload a JSON file, POST to the documents API endpoint, connect to an existing Elasticsearch index, or use the  Elastic Web Crawler to automatically index documents from a URL.',
+          'There are four ways to send documents to your engine for indexing. You can paste or upload a JSON file, POST to the documents API endpoint, connect to an existing Elasticsearch index (beta), or use the  Elastic Web Crawler to automatically index documents from a URL.',
       })}
     </p>
   );
@@ -187,6 +187,19 @@ export const DocumentCreationButtons: React.FC<Props> = ({
           <EuiCard
             hasBorder
             layout="horizontal"
+            betaBadgeProps={{
+              label: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.buttons.elasticsearchBetaBadge',
+                { defaultMessage: 'Beta' }
+              ),
+              tooltipContent: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documentCreation.buttons.elasticsearchTooltip',
+                {
+                  defaultMessage:
+                    'This feature is not GA. Please help us by reporting any bugs you encounter.',
+                }
+              ),
+            }}
             title={i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.buttons.elasticsearchTitle',
               { defaultMessage: 'Use an Elasticsearch Index' }

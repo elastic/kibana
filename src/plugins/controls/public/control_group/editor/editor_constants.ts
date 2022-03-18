@@ -34,10 +34,12 @@ export const CONTROL_WIDTH_OPTIONS = [
 export const CONTROL_LAYOUT_OPTIONS = [
   {
     id: `oneLine`,
+    'data-test-subj': 'control-editor-layout-oneLine',
     label: ControlGroupStrings.management.controlStyle.getSingleLineTitle(),
   },
   {
     id: `twoLine`,
+    'data-test-subj': 'control-editor-layout-twoLine',
     label: ControlGroupStrings.management.controlStyle.getTwoLineTitle(),
   },
 ];

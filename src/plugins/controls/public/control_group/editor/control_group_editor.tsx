@@ -51,6 +51,7 @@ import {
 
 interface EditControlGroupProps {
   initialInput: ControlGroupInput;
+  controlCount: number;
   updateInput: (input: Partial<ControlGroupInput>) => void;
   onDeleteAll: () => void;
   onClose: () => void;
@@ -63,6 +64,7 @@ const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInp
   fastIsEqual(a, b);
 
 export const ControlGroupEditor = ({
+  controlCount,
   initialInput,
   updateInput,
   onDeleteAll,
@@ -158,15 +160,19 @@ export const ControlGroupEditor = ({
                   });
                 }}
               />
-              <EuiSpacer size="s" />
-              <EuiCheckbox
-                id="editControls_setAllSizesCheckbox"
-                label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-                checked={resetAllWidths}
-                onChange={(e) => {
-                  setResetAllWidths(e.target.checked);
-                }}
-              />
+              {controlCount > 0 && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiCheckbox
+                    id="editControls_setAllSizesCheckbox"
+                    label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
+                    checked={resetAllWidths}
+                    onChange={(e) => {
+                      setResetAllWidths(e.target.checked);
+                    }}
+                  />
+                </>
+              )}
             </>
           </EuiFormRow>
           <EuiHorizontalRule />
@@ -283,17 +289,22 @@ export const ControlGroupEditor = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule />
-          <EuiSpacer size="l" />
-          <EuiButtonEmpty
-            onClick={onDeleteAll}
-            aria-label={'delete-all'}
-            iconType="trash"
-            color="danger"
-            flush="left"
-            size="s"
-          >
-            {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-          </EuiButtonEmpty>
+          {controlCount > 0 && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiButtonEmpty
+                onClick={onDeleteAll}
+                data-test-subj="delete-all-controls-button"
+                aria-label={'delete-all'}
+                iconType="trash"
+                color="danger"
+                flush="left"
+                size="s"
+              >
+                {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+              </EuiButtonEmpty>
+            </>
+          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -314,6 +325,7 @@ export const ControlGroupEditor = ({
               aria-label={`save-group`}
               iconType="check"
               color="primary"
+              data-test-subj="control-group-editor-save"
               onClick={() => {
                 applyChangesToInput();
                 onClose();

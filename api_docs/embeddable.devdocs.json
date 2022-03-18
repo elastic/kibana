@@ -975,8 +975,8 @@
                     "pluginId": "embeddable",
                     "scope": "public",
                     "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.Container",
-                    "text": "Container"
+                    "section": "def-public.IContainer",
+                    "text": "IContainer"
                   },
                   "<{}, ",
                   {
@@ -995,6 +995,21 @@
                     "text": "ContainerOutput"
                   },
                   "> | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.Unnamed.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "EmbeddableContainerSettings",
+                  " | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -2342,6 +2357,21 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.refreshInputFromParent",
+            "type": "Function",
+            "tags": [],
+            "label": "refreshInputFromParent",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -8087,6 +8117,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.refreshInputFromParent",
+            "type": "Function",
+            "tags": [],
+            "label": "refreshInputFromParent",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],

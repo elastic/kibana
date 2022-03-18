@@ -35,5 +35,3 @@ export {
 } from './static';
 
 export type { ColorSchemaParams, Labels, Style, PaletteContinuity } from './types';
-
-export { validateOptions } from './utils';

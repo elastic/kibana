@@ -1,0 +1,4 @@
+monitoring.enabled: true
+monitoring.elasticsearch.hosts: http://host.docker.internal:9200
+monitoring.elasticsearch.username: elastic
+monitoring.elasticsearch.password: changeme

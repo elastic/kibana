@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { first, get, last } from 'lodash';
+import { first, get } from 'lodash';
 import moment from 'moment';
 import {
   ActionGroup,
@@ -32,6 +32,7 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
+import { createScopedLogger } from '../common/utils';
 import { evaluateCondition } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
@@ -61,9 +62,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params }) => {
+  >(async ({ services, params, alertId, executionId }) => {
+    const startTime = Date.now();
     const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+    const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
@@ -79,6 +82,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
+        logger.error(e.message);
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory('*', reason);
@@ -117,22 +121,20 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           esClient: services.scopedClusterClient.asCurrentUser,
           compositeSize,
           filterQuery,
+          logger,
         })
       )
     );
+    let scheduledActionsCount = 0;
     const inventoryItems = Object.keys(first(results)!);
     for (const group of inventoryItems) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = results.every((result) => {
-        // Grab the result of the most recent bucket
-        return last(result[group].shouldFire);
-      });
-      const shouldAlertWarn = results.every((result) => last(result[group].shouldWarn));
-
+      const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
+      const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = results.some((result) => last(result[group].isNoData));
-      const isError = results.some((result) => result[group].isError);
+      const isNoData = results.some((result) => result[group]?.isNoData);
+      const isError = results.some((result) => result[group]?.isError);
 
       const nextState = isError
         ? AlertStates.ERROR
@@ -191,6 +193,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             : FIRED_ACTIONS.id;
 
         const alert = alertFactory(`${group}`, reason);
+        scheduledActionsCount++;
         alert.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
@@ -211,6 +214,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
       }
     }
+    const stopTime = Date.now();
+    logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
   });
 
 const formatThreshold = (metric: SnapshotMetricType, value: number) => {
@@ -221,6 +226,9 @@ const formatThreshold = (metric: SnapshotMetricType, value: number) => {
     ? value.map((v: number) => {
         if (metricFormatter.formatter === 'percent') {
           v = Number(v) / 100;
+        }
+        if (metricFormatter.formatter === 'bits') {
+          v = Number(v) / 8;
         }
         return formatter(v);
       })

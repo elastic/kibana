@@ -52,6 +52,7 @@ export const EditControlGroup = ({
           <ControlGroupEditor
             initialInput={controlGroupContainer.getInput()}
             updateInput={(changes) => controlGroupContainer.updateInput(changes)}
+            controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
             onDeleteAll={() => onDeleteAll(flyoutInstance)}
             onClose={() => flyoutInstance.close()}
           />

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common';
-import { DataView } from '../../../data/common';
+import { IIndexPatternFieldList, DataView } from '../../../data_views/public';
 
 const fields = [
   {

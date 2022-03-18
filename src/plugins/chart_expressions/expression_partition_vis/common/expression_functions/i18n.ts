@@ -7,8 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
-import { LegendDisplay } from '../types/expression_renderers';
 
 export const strings = {
   getPieVisFunctionName: () =>
@@ -132,15 +130,5 @@ export const errors = {
     i18n.translate('expressionPartitionVis.reusable.function.errors.splitRowAndColumnSpecified', {
       defaultMessage:
         'A split row and column are specified. Expression is supporting only one of them at once.',
-    }),
-  invalidLegendDisplayError: () =>
-    i18n.translate('expressionPartitionVis.reusable.function.errors.invalidLegendDisplayError', {
-      defaultMessage: `Invalid legend display mode is specified. Supported ticks legend display modes: {legendDisplayModes}`,
-      values: { legendDisplayModes: Object.values(LegendDisplay).join(', ') },
-    }),
-  invalidLegendPositionError: () =>
-    i18n.translate('expressionPartitionVis.reusable.function.errors.invalidLegendPositionError', {
-      defaultMessage: `Invalid legend position is specified. Supported ticks legend positions: {positions}`,
-      values: { positions: Object.values(Position).join(', ') },
     }),
 };
