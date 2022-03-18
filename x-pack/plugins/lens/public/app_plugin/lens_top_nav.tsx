@@ -46,6 +46,7 @@ function getLensTopNavConfig(options: {
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
+  isSaveable: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -58,6 +59,7 @@ function getLensTopNavConfig(options: {
     savingToDashboardPermitted,
     tooltips,
     contextOriginatingApp,
+    isSaveable,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -171,7 +173,7 @@ function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
+      disableButton: !isSaveable,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
@@ -348,6 +350,7 @@ export const LensTopNavMenu = ({
       showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
       savingToDashboardPermitted,
+      isSaveable,
       contextOriginatingApp,
       tooltips: {
         showExportWarning: () => {
@@ -401,7 +404,7 @@ export const LensTopNavMenu = ({
           }
         },
         saveAndReturn: () => {
-          if (savingToDashboardPermitted) {
+          if (isSaveable) {
             // disabling the validation on app leave because the document has been saved.
             onAppLeave((actions) => {
               return actions.default();
