@@ -9,36 +9,30 @@ The documentation can be accessed at: https://docs.elastic.dev/form-lib/welcome
 
 In order to run the documentation locally
 
-1. Follow the guide to setup a Docsmobile site at https://docs.elastic.dev/docs/setup
-2. Create a root folder "nav" with a `nav-form-lib.docnav.json` file in it. Copy the content from https://github.com/elastic/docs.elastic.dev/blob/main/nav/nav-form-lib.docnav.json
-3. Edit the `site-config/nav.json` file and add the "nav-form-lib" to the "structure" array
+1. Fork and clone the elastic docs repo https://github.com/elastic/docs.elastic.dev
+2. `cp sources.json sources-dev.json`
+3. Edit the "elastic/kibana" section inside `source-dev.json`
 
 ```
-
-"structure": ["nav-docs", "nav-content", "nav-form-lib"],
-```
-
-3. Create a `sources-dev.json` file **at the root** of the repo (not inside the "site-config" folder) and add the following
-
-```
+// From this
 {
-  "sources": [
-    {
-      "type": "file",
-      "location": "../nav"
-    },
-    {
-      "type": "file",
-      "location": "../../<root-of-kibana-repo>",
-      "subdirs": [
-          "src/plugins/es_ui_shared/static/forms/docs"
-      ]
-    }
+  "type": "github",
+  "location": "elastic/kibana"
+}
+
+// to this
+{
+  "type": "file",
+  "location": "../../<root-kibana-repo>", 
+  // optional, if you want a faster build you can only include the form lib docs
+  "subdirs": [
+    "src/plugins/es_ui_shared/static/forms/docs"
   ]
 }
 ```
 
-4. Start the dev server with `yarn dev` 
+4. Follow the "Getting started" instructions (https://github.com/elastic/docs.elastic.dev#getting-started)
+5. `yarn dev` to launch the docs server
 
 ## Field value change sequence diagram
 
