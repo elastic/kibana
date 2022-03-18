@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { ReactElement } from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { ElasticAgentCard, NoDataCard } from '../no_data_card';
@@ -17,8 +17,8 @@ interface ActionCardsProps {
 }
 export const ActionCards = ({ actionCards }: ActionCardsProps) => {
   const isWithinBreakpoints = useIsWithinBreakpoints(['xs', 's']);
-  const euiSize = 16;
-  const actionCardsStyle = ActionCardsStyles(euiSize, isWithinBreakpoints);
+  const { euiTheme } = useEuiTheme();
+  const actionCardsStyle = ActionCardsStyles(euiTheme.base, isWithinBreakpoints);
 
   const cards = actionCards.map((card) => (
     <EuiFlexItem key={card.key || ''} css={actionCardsStyle}>
