@@ -52,7 +52,7 @@ describe('fetchIndices lib function', () => {
     jest.clearAllMocks();
   });
 
-  test('regular index', async () => {
+  it('should return regular index without aliases', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => regularIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
 
@@ -87,7 +87,8 @@ describe('fetchIndices lib function', () => {
       index: 'search-*',
     });
   });
-  test('index with aliases', async () => {
+
+  it('should return index with aliases', async () => {
     const aliasedIndexResponse = {
       'index-without-prefix': {
         ...regularIndexResponse['search-regular-index'],
@@ -124,7 +125,8 @@ describe('fetchIndices lib function', () => {
       },
     ]);
   });
-  test('index missing in stats call', async () => {
+
+  it('should handle index missing in stats call', async () => {
     const missingStatsResponse = {
       indices: {
         some_other_index: { ...regularIndexStatsResponse.indices['search-regular-index'] },
@@ -154,7 +156,8 @@ describe('fetchIndices lib function', () => {
       },
     ]);
   });
-  test('no index found', async () => {
+
+  it('should return empty array when no index found', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => ({}));
     await expect(fetchIndices(mockClient as unknown as IScopedClusterClient)).resolves.toEqual([]);
     expect(mockClient.asCurrentUser.indices.stats).not.toHaveBeenCalled();
