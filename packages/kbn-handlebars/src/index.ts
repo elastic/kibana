@@ -227,14 +227,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     transformLiteralToPath(node);
 
     switch (this.classifyNode(node as ProcessableNodeWithPathParts)) {
-      case kHelper:
-        this.helperSexpr(node as ProcessableNodeWithPathParts);
-        break;
       case kSimple:
-        this.simpleSexpr(node as ProcessableNodeWithPathParts);
+        this.processSimpleNode(node as ProcessableNodeWithPathParts);
+        break;
+      case kHelper:
+        this.processHelperNode(node as ProcessableNodeWithPathParts);
         break;
       case kAmbiguous:
-        this.ambiguousSexpr(node as ProcessableNodeWithPathParts);
+        this.processAmbiguousNode(node as ProcessableNodeWithPathParts);
         break;
     }
   }
@@ -273,7 +273,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
   }
 
-  private simpleSexpr(node: ProcessableNodeWithPathParts) {
+  private processSimpleNode(node: ProcessableNodeWithPathParts) {
     const path = node.path;
 
     if (isBlock(node)) {
@@ -296,7 +296,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output.push(result);
   }
 
-  private helperSexpr(node: ProcessableNodeWithPathParts) {
+  private processHelperNode(node: ProcessableNodeWithPathParts) {
     const path = node.path;
     const name = path.parts[0];
 
@@ -340,7 +340,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output.push(result);
   }
 
-  private ambiguousSexpr(node: ProcessableNodeWithPathParts) {
+  private processAmbiguousNode(node: ProcessableNodeWithPathParts) {
     const name = node.path.parts[0];
     const invokeResult = this.invokeAmbiguous(node, name);
 
@@ -383,6 +383,18 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return typeof helper.fn === 'function'
       ? helper.fn.apply(helper.context, helper.params)
       : helper.fn;
+  }
+
+  private ambiguousBlockValue(block: hbs.AST.BlockStatement, result: any) {
+    const name = block.path.parts[0];
+    const helper = this.setupHelper(block, name);
+
+    if (!helper.fn) {
+      const options = helper.params[helper.params.length - 1];
+      result = this.container.hooks.blockHelperMissing!.call(block, result, options);
+    }
+
+    return result;
   }
 
   private setupHelper(
@@ -433,18 +445,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
 
     return Object.assign(options, this.defaultHelperOptions);
-  }
-
-  private ambiguousBlockValue(block: hbs.AST.BlockStatement, result: any) {
-    const name = block.path.parts[0];
-    const helper = this.setupHelper(block, name);
-
-    if (!helper.fn) {
-      const options = helper.params[helper.params.length - 1];
-      result = this.container.hooks.blockHelperMissing!.call(block, result, options);
-    }
-
-    return result;
   }
 
   private resolveNodes(nodes: hbs.AST.Node | hbs.AST.Node[]): any[] {
