@@ -6,27 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { mount as enzymeMount, ReactWrapper } from 'enzyme';
+import { mount as enzymeMount } from 'enzyme';
 import React from 'react';
-import {
-  SharedUxServicesProvider,
-  SharedUxServices,
-  mockServicesFactory,
-} from '@kbn/shared-ux-services';
 import { ToolbarButton } from '../primary/primary';
 
 describe('<ToolbarButton />', () => {
-  let services: SharedUxServices;
-  let mount: (element: JSX.Element) => ReactWrapper;
-
-  beforeEach(() => {
-    services = mockServicesFactory();
-    mount = (element: JSX.Element) =>
-      enzymeMount(<SharedUxServicesProvider {...services}>{element}</SharedUxServicesProvider>);
-  });
-
   test('is rendered', () => {
-    const component = mount(<ToolbarButton iconType="folderOpen" label="Add from library" />);
+    const component = enzymeMount(<ToolbarButton iconType="folderOpen" label="Add from library" />);
 
     expect(component).toMatchSnapshot();
   });

@@ -1,109 +1,72 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ToolbarButton /> is rendered 1`] = `
-<SharedUxServicesProvider
-  application={
-    Object {
-      "currentAppId$": Observable {
-        "_isScalar": false,
-      },
-      "navigateToUrl": [Function],
-    }
-  }
-  docLinks={
-    Object {
-      "dataViewsDocLink": "dummy link",
-    }
-  }
-  editors={
-    Object {
-      "openDataViewEditor": [MockFunction],
-    }
-  }
-  http={
-    Object {
-      "addBasePath": [MockFunction],
-    }
-  }
-  permissions={
-    Object {
-      "canAccessFleet": true,
-      "canCreateNewDataView": true,
-    }
-  }
-  platform={
-    Object {
-      "setIsFullscreen": [MockFunction],
-    }
-  }
+<ToolbarButton
+  iconType="folderOpen"
+  label="Add from library"
 >
-  <ToolbarButton
+  <EuiButton
+    color="primary"
+    fill={true}
     iconType="folderOpen"
-    label="Add from library"
+    size="m"
   >
-    <EuiButton
+    <EuiButtonDisplay
+      baseClassName="euiButton"
       color="primary"
+      disabled={false}
+      element="button"
       fill={true}
       iconType="folderOpen"
+      isDisabled={false}
       size="m"
+      type="button"
     >
-      <EuiButtonDisplay
-        baseClassName="euiButton"
-        color="primary"
+      <button
+        className="euiButton euiButton--primary euiButton--fill"
         disabled={false}
-        element="button"
-        fill={true}
-        iconType="folderOpen"
-        isDisabled={false}
-        size="m"
+        style={
+          Object {
+            "minWidth": undefined,
+          }
+        }
         type="button"
       >
-        <button
-          className="euiButton euiButton--primary euiButton--fill"
-          disabled={false}
-          style={
+        <EuiButtonContent
+          className="euiButton__content"
+          iconSide="left"
+          iconType="folderOpen"
+          textProps={
             Object {
-              "minWidth": undefined,
+              "className": "euiButton__text",
             }
           }
-          type="button"
         >
-          <EuiButtonContent
-            className="euiButton__content"
-            iconSide="left"
-            iconType="folderOpen"
-            textProps={
-              Object {
-                "className": "euiButton__text",
-              }
-            }
+          <span
+            className="euiButtonContent euiButton__content"
           >
-            <span
-              className="euiButtonContent euiButton__content"
+            <EuiIcon
+              className="euiButtonContent__icon"
+              color="inherit"
+              size="m"
+              type="folderOpen"
             >
-              <EuiIcon
+              <span
                 className="euiButtonContent__icon"
                 color="inherit"
+                data-euiicon-type="folderOpen"
                 size="m"
-                type="folderOpen"
-              >
-                <span
-                  className="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="folderOpen"
-                  size="m"
-                />
-              </EuiIcon>
-              <span
-                className="euiButton__text"
-              >
-                Add from library
-              </span>
+              />
+            </EuiIcon>
+            <span
+              className="euiButton__text"
+            >
+              Add from library
             </span>
-          </EuiButtonContent>
-        </button>
-      </EuiButtonDisplay>
-    </EuiButton>
-  </ToolbarButton>
-</SharedUxServicesProvider>
+          </span>
+        </EuiButtonContent>
+      </button>
+    </EuiButtonDisplay>
+  </EuiButton>
+</ToolbarButton>
 `;

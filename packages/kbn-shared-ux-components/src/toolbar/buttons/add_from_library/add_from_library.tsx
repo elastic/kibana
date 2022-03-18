@@ -20,10 +20,5 @@ const label = {
 };
 
 export const AddFromLibraryButton = ({ onClick, ...rest }: Props) => (
-  <ToolbarButton
-    {...rest}
-    iconType="folderOpen"
-    onClick={onClick}
-    label={label.getLibraryButtonLabel()}
-  />
+  <ToolbarButton {...rest} iconType="folderOpen" label={label.getLibraryButtonLabel()} />
 );
