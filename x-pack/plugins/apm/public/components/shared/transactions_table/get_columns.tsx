@@ -169,7 +169,8 @@ export function getColumns({
               {
                 defaultMessage: 'Failed transaction rate',
               }
-            )}{' '}
+            )}
+            &nbsp;
             <EuiIcon
               size="s"
               color="subdued"
@@ -224,7 +225,8 @@ export function getColumns({
               {
                 defaultMessage: 'Impact',
               }
-            )}{' '}
+            )}
+            &nbsp;
             <EuiIcon
               size="s"
               color="subdued"

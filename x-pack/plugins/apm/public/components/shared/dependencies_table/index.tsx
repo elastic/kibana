@@ -146,7 +146,8 @@ export function DependenciesTable(props: Props) {
           <>
             {i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
               defaultMessage: 'Failed transaction rate',
-            })}{' '}
+            })}
+            &nbsp;
             <EuiIcon
               size="s"
               color="subdued"
@@ -191,7 +192,8 @@ export function DependenciesTable(props: Props) {
           <>
             {i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
               defaultMessage: 'Impact',
-            })}{' '}
+            })}
+            &nbsp;
             <EuiIcon
               size="s"
               color="subdued"

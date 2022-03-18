@@ -151,7 +151,8 @@ export function ServiceOverviewDependenciesTable({
               {
                 defaultMessage: 'Dependencies',
               }
-            )}{' '}
+            )}
+            &nbsp;
             <EuiIcon
               size="s"
               color="subdued"
