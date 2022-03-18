@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const retry = getService('retry');
   const security = getService('security');
+  const esArchiver = getService('esArchiver');
 
   const editorTestSubjectSelector = 'searchProfilerEditor';
 
@@ -34,23 +35,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const okInput = [
         `{
-"query": {
-"match_all": {}`,
+    "query": {
+    "match_all": {}`,
         `{
-"query": {
-"match_all": {
-"test": """{ "more": "json" }"""`,
+    "query": {
+    "match_all": {
+    "test": """{ "more": "json" }"""`,
       ];
 
       const notOkInput = [
         `{
-"query": {
-"match_all": {
-"test": """{ "more": "json" }""`,
+    "query": {
+    "match_all": {
+    "test": """{ "more": "json" }""`,
         `{
-"query": {
-"match_all": {
-"test": """{ "more": "json" }""'`,
+    "query": {
+    "match_all": {
+    "test": """{ "more": "json" }""'`,
       ];
 
       const expectHasParseErrorsToBe = (expectation: boolean) => async (inputs: string[]) => {
@@ -69,6 +70,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await expectHasParseErrorsToBe(false)(okInput);
       await expectHasParseErrorsToBe(true)(notOkInput);
+    });
+
+    describe('No indices', () => {
+      before(async () => {
+        await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+      });
+
+      it('returns error if profile is executed with no valid indices', async () => {
+        const input = {
+          query: {
+            match_all: {},
+          },
+        };
+
+        await aceEditor.setValue(editorTestSubjectSelector, JSON.stringify(input));
+
+        await testSubjects.click('profileButton');
+
+        const notification = await testSubjects.find('noShardsNotification');
+        expect(await notification.getVisibleText()).to.contain('Unable to profile');
+      });
     });
   });
 }
