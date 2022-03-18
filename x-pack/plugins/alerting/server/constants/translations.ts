@@ -14,7 +14,7 @@ export const translations = {
         'xpack.alerting.taskRunner.warning.maxExecutableActions',
         {
           defaultMessage:
-            'Rule execution has reached the maximum number of executable actions limit',
+            'The maximum number of actions for this rule type was reached; excess actions were not triggered.',
         }
       ),
     },
