@@ -194,7 +194,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     return {
       pageIndex,
       pageSize,
-      totalItemCount: maxEvents,
+      totalItemCount:
+        maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED ? MAX_EXECUTION_EVENTS_DISPLAYED : maxEvents,
       pageSizeOptions: [5, 10, 25, 50],
     };
   }, [maxEvents, pageIndex, pageSize]);
@@ -274,14 +275,21 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         <UtilityBarSection>
           <UtilityBarGroup>
             <UtilityBarText dataTestSubj="executionsShowing">
-              {i18n.SHOWING_EXECUTIONS(maxEvents)}
+              {i18n.SHOWING_EXECUTIONS(
+                maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED
+                  ? MAX_EXECUTION_EVENTS_DISPLAYED
+                  : maxEvents
+              )}
             </UtilityBarText>
           </UtilityBarGroup>
           {maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED && (
             <UtilityBarGroup>
               <UtilityBarText dataTestSubj="exceptionsShowing">
                 <EuiTextColor color="danger">
-                  {i18n.RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED(maxEvents)}
+                  {i18n.RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED(
+                    maxEvents,
+                    MAX_EXECUTION_EVENTS_DISPLAYED
+                  )}
                 </EuiTextColor>
               </UtilityBarText>
             </UtilityBarGroup>

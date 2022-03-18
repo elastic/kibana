@@ -6,19 +6,20 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
     gutterSize="s"
   >
     <EuiFlexItem
-      style={
-        Object {
-          "minWidth": "65%",
-        }
-      }
+      grow={true}
     >
       <ExecutionLogSearchBar
         onSearch={[Function]}
         onStatusFilterChange={[Function]}
+        onlyShowFilters={true}
       />
     </EuiFlexItem>
     <EuiFlexItem
-      grow={true}
+      style={
+        Object {
+          "maxWidth": "582px",
+        }
+      }
     >
       <EuiSuperDatePicker
         commonlyUsedRanges={

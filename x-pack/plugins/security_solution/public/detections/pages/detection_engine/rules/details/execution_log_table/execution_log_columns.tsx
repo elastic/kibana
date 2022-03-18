@@ -6,6 +6,7 @@
  */
 
 import { EuiBasicTableColumn, EuiHealth, EuiLink, EuiText } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from 'kibana/public';
 import React from 'react';
@@ -32,7 +33,11 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
     ),
     field: 'security_status',
     render: (value: RuleExecutionStatus, data) =>
-      value ? <EuiHealth color={getStatusColor(value)}>{value}</EuiHealth> : getEmptyTagValue(),
+      value ? (
+        <EuiHealth color={getStatusColor(value)}>{capitalize(value)}</EuiHealth>
+      ) : (
+        getEmptyTagValue()
+      ),
     sortable: false,
     truncateText: false,
     width: '10%',

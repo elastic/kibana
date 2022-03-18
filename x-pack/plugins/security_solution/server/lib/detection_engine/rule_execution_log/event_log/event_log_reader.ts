@@ -69,6 +69,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       let statusIds: string[] = [];
       // If 0 or 3 statuses are selected we can search for all statuses and don't need this pre-filter by ID
       if (statusFilters.length > 0 && statusFilters.length < 3) {
+        // TODO: Add cardinality agg and pass as maxEvents in response
         const statusResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
           start,
           end,

@@ -17,13 +17,13 @@ export const SHOWING_EXECUTIONS = (totalItems: number) =>
     }
   );
 
-export const RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED = (totalItems: number) =>
+export const RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED = (totalItems: number, maxItems: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.searchLimitExceededLabel',
     {
-      values: { totalItems },
+      values: { totalItems, maxItems },
       defaultMessage:
-        "More than {totalItems} rule executions match filters provided. Showing first 500 by most recent '@timestamp'. Constrain filters further to view additional execution events",
+        "More than {totalItems} rule executions match filters provided. Showing first {maxItems} by most recent '@timestamp'. Constrain filters further to view additional execution events",
     }
   );
 
