@@ -64,8 +64,8 @@ describe('alertType', () => {
             "name": "conditions",
           },
           Object {
-            "description": "If the alert rule was created in Discover, the link will navigate
-             to Discover showing the records that triggered this alert. In the other case the link will navigate to the rule's status page.",
+            "description": "Navigate to Discover and show the records that triggered
+             the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.",
             "name": "link",
           },
         ],
@@ -81,10 +81,6 @@ describe('alertType', () => {
           Object {
             "description": "A function to determine if the threshold was met.",
             "name": "thresholdComparator",
-          },
-          Object {
-            "description": "The type of search.",
-            "name": "searchType",
           },
           Object {
             "description": "Serialized search source fields used to fetch the documents from Elasticsearch.",
