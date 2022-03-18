@@ -20,7 +20,11 @@ export const createMlAlertType = (
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
-    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
+    configFromOriginPlugin: {
+      execution: {
+        timeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
+      },
+    },
     validate: {
       params: {
         validate: (object: unknown) => {

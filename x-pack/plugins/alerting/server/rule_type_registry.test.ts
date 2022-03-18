@@ -129,37 +129,6 @@ describe('Create Lifecycle', () => {
       );
     });
 
-    test('throws if RuleType ruleTaskTimeout is not a valid duration', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
-        id: '123',
-        name: 'Test',
-        actionGroups: [
-          {
-            id: 'default',
-            name: 'Default',
-          },
-        ],
-        ruleTaskTimeout: '23 milisec',
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        executor: jest.fn(),
-        producer: 'alerts',
-        config: {
-          execution: {
-            actions: { max: 1000 },
-          },
-        },
-      };
-      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-
-      expect(() => registry.register(ruleType)).toThrowError(
-        new Error(
-          `Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`
-        )
-      );
-    });
-
     test('throws if defaultScheduleInterval isnt valid', () => {
       const ruleType: RuleType<never, never, never, never, never, 'default'> = {
         id: '123',
@@ -312,20 +281,20 @@ describe('Create Lifecycle', () => {
           },
         ],
         defaultActionGroupId: 'default',
-        ruleTaskTimeout: '13m',
         executor: jest.fn(),
         producer: 'alerts',
         minimumLicenseRequired: 'basic',
         isExportable: true,
         config: {
           execution: {
+            timeout: '13m',
             actions: { max: 1000 },
           },
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
-      expect(registry.get('test').ruleTaskTimeout).toBe('13m');
+      expect(registry.get('test').config!.execution.timeout).toBe('13m');
     });
 
     test('throws if the custom recovery group is contained in the RuleType action groups', () => {
@@ -389,9 +358,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-        ruleTaskTimeout: '20m',
         config: {
           execution: {
+            timeout: '20m',
             actions: { max: 1000 },
           },
         },
@@ -578,12 +547,12 @@ describe('Create Lifecycle', () => {
         defaultActionGroupId: 'testActionGroup',
         doesSetRecoveryContext: false,
         isExportable: true,
-        ruleTaskTimeout: '20m',
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
         producer: 'alerts',
         config: {
           execution: {
+            timeout: '20m',
             actions: { max: 1000 },
           },
         },
@@ -607,6 +576,14 @@ describe('Create Lifecycle', () => {
             "params": Array [],
             "state": Array [],
           },
+          "config": Object {
+            "execution": Object {
+              "actions": Object {
+                "max": 1000,
+              },
+              "timeout": "20m",
+            },
+          },
           "defaultActionGroupId": "testActionGroup",
           "defaultScheduleInterval": undefined,
           "doesSetRecoveryContext": false,
@@ -620,7 +597,6 @@ describe('Create Lifecycle', () => {
             "id": "recovered",
             "name": "Recovered",
           },
-          "ruleTaskTimeout": "20m",
         },
       }
     `);

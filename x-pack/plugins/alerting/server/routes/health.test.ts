@@ -38,7 +38,14 @@ const ruleTypes = [
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    ruleTaskTimeout: '10m',
+    config: {
+      execution: {
+        timeout: '10m',
+        actions: {
+          max: 1000,
+        },
+      },
+    },
     recoveryActionGroup: RecoveredActionGroup,
     authorizedConsumers: {},
     actionVariables: {

@@ -6,23 +6,50 @@
  */
 
 import { omit } from 'lodash';
-import { RulesConfig, RuleTypeConfig } from '../config';
+import { Logger } from 'kibana/server';
+import { RulesConfig, RuleTypeConfig, RuleTypeConfigFromOriginPlugin } from '../config';
+import { validateDurationSchema } from '../../common';
+import { translations } from '../constants/translations';
+
+const DEFAULT_EXECUTION_TIMEOUT = '5m';
 
 export const getRulesConfig = ({
   config,
+  configFromOriginPlugin,
   ruleTypeId,
+  logger,
 }: {
   config: RulesConfig;
+  configFromOriginPlugin?: RuleTypeConfigFromOriginPlugin;
   ruleTypeId: string;
+  logger: Logger;
 }): RuleTypeConfig => {
   const ruleTypeConfig = config.execution.ruleTypeOverrides?.find(
     (ruleType) => ruleType.id === ruleTypeId
   );
 
+  // validate timeout from rule type registry here
+  let timeout = config.execution.timeout || DEFAULT_EXECUTION_TIMEOUT;
+
+  if (configFromOriginPlugin?.execution.timeout) {
+    const invalidTimeout = validateDurationSchema(configFromOriginPlugin?.execution.timeout);
+    if (!invalidTimeout) {
+      timeout = configFromOriginPlugin?.execution.timeout;
+    } else {
+      logger.error(
+        translations.ruleTypeRegistry.register.invalidTimeoutRuleTypeError({
+          id: ruleTypeId,
+          errorMessage: invalidTimeout,
+        })
+      );
+    }
+  }
+
   return {
     execution: {
       ...omit(config.execution, 'ruleTypeOverrides'),
-      ...ruleTypeConfig,
+      timeout,
+      ...omit(ruleTypeConfig, 'id'),
     },
   };
 };

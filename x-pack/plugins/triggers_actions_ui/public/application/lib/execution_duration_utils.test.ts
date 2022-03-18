@@ -8,42 +8,52 @@
 import { formatMillisForDisplay, shouldShowDurationWarning } from './execution_duration_utils';
 import { RuleType } from '../../types';
 
-describe('formatMillisForDisplay', () => {
-  it('should return 0 for undefined', () => {
-    expect(formatMillisForDisplay(undefined)).toEqual('00:00:00.000');
+describe('execution duration', () => {
+  describe('formatMillisForDisplay', () => {
+    it('should return 0 for undefined', () => {
+      expect(formatMillisForDisplay(undefined)).toEqual('00:00:00.000');
+    });
+
+    it('should correctly format millisecond duration in milliseconds', () => {
+      expect(formatMillisForDisplay(845)).toEqual('00:00:00.845');
+    });
+
+    it('should correctly format second duration in milliseconds', () => {
+      expect(formatMillisForDisplay(45200)).toEqual('00:00:45.200');
+    });
+
+    it('should correctly format minute duration in milliseconds', () => {
+      expect(formatMillisForDisplay(122450)).toEqual('00:02:02.450');
+    });
+
+    it('should correctly format hour duration in milliseconds', () => {
+      expect(formatMillisForDisplay(3634601)).toEqual('01:00:34.601');
+    });
   });
 
-  it('should correctly format millisecond duration in milliseconds', () => {
-    expect(formatMillisForDisplay(845)).toEqual('00:00:00.845');
-  });
+  describe('shouldShowDurationWarning', () => {
+    it('should return false if rule type or config.timeout is undefined', () => {
+      expect(shouldShowDurationWarning(undefined, 1000)).toEqual(false);
+      expect(shouldShowDurationWarning(mockRuleType(), 1000)).toEqual(false);
+    });
 
-  it('should correctly format second duration in milliseconds', () => {
-    expect(formatMillisForDisplay(45200)).toEqual('00:00:45.200');
-  });
+    it('should return false if average duration is less than rule task timeout', () => {
+      expect(
+        shouldShowDurationWarning(
+          mockRuleType({ config: { execution: { timeout: '1m', actions: { max: 1000 } } } }),
+          1000
+        )
+      ).toEqual(false);
+    });
 
-  it('should correctly format minute duration in milliseconds', () => {
-    expect(formatMillisForDisplay(122450)).toEqual('00:02:02.450');
-  });
-
-  it('should correctly format hour duration in milliseconds', () => {
-    expect(formatMillisForDisplay(3634601)).toEqual('01:00:34.601');
-  });
-});
-
-describe('shouldShowDurationWarning', () => {
-  it('should return false if rule type or ruleTaskTimeout is undefined', () => {
-    expect(shouldShowDurationWarning(undefined, 1000)).toEqual(false);
-    expect(shouldShowDurationWarning(mockRuleType(), 1000)).toEqual(false);
-  });
-
-  it('should return false if average duration is less than rule task timeout', () => {
-    expect(shouldShowDurationWarning(mockRuleType({ ruleTaskTimeout: '1m' }), 1000)).toEqual(false);
-  });
-
-  it('should return true if average duration is greater than rule task timeout', () => {
-    expect(shouldShowDurationWarning(mockRuleType({ ruleTaskTimeout: '1m' }), 120000)).toEqual(
-      true
-    );
+    it('should return true if average duration is greater than rule task timeout', () => {
+      expect(
+        shouldShowDurationWarning(
+          mockRuleType({ config: { execution: { timeout: '1m', actions: { max: 1000 } } } }),
+          120000
+        )
+      ).toEqual(true);
+    });
   });
 });
 

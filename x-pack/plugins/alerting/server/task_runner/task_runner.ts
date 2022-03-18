@@ -880,7 +880,11 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
     this.logger.debug(
-      `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`
+      `Cancelling rule type ${
+        this.ruleType.id
+      } with id ${ruleId} - execution exceeded rule type timeout of ${
+        this.ruleType.config!.execution.timeout
+      }`
     );
 
     this.logger.debug(
@@ -898,7 +902,7 @@ export class TaskRunner<
       message: `rule: ${this.ruleType.id}:${ruleId}: '${
         this.ruleName ?? ''
       }' execution cancelled due to timeout - exceeded rule type timeout of ${
-        this.ruleType.ruleTaskTimeout
+        this.ruleType.config!.execution.timeout
       }`,
       kibana: {
         alert: {
@@ -934,7 +938,11 @@ export class TaskRunner<
       status: 'error',
       error: {
         reason: AlertExecutionStatusErrorReasons.Timeout,
-        message: `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
+        message: `${
+          this.ruleType.id
+        }:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${
+          this.ruleType.config!.execution.timeout
+        }`,
       },
     };
     this.logger.debug(

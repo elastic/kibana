@@ -43,7 +43,6 @@ const ruleTypes = [
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    ruleTaskTimeout: '10m',
     recoveryActionGroup: RecoveredActionGroup,
     authorizedConsumers: {},
     actionVariables: {
@@ -53,6 +52,14 @@ const ruleTypes = [
     producer: 'test',
     enabledInLicense: true,
     defaultScheduleInterval: '10m',
+    config: {
+      execution: {
+        timeout: '10m',
+        actions: {
+          max: 1000,
+        },
+      },
+    },
   } as RegistryAlertTypeWithAuth,
 ];
 

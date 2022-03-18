@@ -298,7 +298,9 @@ describe('execution duration overview', () => {
 
   it('renders average execution duration', async () => {
     const rule = mockRule();
-    const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
+    const ruleType = mockRuleType({
+      config: { execution: { timeout: '10m', actions: { max: 1000 } } },
+    });
     const ruleSummary = mockRuleSummary({
       executionDuration: { average: 60284, valuesWithTimestamp: {} },
     });
@@ -329,7 +331,9 @@ describe('execution duration overview', () => {
 
   it('renders warning when average execution duration exceeds rule timeout', async () => {
     const rule = mockRule();
-    const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
+    const ruleType = mockRuleType({
+      config: { execution: { timeout: '10m', actions: { max: 1000 } } },
+    });
     const ruleSummary = mockRuleSummary({
       executionDuration: { average: 60284345, valuesWithTimestamp: {} },
     });

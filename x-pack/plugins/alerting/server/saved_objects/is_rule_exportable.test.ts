@@ -49,6 +49,9 @@ describe('isRuleExportable', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        execution: { timeout: '5m', actions: { max: 1000 } },
+      },
     });
     expect(
       isRuleExportable(
@@ -105,6 +108,9 @@ describe('isRuleExportable', () => {
       isExportable: false,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        execution: { timeout: '5m', actions: { max: 1000 } },
+      },
     });
     expect(
       isRuleExportable(
@@ -164,6 +170,9 @@ describe('isRuleExportable', () => {
       isExportable: false,
       executor: jest.fn(),
       producer: 'alerts',
+      config: {
+        execution: { timeout: '5m', actions: { max: 1000 } },
+      },
     });
     expect(
       isRuleExportable(

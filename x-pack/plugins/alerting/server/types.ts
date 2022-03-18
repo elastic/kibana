@@ -42,7 +42,7 @@ import {
   AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { RulesConfig } from './config';
+import { RulesConfig, RuleTypeConfigFromOriginPlugin } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -167,10 +167,10 @@ export interface RuleType<
   };
   isExportable: boolean;
   defaultScheduleInterval?: string;
-  ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   config?: RulesConfig;
+  configFromOriginPlugin?: RuleTypeConfigFromOriginPlugin;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,

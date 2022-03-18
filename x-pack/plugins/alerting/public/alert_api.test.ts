@@ -13,12 +13,13 @@ const http = httpServiceMock.createStartContract();
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('loadAlertTypes', () => {
-  test('should call get alert types API', async () => {
-    http.get.mockResolvedValueOnce([getApiRuleType()]);
+describe('Alert API', () => {
+  describe('loadAlertTypes', () => {
+    test('should call get alert types API', async () => {
+      http.get.mockResolvedValueOnce([getApiRuleType()]);
 
-    const result = await loadAlertTypes({ http });
-    expect(result).toMatchInlineSnapshot(`
+      const result = await loadAlertTypes({ http });
+      expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
           "actionGroups": Array [
@@ -53,6 +54,14 @@ describe('loadAlertTypes', () => {
               "read": true,
             },
           },
+          "config": Object {
+            "execution": Object {
+              "actions": Object {
+                "max": 1000,
+              },
+              "timeout": "5m",
+            },
+          },
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
           "id": ".index-threshold",
@@ -64,42 +73,41 @@ describe('loadAlertTypes', () => {
             "id": "recovered",
             "name": "Recovered",
           },
-          "ruleTaskTimeout": "5m",
         },
       ]
     `);
 
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/alerting/rule_types",
       ]
     `);
+    });
   });
-});
 
-describe('loadAlertType', () => {
-  test('should call get alert types API', async () => {
-    const ruleType = getApiRuleType();
-    http.get.mockResolvedValueOnce([ruleType]);
+  describe('loadAlertType', () => {
+    test('should call get alert types API', async () => {
+      const ruleType = getApiRuleType();
+      http.get.mockResolvedValueOnce([ruleType]);
 
-    const result = await loadAlertType({ http, id: ruleType.id });
-    expect(result).toEqual(getRuleType());
+      const result = await loadAlertType({ http, id: ruleType.id });
+      expect(result).toEqual(getRuleType());
+    });
   });
-});
 
-describe('loadAlert', () => {
-  test('should call get API with base parameters', async () => {
-    const apiRule = getApiRule();
-    http.get.mockResolvedValueOnce(apiRule);
+  describe('loadAlert', () => {
+    test('should call get API with base parameters', async () => {
+      const apiRule = getApiRule();
+      http.get.mockResolvedValueOnce(apiRule);
 
-    const res = await loadAlert({ http, alertId: apiRule.id });
-    expect(res).toEqual(getRule());
+      const res = await loadAlert({ http, alertId: apiRule.id });
+      expect(res).toEqual(getRule());
 
-    const fixedDate = new Date('2021-12-11T16:59:50.152Z');
-    res.updatedAt = fixedDate;
-    res.createdAt = fixedDate;
-    res.executionStatus.lastExecutionDate = fixedDate;
-    expect(res).toMatchInlineSnapshot(`
+      const fixedDate = new Date('2021-12-11T16:59:50.152Z');
+      res.updatedAt = fixedDate;
+      res.createdAt = fixedDate;
+      res.executionStatus.lastExecutionDate = fixedDate;
+      expect(res).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -142,110 +150,124 @@ describe('loadAlert', () => {
       }
     `);
 
-    expect(http.get).toHaveBeenCalledWith(`/internal/alerting/rule/${apiRule.id}`);
+      expect(http.get).toHaveBeenCalledWith(`/internal/alerting/rule/${apiRule.id}`);
+    });
   });
+
+  function getApiRuleType() {
+    return {
+      id: '.index-threshold',
+      name: 'Index threshold',
+      producer: 'stackAlerts',
+      enabled_in_license: true,
+      config: {
+        execution: {
+          timeout: '5m',
+          actions: {
+            max: 1000,
+          },
+        },
+      },
+      recovery_action_group: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
+      action_groups: [
+        {
+          id: 'default',
+          name: 'Threshold met',
+        },
+      ],
+      default_action_group_id: 'default',
+      minimum_license_required: 'basic',
+      is_exportable: true,
+      action_variables: {
+        context: [
+          {
+            name: 'message',
+            description: 'A pre-constructed message for the alert.',
+          },
+        ],
+        state: [
+          {
+            name: 'example',
+            description: 'Example state variable',
+          },
+        ],
+        params: [
+          {
+            name: 'threshold',
+            description:
+              'An array of values to use as the threshold; "between" and "notBetween" require two values, the others require one.',
+          },
+        ],
+      },
+      authorized_consumers: {
+        alerts: {
+          read: true,
+          all: true,
+        },
+      },
+    };
+  }
+
+  function getRuleType(): RuleType {
+    return {
+      id: '.index-threshold',
+      name: 'Index threshold',
+      producer: 'stackAlerts',
+      enabledInLicense: true,
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Threshold met',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      actionVariables: {
+        context: [
+          {
+            name: 'message',
+            description: 'A pre-constructed message for the alert.',
+          },
+        ],
+        state: [
+          {
+            name: 'example',
+            description: 'Example state variable',
+          },
+        ],
+        params: [
+          {
+            name: 'threshold',
+            description:
+              'An array of values to use as the threshold; "between" and "notBetween" require two values, the others require one.',
+          },
+        ],
+      },
+      authorizedConsumers: {
+        alerts: {
+          read: true,
+          all: true,
+        },
+      },
+      config: {
+        execution: {
+          timeout: '5m',
+          actions: {
+            max: 1000,
+          },
+        },
+      },
+    };
+  }
 });
-
-function getApiRuleType() {
-  return {
-    id: '.index-threshold',
-    name: 'Index threshold',
-    producer: 'stackAlerts',
-    enabled_in_license: true,
-    recovery_action_group: {
-      id: 'recovered',
-      name: 'Recovered',
-    },
-    action_groups: [
-      {
-        id: 'default',
-        name: 'Threshold met',
-      },
-    ],
-    default_action_group_id: 'default',
-    minimum_license_required: 'basic',
-    is_exportable: true,
-    rule_task_timeout: '5m',
-    action_variables: {
-      context: [
-        {
-          name: 'message',
-          description: 'A pre-constructed message for the alert.',
-        },
-      ],
-      state: [
-        {
-          name: 'example',
-          description: 'Example state variable',
-        },
-      ],
-      params: [
-        {
-          name: 'threshold',
-          description:
-            'An array of values to use as the threshold; "between" and "notBetween" require two values, the others require one.',
-        },
-      ],
-    },
-    authorized_consumers: {
-      alerts: {
-        read: true,
-        all: true,
-      },
-    },
-  };
-}
-
-function getRuleType(): RuleType {
-  return {
-    id: '.index-threshold',
-    name: 'Index threshold',
-    producer: 'stackAlerts',
-    enabledInLicense: true,
-    recoveryActionGroup: {
-      id: 'recovered',
-      name: 'Recovered',
-    },
-    actionGroups: [
-      {
-        id: 'default',
-        name: 'Threshold met',
-      },
-    ],
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    ruleTaskTimeout: '5m',
-    actionVariables: {
-      context: [
-        {
-          name: 'message',
-          description: 'A pre-constructed message for the alert.',
-        },
-      ],
-      state: [
-        {
-          name: 'example',
-          description: 'Example state variable',
-        },
-      ],
-      params: [
-        {
-          name: 'threshold',
-          description:
-            'An array of values to use as the threshold; "between" and "notBetween" require two values, the others require one.',
-        },
-      ],
-    },
-    authorizedConsumers: {
-      alerts: {
-        read: true,
-        all: true,
-      },
-    },
-  };
-}
-
 const DateNow = Date.now();
 const RuleCreateDate = new Date(DateNow - 2000);
 const RuleUpdateDate = new Date(DateNow - 1000);

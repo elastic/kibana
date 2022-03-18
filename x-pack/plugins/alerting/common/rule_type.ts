@@ -34,11 +34,19 @@ export interface RuleType<
   producer: string;
   minimumLicenseRequired: LicenseType;
   isExportable: boolean;
-  ruleTaskTimeout?: string;
   defaultScheduleInterval?: string;
   doesSetRecoveryContext?: boolean;
   enabledInLicense: boolean;
   authorizedConsumers: Record<string, ConsumerPrivileges>;
+  config?: {
+    execution: {
+      timeout: string;
+      actions: { max: number };
+    };
+  };
+  configFromOriginPlugin?: {
+    execution: { timeout?: string };
+  };
 }
 
 export interface ActionGroup<ActionGroupIds extends string> {

@@ -29,10 +29,10 @@ export function shouldShowDurationWarning(
   ruleType: RuleType | undefined,
   avgDurationMillis: number
 ) {
-  if (!ruleType || !ruleType.ruleTaskTimeout) {
+  if (!ruleType?.config?.execution.timeout) {
     return false;
   }
-  const ruleTypeTimeout: string = ruleType.ruleTaskTimeout;
+  const ruleTypeTimeout: string = ruleType.config.execution.timeout;
   const ruleTypeTimeoutMillis: number = parseDuration(ruleTypeTimeout);
   return avgDurationMillis > ruleTypeTimeoutMillis;
 }

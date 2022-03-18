@@ -266,12 +266,12 @@ export class AlertingPlugin {
     const alertingConfig: AlertingConfig = this.config;
 
     return {
-      registerType<
-        Params extends AlertTypeParams = AlertTypeParams,
-        ExtractedParams extends AlertTypeParams = AlertTypeParams,
-        State extends AlertTypeState = AlertTypeState,
-        InstanceState extends AlertInstanceState = AlertInstanceState,
-        InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+      registerType: <
+        Params extends AlertTypeParams = never,
+        ExtractedParams extends AlertTypeParams = never,
+        State extends AlertTypeState = never,
+        InstanceState extends AlertInstanceState = never,
+        InstanceContext extends AlertInstanceContext = never,
         ActionGroupIds extends string = never,
         RecoveryActionGroupId extends string = never
       >(
@@ -284,16 +284,16 @@ export class AlertingPlugin {
           ActionGroupIds,
           RecoveryActionGroupId
         >
-      ) {
+      ) => {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
         ruleType.config = getRulesConfig({
           config: alertingConfig.rules,
+          configFromOriginPlugin: ruleType.configFromOriginPlugin,
           ruleTypeId: ruleType.id,
+          logger: this.logger,
         });
-        ruleType.ruleTaskTimeout =
-          ruleType.ruleTaskTimeout ?? alertingConfig.defaultRuleTaskTimeout;
         ruleType.cancelAlertsOnRuleTimeout =
           ruleType.cancelAlertsOnRuleTimeout ?? alertingConfig.cancelAlertsOnRuleTimeout;
         ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;

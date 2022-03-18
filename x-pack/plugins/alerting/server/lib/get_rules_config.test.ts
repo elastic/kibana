@@ -7,6 +7,7 @@
 
 import { getRulesConfig } from './get_rules_config';
 import { RulesConfig } from '../config';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 
 const ruleTypeId = 'test-rule-type-id';
 const config = {
@@ -22,7 +23,7 @@ const configWithRuleType = {
     ruleTypeOverrides: [
       {
         id: ruleTypeId,
-        actions: { max: 20 },
+        timeout: '10m',
       },
     ],
   },
@@ -30,16 +31,76 @@ const configWithRuleType = {
 
 describe('get rules config', () => {
   test('returns the rule type specific config and keeps the default values that are not overwritten', () => {
-    expect(getRulesConfig({ config: configWithRuleType, ruleTypeId })).toEqual({
+    expect(
+      getRulesConfig({
+        config: configWithRuleType,
+        ruleTypeId,
+        logger: loggingSystemMock.create().get(),
+      })
+    ).toEqual({
       execution: {
-        id: ruleTypeId,
-        timeout: '1m',
-        actions: { max: 20 },
+        timeout: '10m',
+        actions: { max: 1000 },
       },
     });
   });
 
-  test('returns the default config when there is no rule type specific config', () => {
-    expect(getRulesConfig({ config, ruleTypeId })).toEqual(config);
+  test('applies the config params passed from the origin plugin', () => {
+    expect(
+      getRulesConfig({
+        config,
+        configFromOriginPlugin: { execution: { timeout: '23m' } },
+        ruleTypeId,
+        logger: loggingSystemMock.create().get(),
+      })
+    ).toEqual({
+      execution: {
+        timeout: '23m',
+        actions: { max: 1000 },
+      },
+    });
+  });
+
+  test('applies the existing timeout value and logs an error if the timeout param passed from the origin plugin is invalid', () => {
+    expect(
+      getRulesConfig({
+        config,
+        configFromOriginPlugin: { execution: { timeout: 'invalid' } },
+        ruleTypeId,
+        logger: loggingSystemMock.create().get(),
+      })
+    ).toEqual({
+      execution: {
+        timeout: '1m',
+        actions: { max: 1000 },
+      },
+    });
+  });
+
+  test("applies the default timeout value if the timeout param passed from the origin plugin is invalid and there isn't timeout from config", () => {
+    expect(
+      getRulesConfig({
+        config: {
+          ...config,
+          execution: {
+            actions: { max: 1000 },
+          },
+        },
+        configFromOriginPlugin: { execution: { timeout: 'invalid' } },
+        ruleTypeId,
+        logger: loggingSystemMock.create().get(),
+      })
+    ).toEqual({
+      execution: {
+        timeout: '5m',
+        actions: { max: 1000 },
+      },
+    });
+  });
+
+  test('returns the default config when there is neither rule type specific config not config from plugin', () => {
+    expect(
+      getRulesConfig({ config, ruleTypeId, logger: loggingSystemMock.create().get() })
+    ).toEqual(config);
   });
 });

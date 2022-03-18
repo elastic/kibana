@@ -94,7 +94,7 @@ The following table describes the properties of the `options` object.
 |executor|This is where the code for the rule type lives. This is a function to be called when executing a rule on an interval basis. For full details, see the executor section below.|Function|
 |producer|The id of the application producing this rule type.|string|
 |minimumLicenseRequired|The value of a minimum license. Most of the rules are licensed as "basic".|string|
-|ruleTaskTimeout|The length of time a rule can run before being cancelled due to timeout. By default, this value is "5m".|string|
+|config.execution.timeout|The length of time a rule can run before being cancelled due to timeout. By default, this value is "5m".|string|
 |cancelAlertsOnRuleTimeout|Whether to skip writing alerts and scheduling actions if a rule execution is cancelled due to timeout. By default, this value is set to "true".|boolean|
 |useSavedObjectReferences.extractReferences|(Optional) When developing a rule type, you can choose to implement hooks for extracting saved object references from rule parameters. This hook will be invoked when a rule is created or updated. Implementing this hook is optional, but if an extract hook is implemented, an inject hook must also be implemented.|Function
 |useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
@@ -366,7 +366,11 @@ const myRuleType: RuleType<
 		};
 	},
 	producer: 'alerting',
-	ruleTaskTimeout: '10m',
+  config: {
+    execution:{
+      timeout:'10m',
+    }
+  },
 	useSavedObjectReferences: {
 		extractReferences: (params: Params): RuleParamsAndRefs<ExtractedParams> => {
 			const { testSavedObjectId, ...otherParams } = params;

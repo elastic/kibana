@@ -49,7 +49,14 @@ describe('ruleTypesRoute', () => {
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
         isExportable: true,
-        ruleTaskTimeout: '10m',
+        config: {
+          execution: {
+            timeout: '10m',
+            actions: {
+              max: 1000,
+            },
+          },
+        },
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -77,7 +84,6 @@ describe('ruleTypesRoute', () => {
         does_set_recovery_context: false,
         minimum_license_required: 'basic',
         is_exportable: true,
-        rule_task_timeout: '10m',
         recovery_action_group: RecoveredActionGroup,
         authorized_consumers: {},
         action_variables: {
@@ -86,6 +92,14 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'test',
         enabled_in_license: true,
+        config: {
+          execution: {
+            actions: {
+              max: 1000,
+            },
+            timeout: '10m',
+          },
+        },
       },
     ];
     rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
@@ -107,6 +121,14 @@ describe('ruleTypesRoute', () => {
               "state": Array [],
             },
             "authorized_consumers": Object {},
+            "config": Object {
+              "execution": Object {
+                "actions": Object {
+                  "max": 1000,
+                },
+                "timeout": "10m",
+              },
+            },
             "default_action_group_id": "default",
             "default_schedule_interval": "10m",
             "does_set_recovery_context": false,
@@ -120,7 +142,6 @@ describe('ruleTypesRoute', () => {
               "id": "recovered",
               "name": "Recovered",
             },
-            "rule_task_timeout": "10m",
           },
         ],
       }

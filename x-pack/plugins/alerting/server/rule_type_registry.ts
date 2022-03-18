@@ -50,9 +50,9 @@ export interface RegistryRuleType
     | 'producer'
     | 'minimumLicenseRequired'
     | 'isExportable'
-    | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
+    | 'config'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -184,21 +184,7 @@ export class RuleTypeRegistry {
         })
       );
     }
-    // validate ruleTypeTimeout here
-    if (ruleType.ruleTaskTimeout) {
-      const invalidTimeout = validateDurationSchema(ruleType.ruleTaskTimeout);
-      if (invalidTimeout) {
-        throw new Error(
-          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidTimeoutRuleTypeError', {
-            defaultMessage: 'Rule type "{id}" has invalid timeout: {errorMessage}.',
-            values: {
-              id: ruleType.id,
-              errorMessage: invalidTimeout,
-            },
-          })
-        );
-      }
-    }
+
     ruleType.actionVariables = normalizedActionVariables(ruleType.actionVariables);
 
     // validate defaultScheduleInterval here
@@ -256,7 +242,7 @@ export class RuleTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
-        timeout: ruleType.ruleTaskTimeout,
+        timeout: ruleType.config!.execution.timeout,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,
@@ -337,9 +323,9 @@ export class RuleTypeRegistry {
             producer,
             minimumLicenseRequired,
             isExportable,
-            ruleTaskTimeout,
             defaultScheduleInterval,
             doesSetRecoveryContext,
+            config,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -351,9 +337,9 @@ export class RuleTypeRegistry {
           producer,
           minimumLicenseRequired,
           isExportable,
-          ruleTaskTimeout,
           defaultScheduleInterval,
           doesSetRecoveryContext,
+          config,
           enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
             id,
             name,

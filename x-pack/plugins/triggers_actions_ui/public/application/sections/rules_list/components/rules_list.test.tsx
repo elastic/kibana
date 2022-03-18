@@ -87,7 +87,11 @@ const ruleTypeFromApi = {
   authorizedConsumers: {
     [ALERTS_FEATURE_ID]: { read: true, all: true },
   },
-  ruleTaskTimeout: '1m',
+  config: {
+    execution: {
+      timeout: '1m',
+    },
+  },
 };
 ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
@@ -482,7 +486,9 @@ describe('rules_list component with items', () => {
     const durationWarningIcon = wrapper.find('EuiIconTip[data-test-subj="ruleDurationWarning"]');
     expect(durationWarningIcon.length).toEqual(
       mockedRulesData.filter(
-        (data) => data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
+        (data) =>
+          data.executionStatus.lastDuration >
+          parseDuration(ruleTypeFromApi.config.execution.timeout)
       ).length
     );
 

@@ -29,11 +29,11 @@ const generateAlertingConfig = (): AlertingConfig => ({
     removalDelay: '1h',
   },
   maxEphemeralActionsPerAlert: 10,
-  defaultRuleTaskTimeout: '5m',
   cancelAlertsOnRuleTimeout: true,
   minimumScheduleInterval: '1m',
   rules: {
     execution: {
+      timeout: '5m',
       actions: {
         max: 1000,
       },
@@ -54,6 +54,7 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
       actions: {
         max: 1000,
       },
+      timeout: '5m',
     },
   },
   async executor() {},
@@ -123,6 +124,7 @@ describe('Alerting Plugin', () => {
         ...generateAlertingConfig(),
         rules: {
           execution: {
+            timeout: '5m',
             actions: {
               max: 123,
             },
@@ -139,6 +141,7 @@ describe('Alerting Plugin', () => {
       expect(ruleType.config).toEqual({
         execution: {
           actions: { max: 123 },
+          timeout: '5m',
         },
       });
     });
@@ -162,7 +165,6 @@ describe('Alerting Plugin', () => {
 
       expect(ruleType.config).toEqual({
         execution: {
-          id: sampleRuleType.id,
           actions: {
             max: 123,
           },
@@ -199,25 +201,6 @@ describe('Alerting Plugin', () => {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
         });
-      });
-
-      it('should apply default config value for ruleTaskTimeout if no value is specified', async () => {
-        const ruleType = {
-          ...sampleRuleType,
-          minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, never, never, never, 'default', never>;
-        await setup.registerType(ruleType);
-        expect(ruleType.ruleTaskTimeout).toBe('5m');
-      });
-
-      it('should apply value for ruleTaskTimeout if specified', async () => {
-        const ruleType = {
-          ...sampleRuleType,
-          minimumLicenseRequired: 'basic',
-          ruleTaskTimeout: '20h',
-        } as RuleType<never, never, never, never, never, 'default', never>;
-        await setup.registerType(ruleType);
-        expect(ruleType.ruleTaskTimeout).toBe('20h');
       });
 
       it('should apply default config value for cancelAlertsOnRuleTimeout if no value is specified', async () => {

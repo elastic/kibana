@@ -54,9 +54,9 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
-  ruleTaskTimeout: '5m',
   config: {
     execution: {
+      timeout: '5m',
       actions: { max: 1000 },
     },
   },

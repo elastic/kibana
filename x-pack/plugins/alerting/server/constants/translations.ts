@@ -19,4 +19,16 @@ export const translations = {
       ),
     },
   },
+  ruleTypeRegistry: {
+    register: {
+      invalidTimeoutRuleTypeError: ({ id, errorMessage }: { id: string; errorMessage: string }) =>
+        i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidTimeoutRuleTypeError', {
+          defaultMessage: 'Rule type "{id}" has invalid timeout: {errorMessage}.',
+          values: {
+            id,
+            errorMessage,
+          },
+        }),
+    },
+  },
 };
