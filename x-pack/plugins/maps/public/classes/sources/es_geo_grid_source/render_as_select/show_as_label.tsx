@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CLUSTER_LABEL, GRID_LABEL, HEX_LABEL } from './i18n_constants';
 
