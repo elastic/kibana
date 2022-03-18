@@ -266,7 +266,7 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   const emptyMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Find apps or objects. Ex: Discover',
+    defaultMessage: 'Find apps, content, and more. Ex: Discover',
   });
   const keyboardShortcutTooltip = `${i18n.translate(
     'xpack.globalSearchBar.searchBar.shortcutTooltip.description',
