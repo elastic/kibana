@@ -40,9 +40,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     if (
       kibanaConfig?.markdownPlugins?.lens &&
       !disabledPlugins?.includes(LensPluginId) &&
-      appCapabilities?.visualize &&
-      // TODO remove this check after the lens plugin fixes this bug
-      appCapabilities.dashboard
+      appCapabilities?.visualize
     ) {
       uiPlugins.push(lensMarkdownPlugin.plugin);
     }
@@ -57,7 +55,6 @@ export const usePlugins = (disabledPlugins?: string[]) => {
       processingPlugins,
     };
   }, [
-    appCapabilities?.dashboard,
     appCapabilities?.visualize,
     disabledPlugins,
     kibanaConfig?.markdownPlugins?.lens,

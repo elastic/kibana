@@ -22,35 +22,50 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import { JobType, CanDeleteJobResponse } from '../../../../common/types/saved_objects';
+import type {
+  JobType,
+  CanDeleteMLSpaceAwareItemsResponse,
+  TrainedModelType,
+} from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ManagedJobsWarningCallout } from '../../jobs/jobs_list/components/confirm_modals/managed_jobs_warning_callout';
 
-const shouldUnTagLabel = i18n.translate('xpack.ml.deleteJobCheckModal.shouldUnTagLabel', {
-  defaultMessage: 'Remove job from current space',
-});
+const shouldUnTagJobLabel = i18n.translate(
+  'xpack.ml.deleteSpaceAwareItemCheckModal.shouldUnTagLabel.job',
+  {
+    defaultMessage: 'Remove job from current space',
+  }
+);
+const shouldUnTagModelLabel = i18n.translate(
+  'xpack.ml.deleteSpaceAwareItemCheckModal.shouldUnTagLabel.model',
+  {
+    defaultMessage: 'Remove model from current space',
+  }
+);
 
 interface ModalContentReturnType {
   buttonText: JSX.Element;
   modalText: JSX.Element;
 }
 
-interface JobCheckRespSummary {
+interface CanDeleteMLSpaceAwareItemsSummary {
   canDelete: boolean;
   canRemoveFromSpace: boolean;
   canTakeAnyAction: boolean;
 }
 
-function getRespSummary(resp: CanDeleteJobResponse): JobCheckRespSummary {
-  const jobsChecked = Object.keys(resp);
-  // Default to first job's permissions
-  const { canDelete, canRemoveFromSpace } = resp[jobsChecked[0]];
+function getRespSummary(
+  resp: CanDeleteMLSpaceAwareItemsResponse
+): CanDeleteMLSpaceAwareItemsSummary {
+  const itemsChecked = Object.keys(resp);
+  // Default to first item's permissions
+  const { canDelete, canRemoveFromSpace } = resp[itemsChecked[0]];
   let canTakeAnyAction = true;
 
-  if (jobsChecked.length > 1) {
+  if (itemsChecked.length > 1) {
     // Check all jobs and make sure they have the same permissions - otherwise no action can be taken
-    canTakeAnyAction = jobsChecked.every(
+    canTakeAnyAction = itemsChecked.every(
       (id) => resp[id].canDelete === canDelete && resp[id].canRemoveFromSpace === canRemoveFromSpace
     );
   }
@@ -59,8 +74,9 @@ function getRespSummary(resp: CanDeleteJobResponse): JobCheckRespSummary {
 }
 
 function getModalContent(
-  jobIds: string[],
-  respSummary: JobCheckRespSummary,
+  ids: string[],
+  jobType: JobType | TrainedModelType,
+  respSummary: CanDeleteMLSpaceAwareItemsSummary,
   hasManagedJob?: boolean
 ): ModalContentReturnType {
   const { canDelete, canRemoveFromSpace, canTakeAnyAction } = respSummary;
@@ -69,17 +85,28 @@ function getModalContent(
     return {
       buttonText: (
         <FormattedMessage
-          id="xpack.ml.deleteJobCheckModal.buttonTextNoAction"
+          id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextNoAction"
           defaultMessage="Close"
         />
       ),
       modalText: (
         <EuiText>
           <FormattedMessage
-            id="xpack.ml.deleteJobCheckModal.modalTextNoAction"
-            defaultMessage="{ids} have different space permissions. When you delete multiple jobs, they must have the same permissions. Deselect the jobs and try deleting each job individually."
-            values={{ ids: jobIds.join(', ') }}
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextNoAction"
+            defaultMessage="{ids} have different space permissions. "
+            values={{ ids: ids.join(', ') }}
           />
+          {jobType === 'trained-model' ? (
+            <FormattedMessage
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextNoAction.model"
+              defaultMessage="When you delete multiple models, they must have the same permissions. Deselect the models and try deleting each model individually."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextNoAction.job"
+              defaultMessage="When you delete multiple jobs, they must have the same permissions. Deselect the jobs and try deleting each job individually."
+            />
+          )}
         </EuiText>
       ),
     };
@@ -87,34 +114,55 @@ function getModalContent(
 
   const noActionContent: ModalContentReturnType = {
     buttonText: (
-      <FormattedMessage id="xpack.ml.deleteJobCheckModal.buttonTextClose" defaultMessage="Close" />
+      <FormattedMessage
+        id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextClose"
+        defaultMessage="Close"
+      />
     ),
     modalText: (
       <EuiText>
         <FormattedMessage
-          id="xpack.ml.deleteJobCheckModal.modalTextClose"
-          defaultMessage="{ids} cannot be deleted and cannot be removed from the current space. This job is assigned to the * space and you do not have access to all spaces."
-          values={{ ids: jobIds.join(', ') }}
+          id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextClose"
+          defaultMessage="{ids} cannot be deleted and cannot be removed from the current space. "
+          values={{ ids: ids.join(', ') }}
         />
+        {jobType === 'trained-model' ? (
+          <FormattedMessage
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextClose.model"
+            defaultMessage="This model is assigned to the * space and you do not have access to all spaces."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextClose.job"
+            defaultMessage="This job is assigned to the * space and you do not have access to all spaces."
+          />
+        )}
       </EuiText>
     ),
   };
 
   if (canDelete) {
     return {
-      buttonText: (
-        <FormattedMessage
-          id="xpack.ml.deleteJobCheckModal.buttonTextCanDelete"
-          defaultMessage="Continue to delete {length, plural, one {# job} other {# jobs}}"
-          values={{ length: jobIds.length }}
-        />
-      ),
+      buttonText:
+        jobType === 'trained-model' ? (
+          <FormattedMessage
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextCanDelete.model"
+            defaultMessage="Continue to delete {length, plural, one {# model} other {# models}}"
+            values={{ length: ids.length }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextCanDelete.job"
+            defaultMessage="Continue to delete {length, plural, one {# job} other {# jobs}}"
+            values={{ length: ids.length }}
+          />
+        ),
       modalText: (
         <>
           {hasManagedJob ? (
             <>
               <ManagedJobsWarningCallout
-                jobsCount={jobIds.length}
+                jobsCount={ids.length}
                 action={i18n.translate(
                   'xpack.ml.jobsList.deleteJobCheckModal.removeOrDeleteAction',
                   {
@@ -128,9 +176,9 @@ function getModalContent(
 
           <EuiText>
             <FormattedMessage
-              id="xpack.ml.deleteJobCheckModal.modalTextCanDelete"
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextCanDelete"
               defaultMessage="{ids} can be deleted."
-              values={{ ids: jobIds.join(', ') }}
+              values={{ ids: ids.join(', ') }}
             />
           </EuiText>
         </>
@@ -140,7 +188,7 @@ function getModalContent(
     return {
       buttonText: (
         <FormattedMessage
-          id="xpack.ml.deleteJobCheckModal.buttonTextCanUnTagConfirm"
+          id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextCanUnTagConfirm"
           defaultMessage="Remove from current space"
         />
       ),
@@ -149,7 +197,7 @@ function getModalContent(
           {hasManagedJob ? (
             <>
               <ManagedJobsWarningCallout
-                jobsCount={jobIds.length}
+                jobsCount={ids.length}
                 action={i18n.translate('xpack.ml.jobsList.deleteJobCheckModal.removeAction', {
                   defaultMessage: 'removing',
                 })}
@@ -160,9 +208,9 @@ function getModalContent(
 
           <EuiText>
             <FormattedMessage
-              id="xpack.ml.deleteJobCheckModal.modalTextCanUnTag"
+              id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextCanUnTag"
               defaultMessage="{ids} cannot be deleted but can be removed from the current space."
-              values={{ ids: jobIds.join(', ') }}
+              values={{ ids: ids.join(', ') }}
             />
           </EuiText>
         </>
@@ -177,18 +225,18 @@ interface Props {
   canDeleteCallback: () => void;
   onCloseCallback: () => void;
   refreshJobsCallback?: () => void;
-  jobType: JobType;
-  jobIds: string[];
+  jobType: JobType | TrainedModelType;
+  ids: string[];
   setDidUntag?: React.Dispatch<React.SetStateAction<boolean>>;
   hasManagedJob?: boolean;
 }
 
-export const DeleteJobCheckModal: FC<Props> = ({
+export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   canDeleteCallback,
   onCloseCallback,
   refreshJobsCallback,
   jobType,
-  jobIds,
+  ids,
   setDidUntag,
   hasManagedJob,
 }) => {
@@ -197,17 +245,19 @@ export const DeleteJobCheckModal: FC<Props> = ({
   const [hasUntagged, setHasUntagged] = useState<boolean>(false);
   const [isUntagging, setIsUntagging] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [jobCheckRespSummary, setJobCheckRespSummary] = useState<JobCheckRespSummary | undefined>();
+  const [itemCheckRespSummary, setItemCheckRespSummary] = useState<
+    CanDeleteMLSpaceAwareItemsSummary | undefined
+  >();
 
   const {
-    savedObjects: { canDeleteJob, removeJobFromCurrentSpace },
+    savedObjects: { canDeleteMLSpaceAwareItems, removeItemFromCurrentSpace },
   } = useMlApiContext();
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   useEffect(() => {
     setIsLoading(true);
     // Do the spaces check and set the content for the modal and buttons depending on results
-    canDeleteJob(jobType, jobIds).then((resp) => {
+    canDeleteMLSpaceAwareItems(jobType, ids).then((resp) => {
       const respSummary = getRespSummary(resp);
       const { canDelete, canRemoveFromSpace, canTakeAnyAction } = respSummary;
       if (canTakeAnyAction && canDelete && !canRemoveFromSpace) {
@@ -215,8 +265,8 @@ export const DeleteJobCheckModal: FC<Props> = ({
         canDeleteCallback();
         return;
       }
-      setJobCheckRespSummary(respSummary);
-      const { buttonText, modalText } = getModalContent(jobIds, respSummary, hasManagedJob);
+      setItemCheckRespSummary(respSummary);
+      const { buttonText, modalText } = getModalContent(ids, jobType, respSummary, hasManagedJob);
       setButtonContent(buttonText);
       setModalContent(modalText);
     });
@@ -228,24 +278,27 @@ export const DeleteJobCheckModal: FC<Props> = ({
 
   const onUntagClick = async () => {
     setIsUntagging(true);
-    const resp = await removeJobFromCurrentSpace(jobType, jobIds);
+    const resp = await removeItemFromCurrentSpace(jobType, ids);
     setIsUntagging(false);
     if (typeof setDidUntag === 'function') {
       setDidUntag(true);
     }
     Object.entries(resp).forEach(([id, { success, error }]) => {
       if (success === false) {
-        const title = i18n.translate('xpack.ml.deleteJobCheckModal.unTagErrorTitle', {
+        const title = i18n.translate('xpack.ml.deleteSpaceAwareItemCheckModal.unTagErrorTitle', {
           defaultMessage: 'Error updating {id}',
           values: { id },
         });
         displayErrorToast(error, title);
       } else {
         setHasUntagged(true);
-        const message = i18n.translate('xpack.ml.deleteJobCheckModal.unTagSuccessTitle', {
-          defaultMessage: 'Successfully updated {id}',
-          values: { id },
-        });
+        const message = i18n.translate(
+          'xpack.ml.deleteSpaceAwareItemCheckModal.unTagSuccessTitle',
+          {
+            defaultMessage: 'Successfully updated {id}',
+            values: { id },
+          }
+        );
         displaySuccessToast(message);
       }
     });
@@ -257,7 +310,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
   };
 
   const onClick = async () => {
-    if (jobCheckRespSummary?.canTakeAnyAction && jobCheckRespSummary?.canDelete) {
+    if (itemCheckRespSummary?.canTakeAnyAction && itemCheckRespSummary?.canDelete) {
       canDeleteCallback();
     } else {
       onCloseCallback();
@@ -265,7 +318,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
   };
 
   return (
-    <EuiModal onClose={onCloseCallback} data-test-subj="mlAnalyticsJobDeleteCheckOverlay">
+    <EuiModal onClose={onCloseCallback} data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay">
       {isLoading === true && (
         <>
           <EuiModalBody>
@@ -282,7 +335,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
-                id="xpack.ml.deleteJobCheckModal.modalTitle"
+                id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
                 defaultMessage="Checking space permissions"
               />
             </EuiModalHeaderTitle>
@@ -294,16 +347,16 @@ export const DeleteJobCheckModal: FC<Props> = ({
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 {!hasUntagged &&
-                  jobCheckRespSummary?.canTakeAnyAction &&
-                  jobCheckRespSummary?.canRemoveFromSpace &&
-                  jobCheckRespSummary?.canDelete && (
+                  itemCheckRespSummary?.canTakeAnyAction &&
+                  itemCheckRespSummary?.canRemoveFromSpace &&
+                  itemCheckRespSummary?.canDelete && (
                     <EuiButtonEmpty
                       isLoading={isUntagging}
                       color="primary"
                       size="s"
                       onClick={onUntagClick}
                     >
-                      {shouldUnTagLabel}
+                      {jobType === 'trained-model' ? shouldUnTagModelLabel : shouldUnTagJobLabel}
                     </EuiButtonEmpty>
                   )}
               </EuiFlexItem>
@@ -311,9 +364,9 @@ export const DeleteJobCheckModal: FC<Props> = ({
                 <EuiButton
                   size="s"
                   onClick={
-                    jobCheckRespSummary?.canTakeAnyAction &&
-                    jobCheckRespSummary?.canRemoveFromSpace &&
-                    !jobCheckRespSummary?.canDelete
+                    itemCheckRespSummary?.canTakeAnyAction &&
+                    itemCheckRespSummary?.canRemoveFromSpace &&
+                    !itemCheckRespSummary?.canDelete
                       ? onUntagClick
                       : onClick
                   }
