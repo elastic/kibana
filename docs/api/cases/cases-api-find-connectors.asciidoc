@@ -4,7 +4,7 @@
 <titleabbrev>Find connectors</titleabbrev>
 ++++
 
-Retrieves a paginated subset of <<action-types,connectors>>.
+Retrieves information about <<action-types,connectors>>.
 
 In particular, only the connectors that are supported for use in cases are
 returned. Refer to the list of supported external incident management systems in
@@ -12,12 +12,19 @@ returned. Refer to the list of supported external incident management systems in
 
 === Request
 
-`GET <kibana host>:<port>/api/cases/configure/connectors/_find`
+`GET <kibana host>:<port>/s/<space_id>/api/cases/configure/connectors/_find`
 
 === Prerequisite
 
-You must have `read` privileges for the *Actions and Connectors* feature in the *Management* section of the
+You must have `read` privileges for the *Actions and Connectors* feature in the
+*Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
+
+=== Path parameters
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
 
 === Response code
 

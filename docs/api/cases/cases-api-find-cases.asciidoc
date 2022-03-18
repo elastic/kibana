@@ -9,19 +9,32 @@ with 20 results per page.
 
 === Request
 
-`GET <kibana host>:<port>/api/cases/_find`
+`GET <kibana host>:<port>/s/<space_id>/api/cases/_find`
 
 === Prerequisite
 
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>.
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're seeking.
+
+=== Path parameters
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
 
 === Query parameters
 
+`defaultSearchOperator`::
+(Optional, string) The default operator to use for the `simple_query_string`.
+
+`fields`::
+(Optional, array of strings) The fields in the entity to return in the response.
+
 `owner`::
-(Optional, string or array of strings) A filter to limit the retrieved cases to a
-specific set of applications. Valid values are: `cases`, `observability`,
+(Optional, string or array of strings) A filter to limit the retrieved cases to
+a specific set of applications. Valid values are: `cases`, `observability`,
 and `securitySolution`. If this parameter is omitted, the response contains all
 cases that the user has access to read.
 
@@ -32,12 +45,17 @@ cases that the user has access to read.
 (Optional, integer) The number of rules to return per page.
 
 `reporters`::
-(Optional, string) Filters the returned cases by the reporter's `username`.
+(Optional, string or array of strings) Filters the returned cases by the
+reporter's `username`.
 
 `search`::
 (Optional, string) An {es}
 {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that
 filters the objects in the response.
+
+`searchFields`::
+(Optional, string or array of strings) The fields to perform the
+`simple_query_string` parsed query against.
 
 `sortField`::
 (Optional, string) Determines which field is used to sort the results,
@@ -55,7 +73,7 @@ query.
 `in-progress`, or `closed`.
 
 `tags`::
-(Optional, string) Filters the returned cases by tags.
+(Optional, string or array of strings) Filters the returned cases by tags.
 
 === Response code
 
