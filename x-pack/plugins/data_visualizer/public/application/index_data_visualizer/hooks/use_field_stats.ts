@@ -31,6 +31,7 @@ import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';
 import type { ISearchOptions } from '../../../../../../../src/plugins/data/common';
 import { getFieldsStats } from '../search_strategy/requests/get_fields_stats';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 
 interface FieldStatsParams {
   metricConfigs: FieldRequestConfig[];
@@ -125,11 +126,17 @@ export function useFieldStatsSearchStrategy(
       ...fieldStatsParams.nonMetricConfigs,
     ].sort(itemsSorter);
 
+    const filteredItems = filterFields(
+      preslicedSortedConfigs,
+      dataVisualizerListState.visibleFieldNames,
+      dataVisualizerListState.visibleFieldTypes
+    );
     const { pageIndex, pageSize } = dataVisualizerListState;
-    const sortedConfigs = preslicedSortedConfigs.slice(
+    const sortedConfigs = filteredItems.filteredFields?.slice(
       pageIndex * pageSize,
       (pageIndex + 1) * pageSize
     );
+    if (!sortedConfigs) return;
 
     const filterCriteria = buildBaseFilterCriteria(
       searchStrategyParams.timeFieldName,
