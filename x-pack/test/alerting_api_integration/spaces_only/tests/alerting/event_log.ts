@@ -154,6 +154,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   ],
                   message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
+                  ruleTypeId: response.body.rule_type_id,
                   executionId: currentExecutionId,
                   rule: {
                     id: alertId,
@@ -174,6 +175,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   status: executeStatuses[executeCount++],
                   shouldHaveTask: true,
                   executionId: currentExecutionId,
+                  ruleTypeId: response.body.rule_type_id,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -181,6 +183,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     ruleset: 'alertsFixture',
                     name: response.body.name,
                   },
+                  consumer: 'alertsFixture',
                 });
                 break;
               case 'execute-action':
@@ -194,6 +197,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   instanceId: 'instance',
                   actionGroupId: 'default',
                   executionId: currentExecutionId,
+                  ruleTypeId: response.body.rule_type_id,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -201,6 +205,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     ruleset: 'alertsFixture',
                     name: response.body.name,
                   },
+                  consumer: 'alertsFixture',
                 });
                 break;
               case 'new-instance':
@@ -259,6 +264,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   message: `action executed: test.noop:${createdAction.id}: MY action`,
                   outcome: 'success',
                   shouldHaveTask: true,
+                  ruleTypeId: response.body.rule_type_id,
                   rule: undefined,
                 });
                 break;
@@ -281,6 +287,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               actionGroupId: 'default',
               shouldHaveEventEnd,
               executionId,
+              ruleTypeId: response.body.rule_type_id,
               rule: {
                 id: alertId,
                 category: response.body.rule_type_id,
@@ -288,6 +295,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 ruleset: 'alertsFixture',
                 name: response.body.name,
               },
+              consumer: 'alertsFixture',
             });
           }
         });
@@ -350,6 +358,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   shouldHaveTask: true,
                   executionId: currentExecutionId,
                   numTriggeredActions: 0,
+                  ruleTypeId: response.body.rule_type_id,
                   rule: {
                     id: ruleId,
                     category: response.body.rule_type_id,
@@ -357,6 +366,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     ruleset: 'alertsFixture',
                     name: response.body.name,
                   },
+                  consumer: 'alertsFixture',
                 });
                 expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(
                   numSearches
@@ -479,6 +489,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
                   executionId: currentExecutionId,
+                  ruleTypeId: response.body.rule_type_id,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -498,6 +509,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   status: executeStatuses[executeCount++],
                   shouldHaveTask: true,
                   executionId: currentExecutionId,
+                  ruleTypeId: response.body.rule_type_id,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -505,6 +517,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     ruleset: 'alertsFixture',
                     name: response.body.name,
                   },
+                  consumer: 'alertsFixture',
                 });
                 break;
               case 'execute-action':
@@ -523,6 +536,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   instanceId: 'instance',
                   actionGroupId: 'default',
                   executionId: currentExecutionId,
+                  ruleTypeId: response.body.rule_type_id,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -530,6 +544,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     ruleset: 'alertsFixture',
                     name: response.body.name,
                   },
+                  consumer: 'alertsFixture',
                 });
                 break;
               case 'new-instance':
@@ -583,6 +598,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               actionGroupId: 'default',
               shouldHaveEventEnd,
               executionId,
+              ruleTypeId: response.body.rule_type_id,
               rule: {
                 id: alertId,
                 category: response.body.rule_type_id,
@@ -590,6 +606,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 ruleset: 'alertsFixture',
                 name: response.body.name,
               },
+              consumer: 'alertsFixture',
             });
           }
         });
@@ -640,6 +657,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             ],
             message: `rule execution start: "${alertId}"`,
             shouldHaveTask: true,
+            ruleTypeId: response.body.rule_type_id,
             rule: {
               id: alertId,
               category: response.body.rule_type_id,
@@ -657,12 +675,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             status: 'error',
             reason: 'execute',
             shouldHaveTask: true,
+            ruleTypeId: response.body.rule_type_id,
             rule: {
               id: alertId,
               category: response.body.rule_type_id,
               license: 'basic',
               ruleset: 'alertsFixture',
             },
+            consumer: 'alertsFixture',
           });
         });
       });
@@ -691,6 +711,8 @@ interface ValidateEventLogParams {
   reason?: string;
   executionId?: string;
   numTriggeredActions?: number;
+  consumer?: string;
+  ruleTypeId: string;
   rule?: {
     id: string;
     name?: string;
@@ -715,6 +737,8 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     shouldHaveTask,
     executionId,
     numTriggeredActions = 1,
+    consumer,
+    ruleTypeId,
   } = params;
   const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
@@ -743,6 +767,13 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   if (executionId) {
     expect(event?.kibana?.alert?.rule?.execution?.uuid).to.be(executionId);
   }
+
+  if (consumer) {
+    expect(event?.kibana?.alert?.rule?.consumer).to.be(consumer);
+  }
+
+  expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);
+  expect(event?.kibana?.space_ids?.[0]).to.equal(spaceId);
 
   const duration = event?.event?.duration;
   const timestamp = Date.parse(event?.['@timestamp'] || 'undefined');
