@@ -39,7 +39,7 @@ export function createJWTAssertion(
 
   try {
     const jwtToken = jwt.sign(
-      JSON.stringify(payloadObj),
+      payloadObj,
       {
         key: privateKey,
         passphrase: privateKeyPassword,

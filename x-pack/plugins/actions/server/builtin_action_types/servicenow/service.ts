@@ -68,8 +68,7 @@ export const createExternalService: ServiceFactory = (
     });
   } else {
     axiosInstance.interceptors.request.use(
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      async (config: AxiosRequestConfig) => {
+      async (axiosConfig: AxiosRequestConfig) => {
         const accessToken = await getAccessToken(
           connectorId,
           logger,
@@ -81,8 +80,8 @@ export const createExternalService: ServiceFactory = (
           urlWithoutTrailingSlash,
           connectorTokenClient
         );
-        config.headers.Authorization = accessToken;
-        return config;
+        axiosConfig.headers.Authorization = accessToken;
+        return axiosConfig;
       },
       (error) => {
         Promise.reject(error);
