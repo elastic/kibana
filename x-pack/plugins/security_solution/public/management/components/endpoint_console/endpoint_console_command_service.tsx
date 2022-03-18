@@ -13,13 +13,7 @@ import { CommandServiceInterface, CommandDefinition, Command } from '../console'
  */
 export class EndpointConsoleCommandService implements CommandServiceInterface {
   getCommandList(): CommandDefinition[] {
-    return [
-      // {
-      //   name: 'about',
-      //   about: 'Endpoint information',
-      //   args: undefined,
-      // },
-    ];
+    return [];
   }
 
   async executeCommand(command: Command): Promise<{ result: ReactNode }> {
