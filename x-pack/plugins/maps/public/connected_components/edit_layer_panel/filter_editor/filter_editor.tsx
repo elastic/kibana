@@ -200,6 +200,7 @@ export class FilterEditor extends Component<Props, State> {
         onClick={this._toggle}
         data-test-subj="mapLayerPanelOpenFilterEditorButton"
         iconType={openButtonIcon}
+        disabled={this.props.editModeActiveForLayer}
       >
         {openButtonLabel}
       </EuiButtonEmpty>

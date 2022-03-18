@@ -8,6 +8,7 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
+import type { Query } from 'src/plugins/data/public';
 import { MapStoreState } from '../../../../../../reducers/store';
 import {
   cloneLayer,
@@ -22,7 +23,7 @@ import { getLayerListRaw } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { DRAW_MODE } from '../../../../../../../common/constants';
-import { updateSourceProp } from '../../../../../../actions';
+import { updateSourceProp, setLayerQuery } from '../../../../../../actions';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -58,6 +59,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     updateSourceProp: (id: string, propName: string, value: unknown) =>
       dispatch(updateSourceProp(id, propName, value)),
+    setLayerQuery: (layerId: string, query: Query) => {
+      dispatch(setLayerQuery(layerId, query));
+    },
   };
 }
 

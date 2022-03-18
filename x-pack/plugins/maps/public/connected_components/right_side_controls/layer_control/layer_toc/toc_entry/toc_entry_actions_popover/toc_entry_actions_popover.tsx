@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Query } from 'src/plugins/data/common';
 import { ILayer } from '../../../../../../classes/layers/layer';
 import { TOCEntryButton } from '../toc_entry_button';
 import {
@@ -39,6 +40,7 @@ export interface Props {
   editModeActiveForLayer: boolean;
   numLayers: number;
   updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
+  setLayerQuery: (layerId: string, query: Query) => void;
 }
 
 interface State {
@@ -214,6 +216,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
             this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', false);
             this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', false);
+            this.props.setLayerQuery(this.props.layer.getId(), { query: '', language: '' });
           },
         });
       }
