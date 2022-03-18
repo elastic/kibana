@@ -21,7 +21,7 @@ export const useFetchSessionViewProcessEvents = (
   const jumpToCursor = jumpToEvent && jumpToEvent.process.start;
 
   const query = useInfiniteQuery(
-    'sessionViewProcessEvents',
+    ['sessionViewProcessEvents', sessionEntityId],
     async ({ pageParam = {} }) => {
       let { cursor } = pageParam;
       const { forward } = pageParam;
