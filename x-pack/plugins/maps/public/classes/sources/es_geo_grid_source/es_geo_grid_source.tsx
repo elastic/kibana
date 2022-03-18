@@ -45,6 +45,7 @@ import { DataView } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
+import { isMvt } from './is_mvt';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
@@ -131,19 +132,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     ];
   }
 
-  isMvt() {
-    // heatmap uses MVT regardless of resolution because heatmap only supports counting metrics
-    if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
-      return true;
-    }
-
-    // hex uses MVT regardless of resolution because hex never supported "top terms" metric
-    if (this._descriptor.requestType === RENDER_AS.HEX) {
-      return true;
-    }
-
-    // point and grid only use mvt at high resolution because lower resolutions may contain mvt unsupported "top terms" metric
-    return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
+  isMvt(): boolean {
+    return isMvt(this._descriptor.requestType, this._descriptor.resolution);
   }
 
   getFieldNames() {

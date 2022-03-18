@@ -27,6 +27,7 @@ import { RenderAsSelect } from './render_as_select';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../source';
 import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
+import { isMvt } from './is_mvt';
 
 interface Props {
   currentLayerType?: string;
@@ -86,25 +87,34 @@ export class UpdateSourceEditor extends Component<Props, State> {
     });
   }
 
+  _getNewLayerType(renderAs: RENDER_AS, resolution: GRID_RESOLUTION): LAYER_TYPE | undefined {
+    let nextLayerType: LAYER_TYPE | undefined;
+    if (renderAs === RENDER_AS.HEATMAP) {
+      nextLayerType = LAYER_TYPE.HEATMAP;
+    } else if (isMvt(renderAs, resolution)) {
+      nextLayerType = LAYER_TYPE.MVT_VECTOR;
+    } else {
+      nextLayerType = LAYER_TYPE.GEOJSON_VECTOR;
+    }
+
+    // only return newLayerType if there is a change from current layer type
+    return nextLayerType !== undefined && nextLayerType !== this.props.currentLayerType
+      ? nextLayerType
+      : undefined;
+  }
+
   _onMetricsChange = (metrics: AggDescriptor[]) => {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
   _onResolutionChange = async (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => {
-    let newLayerType;
-    if (
-      this.props.currentLayerType !== LAYER_TYPE.HEATMAP &&
-      this.props.renderAs !== RENDER_AS.HEX
-    ) {
-      newLayerType =
-        resolution === GRID_RESOLUTION.SUPER_FINE
-          ? LAYER_TYPE.MVT_VECTOR
-          : LAYER_TYPE.GEOJSON_VECTOR;
-    }
-
     await this.props.onChange(
       { propName: 'metrics', value: metrics },
-      { propName: 'resolution', value: resolution, newLayerType }
+      {
+        propName: 'resolution',
+        value: resolution,
+        newLayerType: this._getNewLayerType(this.props.renderAs, resolution),
+      }
     );
 
     // Metrics editor persists metrics in state.
@@ -116,8 +126,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({
       propName: 'requestType',
       value: requestType,
-      newLayerType:
-        requestType === RENDER_AS.HEX ? LAYER_TYPE.MVT_VECTOR : LAYER_TYPE.GEOJSON_VECTOR,
+      newLayerType: this._getNewLayerType(requestType, this.props.resolution),
     });
   };
 
