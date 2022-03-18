@@ -47,7 +47,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
     }
   };
 
-  const { dataTypes } = useExploratoryView();
+  const { dataTypes, reportConfigMap } = useExploratoryView();
 
   const options = dataTypes
     .filter(({ id }) => {
@@ -56,6 +56,10 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       }
       if (reportType === ReportTypes.CORE_WEB_VITAL) {
         return id === DataTypes.UX;
+      }
+      // NOTE: Logs does not have a config for Performance Distribution
+      if (reportType === ReportTypes.DISTRIBUTION && id === DataTypes.LOGS) {
+        return false;
       }
       return true;
     })
