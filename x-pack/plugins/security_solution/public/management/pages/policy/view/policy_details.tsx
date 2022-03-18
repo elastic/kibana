@@ -19,7 +19,7 @@ import {
   BackToExternalAppButtonProps,
 } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { getEndpointListPath } from '../../../common/routing';
+import { getPoliciesPath } from '../../../common/routing';
 import { useAppUrl } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
 
@@ -45,20 +45,18 @@ export const PolicyDetails = React.memo(() => {
       };
     }
 
-    const endpointListPath = getEndpointListPath({ name: 'endpointList' });
+    const policyListPath = getPoliciesPath();
 
+    // default is to go back to the policy list
     return {
-      backButtonLabel: i18n.translate(
-        'xpack.securitySolution.endpoint.policy.details.backToListTitle',
-        {
-          defaultMessage: 'View all endpoints',
-        }
-      ),
-      backButtonUrl: getAppUrl({ path: endpointListPath }),
+      backButtonLabel: i18n.translate('xpack.securitySolution.endpoint.list.backToPolicyButton', {
+        defaultMessage: 'Back to policy list',
+      }),
+      backButtonUrl: getAppUrl({ path: policyListPath }),
       onBackButtonNavigateTo: [
         APP_UI_ID,
         {
-          path: endpointListPath,
+          path: policyListPath,
         },
       ],
     };

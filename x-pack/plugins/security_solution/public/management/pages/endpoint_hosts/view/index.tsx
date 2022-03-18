@@ -131,6 +131,7 @@ export const EndpointList = () => {
     metadataTransformStats,
   } = useEndpointSelector(selector);
   const { search } = useFormatUrl(SecurityPageName.administration);
+  const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
@@ -149,6 +150,7 @@ export const EndpointList = () => {
       };
     }
 
+    // default back button is to the policy list
     const policyListPath = getPoliciesPath();
 
     return {
@@ -239,6 +241,23 @@ export const EndpointList = () => {
       },
     }
   );
+
+  const backToEndpointList: PolicyDetailsRouteState['backLink'] = useMemo(() => {
+    const endpointListPath = getEndpointListPath({ name: 'endpointList' }, searchParams);
+
+    return {
+      navigateTo: [
+        APP_UI_ID,
+        {
+          path: endpointListPath,
+        },
+      ],
+      label: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
+        defaultMessage: 'View all endpoints',
+      }),
+      href: getAppUrl({ path: endpointListPath }),
+    };
+  }, [getAppUrl, searchParams]);
 
   const onRefresh = useCallback(() => {
     dispatch({
@@ -361,6 +380,7 @@ export const EndpointList = () => {
                   policyId={policy.id}
                   className="eui-textTruncate"
                   data-test-subj="policyNameCellLink"
+                  backLink={backToEndpointList}
                 >
                   {policy.name}
                 </EndpointPolicyLink>
