@@ -21,6 +21,7 @@ export type {
   AggregateEventsBySavedObjectResult,
 } from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
+import { FieldDescriptor } from '../../../../src/plugins/data_views/server';
 
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
 
@@ -61,6 +62,7 @@ export interface IEventLogClient {
     options?: Partial<AggregateOptionsType>,
     legacyIds?: string[]
   ): Promise<AggregateEventsBySavedObjectResult>;
+  getEventLogsFieldCaps(type: string, ids: string[]): Promise<FieldDescriptor[]>;
 }
 
 export interface IEventLogger {

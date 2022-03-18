@@ -13,6 +13,7 @@ import { Logger, ElasticsearchClient } from 'src/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
@@ -414,6 +415,14 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
       );
     }
+  }
+
+  public async getEventLogsFieldCaps(index: string): Promise<FieldDescriptor[]> {
+    const esClient = await this.elasticsearchClientPromise;
+    const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
+    return await indexPatternsFetcher.getFieldsForWildcard({
+      pattern: index,
+    });
   }
 }
 
