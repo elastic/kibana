@@ -52,13 +52,13 @@ export const BLOCKLISTS_LABELS = {
   cardTitle: (
     <FormattedMessage
       id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
-      defaultMessage="Blocklists"
+      defaultMessage="Blocklist"
     />
   ),
   linkLabel: (
     <FormattedMessage
       id="xpack.securitySolution.endpoint.fleetIntegrationCard.blocklistsManageLabel"
-      defaultMessage="Manage blocklists"
+      defaultMessage="Manage blocklist"
     />
   ),
 };
@@ -119,13 +119,13 @@ export const TRUSTED_APPS_LABELS = {
   cardTitle: (
     <FormattedMessage
       id="xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title"
-      defaultMessage="Trusted apps"
+      defaultMessage="Trusted applications"
     />
   ),
   linkLabel: (
     <FormattedMessage
       id="xpack.securitySolution.endpoint.fleetIntegrationCard.trustedAppsManageLabel"
-      defaultMessage="Manage trusted apps"
+      defaultMessage="Manage trusted applications"
     />
   ),
 };

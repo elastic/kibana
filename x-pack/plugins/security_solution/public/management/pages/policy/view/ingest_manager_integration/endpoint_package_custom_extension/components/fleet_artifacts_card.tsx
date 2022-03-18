@@ -36,17 +36,11 @@ const ARTIFACTS_LABELS = {
       defaultMessage="Artifacts"
     />
   ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetCustomExtension.artifactsManageLabel"
-      defaultMessage="Manage artifacts"
-    />
-  ),
 };
 
 export type ARTIFACTS_LABELS_TYPE = typeof ARTIFACTS_LABELS;
 
-export type FleetArtifactsCardProps = PackageCustomExtensionComponentProps & {
+type FleetArtifactsCardProps = PackageCustomExtensionComponentProps & {
   artifactApiClientInstance: ExceptionsListApiClient;
   getArtifactsPath: () => string;
   labels?: ARTIFACTS_LABELS_TYPE;

@@ -29,20 +29,14 @@ export const TRUSTED_APPS_LABELS = {
     i18n.translate(
       'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummarySummary.error',
       {
-        defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
+        defaultMessage: 'There was an error trying to fetch trusted applications stats: "{error}"',
         values: { error },
       }
     ),
   cardTitle: (
     <FormattedMessage
       id="xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title"
-      defaultMessage="Trusted apps"
-    />
-  ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsManageLabel"
-      defaultMessage="Manage trusted apps"
+      defaultMessage="Trusted applications"
     />
   ),
 };
@@ -60,12 +54,6 @@ export const EVENT_FILTERS_LABELS = {
     <FormattedMessage
       id="xpack.securitySolution.endpoint.eventFilters.fleetIntegration.title"
       defaultMessage="Event filters"
-    />
-  ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersManageLabel"
-      defaultMessage="Manage event filters"
     />
   ),
 };
@@ -86,12 +74,6 @@ export const HOST_ISOLATION_EXCEPTIONS_LABELS = {
       defaultMessage="Host isolation exceptions"
     />
   ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsManageLabel"
-      defaultMessage="Manage host isolation exceptions"
-    />
-  ),
 };
 
 export const BLOCKLISTS_LABELS = {
@@ -99,20 +81,14 @@ export const BLOCKLISTS_LABELS = {
     i18n.translate(
       'xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsSummarySummary.error',
       {
-        defaultMessage: 'There was an error trying to fetch blocklists stats: "{error}"',
+        defaultMessage: 'There was an error trying to fetch blocklist stats: "{error}"',
         values: { error },
       }
     ),
   cardTitle: (
     <FormattedMessage
       id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
-      defaultMessage="Blocklists"
-    />
-  ),
-  linkLabel: (
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.fleetCustomExtension.blocklistsManageLabel"
-      defaultMessage="Manage blocklists"
+      defaultMessage="Blocklist"
     />
   ),
 };
