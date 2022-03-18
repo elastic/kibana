@@ -22,11 +22,15 @@ import {
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  CoreSetup,
+  ApplicationStart,
   CoreStart,
+  DocLinksStart,
+  HttpSetup,
   IHttpFetchError,
+  IUiSettingsClient,
   ThemeServiceSetup,
   ToastsSetup,
+  ExecutionContextSetup,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '../../../../bfetch/public';
@@ -60,9 +64,9 @@ import { SearchAbortController } from './search_abort_controller';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
-  http: CoreSetup['http'];
-  executionContext: CoreSetup['executionContext'];
-  uiSettings: CoreSetup['uiSettings'];
+  http: HttpSetup;
+  executionContext: ExecutionContextSetup;
+  uiSettings: IUiSettingsClient;
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
@@ -91,8 +95,8 @@ export class SearchInterceptor {
   /**
    * @internal
    */
-  private application!: CoreStart['application'];
-  private docLinks!: CoreStart['docLinks'];
+  private application!: ApplicationStart;
+  private docLinks!: DocLinksStart;
   private batchedFetch!: BatchedFunc<
     { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse

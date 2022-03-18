@@ -19,7 +19,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { colors, border, size } = euiTheme;
+    const { colors, border, size, font } = euiTheme;
 
     const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
 
@@ -98,6 +98,16 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       color: colors.successText,
     };
 
+    const timeStamp: CSSObject = {
+      float: 'right',
+      fontFamily: font.familyCode,
+      fontSize: size.m,
+      fontWeight: font.weight.regular,
+      paddingRight: size.base,
+      paddingLeft: size.xxl,
+      position: 'relative',
+    };
+
     const alertDetails: CSSObject = {
       padding: size.s,
       border: border.editable,
@@ -111,6 +121,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       processNode,
       wrapper,
       workingDir,
+      timeStamp,
       alertDetails,
     };
   }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert]);

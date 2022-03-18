@@ -23,6 +23,7 @@ export enum RuleAuditAction {
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
   AGGREGATE = 'rule_aggregate',
+  SNOOZE = 'rule_snooze',
 }
 
 type VerbsTuple = [string, string, string];
@@ -42,6 +43,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_alert_mute: ['mute alert of', 'muting alert of', 'muted alert of'],
   rule_alert_unmute: ['unmute alert of', 'unmuting alert of', 'unmuted alert of'],
   rule_aggregate: ['access', 'accessing', 'accessed'],
+  rule_snooze: ['snooze', 'snoozing', 'snoozed'],
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
@@ -59,6 +61,7 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_alert_mute: 'change',
   rule_alert_unmute: 'change',
   rule_aggregate: 'access',
+  rule_snooze: 'change',
 };
 
 export interface RuleAuditEventParams {

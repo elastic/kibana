@@ -178,7 +178,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     browserFields,
                     isDraggable,
                     timelineId,
-                    title: i18n.HIGHLIGHTES_FIELDS,
+                    title: i18n.HIGHLIGHTED_FIELDS,
                   }}
                   goToTable={goToTableTab}
                 />
