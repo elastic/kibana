@@ -74,6 +74,7 @@ export enum KibanaAssetType {
   securityRule = 'security_rule',
   mlModule = 'ml_module',
   tag = 'tag',
+  osqueryPackAsset = 'osquery_pack_asset',
 }
 
 /*
@@ -89,6 +90,7 @@ export enum KibanaSavedObjectType {
   mlModule = 'ml-module',
   securityRule = 'security-rule',
   tag = 'tag',
+  osqueryPackAsset = 'osquery-pack-asset',
 }
 
 export enum ElasticsearchAssetType {
