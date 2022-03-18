@@ -6,9 +6,10 @@
  */
 
 import { Dictionary } from 'lodash';
-import { Logger } from 'kibana/server';
+import { KibanaRequest, Logger } from 'kibana/server';
 import {
   ActionGroup,
+  AlertAction,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
@@ -24,6 +25,8 @@ import { Alert as CreatedAlert } from '../alert';
 import { IEventLogger } from '../../../event_log/server';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
+import { RawRule } from '../types';
 
 export interface RuleTaskRunResultWithActions {
   state: RuleExecutionState;
@@ -90,6 +93,7 @@ export interface ScheduleActionsForRecoveredAlertsParams<
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
+  alertExecutionStore: AlertExecutionStore;
 }
 
 export interface LogActiveAndRecoveredAlertsParams<
@@ -103,4 +107,61 @@ export interface LogActiveAndRecoveredAlertsParams<
   recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   ruleLabel: string;
   canSetRecoveryContext: boolean;
+}
+
+// / ExecutionHandler
+
+export interface CreateExecutionHandlerOptions<
+  Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  ruleId: string;
+  ruleName: string;
+  ruleConsumer: string;
+  executionId: string;
+  tags?: string[];
+  actionsPlugin: ActionsPluginStartContract;
+  actions: AlertAction[];
+  spaceId: string;
+  apiKey: RawRule['apiKey'];
+  kibanaBaseUrl: string | undefined;
+  ruleType: NormalizedRuleType<
+    Params,
+    ExtractedParams,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
+  logger: Logger;
+  eventLogger: IEventLogger;
+  request: KibanaRequest;
+  ruleParams: AlertTypeParams;
+  supportsEphemeralTasks: boolean;
+  maxEphemeralActionsPerRule: number;
+}
+
+export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
+  actionGroup: ActionGroupIds;
+  actionSubgroup?: string;
+  alertId: string;
+  context: AlertInstanceContext;
+  state: AlertInstanceState;
+  alertExecutionStore: AlertExecutionStore;
+}
+
+export enum ActionsCompletion {
+  COMPLETE = 'complete',
+  PARTIAL = 'partial',
+}
+
+export interface AlertExecutionStore {
+  numberOfTriggeredActions: number;
+  triggeredActionsStatus: ActionsCompletion;
 }

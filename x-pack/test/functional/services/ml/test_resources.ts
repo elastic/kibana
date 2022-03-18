@@ -20,6 +20,8 @@ export enum SavedObjectType {
   SEARCH = 'search',
   VISUALIZATION = 'visualization',
   ML_JOB = 'ml-job',
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE = 'ml-trained-model',
+  ML_MODULE_SAVED_OBJECT_TYPE = 'ml-module',
 }
 
 export type MlTestResourcesi = ProvidedType<typeof MachineLearningTestResourcesProvider>;
@@ -462,12 +464,32 @@ export function MachineLearningTestResourcesProvider(
     },
 
     async cleanMLSavedObjects() {
-      log.debug('Deleting ML saved objects ...');
+      await this.cleanMLJobSavedObjects();
+      await this.cleanMLTrainedModelsSavedObjects();
+    },
+
+    async cleanMLJobSavedObjects() {
+      log.debug('Deleting ML job saved objects ...');
       const savedObjectIds = await this.getSavedObjectIdsByType(SavedObjectType.ML_JOB);
       for (const id of savedObjectIds) {
         await this.deleteSavedObjectById(id, SavedObjectType.ML_JOB, true);
       }
-      log.debug('> ML saved objects deleted.');
+      log.debug('> ML job saved objects deleted.');
+    },
+
+    async cleanMLTrainedModelsSavedObjects() {
+      log.debug('Deleting ML trained model saved objects ...');
+      const savedObjectIds = await this.getSavedObjectIdsByType(
+        SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
+      );
+      for (const id of savedObjectIds) {
+        await this.deleteSavedObjectById(
+          id,
+          SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+          true
+        );
+      }
+      log.debug('> ML trained model saved objects deleted.');
     },
 
     async setupFleet() {
