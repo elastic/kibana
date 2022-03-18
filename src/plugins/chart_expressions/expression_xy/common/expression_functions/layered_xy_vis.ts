@@ -12,10 +12,8 @@ import type {
   TablesAdapter,
   Datatable,
 } from '../../../../expressions';
-import { XYArgs, XYLayerConfigResult, XYRender } from '../types';
+import { LayeredXYArgs, XYExtendedLayerConfigResult, XYRender } from '../types';
 import {
-  XY_VIS,
-  DATA_LAYER,
   XYCurveTypes,
   LEGEND_CONFIG,
   ValueLabelModes,
@@ -24,22 +22,24 @@ import {
   XY_VIS_RENDERER,
   AXIS_EXTENT_CONFIG,
   TICK_LABELS_CONFIG,
-  REFERENCE_LINE_LAYER,
   LABELS_ORIENTATION_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
+  EXTENDED_DATA_LAYER,
+  EXTENDED_REFERENCE_LINE_LAYER,
+  LAYERED_XY_VIS,
 } from '../constants';
 
 const logDataTable = (tableAdapter: TablesAdapter, datatables: Record<string, Datatable> = {}) => {
   Object.entries(datatables).forEach(([key, table]) => tableAdapter.logDatatable(key, table));
 };
 
-export const xyVisFunction: ExpressionFunctionDefinition<
-  typeof XY_VIS,
+export const layeredXyVisFunction: ExpressionFunctionDefinition<
+  typeof LAYERED_XY_VIS,
   Datatable,
-  XYArgs,
+  LayeredXYArgs,
   XYRender
 > = {
-  name: XY_VIS,
+  name: LAYERED_XY_VIS,
   type: 'render',
   inputTypes: ['datatable'],
   help: i18n.translate('expressionXY.xyVis.help', {
@@ -128,17 +128,12 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Show x and y axes titles',
       }),
     },
-    dataLayer: {
-      types: [DATA_LAYER],
-      help: i18n.translate('expressionXY.xyVis.dataLayer.help', {
-        defaultMessage: 'Data layer of visual series',
+    layers: {
+      types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER],
+      help: i18n.translate('expressionXY.xyVis.layers.help', {
+        defaultMessage: 'Layers of visual series',
       }),
-    },
-    referenceLineLayer: {
-      types: [REFERENCE_LINE_LAYER],
-      help: i18n.translate('expressionXY.xyVis.referenceLineLayer.help', {
-        defaultMessage: 'Reference line layer',
-      }),
+      multi: true,
     },
     curveType: {
       types: ['string'],
@@ -176,8 +171,8 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     },
   },
   fn(data, args, handlers) {
-    const layers = [args.dataLayer, args.referenceLineLayer].filter<XYLayerConfigResult>(
-      (layer): layer is XYLayerConfigResult => layer !== undefined
+    const layers = args.layers.filter<XYExtendedLayerConfigResult>(
+      (layer): layer is XYExtendedLayerConfigResult => layer !== undefined
     );
     const tables = layers.reduce<Record<string, Datatable>>((t, { layerId }) => {
       t[layerId] = data;

@@ -15,14 +15,17 @@ import { CoreSetup, CoreStart, IUiSettingsClient } from '../../../../core/public
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
   xyVisFunction,
+  layeredXyVisFunction,
+  dataLayerFunction,
+  extendedDataLayerFunction,
   yAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
-  dataLayerConfigFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
+  referenceLineLayerFunction,
+  extendedReferenceLineLayerFunction,
   labelsOrientationConfigFunction,
-  referenceLineLayerConfigFunction,
   axisTitlesVisibilityConfigFunction,
 } from '../common';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
@@ -50,13 +53,16 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(yAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
-    expressions.registerFunction(dataLayerConfigFunction);
+    expressions.registerFunction(dataLayerFunction);
+    expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
-    expressions.registerFunction(referenceLineLayerConfigFunction);
+    expressions.registerFunction(referenceLineLayerFunction);
+    expressions.registerFunction(extendedReferenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
+    expressions.registerFunction(layeredXyVisFunction);
 
     const getStartDeps: GetStartDepsFn = async () => {
       const [coreStart, deps] = await core.getStartServices();

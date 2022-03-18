@@ -7,12 +7,15 @@
  */
 
 export * from './xy_vis';
+export * from './layered_xy_vis';
 export * from './legend_config';
 export * from './y_axis_config';
-export * from './data_layer_config';
+export * from './data_layer';
+export * from './extended_data_layer';
 export * from './grid_lines_config';
 export * from './axis_extent_config';
 export * from './tick_labels_config';
 export * from './labels_orientation_config';
-export * from './reference_line_layer_config';
+export * from './reference_line_layer';
+export * from './extended_reference_line_layer';
 export * from './axis_titles_visibility_config';

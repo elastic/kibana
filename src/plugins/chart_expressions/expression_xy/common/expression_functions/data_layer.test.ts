@@ -7,7 +7,7 @@
  */
 
 import { DataLayerArgs } from '../types';
-import { dataLayerConfigFunction } from '../expression_functions';
+import { dataLayerFunction } from '.';
 import { createMockExecutionContext } from '../../../../expressions/common/mocks';
 import { mockPaletteOutput } from '../__mocks__';
 import { LayerTypes } from '../constants';
@@ -26,7 +26,7 @@ describe('dataLayerConfig', () => {
       palette: mockPaletteOutput,
     };
 
-    const result = dataLayerConfigFunction.fn(null, args, createMockExecutionContext());
+    const result = dataLayerFunction.fn(null, args, createMockExecutionContext());
 
     expect(result).toEqual({ type: 'dataLayer', layerType: LayerTypes.DATA, ...args });
   });

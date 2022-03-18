@@ -11,7 +11,7 @@ import type { ExpressionFunctionDefinition } from '../../../../expressions/commo
 import { LayerTypes, REFERENCE_LINE_LAYER, Y_CONFIG } from '../constants';
 import { ReferenceLineLayerArgs, ReferenceLineLayerConfigResult } from '../types';
 
-export const referenceLineLayerConfigFunction: ExpressionFunctionDefinition<
+export const referenceLineLayerFunction: ExpressionFunctionDefinition<
   typeof REFERENCE_LINE_LAYER,
   null,
   ReferenceLineLayerArgs,

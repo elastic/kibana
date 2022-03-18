@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
-import { DataLayerArgs, DataLayerConfigResult } from '../types';
+import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
+import { ExtendedDataLayerArgs, ExtendedDataLayerConfigResult } from '../types';
 import {
-  DATA_LAYER,
+  EXTENDED_DATA_LAYER,
   LayerTypes,
   SeriesTypes,
   XScaleTypes,
@@ -18,19 +18,19 @@ import {
   Y_CONFIG,
 } from '../constants';
 
-export const dataLayerConfigFunction: ExpressionFunctionDefinition<
-  typeof DATA_LAYER,
-  null,
-  DataLayerArgs,
-  DataLayerConfigResult
+export const extendedDataLayerFunction: ExpressionFunctionDefinition<
+  typeof EXTENDED_DATA_LAYER,
+  Datatable | null,
+  ExtendedDataLayerArgs,
+  ExtendedDataLayerConfigResult
 > = {
-  name: DATA_LAYER,
+  name: EXTENDED_DATA_LAYER,
   aliases: [],
-  type: DATA_LAYER,
+  type: EXTENDED_DATA_LAYER,
   help: i18n.translate('expressionXY.dataLayer.help', {
     defaultMessage: `Configure a layer in the xy chart`,
   }),
-  inputTypes: ['null'],
+  inputTypes: ['null', 'datatable'],
   args: {
     hide: {
       types: ['boolean'],
@@ -112,10 +112,16 @@ export const dataLayerConfigFunction: ExpressionFunctionDefinition<
       }),
       types: ['palette'],
     },
+    table: {
+      types: ['datatable'],
+      help: i18n.translate('expressionXY.dataLayer.table.help', {
+        defaultMessage: 'Table',
+      }),
+    },
   },
   fn(input, args) {
     return {
-      type: DATA_LAYER,
+      type: EXTENDED_DATA_LAYER,
       ...args,
       layerType: LayerTypes.DATA,
     };

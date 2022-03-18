@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { Datatable } from '../../../../expressions';
 import { XY_VIS_RENDERER } from '../constants';
-import { LensMultiTable, XYArgs } from './expression_functions';
+import { XYProps } from './expression_functions';
 
 export interface XYChartProps {
-  data: LensMultiTable;
-  args: XYArgs;
+  data: Datatable;
+  args: XYProps;
 }
 
 export interface XYRender {

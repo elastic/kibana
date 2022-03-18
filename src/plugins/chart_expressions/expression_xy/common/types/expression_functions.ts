@@ -33,6 +33,8 @@ import {
   LEGEND_CONFIG,
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
+  EXTENDED_DATA_LAYER,
+  EXTENDED_REFERENCE_LINE_LAYER,
 } from '../constants';
 
 export type LayerType = $Values<typeof LayerTypes>;
@@ -87,6 +89,18 @@ export interface XYDataLayerConfig {
   splitAccessor?: string;
   palette?: PaletteOutput;
 }
+
+export interface XYExtendedDataLayerConfig {
+  layerId: string;
+  accessors: string[];
+  seriesType: SeriesType;
+  xAccessor?: string;
+  hide?: boolean;
+  yConfig?: YConfigResult[];
+  splitAccessor?: string;
+  palette?: PaletteOutput;
+}
+
 export interface ValidLayer extends DataLayerConfigResult {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
 }
@@ -98,6 +112,16 @@ export type DataLayerArgs = XYDataLayerConfig & {
   isHistogram: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
+};
+
+export type ExtendedDataLayerArgs = XYExtendedDataLayerConfig & {
+  columnToLabel?: string; // Actually a JSON key-value pair
+  yScaleType: YScaleType;
+  xScaleType: XScaleType;
+  isHistogram: boolean;
+  // palette will always be set on the expression
+  palette: PaletteOutput;
+  table?: Datatable;
 };
 
 export interface LegendConfig {
@@ -163,7 +187,54 @@ export interface XYArgs {
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
-  layers: XYLayerConfigResult[];
+  dataLayer?: DataLayerConfigResult;
+  referenceLineLayer?: ReferenceLineLayerConfigResult;
+  fittingFunction?: FittingFunction;
+  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
+  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
+  gridlinesVisibilitySettings?: GridlinesConfigResult;
+  labelsOrientation?: LabelsOrientationConfigResult;
+  curveType?: XYCurveType;
+  fillOpacity?: number;
+  hideEndzones?: boolean;
+  valuesInLegend?: boolean;
+  ariaLabel?: string;
+}
+
+export interface LayeredXYArgs {
+  title?: string;
+  description?: string;
+  xTitle: string;
+  yTitle: string;
+  yRightTitle: string;
+  yLeftExtent: AxisExtentConfigResult;
+  yRightExtent: AxisExtentConfigResult;
+  legend: LegendConfigResult;
+  valueLabels: ValueLabelMode;
+  layers: XYExtendedLayerConfigResult[];
+  fittingFunction?: FittingFunction;
+  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
+  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
+  gridlinesVisibilitySettings?: GridlinesConfigResult;
+  labelsOrientation?: LabelsOrientationConfigResult;
+  curveType?: XYCurveType;
+  fillOpacity?: number;
+  hideEndzones?: boolean;
+  valuesInLegend?: boolean;
+  ariaLabel?: string;
+}
+
+export interface XYProps {
+  title?: string;
+  description?: string;
+  xTitle: string;
+  yTitle: string;
+  yRightTitle: string;
+  yLeftExtent: AxisExtentConfigResult;
+  yRightExtent: AxisExtentConfigResult;
+  legend: LegendConfigResult;
+  valueLabels: ValueLabelMode;
+  layers: Array<XYExtendedLayerConfigResult | XYLayerConfigResult>;
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -182,11 +253,25 @@ export interface XYReferenceLineLayerConfig {
   yConfig?: YConfigResult[];
 }
 
+export interface XYExtendedReferenceLineLayerConfig {
+  layerId: string;
+  accessors: string[];
+  yConfig?: YConfigResult[];
+}
+
 export type ReferenceLineLayerArgs = XYReferenceLineLayerConfig & {
   columnToLabel?: string;
 };
 
+export type ExtendedReferenceLineLayerArgs = XYExtendedReferenceLineLayerConfig & {
+  columnToLabel?: string;
+  table?: Datatable;
+};
+
 export type XYLayerConfigResult = DataLayerConfigResult | ReferenceLineLayerConfigResult;
+export type XYExtendedLayerConfigResult =
+  | ExtendedDataLayerConfigResult
+  | ExtendedReferenceLineLayerConfigResult;
 
 export interface LensMultiTable {
   type: typeof MULTITABLE;
@@ -202,8 +287,19 @@ export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
   layerType: typeof LayerTypes.REFERENCELINE;
 };
 
+export type ExtendedReferenceLineLayerConfigResult = ExtendedReferenceLineLayerArgs & {
+  type: typeof EXTENDED_REFERENCE_LINE_LAYER;
+  layerType: typeof LayerTypes.REFERENCELINE;
+};
+
 export type DataLayerConfigResult = DataLayerArgs & {
   type: typeof DATA_LAYER;
+  layerType: typeof LayerTypes.DATA;
+  table?: Datatable;
+};
+
+export type ExtendedDataLayerConfigResult = ExtendedDataLayerArgs & {
+  type: typeof EXTENDED_DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
 };
 

@@ -11,14 +11,17 @@ export const PLUGIN_NAME = 'expressionXy';
 
 export {
   xyVisFunction,
+  layeredXyVisFunction,
   yAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
-  dataLayerConfigFunction,
+  dataLayerFunction,
+  extendedDataLayerFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
   labelsOrientationConfigFunction,
-  referenceLineLayerConfigFunction,
+  referenceLineLayerFunction,
+  extendedReferenceLineLayerFunction,
   axisTitlesVisibilityConfigFunction,
 } from './expression_functions';
 
