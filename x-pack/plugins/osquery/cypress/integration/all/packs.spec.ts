@@ -58,7 +58,7 @@ describe('ALL - Packs', () => {
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
         .clear()
-        .type('10');
+        .type('500');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
       findAndClickButton('Save pack');
