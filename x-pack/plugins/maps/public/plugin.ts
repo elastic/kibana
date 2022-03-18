@@ -77,6 +77,7 @@ import type { SpacesPluginStart } from '../../spaces/public';
 import type { LensPublicSetup } from '../../lens/public';
 
 import { setupLensChoroplethChart } from './lens';
+import { SharedUXPluginStart } from '../../../../src/plugins/shared_ux/public';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -110,6 +111,7 @@ export interface MapsPluginStartDependencies {
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   usageCollection?: UsageCollectionSetup;
+  sharedUX: SharedUXPluginStart;
 }
 
 /**

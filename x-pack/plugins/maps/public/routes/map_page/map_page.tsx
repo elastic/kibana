@@ -16,6 +16,7 @@ import {
   getOpenLayerWizardFromUrlParam,
 } from './saved_map';
 import { MapEmbeddableInput } from '../../embeddable/types';
+import { getSharedUXPluginContext } from '../../kibana_services';
 
 interface Props {
   mapEmbeddableInput?: MapEmbeddableInput;
@@ -74,15 +75,19 @@ export class MapPage extends Component<Props, State> {
   };
 
   render() {
+    const ServicesContext = getSharedUXPluginContext();
+
     return (
       <Provider store={this.state.savedMap.getStore()}>
-        <MapApp
-          history={this.props.history}
-          savedMap={this.state.savedMap}
-          onAppLeave={this.props.onAppLeave}
-          setHeaderActionMenu={this.props.setHeaderActionMenu}
-          saveCounter={this.state.saveCounter}
-        />
+        <ServicesContext>
+          <MapApp
+            history={this.props.history}
+            savedMap={this.state.savedMap}
+            onAppLeave={this.props.onAppLeave}
+            setHeaderActionMenu={this.props.setHeaderActionMenu}
+            saveCounter={this.state.saveCounter}
+          />
+        </ServicesContext>
       </Provider>
     );
   }

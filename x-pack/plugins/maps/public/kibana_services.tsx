@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
+import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
 import type { CoreStart } from 'kibana/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
@@ -57,6 +59,14 @@ export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getUsageCollection = () => pluginsStart.usageCollection;
+export const getSharedUXPluginContext =
+  (): FC =>
+  ({ children }) =>
+    (
+      <SharedUxServicesProvider {...pluginsStart.sharedUX.getContextServices()}>
+        {children}
+      </SharedUxServicesProvider>
+    );
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
