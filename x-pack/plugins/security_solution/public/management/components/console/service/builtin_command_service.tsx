@@ -6,6 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import { HistoryItem, HistoryItemComponent } from '../components/history_item';
 import { HelpOutput } from '../components/help_output';
 import { ParsedCommandInput } from './parsed_command_input';
@@ -18,11 +19,15 @@ const builtInCommands = (): CommandDefinition[] => {
   return [
     {
       name: 'help',
-      about: 'View list of available commands', // FIXME:PT i18n here and bleow
+      about: i18n.translate('xpack.securitySolution.console.builtInCommands.helpAbout', {
+        defaultMessage: 'View list of available commands',
+      }),
     },
     {
       name: 'clear',
-      about: 'Clear the console buffer',
+      about: i18n.translate('xpack.securitySolution.console.builtInCommands.clearAbout', {
+        defaultMessage: 'Clear the console buffer',
+      }),
     },
   ];
 };
