@@ -207,6 +207,7 @@ export const LensTopNavMenu = ({
     attributeService,
     discover,
     dashboardFeatureFlag,
+    dataViews,
   } = useKibana<LensAppServices>().services;
 
   const dispatch = useLensDispatch();
@@ -260,7 +261,7 @@ export const LensTopNavMenu = ({
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
+      getIndexPatternsObjects(indexPatternIds, dataViews).then(
         ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
           setRejectedIndexPatterns(rejectedIds);
@@ -273,7 +274,7 @@ export const LensTopNavMenu = ({
     rejectedIndexPatterns,
     datasourceMap,
     indexPatterns,
-    data.indexPatterns,
+    dataViews,
   ]);
 
   const { TopNavMenu } = navigation.ui;
