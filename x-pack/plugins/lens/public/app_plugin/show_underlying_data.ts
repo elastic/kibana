@@ -183,11 +183,12 @@ export function combineQueryAndFilters(
   // make a copy as the original filters are readonly
   const newFilters = [...filters];
 
+  const dataView = dataViews?.find(({ id }) => id === meta.id);
+
   const hasQueriesInFiltersLanguage = Boolean(
     meta.filters.enabled[filtersLanguage]?.length || queries[filtersLanguage].length
   );
 
-  const dataView = dataViews?.find(({ id }) => id === meta.id);
   if (hasQueriesInFiltersLanguage) {
     const queryExpression = joinQueries([
       ...queries[filtersLanguage].map((q) => [q]),

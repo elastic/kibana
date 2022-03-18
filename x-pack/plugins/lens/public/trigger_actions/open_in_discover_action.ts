@@ -25,11 +25,10 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart) =>
         defaultMessage: 'Open in Discover',
       }),
     isCompatible: async (context: { embeddable: IEmbeddable }) => {
-      let isCompatible = false;
-      if (context.embeddable.type === DOC_TYPE) {
-        isCompatible = await (context.embeddable as Embeddable).getCanViewUnderlyingData();
-      }
-      return isCompatible;
+      return (
+        context.embeddable.type === DOC_TYPE &&
+        (await (context.embeddable as Embeddable).canViewUnderlyingData())
+      );
     },
     execute: async (context: { embeddable: Embeddable }) => {
       const args = context.embeddable.getViewUnderlyingDataArgs()!;

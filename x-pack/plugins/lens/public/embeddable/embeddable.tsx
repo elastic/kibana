@@ -716,12 +716,14 @@ export class Embeddable
 
   /**
    * Returns the necessary arguments to view the underlying data in discover.
+   *
+   * Only makes sense to call this after canViewUnderlyingData has been checked
    */
   public getViewUnderlyingDataArgs() {
     return this.viewUnderlyingDataArgs;
   }
 
-  public getCanViewUnderlyingData() {
+  public canViewUnderlyingData() {
     return this.loadViewUnderlyingDataArgs();
   }
 

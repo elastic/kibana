@@ -28,24 +28,24 @@ describe('open in discover action', () => {
       const embeddable = { type: DOC_TYPE } as Embeddable;
 
       // test false
-      embeddable.getCanViewUnderlyingData = jest.fn(() => Promise.resolve(false));
+      embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(false));
       expect(
         await createOpenInDiscoverAction({} as DiscoverStart).isCompatible({
           embeddable,
         } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
       ).toBeFalsy();
 
-      expect(embeddable.getCanViewUnderlyingData).toHaveBeenCalledTimes(1);
+      expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
 
       // test true
-      embeddable.getCanViewUnderlyingData = jest.fn(() => Promise.resolve(true));
+      embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(true));
       expect(
         await createOpenInDiscoverAction({} as DiscoverStart).isCompatible({
           embeddable,
         } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
       ).toBeTruthy();
 
-      expect(embeddable.getCanViewUnderlyingData).toHaveBeenCalledTimes(1);
+      expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
     });
   });
 
