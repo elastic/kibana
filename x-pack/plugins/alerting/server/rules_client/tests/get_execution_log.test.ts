@@ -88,6 +88,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
       status: 'unknown',
       lastExecutionDate: '2020-08-20T19:23:38Z',
       error: null,
+      warning: null,
     },
   },
   references: [],
