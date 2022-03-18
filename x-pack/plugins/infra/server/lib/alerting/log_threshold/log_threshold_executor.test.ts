@@ -420,7 +420,7 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        const indexedStartedAt = "2022-03-17T11:26:11.843Z";
+        const indexedStartedAt = '2022-03-17T11:26:11.843Z';
         const kibanaBaseUrl = undefined; // Test when server.rewriteBasePath: in not provided.
         processUngroupedResults(
           results,
@@ -491,8 +491,8 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        const indexedStartedAt = "2022-03-17T11:26:11.843Z";
-        const kibanaBaseUrl = "http://localhost:5601/kibana"
+        const indexedStartedAt = '2022-03-17T11:26:11.843Z';
+        const kibanaBaseUrl = 'http://localhost:5601/kibana';
 
         processGroupByResults(
           results,
