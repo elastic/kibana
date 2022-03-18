@@ -17,6 +17,7 @@ import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 import { SearchIndexSelectableOption } from './search_index_selectable';
 import { getRedirectToAfterEngineCreation, formatIndicesToSelectable } from './utils';
 
+type EngineType = 'appSearch' | 'elasticsearch';
 interface EngineCreationActions {
   onEngineCreationSuccess(): void;
   setIngestionMethod(method: string): { method: string };
@@ -27,6 +28,7 @@ interface EngineCreationActions {
   loadIndices(): void;
   onLoadIndicesSuccess(indices: ElasticsearchIndex[]): { indices: ElasticsearchIndex[] };
   setSelectedIndex(selectedIndexName: string): { selectedIndexName: string };
+  setEngineType(engineType: EngineType): { engineType: EngineType };
 }
 
 interface EngineCreationValues {
@@ -39,6 +41,8 @@ interface EngineCreationValues {
   indices: ElasticsearchIndex[];
   indicesFormatted: SearchIndexSelectableOption[];
   selectedIndex: string;
+  engineType: EngineType;
+  isSubmitDisabled: boolean;
 }
 
 export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
@@ -53,6 +57,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     loadIndices: true,
     onLoadIndicesSuccess: (indices) => ({ indices }),
     setSelectedIndex: (selectedIndexName) => ({ selectedIndexName }),
+    setEngineType: (engineType) => ({ engineType }),
   },
   reducers: {
     ingestionMethod: [
@@ -100,6 +105,12 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         setSelectedIndex: (_, { selectedIndexName }) => selectedIndexName,
       },
     ],
+    engineType: [
+      'appSearch',
+      {
+        setEngineType: (_, { engineType }) => engineType,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
@@ -107,6 +118,12 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       () => [selectors.indices, selectors.selectedIndex],
       (indices: ElasticsearchIndex[], selectedIndexName) =>
         formatIndicesToSelectable(indices, selectedIndexName),
+    ],
+    isSubmitDisabled: [
+      () => [selectors.name, selectors.engineType, selectors.selectedIndex],
+      (name: string, engineType: EngineType, selectedIndex: string) =>
+        (name.length === 0 && engineType === 'appSearch') ||
+        ((name.length === 0 || selectedIndex.length === 0) && engineType === 'elasticsearch'),
     ],
   }),
   listeners: ({ values, actions }) => ({

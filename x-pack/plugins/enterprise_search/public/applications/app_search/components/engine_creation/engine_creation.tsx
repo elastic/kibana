@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
@@ -55,14 +55,11 @@ export const EngineCreation: React.FC = () => {
   const { search } = useLocation() as Location;
   const { method } = parseQueryParams(search);
 
-  const [engineType, setEngineType] = useState('appSearch');
-  const { name, rawName, language, isLoading, selectedIndex } = useValues(EngineCreationLogic);
-  const { setIngestionMethod, setLanguage, setRawName, submitEngine } =
+  const { name, rawName, language, isLoading, engineType, isSubmitDisabled } =
+    useValues(EngineCreationLogic);
+  const { setIngestionMethod, setLanguage, setRawName, submitEngine, setEngineType } =
     useActions(EngineCreationLogic);
 
-  const isSubmitDisabled =
-    (name.length === 0 && engineType !== 'elasticsearch') ||
-    ((name.length === 0 || selectedIndex.length === 0) && engineType === 'elasticsearch');
   useEffect(() => {
     if (typeof method === 'string') {
       setIngestionMethod(method);
