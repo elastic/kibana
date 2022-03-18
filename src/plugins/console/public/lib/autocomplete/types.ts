@@ -15,6 +15,14 @@ export interface ResultTerm {
   value?: string;
 }
 
+export interface ConditionalTemplateType {
+  __condition?: {
+    lines_regex: string;
+  };
+  __template: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 export interface AutoCompleteContext {
   autoCompleteSet?: null | ResultTerm[];
   endpoint?: null | {
