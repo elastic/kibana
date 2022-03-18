@@ -243,7 +243,7 @@ export class Embeddable
     activeDatasourceState?: unknown;
   } = {};
 
-  private indexPatterns: IndexPattern[] = [];
+  private indexPatterns: DataView[] = [];
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
 
