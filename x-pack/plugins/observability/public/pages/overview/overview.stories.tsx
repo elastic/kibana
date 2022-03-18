@@ -248,7 +248,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => ({ hasData: false, indices: 'test-index' }),
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
 
     return (
