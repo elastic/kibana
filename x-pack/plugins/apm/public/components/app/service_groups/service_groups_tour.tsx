@@ -58,6 +58,8 @@ export function ServiceGroupsTour({ type, title, content, children }: Props) {
       anchorPosition="leftUp"
       footerAction={
         <EuiButtonEmpty
+          color="text"
+          size="xs"
           onClick={() => {
             setTourEnabled({ ...tourEnabled, [type]: false });
           }}
