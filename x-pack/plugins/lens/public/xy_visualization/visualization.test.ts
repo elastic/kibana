@@ -15,11 +15,9 @@ import type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
+  LensDataLayerConfigResult as DataLayerConfigResult,
 } from './types';
-import type {
-  DataLayerConfigResult,
-  SeriesType,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';

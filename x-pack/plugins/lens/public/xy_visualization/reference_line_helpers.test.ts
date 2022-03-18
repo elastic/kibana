@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataLayerConfigResult } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { FramePublicAPI } from '../types';
+import { LensDataLayerConfigResult as DataLayerConfigResult } from './types';
 import { computeOverallDataDomain, getStaticValue } from './reference_line_helpers';
 
 function getActiveData(json: Array<{ id: string; rows: Array<Record<string, number | null>> }>) {
