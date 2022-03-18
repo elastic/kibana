@@ -15,7 +15,6 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
   const remoteEsArchiver = getService('remoteEsArchiver');
 
   describe('CCS lens app', () => {
-    this.tags(['ciGroup3', 'skipFirefox']);
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
