@@ -280,6 +280,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
+        refetchFlyoutData={refetchFlyoutData}
         timelineId={timelineId}
       />
     </CasesContext>
