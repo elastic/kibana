@@ -376,7 +376,8 @@ export const QueryBarTopRow = React.memo(
     }
 
     const classes = classNames('kbnQueryBar', {
-      'kbnQueryBar--withDatePicker': showDatePicker,
+      'kbnQueryBar--withDatePicker': showDatePicker && !props.dataViewPickerComponentProps,
+      'kbnQueryBar-withDataViewPicker': showDatePicker && props.dataViewPickerComponentProps,
     });
 
     return (

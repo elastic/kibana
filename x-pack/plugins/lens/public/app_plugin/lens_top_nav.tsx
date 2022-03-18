@@ -669,6 +669,7 @@ export const LensTopNavMenu = ({
       label: currentIndexPattern?.title || '',
       'data-test-subj': 'lns-dataView-switch-link',
       title: currentIndexPattern?.title || '',
+      fullWidth: true,
     },
     currentDataViewId: currentIndexPattern?.id,
     onAddField: addField,
