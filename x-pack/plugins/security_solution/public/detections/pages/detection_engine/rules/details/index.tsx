@@ -211,7 +211,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
-  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
+  const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
     rule: maybeRule,
@@ -274,7 +274,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         spacesApi.ui.redirectLegacyUrl(
           path,
           i18nTranslate.translate(
-            'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
             {
               defaultMessage: 'rule',
             }
@@ -295,7 +295,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiSpacer />
           {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18nTranslate.translate(
-              'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
               {
                 defaultMessage: 'rule',
               }
@@ -320,7 +320,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [hasIndexRead]);
 
-  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
+  const showUpdating = useMemo(
+    () => isLoadingIndexPattern || isAlertsLoading || loading,
+    [isLoadingIndexPattern, isAlertsLoading, loading]
+  );
 
   const title = useMemo(
     () => (
@@ -677,7 +680,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         enabled={isExistingRule && (rule?.enabled ?? false)}
                         onChange={handleOnChangeEnabledRule}
                       />
-                      <EuiFlexItem>{i18n.ACTIVATE_RULE}</EuiFlexItem>
+                      <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiToolTip>
                 </EuiFlexItem>

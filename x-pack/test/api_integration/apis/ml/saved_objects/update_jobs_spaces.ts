@@ -33,12 +33,12 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     user: USER
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/api/ml/saved_objects/update_jobs_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(requestBody)
-      .expect(expectedStatusCode);
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_POWERUSER_SPACE1
       );
 
-      expect(body).to.eql({ [adJobId]: { success: true } });
+      expect(body).to.eql({ [adJobId]: { type: 'ml-job', success: true } });
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [idSpace1]);
     });
 
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_POWERUSER_SPACE1
       );
 
-      expect(body).to.eql({ [dfaJobId]: { success: true } });
+      expect(body).to.eql({ [dfaJobId]: { type: 'ml-job', success: true } });
       await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', [idSpace1]);
     });
 

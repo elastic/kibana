@@ -10,6 +10,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from 'kibana/server';
+import { RuleExecutionMetrics } from '.';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
@@ -37,6 +38,7 @@ export enum AlertExecutionStatusErrorReasons {
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   numberOfTriggeredActions?: number;
+  metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
@@ -61,6 +63,13 @@ export interface AlertAggregations {
   ruleMutedStatus: { muted: number; unmuted: number };
 }
 
+export interface MappedParamsProperties {
+  risk_score?: number;
+  severity?: string;
+}
+
+export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
+
 export interface Alert<Params extends AlertTypeParams = never> {
   id: string;
   enabled: boolean;
@@ -71,6 +80,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   schedule: IntervalSchedule;
   actions: AlertAction[];
   params: Params;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;

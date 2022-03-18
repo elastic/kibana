@@ -26,6 +26,8 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 
 import { once } from 'lodash';
 
+import type { SpacesPluginStart } from '../../spaces/public';
+
 import type { CloudStart } from '../../cloud/public';
 
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
@@ -36,7 +38,6 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import type { FieldFormatsStart } from '../../../../src/plugins/field_formats/public/index';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -94,7 +95,6 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
@@ -105,6 +105,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   storage: Storage;
   share: SharePluginStart;
   cloud?: CloudSetup & CloudStart;
+  spaces?: SpacesPluginStart;
   authz: FleetAuthz;
 }
 
