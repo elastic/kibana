@@ -362,7 +362,6 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         aggs: getExecutionLogAggregation({
-          numExecutions: 1000,
           page: 1,
           perPage: 10,
           sort: [{ timestamp: { order: 'desc' } }],
@@ -389,7 +388,6 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         aggs: getExecutionLogAggregation({
-          numExecutions: 1000,
           page: 1,
           perPage: 10,
           sort: [{ timestamp: { order: 'desc' } }],
@@ -416,7 +414,6 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         aggs: getExecutionLogAggregation({
-          numExecutions: 900,
           page: 1,
           perPage: 10,
           sort: [{ timestamp: { order: 'desc' } }],
@@ -443,7 +440,6 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         aggs: getExecutionLogAggregation({
-          numExecutions: 1000,
           page: 1,
           perPage: 10,
           sort: [{ timestamp: { order: 'desc' } }],
