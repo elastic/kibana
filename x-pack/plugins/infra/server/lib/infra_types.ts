@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
 import { InfraConfig } from '../types';
 import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
@@ -32,4 +33,5 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
   kibanaBaseUrl: string | undefined;
+  logger: Logger;
 }
