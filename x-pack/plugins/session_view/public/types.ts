@@ -21,9 +21,18 @@ export interface SessionViewDeps {
   // session view will fetch a page worth of events starting from jumpToEvent as well as a page backwards.
   jumpToEvent?: ProcessEvent;
   // Callback to open the alerts flyout
-  loadAlertDetails?: (alertUuid: string) => void;
-  // Callback used when alert flyout panel is closed
-  handleOnAlertDetailsClosed?: (alertUuid: string, status?: string) => void;
+  loadAlertDetails?: (
+    alertUuid: string,
+    // Callback used when alert flyout panel is closed
+    handleOnAlertDetailsClosed: () => void
+  ) => void;
+}
+
+export interface UpdateAlertStatus {
+  [key: string]: {
+    status: string;
+    processEntityId: string;
+  };
 }
 
 export interface EuiTabProps {

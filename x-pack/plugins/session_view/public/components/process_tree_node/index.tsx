@@ -43,8 +43,8 @@ export interface ProcessDeps {
   verboseModeOn?: boolean;
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
-  loadAlertDetails?: (alertUuid: string) => void;
-  handleOnAlertDetailsClosed?: (alertUuid: string, status?: string) => void;
+  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
+  handleOnAlertDetailsClosed: (alertUuid: string) => void;
 }
 
 /**

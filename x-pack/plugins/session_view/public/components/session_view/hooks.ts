@@ -5,12 +5,18 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import { useInfiniteQuery } from 'react-query';
+import { useQuery, useInfiniteQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ProcessEvent, ProcessEventResults } from '../../../common/types/process_tree';
-import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
+import { UpdateAlertStatus } from '../../types';
+import {
+  PROCESS_EVENTS_ROUTE,
+  PROCESS_EVENTS_PER_PAGE,
+  ALERT_STATUS_ROUTE,
+  QUERY_KEY_ALERTS,
+} from '../../../common/constants';
 
 export const useFetchSessionViewProcessEvents = (
   sessionEntityId: string,
@@ -71,6 +77,42 @@ export const useFetchSessionViewProcessEvents = (
       setIsJumpToFirstPage(true);
     }
   }, [jumpToEvent, query, isJumpToFirstPage]);
+
+  return query;
+};
+
+export const useFetchAlertStatus = (updatedAlertsStatus: UpdateAlertStatus, alertUuid: string) => {
+  const { http } = useKibana<CoreStart>().services;
+  const cachingKeys = [QUERY_KEY_ALERTS, alertUuid];
+  const query = useQuery<UpdateAlertStatus, Error>(
+    cachingKeys,
+    async () => {
+      if (!alertUuid) {
+        return updatedAlertsStatus;
+      }
+
+      const res = await http.get<ProcessEventResults>(ALERT_STATUS_ROUTE, {
+        query: {
+          alertUuid,
+        },
+      });
+
+      const events = res.events.map((event: any) => event._source as ProcessEvent);
+
+      return {
+        ...updatedAlertsStatus,
+        [alertUuid]: {
+          status: events[0].kibana?.alert.workflow_status ?? '',
+          processEntityId: events[0].process.entity_id,
+        },
+      };
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    }
+  );
 
   return query;
 };

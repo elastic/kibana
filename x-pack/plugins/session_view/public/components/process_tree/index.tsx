@@ -11,6 +11,7 @@ import { ProcessTreeNode } from '../process_tree_node';
 import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
 import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
+import { UpdateAlertStatus } from '../../types';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
@@ -36,8 +37,11 @@ interface ProcessTreeDeps {
   selectedProcess?: Process | null;
   onProcessSelected: (process: Process | null) => void;
   setSearchResults?: (results: Process[]) => void;
-  loadAlertDetails?: (alertUuid: string) => void;
-  handleOnAlertDetailsClosed?: (alertUuid: string, status?: string) => void;
+
+  // a map for alerts with updated status and process.entity_id
+  updatedAlertsStatus: UpdateAlertStatus;
+  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
+  handleOnAlertDetailsClosed: (alertUuid: string) => void;
   timeStampOn?: boolean;
   verboseModeOn?: boolean;
 }
@@ -55,6 +59,7 @@ export const ProcessTree = ({
   selectedProcess,
   onProcessSelected,
   setSearchResults,
+  updatedAlertsStatus,
   loadAlertDetails,
   handleOnAlertDetailsClosed,
   timeStampOn,
@@ -68,6 +73,7 @@ export const ProcessTree = ({
     sessionEntityId,
     data,
     searchQuery,
+    updatedAlertsStatus,
   });
 
   const scrollerRef = useRef<HTMLDivElement>(null);

@@ -5,7 +5,21 @@
  * 2.0.
  */
 import { Process, ProcessEvent, ProcessMap } from '../../../common/types/process_tree';
+import { UpdateAlertStatus } from '../../types';
 import { ProcessImpl } from './hooks';
+
+// if given event is an alert, and it exist in updatedAlertsStatus, update the alert's status
+// with the updated status value in updatedAlertsStatus Map
+export const updateAlertEventStatus = (
+  events: ProcessEvent[],
+  updatedAlertsStatus: UpdateAlertStatus
+) => {
+  events.forEach((event) => {
+    if (event.kibana?.alert.uuid && updatedAlertsStatus[event.kibana.alert.uuid]) {
+      event.kibana.alert.workflow_status = updatedAlertsStatus[event.kibana.alert.uuid].status;
+    }
+  });
+};
 
 // given a page of new events, add these events to the appropriate process class model
 // create a new process if none are created and return the mutated processMap

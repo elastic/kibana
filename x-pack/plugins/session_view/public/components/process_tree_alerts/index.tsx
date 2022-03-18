@@ -16,8 +16,8 @@ interface ProcessTreeAlertsDeps {
   jumpToAlertID?: string;
   isProcessSelected?: boolean;
   onAlertSelected: (e: MouseEvent) => void;
-  loadAlertDetails?: (alertUuid: string) => void;
-  handleOnAlertDetailsClosed?: (alertUuid: string, status?: string) => void;
+  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
+  handleOnAlertDetailsClosed: (alertUuid: string) => void;
 }
 
 export function ProcessTreeAlerts({
