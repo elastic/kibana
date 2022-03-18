@@ -17,7 +17,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiCheckableCard,
-  EuiCode,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +30,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { parseQueryParams } from '../../../shared/query_params';
@@ -201,11 +201,25 @@ export const EngineCreation: React.FC = () => {
                           </EuiTitle>
                           <EuiSpacer size="xs" />
                           <EuiText size="s" color="subdued">
-                            <p>Create an engine based on data managed in an Elasticsearch index.</p>
+                            <p>
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.engineCreation.elasticsearchIndexedLabel',
+                                {
+                                  defaultMessage:
+                                    'Create an engine based on data managed in an Elasticsearch index.',
+                                }
+                              )}
+                            </p>
                             <p>
                               <small>
                                 <EuiLink href="#" target="_blank">
-                                  Learn more about using an existing Elasticsearch index
+                                  {i18n.translate(
+                                    'xpack.enterpriseSearch.engineCreation.elasticsearchIndexedLink',
+                                    {
+                                      defaultMessage:
+                                        'Learn more about using an existing Elasticsearch index',
+                                    }
+                                  )}
                                 </EuiLink>
                               </small>
                             </p>

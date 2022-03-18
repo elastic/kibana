@@ -7,13 +7,15 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { ElasticsearchIndex } from '../../../../../common/types';
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { formatApiName } from '../../utils/format_api_name';
 
 import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
-import { getRedirectToAfterEngineCreation } from './utils';
+import { SearchIndexSelectableOption } from './search_index_selectable';
+import { getRedirectToAfterEngineCreation, formatIndexToSelectable } from './utils';
 
 interface EngineCreationActions {
   onEngineCreationSuccess(): void;
@@ -22,6 +24,8 @@ interface EngineCreationActions {
   setRawName(rawName: string): { rawName: string };
   submitEngine(): void;
   onSubmitError(): void;
+  loadIndices(): void;
+  onLoadIndicesSuccess(indices: ElasticsearchIndex[]): { indices: ElasticsearchIndex[] };
 }
 
 interface EngineCreationValues {
@@ -30,6 +34,9 @@ interface EngineCreationValues {
   language: string;
   name: string;
   rawName: string;
+  isLoadingIndices: boolean;
+  indices: ElasticsearchIndex[];
+  indicesFormatted: SearchIndexSelectableOption[];
 }
 
 export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
@@ -41,6 +48,8 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     setRawName: (rawName) => ({ rawName }),
     submitEngine: true,
     onSubmitError: true,
+    loadIndices: true,
+    onLoadIndicesSuccess: (indices) => ({ indices }),
   },
   reducers: {
     ingestionMethod: [
@@ -68,9 +77,27 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         setRawName: (_, { rawName }) => rawName,
       },
     ],
+    isLoadingIndices: [
+      false,
+      {
+        loadIndices: () => true,
+        onLoadIndicesSuccess: () => false,
+        onSubmitError: () => false,
+      },
+    ],
+    indices: [
+      [],
+      {
+        onLoadIndicesSuccess: (_, { indices }) => indices,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
+    indicesFormatted: [
+      () => [selectors.indices],
+      (indices: ElasticsearchIndex[]) => indices.map(formatIndexToSelectable),
+    ],
   }),
   listeners: ({ values, actions }) => ({
     submitEngine: async () => {
@@ -94,6 +121,16 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
 
       flashSuccessToast(ENGINE_CREATION_SUCCESS_MESSAGE(name));
       navigateToUrl(toUrl);
+    },
+    loadIndices: async () => {
+      const { http } = HttpLogic.values;
+      try {
+        const indices = await http.get('/internal/enterprise_search/indices');
+        actions.onLoadIndicesSuccess(indices as ElasticsearchIndex[]);
+      } catch (e) {
+        flashAPIErrors(e);
+        actions.onSubmitError();
+      }
     },
   }),
 });
