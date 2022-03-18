@@ -6,19 +6,7 @@ exports[`ExecutionLogSearchBar snapshots renders correctly against snapshot 1`] 
 >
   <EuiFlexItem
     grow={true}
-  >
-    <EuiFieldSearch
-      aria-label="duration > 100 and gapDuration > 10"
-      compressed={false}
-      data-test-subj="executionLogSearch"
-      fullWidth={true}
-      incremental={false}
-      isClearable={true}
-      isLoading={false}
-      onSearch={[Function]}
-      placeholder="duration > 100 and gapDuration > 10"
-    />
-  </EuiFlexItem>
+  />
   <EuiFlexItem
     grow={false}
   >

@@ -1,17 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`RuleDurationFormat snapshots renders correctly against snapshot 1`] = `
-<EuiToolTip
-  content="0 ms"
-  data-test-subj="rule-duration-format-tooltip"
-  delay="regular"
-  display="inlineBlock"
-  position="top"
+<span
+  data-test-subj="rule-duration-format-value"
 >
-  <span
-    data-test-subj="rule-duration-format-value"
-  >
-    00:00
-  </span>
-</EuiToolTip>
+  00:00
+</span>
 `;
