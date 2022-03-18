@@ -203,12 +203,9 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
 }) => {
-  const indices = 'logs-endpoint.events.process-default';
+  const indices = request.defaultIndex ?? request.indexType;
 
   const runtimeMappings = {
-    'process.entity_id': {
-      type: 'keyword',
-    },
     'process.entry_leader.entity_id': {
       type: 'keyword',
     },
