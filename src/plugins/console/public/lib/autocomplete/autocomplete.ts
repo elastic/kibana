@@ -349,31 +349,26 @@ export default function ({
     });
   }
 
-  function getConditionalTemplate(term: { value?: string; context?: AutoCompleteContext }) {
-    const context = term.context;
-    if (context?.endpoint && term.value) {
-      const { data_autocomplete_rules: autocompleteRules } = context.endpoint;
-      if (autocompleteRules && autocompleteRules[term.value]) {
-        const currentLineNumber = editor.getCurrentPosition().lineNumber;
-        const { __one_of } = autocompleteRules[term.value] as {
-          __one_of: ConditionalTemplateType[];
-        };
-        const rules = __one_of ?? [];
-        const startLine = getStartLineNumber(currentLineNumber, context.requestStartRow!, rules);
-        const lines = editor.getLines(startLine, currentLineNumber).join('\n');
-        const match = matchCondition(rules, lines);
-        if (match && match.__template) {
-          return match.__template;
-        }
+  function getConditionalTemplate(
+    name: string,
+    autocompleteRules: Record<string, unknown> | null | undefined
+  ) {
+    if (autocompleteRules && autocompleteRules[name]) {
+      const currentLineNumber = editor.getCurrentPosition().lineNumber;
+      const { __one_of } = autocompleteRules[name] as {
+        __one_of: ConditionalTemplateType[];
+      };
+      const rules = __one_of ?? [];
+      const startLine = getStartLineNumber(currentLineNumber, rules);
+      const lines = editor.getLines(startLine, currentLineNumber).join('\n');
+      const match = matchCondition(rules, lines);
+      if (match && match.__template) {
+        return match.__template;
       }
     }
   }
 
-  function getStartLineNumber(
-    currentLine: number,
-    endLine = 1,
-    rules: ConditionalTemplateType[]
-  ): number {
+  function getStartLineNumber(currentLine: number, rules: ConditionalTemplateType[]): number {
     if (currentLine === 1) {
       return currentLine;
     }
@@ -382,7 +377,7 @@ export default function ({
     if (match) {
       return currentLine;
     }
-    return getStartLineNumber(currentLine - 1, endLine, rules);
+    return getStartLineNumber(currentLine - 1, rules);
   }
 
   function matchCondition(rules: ConditionalTemplateType[], condition: string) {
@@ -402,12 +397,14 @@ export default function ({
   }) {
     const context = term.context!;
 
-    // If term contains conditional definitions, it returns the correct template based on the value configured in the request.
-    const template = getConditionalTemplate(term);
-    if (template) {
-      term.template = template;
+    if (context?.endpoint && term.value) {
+      const { data_autocomplete_rules: autocompleteRules } = context.endpoint;
+      // If term contains conditional definitions, it returns the correct template based on the value configured in the request.
+      const template = getConditionalTemplate(term.value, autocompleteRules);
+      if (template) {
+        term.template = template;
+      }
     }
-
     // make sure we get up to date replacement info.
     addReplacementInfoToContext(context, editor.getCurrentPosition(), term.insertValue);
 
