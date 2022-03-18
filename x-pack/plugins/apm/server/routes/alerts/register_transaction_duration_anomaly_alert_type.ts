@@ -131,6 +131,9 @@ export function registerTransactionDurationAnomalyAlertType({
           return {};
         }
 
+        // Window size must be at least 30, does like this to support rules created before this change where default was 15
+        const windowSize = Math.max(ruleParams.windowSize, 30);
+
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {
@@ -144,7 +147,7 @@ export function registerTransactionDurationAnomalyAlertType({
                   {
                     range: {
                       timestamp: {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: `now-${windowSize}${ruleParams.windowUnit}`,
                         format: 'epoch_millis',
                       },
                     },
