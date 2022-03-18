@@ -13,10 +13,7 @@ import { groupBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import {
-  getAccessorByDimension,
-  getFormatByAccessor,
-} from '../../../../../plugins/visualizations/common/utils';
+import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
 import type { FieldFormat } from '../../../../field_formats/common';
 import type { ReferenceLineLayerConfigResult, IconPosition, YAxisMode } from '../../common';
 import type { LensMultiTable } from '../../common/types';
