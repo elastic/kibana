@@ -30,7 +30,7 @@ export const CopySource: Task = {
         '!src/functional_test_runner/**',
         '!src/dev/**',
         '!**/jest.config.js',
-        '**/jest.integration.config.js',
+        '!**/jest.integration.config.js',
         '!**/mocks.js',
         '!**/test_utils.js',
         '!**/test_helpers.js',
