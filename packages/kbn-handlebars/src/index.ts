@@ -175,40 +175,17 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   SubExpression(sexpr: hbs.AST.SubExpression) {
-    transformLiteralToPath(sexpr);
-
-    switch (this.classifySexpr(sexpr)) {
-      case kSimple:
-        this.simpleSexpr(sexpr);
-        break;
-      case kHelper:
-        this.helperSexpr(sexpr);
-        break;
-      case kAmbiguous:
-        this.ambiguousSexpr(sexpr);
-        break;
-    }
+    this.processSexprOrBlock(sexpr);
   }
 
   BlockStatement(block: hbs.AST.BlockStatement) {
-    transformLiteralToPath(block);
-
-    switch (this.classifySexpr(block)) {
-      case kHelper:
-        this.helperSexpr(block);
-        break;
-      case kSimple:
-        this.simpleSexpr(block);
-        break;
-      case kAmbiguous:
-        this.ambiguousSexpr(block);
-        break;
-    }
+    this.processSexprOrBlock(block);
   }
 
   PathExpression(path: hbs.AST.PathExpression) {
     const context = this.scopes[path.depth];
     const value = path.parts[0] === undefined ? context : get(context, path.parts);
+
     if (this.compileOptions.noEscape === true || typeof value !== 'string') {
       this.output.push(value);
     } else {
@@ -244,13 +221,29 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // ***      Visitor AST Helper Functions      *** //
   // ********************************************** //
 
-  // Liftet from lib/handlebars/compiler/compiler.js
-  private classifySexpr(sexpr: { path: hbs.AST.PathExpression }): NodeType {
-    const isSimple = AST.helpers.simpleId(sexpr.path);
+  private processSexprOrBlock(node: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
+    transformLiteralToPath(node);
+
+    switch (this.classifyNode(node)) {
+      case kHelper:
+        this.helperSexpr(node);
+        break;
+      case kSimple:
+        this.simpleSexpr(node);
+        break;
+      case kAmbiguous:
+        this.ambiguousSexpr(node);
+        break;
+    }
+  }
+
+  // Liftet from lib/handlebars/compiler/compiler.js (original name: classifySexpr)
+  private classifyNode(node: { path: hbs.AST.PathExpression }): NodeType {
+    const isSimple = AST.helpers.simpleId(node.path);
 
     // a mustache is an eligible helper if:
     // * its id is simple (a single part, not `this` or `..`)
-    let isHelper = AST.helpers.helperExpression(sexpr);
+    let isHelper = AST.helpers.helperExpression(node);
 
     // if a mustache is an eligible helper but not a definite
     // helper, it is ambiguous, and will be resolved in a later
@@ -260,7 +253,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     // if ambiguous, we can possibly resolve the ambiguity now
     // An eligible helper is one that does not have a complex path, i.e. `this.foo`, `../foo` etc.
     if (isEligible && !isHelper) {
-      const name = sexpr.path.parts[0];
+      const name = node.path.parts[0];
       const options = this.compileOptions;
       if (options.knownHelpers && options.knownHelpers[name]) {
         isHelper = true;
@@ -278,13 +271,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
   }
 
-  private simpleSexpr(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
-    const path = sexpr.path;
+  private simpleSexpr(node: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
+    const path = node.path;
 
-    if (isBlock(sexpr)) {
-      const result = this.resolveNode(path)[0];
+    if (isBlock(node)) {
+      const result = this.resolveNodes(path)[0];
       const lambdaResult = this.container.lambda(result, this.scopes[0]);
-      this.blockValue(sexpr, lambdaResult);
+      this.blockValue(node, lambdaResult);
     } else {
       this.accept(path);
     }
@@ -294,33 +287,33 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // `{{#this.foo}}...{{/this.foo}}`, resolve the value of `foo`, and
   // replace it on the stack with the result of properly
   // invoking blockHelperMissing.
-  private blockValue(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, context: any) {
-    const name = sexpr.path.original;
-    const options = this.setupParams(sexpr, name);
-    const result = this.container.hooks.blockHelperMissing!.call(sexpr, context, options);
+  private blockValue(node: hbs.AST.SubExpression | hbs.AST.BlockStatement, context: any) {
+    const name = node.path.original;
+    const options = this.setupParams(node, name);
+    const result = this.container.hooks.blockHelperMissing!.call(node, context, options);
     this.output.push(result);
   }
 
-  private helperSexpr(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
-    const path = sexpr.path;
+  private helperSexpr(node: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
+    const path = node.path;
     const name = path.parts[0];
 
     if (this.compileOptions.knownHelpers && this.compileOptions.knownHelpers[name]) {
-      this.invokeKnownHelper(sexpr, name);
+      this.invokeKnownHelper(node, name);
     } else if (this.compileOptions.knownHelpersOnly) {
       throw new Handlebars.Exception(
         'You specified knownHelpersOnly, but used the unknown helper ' + name,
-        sexpr
+        node
       );
     } else {
-      this.invokeHelper(sexpr, path.original); // TODO: Should this be `name` instead of `path.original`?
+      this.invokeHelper(node, path.original); // TODO: Should this be `name` instead of `path.original`?
     }
   }
 
   // This operation is used when the helper is known to exist,
   // so a `helperMissing` fallback is not required.
-  private invokeKnownHelper(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
-    const helper = this.setupHelper(sexpr, name);
+  private invokeKnownHelper(node: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
+    const helper = this.setupHelper(node, name);
     const result = helper.fn.apply(helper.context, helper.params);
     this.output.push(result);
   }
@@ -329,14 +322,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // and pushes the helper's return value onto the stack.
   //
   // If the helper is not found, `helperMissing` is called.
-  private invokeHelper(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
-    const helper = this.setupHelper(sexpr, name);
+  private invokeHelper(node: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
+    const helper = this.setupHelper(node, name);
 
     if (!helper.fn) {
       if (this.compileOptions.strict) {
-        helper.fn = this.container.strict(helper.context, name, sexpr.loc);
+        helper.fn = this.container.strict(helper.context, name, node.loc);
       } else {
-        helper.fn = this.resolveNode(sexpr.path)[0] || this.container.hooks.helperMissing;
+        helper.fn = this.resolveNodes(node.path)[0] || this.container.hooks.helperMissing;
       }
     }
 
@@ -345,12 +338,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output.push(result);
   }
 
-  private ambiguousSexpr(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
-    const name = sexpr.path.parts[0];
-    const invokeResult = this.invokeAmbiguous(sexpr, name);
+  private ambiguousSexpr(node: hbs.AST.SubExpression | hbs.AST.BlockStatement) {
+    const name = node.path.parts[0];
+    const invokeResult = this.invokeAmbiguous(node, name);
 
-    if (isBlock(sexpr)) {
-      const result = this.ambiguousBlockValue(sexpr as hbs.AST.BlockStatement, invokeResult);
+    if (isBlock(node)) {
+      const result = this.ambiguousBlockValue(node as hbs.AST.BlockStatement, invokeResult);
       if (result != null) {
         this.output.push(result);
       }
@@ -370,12 +363,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // This operation emits more code than the other options,
   // and can be avoided by passing the `knownHelpers` and
   // `knownHelpersOnly` flags at compile-time.
-  private invokeAmbiguous(sexpr: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
-    const helper = this.setupHelper(sexpr, name);
+  private invokeAmbiguous(node: hbs.AST.SubExpression | hbs.AST.BlockStatement, name: string) {
+    const helper = this.setupHelper(node, name);
 
     if (!helper.fn) {
       if (this.compileOptions.strict) {
-        helper.fn = this.container.strict(helper.context, name, sexpr.loc);
+        helper.fn = this.container.strict(helper.context, name, node.loc);
       } else {
         helper.fn =
           helper.context != null
@@ -391,53 +384,53 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private setupHelper(
-    block: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    node: hbs.AST.SubExpression | hbs.AST.BlockStatement,
     helperName: string,
     blockHelper: boolean = false
   ) {
     return {
       fn: this.container.lookupProperty(this.container.helpers, helperName),
       context: this.scopes[0],
-      params: this.setupHelperArgs(block, helperName, blockHelper),
+      params: this.setupHelperArgs(node, helperName, blockHelper),
     };
   }
 
   private setupHelperArgs(
-    block: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    node: hbs.AST.SubExpression | hbs.AST.BlockStatement,
     helperName: string,
     blockHelper: boolean = false
   ): [...any[], Handlebars.HelperOptions] {
     if (blockHelper) {
       throw new Error('Not implemented!'); // TODO: Handle or remove this
     }
-    return [...this.resolveNode(block.params), this.setupParams(block, helperName)];
+    return [...this.resolveNodes(node.params), this.setupParams(node, helperName)];
   }
 
   private setupParams(
-    block: hbs.AST.SubExpression | hbs.AST.BlockStatement,
+    node: hbs.AST.SubExpression | hbs.AST.BlockStatement,
     helperName: string
   ): Handlebars.HelperOptions {
     const options: Handlebars.HelperOptions = {
       // @ts-expect-error name should be on there, but the offical types doesn't know this
       name: helperName,
-      hash: getHash(block),
+      hash: getHash(node),
     };
 
-    if (isBlock(block)) {
+    if (isBlock(node)) {
       // @ts-expect-error hack to ensure TypeScript doesn't complain about block.program/inverse usage below
-      declare let block: hbs.AST.BlockStatement; // eslint-disable-line @typescript-eslint/no-shadow
+      declare let node: hbs.AST.BlockStatement; // eslint-disable-line @typescript-eslint/no-shadow
 
       const generateProgramFunction = (program: hbs.AST.Program) => {
         return (nextContext: any) => {
           this.scopes.unshift(nextContext);
-          const result = this.resolveNode(program).join('');
+          const result = this.resolveNodes(program).join('');
           this.scopes.shift();
           return result;
         };
       };
 
-      options.fn = block.program ? generateProgramFunction(block.program) : noop;
-      options.inverse = block.inverse ? generateProgramFunction(block.inverse) : noop;
+      options.fn = node.program ? generateProgramFunction(node.program) : noop;
+      options.inverse = node.inverse ? generateProgramFunction(node.inverse) : noop;
     }
 
     return Object.assign(options, this.defaultHelperOptions);
@@ -455,14 +448,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return result;
   }
 
-  private resolveNode(nodeOrArrayOfNodes: hbs.AST.Node | hbs.AST.Node[]): any[] {
+  private resolveNodes(nodes: hbs.AST.Node | hbs.AST.Node[]): any[] {
     const currentOutput = this.output;
     this.output = [];
 
-    if (Array.isArray(nodeOrArrayOfNodes)) {
-      this.acceptArray(nodeOrArrayOfNodes);
+    if (Array.isArray(nodes)) {
+      this.acceptArray(nodes);
     } else {
-      this.accept(nodeOrArrayOfNodes);
+      this.accept(nodes);
     }
 
     const result = this.output;
