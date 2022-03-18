@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { first, isEqual, last } from 'lodash';
-import moment from 'moment';
 import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
@@ -223,7 +222,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
       if (reason) {
         const firstResult = first(alertResults);
-        const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
+        const timestamp = (firstResult && firstResult[group].timestamp) ?? startedAt.toISOString();
         const actionGroupId =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
