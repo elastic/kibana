@@ -14,10 +14,11 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from
 import { i18n } from '@kbn/i18n';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor/json_code_editor_common';
 import { getServices } from '../../../kibana_services';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, DOC_TABLE_LEGACY } from '../../../../common';
 import { ElasticRequestState } from '../../apps/doc/types';
 import { useEsDocSearch } from '../../services/use_es_doc_search';
 import { IndexPattern } from '../../../../../data_views/common';
+import { getHeight } from './get_height';
 
 interface SourceViewerProps {
   id: string;
@@ -27,16 +28,23 @@ interface SourceViewerProps {
   width?: number;
 }
 
+// Ihe number of lines displayed without scrolling used for classic table, which renders the component
+// inline limitation was necessary to enable virtualized scrolling, which improves performance
+export const MAX_LINES_CLASSIC_TABLE = 500;
+// Displayed margin of the code editor to the window bottom when rendered in the document explorer flyout
+export const MARGIN_BOTTOM = 25;
+
 export const SourceViewer = ({
-  id,
-  index,
-  indexPattern,
-  width,
-  hasLineNumbers,
-}: SourceViewerProps) => {
+                               id,
+                               index,
+                               indexPattern,
+                               width,
+                               hasLineNumbers,
+                             }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
   const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const useDocExplorer = !getServices().uiSettings.get(DOC_TABLE_LEGACY);
   const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,
@@ -61,16 +69,18 @@ export const SourceViewer = ({
       return;
     }
 
-    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-    const lineCount = editor.getModel()?.getLineCount() || 1;
-    const height = editor.getTopForLineNumber(lineCount + 1) + lineHeight;
+    const height = getHeight(editor, useDocExplorer);
+    if (height === 0) {
+      return;
+    }
+
     if (!jsonValue || jsonValue === '') {
       editorElement.style.height = '0px';
     } else {
       editorElement.style.height = `${height}px`;
     }
     editor.layout();
-  }, [editor, jsonValue]);
+  }, [editor, jsonValue, useDocExplorer]);
 
   const loadingState = (
     <div className="sourceViewer__loading">
@@ -122,7 +132,3 @@ export const SourceViewer = ({
     />
   );
 };
-
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default SourceViewer;
