@@ -171,8 +171,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 <EuiSpacer size="l" />
                 <Reason eventId={id} data={data} />
-                <EuiSpacer size="m" />
-                <RelatedCases data={data} isAlert={isAlert} />
+                <RelatedCases eventId={id} />
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{

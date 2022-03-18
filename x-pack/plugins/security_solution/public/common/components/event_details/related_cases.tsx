@@ -5,85 +5,95 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import React, { useCallback, useState, useEffect } from 'react';
+import { EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../common/lib/kibana';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { getFieldValue } from '../../../detections/components/host_isolation/helpers';
+import { useGetUserCasesPermissions, useKibana, useToasts } from '../../lib/kibana';
 import { CaseDetailsLink } from '../links';
 import { APP_ID } from '../../../../common/constants';
 
 interface Props {
-  data: TimelineEventsDetailsItem[];
-  isAlert: boolean;
+  eventId: string;
 }
 
 type RelatedCaseList = Array<{ id: string; title: string }>;
 
-export const RelatedCases: React.FC<Props> = React.memo(({ data, isAlert }) => {
+export const RelatedCases: React.FC<Props> = React.memo(({ eventId }) => {
   const {
     services: { cases },
   } = useKibana();
-
-  const alertId = useMemo(() => getFieldValue({ category: '_id', field: '_id' }, data), [data]);
-
+  const toasts = useToasts();
+  const casePermissions = useGetUserCasesPermissions();
   const [relatedCases, setRelatedCases] = useState<RelatedCaseList>([]);
   const [areCasesLoading, setAreCasesLoading] = useState(true);
+  const [hasError, setHasError] = useState<boolean>(false);
+  const hasCasesReadPermissions = casePermissions?.read ?? false;
 
   const getRelatedCases = useCallback(async () => {
     let relatedCaseList: RelatedCaseList = [];
     try {
-      relatedCaseList =
-        (await cases.api.getRelatedCases(alertId, {
-          owner: APP_ID,
-        })) ?? [];
-    } catch {
-      // TODO: Show an error toaster here?
+      if (eventId) {
+        relatedCaseList =
+          (await cases.api.getRelatedCases(eventId, {
+            owner: APP_ID,
+          })) ?? [];
+      }
+    } catch (error) {
+      setHasError(true);
+      toasts.addWarning(
+        i18n.translate('xpack.securitySolution.alertDetails.overview.relatedCasesFailure.title', {
+          defaultMessage: 'Unable to load related cases: "{error}"',
+          values: { error },
+        })
+      );
     }
     setRelatedCases(relatedCaseList);
     setAreCasesLoading(false);
-  }, [alertId, cases.api]);
+  }, [eventId, cases.api, toasts]);
 
   useEffect(() => {
-    if (alertId && isAlert) {
-      getRelatedCases();
-    }
-  }, [alertId, getRelatedCases, isAlert]);
+    getRelatedCases();
+  }, [eventId, getRelatedCases]);
+
+  if (hasError || !hasCasesReadPermissions) return null;
 
   return areCasesLoading ? (
     <EuiLoadingContent lines={2} />
   ) : (
-    <EuiFlexItem grow={false} style={{ flexDirection: 'row' }}>
-      <span>
-        <FormattedMessage
-          defaultMessage="This alert was found in"
-          id="xpack.securitySolution.alertDetails.overview.relatedCasesFound"
-        />{' '}
-        <strong>
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexItem grow={false} style={{ flexDirection: 'row' }}>
+        <span>
           <FormattedMessage
-            defaultMessage="{caseCount} {caseCount, plural, =0 {cases.} =1 {case:} other {cases:}}"
-            id="xpack.securitySolution.alertDetails.overview.relatedCasesCount"
-            values={{
-              caseCount: relatedCases?.length ?? 0,
-            }}
-          />
-        </strong>
-        {relatedCases?.map(({ id, title }, index) =>
-          id && title ? (
-            <span key={id}>
-              {' '}
-              <CaseDetailsLink detailName={id} title={title}>
-                {title}
-              </CaseDetailsLink>
-              {relatedCases[index + 1] ? ',' : ''}
-            </span>
-          ) : (
-            <></>
-          )
-        )}
-      </span>
-    </EuiFlexItem>
+            defaultMessage="This alert was found in"
+            id="xpack.securitySolution.alertDetails.overview.relatedCasesFound"
+          />{' '}
+          <strong>
+            <FormattedMessage
+              defaultMessage="{caseCount} {caseCount, plural, =0 {cases.} =1 {case:} other {cases:}}"
+              id="xpack.securitySolution.alertDetails.overview.relatedCasesCount"
+              values={{
+                caseCount: relatedCases?.length ?? 0,
+              }}
+            />
+          </strong>
+          {relatedCases?.map(({ id, title }, index) =>
+            id && title ? (
+              <span key={id}>
+                {' '}
+                <CaseDetailsLink detailName={id} title={title}>
+                  {title}
+                </CaseDetailsLink>
+                {relatedCases[index + 1] ? ',' : ''}
+              </span>
+            ) : (
+              <></>
+            )
+          )}
+        </span>
+      </EuiFlexItem>
+    </>
   );
 });
 

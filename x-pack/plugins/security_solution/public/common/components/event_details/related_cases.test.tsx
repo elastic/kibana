@@ -10,6 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../mock';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { RelatedCases } from './related_cases';
 
 const mockedUseKibana = mockUseKibana();
@@ -20,6 +21,8 @@ jest.mock('../../lib/kibana', () => {
 
   return {
     ...original,
+    useGetUserCasesPermissions: jest.fn(),
+    useToasts: jest.fn().mockReturnValue({ addWarning: jest.fn() }),
     useKibana: () => ({
       ...mockedUseKibana,
       services: {
@@ -34,67 +37,83 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 
-const testData = [
-  {
-    category: '_id',
-    field: '_id',
-    isObjectArray: false,
-    originalValue: ['1c84d9bff4884dabe6aa1bb15f08433463b848d9269e587078dc56669550d27a'],
-    values: ['1c84d9bff4884dabe6aa1bb15f08433463b848d9269e587078dc56669550d27a'],
-  },
-];
+const eventId = '1c84d9bff4884dabe6aa1bb15f08433463b848d9269e587078dc56669550d27a';
 
 describe('Related Cases', () => {
-  describe('When related cases are unable to be retrieved', () => {
-    test('should show 0 related cases when there are none', async () => {
-      mockGetRelatedCases.mockReturnValue([]);
+  describe('When user does not have cases read permissions', () => {
+    test('should not show related cases when user does not have permissions', () => {
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+        read: false,
+      });
       act(() => {
         render(
           <TestProviders>
-            <RelatedCases data={testData} isAlert />
+            <RelatedCases eventId={eventId} />
           </TestProviders>
         );
       });
 
-      expect(await screen.findByText('0 cases.')).toBeInTheDocument();
+      expect(screen.queryByText('cases')).toBeNull();
     });
   });
-
-  describe('When 1 related case is retrieved', () => {
-    test('should show 1 related case', async () => {
-      mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
-      act(() => {
-        render(
-          <TestProviders>
-            <RelatedCases data={testData} isAlert />
-          </TestProviders>
-        );
+  describe('When user does have case read permissions', () => {
+    beforeEach(() => {
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+        read: true,
       });
-
-      expect(await screen.findByText('1 case:')).toBeInTheDocument();
-      expect(await screen.findByTestId('case-details-link')).toHaveTextContent('Test Case');
     });
-  });
 
-  describe('When 2 related cases are retrieved', () => {
-    test('should show 2 related cases', async () => {
-      mockGetRelatedCases.mockReturnValue([
-        { id: '789', title: 'Test Case 1' },
-        { id: '456', title: 'Test Case 2' },
-      ]);
-      act(() => {
-        render(
-          <TestProviders>
-            <RelatedCases data={testData} isAlert />
-          </TestProviders>
-        );
+    describe('When related cases are unable to be retrieved', () => {
+      test('should show 0 related cases when there are none', async () => {
+        mockGetRelatedCases.mockReturnValue([]);
+        act(() => {
+          render(
+            <TestProviders>
+              <RelatedCases eventId={eventId} />
+            </TestProviders>
+          );
+        });
+
+        expect(await screen.findByText('0 cases.')).toBeInTheDocument();
       });
+    });
 
-      expect(await screen.findByText('2 cases:')).toBeInTheDocument();
-      const cases = await screen.findAllByTestId('case-details-link');
-      expect(cases).toHaveLength(2);
-      expect(cases[0]).toHaveTextContent('Test Case 1');
-      expect(cases[1]).toHaveTextContent('Test Case 2');
+    describe('When 1 related case is retrieved', () => {
+      test('should show 1 related case', async () => {
+        mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
+        act(() => {
+          render(
+            <TestProviders>
+              <RelatedCases eventId={eventId} />
+            </TestProviders>
+          );
+        });
+
+        expect(await screen.findByText('1 case:')).toBeInTheDocument();
+        expect(await screen.findByTestId('case-details-link')).toHaveTextContent('Test Case');
+      });
+    });
+
+    describe('When 2 related cases are retrieved', () => {
+      test('should show 2 related cases', async () => {
+        mockGetRelatedCases.mockReturnValue([
+          { id: '789', title: 'Test Case 1' },
+          { id: '456', title: 'Test Case 2' },
+        ]);
+        act(() => {
+          render(
+            <TestProviders>
+              <RelatedCases eventId={eventId} />
+            </TestProviders>
+          );
+        });
+
+        expect(await screen.findByText('2 cases:')).toBeInTheDocument();
+        const cases = await screen.findAllByTestId('case-details-link');
+        expect(cases).toHaveLength(2);
+        expect(cases[0]).toHaveTextContent('Test Case 1');
+        expect(cases[1]).toHaveTextContent('Test Case 2');
+      });
     });
   });
 });
