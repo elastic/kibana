@@ -420,15 +420,13 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        const indexedStartedAt = '2022-03-17T11:26:11.843Z';
-        const kibanaBaseUrl = undefined; // Test when server.rewriteBasePath is not provided.
+        const viewInAppUrl = '/app/logs/link-to/default/logs?time=1647516371843';
         processUngroupedResults(
           results,
           ruleParams,
           alertsMock.createAlertFactory.create,
           alertUpdaterMock,
-          indexedStartedAt,
-          kibanaBaseUrl
+          viewInAppUrl
         );
         // First call, second argument
         expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
@@ -491,16 +489,13 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        const indexedStartedAt = '2022-03-17T11:26:11.843Z';
-        const kibanaBaseUrl = 'http://localhost:5601/kibana';
-
+        const viewInAppUrl = `http://localhost:5601/kibana/app/logs/link-to/default/logs?time=1647516371843`;
         processGroupByResults(
           results,
           ruleParams,
           alertsMock.createAlertFactory.create,
           alertUpdaterMock,
-          indexedStartedAt,
-          kibanaBaseUrl
+          viewInAppUrl
         );
         expect(alertUpdaterMock.mock.calls.length).toBe(2);
         // First call, second argument
@@ -516,7 +511,7 @@ describe('Log threshold executor', () => {
               isRatio: false,
               reason:
                 '10 log entries in the last 5 mins for i-am-a-host-name-1, i-am-a-dataset-1. Alert when > 5.',
-              viewInAppUrl: `${kibanaBaseUrl}/app/logs/link-to/default/logs?time=1647516371843`,
+              viewInAppUrl,
             },
           },
         ]);
@@ -534,7 +529,7 @@ describe('Log threshold executor', () => {
               isRatio: false,
               reason:
                 '20 log entries in the last 5 mins for i-am-a-host-name-3, i-am-a-dataset-3. Alert when > 5.',
-              viewInAppUrl: `${kibanaBaseUrl}/app/logs/link-to/default/logs?time=1647516371843`,
+              viewInAppUrl,
             },
           },
         ]);
