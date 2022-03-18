@@ -5,7 +5,7 @@ on:
 
 jobs:
   issue_commented:
-    name: Skip failed test on comment
+    name: Label failed test issue
     if: |
       !github.event.issue.pull_request
       && github.event.label.name == 'failed-test'
