@@ -218,7 +218,7 @@ type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Par
 export interface BulkEditOptions<Params extends RuleTypeParams> {
   filter?: string;
   paramsModifier?: RuleParamsModifier<Params>;
-  actions: BulkEditActionRule[];
+  actions?: BulkEditActionRule[];
 }
 
 export interface BulkEditError {
@@ -1178,7 +1178,7 @@ export class RulesClient {
 
   public async bulkEdit<Params extends RuleTypeParams>({
     filter,
-    actions,
+    actions = [],
     paramsModifier,
   }: BulkEditOptions<Params>) {
     let authorizationTuple;
@@ -1365,7 +1365,7 @@ export class RulesClient {
       );
     }
 
-    const results = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
+    const results = await this.unsecuredSavedObjectsClient.bulkUpdate<RawRule>(rules);
 
     if (apiKeysToInvalidate.length) {
       await bulkMarkApiKeysForInvalidation(
@@ -1375,7 +1375,17 @@ export class RulesClient {
       );
     }
 
-    return { rules: results.saved_objects, errors };
+    const updatedRules = results.saved_objects.map(({ id, attributes, references }) => {
+      return this.getAlertFromRaw<Params>(
+        id,
+        attributes.alertTypeId as string,
+        attributes as RawRule,
+        references,
+        false
+      );
+    });
+
+    return { rules: updatedRules, errors };
   }
 
   private apiKeyAsAlertAttributes(

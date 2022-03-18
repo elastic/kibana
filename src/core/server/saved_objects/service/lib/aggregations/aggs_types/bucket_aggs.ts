@@ -19,6 +19,7 @@ import { sortOrderSchema } from './common_schemas';
  * - nested
  * - reverse_nested
  * - terms
+ * - multi_terms
  *
  * Not fully supported:
  * - filter
@@ -37,7 +38,6 @@ import { sortOrderSchema } from './common_schemas';
  * - global
  * - ip_range
  * - missing
- * - multi_terms
  * - parent
  * - range
  * - rare_terms
