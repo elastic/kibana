@@ -35,6 +35,11 @@ export declare namespace ExtendedHandlebars {
 const originalCreate = OriginalHandlebars.create;
 const Handlebars: typeof ExtendedHandlebars & typeof OriginalHandlebars = OriginalHandlebars as any;
 
+const kHelper = Symbol('helper');
+const kAmbiguous = Symbol('ambiguous');
+const kSimple = Symbol('simple');
+type NodeType = typeof kHelper | typeof kAmbiguous | typeof kSimple;
+
 // I've not been able to successfully re-export all of Handlebars, so for now we just re-export the features that we use.
 // The handlebars module uses `export =`, so it can't be re-exported using `export *`. However, because of Babel, we're not allowed to use `export =` ourselves.
 // Similarly we should technically be using `import OriginalHandlebars = require('handlebars')` above, but again, Babel will not allow this.
@@ -173,14 +178,15 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     transformLiteralToPath(sexpr);
 
     switch (this.classifySexpr(sexpr)) {
-      case 'simple':
+      case kSimple:
         this.simpleSexpr(sexpr);
         break;
-      case 'helper':
+      case kHelper:
         this.helperSexpr(sexpr);
         break;
-      default:
+      case kAmbiguous:
         this.ambiguousSexpr(sexpr);
+        break;
     }
   }
 
@@ -188,14 +194,15 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     transformLiteralToPath(block);
 
     switch (this.classifySexpr(block)) {
-      case 'helper':
+      case kHelper:
         this.helperSexpr(block);
         break;
-      case 'simple':
+      case kSimple:
         this.simpleSexpr(block);
         break;
-      default:
+      case kAmbiguous:
         this.ambiguousSexpr(block);
+        break;
     }
   }
 
@@ -238,7 +245,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // ********************************************** //
 
   // Liftet from lib/handlebars/compiler/compiler.js
-  private classifySexpr(sexpr: { path: hbs.AST.PathExpression }) {
+  private classifySexpr(sexpr: { path: hbs.AST.PathExpression }): NodeType {
     const isSimple = AST.helpers.simpleId(sexpr.path);
 
     // a mustache is an eligible helper if:
@@ -263,11 +270,11 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
 
     if (isHelper) {
-      return 'helper';
+      return kHelper;
     } else if (isEligible) {
-      return 'ambiguous';
+      return kAmbiguous;
     } else {
-      return 'simple';
+      return kSimple;
     }
   }
 
