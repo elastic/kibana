@@ -11,7 +11,8 @@ import { API_BASE_PATH } from '../../../../plugins/upgrade_assistant/common/cons
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Elasticsearch version precheck', function () {
+  // Tests only applicable on 7.17
+  describe.skip('Elasticsearch version precheck', function () {
     this.onlyEsVersion('>=8');
 
     describe('Elasticsearch 8.x running against Kibana 7.last', () => {
