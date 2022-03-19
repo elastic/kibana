@@ -10,6 +10,7 @@ import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import { NoDataViewsComponent } from '@kbn/shared-ux-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '../../shared_imports';
 
 import { MatchedItem, DataViewEditorContext } from '../../types';
@@ -94,12 +95,16 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       // first time
       return (
         <>
-          <NoDataViewsComponent
-            onClickCreate={() => setGoToForm(true)}
-            canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
-            dataViewsDocLink={docLinks.links.indexPatterns.introduction}
-            emptyPromptColor={'subdued'}
-          />
+          <EuiFlexGroup justifyContent={'spaceAround'} direction={'column'}>
+            <EuiFlexItem grow={false}>
+              <NoDataViewsComponent
+                onClickCreate={() => setGoToForm(true)}
+                canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
+                dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+                emptyPromptColor={'subdued'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <PromptFooter onCancel={onCancel} />
         </>
       );
