@@ -27,7 +27,6 @@ import {
 } from '../../../state_management';
 import { AddLayerButton } from './add_layer';
 import { getRemoveOperation } from '../../../utils';
-import { layerTypes } from '../../..';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
@@ -193,9 +192,7 @@ export function LayerPanels(
         layersMeta={props.framePublicAPI}
         onAddLayerClick={(layerType, noDatasource) => {
           const layerId = generateId();
-          dispatchLens(
-            addLayer({ layerId, layerType, noDatasource: layerType === layerTypes.ANNOTATIONS })
-          );
+          dispatchLens(addLayer({ layerId, layerType, noDatasource }));
           trackUiEvent('layer_added');
           setNextFocusedLayerId(layerId);
         }}
