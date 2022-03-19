@@ -54,5 +54,6 @@ export function toEditableConfig({
     requiresPageReload: !!def.requiresPageReload,
     metric: def.metric,
   };
+
   return conf;
 }
