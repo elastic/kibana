@@ -1,3 +1,3 @@
-# Annotation Service
+# Event Annotation service
 
-TBD
+The Event Annotation service contains expressions for event annotations

@@ -7,7 +7,7 @@
  */
 
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { EventAnnotationOutput } from '../manual_event_annotation/types';
+import type { EventAnnotationOutput } from '../manual_event_annotation/types';
 
 export interface EventAnnotationGroupOutput {
   type: 'event_annotation_group';
@@ -33,7 +33,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     args: {
       annotations: {
         types: ['manual_event_annotation'],
-        help: '',
+        help: 'Annotation configs',
         multi: true,
       },
     },

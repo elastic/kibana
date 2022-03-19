@@ -22,7 +22,6 @@ export interface StyleProps {
   isHidden?: boolean;
 }
 
-// Lens state
 export type EventAnnotationConfig = {
   id: string;
   key: {

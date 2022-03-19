@@ -1,3 +1,3 @@
-# Annotation service
+# Event Annotation service
 
-// TODO 
+The Event Annotation service contains expressions for event annotations
