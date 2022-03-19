@@ -109,6 +109,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
   monitoring?: RuleMonitoring;
+  snoozeEndTime?: Date | null; // Remove ? when this parameter is made available in the public API
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;

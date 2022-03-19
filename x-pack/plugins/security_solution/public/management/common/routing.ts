@@ -11,6 +11,7 @@ import querystring from 'querystring';
 import { generatePath } from 'react-router-dom';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { ArtifactListPageUrlParams } from '../components/artifact_list_page';
+import { paginationFromUrlParams } from '../components/hooks/use_url_pagination';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { EventFiltersPageLocation } from '../pages/event_filters/types';
 import { HostIsolationExceptionsPageLocation } from '../pages/host_isolation_exceptions/types';
@@ -181,11 +182,11 @@ const normalizePolicyDetailsArtifactsListPageLocation = (
 ): Partial<PolicyDetailsArtifactsPageLocation> => {
   if (location) {
     return {
-      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
-        ? { page_index: location.page_index }
+      ...(!isDefaultOrMissing(location.page, MANAGEMENT_DEFAULT_PAGE + 1)
+        ? { page: location.page }
         : {}),
-      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
-        ? { page_size: location.page_size }
+      ...(!isDefaultOrMissing(location.pageSize, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { pageSize: location.pageSize }
         : {}),
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
@@ -348,9 +349,11 @@ export const extractPolicyDetailsArtifactsListPageLocation = (
     query,
     'show'
   ) as PolicyDetailsArtifactsPageLocation['show'];
-
+  const pagination = paginationFromUrlParams(query);
   return {
-    ...extractListPaginationParams(query),
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+    filter: query.filter as string,
     show: showParamValue && 'list' === showParamValue ? showParamValue : undefined,
   };
 };
