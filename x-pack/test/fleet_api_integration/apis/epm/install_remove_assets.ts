@@ -448,7 +448,7 @@ const expectAssetsInstalled = ({
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
     const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
-      type: 'cloud_security_posture_rule_template',
+      type: 'cloud-security-posture-rule-template',
       id: 'sample_cloud_security_posture_rule_template',
     });
     expect(resCloudSecurityPostureRuleTemplate.id).equal(
@@ -506,7 +506,7 @@ const expectAssetsInstalled = ({
       installed_kibana_space_id: 'default',
       installed_kibana: [
         {
-          id: 'sample_cloud_security_posture_rule_template',
+          id: 'cloud-security-posture-rule-template',
           type: 'cloud_security_posture_rule_template',
         },
         {
