@@ -15,10 +15,8 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../tasks/live_query';
-const SAVED_QUERY_ID = 'Saved-Query-Id';
-const SAVED_QUERY_DESCRIPTION = 'Test saved query description';
 
-export const getSavedQueriesComplexTest = () =>
+export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescription: string) =>
   it(
     'should create a new query and verify: \n ' +
       '- hidden columns, full screen and sorting \n' +
@@ -70,8 +68,8 @@ export const getSavedQueriesComplexTest = () =>
       cy.contains('Exit full screen').should('not.exist');
       cy.contains('Save for later').click();
       cy.contains('Save query');
-      findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);
-      findFormFieldByRowsLabelAndType('Description (optional)', SAVED_QUERY_DESCRIPTION);
+      findFormFieldByRowsLabelAndType('ID', savedQueryId);
+      findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
       cy.react('EuiButtonDisplay').contains('Save').click();
 
       // visit Status results
@@ -81,30 +79,30 @@ export const getSavedQueriesComplexTest = () =>
 
       // play saved query
       cy.contains('Saved queries').click();
-      cy.contains(SAVED_QUERY_ID);
+      cy.contains(savedQueryId);
       cy.react('PlayButtonComponent', {
-        props: { savedQuery: { attributes: { id: SAVED_QUERY_ID } } },
+        props: { savedQuery: { attributes: { id: savedQueryId } } },
       }).click();
       selectAllAgents();
       submitQuery();
 
       // edit saved query
       cy.contains('Saved queries').click();
-      cy.contains(SAVED_QUERY_ID);
+      cy.contains(savedQueryId);
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+        props: { index: 1, item: { attributes: { id: savedQueryId } } },
       }).click();
       findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
       cy.react('EuiButton').contains('Update query').click();
-      cy.contains(`${SAVED_QUERY_DESCRIPTION} Edited`);
+      cy.contains(`${savedQueryDescription} Edited`);
 
       // delete saved query
-      cy.contains(SAVED_QUERY_ID);
+      cy.contains(savedQueryId);
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+        props: { index: 1, item: { attributes: { id: savedQueryId } } },
       }).click();
       deleteAndConfirm('query');
-      cy.contains(SAVED_QUERY_ID);
+      cy.contains(savedQueryId);
       cy.contains(/^No items found/);
     }
   );
