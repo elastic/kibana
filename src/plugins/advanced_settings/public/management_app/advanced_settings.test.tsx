@@ -269,7 +269,7 @@ describe('AdvancedSettings', () => {
   });
 
   it('should should not render a custom setting', async () => {
-    // For various complicated reasons the mock returns false for isConfig, override that
+    // The manual mock for the uiSettings client returns false for isConfig, override that
     const uiSettings = mockConfig().core.uiSettings;
     uiSettings.isCustom = (key) => true;
 
@@ -287,12 +287,14 @@ describe('AdvancedSettings', () => {
       />
     );
 
-    const expected = component
-      .find('Field')
-      .filterWhere(
-        (n: ReactWrapper) => (n.prop('setting') as Record<string, any>).name === customSettingQuery
-      );
-    expect(component).toEqual({});
+    expect(
+      component
+        .find('Field')
+        .filterWhere(
+          (n: ReactWrapper) =>
+            (n.prop('setting') as Record<string, any>).name === customSettingQuery
+        )
+    ).toEqual({});
   });
 
   it('should render read-only when saving is disabled', async () => {
