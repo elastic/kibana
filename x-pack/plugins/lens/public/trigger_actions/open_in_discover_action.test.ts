@@ -62,11 +62,14 @@ describe('open in discover action', () => {
       getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
     };
 
+    const discoverUrl = 'https://discover-redirect-url';
     const discover = {
       locator: {
-        navigate: jest.fn(),
+        getRedirectUrl: jest.fn(() => discoverUrl),
       },
     } as unknown as DiscoverStart;
+
+    globalThis.open = jest.fn();
 
     await createOpenInDiscoverAction(discover).execute({
       embeddable,
@@ -75,6 +78,7 @@ describe('open in discover action', () => {
     }>);
 
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
-    expect(discover.locator!.navigate).toHaveBeenCalledWith(viewUnderlyingDataArgs);
+    expect(discover.locator!.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
+    expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 });
