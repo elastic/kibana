@@ -8,7 +8,7 @@
 import { FetchStatus } from '../../types';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { reduce } from 'rxjs/operators';
-import { SearchSource } from '../../../../../data/common';
+import { SearchSource } from '../../../../../data/public';
 import { RequestAdapter } from '../../../../../inspector';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';

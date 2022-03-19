@@ -8,8 +8,6 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALERT_RULE_TYPE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
-import { AlertType } from '../../../../../common/alert_types';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -72,7 +70,7 @@ export function FailedTransactionRateChart({
     ApmMlDetectorType.txFailureRate
   );
 
-  const { serviceName, transactionType, alerts } = useApmServiceContext();
+  const { serviceName, transactionType } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
@@ -167,10 +165,6 @@ export function FailedTransactionRateChart({
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartTheme}
         anomalyTimeseries={preferredAnomalyTimeseries}
-        alerts={alerts.filter(
-          (alert) =>
-            alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionErrorRate
-        )}
       />
     </EuiPanel>
   );

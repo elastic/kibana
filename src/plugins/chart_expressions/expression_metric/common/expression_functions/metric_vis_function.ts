@@ -59,6 +59,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionMetricVis.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
+      strict: true,
     },
     colorFullBackground: {
       types: ['boolean'],
@@ -101,6 +102,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Label position',
       }),
       default: LabelPosition.BOTTOM,
+      strict: true,
     },
     metric: {
       types: ['string', 'vis_dimension'],

@@ -61,6 +61,7 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
@@ -677,7 +678,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         pkgVersion
       ));
 
-      return this.calculateDiff(packagePolicy, packageInfo);
+      return this.calculateDiff(soClient, packagePolicy, packageInfo);
     } catch (error) {
       return {
         hasErrors: true,
@@ -687,6 +688,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   }
 
   private async calculateDiff(
+    soClient: SavedObjectsClientContract,
     packagePolicy: PackagePolicy,
     packageInfo: PackageInfo
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
@@ -722,6 +724,9 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     return {
       name: updatedPackagePolicy.name,
       diff: [packagePolicy, updatedPackagePolicy],
+      // TODO: Currently only returns the agent inputs for current package policy, not the upgraded one
+      // as we only show this version in the UI
+      agent_diff: [storedPackagePolicyToAgentInputs(packagePolicy, packageInfo)],
       hasErrors,
     };
   }

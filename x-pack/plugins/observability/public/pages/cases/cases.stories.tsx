@@ -27,6 +27,9 @@ export default {
           capabilities: { [casesFeatureId]: { read_cases: true } },
           getUrlForApp: () => '',
         },
+        http: {
+          basePath: { prepend: (link: string) => `http://localhost:5601${link}` },
+        },
         cases: { getAllCases: () => <></> },
         chrome: { docTitle: { change: () => {} }, setBadge: () => {} },
         docLinks: {
@@ -38,11 +41,6 @@ export default {
 
       const pluginContextValue = {
         ObservabilityPageTemplate: KibanaPageTemplate,
-        core: {
-          http: {
-            basePath: { prepend: (link: string) => `http://localhost:5601${link}` },
-          },
-        },
         appMountParameters: {
           setHeaderActionMenu: () => {},
         } as unknown as AppMountParameters,

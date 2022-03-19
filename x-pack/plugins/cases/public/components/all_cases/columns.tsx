@@ -41,6 +41,7 @@ import { getConnectorIcon } from '../utils';
 import { PostComment } from '../../containers/use_post_comment';
 import { CaseAttachments } from '../../types';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -102,6 +103,8 @@ export const useCasesColumns = ({
     isDisplayConfirmDeleteModal,
     isLoading: isDeleting,
   } = useDeleteCases();
+
+  const { isAlertsEnabled } = useCasesFeatures();
 
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
     id: '',
@@ -239,15 +242,19 @@ export const useCasesColumns = ({
       },
       truncateText: true,
     },
-    {
-      align: RIGHT_ALIGNMENT,
-      field: 'totalAlerts',
-      name: ALERTS,
-      render: (totalAlerts: Case['totalAlerts']) =>
-        totalAlerts != null
-          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-          : getEmptyTagValue(),
-    },
+    ...(isAlertsEnabled
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            field: 'totalAlerts',
+            name: ALERTS,
+            render: (totalAlerts: Case['totalAlerts']) =>
+              totalAlerts != null
+                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+                : getEmptyTagValue(),
+          },
+        ]
+      : []),
     ...(showSolutionColumn
       ? [
           {

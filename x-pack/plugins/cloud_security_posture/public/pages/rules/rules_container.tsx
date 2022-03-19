@@ -18,6 +18,7 @@ import {
   type RulesQueryResult,
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
+import { RuleFlyout } from './rules_flyout';
 
 interface RulesPageData {
   rules_page: RuleSavedObject[];
@@ -81,6 +82,7 @@ const MAX_ITEMS_PER_PAGE = 10000;
 export const RulesContainer = () => {
   const tableRef = useRef<EuiBasicTable>(null);
   const [changedRules, setChangedRules] = useState<Map<string, RuleSavedObject>>(new Map());
+  const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [visibleSelectedRulesIds, setVisibleSelectedRulesIds] = useState<string[]>([]);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({ page: 0, perPage: 5, search: '' });
@@ -178,10 +180,18 @@ export const RulesContainer = () => {
           setPagination={(paginationQuery) =>
             setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }))
           }
+          setSelectedRuleId={setSelectedRuleId}
+          selectedRuleId={selectedRuleId}
         />
       </EuiPanel>
       {hasChanges && (
         <RulesBottomBar onSave={bulkUpdateRules} onCancel={discardChanges} isLoading={isUpdating} />
+      )}
+      {selectedRuleId && (
+        <RuleFlyout
+          rule={rulesPageData.rules_map.get(selectedRuleId)!}
+          onClose={() => setSelectedRuleId(null)}
+        />
       )}
     </div>
   );

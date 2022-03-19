@@ -98,7 +98,7 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
 
   const tablePagination = useMemo(
     () => ({
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
       pageSize: PAGE_SIZE,
       totalItemCount: items.length,
     }),

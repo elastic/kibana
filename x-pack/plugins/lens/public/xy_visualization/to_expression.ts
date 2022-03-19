@@ -13,7 +13,7 @@ import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type {
   ValidLayer,
-  XYLayerConfig,
+  XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
 } from '../../common/expressions';
@@ -23,7 +23,10 @@ import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 import { isDataLayer } from './visualization_helpers';
 
-export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
+export const getSortedAccessors = (
+  datasource: DatasourcePublicAPI,
+  layer: XYDataLayerConfig | XYReferenceLineLayerConfig
+) => {
   const originalOrder = datasource
     .getTableSpec()
     .map(({ columnId }: { columnId: string }) => columnId)

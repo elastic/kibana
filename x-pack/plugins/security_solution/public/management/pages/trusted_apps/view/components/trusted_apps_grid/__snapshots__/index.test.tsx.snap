@@ -173,7 +173,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
         >
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -4282,7 +4282,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
         >
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -8434,7 +8434,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
         >
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -12543,7 +12543,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
         >
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"

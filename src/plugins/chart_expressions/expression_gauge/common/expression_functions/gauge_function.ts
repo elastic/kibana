@@ -67,6 +67,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Type of gauge chart',
       }),
       required: true,
+      strict: true,
     },
     metric: {
       types: ['string', 'vis_dimension'],
@@ -99,6 +100,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.colorMode.help', {
         defaultMessage: 'If set to palette, the palette colors will be applied to the bands',
       }),
+      strict: true,
     },
     palette: {
       types: ['palette'],
@@ -113,6 +115,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.ticksPosition.help', {
         defaultMessage: 'Specifies the placement of ticks',
       }),
+      strict: true,
     },
     labelMajor: {
       types: ['string'],
@@ -127,6 +130,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies the mode of labelMajor',
       }),
       default: GaugeLabelMajorModes.AUTO,
+      strict: true,
     },
     labelMinor: {
       types: ['string'],
@@ -146,6 +150,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
         defaultMessage: 'Specifies the mode of centralMajor',
       }),
+      strict: true,
     },
     // used only in legacy gauge, consider it as @deprecated
     percentageMode: {

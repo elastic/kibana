@@ -57,7 +57,7 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
-  hidePerPageOptions?: boolean;
+  showPerPageOptions?: boolean;
   showAggregationAccurateCallout?: boolean;
   environment: string;
   fixedHeight?: boolean;
@@ -71,7 +71,7 @@ export function TransactionsTable({
   hideViewTransactionsLink = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
-  hidePerPageOptions = false,
+  showPerPageOptions = true,
   showAggregationAccurateCallout = false,
   environment,
   kuery,
@@ -329,7 +329,7 @@ export function TransactionsTable({
                       defaultMessage: 'No transaction groups found',
                     })
               }
-              hidePerPageOptions={hidePerPageOptions}
+              showPerPageOptions={showPerPageOptions}
             />
           </OverviewTableContainer>
         </EuiFlexItem>
