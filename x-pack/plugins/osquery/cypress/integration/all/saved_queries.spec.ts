@@ -10,8 +10,8 @@ import { navigateTo } from '../../tasks/navigation';
 import { login } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
-const SAVED_QUERY_ID = 'Saved-Query-Id-All';
-const SAVED_QUERY_DESCRIPTION = 'Test saved query description All';
+const SAVED_QUERY_ID = 'Saved-Query-Id';
+const SAVED_QUERY_DESCRIPTION = 'Test saved query description';
 
 describe('ALL - Saved queries', () => {
   beforeEach(() => {
