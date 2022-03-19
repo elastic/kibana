@@ -20,12 +20,13 @@ import {
   HorizontalAlignment,
   VerticalAlignment,
   LayoutDirection,
+  LineAnnotation,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { calculateMinInterval, XYChart, XYChartRenderProps } from './expression';
 import type { LensMultiTable } from '../../common';
 import { layerTypes } from '../../common';
-import { xyChart } from '../../common/expressions';
+import { AnnotationLayerArgs, xyChart } from '../../common/expressions';
 import {
   dataLayerConfig,
   legendConfig,
@@ -41,13 +42,14 @@ import {
 } from '../../common/expressions';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { XyEndzones } from './x_domain';
-import { eventAnnotationServiceMock } from 'src/plugins/event_annotation/public/mocks';
+import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
+import { EventAnnotationOutput } from 'src/plugins/event_annotation/common';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -2958,6 +2960,140 @@ describe('xy_expression', () => {
           c: true,
         },
       ]);
+    });
+
+    describe('annotations', () => {
+      const sampleStyledAnnotation: EventAnnotationOutput = {
+        time: '2022-03-18T08:25:00.000Z',
+        label: 'Event 1',
+        icon: 'triangle',
+        iconPosition: 'below',
+        type: 'manual_event_annotation',
+        color: 'red',
+        lineStyle: 'dashed',
+        lineWidth: 3,
+      };
+      const sampleAnnotationLayers: AnnotationLayerArgs[] = [
+        {
+          layerType: layerTypes.ANNOTATIONS,
+          layerId: 'annotation',
+          annotations: [
+            {
+              time: '2022-03-18T08:25:17.140Z',
+              label: 'Annotation',
+              type: 'manual_event_annotation',
+            },
+          ],
+        },
+      ];
+      function sampleArgsWithAnnotation(annotationLayers = sampleAnnotationLayers) {
+        const { args } = sampleArgs();
+        return {
+          data: dateHistogramData,
+          args: {
+            ...args,
+            layers: [dateHistogramLayer, ...annotationLayers],
+          } as XYArgs,
+        };
+      }
+      test('should render basic annotation', () => {
+        const { data, args } = sampleArgsWithAnnotation();
+        const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
+        expect(component.find('LineAnnotation')).toMatchSnapshot();
+      });
+      test('should render simplified annotation when hide is true', () => {
+        const { data, args } = sampleArgsWithAnnotation();
+        args.layers[0].hide = true;
+        const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
+        expect(component.find('LineAnnotation')).toMatchSnapshot();
+      });
+
+      test('should render grouped annotations preserving the shared styles', () => {
+        const { data, args } = sampleArgsWithAnnotation([
+          {
+            layerType: layerTypes.ANNOTATIONS,
+            layerId: 'annotation',
+            annotations: [
+              sampleStyledAnnotation,
+              { ...sampleStyledAnnotation, time: '2022-03-18T08:25:00.020Z', label: 'Event 2' },
+              {
+                ...sampleStyledAnnotation,
+                time: '2022-03-18T08:25:00.001Z',
+                label: 'Event 3',
+              },
+            ],
+          },
+        ]);
+        const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
+        const groupedAnnotation = component.find(LineAnnotation);
+
+        expect(groupedAnnotation.length).toEqual(1);
+        // styles are passed because they are shared, dataValues & header is rounded to the interval
+        expect(groupedAnnotation).toMatchSnapshot();
+        // renders numeric icon for grouped annotations
+        const marker = mount(<div>{groupedAnnotation.prop('marker')}</div>);
+        const numberIcon = marker.find('NumberIcon');
+        expect(numberIcon.length).toEqual(1);
+        expect(numberIcon.text()).toEqual('3');
+
+        // checking tooltip
+        const renderLinks = mount(<div>{groupedAnnotation.prop('customTooltipDetails')!()}</div>);
+        expect(renderLinks.text()).toEqual(
+          'Event 1 2022-03-18T08:25:00.000ZEvent 2 2022-03-18T08:25:00.020ZEvent 3 2022-03-18T08:25:00.001Z'
+        );
+      });
+      test('should render grouped annotations with default styles', () => {
+        const { data, args } = sampleArgsWithAnnotation([
+          {
+            layerType: layerTypes.ANNOTATIONS,
+            layerId: 'annotation',
+            annotations: [sampleStyledAnnotation],
+          },
+          {
+            layerType: layerTypes.ANNOTATIONS,
+            layerId: 'annotation',
+            annotations: [
+              {
+                ...sampleStyledAnnotation,
+                icon: 'square',
+                color: 'blue',
+                lineStyle: 'dotted',
+                lineWidth: 10,
+                time: '2022-03-18T08:25:00.001Z',
+                label: 'Event 2',
+              },
+            ],
+          },
+        ]);
+        const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
+        const groupedAnnotation = component.find(LineAnnotation);
+
+        expect(groupedAnnotation.length).toEqual(1);
+        // styles are default because they are different for both annotations
+        expect(groupedAnnotation).toMatchSnapshot();
+      });
+      test('should not render hidden annotations', () => {
+        const { data, args } = sampleArgsWithAnnotation([
+          {
+            layerType: layerTypes.ANNOTATIONS,
+            layerId: 'annotation',
+            annotations: [
+              sampleStyledAnnotation,
+              { ...sampleStyledAnnotation, time: '2022-03-18T08:30:00.020Z', label: 'Event 2' },
+              {
+                ...sampleStyledAnnotation,
+                time: '2022-03-18T08:35:00.001Z',
+                label: 'Event 3',
+                isHidden: true,
+              },
+            ],
+          },
+        ]);
+        const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
+        const annotations = component.find(LineAnnotation);
+
+        expect(annotations.length).toEqual(2);
+      });
     });
   });
 

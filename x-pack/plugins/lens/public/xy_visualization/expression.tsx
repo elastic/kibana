@@ -366,7 +366,6 @@ export function XYChart({
 
   const referenceLineLayers = getReferenceLayers(layers);
   const annotationsLayers = getAnnotationsLayersArgs(layers);
-
   const firstTable = data.tables[filteredLayers[0].layerId];
 
   const xColumnId = firstTable.columns.find((col) => col.id === filteredLayers[0].xAccessor)?.id;

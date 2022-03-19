@@ -24,6 +24,17 @@ import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_format
 import { Datatable } from 'src/plugins/expressions';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
 import { eventAnnotationServiceMock } from 'src/plugins/event_annotation/public/mocks';
+import { EventAnnotationConfig } from 'src/plugins/event_annotation/common';
+
+const exampleAnnotation: EventAnnotationConfig = {
+  id: 'an1',
+  label: 'Event 1',
+  key: {
+    type: 'point_in_time',
+    timestamp: '2022-03-18T08:25:17.140Z',
+  },
+  icon: 'circle',
+};
 
 function exampleState(): State {
   return {
@@ -235,6 +246,56 @@ describe('xy_visualization', () => {
     it('should return the icon for the visualization type', () => {
       expect(xyVisualization.getSupportedLayers()[0].icon).not.toBeUndefined();
     });
+    describe('annotations', () => {
+      let mockDatasource: ReturnType<typeof createMockDatasource>;
+      let frame: ReturnType<typeof createMockFramePublicAPI>;
+      beforeEach(() => {
+        frame = createMockFramePublicAPI();
+        mockDatasource = createMockDatasource('testDatasource');
+
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+        frame.datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'a') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
+            };
+          }
+          return null;
+        });
+
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        };
+      });
+      it('when there is no date histogram annotation layer is disabled', () => {
+        const supportedAnnotationLayer = xyVisualization
+          .getSupportedLayers(exampleState())
+          .find((a) => a.type === 'annotations');
+        expect(supportedAnnotationLayer?.disabled).toBeTruthy();
+      });
+      it('for data with date histogram annotation layer is enabled and calculates initial dimensions', () => {
+        const supportedAnnotationLayer = xyVisualization
+          .getSupportedLayers(exampleState(), frame)
+          .find((a) => a.type === 'annotations');
+        expect(supportedAnnotationLayer?.disabled).toBeFalsy();
+        expect(supportedAnnotationLayer?.initialDimensions).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ groupId: 'xAnnotations', columnId: expect.any(String) }),
+          ])
+        );
+      });
+    });
   });
 
   describe('#getLayerType', () => {
@@ -358,6 +419,45 @@ describe('xy_visualization', () => {
             forAccessor: 'newCol',
           },
         ],
+      });
+    });
+
+    describe('annotations', () => {
+      it('should add a dimension to a annotation layer', () => {
+        jest.spyOn(Date, 'now').mockReturnValue(new Date('2022-04-18T11:01:58.135Z').valueOf());
+        expect(
+          xyVisualization.setDimension({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation],
+                },
+              ],
+            },
+            layerId: 'annotation',
+            groupId: 'xAnnotation',
+            columnId: 'newCol',
+          }).layers[0]
+        ).toEqual({
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [
+            exampleAnnotation,
+            {
+              icon: 'triangle',
+              id: 'newCol',
+              key: {
+                timestamp: '2022-04-18T11:01:58.135Z',
+                type: 'point_in_time',
+              },
+              label: 'Event',
+            },
+          ],
+        });
       });
     });
   });
@@ -697,6 +797,45 @@ describe('xy_visualization', () => {
         xAccessor: undefined,
         accessors: [],
       });
+    });
+    it('removes annotation dimension', () => {
+      expect(
+        xyVisualization.removeDimension({
+          frame,
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'ann',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
+              },
+            ],
+          },
+          layerId: 'ann',
+          columnId: 'an2',
+        }).layers
+      ).toEqual([
+        {
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          seriesType: 'area',
+          xAccessor: 'a',
+          accessors: [],
+        },
+        {
+          layerId: 'ann',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation],
+        },
+      ]);
     });
   });
 
@@ -1358,6 +1497,84 @@ describe('xy_visualization', () => {
         }).groups;
         // it should not crash basically
         expect(options).toHaveLength(1);
+      });
+    });
+
+    describe('annotations', () => {
+      beforeEach(() => {
+        frame = createMockFramePublicAPI();
+        mockDatasource = createMockDatasource('testDatasource');
+
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+        frame.datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'a') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
+            };
+          }
+          return null;
+        });
+
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        };
+      });
+
+      function getStateWithAnnotationLayer(): State {
+        return {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              splitAccessor: undefined,
+              xAccessor: 'a',
+              accessors: ['b'],
+            },
+            {
+              layerId: 'annotations',
+              layerType: layerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation],
+            },
+          ],
+        };
+      }
+
+      it('returns configuration correctly', () => {
+        const state = getStateWithAnnotationLayer();
+        const config = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'annotations',
+        });
+        expect(config.noDatasource).toBeTruthy();
+        expect(config.groups[0].accessors).toEqual([
+          { color: '#f04e98', columnId: 'an1', triggerIcon: 'color' },
+        ]);
+        expect(config.groups[0].invalid).toEqual(false);
+      });
+
+      it('When data layer is empty, should return invalid state', () => {
+        const state = getStateWithAnnotationLayer();
+        (state.layers[0] as XYDataLayerConfig).xAccessor = undefined;
+        const config = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'annotations',
+        });
+        expect(config.groups[0].invalid).toEqual(true);
       });
     });
 

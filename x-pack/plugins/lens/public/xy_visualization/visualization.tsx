@@ -30,7 +30,7 @@ import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expr
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
-  getGroupsAvailableInData, // TODO - see how we should handle this in annotations
+  getGroupsAvailableInData,
   getReferenceConfiguration,
   getReferenceSupportedLayer,
   setReferenceDimension,

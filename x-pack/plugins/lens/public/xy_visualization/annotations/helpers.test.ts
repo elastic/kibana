@@ -12,7 +12,7 @@ describe('annotations helpers', () => {
   describe('getStaticDate', () => {
     it('should return `now` value on when nothing is configured', () => {
       jest.spyOn(Date, 'now').mockReturnValue(new Date('2022-04-08T11:01:58.135Z').valueOf());
-      expect(getStaticDate([], undefined)).toBe(1649415718135);
+      expect(getStaticDate([], undefined)).toBe('2022-04-08T11:01:58.135Z');
     });
     it('should return `now` value on when there is no active data', () => {
       expect(
@@ -28,7 +28,7 @@ describe('annotations helpers', () => {
           ],
           undefined
         )
-      ).toBe(1649415718135);
+      ).toBe('2022-04-08T11:01:58.135Z');
     });
 
     it('should return timestamp value for single active data point', () => {
@@ -68,7 +68,7 @@ describe('annotations helpers', () => {
           ],
           activeData as FramePublicAPI['activeData']
         )
-      ).toBe(1646002800000);
+      ).toBe('2022-02-27T23:00:00.000Z');
     });
 
     it('should correctly calculate middle value for active data', () => {
@@ -120,7 +120,7 @@ describe('annotations helpers', () => {
           ],
           activeData as FramePublicAPI['activeData']
         )
-      ).toBe(1648270800000);
+      ).toBe('2022-03-26T05:00:00.000Z');
     });
 
     it('should calculate middle date point correctly for multiple layers', () => {
@@ -204,7 +204,7 @@ describe('annotations helpers', () => {
           ],
           activeData as FramePublicAPI['activeData']
         )
-      ).toBe(1598270800000);
+      ).toBe('2020-08-24T12:06:40.000Z');
     });
   });
 });

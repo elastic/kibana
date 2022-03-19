@@ -16,7 +16,7 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
-import { XYDataLayerConfig } from '../../common/expressions';
+import { XYAnnotationLayerConfig, XYDataLayerConfig } from '../../common/expressions';
 
 jest.mock('../id_generator');
 
@@ -532,6 +532,60 @@ describe('xy_suggestions', () => {
           }),
         ],
       })
+    );
+  });
+
+  test('passes annotation layer without modifying it', () => {
+    const annotationLayer: XYAnnotationLayerConfig = {
+      layerId: 'second',
+      layerType: layerTypes.ANNOTATIONS,
+      annotations: [
+        {
+          id: '1',
+          key: {
+            type: 'point_in_time',
+            timestamp: '2020-20-22',
+          },
+          label: 'annotation',
+        },
+      ],
+    };
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      layers: [
+        {
+          accessors: ['price'],
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          seriesType: 'bar',
+          splitAccessor: 'date',
+          xAccessor: 'product',
+        },
+        annotationLayer,
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: [],
+    });
+
+    suggestions.every((suggestion) =>
+      expect(suggestion.state.layers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            layerType: layerTypes.ANNOTATIONS,
+          }),
+        ])
+      )
     );
   });
 

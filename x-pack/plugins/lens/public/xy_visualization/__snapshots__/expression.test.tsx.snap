@@ -1,5 +1,220 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`xy_expression XYChart component annotations should render basic annotation 1`] = `
+<LineAnnotation
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591917125,
+        "details": "Annotation",
+        "header": 1647591917100,
+      },
+    ]
+  }
+  domainType="xDomain"
+  id="annotation"
+  key="annotation"
+  marker={
+    <Marker
+      config={
+        Object {
+          "axisMode": "bottom",
+          "label": "Annotation",
+          "roundedTimestamp": 1647591917100,
+          "time": "2022-03-18T08:25:17.140Z",
+          "type": "manual_event_annotation",
+        }
+      }
+      hasReducedPadding={false}
+      isHorizontal={true}
+      label="Annotation"
+    />
+  }
+  markerBody={
+    <MarkerBody
+      isHorizontal={true}
+    />
+  }
+  markerPosition="top"
+  style={
+    Object {
+      "line": Object {
+        "dash": undefined,
+        "opacity": 1,
+        "stroke": "#f04e98",
+        "strokeWidth": 1,
+      },
+    }
+  }
+/>
+`;
+
+exports[`xy_expression XYChart component annotations should render grouped annotations preserving the shared styles 1`] = `
+<LineAnnotation
+  customTooltipDetails={[Function]}
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591900025,
+        "details": "",
+        "header": 1647591900000,
+      },
+    ]
+  }
+  domainType="xDomain"
+  id=""
+  key=""
+  marker={
+    <Marker
+      config={
+        Object {
+          "axisMode": "bottom",
+          "color": "red",
+          "customTooltipDetails": [Function],
+          "icon": "3",
+          "iconPosition": "below",
+          "label": "",
+          "lineStyle": "dashed",
+          "lineWidth": 3,
+          "roundedTimestamp": 1647591900000,
+          "textVisibility": undefined,
+          "time": "2022-03-18T08:25:00.000Z",
+          "type": "manual_event_annotation",
+        }
+      }
+      hasReducedPadding={true}
+      isHorizontal={true}
+      label=""
+    />
+  }
+  markerBody={
+    <MarkerBody
+      isHorizontal={true}
+    />
+  }
+  markerPosition="bottom"
+  style={
+    Object {
+      "line": Object {
+        "dash": Array [
+          9,
+          3,
+        ],
+        "opacity": 1,
+        "stroke": "red",
+        "strokeWidth": 3,
+      },
+    }
+  }
+/>
+`;
+
+exports[`xy_expression XYChart component annotations should render grouped annotations with default styles 1`] = `
+<LineAnnotation
+  customTooltipDetails={[Function]}
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591900025,
+        "details": "",
+        "header": 1647591900000,
+      },
+    ]
+  }
+  domainType="xDomain"
+  id=""
+  key=""
+  marker={
+    <Marker
+      config={
+        Object {
+          "axisMode": "bottom",
+          "color": "#f04e98",
+          "customTooltipDetails": [Function],
+          "icon": "2",
+          "iconPosition": "below",
+          "label": "",
+          "lineStyle": "solid",
+          "lineWidth": 1,
+          "roundedTimestamp": 1647591900000,
+          "textVisibility": undefined,
+          "time": "2022-03-18T08:25:00.000Z",
+          "type": "manual_event_annotation",
+        }
+      }
+      hasReducedPadding={true}
+      isHorizontal={true}
+      label=""
+    />
+  }
+  markerBody={
+    <MarkerBody
+      isHorizontal={true}
+    />
+  }
+  markerPosition="bottom"
+  style={
+    Object {
+      "line": Object {
+        "dash": undefined,
+        "opacity": 1,
+        "stroke": "#f04e98",
+        "strokeWidth": 1,
+      },
+    }
+  }
+/>
+`;
+
+exports[`xy_expression XYChart component annotations should render simplified annotation when hide is true 1`] = `
+<LineAnnotation
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591917125,
+        "details": "Annotation",
+        "header": 1647591917100,
+      },
+    ]
+  }
+  domainType="xDomain"
+  id="annotation"
+  key="annotation"
+  marker={
+    <Marker
+      config={
+        Object {
+          "axisMode": "bottom",
+          "label": "Annotation",
+          "roundedTimestamp": 1647591917100,
+          "time": "2022-03-18T08:25:17.140Z",
+          "type": "manual_event_annotation",
+        }
+      }
+      hasReducedPadding={false}
+      isHorizontal={true}
+      label="Annotation"
+    />
+  }
+  markerBody={
+    <MarkerBody
+      isHorizontal={true}
+    />
+  }
+  markerPosition="top"
+  style={
+    Object {
+      "line": Object {
+        "dash": undefined,
+        "opacity": 1,
+        "stroke": "#f04e98",
+        "strokeWidth": 1,
+      },
+    }
+  }
+/>
+`;
+
 exports[`xy_expression XYChart component it renders area 1`] = `
 <Chart
   renderer="canvas"

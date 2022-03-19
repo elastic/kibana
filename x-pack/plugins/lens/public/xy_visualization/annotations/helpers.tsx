@@ -68,12 +68,14 @@ export const getAnnotationsSupportedLayer = (
 ) => {
   const dataLayers = getDataLayers(state?.layers || []);
 
-  const hasDateHistogram = dataLayers.every(
-    (dataLayer) =>
-      dataLayer.xAccessor &&
-      checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+  const hasDateHistogram = Boolean(
+    dataLayers.length &&
+      dataLayers.every(
+        (dataLayer) =>
+          dataLayer.xAccessor &&
+          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+      )
   );
-
   const initialDimensions =
     state && hasDateHistogram
       ? [
@@ -161,11 +163,15 @@ export const getAnnotationsConfiguration = ({
 }) => {
   const dataLayers = getDataLayers(state.layers);
 
-  const hasDateHistogram = dataLayers.every(
-    (dataLayer) =>
-      dataLayer.xAccessor &&
-      checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+  const hasDateHistogram = Boolean(
+    dataLayers.length &&
+      dataLayers.every(
+        (dataLayer) =>
+          dataLayer.xAccessor &&
+          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+      )
   );
+
   return {
     noDatasource: true,
     groups: [
