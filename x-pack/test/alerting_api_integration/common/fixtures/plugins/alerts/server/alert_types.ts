@@ -523,7 +523,12 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    ruleTaskTimeout: '3s',
+    config: {
+      execution: {
+        actions: { max: 1000 },
+        timeout: '3s',
+      },
+    },
     cancelAlertsOnRuleTimeout,
     async executor(ruleExecutorOptions) {
       const { services, params } = ruleExecutorOptions;
@@ -564,7 +569,12 @@ function getCancellableRuleType() {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    ruleTaskTimeout: '3s',
+    config: {
+      execution: {
+        actions: { max: 1000 },
+        timeout: '3s',
+      },
+    },
     async executor(ruleExecutorOptions) {
       const { services, params } = ruleExecutorOptions;
       const doLongSearch = params.doLongSearch;

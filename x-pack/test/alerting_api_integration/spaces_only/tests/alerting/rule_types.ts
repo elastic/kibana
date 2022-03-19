@@ -132,7 +132,11 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           enabledInLicense: true,
-          ruleTaskTimeout: '5m',
+          config: {
+            execution: {
+              timeout: '5m',
+            },
+          },
         });
         expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
       });
