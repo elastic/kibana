@@ -34,11 +34,8 @@ const REFRESH_INTERVAL_OVERRIDE = {
 };
 
 /**
- * Stack Monitoring relies on live data to offer a relevant dashboard experience.
- * Since current refresh interval defaults to a paused state we should override it
- * to an active interval when it's not conflicting with user-defined values.
- * This logic can be removed if we move forward with a suiting defaults
- * https://github.com/elastic/kibana/issues/70562
+ * Make sure we default to an active refresh interval if it's not conflicting
+ * with user-defined values
  */
 const shouldOverrideRefreshInterval = (
   uiSettings: MonitoringStartServices['uiSettings'],
