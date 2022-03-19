@@ -7,7 +7,7 @@
 
 import './expression_reference_lines.scss';
 import React from 'react';
-import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import type { IconPosition, YAxisMode, YConfig } from '../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
@@ -167,17 +167,17 @@ export function MarkerBody({
 
 const isNumericalString = (value: string) => !isNaN(Number(value));
 
-const shapesIconMap = {
-  circle: IconCircle,
-  hexagon: IconHexagon,
-  triangle: IconTriangle,
-  square: IconSquare,
+const shapes = ['circle', 'hexagon', 'triangle', 'square'] as const;
+type Shape = typeof shapes[number];
+
+const shapesIconMap: Record<Shape, { icon: IconType; shouldRotate?: boolean }> = {
+  triangle: { icon: IconTriangle, shouldRotate: true },
+  circle: { icon: IconCircle },
+  hexagon: { icon: IconHexagon, shouldRotate: true },
+  square: { icon: IconSquare },
 };
 
-const isCustomAnnotationShape = (
-  value: string
-): value is 'circle' | 'hexagon' | 'triangle' | 'square' =>
-  ['circle', 'hexagon', 'triangle', 'square'].includes(value);
+const isCustomAnnotationShape = (value: string): value is Shape => shapes.includes(value as Shape);
 
 function NumberIcon({ number }: { number: number }) {
   return (
@@ -198,14 +198,41 @@ interface MarkerConfig {
   axisMode?: YAxisMode;
   icon?: string;
   textVisibility?: boolean;
+  iconPosition?: IconPosition;
 }
 
-export const AnnotationIcon = ({ type, ...rest }: { type: string } & EuiIconProps) => {
+export const getIconRotationClass = (markerPosition?: string) => {
+  if (markerPosition === 'left') {
+    return 'lnsXyAnnotationIcon_rotate270';
+  }
+  if (markerPosition === 'right') {
+    return 'lnsXyAnnotationIcon_rotate90';
+  }
+  if (markerPosition === 'bottom') {
+    return 'lnsXyAnnotationIcon_rotate180';
+  }
+};
+
+export const AnnotationIcon = ({
+  type,
+  rotationClass = '',
+  isHorizontal,
+  ...rest
+}: {
+  type: string;
+  rotationClass?: string;
+  isHorizontal?: boolean;
+} & EuiIconProps) => {
   if (isNumericalString(type)) {
     return <NumberIcon number={Number(type)} />;
   }
-  const iconType = isCustomAnnotationShape(type) ? shapesIconMap[type] : type;
-  return <EuiIcon {...rest} type={iconType} />;
+  const isCustom = isCustomAnnotationShape(type);
+  if (!isCustom) {
+    return <EuiIcon {...rest} type={type} />;
+  }
+
+  const rotationClassName = shapesIconMap[type].shouldRotate ? rotationClass : '';
+  return <EuiIcon {...rest} type={shapesIconMap[type].icon} className={rotationClassName} />;
 };
 
 export function Marker({
@@ -213,15 +240,16 @@ export function Marker({
   isHorizontal,
   hasReducedPadding,
   label,
+  rotationClass,
 }: {
   config: MarkerConfig;
   isHorizontal: boolean;
   hasReducedPadding: boolean;
   label?: string;
+  rotationClass?: string;
 }) {
-  const { icon } = config;
-  if (hasIcon(icon)) {
-    return <AnnotationIcon type={icon} />;
+  if (hasIcon(config.icon)) {
+    return <AnnotationIcon type={config.icon} rotationClass={rotationClass} />;
   }
 
   // if there's some text, check whether to show it as marker, or just show some padding for the icon

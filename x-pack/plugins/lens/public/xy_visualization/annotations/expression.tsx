@@ -15,7 +15,7 @@ import {
   Position,
 } from '@elastic/charts';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
-import { EventAnnotationArgs } from 'src/plugins/event_annotation/common';
+import type { EventAnnotationArgs } from 'src/plugins/event_annotation/common';
 import moment from 'moment';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 import type { AnnotationLayerArgs, IconPosition } from '../../../common/expressions';
@@ -27,6 +27,7 @@ import {
   MarkerBody,
   Marker,
   AnnotationIcon,
+  getIconRotationClass,
 } from '../annotations_helpers';
 
 const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
@@ -81,14 +82,14 @@ const createCustomTooltipDetails =
   ): AnnotationTooltipFormatter | undefined =>
   () => {
     return (
-      <div>
+      <div key={config[0].time}>
         {config.map(({ icon, label, time, color }) => (
-          <div className="echTooltip__item--container">
+          <div className="echTooltip__item--container" key={snakeCase(label)}>
             <span className="echTooltip__label">
               {hasIcon(icon) ? <AnnotationIcon type={icon} color={color} /> : null}
               {label}
             </span>
-            <span className="echTooltip__value">{formatter?.convert(time) || String(time)}</span>
+            <span className="echTooltip__value"> {formatter?.convert(time) || String(time)}</span>
           </div>
         ))}
       </div>
@@ -162,9 +163,13 @@ export const Annotations = ({
     <>
       {groupedAnnotations.map((annotation) => {
         const markerPositionVertical = getBaseIconPlacement(annotation.iconPosition);
+        const markerPosition = isHorizontal
+          ? mapVerticalToHorizontalPlacement(markerPositionVertical)
+          : markerPositionVertical;
         const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
         const id = snakeCase(annotation.label);
         const { roundedTimestamp } = annotation;
+
         return (
           <LineAnnotation
             id={id}
@@ -178,6 +183,7 @@ export const Annotations = ({
                     isHorizontal: !isHorizontal,
                     hasReducedPadding,
                     label: annotation.label,
+                    rotationClass: getIconRotationClass(markerPosition),
                   }}
                 />
               ) : undefined
@@ -192,11 +198,7 @@ export const Annotations = ({
                 />
               ) : undefined
             }
-            markerPosition={
-              isHorizontal
-                ? mapVerticalToHorizontalPlacement(markerPositionVertical)
-                : markerPositionVertical
-            }
+            markerPosition={markerPosition}
             dataValues={[
               {
                 dataValue: moment(
