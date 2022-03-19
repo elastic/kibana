@@ -530,7 +530,6 @@
     "xpack.lens.indexPattern.ranges.lessThanTooltip": "Inférieur à",
     "xpack.lens.indexPattern.records": "Enregistrements",
     "xpack.lens.indexPattern.referenceFunctionPlaceholder": "Sous-fonction",
-    "xpack.lens.indexPattern.removeColumnAriaLabel": "Ajouter ou glisser-déposer un champ dans {groupLabel}",
     "xpack.lens.indexPattern.removeColumnLabel": "Retirer la configuration de \"{groupLabel}\"",
     "xpack.lens.indexPattern.removeFieldLabel": "Retirer le champ du modèle d'indexation",
     "xpack.lens.indexPattern.sortField.invalid": "Champ non valide. Vérifiez votre modèle d'indexation ou choisissez un autre champ.",

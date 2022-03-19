@@ -50,11 +50,13 @@ const defaultButtonLabels = {
 
 const noDndButtonLabels = {
   ariaLabel: (group: VisualizationDimensionGroupConfig) =>
-    i18n.translate('xpack.lens.indexPattern.addColumnAriaLabel', {
+    i18n.translate('xpack.lens.indexPattern.addColumnAriaLabelClick', {
       defaultMessage: 'Click to add to {groupLabel}',
       values: { groupLabel: group.groupLabel },
     }),
-  label: <FormattedMessage id="xpack.lens.configure.emptyConfig" defaultMessage="Click to add" />,
+  label: (
+    <FormattedMessage id="xpack.lens.configure.emptyConfigClick" defaultMessage="Click to add" />
+  ),
 };
 
 const DefaultEmptyButton = ({
@@ -187,7 +189,7 @@ export function EmptyDimensionButton({
     group,
   };
 
-  if (!dropProps) {
+  if (!layerDatasource) {
     buttonProps.labels = noDndButtonLabels;
   }
 

@@ -617,7 +617,6 @@
     "xpack.lens.indexPattern.rareTermsOf": "{name} 的稀有值",
     "xpack.lens.indexPattern.records": "记录",
     "xpack.lens.indexPattern.referenceFunctionPlaceholder": "子函数",
-    "xpack.lens.indexPattern.removeColumnAriaLabel": "将字段添加或拖放到 {groupLabel}",
     "xpack.lens.indexPattern.removeColumnLabel": "从“{groupLabel}”中删除配置",
     "xpack.lens.indexPattern.removeFieldLabel": "移除数据视图字段",
     "xpack.lens.indexPattern.sortField.invalid": "字段无效。检查数据视图或选取其他字段。",

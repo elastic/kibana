@@ -611,7 +611,6 @@
     "xpack.lens.indexPattern.rareTermsOf": "{name}の希少な値",
     "xpack.lens.indexPattern.records": "記録",
     "xpack.lens.indexPattern.referenceFunctionPlaceholder": "サブ関数",
-    "xpack.lens.indexPattern.removeColumnAriaLabel": "フィールドを追加するか、{groupLabel}までドラッグアンドドロップします",
     "xpack.lens.indexPattern.removeColumnLabel": "「{groupLabel}」から構成を削除",
     "xpack.lens.indexPattern.removeFieldLabel": "データビューフィールドを削除",
     "xpack.lens.indexPattern.sortField.invalid": "無効なフィールドです。データビューを確認するか、別のフィールドを選択してください。",
