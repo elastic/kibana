@@ -17,7 +17,6 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -38,7 +37,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          Manage workpad assets
+          <h1>
+            Manage workpad assets
+          </h1>
         </div>
         <div
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive canvasAssetManager__fileUploadWrapper"
@@ -214,7 +215,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -235,7 +235,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          Manage workpad assets
+          <h1>
+            Manage workpad assets
+          </h1>
         </div>
         <div
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive canvasAssetManager__fileUploadWrapper"
@@ -367,7 +369,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -401,7 +402,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -433,7 +433,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -458,7 +457,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -539,7 +537,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -573,7 +570,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -605,7 +601,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -630,7 +625,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}

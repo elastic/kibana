@@ -87,6 +87,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>
@@ -250,6 +251,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>
@@ -413,6 +415,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>

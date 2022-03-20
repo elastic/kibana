@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType } from 'react';
-import { DataView, DataViewField } from '../../../../data/common';
+import { DataView, DataViewField } from '../../../../data_views/public';
 import { ElasticSearchHit } from '../../types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
 
@@ -34,7 +33,7 @@ export interface DocViewRenderProps {
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
-export type DocViewerComponent = ComponentType<DocViewRenderProps>;
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,
   renderProps: DocViewRenderProps

@@ -1,0 +1,60 @@
+/* hide unusable controls */
+/* TODO: This is the legacy way of hiding chrome elements. Rather use chrome.setIsVisible */
+kbn-top-nav,
+filter-bar,
+.kbnTopNavMenu__wrapper,
+::-webkit-scrollbar,
+.euiNavDrawer {
+  display: none !important;
+}
+
+/* hide unusable controls
+*  !important is required to override resizable panel inline display */
+.visEditorScreenshotModeActive .visEditor__content .visEditor--default > :not(.visEditor__visualization__wrapper) {
+  display: none !important;
+}
+
+/** THIS IS FOR TSVB UNTIL REFACTOR **/
+.visEditorScreenshotModeActive .tvbEditorVisualization {
+  position: static !important;
+}
+.visEditorScreenshotModeActive .visualize .tvbVisTimeSeries__legendToggle {
+  /* all non-content rows in interface */
+  display: none;
+}
+
+.visEditorScreenshotModeActive .tvbEditor--hideForReporting {
+  /* all non-content rows in interface */
+  display: none;
+}
+/**  END TSVB BAD BAD HACKS **/
+
+/* remove left padding from visualizations so that map lines up with .leaflet-container and
+*  setting the position to be fixed and to take up the entire screen, because some zoom levels/viewports
+*  are triggering the media breakpoints that cause the .visEditor__canvas to take up more room than the viewport */
+
+.visEditorScreenshotModeActive .visEditor .visEditor__canvas {
+  padding-left: 0;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+/**
+ *  Visualization tweaks
+ */
+
+/* hide unusable controls */
+.visEditorScreenshotModeActive .visualize .visLegend__toggle,
+.visEditorScreenshotModeActive .visualize .kbnAggTable__controls,
+.visEditorScreenshotModeActive .visualize .leaflet-container .leaflet-top.leaflet-left,
+.visEditorScreenshotModeActive .visualize paginate-controls /* page numbers */ {
+  display: none;
+}
+
+/* Ensure the min-height of the small breakpoint isn't used */
+.visEditorScreenshotModeActive .vis-editor visualization {
+  min-height: 0 !important;
+}

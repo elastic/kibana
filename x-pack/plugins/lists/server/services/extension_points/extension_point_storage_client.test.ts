@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
 import { getCreateExceptionListItemOptionsMock } from '../exception_lists/exception_list_client.mock';
@@ -13,11 +13,12 @@ import { DataValidationError } from '../exception_lists/utils/errors';
 
 import { ExtensionPointError } from './errors';
 import {
-  ExceptionListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreUpdateItemServerExtension,
   ExtensionPoint,
   ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
+  ServerExtensionCallbackContext,
 } from './types';
 import { createExtensionPointStorageMock } from './extension_point_storage.mock';
 
@@ -25,6 +26,7 @@ describe('When using the ExtensionPointStorageClient', () => {
   let storageClient: ExtensionPointStorageClientInterface;
   let logger: ReturnType<typeof loggerMock.create>;
   let extensionPointStorage: ExtensionPointStorageInterface;
+  let callbackContext: ServerExtensionCallbackContext;
   let preCreateExtensionPointMock1: jest.Mocked<ExceptionsListPreCreateItemServerExtension>;
   let extensionPointsMocks: Array<jest.Mocked<ExtensionPoint>>;
   let callbackRunLog: string;
@@ -34,10 +36,10 @@ describe('When using the ExtensionPointStorageClient', () => {
   };
 
   beforeEach(() => {
-    const storageContext = createExtensionPointStorageMock();
+    const extensionPointStorageMock = createExtensionPointStorageMock();
 
     callbackRunLog = '';
-    ({ logger, extensionPointStorage } = storageContext);
+    ({ logger, extensionPointStorage, callbackContext } = extensionPointStorageMock);
     extensionPointStorage.clear();
 
     // Generic callback function that also logs to the `callbackRunLog` its id, so we know the order in which they ran.
@@ -48,13 +50,18 @@ describe('When using the ExtensionPointStorageClient', () => {
       A extends Parameters<T['callback']>[0] = Parameters<T['callback']>[0]
     >(
       id: number,
-      arg: A
-    ): Promise<A> => {
+      { data }: A
+    ): Promise<A['data']> => {
       callbackRunLog += id;
-      return {
-        ...arg,
-        name: `${arg.name}-${id}`,
-      };
+
+      if ('name' in data) {
+        return {
+          ...data,
+          name: `${data.name}-${id}`,
+        };
+      }
+
+      return data;
     };
     preCreateExtensionPointMock1 = {
       callback: jest.fn(
@@ -72,7 +79,7 @@ describe('When using the ExtensionPointStorageClient', () => {
       },
       {
         callback: jest.fn(
-          callbackFn.bind(window, 3) as ExceptionListPreUpdateItemServerExtension['callback']
+          callbackFn.bind(window, 3) as ExceptionsListPreUpdateItemServerExtension['callback']
         ),
         type: 'exceptionsListPreUpdateItem',
       },
@@ -115,38 +122,68 @@ describe('When using the ExtensionPointStorageClient', () => {
     it('should run extension point callbacks serially', async () => {
       await storageClient.pipeRun(
         'exceptionsListPreCreateItem',
-        createExceptionListItemOptionsMock
+        createExceptionListItemOptionsMock,
+        callbackContext
       );
       expect(callbackRunLog).toEqual('1245');
+    });
+
+    it('should provide `context` to every callback', async () => {
+      await storageClient.pipeRun(
+        'exceptionsListPreCreateItem',
+        createExceptionListItemOptionsMock,
+        callbackContext
+      );
+      for (const extensionPointsMock of extensionPointsMocks) {
+        if (extensionPointsMock.type === 'exceptionsListPreCreateItem') {
+          expect(extensionPointsMock.callback).toHaveBeenCalledWith(
+            expect.objectContaining({
+              context: callbackContext,
+            })
+          );
+        }
+      }
     });
 
     it('should pass the return value of one extensionPoint to the next', async () => {
       await storageClient.pipeRun(
         'exceptionsListPreCreateItem',
-        createExceptionListItemOptionsMock
+        createExceptionListItemOptionsMock,
+        callbackContext
       );
 
-      expect(extensionPointsMocks[0].callback).toHaveBeenCalledWith(
-        createExceptionListItemOptionsMock
-      );
+      expect(extensionPointsMocks[0].callback).toHaveBeenCalledWith({
+        context: callbackContext,
+        data: createExceptionListItemOptionsMock,
+      });
       expect(extensionPointsMocks[1].callback).toHaveBeenCalledWith({
-        ...createExceptionListItemOptionsMock,
-        name: `${createExceptionListItemOptionsMock.name}-1`,
+        context: callbackContext,
+        data: {
+          ...createExceptionListItemOptionsMock,
+          name: `${createExceptionListItemOptionsMock.name}-1`,
+        },
       });
       expect(extensionPointsMocks[3].callback).toHaveBeenCalledWith({
-        ...createExceptionListItemOptionsMock,
-        name: `${createExceptionListItemOptionsMock.name}-1-2`,
+        context: callbackContext,
+        data: {
+          ...createExceptionListItemOptionsMock,
+          name: `${createExceptionListItemOptionsMock.name}-1-2`,
+        },
       });
       expect(extensionPointsMocks[4].callback).toHaveBeenCalledWith({
-        ...createExceptionListItemOptionsMock,
-        name: `${createExceptionListItemOptionsMock.name}-1-2-4`,
+        context: callbackContext,
+        data: {
+          ...createExceptionListItemOptionsMock,
+          name: `${createExceptionListItemOptionsMock.name}-1-2-4`,
+        },
       });
     });
 
     it('should return a data structure similar to the one provided initially', async () => {
       const result = await storageClient.pipeRun(
         'exceptionsListPreCreateItem',
-        createExceptionListItemOptionsMock
+        createExceptionListItemOptionsMock,
+        callbackContext
       );
 
       expect(result).toEqual({
@@ -155,36 +192,20 @@ describe('When using the ExtensionPointStorageClient', () => {
       });
     });
 
-    it("should log an error if extension point callback Throw's", async () => {
+    it('should stop execution of other extension points after encountering one that `throw`s', async () => {
       const extensionError = new Error('foo');
       preCreateExtensionPointMock1.callback.mockImplementation(async () => {
         throw extensionError;
       });
 
-      await storageClient.pipeRun(
+      const resultPromise = storageClient.pipeRun(
         'exceptionsListPreCreateItem',
-        createExceptionListItemOptionsMock
+        createExceptionListItemOptionsMock,
+        callbackContext
       );
 
-      expect(logger.error).toHaveBeenCalledWith(expect.any(ExtensionPointError));
-      expect(logger.error.mock.calls[0][0]).toMatchObject({ meta: extensionError });
-    });
-
-    it('should continue to other extension points after encountering one that `throw`s', async () => {
-      const extensionError = new Error('foo');
-      preCreateExtensionPointMock1.callback.mockImplementation(async () => {
-        throw extensionError;
-      });
-
-      const result = await storageClient.pipeRun(
-        'exceptionsListPreCreateItem',
-        createExceptionListItemOptionsMock
-      );
-
-      expect(result).toEqual({
-        ...createExceptionListItemOptionsMock,
-        name: `${createExceptionListItemOptionsMock.name}-2-4-5`,
-      });
+      await expect(resultPromise).rejects.toBe(extensionError);
+      expect(extensionPointsMocks[1].callback).not.toHaveBeenCalled();
     });
 
     it('should log an error and Throw if external callback returned invalid data', async () => {
@@ -194,6 +215,7 @@ describe('When using the ExtensionPointStorageClient', () => {
         storageClient.pipeRun(
           'exceptionsListPreCreateItem',
           createExceptionListItemOptionsMock,
+          callbackContext,
           () => {
             return validationError;
           }

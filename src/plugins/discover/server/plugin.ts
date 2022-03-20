@@ -14,7 +14,7 @@ import { searchSavedObjectType } from './saved_objects';
 export class DiscoverServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup) {
     core.capabilities.registerProvider(capabilitiesProvider);
-    core.uiSettings.register(getUiSettings());
+    core.uiSettings.register(getUiSettings(core.docLinks));
     core.savedObjects.registerType(searchSavedObjectType);
 
     return {};

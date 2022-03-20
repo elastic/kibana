@@ -13,6 +13,7 @@ import {
 } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
+  APP_DETECTION_RESPONSE_PATH,
   APP_RULES_PATH,
   APP_ALERTS_PATH,
   APP_EXCEPTIONS_PATH,
@@ -22,11 +23,13 @@ import {
   APP_CASES_PATH,
   APP_MANAGEMENT_PATH,
   APP_ENDPOINTS_PATH,
+  APP_POLICIES_PATH,
   APP_TRUSTED_APPS_PATH,
   APP_EVENT_FILTERS_PATH,
-  APP_UEBA_PATH,
+  APP_BLOCKLIST_PATH,
   SecurityPageName,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
+  APP_USERS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -36,6 +39,13 @@ export const navTabs: SecurityNav = {
     href: APP_OVERVIEW_PATH,
     disabled: false,
     urlKey: 'overview',
+  },
+  [SecurityPageName.detectionAndResponse]: {
+    id: SecurityPageName.detectionAndResponse,
+    name: i18n.DETECTION_RESPONSE,
+    href: APP_DETECTION_RESPONSE_PATH,
+    disabled: false,
+    urlKey: 'detection_response',
   },
   [SecurityPageName.alerts]: {
     id: SecurityPageName.alerts,
@@ -65,19 +75,19 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'host',
   },
+  [SecurityPageName.users]: {
+    id: SecurityPageName.users,
+    name: i18n.USERS,
+    href: APP_USERS_PATH,
+    disabled: false,
+    urlKey: 'users',
+  },
   [SecurityPageName.network]: {
     id: SecurityPageName.network,
     name: i18n.NETWORK,
     href: APP_NETWORK_PATH,
     disabled: false,
     urlKey: 'network',
-  },
-  [SecurityPageName.ueba]: {
-    id: SecurityPageName.ueba,
-    name: i18n.UEBA,
-    href: APP_UEBA_PATH,
-    disabled: false,
-    urlKey: 'ueba',
   },
   [SecurityPageName.timelines]: {
     id: SecurityPageName.timelines,
@@ -107,6 +117,13 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
+  [SecurityPageName.policies]: {
+    id: SecurityPageName.policies,
+    name: i18n.POLICIES,
+    href: APP_POLICIES_PATH,
+    disabled: false,
+    urlKey: 'administration',
+  },
   [SecurityPageName.trustedApps]: {
     id: SecurityPageName.trustedApps,
     name: i18n.TRUSTED_APPLICATIONS,
@@ -125,6 +142,13 @@ export const navTabs: SecurityNav = {
     id: SecurityPageName.hostIsolationExceptions,
     name: i18n.HOST_ISOLATION_EXCEPTIONS,
     href: APP_HOST_ISOLATION_EXCEPTIONS_PATH,
+    disabled: false,
+    urlKey: 'administration',
+  },
+  [SecurityPageName.blocklist]: {
+    id: SecurityPageName.blocklist,
+    name: i18n.BLOCKLIST,
+    href: APP_BLOCKLIST_PATH,
     disabled: false,
     urlKey: 'administration',
   },

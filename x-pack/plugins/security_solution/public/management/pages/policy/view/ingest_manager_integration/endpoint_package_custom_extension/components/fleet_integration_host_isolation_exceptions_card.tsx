@@ -19,7 +19,7 @@ import {
 import { useAppUrl, useHttp, useToasts } from '../../../../../../../common/lib/kibana';
 import { getPolicyHostIsolationExceptionsPath } from '../../../../../../common/routing';
 import { parsePoliciesToKQL } from '../../../../../../common/utils';
-import { getHostIsolationExceptionItems } from '../../../../../host_isolation_exceptions/service';
+import { getHostIsolationExceptionSummary } from '../../../../../host_isolation_exceptions/service';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import { LinkWithIcon } from './link_with_icon';
 import { StyledEuiFlexItem } from './styled_components';
@@ -86,20 +86,12 @@ export const FleetIntegrationHostIsolationExceptionsCard = memo<{
     isMounted.current = true;
     const fetchStats = async () => {
       try {
-        const summary = await getHostIsolationExceptionItems({
+        const summary = await getHostIsolationExceptionSummary(
           http,
-          perPage: 1,
-          page: 1,
-          filter: parsePoliciesToKQL([policyId, 'all']),
-        });
+          parsePoliciesToKQL([policyId, 'all'])
+        );
         if (isMounted.current) {
-          setStats({
-            total: summary.total,
-            // the following properties are not relevant for this specific card
-            windows: 0,
-            linux: 0,
-            macos: 0,
-          });
+          setStats(summary);
         }
       } catch (error) {
         if (isMounted.current) {
@@ -150,7 +142,7 @@ export const FleetIntegrationHostIsolationExceptionsCard = memo<{
             <h5>
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostIsolationExceptions.fleetIntegration.title"
-                defaultMessage="Host isolation exceptions applications"
+                defaultMessage="Host isolation exceptions"
               />
             </h5>
           </EuiText>

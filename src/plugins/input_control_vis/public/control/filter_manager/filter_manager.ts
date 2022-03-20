@@ -6,23 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { Filter } from '@kbn/es-query';
 import _ from 'lodash';
 
-import {
-  FilterManager as QueryFilterManager,
-  IndexPattern,
-  Filter,
-  IndexPatternsContract,
-} from '../../../../data/public';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '../../../../data/public';
+import { DataView } from '../../../../data_views/public';
 
 export abstract class FilterManager {
-  protected indexPattern: IndexPattern | undefined;
+  protected indexPattern: DataView | undefined;
 
   constructor(
     public controlId: string,
     public fieldName: string,
     private indexPatternId: string,
-    private indexPatternsService: IndexPatternsContract,
+    private indexPatternsService: DataViewsContract,
     protected queryFilter: QueryFilterManager
   ) {}
 
@@ -48,7 +45,7 @@ export abstract class FilterManager {
     }
   }
 
-  getIndexPattern(): IndexPattern | undefined {
+  getIndexPattern(): DataView | undefined {
     return this.indexPattern;
   }
 

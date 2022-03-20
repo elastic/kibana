@@ -264,7 +264,7 @@ export const FilterList = ({
                 setFilter={(f: FilterValue) => {
                   onChangeValue(f.id, f.input, f.label);
                 }}
-                Button={() => (
+                button={
                   <EuiLink
                     className="lnsFiltersOperation__popoverButton"
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
@@ -276,7 +276,7 @@ export const FilterList = ({
                   >
                     {filter.label || filter.input.query || defaultLabel}
                   </EuiLink>
-                )}
+                }
               />
             </DraggableBucketContainer>
           );

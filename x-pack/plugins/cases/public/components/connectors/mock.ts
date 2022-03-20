@@ -88,6 +88,12 @@ export const choices = [
     value: 'os',
     element: 'subcategory',
   },
+  {
+    dependent_value: '',
+    label: 'Failed Login',
+    value: 'failed_login',
+    element: 'category',
+  },
   ...['severity', 'urgency', 'impact', 'priority']
     .map((element) => [
       {

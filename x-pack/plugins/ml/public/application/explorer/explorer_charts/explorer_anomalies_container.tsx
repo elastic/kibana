@@ -20,6 +20,7 @@ import type { TimefilterContract } from '../../../../../../../src/plugins/data/p
 import type { EntityFieldOperation } from '../../../../common/util/anomaly_utils';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 import type { MlLocator } from '../../../../common/types/locator';
+import { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
@@ -32,6 +33,7 @@ interface ExplorerAnomaliesContainerProps {
   timefilter: TimefilterContract;
   onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
   showSelectedInterval?: boolean;
+  chartsService: ChartsPluginStart;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -53,6 +55,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   timefilter,
   onSelectEntity,
   showSelectedInterval,
+  chartsService,
 }) => {
   return (
     <>
@@ -87,6 +90,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
               onSelectEntity,
               tooManyBucketsCalloutMsg,
               showSelectedInterval,
+              chartsService,
             }}
           />
         )}

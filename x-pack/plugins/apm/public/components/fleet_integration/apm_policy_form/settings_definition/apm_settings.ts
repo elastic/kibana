@@ -78,7 +78,7 @@ export function getApmSettings({
         },
         {
           key: 'idle_timeout',
-          type: 'text',
+          type: 'duration',
           labelAppend: OPTIONAL_LABEL,
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.idleTimeoutLabel',
@@ -91,7 +91,7 @@ export function getApmSettings({
         },
         {
           key: 'read_timeout',
-          type: 'text',
+          type: 'duration',
           labelAppend: OPTIONAL_LABEL,
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.readTimeoutLabel',
@@ -101,7 +101,7 @@ export function getApmSettings({
         },
         {
           key: 'shutdown_timeout',
-          type: 'text',
+          type: 'duration',
           labelAppend: OPTIONAL_LABEL,
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.shutdownTimeoutLabel',
@@ -114,7 +114,7 @@ export function getApmSettings({
         },
         {
           key: 'write_timeout',
-          type: 'text',
+          type: 'duration',
           labelAppend: OPTIONAL_LABEL,
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.writeTimeoutLabel',

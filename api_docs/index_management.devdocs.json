@@ -1,0 +1,2437 @@
+{
+  "id": "indexManagement",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-public.getIndexListUri",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexListUri",
+        "description": [],
+        "signature": [
+          "(filter?: string | undefined, includeHiddenIndices?: boolean | undefined) => string"
+        ],
+        "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.getIndexListUri.$1",
+            "type": "string",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.getIndexListUri.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeHiddenIndices",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-public.getTemplateDetailsLink",
+        "type": "Function",
+        "tags": [],
+        "label": "getTemplateDetailsLink",
+        "description": [],
+        "signature": [
+          "(name: string, isLegacy?: boolean | undefined) => string"
+        ],
+        "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.getTemplateDetailsLink.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.getTemplateDetailsLink.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLegacy",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-public.Index",
+        "type": "Interface",
+        "tags": [],
+        "label": "Index",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.health",
+            "type": "string",
+            "tags": [],
+            "label": "health",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.primary",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "primary",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.replica",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replica",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.documents",
+            "type": "number",
+            "tags": [],
+            "label": "documents",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.documents_deleted",
+            "type": "number",
+            "tags": [],
+            "label": "documents_deleted",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.size",
+            "type": "string",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.primary_size",
+            "type": "string",
+            "tags": [],
+            "label": "primary_size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.isFrozen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFrozen",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.aliases",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.data_stream",
+            "type": "string",
+            "tags": [],
+            "label": "data_stream",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.Index.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-public.IndexManagementPluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexManagementPluginSetup",
+        "description": [],
+        "path": "x-pack/plugins/index_management/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.IndexManagementPluginSetup.extensionsService",
+            "type": "Object",
+            "tags": [],
+            "label": "extensionsService",
+            "description": [],
+            "signature": [
+              "ExtensionsSetup"
+            ],
+            "path": "x-pack/plugins/index_management/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-server.Dependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "Dependencies",
+        "description": [],
+        "path": "x-pack/plugins/index_management/server/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Dependencies.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.SecurityPluginSetup",
+                "text": "SecurityPluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/index_management/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Dependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingPluginSetup",
+                "text": "LicensingPluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/index_management/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Dependencies.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.PluginSetupContract",
+                "text": "PluginSetupContract"
+              }
+            ],
+            "path": "x-pack/plugins/index_management/server/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-server.Index",
+        "type": "Interface",
+        "tags": [],
+        "label": "Index",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.health",
+            "type": "string",
+            "tags": [],
+            "label": "health",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.primary",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "primary",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.replica",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replica",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.documents",
+            "type": "number",
+            "tags": [],
+            "label": "documents",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.documents_deleted",
+            "type": "number",
+            "tags": [],
+            "label": "documents_deleted",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.size",
+            "type": "string",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.primary_size",
+            "type": "string",
+            "tags": [],
+            "label": "primary_size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.isFrozen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFrozen",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.aliases",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.data_stream",
+            "type": "string",
+            "tags": [],
+            "label": "data_stream",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-server.LegacyTemplateSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyTemplateSerialized",
+        "description": [
+          "\n------------------------------------------\n--------- LEGACY INDEX TEMPLATES ---------\n------------------------------------------"
+        ],
+        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.LegacyTemplateSerialized.index_patterns",
+            "type": "Array",
+            "tags": [],
+            "label": "index_patterns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.LegacyTemplateSerialized.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.LegacyTemplateSerialized.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexSettings",
+                "text": "IndexSettings"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.LegacyTemplateSerialized.aliases",
+            "type": "Object",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Aliases",
+                "text": "Aliases"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.LegacyTemplateSerialized.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.LegacyTemplateSerialized.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-server.IndexManagementConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexManagementConfig",
+        "description": [],
+        "signature": [
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; }"
+        ],
+        "path": "x-pack/plugins/index_management/server/config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "indexManagement",
+      "id": "def-server.IndexManagementPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "IndexManagementPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/index_management/server/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "indexManagement",
+          "id": "def-server.IndexManagementPluginSetup.indexDataEnricher",
+          "type": "Object",
+          "tags": [],
+          "label": "indexDataEnricher",
+          "description": [],
+          "signature": [
+            "{ add: (enricher: ",
+            "Enricher",
+            ") => void; }"
+          ],
+          "path": "x-pack/plugins/index_management/server/plugin.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.getTemplateParameter",
+        "type": "Function",
+        "tags": [],
+        "label": "getTemplateParameter",
+        "description": [],
+        "signature": [
+          "(template: ",
+          {
+            "pluginId": "indexManagement",
+            "scope": "common",
+            "docId": "kibIndexManagementPluginApi",
+            "section": "def-common.LegacyTemplateSerialized",
+            "text": "LegacyTemplateSerialized"
+          },
+          " | ",
+          {
+            "pluginId": "indexManagement",
+            "scope": "common",
+            "docId": "kibIndexManagementPluginApi",
+            "section": "def-common.TemplateSerialized",
+            "text": "TemplateSerialized"
+          },
+          ", setting: \"aliases\" | \"settings\" | \"mappings\") => ",
+          {
+            "pluginId": "indexManagement",
+            "scope": "common",
+            "docId": "kibIndexManagementPluginApi",
+            "section": "def-common.Aliases",
+            "text": "Aliases"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/plugins/index_management/common/lib/utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.getTemplateParameter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.LegacyTemplateSerialized",
+                "text": "LegacyTemplateSerialized"
+              },
+              " | ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.TemplateSerialized",
+                "text": "TemplateSerialized"
+              }
+            ],
+            "path": "x-pack/plugins/index_management/common/lib/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.getTemplateParameter.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "setting",
+            "description": [],
+            "signature": [
+              "\"aliases\" | \"settings\" | \"mappings\""
+            ],
+            "path": "x-pack/plugins/index_management/common/lib/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.Aliases",
+        "type": "Interface",
+        "tags": [],
+        "label": "Aliases",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/aliases.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Aliases.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/aliases.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.ComponentTemplateDeserialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateDeserialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "indexManagement",
+            "scope": "common",
+            "docId": "kibIndexManagementPluginApi",
+            "section": "def-common.ComponentTemplateDeserialized",
+            "text": "ComponentTemplateDeserialized"
+          },
+          " extends ",
+          {
+            "pluginId": "indexManagement",
+            "scope": "common",
+            "docId": "kibIndexManagementPluginApi",
+            "section": "def-common.ComponentTemplateSerialized",
+            "text": "ComponentTemplateSerialized"
+          }
+        ],
+        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateDeserialized.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateDeserialized._kbnMeta",
+            "type": "Object",
+            "tags": [],
+            "label": "_kbnMeta",
+            "description": [],
+            "signature": [
+              "{ usedBy: string[]; isManaged: boolean; }"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.ComponentTemplateFromEs",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateFromEs",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateFromEs.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateFromEs.component_template",
+            "type": "Object",
+            "tags": [],
+            "label": "component_template",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.ComponentTemplateSerialized",
+                "text": "ComponentTemplateSerialized"
+              }
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.ComponentTemplateListItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateListItem",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateListItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateListItem.usedBy",
+            "type": "Array",
+            "tags": [],
+            "label": "usedBy",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateListItem.hasMappings",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasMappings",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateListItem.hasAliases",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasAliases",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateListItem.hasSettings",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasSettings",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateListItem.isManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isManaged",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.ComponentTemplateSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateSerialized",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateSerialized.template",
+            "type": "Object",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "{ settings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexSettings",
+                "text": "IndexSettings"
+              },
+              " | undefined; aliases?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Aliases",
+                "text": "Aliases"
+              },
+              " | undefined; mappings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              },
+              " | undefined; }"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateSerialized.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateSerialized._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.DataStream",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStream",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.timeStampField",
+            "type": "Object",
+            "tags": [],
+            "label": "timeStampField",
+            "description": [],
+            "signature": [
+              "TimestampFieldFromEs"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.DataStreamIndex",
+                "text": "DataStreamIndex"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.generation",
+            "type": "number",
+            "tags": [],
+            "label": "generation",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.health",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "health",
+            "description": [],
+            "signature": [
+              "\"green\" | \"yellow\" | \"red\""
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.indexTemplateName",
+            "type": "string",
+            "tags": [],
+            "label": "indexTemplateName",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.ilmPolicyName",
+            "type": "string",
+            "tags": [],
+            "label": "ilmPolicyName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.storageSize",
+            "type": "string",
+            "tags": [],
+            "label": "storageSize",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.storageSizeBytes",
+            "type": "number",
+            "tags": [],
+            "label": "storageSizeBytes",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.maxTimeStamp",
+            "type": "number",
+            "tags": [],
+            "label": "maxTimeStamp",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "MetaFromEs | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "PrivilegesFromEs"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.DataStreamFromEs",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStreamFromEs",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.timestamp_field",
+            "type": "Object",
+            "tags": [],
+            "label": "timestamp_field",
+            "description": [],
+            "signature": [
+              "TimestampFieldFromEs"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "DataStreamIndexFromEs",
+              "[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.generation",
+            "type": "number",
+            "tags": [],
+            "label": "generation",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "MetaFromEs | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"GREEN\" | \"YELLOW\" | \"RED\""
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.template",
+            "type": "string",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.ilm_policy",
+            "type": "string",
+            "tags": [],
+            "label": "ilm_policy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.store_size",
+            "type": "string",
+            "tags": [],
+            "label": "store_size",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.store_size_bytes",
+            "type": "number",
+            "tags": [],
+            "label": "store_size_bytes",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.maximum_timestamp",
+            "type": "number",
+            "tags": [],
+            "label": "maximum_timestamp",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "PrivilegesFromEs"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamFromEs.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.DataStreamIndex",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStreamIndex",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamIndex.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStreamIndex.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.Index",
+        "type": "Interface",
+        "tags": [],
+        "label": "Index",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.health",
+            "type": "string",
+            "tags": [],
+            "label": "health",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.primary",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "primary",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.replica",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replica",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.documents",
+            "type": "number",
+            "tags": [],
+            "label": "documents",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.documents_deleted",
+            "type": "number",
+            "tags": [],
+            "label": "documents_deleted",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.size",
+            "type": "string",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.primary_size",
+            "type": "string",
+            "tags": [],
+            "label": "primary_size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.isFrozen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFrozen",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.aliases",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.data_stream",
+            "type": "string",
+            "tags": [],
+            "label": "data_stream",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.IndexSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexSettings",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexSettings.index",
+            "type": "Object",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "Partial<IndexModule> | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexSettings.analysis",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [],
+            "signature": [
+              "AnalysisModule | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexSettings.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.LegacyTemplateSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyTemplateSerialized",
+        "description": [
+          "\n------------------------------------------\n--------- LEGACY INDEX TEMPLATES ---------\n------------------------------------------"
+        ],
+        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.LegacyTemplateSerialized.index_patterns",
+            "type": "Array",
+            "tags": [],
+            "label": "index_patterns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.LegacyTemplateSerialized.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.LegacyTemplateSerialized.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexSettings",
+                "text": "IndexSettings"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.LegacyTemplateSerialized.aliases",
+            "type": "Object",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Aliases",
+                "text": "Aliases"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.LegacyTemplateSerialized.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.LegacyTemplateSerialized.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.Mappings",
+        "type": "Interface",
+        "tags": [],
+        "label": "Mappings",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/mappings.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Mappings.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/mappings.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.TemplateDeserialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "TemplateDeserialized",
+        "description": [
+          "\nTemplateDeserialized is the format the UI will be working with,\nregardless if we are loading the new format (composable) index template,\nor the legacy one. Serialization is done server side."
+        ],
+        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.template",
+            "type": "Object",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "{ settings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexSettings",
+                "text": "IndexSettings"
+              },
+              " | undefined; aliases?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Aliases",
+                "text": "Aliases"
+              },
+              " | undefined; mappings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              },
+              " | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.composedOf",
+            "type": "Array",
+            "tags": [],
+            "label": "composedOf",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.priority",
+            "type": "number",
+            "tags": [],
+            "label": "priority",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.ilmPolicy",
+            "type": "Object",
+            "tags": [],
+            "label": "ilmPolicy",
+            "description": [],
+            "signature": [
+              "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.dataStream",
+            "type": "Object",
+            "tags": [],
+            "label": "dataStream",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; hidden?: boolean | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized._kbnMeta",
+            "type": "Object",
+            "tags": [],
+            "label": "_kbnMeta",
+            "description": [],
+            "signature": [
+              "{ type: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.TemplateType",
+                "text": "TemplateType"
+              },
+              "; hasDatastream: boolean; isLegacy?: boolean | undefined; }"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.TemplateFromEs",
+        "type": "Interface",
+        "tags": [],
+        "label": "TemplateFromEs",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateFromEs.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateFromEs.index_template",
+            "type": "Object",
+            "tags": [],
+            "label": "index_template",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.TemplateSerialized",
+                "text": "TemplateSerialized"
+              }
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.TemplateListItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "TemplateListItem",
+        "description": [
+          "\nInterface for the template list in our UI table\nwe don't include the mappings, settings and aliases\nto reduce the payload size sent back to the client."
+        ],
+        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.priority",
+            "type": "number",
+            "tags": [],
+            "label": "priority",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.hasSettings",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasSettings",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.hasAliases",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasAliases",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.hasMappings",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasMappings",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.ilmPolicy",
+            "type": "Object",
+            "tags": [],
+            "label": "ilmPolicy",
+            "description": [],
+            "signature": [
+              "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem._kbnMeta",
+            "type": "Object",
+            "tags": [],
+            "label": "_kbnMeta",
+            "description": [],
+            "signature": [
+              "{ type: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.TemplateType",
+                "text": "TemplateType"
+              },
+              "; hasDatastream: boolean; isLegacy?: boolean | undefined; }"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.TemplateSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "TemplateSerialized",
+        "description": [
+          "\nIndex template format from Elasticsearch"
+        ],
+        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.index_patterns",
+            "type": "Array",
+            "tags": [],
+            "label": "index_patterns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.template",
+            "type": "Object",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "{ settings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexSettings",
+                "text": "IndexSettings"
+              },
+              " | undefined; aliases?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Aliases",
+                "text": "Aliases"
+              },
+              " | undefined; mappings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              },
+              " | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.composed_of",
+            "type": "Array",
+            "tags": [],
+            "label": "composed_of",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.priority",
+            "type": "number",
+            "tags": [],
+            "label": "priority",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.data_stream",
+            "type": "Object",
+            "tags": [],
+            "label": "data_stream",
+            "description": [],
+            "signature": [
+              "{} | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.API_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "API_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/index_management\""
+        ],
+        "path": "x-pack/plugins/index_management/common/constants/api_base_path.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/management/data/index_management/\""
+        ],
+        "path": "x-pack/plugins/index_management/common/constants/base_path.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.Health",
+        "type": "Type",
+        "tags": [],
+        "label": "Health",
+        "description": [],
+        "signature": [
+          "\"green\" | \"yellow\" | \"red\""
+        ],
+        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.MAJOR_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "MAJOR_VERSION",
+        "description": [],
+        "signature": [
+          "\"8.2.0\""
+        ],
+        "path": "x-pack/plugins/index_management/common/constants/plugin.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.TemplateType",
+        "type": "Type",
+        "tags": [],
+        "label": "TemplateType",
+        "description": [],
+        "signature": [
+          "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""
+        ],
+        "path": "x-pack/plugins/index_management/common/types/templates.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

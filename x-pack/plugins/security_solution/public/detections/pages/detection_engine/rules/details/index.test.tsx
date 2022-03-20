@@ -20,7 +20,6 @@ import {
 import { RuleDetailsPage } from './index';
 import { createStore, State } from '../../../../../common/store';
 import { useUserData } from '../../../../components/user_info';
-import { useRuleStatus } from '../../../../containers/detection_engine/rules';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
@@ -131,15 +130,6 @@ describe('RuleDetailsPageComponent', () => {
       indicesExist: true,
       indexPattern: {},
     });
-    (useRuleStatus as jest.Mock).mockReturnValue([
-      false,
-      {
-        status: 'succeeded',
-        last_failure_at: new Date().toISOString(),
-        last_failure_message: 'my fake failure message',
-        failures: [],
-      },
-    ]);
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       error: null,
       loading: false,
@@ -151,6 +141,8 @@ describe('RuleDetailsPageComponent', () => {
   });
 
   async function setup() {
+    mockRedirectLegacyUrl.mockReset();
+    mockGetLegacyUrlConflict.mockReset();
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -176,6 +168,7 @@ describe('RuleDetailsPageComponent', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
       expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
+      expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
     });
   });
 
@@ -199,6 +192,7 @@ describe('RuleDetailsPageComponent', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
       expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
+      expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
     });
   });
 
@@ -209,7 +203,7 @@ describe('RuleDetailsPageComponent', () => {
       loading: false,
       isExistingRule: true,
       refresh: jest.fn(),
-      rule: { ...mockRule, outcome: 'aliasMatch' },
+      rule: { ...mockRule, outcome: 'aliasMatch', alias_purpose: 'savedObjectConversion' },
     });
     const wrapper = mount(
       <TestProviders store={store}>
@@ -220,7 +214,12 @@ describe('RuleDetailsPageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
-      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(`rules/id/myfakeruleid`, `rule`);
+      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+        path: 'rules/id/myfakeruleid',
+        aliasPurpose: 'savedObjectConversion',
+        objectNoun: 'rule',
+      });
+      expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
     });
   });
 
@@ -231,7 +230,12 @@ describe('RuleDetailsPageComponent', () => {
       loading: false,
       isExistingRule: true,
       refresh: jest.fn(),
-      rule: { ...mockRule, outcome: 'conflict', alias_target_id: 'aliased_rule_id' },
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+      },
     });
     const wrapper = mount(
       <TestProviders store={store}>
@@ -242,7 +246,7 @@ describe('RuleDetailsPageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
-      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(`rules/id/myfakeruleid`, `rule`);
+      expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
       expect(mockGetLegacyUrlConflict).toHaveBeenCalledWith({
         currentObjectId: 'myfakeruleid',
         objectNoun: 'rule',

@@ -44,6 +44,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
+  minimumScheduleInterval: '1m',
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
   actions: actionsMock.createStart(),
   eventLog: eventLogMock.createStart(),
@@ -119,6 +120,7 @@ test('creates an alerts client with proper constructor arguments when security i
     createAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
+    minimumScheduleInterval: '1m',
   });
 });
 
@@ -156,6 +158,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     kibanaVersion: '7.10.0',
+    minimumScheduleInterval: '1m',
   });
 });
 

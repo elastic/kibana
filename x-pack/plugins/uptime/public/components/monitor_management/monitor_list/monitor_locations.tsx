@@ -22,13 +22,13 @@ export const MonitorLocations = ({ locations }: Props) => {
   const locationsToDisplay = locations.slice(0, toDisplay);
 
   return (
-    <EuiBadgeGroup>
+    <EuiBadgeGroup css={{ width: '100%' }}>
       {locationsToDisplay.map((location: ServiceLocation) => (
         <EuiBadge
           key={location.id}
           color="hollow"
           className="eui-textTruncate"
-          style={{ maxWidth: 120 }}
+          css={{ display: 'flex', maxWidth: 120 }}
         >
           {location.label}
         </EuiBadge>

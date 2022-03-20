@@ -7,20 +7,22 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiHorizontalRule,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DiscoverServices } from '../../../../build_services';
-import { DataView } from '../../../../../../data/common';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import type { DataView } from '../../../../../../data_views/public';
 
 export interface DiscoverIndexPatternManagementProps {
   /**
    * Currently selected index pattern
    */
   selectedIndexPattern?: DataView;
-  /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
   /**
    * Read from the Fields API
    */
@@ -30,11 +32,16 @@ export interface DiscoverIndexPatternManagementProps {
    * @param fieldName
    */
   editField: (fieldName?: string) => void;
+
+  /**
+   * Callback to execute on create new data action
+   */
+  createNewDataView: () => void;
 }
 
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
-  const { dataViewFieldEditor, core } = props.services;
-  const { useNewFieldsApi, selectedIndexPattern, editField } = props;
+  const { dataViewFieldEditor, core } = useDiscoverServices();
+  const { useNewFieldsApi, selectedIndexPattern, editField, createNewDataView } = props;
   const dataViewEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditDataViewField = !!dataViewEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
@@ -49,7 +56,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
 
   return (
     <EuiPopover
-      panelPaddingSize="s"
+      panelPaddingSize="none"
       isOpen={isAddIndexPatternFieldPopoverOpen}
       closePopover={() => {
         setIsAddIndexPatternFieldPopoverOpen(false);
@@ -71,7 +78,8 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
       }
     >
       <EuiContextMenuPanel
-        size="s"
+        size="m"
+        title="Data view"
         items={[
           <EuiContextMenuItem
             key="add"
@@ -83,7 +91,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.addFieldButton', {
-              defaultMessage: 'Add field to data view',
+              defaultMessage: 'Add field',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
@@ -98,7 +106,21 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {
-              defaultMessage: 'Manage data view fields',
+              defaultMessage: 'Manage settings',
+            })}
+          </EuiContextMenuItem>,
+          <EuiHorizontalRule style={{ margin: '0px' }} />,
+          <EuiContextMenuItem
+            key="new"
+            icon="plusInCircleFilled"
+            data-test-subj="dataview-create-new"
+            onClick={() => {
+              setIsAddIndexPatternFieldPopoverOpen(false);
+              createNewDataView();
+            }}
+          >
+            {i18n.translate('discover.fieldChooser.dataViews.createNewDataView', {
+              defaultMessage: 'Create new data view',
             })}
           </EuiContextMenuItem>,
         ]}

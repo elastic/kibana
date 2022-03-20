@@ -24,6 +24,7 @@ import { getLoadPoliciesError } from '../../../common/translations';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ManagementPageLoader } from '../../../components/management_page_loader';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
@@ -42,11 +43,27 @@ import {
   useHostIsolationExceptionsNavigateCallback,
   useHostIsolationExceptionsSelector,
 } from './hooks';
+import { useMemoizedRouteState } from '../../../common/hooks';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
   typeof ExceptionItem
 >;
+
+const getPaginationObject = ({
+  total = 0,
+  perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+  page = 1,
+}: {
+  total?: number;
+  perPage?: number;
+  page?: number;
+}) => ({
+  totalItemCount: total,
+  pageSize: perPage,
+  pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+  pageIndex: page - 1,
+});
 
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
@@ -56,11 +73,25 @@ export const HostIsolationExceptionsList = () => {
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
+  const memoizedRouteState = useMemoizedRouteState(routeState);
+
+  const backButtonEmptyComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+    }
+  }, [memoizedRouteState]);
+
+  const backButtonHeaderComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...memoizedRouteState} />;
+    }
+  }, [memoizedRouteState]);
+
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
   const includedPoliciesParam = location.included_policies;
 
-  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
+  const { isLoading, isRefetching, data, error, refetch } = useFetchHostIsolationExceptionsList({
     filter: location.filter,
     page: location.page_index,
     perPage: location.page_size,
@@ -68,6 +99,12 @@ export const HostIsolationExceptionsList = () => {
       includedPoliciesParam && includedPoliciesParam !== ''
         ? includedPoliciesParam.split(',')
         : undefined,
+  });
+
+  const { isLoading: isLoadingAll, data: allData } = useFetchHostIsolationExceptionsList({
+    page: 0,
+    perPage: 1,
+    enabled: data && !data.total,
   });
 
   const toasts = useToasts();
@@ -79,18 +116,17 @@ export const HostIsolationExceptionsList = () => {
     },
   });
 
-  const pagination = {
-    totalItemCount: data?.total ?? 0,
-    pageSize: data?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
-    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-    pageIndex: (data?.page ?? 1) - 1,
-  };
+  const pagination = getPaginationObject({
+    total: data?.total,
+    perPage: data?.per_page,
+    page: data?.page,
+  });
 
   const listItems = data?.data || [];
-  const totalCountListItems = data?.total || 0;
+  const allListItems = allData?.data || [];
 
   const showFlyout = privileges.canIsolateHost && !!location.show;
-  const hasDataToShow = !!location.filter || listItems.length > 0;
+  const hasDataToShow = allListItems.length > 0 || listItems.length > 0;
 
   useEffect(() => {
     if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
@@ -135,6 +171,8 @@ export const HostIsolationExceptionsList = () => {
       'data-test-subj': `hostIsolationExceptionsCard`,
       actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
       policies: artifactCardPolicies,
+      hideDescription: !element.description,
+      hideComments: !element.comments.length,
     };
   }
 
@@ -148,13 +186,6 @@ export const HostIsolationExceptionsList = () => {
       },
       [navigateCallback]
     );
-
-  const backButton = useMemo(() => {
-    if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppButton {...routeState} />;
-    }
-    return null;
-  }, [routeState]);
 
   const handleAddButtonClick = useCallback(
     () =>
@@ -181,13 +212,15 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
-  if (isLoading && !hasDataToShow) {
+  const isSearchLoading = isLoading || isRefetching;
+
+  if ((isSearchLoading || isLoadingAll) && !hasDataToShow) {
     return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
   }
 
   return (
     <AdministrationListPage
-      headerBackComponent={backButton}
+      headerBackComponent={backButtonHeaderComponent}
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
@@ -197,7 +230,7 @@ export const HostIsolationExceptionsList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageSubTitle"
-          defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
+          defaultMessage="Add a host isolation exception to allow isolated hosts to communicate with specific IPs."
         />
       }
       actions={
@@ -211,7 +244,7 @@ export const HostIsolationExceptionsList = () => {
           >
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
-              defaultMessage="Add Host isolation exception"
+              defaultMessage="Add host isolation exception"
             />
           </EuiButton>
         ) : (
@@ -234,12 +267,12 @@ export const HostIsolationExceptionsList = () => {
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             policyList={policiesRequest.data?.items}
-            hasPolicyFilter={true}
+            hasPolicyFilter
             defaultIncludedPolicies={location.included_policies}
             placeholder={i18n.translate(
               'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
               {
-                defaultMessage: 'Search on the fields below: name, description, ip',
+                defaultMessage: 'Search on the fields below: name, description, IP',
               }
             )}
           />
@@ -247,8 +280,8 @@ export const HostIsolationExceptionsList = () => {
           <EuiText color="subdued" size="xs" data-test-subj="hostIsolationExceptions-totalCount">
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.totalCount"
-              defaultMessage="Showing {total, plural, one {# exception} other {# exceptions}}"
-              values={{ total: totalCountListItems }}
+              defaultMessage="Showing {total, plural, one {# host isolation exception} other {# host isolation exceptions}}"
+              values={{ total: listItems.length }}
             />
           </EuiText>
           <EuiSpacer size="s" />
@@ -261,12 +294,17 @@ export const HostIsolationExceptionsList = () => {
         itemComponentProps={handleItemComponentProps}
         onChange={handlePaginatedContentChange}
         error={error?.message}
-        loading={isLoading}
+        loading={isSearchLoading}
         pagination={pagination}
         contentClassName="host-isolation-exceptions-container"
         data-test-subj="hostIsolationExceptionsContent"
         noItemsMessage={
-          !hasDataToShow && <HostIsolationExceptionsEmptyState onAdd={handleAddButtonClick} />
+          !hasDataToShow && (
+            <HostIsolationExceptionsEmptyState
+              onAdd={handleAddButtonClick}
+              backComponent={backButtonEmptyComponent}
+            />
+          )
         }
       />
     </AdministrationListPage>

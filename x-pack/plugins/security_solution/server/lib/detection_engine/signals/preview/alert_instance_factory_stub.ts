@@ -12,7 +12,7 @@ import {
   AlertTypeState,
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
+import { Alert } from '../../../../../../alerting/server/alert';
 
 export const alertInstanceFactoryStub = <
   TParams extends RuleParams,
@@ -27,13 +27,13 @@ export const alertInstanceFactoryStub = <
     return {} as unknown as TInstanceState;
   },
   replaceState(state: TInstanceState) {
-    return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },
     });
   },
   scheduleActions(actionGroup: TActionGroupIds, alertcontext: TInstanceContext) {
-    return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },
     });
@@ -43,9 +43,21 @@ export const alertInstanceFactoryStub = <
     subgroup: string,
     alertcontext: TInstanceContext
   ) {
-    return new AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>({
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },
     });
+  },
+  setContext(alertContext: TInstanceContext) {
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
+      state: {} as TInstanceState,
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+  },
+  getContext() {
+    return {} as unknown as TInstanceContext;
+  },
+  hasContext() {
+    return false;
   },
 });

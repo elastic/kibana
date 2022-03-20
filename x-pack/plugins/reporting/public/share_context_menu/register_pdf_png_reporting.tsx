@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ShareContext } from 'src/plugins/share/public';
-import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import { ShareContext, ShareMenuProvider } from 'src/plugins/share/public';
 import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from './';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
 const getJobParams =
@@ -60,37 +60,11 @@ export const reportingScreenshotShareProvider = ({
   apiClient,
   toasts,
   uiSettings,
-  license$,
-  startServices$,
+  license,
+  application,
   usesUiCapabilities,
-}: ExportPanelShareOpts) => {
-  let licenseToolTipContent = '';
-  let licenseDisabled = true;
-  let licenseHasScreenshotReporting = false;
-  let capabilityHasDashboardScreenshotReporting = false;
-  let capabilityHasVisualizeScreenshotReporting = false;
-
-  license$.subscribe((license) => {
-    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
-    licenseToolTipContent = message;
-    licenseHasScreenshotReporting = showLinks;
-    licenseDisabled = !enableLinks;
-  });
-
-  if (usesUiCapabilities) {
-    startServices$.subscribe(([{ application }]) => {
-      // TODO: add abstractions in ExportTypeRegistry to use here?
-      capabilityHasDashboardScreenshotReporting =
-        application.capabilities.dashboard?.generateScreenshot === true;
-      capabilityHasVisualizeScreenshotReporting =
-        application.capabilities.visualize?.generateScreenshot === true;
-    });
-  } else {
-    // deprecated
-    capabilityHasDashboardScreenshotReporting = true;
-    capabilityHasVisualizeScreenshotReporting = true;
-  }
-
+  theme,
+}: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -99,6 +73,25 @@ export const reportingScreenshotShareProvider = ({
     shareableUrl,
     ...shareOpts
   }: ShareContext) => {
+    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
+    const licenseToolTipContent = message;
+    const licenseHasScreenshotReporting = showLinks;
+    const licenseDisabled = !enableLinks;
+
+    let capabilityHasDashboardScreenshotReporting = false;
+    let capabilityHasVisualizeScreenshotReporting = false;
+    if (usesUiCapabilities) {
+      // TODO: add abstractions in ExportTypeRegistry to use here?
+      capabilityHasDashboardScreenshotReporting =
+        application.capabilities.dashboard?.generateScreenshot === true;
+      capabilityHasVisualizeScreenshotReporting =
+        application.capabilities.visualize?.generateScreenshot === true;
+    } else {
+      // deprecated
+      capabilityHasDashboardScreenshotReporting = true;
+      capabilityHasVisualizeScreenshotReporting = true;
+    }
+
     if (!licenseHasScreenshotReporting) {
       return [];
     }
@@ -156,6 +149,7 @@ export const reportingScreenshotShareProvider = ({
             getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
             isDirty={isDirty}
             onClose={onClose}
+            theme={theme}
           />
         ),
       },
@@ -191,6 +185,7 @@ export const reportingScreenshotShareProvider = ({
             getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}
             onClose={onClose}
+            theme={theme}
           />
         ),
       },
@@ -201,5 +196,8 @@ export const reportingScreenshotShareProvider = ({
     return shareActions;
   };
 
-  return { id: 'screenCaptureReports', getShareMenuItems };
+  return {
+    id: 'screenCaptureReports',
+    getShareMenuItems,
+  };
 };

@@ -58,6 +58,10 @@ export interface TelemetryEvent {
     };
   };
   license?: ESLicense;
+  event?: {
+    id?: string;
+    kind?: string;
+  };
 }
 
 // EP Policy Response
@@ -82,6 +86,10 @@ interface EndpointPolicyResponseHits {
     total: { value: number };
     hits: EndpointPolicyResponseDocument[];
   };
+}
+
+interface NonPolicyConfiguration {
+  isolation: boolean;
 }
 
 export interface EndpointPolicyResponseDocument {
@@ -109,6 +117,8 @@ export interface EndpointPolicyResponseDocument {
           status: string;
         };
       };
+      configuration: NonPolicyConfiguration;
+      state: NonPolicyConfiguration;
     };
   };
 }
@@ -157,6 +167,17 @@ interface EndpointMetricDocument {
   };
 }
 
+interface DocumentsVolumeMetrics {
+  suppressed_count: number;
+  suppressed_bytes: number;
+  sent_count: number;
+  sent_bytes: number;
+}
+
+interface SystemImpactEventsMetrics {
+  week_ms: number;
+}
+
 export interface EndpointMetrics {
   memory: {
     endpoint: {
@@ -180,6 +201,34 @@ export interface EndpointMetrics {
     endpoint: number;
     system: number;
   };
+  documents_volume: {
+    file_events: DocumentsVolumeMetrics;
+    library_events: DocumentsVolumeMetrics;
+    process_events: DocumentsVolumeMetrics;
+    registry_events: DocumentsVolumeMetrics;
+    network_events: DocumentsVolumeMetrics;
+    overall: DocumentsVolumeMetrics;
+  };
+  malicious_behavior_rules: Array<{ id: string; endpoint_uptime_percent: number }>;
+  system_impact: Array<{
+    process: {
+      code_signature: Array<{
+        trusted: boolean;
+        subject_name: string;
+        exists: boolean;
+        status: string;
+      }>;
+      executable: string;
+    };
+    malware?: SystemImpactEventsMetrics;
+    process_events?: SystemImpactEventsMetrics;
+    registry_events?: SystemImpactEventsMetrics;
+    dns_events?: SystemImpactEventsMetrics;
+    network_events?: SystemImpactEventsMetrics;
+    overall?: SystemImpactEventsMetrics;
+    library_load_events?: SystemImpactEventsMetrics;
+  }>;
+  threads: Array<{ name: string; cpu: { mean: number } }>;
 }
 
 interface EndpointMetricOS {
@@ -192,6 +241,44 @@ interface EndpointMetricOS {
   version: string;
   platform: string;
   full: string;
+}
+
+// EP Metadata
+
+export interface EndpointMetadataAggregation {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    endpoint_metadata: {
+      buckets: Array<{ key: string; doc_count: number; latest_metadata: EndpointMetadataHits }>;
+    };
+  };
+}
+
+interface EndpointMetadataHits {
+  hits: {
+    total: { value: number };
+    hits: EndpointMetadataDocument[];
+  };
+}
+
+export interface EndpointMetadataDocument {
+  _source: {
+    '@timestamp': string;
+    agent: {
+      id: string;
+      version: string;
+    };
+    Endpoint: {
+      capabilities: string[];
+    };
+    elastic: {
+      agent: {
+        id: string;
+      };
+    };
+  };
 }
 
 // List HTTP Types
@@ -227,6 +314,9 @@ export interface ExceptionListItem {
 
 export interface ListTemplate {
   '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  license_id: string | undefined;
   detection_rule?: TelemetryEvent;
   endpoint_exception?: TelemetryEvent;
   endpoint_event_filter?: TelemetryEvent;

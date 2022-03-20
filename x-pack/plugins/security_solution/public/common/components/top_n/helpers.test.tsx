@@ -29,7 +29,6 @@ const otherTimelines = [
   TimelineId.hostsPageEvents,
   TimelineId.hostsPageExternalAlerts,
   TimelineId.networkPageExternalAlerts,
-  TimelineId.uebaPageExternalAlerts,
   TimelineId.active,
   TimelineId.casePage,
   TimelineId.test,
@@ -115,17 +114,12 @@ const ruleNameFilter: Filter = {
 const threatMappingFilter: Filter = {
   meta: {
     alias: null,
-    negate: true,
     disabled: false,
-    type: 'exists',
-    key: 'kibana.alert.rule.threat_mapping',
-    value: 'exists',
+    negate: false,
+    key: 'kibana.alert.rule.type',
+    type: 'term',
   },
-  query: {
-    exists: {
-      field: 'kibana.alert.rule.threat_mapping',
-    },
-  },
+  query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
 };
 
 const workflowStatusFilter: Filter = {

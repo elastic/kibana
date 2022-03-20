@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiTitle,
   SearchFilterConfig,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -24,16 +25,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import {
-  getAnalysisType,
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-  useRefreshAnalyticsList,
-} from '../../data_frame_analytics/common';
+import { getAnalysisType } from '../../data_frame_analytics/common';
 import { ModelsTableToConfigMapping } from './index';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useNavigateToPath, useTimefilter } from '../../contexts/kibana';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
+import { useSavedObjectsApiService } from '../../services/ml_api_service/saved_objects';
 import {
   ModelPipelines,
   TrainedModelConfigResponse,
@@ -52,8 +49,10 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
-import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
+import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
+import { JobSpacesList } from '../../components/job_spaces_list';
+import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -77,42 +76,64 @@ export const BUILT_IN_MODEL_TYPE = i18n.translate(
   { defaultMessage: 'built-in' }
 );
 
-export const ModelsList: FC = () => {
+interface Props {
+  isManagementTable?: boolean;
+  pageState?: ListingPageUrlState;
+  updatePageState?: (update: Partial<ListingPageUrlState>) => void;
+}
+
+export const ModelsList: FC<Props> = ({
+  isManagementTable = false,
+  pageState: pageStateExternal,
+  updatePageState: updatePageStateExternal,
+}) => {
   const {
     services: {
       application: { navigateToUrl, capabilities },
       overlays,
       theme,
+      spacesApi,
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
 
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
+
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
-  const [pageState, updatePageState] = usePageUrlState(
+  // allow for an internally controlled page state which stores the state in the URL
+  // or an external page state, which is passed in as a prop.
+  // external page state is used on the management page.
+  const [pageStateInternal, updatePageStateInternal] = usePageUrlState(
     ML_PAGES.TRAINED_MODELS_MANAGE,
     getDefaultModelsListState()
   );
+
+  const [pageState, updatePageState] =
+    pageStateExternal && updatePageStateExternal
+      ? [pageStateExternal, updatePageStateExternal]
+      : [pageStateInternal, updatePageStateInternal];
 
   const refresh = useRefresh();
 
   const searchQueryText = pageState.queryText ?? '';
 
-  const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
+  const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
+  const canStartStopTrainedModels = capabilities.ml.canStartStopTrainedModels as boolean;
 
   const trainedModelsApiService = useTrainedModelsApiService();
+  const savedObjectsApiService = useSavedObjectsApiService();
 
-  const { displayErrorToast, displayDangerToast, displaySuccessToast } =
-    useToastNotificationService();
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-  const [modelsToDelete, setModelsToDelete] = useState<ModelItemFull[]>([]);
+  const [modelIdsToDelete, setModelIdsToDelete] = useState<string[]>([]);
+  const [modelSpaces, setModelSpaces] = useState<{ [modelId: string]: string[] }>({});
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const navigateToPath = useNavigateToPath();
@@ -126,11 +147,16 @@ export const ModelsList: FC = () => {
    * Fetches trained models.
    */
   const fetchModelsData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
         size: 1000,
       });
+      if (isManagementTable) {
+        const { trainedModels } = await savedObjectsApiService.trainedModelsSpaces();
+        setModelSpaces(trainedModels);
+      }
 
       const newItems: ModelItem[] = [];
       const expandedItemsToRefresh = [];
@@ -157,7 +183,9 @@ export const ModelsList: FC = () => {
       }
 
       // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchModelsStats(newItems.filter((v) => v.model_type.includes('pytorch')));
+      await fetchModelsStats(
+        newItems.filter((v) => v.model_type.includes(TRAINED_MODEL_TYPE.PYTORCH))
+      );
 
       setItems(newItems);
 
@@ -180,17 +208,11 @@ export const ModelsList: FC = () => {
       );
     }
     setIsLoading(false);
-    refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
   }, [itemIdToExpandedRowMap]);
-
-  // Subscribe to the refresh observable to trigger reloading the model list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: fetchModelsData,
-  });
 
   useEffect(
     function updateOnTimerRefresh() {
+      if (!refresh) return;
       fetchModelsData();
     },
     [refresh]
@@ -236,6 +258,7 @@ export const ModelsList: FC = () => {
           defaultMessage: 'Fetch model stats failed',
         })
       );
+      return false;
     }
   }, []);
 
@@ -256,57 +279,6 @@ export const ModelsList: FC = () => {
       name: v,
     }));
   }, [items]);
-
-  async function prepareModelsForDeletion(models: ModelItem[]) {
-    // Fetch model stats to check associated pipelines
-    if (await fetchModelsStats(models)) {
-      setModelsToDelete(models as ModelItemFull[]);
-    } else {
-      displayDangerToast(
-        i18n.translate('xpack.ml.trainedModels.modelsList.unableToDeleteModelsErrorMessage', {
-          defaultMessage: 'Unable to delete models',
-        })
-      );
-    }
-  }
-
-  /**
-   * Deletes the models marked for deletion.
-   */
-  async function deleteModels() {
-    const modelsToDeleteIds = modelsToDelete.map((model) => model.model_id);
-
-    try {
-      await Promise.all(
-        modelsToDeleteIds.map((modelId) => trainedModelsApiService.deleteTrainedModel(modelId))
-      );
-      setItems(
-        items.filter(
-          (model) => !modelsToDelete.some((toDelete) => toDelete.model_id === model.model_id)
-        )
-      );
-      displaySuccessToast(
-        i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
-          defaultMessage:
-            '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
-          values: {
-            modelsCount: modelsToDeleteIds.length,
-            modelsToDeleteIds: modelsToDeleteIds.join(', '),
-          },
-        })
-      );
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
-          defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
-          values: {
-            modelsCount: modelsToDeleteIds.length,
-          },
-        })
-      );
-    }
-  }
 
   /**
    * Table actions
@@ -366,125 +338,141 @@ export const ModelsList: FC = () => {
         await navigateToPath(path, false);
       },
     },
-    {
-      name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
-        defaultMessage: 'Start deployment',
-      }),
-      description: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
-        defaultMessage: 'Start deployment',
-      }),
-      icon: 'play',
-      type: 'icon',
-      isPrimary: true,
-      enabled: (item) => {
-        const { state } = item.stats?.deployment_stats ?? {};
-        return (
-          !isLoading && state !== DEPLOYMENT_STATE.STARTED && state !== DEPLOYMENT_STATE.STARTING
-        );
-      },
-      available: (item) => item.model_type === 'pytorch',
-      onClick: async (item) => {
-        try {
-          setIsLoading(true);
-          await trainedModelsApiService.startModelAllocation(item.model_id);
-          displaySuccessToast(
-            i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
-              defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
-              values: {
-                modelId: item.model_id,
-              },
-            })
-          );
-          await fetchModelsData();
-        } catch (e) {
-          displayErrorToast(
-            e,
-            i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
-              defaultMessage: 'Failed to start "{modelId}"',
-              values: {
-                modelId: item.model_id,
-              },
-            })
-          );
-          setIsLoading(false);
-        }
-      },
-    },
-    {
-      name: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
-        defaultMessage: 'Stop deployment',
-      }),
-      description: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
-        defaultMessage: 'Stop deployment',
-      }),
-      icon: 'stop',
-      type: 'icon',
-      isPrimary: true,
-      available: (item) => item.model_type === 'pytorch',
-      enabled: (item) =>
-        !isLoading &&
-        isPopulatedObject(item.stats?.deployment_stats) &&
-        item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
-      onClick: async (item) => {
-        const requireForceStop = isPopulatedObject(item.pipelines);
-
-        if (requireForceStop) {
-          const hasUserApproved = await getUserConfirmation(item);
-          if (!hasUserApproved) return;
-        }
-
-        try {
-          setIsLoading(true);
-          await trainedModelsApiService.stopModelAllocation(item.model_id, {
-            force: requireForceStop,
-          });
-          displaySuccessToast(
-            i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
-              defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
-              values: {
-                modelId: item.model_id,
-              },
-            })
-          );
-          // Need to fetch model state updates
-          await fetchModelsData();
-        } catch (e) {
-          displayErrorToast(
-            e,
-            i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
-              defaultMessage: 'Failed to stop "{modelId}"',
-              values: {
-                modelId: item.model_id,
-              },
-            })
-          );
-          setIsLoading(false);
-        }
-      },
-    },
-    {
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-        defaultMessage: 'Delete model',
-      }),
-      description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-        defaultMessage: 'Delete model',
-      }),
-      'data-test-subj': 'mlModelsTableRowDeleteAction',
-      icon: 'trash',
-      type: 'icon',
-      color: 'danger',
-      isPrimary: false,
-      onClick: async (model) => {
-        await prepareModelsForDeletion([model]);
-      },
-      available: (item) => canDeleteDataFrameAnalytics && !isBuiltInModel(item),
-      enabled: (item) => {
-        // TODO check for permissions to delete ingest pipelines.
-        // ATM undefined means pipelines fetch failed server-side.
-        return !isPopulatedObject(item.pipelines);
-      },
-    },
   ];
+  if (isManagementTable === false) {
+    actions.push(
+      ...([
+        {
+          name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
+            defaultMessage: 'Start deployment',
+          }),
+          description: i18n.translate(
+            'xpack.ml.inference.modelsList.startModelDeploymentActionLabel',
+            {
+              defaultMessage: 'Start deployment',
+            }
+          ),
+          icon: 'play',
+          type: 'icon',
+          isPrimary: true,
+          enabled: (item) => {
+            const { state } = item.stats?.deployment_stats ?? {};
+            return (
+              canStartStopTrainedModels &&
+              !isLoading &&
+              state !== DEPLOYMENT_STATE.STARTED &&
+              state !== DEPLOYMENT_STATE.STARTING
+            );
+          },
+          available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
+          onClick: async (item) => {
+            try {
+              setIsLoading(true);
+              await trainedModelsApiService.startModelAllocation(item.model_id);
+              displaySuccessToast(
+                i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
+                  defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
+                  values: {
+                    modelId: item.model_id,
+                  },
+                })
+              );
+              await fetchModelsData();
+            } catch (e) {
+              displayErrorToast(
+                e,
+                i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
+                  defaultMessage: 'Failed to start "{modelId}"',
+                  values: {
+                    modelId: item.model_id,
+                  },
+                })
+              );
+              setIsLoading(false);
+            }
+          },
+        },
+        {
+          name: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
+            defaultMessage: 'Stop deployment',
+          }),
+          description: i18n.translate(
+            'xpack.ml.inference.modelsList.stopModelDeploymentActionLabel',
+            {
+              defaultMessage: 'Stop deployment',
+            }
+          ),
+          icon: 'stop',
+          type: 'icon',
+          isPrimary: true,
+          available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
+          enabled: (item) =>
+            canStartStopTrainedModels &&
+            !isLoading &&
+            isPopulatedObject(item.stats?.deployment_stats) &&
+            item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
+          onClick: async (item) => {
+            const requireForceStop = isPopulatedObject(item.pipelines);
+
+            if (requireForceStop) {
+              const hasUserApproved = await getUserConfirmation(item);
+              if (!hasUserApproved) return;
+            }
+
+            try {
+              setIsLoading(true);
+              await trainedModelsApiService.stopModelAllocation(item.model_id, {
+                force: requireForceStop,
+              });
+              displaySuccessToast(
+                i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
+                  defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
+                  values: {
+                    modelId: item.model_id,
+                  },
+                })
+              );
+              // Need to fetch model state updates
+              await fetchModelsData();
+            } catch (e) {
+              displayErrorToast(
+                e,
+                i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
+                  defaultMessage: 'Failed to stop "{modelId}"',
+                  values: {
+                    modelId: item.model_id,
+                  },
+                })
+              );
+              setIsLoading(false);
+            }
+          },
+        },
+        {
+          name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+            defaultMessage: 'Delete model',
+          }),
+          description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+            defaultMessage: 'Delete model',
+          }),
+          'data-test-subj': 'mlModelsTableRowDeleteAction',
+          icon: 'trash',
+          type: 'icon',
+          color: 'danger',
+          isPrimary: false,
+          onClick: (model) => {
+            setModelIdsToDelete([model.model_id]);
+          },
+          available: (item) => canDeleteTrainedModels && !isBuiltInModel(item),
+          enabled: (item) => {
+            // TODO check for permissions to delete ingest pipelines.
+            // ATM undefined means pipelines fetch failed server-side.
+            return !isPopulatedObject(item.pipelines);
+          },
+        },
+      ] as Array<Action<ModelItem>>)
+    );
+  }
 
   const toggleDetails = async (item: ModelItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -591,6 +579,29 @@ export const ModelsList: FC = () => {
     },
   ];
 
+  if (isManagementTable) {
+    columns.splice(columns.length - 1, 0, {
+      field: ModelsTableToConfigMapping.id,
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.spacesLabel', {
+        defaultMessage: 'Spaces',
+      }),
+      render: (id: string) => {
+        const spaces = modelSpaces[id];
+        return (
+          <JobSpacesList
+            spacesApi={spacesApi}
+            spaceIds={spaces ?? []}
+            id={id}
+            jobType="trained-model"
+            refresh={fetchModelsData}
+          />
+        );
+      },
+      sortable: false,
+      'data-test-subj': 'mlModelsTableColumnSpacesLabel',
+    });
+  }
+
   const filters: SearchFilterConfig[] =
     inferenceTypesOptions && inferenceTypesOptions.length > 0
       ? [
@@ -621,7 +632,13 @@ export const ModelsList: FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton color="danger" onClick={prepareModelsForDeletion.bind(null, selectedModels)}>
+          <EuiButton
+            color="danger"
+            onClick={setModelIdsToDelete.bind(
+              null,
+              selectedModels.map((m) => m.model_id)
+            )}
+          >
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
               defaultMessage="Delete"
@@ -632,7 +649,7 @@ export const ModelsList: FC = () => {
     </EuiFlexItem>
   );
 
-  const isSelectionAllowed = canDeleteDataFrameAnalytics;
+  const isSelectionAllowed = canDeleteTrainedModels;
 
   const selection: EuiTableSelectionType<ModelItem> | undefined = isSelectionAllowed
     ? {
@@ -695,12 +712,27 @@ export const ModelsList: FC = () => {
 
   return (
     <>
-      <EuiSpacer size="m" />
+      {isManagementTable ? null : (
+        <>
+          <SavedObjectsWarning
+            jobType="trained-model"
+            onCloseFlyout={fetchModelsData}
+            forceRefresh={isLoading}
+          />
+        </>
+      )}
       <EuiFlexGroup justifyContent="spaceBetween">
         {modelsStats && (
-          <EuiFlexItem grow={false}>
-            <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+            </EuiFlexItem>
+            {isManagementTable ? (
+              <EuiFlexItem grow={false}>
+                <RefreshModelsListButton refresh={fetchModelsData} isLoading={isLoading} />
+              </EuiFlexItem>
+            ) : null}
+          </>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -716,7 +748,7 @@ export const ModelsList: FC = () => {
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
           search={search}
-          selection={selection}
+          selection={isManagementTable ? undefined : selection}
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
           })}
@@ -726,17 +758,35 @@ export const ModelsList: FC = () => {
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
         />
       </div>
-      {modelsToDelete.length > 0 && (
+      {modelIdsToDelete.length > 0 && (
         <DeleteModelsModal
-          onClose={async (deletionApproved) => {
-            if (deletionApproved) {
-              await deleteModels();
+          onClose={(refreshList) => {
+            setModelIdsToDelete([]);
+            if (refreshList) {
+              fetchModelsData();
             }
-            setModelsToDelete([]);
           }}
-          models={modelsToDelete}
+          modelIds={modelIdsToDelete}
         />
       )}
     </>
+  );
+};
+
+export const RefreshModelsListButton: FC<{ refresh: () => Promise<void>; isLoading: boolean }> = ({
+  refresh,
+  isLoading,
+}) => {
+  return (
+    <EuiButtonEmpty
+      data-test-subj={`mlTrainedModelsRefreshListButton${isLoading ? ' loading' : ' loaded'}`}
+      onClick={refresh}
+      isLoading={isLoading}
+    >
+      <FormattedMessage
+        id="xpack.ml.trainedModels.modelsList.refreshManagementList"
+        defaultMessage="Refresh"
+      />
+    </EuiButtonEmpty>
   );
 };

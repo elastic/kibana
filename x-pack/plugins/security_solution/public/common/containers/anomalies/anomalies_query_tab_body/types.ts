@@ -12,9 +12,10 @@ import { GlobalTimeArgs } from '../../use_global_time';
 import { HostsType } from '../../../../hosts/store/model';
 import { NetworkType } from '../../../../network/store//model';
 import { FlowTarget } from '../../../../../common/search_strategy';
+import { UsersType } from '../../../../users/store/model';
 
 interface QueryTabBodyProps {
-  type: HostsType | NetworkType;
+  type: HostsType | NetworkType | UsersType;
   filterQuery?: string | ESTermQuery;
 }
 
@@ -34,4 +35,5 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   hideHistogramIfEmpty?: boolean;
   ip?: string;
   hostName?: string;
+  userName?: string;
 };

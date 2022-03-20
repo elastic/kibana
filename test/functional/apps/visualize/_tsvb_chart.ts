@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async () => {
       await security.testUser.setRoles(
         ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],
-        false
+        { skipBrowserRefresh: true }
       );
       await visualize.navigateToNewVisualization();
       await visualize.clickVisualBuilder();
@@ -52,8 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickDataTab('metric');
       });
 
-      it('should not have inspector enabled', async () => {
-        await inspector.expectIsNotEnabled();
+      it('should have inspector enabled', async () => {
+        await inspector.expectIsEnabled();
       });
 
       it('should show correct data', async () => {

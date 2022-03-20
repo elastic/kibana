@@ -44,14 +44,10 @@ export const getPrepackagedRulesStatusRoute = (
       },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = context.alerting.getRulesClient();
       const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
-
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
 
       try {
         const latestPrepackagedRules = await getLatestPrepackagedRules(

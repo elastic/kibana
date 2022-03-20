@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
 import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import type { Query } from 'src/plugins/data/public';
 import {
   findMathNodes,
   findVariables,
@@ -83,6 +84,10 @@ interface ValidationErrors {
   wrongReturnedType: {
     message: string;
     type: { text: string };
+  };
+  filtersTypeConflict: {
+    message: string;
+    type: { operation: string; outerType: string; innerType: string };
   };
 }
 
@@ -323,6 +328,13 @@ function getMessageFromId<K extends ErrorTypes>({
         values: { text: out.text },
       });
       break;
+    case 'filtersTypeConflict':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationFiltersTypeConflicts', {
+        defaultMessage:
+          'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation.',
+        values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
+      });
+      break;
     // case 'mathRequiresFunction':
     //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
     //     defaultMessage; 'The function {name} requires an Elasticsearch function',
@@ -372,11 +384,12 @@ export function runASTValidation(
   ast: TinymathAST,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  operations: Record<string, GenericOperationDefinition>
+  operations: Record<string, GenericOperationDefinition>,
+  currentColumn: GenericIndexPatternColumn
 ) {
   return [
     ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations),
-    ...runFullASTValidation(ast, layer, indexPattern, operations),
+    ...runFullASTValidation(ast, layer, indexPattern, operations, currentColumn),
   ];
 }
 
@@ -483,6 +496,38 @@ function checkSingleQuery(namedArguments: TinymathNamedArgument[] | undefined) {
     : undefined;
 }
 
+function validateFiltersArguments(
+  node: TinymathFunction,
+  nodeOperation:
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
+  namedArguments: TinymathNamedArgument[] | undefined,
+  globalFilters?: Query
+) {
+  const errors = [];
+  const { conflicts, innerType, outerType } = hasFiltersConflicts(
+    nodeOperation,
+    namedArguments,
+    globalFilters
+  );
+  if (conflicts) {
+    if (innerType && outerType) {
+      errors.push(
+        getMessageFromId({
+          messageId: 'filtersTypeConflict',
+          values: {
+            operation: node.name,
+            innerType,
+            outerType,
+          },
+          locations: node.location ? [node.location] : [],
+        })
+      );
+    }
+  }
+  return errors;
+}
+
 function validateNameArguments(
   node: TinymathFunction,
   nodeOperation:
@@ -552,13 +597,15 @@ function runFullASTValidation(
   ast: TinymathAST,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  operations: Record<string, GenericOperationDefinition>
+  operations: Record<string, GenericOperationDefinition>,
+  currentColumn?: GenericIndexPatternColumn
 ): ErrorWrapper[] {
   const missingVariables = findVariables(ast).filter(
     // filter empty string as well?
     ({ value }) => !indexPattern.getFieldByName(value) && !layer.columns[value]
   );
   const missingVariablesSet = new Set(missingVariables.map(({ value }) => value));
+  const globalFilter = currentColumn?.filter;
 
   function validateNode(node: TinymathAST): ErrorWrapper[] {
     if (!isObject(node) || node.type !== 'function') {
@@ -664,9 +711,14 @@ function runFullASTValidation(
             namedArguments,
             indexPattern
           );
-          if (argumentsErrors.length) {
-            errors.push(...argumentsErrors);
-          }
+
+          const filtersErrors = validateFiltersArguments(
+            node,
+            nodeOperation,
+            namedArguments,
+            globalFilter
+          );
+          errors.push(...argumentsErrors, ...filtersErrors);
         }
         return errors;
       }
@@ -729,18 +781,19 @@ function runFullASTValidation(
             firstArg,
             returnedType: undefined,
           });
-          if (fieldErrors.length) {
-            errors.push(...fieldErrors);
-          }
           const argumentsErrors = validateNameArguments(
             node,
             nodeOperation,
             namedArguments,
             indexPattern
           );
-          if (argumentsErrors.length) {
-            errors.push(...argumentsErrors);
-          }
+          const filtersErrors = validateFiltersArguments(
+            node,
+            nodeOperation,
+            namedArguments,
+            globalFilter
+          );
+          errors.push(...fieldErrors, ...argumentsErrors, ...filtersErrors);
         }
       }
       return errors.concat(validateNode(functions[0]));
@@ -822,6 +875,26 @@ function getDuplicateParams(params: TinymathNamedArgument[] = []) {
     return uniqueNames.filter((name) => uniqueArgs[name] > 1);
   }
   return [];
+}
+
+export function hasFiltersConflicts(
+  operation:
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
+  params: TinymathNamedArgument[] = [],
+  globalFilter?: Query
+) {
+  const paramsObj = getOperationParams(operation, params);
+  if (!operation.filterable || !globalFilter || !(paramsObj.kql || paramsObj.lucene)) {
+    return { conflicts: false };
+  }
+  const language = globalFilter.language === 'kuery' ? 'kql' : globalFilter.language;
+  const conflicts = !(language in paramsObj);
+  return {
+    conflicts,
+    innerType: paramsObj.lucene ? 'lucene' : 'kql',
+    outerType: language,
+  };
 }
 
 export function validateParams(

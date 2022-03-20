@@ -8,20 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { stringify } from 'querystring';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_SEVERITY,
-} from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import {
-  AlertType,
-  formatErrorCountReason,
-  formatTransactionDurationAnomalyReason,
-  formatTransactionDurationReason,
-  formatTransactionErrorRateReason,
-} from '../../../common/alert_types';
+import { AlertType } from '../../../common/alert_types';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
@@ -49,11 +39,7 @@ export function registerApmAlerts(
     }),
     format: ({ fields }) => {
       return {
-        reason: formatErrorCountReason({
-          threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
-          measured: fields[ALERT_EVALUATION_VALUE]!,
-          serviceName: String(fields[SERVICE_NAME][0]),
-        }),
+        reason: fields[ALERT_REASON]!,
         link: format({
           pathname: `/app/apm/services/${String(
             fields[SERVICE_NAME][0]
@@ -98,12 +84,8 @@ export function registerApmAlerts(
       }
     ),
     format: ({ fields, formatters: { asDuration } }) => ({
-      reason: formatTransactionDurationReason({
-        threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
-        measured: fields[ALERT_EVALUATION_VALUE]!,
-        serviceName: String(fields[SERVICE_NAME][0]),
-        asDuration,
-      }),
+      reason: fields[ALERT_REASON]!,
+
       link: format({
         pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
         query: {
@@ -149,12 +131,7 @@ export function registerApmAlerts(
       }
     ),
     format: ({ fields, formatters: { asPercent } }) => ({
-      reason: formatTransactionErrorRateReason({
-        threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
-        measured: fields[ALERT_EVALUATION_VALUE]!,
-        serviceName: String(fields[SERVICE_NAME][0]),
-        asPercent,
-      }),
+      reason: fields[ALERT_REASON]!,
       link: format({
         pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0]!)}`,
         query: {
@@ -199,11 +176,7 @@ export function registerApmAlerts(
       }
     ),
     format: ({ fields }) => ({
-      reason: formatTransactionDurationAnomalyReason({
-        serviceName: String(fields[SERVICE_NAME][0]),
-        severityLevel: String(fields[ALERT_SEVERITY]),
-        measured: Number(fields[ALERT_EVALUATION_VALUE]),
-      }),
+      reason: fields[ALERT_REASON]!,
       link: format({
         pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0])}`,
         query: {

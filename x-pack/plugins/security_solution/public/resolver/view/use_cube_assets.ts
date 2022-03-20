@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { ButtonColor } from '@elastic/eui';
 import { useMemo } from 'react';
 import { ResolverProcessType, NodeDataStatus } from '../types';

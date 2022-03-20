@@ -92,16 +92,6 @@ export const cleanKibana = () => {
               type: 'alert',
             },
           },
-          {
-            match: {
-              'alert.alertTypeId': 'siem.signals',
-            },
-          },
-          {
-            match: {
-              'alert.consumer': 'siem',
-            },
-          },
         ],
       },
     },
@@ -127,7 +117,7 @@ export const cleanKibana = () => {
     'POST',
     `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
     {
       query: {
         match_all: {},

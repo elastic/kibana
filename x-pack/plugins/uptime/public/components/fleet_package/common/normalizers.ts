@@ -8,6 +8,7 @@
 import { CommonFields, ConfigKey } from '../types';
 import { NewPackagePolicyInput } from '../../../../../fleet/common';
 import { defaultValues as commonDefaultValues } from './default_values';
+import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
 
 // TO DO: create a standard input format that all fields resolve to
 export type Normalizer = (fields: NewPackagePolicyInput['vars']) => unknown;
@@ -79,4 +80,7 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKey.APM_SERVICE_NAME),
   [ConfigKey.TAGS]: getCommonjsonToJavascriptNormalizer(ConfigKey.TAGS),
   [ConfigKey.TIMEOUT]: getCommonCronToSecondsNormalizer(ConfigKey.TIMEOUT),
+  [ConfigKey.NAMESPACE]: (fields) =>
+    fields?.[ConfigKey.NAMESPACE]?.value ?? DEFAULT_NAMESPACE_STRING,
+  [ConfigKey.REVISION]: getCommonNormalizer(ConfigKey.REVISION),
 };

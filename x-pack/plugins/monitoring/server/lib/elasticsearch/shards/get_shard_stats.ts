@@ -20,6 +20,8 @@ import { getShardAggs } from './get_shard_stat_aggs';
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
 import { LegacyRequest } from '../../../types';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../common/types/es';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(
   resp: ElasticsearchResponse,
@@ -55,13 +57,20 @@ export function handleResponse(
 
 export function getShardStats(
   req: LegacyRequest,
-  esIndexPattern: string,
   cluster: ElasticsearchModifiedSource,
   { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {}
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
+  const dataset = 'shard'; // data_stream.dataset
+  const type = 'shards'; // legacy
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
 
-  const config = req.server.config();
+  const config = req.server.config;
   const metric = ElasticsearchMetric.getMetricFields();
   const filters = [];
   if (cluster.cluster_state?.state_uuid) {
@@ -95,13 +104,15 @@ export function getShardStats(
     });
   }
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        types: ['shard', 'shards'],
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,
@@ -111,7 +122,6 @@ export function getShardStats(
       },
     },
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((resp) => {
     return handleResponse(resp, includeNodes, includeIndices, cluster);

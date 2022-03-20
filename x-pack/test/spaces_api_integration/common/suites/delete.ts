@@ -54,37 +54,37 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     const buckets = response.aggregations?.count.buckets;
 
     // The test fixture contains six legacy URL aliases:
-    // (1) two for "space_1", (2) two for "space_2", and (3) two for "other_space", which is a non-existent space.
+    // (1) two for "default", (2) two for "space_2", and (3) two for "other_space", which is a non-existent space.
     // Each test deletes "space_2", so the agg buckets should reflect that aliases (1) and (3) still exist afterwards.
 
     // Space 2 deleted, all others should exist
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 7,
-        countByType: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            { key: 'visualization', doc_count: 3 },
-            { key: 'space', doc_count: 2 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
-            { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', doc_count: 1 },
-            // legacy-url-alias objects cannot exist for the default space
-          ],
-        },
-      },
-      {
-        doc_count: 7,
-        key: 'space_1',
+        doc_count: 9,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
             { key: 'visualization', doc_count: 3 },
             { key: 'legacy-url-alias', doc_count: 2 }, // aliases (1)
+            { key: 'space', doc_count: 2 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
             { key: 'dashboard', doc_count: 1 },
             { key: 'index-pattern', doc_count: 1 },
+          ],
+        },
+      },
+      {
+        doc_count: 5,
+        key: 'space_1',
+        countByType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            { key: 'visualization', doc_count: 3 },
+            { key: 'dashboard', doc_count: 1 },
+            { key: 'index-pattern', doc_count: 1 },
+            // no legacy url alias objects exist in space_1
           ],
         },
       },
@@ -101,7 +101,7 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
 
     expect(buckets).to.eql(expectedBuckets);
 
-    // There were 15 multi-namespace objects.
+    // There were 22 multi-namespace objects.
     // Since Space 2 was deleted, any multi-namespace objects that existed in that space
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
     const multiNamespaceResponse = await es.search<Record<string, any>>({
@@ -110,8 +110,8 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
       body: { query: { terms: { type: ['sharedtype'] } } },
     });
     const docs = multiNamespaceResponse.hits.hits;
-    // Just 14 results, since spaces_2_only, conflict_1_space_2 and conflict_2_space_2 got deleted.
-    expect(docs).length(14);
+    // Just 17 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
+    expect(docs).length(17);
     docs.forEach((doc) => () => {
       const containsSpace2 = doc?._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);

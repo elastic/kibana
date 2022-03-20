@@ -18,6 +18,7 @@ import {
   LayoutDirection,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
+import { RangeFilterParams } from '@kbn/es-query';
 
 import { useKibana } from '../../../../kibana_react/public';
 import { useActiveCursor } from '../../../../charts/public';
@@ -38,7 +39,6 @@ import { getCharts } from '../helpers/plugin_services';
 import type { Sheet } from '../helpers/timelion_request_handler';
 import type { IInterpreterRenderHandlers } from '../../../../expressions';
 import type { TimelionVisDependencies } from '../plugin';
-import type { RangeFilterParams } from '../../../../data/public';
 import type { Series } from '../helpers/timelion_request_handler';
 
 import './timelion_vis.scss';
@@ -57,6 +57,7 @@ interface TimelionVisComponentProps {
   seriesList: Sheet;
   onBrushEvent: (rangeFilterParams: RangeFilterParams) => void;
   renderComplete: IInterpreterRenderHandlers['done'];
+  ariaLabel?: string;
 }
 
 const DefaultYAxis = () => (
@@ -98,6 +99,7 @@ export const TimelionVisComponent = ({
   seriesList,
   renderComplete,
   onBrushEvent,
+  ariaLabel,
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const chartRef = useRef<Chart>(null);
@@ -206,6 +208,8 @@ export const TimelionVisComponent = ({
             type: TooltipType.VerticalCursor,
           }}
           externalPointerEvents={{ tooltip: { visible: false } }}
+          ariaLabel={ariaLabel}
+          ariaUseDefaultSummary={!ariaLabel}
         />
 
         <Axis

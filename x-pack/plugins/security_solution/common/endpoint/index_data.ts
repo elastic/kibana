@@ -57,7 +57,6 @@ export async function indexHostsAndAlerts(
   alertIndex: string,
   alertsPerHost: number,
   fleet: boolean,
-  logsEndpoint: boolean,
   options: TreeOptions = {}
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
@@ -103,7 +102,6 @@ export async function indexHostsAndAlerts(
       metadataIndex,
       policyResponseIndex,
       enrollFleet: fleet,
-      addEndpointActions: logsEndpoint,
       generator,
     });
 

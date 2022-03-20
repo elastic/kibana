@@ -311,25 +311,26 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       /* From 0.6.0 we don't provide an input template, so we have to set it here */
       if (satisfies(newPolicy?.package?.version, '>=0.6.0')) {
         const updatedPolicy = produce(newPolicy, (draft) => {
-          if (!draft.inputs.length) {
+          if (editMode && policy?.inputs.length) {
+            set(draft, 'inputs', policy.inputs);
+          } else {
             set(draft, 'inputs[0]', {
               type: 'osquery',
               enabled: true,
               streams: [],
               policy_template: 'osquery_manager',
             });
-          } else {
-            if (!draft.inputs[0].type) {
-              set(draft, 'inputs[0].type', 'osquery');
-            }
-            if (!draft.inputs[0].policy_template) {
-              set(draft, 'inputs[0].policy_template', 'osquery_manager');
-            }
-            if (!draft.inputs[0].enabled) {
-              set(draft, 'inputs[0].enabled', true);
-            }
           }
+          return draft;
         });
+
+        if (updatedPolicy?.inputs[0].config) {
+          setFieldValue(
+            'config',
+            JSON.stringify(updatedPolicy?.inputs[0].config.osquery.value, null, 2)
+          );
+        }
+
         onChange({
           isValid: true,
           updatedPolicy,

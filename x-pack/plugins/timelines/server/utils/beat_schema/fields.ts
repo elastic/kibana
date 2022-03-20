@@ -7,7 +7,6 @@
 
 import { BeatFields } from '../../../common/search_strategy/index_fields';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 export const fieldsBeat: BeatFields = {
   _id: {
     category: 'base',
@@ -46,13 +45,22 @@ export const fieldsBeat: BeatFields = {
       'For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.',
     example: 'Hello World',
     name: 'message',
-    type: 'text',
+    type: 'match_only_text',
   },
   tags: {
     category: 'base',
     description: 'List of keywords used to tag each event.',
     example: '["production", "env2"]',
     name: 'tags',
+    type: 'keyword',
+  },
+  'agent.build.original': {
+    category: 'agent',
+    description:
+      'Extended build information for the agent. This field is intended to contain any build information that a data source may provide, no specific formatting is required.',
+    example:
+      'metricbeat version 7.6.0 (amd64), libbeat 7.6.0 [6a23e8f8f30f5001ba344e4e54d8d9cb82cb107c built 2020-02-05 23:10:10 +0000 UTC]',
+    name: 'agent.build.original',
     type: 'keyword',
   },
   'agent.ephemeral_id': {
@@ -82,7 +90,7 @@ export const fieldsBeat: BeatFields = {
   'agent.type': {
     category: 'agent',
     description:
-      'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+      'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
     example: 'filebeat',
     name: 'agent.type',
     type: 'keyword',
@@ -152,6 +160,13 @@ export const fieldsBeat: BeatFields = {
     name: 'client.geo.city_name',
     type: 'keyword',
   },
+  'client.geo.continent_code': {
+    category: 'client',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'client.geo.continent_code',
+    type: 'keyword',
+  },
   'client.geo.continent_name': {
     category: 'client',
     description: 'Name of the continent.',
@@ -188,6 +203,14 @@ export const fieldsBeat: BeatFields = {
     name: 'client.geo.name',
     type: 'keyword',
   },
+  'client.geo.postal_code': {
+    category: 'client',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'client.geo.postal_code',
+    type: 'keyword',
+  },
   'client.geo.region_iso_code': {
     category: 'client',
     description: 'Region ISO code.',
@@ -202,15 +225,24 @@ export const fieldsBeat: BeatFields = {
     name: 'client.geo.region_name',
     type: 'keyword',
   },
+  'client.geo.timezone': {
+    category: 'client',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'client.geo.timezone',
+    type: 'keyword',
+  },
   'client.ip': {
     category: 'client',
-    description: 'IP address of the client. Can be one or multiple IPv4 or IPv6 addresses.',
+    description: 'IP address of the client (IPv4 or IPv6).',
     name: 'client.ip',
     type: 'ip',
   },
   'client.mac': {
     category: 'client',
-    description: 'MAC address of the client.',
+    description:
+      'MAC address of the client. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '00-00-5E-00-53-23',
     name: 'client.mac',
     type: 'keyword',
   },
@@ -246,15 +278,23 @@ export const fieldsBeat: BeatFields = {
   'client.registered_domain': {
     category: 'client',
     description:
-      'The highest registered client domain, stripped of the subdomain. For example, the registered domain for "foo.google.com" is "google.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
-    example: 'google.com',
+      'The highest registered client domain, stripped of the subdomain. For example, the registered domain for "foo.example.com" is "example.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
+    example: 'example.com',
     name: 'client.registered_domain',
+    type: 'keyword',
+  },
+  'client.subdomain': {
+    category: 'client',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain. For example the subdomain portion of "www.east.mydomain.co.uk" is "east". If the domain has multiple levels of subdomain, such as "sub2.sub1.example.com", the subdomain field should contain "sub2.sub1", with no trailing period.',
+    example: 'east',
+    name: 'client.subdomain',
     type: 'keyword',
   },
   'client.top_level_domain': {
     category: 'client',
     description:
-      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for google.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
     example: 'co.uk',
     name: 'client.top_level_domain',
     type: 'keyword',
@@ -307,15 +347,23 @@ export const fieldsBeat: BeatFields = {
   },
   'client.user.id': {
     category: 'client',
-    description: 'Unique identifiers of the user.',
+    description: 'Unique identifier of the user.',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
     name: 'client.user.id',
     type: 'keyword',
   },
   'client.user.name': {
     category: 'client',
     description: 'Short name or login of the user.',
-    example: 'albert',
+    example: 'a.einstein',
     name: 'client.user.name',
+    type: 'keyword',
+  },
+  'client.user.roles': {
+    category: 'client',
+    description: 'Array of user roles at the time of the event.',
+    example: '["kibana_admin", "reporting_user"]',
+    name: 'client.user.roles',
     type: 'keyword',
   },
   'cloud.account.id': {
@@ -326,9 +374,17 @@ export const fieldsBeat: BeatFields = {
     name: 'cloud.account.id',
     type: 'keyword',
   },
+  'cloud.account.name': {
+    category: 'cloud',
+    description:
+      'The cloud account name or alias used to identify different entities in a multi-tenant environment. Examples: AWS account name, Google Cloud ORG display name.',
+    example: 'elastic-dev',
+    name: 'cloud.account.name',
+    type: 'keyword',
+  },
   'cloud.availability_zone': {
     category: 'cloud',
-    description: 'Availability zone in which this host is running.',
+    description: 'Availability zone in which this host, resource, or service is located.',
     example: 'us-east-1c',
     name: 'cloud.availability_zone',
     type: 'keyword',
@@ -353,6 +409,101 @@ export const fieldsBeat: BeatFields = {
     name: 'cloud.machine.type',
     type: 'keyword',
   },
+  'cloud.origin.account.id': {
+    category: 'cloud',
+    description:
+      'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
+    example: 666777888999,
+    name: 'cloud.origin.account.id',
+    type: 'keyword',
+  },
+  'cloud.origin.account.name': {
+    category: 'cloud',
+    description:
+      'The cloud account name or alias used to identify different entities in a multi-tenant environment. Examples: AWS account name, Google Cloud ORG display name.',
+    example: 'elastic-dev',
+    name: 'cloud.origin.account.name',
+    type: 'keyword',
+  },
+  'cloud.origin.availability_zone': {
+    category: 'cloud',
+    description: 'Availability zone in which this host, resource, or service is located.',
+    example: 'us-east-1c',
+    name: 'cloud.origin.availability_zone',
+    type: 'keyword',
+  },
+  'cloud.origin.instance.id': {
+    category: 'cloud',
+    description: 'Instance ID of the host machine.',
+    example: 'i-1234567890abcdef0',
+    name: 'cloud.origin.instance.id',
+    type: 'keyword',
+  },
+  'cloud.origin.instance.name': {
+    category: 'cloud',
+    description: 'Instance name of the host machine.',
+    name: 'cloud.origin.instance.name',
+    type: 'keyword',
+  },
+  'cloud.origin.machine.type': {
+    category: 'cloud',
+    description: 'Machine type of the host machine.',
+    example: 't2.medium',
+    name: 'cloud.origin.machine.type',
+    type: 'keyword',
+  },
+  'cloud.origin.project.id': {
+    category: 'cloud',
+    description:
+      'The cloud project identifier. Examples: Google Cloud Project id, Azure Project id.',
+    example: 'my-project',
+    name: 'cloud.origin.project.id',
+    type: 'keyword',
+  },
+  'cloud.origin.project.name': {
+    category: 'cloud',
+    description: 'The cloud project name. Examples: Google Cloud Project name, Azure Project name.',
+    example: 'my project',
+    name: 'cloud.origin.project.name',
+    type: 'keyword',
+  },
+  'cloud.origin.provider': {
+    category: 'cloud',
+    description: 'Name of the cloud provider. Example values are aws, azure, gcp, or digitalocean.',
+    example: 'aws',
+    name: 'cloud.origin.provider',
+    type: 'keyword',
+  },
+  'cloud.origin.region': {
+    category: 'cloud',
+    description: 'Region in which this host, resource, or service is located.',
+    example: 'us-east-1',
+    name: 'cloud.origin.region',
+    type: 'keyword',
+  },
+  'cloud.origin.service.name': {
+    category: 'cloud',
+    description:
+      'The cloud service name is intended to distinguish services running on different platforms within a provider, eg AWS EC2 vs Lambda, GCP GCE vs App Engine, Azure VM vs App Server. Examples: app engine, app service, cloud run, fargate, lambda.',
+    example: 'lambda',
+    name: 'cloud.origin.service.name',
+    type: 'keyword',
+  },
+  'cloud.project.id': {
+    category: 'cloud',
+    description:
+      'The cloud project identifier. Examples: Google Cloud Project id, Azure Project id.',
+    example: 'my-project',
+    name: 'cloud.project.id',
+    type: 'keyword',
+  },
+  'cloud.project.name': {
+    category: 'cloud',
+    description: 'The cloud project name. Examples: Google Cloud Project name, Azure Project name.',
+    example: 'my project',
+    name: 'cloud.project.name',
+    type: 'keyword',
+  },
   'cloud.provider': {
     category: 'cloud',
     description: 'Name of the cloud provider. Example values are aws, azure, gcp, or digitalocean.',
@@ -362,9 +513,105 @@ export const fieldsBeat: BeatFields = {
   },
   'cloud.region': {
     category: 'cloud',
-    description: 'Region in which this host is running.',
+    description: 'Region in which this host, resource, or service is located.',
     example: 'us-east-1',
     name: 'cloud.region',
+    type: 'keyword',
+  },
+  'cloud.service.name': {
+    category: 'cloud',
+    description:
+      'The cloud service name is intended to distinguish services running on different platforms within a provider, eg AWS EC2 vs Lambda, GCP GCE vs App Engine, Azure VM vs App Server. Examples: app engine, app service, cloud run, fargate, lambda.',
+    example: 'lambda',
+    name: 'cloud.service.name',
+    type: 'keyword',
+  },
+  'cloud.target.account.id': {
+    category: 'cloud',
+    description:
+      'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
+    example: 666777888999,
+    name: 'cloud.target.account.id',
+    type: 'keyword',
+  },
+  'cloud.target.account.name': {
+    category: 'cloud',
+    description:
+      'The cloud account name or alias used to identify different entities in a multi-tenant environment. Examples: AWS account name, Google Cloud ORG display name.',
+    example: 'elastic-dev',
+    name: 'cloud.target.account.name',
+    type: 'keyword',
+  },
+  'cloud.target.availability_zone': {
+    category: 'cloud',
+    description: 'Availability zone in which this host, resource, or service is located.',
+    example: 'us-east-1c',
+    name: 'cloud.target.availability_zone',
+    type: 'keyword',
+  },
+  'cloud.target.instance.id': {
+    category: 'cloud',
+    description: 'Instance ID of the host machine.',
+    example: 'i-1234567890abcdef0',
+    name: 'cloud.target.instance.id',
+    type: 'keyword',
+  },
+  'cloud.target.instance.name': {
+    category: 'cloud',
+    description: 'Instance name of the host machine.',
+    name: 'cloud.target.instance.name',
+    type: 'keyword',
+  },
+  'cloud.target.machine.type': {
+    category: 'cloud',
+    description: 'Machine type of the host machine.',
+    example: 't2.medium',
+    name: 'cloud.target.machine.type',
+    type: 'keyword',
+  },
+  'cloud.target.project.id': {
+    category: 'cloud',
+    description:
+      'The cloud project identifier. Examples: Google Cloud Project id, Azure Project id.',
+    example: 'my-project',
+    name: 'cloud.target.project.id',
+    type: 'keyword',
+  },
+  'cloud.target.project.name': {
+    category: 'cloud',
+    description: 'The cloud project name. Examples: Google Cloud Project name, Azure Project name.',
+    example: 'my project',
+    name: 'cloud.target.project.name',
+    type: 'keyword',
+  },
+  'cloud.target.provider': {
+    category: 'cloud',
+    description: 'Name of the cloud provider. Example values are aws, azure, gcp, or digitalocean.',
+    example: 'aws',
+    name: 'cloud.target.provider',
+    type: 'keyword',
+  },
+  'cloud.target.region': {
+    category: 'cloud',
+    description: 'Region in which this host, resource, or service is located.',
+    example: 'us-east-1',
+    name: 'cloud.target.region',
+    type: 'keyword',
+  },
+  'cloud.target.service.name': {
+    category: 'cloud',
+    description:
+      'The cloud service name is intended to distinguish services running on different platforms within a provider, eg AWS EC2 vs Lambda, GCP GCE vs App Engine, Azure VM vs App Server. Examples: app engine, app service, cloud run, fargate, lambda.',
+    example: 'lambda',
+    name: 'cloud.target.service.name',
+    type: 'keyword',
+  },
+  'code_signature.digest_algorithm': {
+    category: 'code_signature',
+    description:
+      'The hashing algorithm used to sign the process. This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
+    example: 'sha256',
+    name: 'code_signature.digest_algorithm',
     type: 'keyword',
   },
   'code_signature.exists': {
@@ -373,6 +620,14 @@ export const fieldsBeat: BeatFields = {
     example: 'true',
     name: 'code_signature.exists',
     type: 'boolean',
+  },
+  'code_signature.signing_id': {
+    category: 'code_signature',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'code_signature.signing_id',
+    type: 'keyword',
   },
   'code_signature.status': {
     category: 'code_signature',
@@ -388,6 +643,21 @@ export const fieldsBeat: BeatFields = {
     example: 'Microsoft Corporation',
     name: 'code_signature.subject_name',
     type: 'keyword',
+  },
+  'code_signature.team_id': {
+    category: 'code_signature',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'code_signature.team_id',
+    type: 'keyword',
+  },
+  'code_signature.timestamp': {
+    category: 'code_signature',
+    description: 'Date and time when the code signature was generated and signed.',
+    example: '2021-01-01T12:10:30Z',
+    name: 'code_signature.timestamp',
+    type: 'date',
   },
   'code_signature.trusted': {
     category: 'code_signature',
@@ -442,6 +712,30 @@ export const fieldsBeat: BeatFields = {
     name: 'container.runtime',
     type: 'keyword',
   },
+  'data_stream.dataset': {
+    category: 'data_stream',
+    description:
+      'The field can contain anything that makes sense to signify the source of the data. Examples include `nginx.access`, `prometheus`, `endpoint` etc. For data streams that otherwise fit, but that do not have dataset set we use the value "generic" for the dataset value. `event.dataset` should have the same value as `data_stream.dataset`. Beyond the Elasticsearch data stream naming criteria noted above, the `dataset` value has additional restrictions:   * Must not contain `-`   * No longer than 100 characters',
+    example: 'nginx.access',
+    name: 'data_stream.dataset',
+    type: 'constant_keyword',
+  },
+  'data_stream.namespace': {
+    category: 'data_stream',
+    description:
+      'A user defined namespace. Namespaces are useful to allow grouping of data. Many users already organize their indices this way, and the data stream naming scheme now provides this best practice as a default. Many users will populate this field with `default`. If no value is used, it falls back to `default`. Beyond the Elasticsearch index naming criteria noted above, `namespace` value has the additional restrictions:   * Must not contain `-`   * No longer than 100 characters',
+    example: 'production',
+    name: 'data_stream.namespace',
+    type: 'constant_keyword',
+  },
+  'data_stream.type': {
+    category: 'data_stream',
+    description:
+      'An overarching type for the data stream. Currently allowed values are "logs" and "metrics". We expect to also add "traces" and "synthetics" in the near future.',
+    example: 'logs',
+    name: 'data_stream.type',
+    type: 'constant_keyword',
+  },
   'destination.address': {
     category: 'destination',
     description:
@@ -485,6 +779,13 @@ export const fieldsBeat: BeatFields = {
     name: 'destination.geo.city_name',
     type: 'keyword',
   },
+  'destination.geo.continent_code': {
+    category: 'destination',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'destination.geo.continent_code',
+    type: 'keyword',
+  },
   'destination.geo.continent_name': {
     category: 'destination',
     description: 'Name of the continent.',
@@ -521,6 +822,14 @@ export const fieldsBeat: BeatFields = {
     name: 'destination.geo.name',
     type: 'keyword',
   },
+  'destination.geo.postal_code': {
+    category: 'destination',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'destination.geo.postal_code',
+    type: 'keyword',
+  },
   'destination.geo.region_iso_code': {
     category: 'destination',
     description: 'Region ISO code.',
@@ -535,15 +844,24 @@ export const fieldsBeat: BeatFields = {
     name: 'destination.geo.region_name',
     type: 'keyword',
   },
+  'destination.geo.timezone': {
+    category: 'destination',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'destination.geo.timezone',
+    type: 'keyword',
+  },
   'destination.ip': {
     category: 'destination',
-    description: 'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
+    description: 'IP address of the destination (IPv4 or IPv6).',
     name: 'destination.ip',
     type: 'ip',
   },
   'destination.mac': {
     category: 'destination',
-    description: 'MAC address of the destination.',
+    description:
+      'MAC address of the destination. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '00-00-5E-00-53-23',
     name: 'destination.mac',
     type: 'keyword',
   },
@@ -579,15 +897,23 @@ export const fieldsBeat: BeatFields = {
   'destination.registered_domain': {
     category: 'destination',
     description:
-      'The highest registered destination domain, stripped of the subdomain. For example, the registered domain for "foo.google.com" is "google.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
-    example: 'google.com',
+      'The highest registered destination domain, stripped of the subdomain. For example, the registered domain for "foo.example.com" is "example.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
+    example: 'example.com',
     name: 'destination.registered_domain',
+    type: 'keyword',
+  },
+  'destination.subdomain': {
+    category: 'destination',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain. For example the subdomain portion of "www.east.mydomain.co.uk" is "east". If the domain has multiple levels of subdomain, such as "sub2.sub1.example.com", the subdomain field should contain "sub2.sub1", with no trailing period.',
+    example: 'east',
+    name: 'destination.subdomain',
     type: 'keyword',
   },
   'destination.top_level_domain': {
     category: 'destination',
     description:
-      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for google.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
     example: 'co.uk',
     name: 'destination.top_level_domain',
     type: 'keyword',
@@ -640,15 +966,31 @@ export const fieldsBeat: BeatFields = {
   },
   'destination.user.id': {
     category: 'destination',
-    description: 'Unique identifiers of the user.',
+    description: 'Unique identifier of the user.',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
     name: 'destination.user.id',
     type: 'keyword',
   },
   'destination.user.name': {
     category: 'destination',
     description: 'Short name or login of the user.',
-    example: 'albert',
+    example: 'a.einstein',
     name: 'destination.user.name',
+    type: 'keyword',
+  },
+  'destination.user.roles': {
+    category: 'destination',
+    description: 'Array of user roles at the time of the event.',
+    example: '["kibana_admin", "reporting_user"]',
+    name: 'destination.user.roles',
+    type: 'keyword',
+  },
+  'dll.code_signature.digest_algorithm': {
+    category: 'dll',
+    description:
+      'The hashing algorithm used to sign the process. This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
+    example: 'sha256',
+    name: 'dll.code_signature.digest_algorithm',
     type: 'keyword',
   },
   'dll.code_signature.exists': {
@@ -657,6 +999,14 @@ export const fieldsBeat: BeatFields = {
     example: 'true',
     name: 'dll.code_signature.exists',
     type: 'boolean',
+  },
+  'dll.code_signature.signing_id': {
+    category: 'dll',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'dll.code_signature.signing_id',
+    type: 'keyword',
   },
   'dll.code_signature.status': {
     category: 'dll',
@@ -672,6 +1022,21 @@ export const fieldsBeat: BeatFields = {
     example: 'Microsoft Corporation',
     name: 'dll.code_signature.subject_name',
     type: 'keyword',
+  },
+  'dll.code_signature.team_id': {
+    category: 'dll',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'dll.code_signature.team_id',
+    type: 'keyword',
+  },
+  'dll.code_signature.timestamp': {
+    category: 'dll',
+    description: 'Date and time when the code signature was generated and signed.',
+    example: '2021-01-01T12:10:30Z',
+    name: 'dll.code_signature.timestamp',
+    type: 'date',
   },
   'dll.code_signature.trusted': {
     category: 'dll',
@@ -713,6 +1078,12 @@ export const fieldsBeat: BeatFields = {
     name: 'dll.hash.sha512',
     type: 'keyword',
   },
+  'dll.hash.ssdeep': {
+    category: 'dll',
+    description: 'SSDEEP hash.',
+    name: 'dll.hash.ssdeep',
+    type: 'keyword',
+  },
   'dll.name': {
     category: 'dll',
     description: 'Name of the library. This generally maps to the name of the file on disk.',
@@ -725,6 +1096,13 @@ export const fieldsBeat: BeatFields = {
     description: 'Full file path of the library.',
     example: 'C:\\Windows\\System32\\kernel32.dll',
     name: 'dll.path',
+    type: 'keyword',
+  },
+  'dll.pe.architecture': {
+    category: 'dll',
+    description: 'CPU architecture target for the file.',
+    example: 'x64',
+    name: 'dll.pe.architecture',
     type: 'keyword',
   },
   'dll.pe.company': {
@@ -746,6 +1124,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Internal version of the file, provided at compile-time.',
     example: '6.3.9600.17415',
     name: 'dll.pe.file_version',
+    type: 'keyword',
+  },
+  'dll.pe.imphash': {
+    category: 'dll',
+    description:
+      'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values. Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
+    example: '0c6803c4e922103c4dca5963aad36ddf',
+    name: 'dll.pe.imphash',
     type: 'keyword',
   },
   'dll.pe.original_file_name': {
@@ -788,7 +1174,7 @@ export const fieldsBeat: BeatFields = {
     category: 'dns',
     description:
       "The domain name to which this resource record pertains. If a chain of CNAME is being resolved, each answer's `name` should be the one that corresponds with the answer's `data`. It should not simply be the original `question.name` repeated.",
-    example: 'www.google.com',
+    example: 'www.example.com',
     name: 'dns.answers.name',
     type: 'keyword',
   },
@@ -811,7 +1197,7 @@ export const fieldsBeat: BeatFields = {
     category: 'dns',
     description:
       'Array of 2 letter DNS header flags. Expected values are: AA, TC, RD, RA, AD, CD, DO.',
-    example: '["RD","RA"]',
+    example: '["RD", "RA"]',
     name: 'dns.header_flags',
     type: 'keyword',
   },
@@ -842,15 +1228,15 @@ export const fieldsBeat: BeatFields = {
     category: 'dns',
     description:
       'The name being queried. If the name field contains non-printable characters (below 32 or above 126), those characters should be represented as escaped base 10 integers (\\DDD). Back slashes and quotes should be escaped. Tabs, carriage returns, and line feeds should be converted to \\t, \\r, and \\n respectively.',
-    example: 'www.google.com',
+    example: 'www.example.com',
     name: 'dns.question.name',
     type: 'keyword',
   },
   'dns.question.registered_domain': {
     category: 'dns',
     description:
-      'The highest registered domain, stripped of the subdomain. For example, the registered domain for "foo.google.com" is "google.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
-    example: 'google.com',
+      'The highest registered domain, stripped of the subdomain. For example, the registered domain for "foo.example.com" is "example.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
+    example: 'example.com',
     name: 'dns.question.registered_domain',
     type: 'keyword',
   },
@@ -865,7 +1251,7 @@ export const fieldsBeat: BeatFields = {
   'dns.question.top_level_domain': {
     category: 'dns',
     description:
-      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for google.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
     example: 'co.uk',
     name: 'dns.question.top_level_domain',
     type: 'keyword',
@@ -881,7 +1267,7 @@ export const fieldsBeat: BeatFields = {
     category: 'dns',
     description:
       'Array containing all IPs seen in `answers.data`. The `answers` array can be difficult to use, because of the variety of data formats it can contain. Extracting all IP addresses seen in there to `dns.resolved_ip` makes it possible to index them as IP addresses, and makes them easier to visualize and query for.',
-    example: '["10.10.10.10","10.10.10.11"]',
+    example: '["10.10.10.10", "10.10.10.11"]',
     name: 'dns.resolved_ip',
     type: 'ip',
   },
@@ -908,6 +1294,192 @@ export const fieldsBeat: BeatFields = {
     name: 'ecs.version',
     type: 'keyword',
   },
+  'elf.architecture': {
+    category: 'elf',
+    description: 'Machine architecture of the ELF file.',
+    example: 'x86-64',
+    name: 'elf.architecture',
+    type: 'keyword',
+  },
+  'elf.byte_order': {
+    category: 'elf',
+    description: 'Byte sequence of ELF file.',
+    example: 'Little Endian',
+    name: 'elf.byte_order',
+    type: 'keyword',
+  },
+  'elf.cpu_type': {
+    category: 'elf',
+    description: 'CPU type of the ELF file.',
+    example: 'Intel',
+    name: 'elf.cpu_type',
+    type: 'keyword',
+  },
+  'elf.creation_date': {
+    category: 'elf',
+    description:
+      "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+    name: 'elf.creation_date',
+    type: 'date',
+  },
+  'elf.exports': {
+    category: 'elf',
+    description: 'List of exported element names and types.',
+    name: 'elf.exports',
+    type: 'flattened',
+  },
+  'elf.header.abi_version': {
+    category: 'elf',
+    description: 'Version of the ELF Application Binary Interface (ABI).',
+    name: 'elf.header.abi_version',
+    type: 'keyword',
+  },
+  'elf.header.class': {
+    category: 'elf',
+    description: 'Header class of the ELF file.',
+    name: 'elf.header.class',
+    type: 'keyword',
+  },
+  'elf.header.data': {
+    category: 'elf',
+    description: 'Data table of the ELF header.',
+    name: 'elf.header.data',
+    type: 'keyword',
+  },
+  'elf.header.entrypoint': {
+    category: 'elf',
+    description: 'Header entrypoint of the ELF file.',
+    name: 'elf.header.entrypoint',
+    type: 'long',
+    format: 'string',
+  },
+  'elf.header.object_version': {
+    category: 'elf',
+    description: '"0x1" for original ELF files.',
+    name: 'elf.header.object_version',
+    type: 'keyword',
+  },
+  'elf.header.os_abi': {
+    category: 'elf',
+    description: 'Application Binary Interface (ABI) of the Linux OS.',
+    name: 'elf.header.os_abi',
+    type: 'keyword',
+  },
+  'elf.header.type': {
+    category: 'elf',
+    description: 'Header type of the ELF file.',
+    name: 'elf.header.type',
+    type: 'keyword',
+  },
+  'elf.header.version': {
+    category: 'elf',
+    description: 'Version of the ELF header.',
+    name: 'elf.header.version',
+    type: 'keyword',
+  },
+  'elf.imports': {
+    category: 'elf',
+    description: 'List of imported element names and types.',
+    name: 'elf.imports',
+    type: 'flattened',
+  },
+  'elf.sections': {
+    category: 'elf',
+    description:
+      'An array containing an object for each section of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
+    name: 'elf.sections',
+    type: 'nested',
+  },
+  'elf.sections.chi2': {
+    category: 'elf',
+    description: 'Chi-square probability distribution of the section.',
+    name: 'elf.sections.chi2',
+    type: 'long',
+    format: 'number',
+  },
+  'elf.sections.entropy': {
+    category: 'elf',
+    description: 'Shannon entropy calculation from the section.',
+    name: 'elf.sections.entropy',
+    type: 'long',
+    format: 'number',
+  },
+  'elf.sections.flags': {
+    category: 'elf',
+    description: 'ELF Section List flags.',
+    name: 'elf.sections.flags',
+    type: 'keyword',
+  },
+  'elf.sections.name': {
+    category: 'elf',
+    description: 'ELF Section List name.',
+    name: 'elf.sections.name',
+    type: 'keyword',
+  },
+  'elf.sections.physical_offset': {
+    category: 'elf',
+    description: 'ELF Section List offset.',
+    name: 'elf.sections.physical_offset',
+    type: 'keyword',
+  },
+  'elf.sections.physical_size': {
+    category: 'elf',
+    description: 'ELF Section List physical size.',
+    name: 'elf.sections.physical_size',
+    type: 'long',
+    format: 'bytes',
+  },
+  'elf.sections.type': {
+    category: 'elf',
+    description: 'ELF Section List type.',
+    name: 'elf.sections.type',
+    type: 'keyword',
+  },
+  'elf.sections.virtual_address': {
+    category: 'elf',
+    description: 'ELF Section List virtual address.',
+    name: 'elf.sections.virtual_address',
+    type: 'long',
+    format: 'string',
+  },
+  'elf.sections.virtual_size': {
+    category: 'elf',
+    description: 'ELF Section List virtual size.',
+    name: 'elf.sections.virtual_size',
+    type: 'long',
+    format: 'string',
+  },
+  'elf.segments': {
+    category: 'elf',
+    description:
+      'An array containing an object for each segment of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
+    name: 'elf.segments',
+    type: 'nested',
+  },
+  'elf.segments.sections': {
+    category: 'elf',
+    description: 'ELF object segment sections.',
+    name: 'elf.segments.sections',
+    type: 'keyword',
+  },
+  'elf.segments.type': {
+    category: 'elf',
+    description: 'ELF object segment type.',
+    name: 'elf.segments.type',
+    type: 'keyword',
+  },
+  'elf.shared_libraries': {
+    category: 'elf',
+    description: 'List of shared libraries used by this ELF object.',
+    name: 'elf.shared_libraries',
+    type: 'keyword',
+  },
+  'elf.telfhash': {
+    category: 'elf',
+    description: 'telfhash symbol hash for ELF file.',
+    name: 'elf.telfhash',
+    type: 'keyword',
+  },
   'error.code': {
     category: 'error',
     description: 'Error code describing the error.',
@@ -924,13 +1496,13 @@ export const fieldsBeat: BeatFields = {
     category: 'error',
     description: 'Error message.',
     name: 'error.message',
-    type: 'text',
+    type: 'match_only_text',
   },
   'error.stack_trace': {
     category: 'error',
     description: 'The stack trace of this error in plain text.',
     name: 'error.stack_trace',
-    type: 'keyword',
+    type: 'wildcard',
   },
   'error.type': {
     category: 'error',
@@ -945,6 +1517,14 @@ export const fieldsBeat: BeatFields = {
       'The action captured by the event. This describes the information in the event. It is more specific than `event.category`. Examples are `group-add`, `process-started`, `file-created`. The value is normally defined by the implementer.',
     example: 'user-password-change',
     name: 'event.action',
+    type: 'keyword',
+  },
+  'event.agent_id_status': {
+    category: 'event',
+    description:
+      "Agents are normally responsible for populating the `agent.id` field value. If the system receiving events is capable of validating the value based on authentication information for the client then this field can be used to reflect the outcome of that validation. For example if the agent's connection is authenticated with mTLS and the client cert contains the ID of the agent to which the cert was issued then the `agent.id` value in events can be checked against the certificate. If the values match then `event.agent_id_status: verified` is added to the event, otherwise one of the other allowed values should be used. If no validation is performed then the field should be omitted. The allowed values are: `verified` - The `agent.id` field value matches expected value obtained from auth metadata. `mismatch` - The `agent.id` field value does not match the expected value obtained from auth metadata. `missing` - There was no `agent.id` field in the event to validate. `auth_metadata_missing` - There was no auth metadata or it was missing information about the agent ID.",
+    example: 'verified',
+    name: 'event.agent_id_status',
     type: 'keyword',
   },
   'event.category': {
@@ -1036,7 +1616,7 @@ export const fieldsBeat: BeatFields = {
   'event.original': {
     category: 'event',
     description:
-      'Raw text message of entire event. Used to demonstrate log integrity. This field is not indexed and doc_values are disabled. It cannot be searched, but it can be retrieved from `_source`.',
+      'Raw text message of entire event. Used to demonstrate log integrity or where the full log message (before splitting it up in multiple parts) may be required, e.g. for reindex. This field is not indexed and doc_values are disabled. It cannot be searched, but it can be retrieved from `_source`. If users wish to override this and index this field, please see `Field data types` in the `Elasticsearch Reference`.',
     example:
       'Sep 19 08:26:10 host CEF:0&#124;Security&#124; threatmanager&#124;1.0&#124;100&#124; worm successfully stopped&#124;10&#124;src=10.0.0.1 dst=2.1.2.2spt=1232',
     name: 'event.original',
@@ -1058,11 +1638,19 @@ export const fieldsBeat: BeatFields = {
     name: 'event.provider',
     type: 'keyword',
   },
+  'event.reason': {
+    category: 'event',
+    description:
+      'Reason why this event happened, according to the source. This describes the why of a particular action or outcome captured in the event. Where `event.action` captures the action from the event, `event.reason` describes why that action was taken. For example, a web proxy with an `event.action` which denied the request may also populate `event.reason` with the reason why (e.g. `blocked site`).',
+    example: 'Terminated an unexpected process',
+    name: 'event.reason',
+    type: 'keyword',
+  },
   'event.reference': {
     category: 'event',
     description:
-      'Reference URL linking to additional information about this event. This URL links to a static definition of the this event. Alert events, indicated by `event.kind:alert`, are a common use case for this field.',
-    example: 'https://system.vendor.com/event/#0001234',
+      'Reference URL linking to additional information about this event. This URL links to a static definition of this event. Alert events, indicated by `event.kind:alert`, are a common use case for this field.',
+    example: 'https://system.example.com/event/#0001234',
     name: 'event.reference',
     type: 'keyword',
   },
@@ -1121,9 +1709,43 @@ export const fieldsBeat: BeatFields = {
   'event.url': {
     category: 'event',
     description:
-      'URL linking to an external system to continue investigation of this event. This URL links to another system where in-depth investigation of the specific occurence of this event can take place. Alert events, indicated by `event.kind:alert`, are a common use case for this field.',
-    example: 'https://mysystem.mydomain.com/alert/5271dedb-f5b0-4218-87f0-4ac4870a38fe',
+      'URL linking to an external system to continue investigation of this event. This URL links to another system where in-depth investigation of the specific occurrence of this event can take place. Alert events, indicated by `event.kind:alert`, are a common use case for this field.',
+    example: 'https://mysystem.example.com/alert/5271dedb-f5b0-4218-87f0-4ac4870a38fe',
     name: 'event.url',
+    type: 'keyword',
+  },
+  'faas.coldstart': {
+    category: 'faas',
+    description: 'Boolean value indicating a cold start of a function.',
+    name: 'faas.coldstart',
+    type: 'boolean',
+  },
+  'faas.execution': {
+    category: 'faas',
+    description: 'The execution ID of the current function execution.',
+    example: 'af9d5aa4-a685-4c5f-a22b-444f80b3cc28',
+    name: 'faas.execution',
+    type: 'keyword',
+  },
+  'faas.trigger': {
+    category: 'faas',
+    description: 'Details about the function trigger.',
+    name: 'faas.trigger',
+    type: 'nested',
+  },
+  'faas.trigger.request_id': {
+    category: 'faas',
+    description: 'The ID of the trigger request , message, event, etc.',
+    example: 123456789,
+    name: 'faas.trigger.request_id',
+    type: 'keyword',
+  },
+  'faas.trigger.type': {
+    category: 'faas',
+    description:
+      'The trigger for the function execution. Expected values are:   * http   * pubsub   * datasource   * timer   * other',
+    example: 'http',
+    name: 'faas.trigger.type',
     type: 'keyword',
   },
   'file.accessed': {
@@ -1141,12 +1763,28 @@ export const fieldsBeat: BeatFields = {
     name: 'file.attributes',
     type: 'keyword',
   },
+  'file.code_signature.digest_algorithm': {
+    category: 'file',
+    description:
+      'The hashing algorithm used to sign the process. This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
+    example: 'sha256',
+    name: 'file.code_signature.digest_algorithm',
+    type: 'keyword',
+  },
   'file.code_signature.exists': {
     category: 'file',
     description: 'Boolean to capture if a signature is present.',
     example: 'true',
     name: 'file.code_signature.exists',
     type: 'boolean',
+  },
+  'file.code_signature.signing_id': {
+    category: 'file',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'file.code_signature.signing_id',
+    type: 'keyword',
   },
   'file.code_signature.status': {
     category: 'file',
@@ -1162,6 +1800,21 @@ export const fieldsBeat: BeatFields = {
     example: 'Microsoft Corporation',
     name: 'file.code_signature.subject_name',
     type: 'keyword',
+  },
+  'file.code_signature.team_id': {
+    category: 'file',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'file.code_signature.team_id',
+    type: 'keyword',
+  },
+  'file.code_signature.timestamp': {
+    category: 'file',
+    description: 'Date and time when the code signature was generated and signed.',
+    example: '2021-01-01T12:10:30Z',
+    name: 'file.code_signature.timestamp',
+    type: 'date',
   },
   'file.code_signature.trusted': {
     category: 'file',
@@ -1215,11 +1868,206 @@ export const fieldsBeat: BeatFields = {
     name: 'file.drive_letter',
     type: 'keyword',
   },
+  'file.elf.architecture': {
+    category: 'file',
+    description: 'Machine architecture of the ELF file.',
+    example: 'x86-64',
+    name: 'file.elf.architecture',
+    type: 'keyword',
+  },
+  'file.elf.byte_order': {
+    category: 'file',
+    description: 'Byte sequence of ELF file.',
+    example: 'Little Endian',
+    name: 'file.elf.byte_order',
+    type: 'keyword',
+  },
+  'file.elf.cpu_type': {
+    category: 'file',
+    description: 'CPU type of the ELF file.',
+    example: 'Intel',
+    name: 'file.elf.cpu_type',
+    type: 'keyword',
+  },
+  'file.elf.creation_date': {
+    category: 'file',
+    description:
+      "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+    name: 'file.elf.creation_date',
+    type: 'date',
+  },
+  'file.elf.exports': {
+    category: 'file',
+    description: 'List of exported element names and types.',
+    name: 'file.elf.exports',
+    type: 'flattened',
+  },
+  'file.elf.header.abi_version': {
+    category: 'file',
+    description: 'Version of the ELF Application Binary Interface (ABI).',
+    name: 'file.elf.header.abi_version',
+    type: 'keyword',
+  },
+  'file.elf.header.class': {
+    category: 'file',
+    description: 'Header class of the ELF file.',
+    name: 'file.elf.header.class',
+    type: 'keyword',
+  },
+  'file.elf.header.data': {
+    category: 'file',
+    description: 'Data table of the ELF header.',
+    name: 'file.elf.header.data',
+    type: 'keyword',
+  },
+  'file.elf.header.entrypoint': {
+    category: 'file',
+    description: 'Header entrypoint of the ELF file.',
+    name: 'file.elf.header.entrypoint',
+    type: 'long',
+    format: 'string',
+  },
+  'file.elf.header.object_version': {
+    category: 'file',
+    description: '"0x1" for original ELF files.',
+    name: 'file.elf.header.object_version',
+    type: 'keyword',
+  },
+  'file.elf.header.os_abi': {
+    category: 'file',
+    description: 'Application Binary Interface (ABI) of the Linux OS.',
+    name: 'file.elf.header.os_abi',
+    type: 'keyword',
+  },
+  'file.elf.header.type': {
+    category: 'file',
+    description: 'Header type of the ELF file.',
+    name: 'file.elf.header.type',
+    type: 'keyword',
+  },
+  'file.elf.header.version': {
+    category: 'file',
+    description: 'Version of the ELF header.',
+    name: 'file.elf.header.version',
+    type: 'keyword',
+  },
+  'file.elf.imports': {
+    category: 'file',
+    description: 'List of imported element names and types.',
+    name: 'file.elf.imports',
+    type: 'flattened',
+  },
+  'file.elf.sections': {
+    category: 'file',
+    description:
+      'An array containing an object for each section of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
+    name: 'file.elf.sections',
+    type: 'nested',
+  },
+  'file.elf.sections.chi2': {
+    category: 'file',
+    description: 'Chi-square probability distribution of the section.',
+    name: 'file.elf.sections.chi2',
+    type: 'long',
+    format: 'number',
+  },
+  'file.elf.sections.entropy': {
+    category: 'file',
+    description: 'Shannon entropy calculation from the section.',
+    name: 'file.elf.sections.entropy',
+    type: 'long',
+    format: 'number',
+  },
+  'file.elf.sections.flags': {
+    category: 'file',
+    description: 'ELF Section List flags.',
+    name: 'file.elf.sections.flags',
+    type: 'keyword',
+  },
+  'file.elf.sections.name': {
+    category: 'file',
+    description: 'ELF Section List name.',
+    name: 'file.elf.sections.name',
+    type: 'keyword',
+  },
+  'file.elf.sections.physical_offset': {
+    category: 'file',
+    description: 'ELF Section List offset.',
+    name: 'file.elf.sections.physical_offset',
+    type: 'keyword',
+  },
+  'file.elf.sections.physical_size': {
+    category: 'file',
+    description: 'ELF Section List physical size.',
+    name: 'file.elf.sections.physical_size',
+    type: 'long',
+    format: 'bytes',
+  },
+  'file.elf.sections.type': {
+    category: 'file',
+    description: 'ELF Section List type.',
+    name: 'file.elf.sections.type',
+    type: 'keyword',
+  },
+  'file.elf.sections.virtual_address': {
+    category: 'file',
+    description: 'ELF Section List virtual address.',
+    name: 'file.elf.sections.virtual_address',
+    type: 'long',
+    format: 'string',
+  },
+  'file.elf.sections.virtual_size': {
+    category: 'file',
+    description: 'ELF Section List virtual size.',
+    name: 'file.elf.sections.virtual_size',
+    type: 'long',
+    format: 'string',
+  },
+  'file.elf.segments': {
+    category: 'file',
+    description:
+      'An array containing an object for each segment of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
+    name: 'file.elf.segments',
+    type: 'nested',
+  },
+  'file.elf.segments.sections': {
+    category: 'file',
+    description: 'ELF object segment sections.',
+    name: 'file.elf.segments.sections',
+    type: 'keyword',
+  },
+  'file.elf.segments.type': {
+    category: 'file',
+    description: 'ELF object segment type.',
+    name: 'file.elf.segments.type',
+    type: 'keyword',
+  },
+  'file.elf.shared_libraries': {
+    category: 'file',
+    description: 'List of shared libraries used by this ELF object.',
+    name: 'file.elf.shared_libraries',
+    type: 'keyword',
+  },
+  'file.elf.telfhash': {
+    category: 'file',
+    description: 'telfhash symbol hash for ELF file.',
+    name: 'file.elf.telfhash',
+    type: 'keyword',
+  },
   'file.extension': {
     category: 'file',
-    description: 'File extension.',
+    description:
+      'File extension, excluding the leading dot. Note that when the file name has multiple extensions (example.tar.gz), only the last one should be captured ("gz", not "tar.gz").',
     example: 'png',
     name: 'file.extension',
+    type: 'keyword',
+  },
+  'file.fork_name': {
+    category: 'file',
+    description:
+      'A fork is additional data associated with a filesystem object. On Linux, a resource fork is used to store additional data with a filesystem object. A file always has at least one fork for the data portion, and additional forks may exist. On NTFS, this is analogous to an Alternate Data Stream (ADS), and the default data stream for a file is just called $DATA. Zone.Identifier is commonly used by Windows to track contents downloaded from the Internet. An ADS is typically of the form: `C:\\path\\to\\filename.extension:some_fork_name`, and `some_fork_name` is the value that should populate `fork_name`. `filename.extension` should populate `file.name`, and `extension` should populate `file.extension`. The full path, `file.path`, will include the fork name.',
+    example: 'Zone.Identifer',
+    name: 'file.fork_name',
     type: 'keyword',
   },
   'file.gid': {
@@ -1258,6 +2106,12 @@ export const fieldsBeat: BeatFields = {
     category: 'file',
     description: 'SHA512 hash.',
     name: 'file.hash.sha512',
+    type: 'keyword',
+  },
+  'file.hash.ssdeep': {
+    category: 'file',
+    description: 'SSDEEP hash.',
+    name: 'file.hash.ssdeep',
     type: 'keyword',
   },
   'file.inode': {
@@ -1309,6 +2163,13 @@ export const fieldsBeat: BeatFields = {
     name: 'file.path',
     type: 'keyword',
   },
+  'file.pe.architecture': {
+    category: 'file',
+    description: 'CPU architecture target for the file.',
+    example: 'x64',
+    name: 'file.pe.architecture',
+    type: 'keyword',
+  },
   'file.pe.company': {
     category: 'file',
     description: 'Internal company name of the file, provided at compile-time.',
@@ -1328,6 +2189,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Internal version of the file, provided at compile-time.',
     example: '6.3.9600.17415',
     name: 'file.pe.file_version',
+    type: 'keyword',
+  },
+  'file.pe.imphash': {
+    category: 'file',
+    description:
+      'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values. Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
+    example: '0c6803c4e922103c4dca5963aad36ddf',
+    name: 'file.pe.imphash',
     type: 'keyword',
   },
   'file.pe.original_file_name': {
@@ -1371,11 +2240,189 @@ export const fieldsBeat: BeatFields = {
     name: 'file.uid',
     type: 'keyword',
   },
+  'file.x509.alternative_names': {
+    category: 'file',
+    description:
+      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    example: '*.elastic.co',
+    name: 'file.x509.alternative_names',
+    type: 'keyword',
+  },
+  'file.x509.issuer.common_name': {
+    category: 'file',
+    description: 'List of common name (CN) of issuing certificate authority.',
+    example: 'Example SHA2 High Assurance Server CA',
+    name: 'file.x509.issuer.common_name',
+    type: 'keyword',
+  },
+  'file.x509.issuer.country': {
+    category: 'file',
+    description: 'List of country (C) codes',
+    example: 'US',
+    name: 'file.x509.issuer.country',
+    type: 'keyword',
+  },
+  'file.x509.issuer.distinguished_name': {
+    category: 'file',
+    description: 'Distinguished name (DN) of issuing certificate authority.',
+    example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+    name: 'file.x509.issuer.distinguished_name',
+    type: 'keyword',
+  },
+  'file.x509.issuer.locality': {
+    category: 'file',
+    description: 'List of locality names (L)',
+    example: 'Mountain View',
+    name: 'file.x509.issuer.locality',
+    type: 'keyword',
+  },
+  'file.x509.issuer.organization': {
+    category: 'file',
+    description: 'List of organizations (O) of issuing certificate authority.',
+    example: 'Example Inc',
+    name: 'file.x509.issuer.organization',
+    type: 'keyword',
+  },
+  'file.x509.issuer.organizational_unit': {
+    category: 'file',
+    description: 'List of organizational units (OU) of issuing certificate authority.',
+    example: 'www.example.com',
+    name: 'file.x509.issuer.organizational_unit',
+    type: 'keyword',
+  },
+  'file.x509.issuer.state_or_province': {
+    category: 'file',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'file.x509.issuer.state_or_province',
+    type: 'keyword',
+  },
+  'file.x509.not_after': {
+    category: 'file',
+    description: 'Time at which the certificate is no longer considered valid.',
+    example: '"2020-07-16T03:15:39.000Z"',
+    name: 'file.x509.not_after',
+    type: 'date',
+  },
+  'file.x509.not_before': {
+    category: 'file',
+    description: 'Time at which the certificate is first considered valid.',
+    example: '"2019-08-16T01:40:25.000Z"',
+    name: 'file.x509.not_before',
+    type: 'date',
+  },
+  'file.x509.public_key_algorithm': {
+    category: 'file',
+    description: 'Algorithm used to generate the public key.',
+    example: 'RSA',
+    name: 'file.x509.public_key_algorithm',
+    type: 'keyword',
+  },
+  'file.x509.public_key_curve': {
+    category: 'file',
+    description:
+      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    example: 'nistp521',
+    name: 'file.x509.public_key_curve',
+    type: 'keyword',
+  },
+  'file.x509.public_key_exponent': {
+    category: 'file',
+    description: 'Exponent used to derive the public key. This is algorithm specific.',
+    example: 65537,
+    name: 'file.x509.public_key_exponent',
+    type: 'long',
+  },
+  'file.x509.public_key_size': {
+    category: 'file',
+    description: 'The size of the public key space in bits.',
+    example: 2048,
+    name: 'file.x509.public_key_size',
+    type: 'long',
+  },
+  'file.x509.serial_number': {
+    category: 'file',
+    description:
+      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    example: '55FBB9C7DEBF09809D12CCAA',
+    name: 'file.x509.serial_number',
+    type: 'keyword',
+  },
+  'file.x509.signature_algorithm': {
+    category: 'file',
+    description:
+      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    example: 'SHA256-RSA',
+    name: 'file.x509.signature_algorithm',
+    type: 'keyword',
+  },
+  'file.x509.subject.common_name': {
+    category: 'file',
+    description: 'List of common names (CN) of subject.',
+    example: 'shared.global.example.net',
+    name: 'file.x509.subject.common_name',
+    type: 'keyword',
+  },
+  'file.x509.subject.country': {
+    category: 'file',
+    description: 'List of country (C) code',
+    example: 'US',
+    name: 'file.x509.subject.country',
+    type: 'keyword',
+  },
+  'file.x509.subject.distinguished_name': {
+    category: 'file',
+    description: 'Distinguished name (DN) of the certificate subject entity.',
+    example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+    name: 'file.x509.subject.distinguished_name',
+    type: 'keyword',
+  },
+  'file.x509.subject.locality': {
+    category: 'file',
+    description: 'List of locality names (L)',
+    example: 'San Francisco',
+    name: 'file.x509.subject.locality',
+    type: 'keyword',
+  },
+  'file.x509.subject.organization': {
+    category: 'file',
+    description: 'List of organizations (O) of subject.',
+    example: 'Example, Inc.',
+    name: 'file.x509.subject.organization',
+    type: 'keyword',
+  },
+  'file.x509.subject.organizational_unit': {
+    category: 'file',
+    description: 'List of organizational units (OU) of subject.',
+    name: 'file.x509.subject.organizational_unit',
+    type: 'keyword',
+  },
+  'file.x509.subject.state_or_province': {
+    category: 'file',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'file.x509.subject.state_or_province',
+    type: 'keyword',
+  },
+  'file.x509.version_number': {
+    category: 'file',
+    description: 'Version of x509 format.',
+    example: 3,
+    name: 'file.x509.version_number',
+    type: 'keyword',
+  },
   'geo.city_name': {
     category: 'geo',
     description: 'City name.',
     example: 'Montreal',
     name: 'geo.city_name',
+    type: 'keyword',
+  },
+  'geo.continent_code': {
+    category: 'geo',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'geo.continent_code',
     type: 'keyword',
   },
   'geo.continent_name': {
@@ -1414,6 +2461,14 @@ export const fieldsBeat: BeatFields = {
     name: 'geo.name',
     type: 'keyword',
   },
+  'geo.postal_code': {
+    category: 'geo',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'geo.postal_code',
+    type: 'keyword',
+  },
   'geo.region_iso_code': {
     category: 'geo',
     description: 'Region ISO code.',
@@ -1426,6 +2481,13 @@ export const fieldsBeat: BeatFields = {
     description: 'Region name.',
     example: 'Quebec',
     name: 'geo.region_name',
+    type: 'keyword',
+  },
+  'geo.timezone': {
+    category: 'geo',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'geo.timezone',
     type: 'keyword',
   },
   'group.domain': {
@@ -1471,12 +2533,39 @@ export const fieldsBeat: BeatFields = {
     name: 'hash.sha512',
     type: 'keyword',
   },
+  'hash.ssdeep': {
+    category: 'hash',
+    description: 'SSDEEP hash.',
+    name: 'hash.ssdeep',
+    type: 'keyword',
+  },
   'host.architecture': {
     category: 'host',
     description: 'Operating system architecture.',
     example: 'x86_64',
     name: 'host.architecture',
     type: 'keyword',
+  },
+  'host.cpu.usage': {
+    category: 'host',
+    description:
+      'Percent CPU used which is normalized by the number of CPU cores and it ranges from 0 to 1. Scaling factor: 1000. For example: For a two core host, this value should be the average of the two cores, between 0 and 1.',
+    name: 'host.cpu.usage',
+    type: 'scaled_float',
+  },
+  'host.disk.read.bytes': {
+    category: 'host',
+    description:
+      'The total number of bytes (gauge) read successfully (aggregated from all disks) since the last metric collection.',
+    name: 'host.disk.read.bytes',
+    type: 'long',
+  },
+  'host.disk.write.bytes': {
+    category: 'host',
+    description:
+      'The total number of bytes (gauge) written successfully (aggregated from all disks) since the last metric collection.',
+    name: 'host.disk.write.bytes',
+    type: 'long',
   },
   'host.domain': {
     category: 'host',
@@ -1491,6 +2580,13 @@ export const fieldsBeat: BeatFields = {
     description: 'City name.',
     example: 'Montreal',
     name: 'host.geo.city_name',
+    type: 'keyword',
+  },
+  'host.geo.continent_code': {
+    category: 'host',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'host.geo.continent_code',
     type: 'keyword',
   },
   'host.geo.continent_name': {
@@ -1529,6 +2625,14 @@ export const fieldsBeat: BeatFields = {
     name: 'host.geo.name',
     type: 'keyword',
   },
+  'host.geo.postal_code': {
+    category: 'host',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'host.geo.postal_code',
+    type: 'keyword',
+  },
   'host.geo.region_iso_code': {
     category: 'host',
     description: 'Region ISO code.',
@@ -1541,6 +2645,13 @@ export const fieldsBeat: BeatFields = {
     description: 'Region name.',
     example: 'Quebec',
     name: 'host.geo.region_name',
+    type: 'keyword',
+  },
+  'host.geo.timezone': {
+    category: 'host',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'host.geo.timezone',
     type: 'keyword',
   },
   'host.hostname': {
@@ -1565,7 +2676,9 @@ export const fieldsBeat: BeatFields = {
   },
   'host.mac': {
     category: 'host',
-    description: 'Host mac addresses.',
+    description:
+      'Host MAC addresses. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '["00-00-5E-00-53-23", "00-00-5E-00-53-24"]',
     name: 'host.mac',
     type: 'keyword',
   },
@@ -1575,6 +2688,34 @@ export const fieldsBeat: BeatFields = {
       'Name of the host. It can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
     name: 'host.name',
     type: 'keyword',
+  },
+  'host.network.egress.bytes': {
+    category: 'host',
+    description:
+      'The number of bytes (gauge) sent out on all network interfaces by the host since the last metric collection.',
+    name: 'host.network.egress.bytes',
+    type: 'long',
+  },
+  'host.network.egress.packets': {
+    category: 'host',
+    description:
+      'The number of packets (gauge) sent out on all network interfaces by the host since the last metric collection.',
+    name: 'host.network.egress.packets',
+    type: 'long',
+  },
+  'host.network.ingress.bytes': {
+    category: 'host',
+    description:
+      'The number of bytes received (gauge) on all network interfaces by the host since the last metric collection.',
+    name: 'host.network.ingress.bytes',
+    type: 'long',
+  },
+  'host.network.ingress.packets': {
+    category: 'host',
+    description:
+      'The number of packets (gauge) received on all network interfaces by the host since the last metric collection.',
+    name: 'host.network.ingress.packets',
+    type: 'long',
   },
   'host.os.family': {
     category: 'host',
@@ -1611,6 +2752,14 @@ export const fieldsBeat: BeatFields = {
     name: 'host.os.platform',
     type: 'keyword',
   },
+  'host.os.type': {
+    category: 'host',
+    description:
+      "Use the `os.type` field to categorize the operating system into one of the broad commercial families. One of these following values should be used (lowercase): linux, macos, unix, windows. If the OS you're dealing with is not in the list, the field should not be populated. Please let us know by opening an issue with ECS, to propose its addition.",
+    example: 'macos',
+    name: 'host.os.type',
+    type: 'keyword',
+  },
   'host.os.version': {
     category: 'host',
     description: 'Operating system version as a raw string.',
@@ -1632,65 +2781,6 @@ export const fieldsBeat: BeatFields = {
     name: 'host.uptime',
     type: 'long',
   },
-  'host.user.domain': {
-    category: 'host',
-    description:
-      'Name of the directory the user is a member of. For example, an LDAP or Active Directory domain name.',
-    name: 'host.user.domain',
-    type: 'keyword',
-  },
-  'host.user.email': {
-    category: 'host',
-    description: 'User email address.',
-    name: 'host.user.email',
-    type: 'keyword',
-  },
-  'host.user.full_name': {
-    category: 'host',
-    description: "User's full name, if available.",
-    example: 'Albert Einstein',
-    name: 'host.user.full_name',
-    type: 'keyword',
-  },
-  'host.user.group.domain': {
-    category: 'host',
-    description:
-      'Name of the directory the group is a member of. For example, an LDAP or Active Directory domain name.',
-    name: 'host.user.group.domain',
-    type: 'keyword',
-  },
-  'host.user.group.id': {
-    category: 'host',
-    description: 'Unique identifier for the group on the system/platform.',
-    name: 'host.user.group.id',
-    type: 'keyword',
-  },
-  'host.user.group.name': {
-    category: 'host',
-    description: 'Name of the group.',
-    name: 'host.user.group.name',
-    type: 'keyword',
-  },
-  'host.user.hash': {
-    category: 'host',
-    description:
-      'Unique user hash to correlate information for a user in anonymized form. Useful if `user.id` or `user.name` contain confidential information and cannot be used.',
-    name: 'host.user.hash',
-    type: 'keyword',
-  },
-  'host.user.id': {
-    category: 'host',
-    description: 'Unique identifiers of the user.',
-    name: 'host.user.id',
-    type: 'keyword',
-  },
-  'host.user.name': {
-    category: 'host',
-    description: 'Short name or login of the user.',
-    example: 'albert',
-    name: 'host.user.name',
-    type: 'keyword',
-  },
   'http.request.body.bytes': {
     category: 'http',
     description: 'Size in bytes of the request body.',
@@ -1704,7 +2794,7 @@ export const fieldsBeat: BeatFields = {
     description: 'The full HTTP request body.',
     example: 'Hello world',
     name: 'http.request.body.content',
-    type: 'keyword',
+    type: 'wildcard',
   },
   'http.request.bytes': {
     category: 'http',
@@ -1714,12 +2804,28 @@ export const fieldsBeat: BeatFields = {
     type: 'long',
     format: 'bytes',
   },
+  'http.request.id': {
+    category: 'http',
+    description:
+      'A unique identifier for each HTTP request to correlate logs between clients and servers in transactions. The id may be contained in a non-standard HTTP header, such as `X-Request-ID` or `X-Correlation-ID`.',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: 'http.request.id',
+    type: 'keyword',
+  },
   'http.request.method': {
     category: 'http',
     description:
-      'HTTP request method. The field value must be normalized to lowercase for querying. See the documentation section "Implementing ECS".',
-    example: 'get, post, put',
+      'HTTP request method. The value should retain its casing from the original event. For example, `GET`, `get`, and `GeT` are all considered valid values for this field.',
+    example: 'POST',
     name: 'http.request.method',
+    type: 'keyword',
+  },
+  'http.request.mime_type': {
+    category: 'http',
+    description:
+      "Mime type of the body of the request. This value must only be populated based on the content of the request body, not on the `Content-Type` header. Comparing the mime type of a request with the request's Content-Type header can be helpful in detecting threats or misconfigured clients.",
+    example: 'image/gif',
+    name: 'http.request.mime_type',
     type: 'keyword',
   },
   'http.request.referrer': {
@@ -1742,7 +2848,7 @@ export const fieldsBeat: BeatFields = {
     description: 'The full HTTP response body.',
     example: 'Hello world',
     name: 'http.response.body.content',
-    type: 'keyword',
+    type: 'wildcard',
   },
   'http.response.bytes': {
     category: 'http',
@@ -1751,6 +2857,14 @@ export const fieldsBeat: BeatFields = {
     name: 'http.response.bytes',
     type: 'long',
     format: 'bytes',
+  },
+  'http.response.mime_type': {
+    category: 'http',
+    description:
+      "Mime type of the body of the response. This value must only be populated based on the content of the response body, not on the `Content-Type` header. Comparing the mime type of a response with the response's Content-Type header can be helpful in detecting misconfigured servers.",
+    example: 'image/gif',
+    name: 'http.response.mime_type',
+    type: 'keyword',
   },
   'http.response.status_code': {
     category: 'http',
@@ -1789,6 +2903,14 @@ export const fieldsBeat: BeatFields = {
     name: 'interface.name',
     type: 'keyword',
   },
+  'log.file.path': {
+    category: 'log',
+    description:
+      "Full path to the log file this event came from, including the file name. It should include the drive letter, when appropriate. If the event wasn't read from a log file, do not populate this field.",
+    example: '/var/log/fun-times.log',
+    name: 'log.file.path',
+    type: 'keyword',
+  },
   'log.level': {
     category: 'log',
     description:
@@ -1811,12 +2933,12 @@ export const fieldsBeat: BeatFields = {
       'The line number of the file containing the source code which originated the log event.',
     example: 42,
     name: 'log.origin.file.line',
-    type: 'integer',
+    type: 'long',
   },
   'log.origin.file.name': {
     category: 'log',
     description:
-      'The name of the file containing the source code which originated the log event. Note that this is not the name of the log file.',
+      'The name of the file containing the source code which originated the log event. Note that this field is not meant to capture the log file. The correct field to capture the log file is `log.file.path`.',
     example: 'Bootstrap.java',
     name: 'log.origin.file.name',
     type: 'keyword',
@@ -1826,14 +2948,6 @@ export const fieldsBeat: BeatFields = {
     description: 'The name of the function or method which originated the log event.',
     example: 'init',
     name: 'log.origin.function',
-    type: 'keyword',
-  },
-  'log.original': {
-    category: 'log',
-    description:
-      "This is the original log message and contains the full log message before splitting it up in multiple parts. In contrast to the `message` field which can contain an extracted part of the log message, this field contains the original, full log message. It can have already some modifications applied like encoding or new lines removed to clean up the log message. This field is not indexed and doc_values are disabled so it can't be queried but the value can be retrieved from `_source`.",
-    example: 'Sep 19 08:26:10 localhost My log',
-    name: 'log.original',
     type: 'keyword',
   },
   'log.syslog': {
@@ -1887,7 +3001,7 @@ export const fieldsBeat: BeatFields = {
   'network.application': {
     category: 'network',
     description:
-      'A name given to an application level protocol. This can be arbitrarily assigned for things like microservices, but also apply to things like skype, icq, facebook, twitter. This would be used in situations where the vendor or service can be decoded such as from the source/dest IP owners, ports, or wire format. The field value must be normalized to lowercase for querying. See the documentation section "Implementing ECS".',
+      "When a specific application or service is identified from network connection details (source/dest IPs, ports, certificates, or wire format), this field captures the application's or service's name. For example, the original event identifies the network connection being from a specific web service in a `https` network connection, like `facebook` or `twitter`. The field value must be normalized to lowercase for querying.",
     example: 'aim',
     name: 'network.application',
     type: 'keyword',
@@ -1912,7 +3026,7 @@ export const fieldsBeat: BeatFields = {
   'network.direction': {
     category: 'network',
     description:
-      "Direction of the network traffic. Recommended values are:   * inbound   * outbound   * internal   * external   * unknown  When mapping events from a host-based monitoring context, populate this field from the host's point of view. When mapping events from a network or perimeter-based monitoring context, populate this field from the point of view of your network perimeter.",
+      'Direction of the network traffic. Recommended values are:   * ingress   * egress   * inbound   * outbound   * internal   * external   * unknown  When mapping events from a host-based monitoring context, populate this field from the host\'s point of view, using the values "ingress" or "egress". When mapping events from a network or perimeter-based monitoring context, populate this field from the point of view of the network perimeter, using the values "inbound", "outbound", "internal" or "external". Note that "internal" is not crossing perimeter boundaries, and is meant to describe communication between two hosts within the perimeter. Note also that "external" is meant to describe traffic between two hosts that are external to the perimeter. This could for example be useful for ISPs or VPN service providers.',
     example: 'inbound',
     name: 'network.direction',
     type: 'keyword',
@@ -1935,7 +3049,7 @@ export const fieldsBeat: BeatFields = {
   'network.inner': {
     category: 'network',
     description:
-      'Network.inner fields are added in addition to network.vlan fields to describe  the innermost VLAN when q-in-q VLAN tagging is present. Allowed fields include  vlan.id and vlan.name. Inner vlan fields are typically used when sending traffic with multiple 802.1q encapsulations to a network sensor (e.g. Zeek, Wireshark.)',
+      'Network.inner fields are added in addition to network.vlan fields to describe the innermost VLAN when q-in-q VLAN tagging is present. Allowed fields include vlan.id and vlan.name. Inner vlan fields are typically used when sending traffic with multiple 802.1q encapsulations to a network sensor (e.g. Zeek, Wireshark.)',
     name: 'network.inner',
     type: 'object',
   },
@@ -1971,7 +3085,7 @@ export const fieldsBeat: BeatFields = {
   'network.protocol': {
     category: 'network',
     description:
-      'L7 Network protocol name. ex. http, lumberjack, transport protocol. The field value must be normalized to lowercase for querying. See the documentation section "Implementing ECS".',
+      'In the OSI Model this would be the Application Layer protocol. For example, `http`, `dns`, or `ssh`. The field value must be normalized to lowercase for querying.',
     example: 'http',
     name: 'network.protocol',
     type: 'keyword',
@@ -1979,7 +3093,7 @@ export const fieldsBeat: BeatFields = {
   'network.transport': {
     category: 'network',
     description:
-      'Same as network.iana_number, but instead using the Keyword name of the transport layer (udp, tcp, ipv6-icmp, etc.) The field value must be normalized to lowercase for querying. See the documentation section "Implementing ECS".',
+      'Same as network.iana_number, but instead using the Keyword name of the transport layer (udp, tcp, ipv6-icmp, etc.) The field value must be normalized to lowercase for querying.',
     example: 'tcp',
     name: 'network.transport',
     type: 'keyword',
@@ -1987,7 +3101,7 @@ export const fieldsBeat: BeatFields = {
   'network.type': {
     category: 'network',
     description:
-      'In the OSI Model this would be the Network Layer. ipv4, ipv6, ipsec, pim, etc The field value must be normalized to lowercase for querying. See the documentation section "Implementing ECS".',
+      'In the OSI Model this would be the Network Layer. ipv4, ipv6, ipsec, pim, etc The field value must be normalized to lowercase for querying.',
     example: 'ipv4',
     name: 'network.type',
     type: 'keyword',
@@ -2009,7 +3123,7 @@ export const fieldsBeat: BeatFields = {
   'observer.egress': {
     category: 'observer',
     description:
-      'Observer.egress holds information like interface number and name, vlan, and zone information to  classify egress traffic.  Single armed monitoring such as a network sensor on a span port should  only use observer.ingress to categorize traffic.',
+      'Observer.egress holds information like interface number and name, vlan, and zone information to classify egress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',
     name: 'observer.egress',
     type: 'object',
   },
@@ -2052,7 +3166,7 @@ export const fieldsBeat: BeatFields = {
   'observer.egress.zone': {
     category: 'observer',
     description:
-      'Network zone of outbound traffic as reported by the observer to categorize the destination area of egress  traffic, e.g. Internal, External, DMZ, HR, Legal, etc.',
+      'Network zone of outbound traffic as reported by the observer to categorize the destination area of egress traffic, e.g. Internal, External, DMZ, HR, Legal, etc.',
     example: 'Public_Internet',
     name: 'observer.egress.zone',
     type: 'keyword',
@@ -2062,6 +3176,13 @@ export const fieldsBeat: BeatFields = {
     description: 'City name.',
     example: 'Montreal',
     name: 'observer.geo.city_name',
+    type: 'keyword',
+  },
+  'observer.geo.continent_code': {
+    category: 'observer',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'observer.geo.continent_code',
     type: 'keyword',
   },
   'observer.geo.continent_name': {
@@ -2100,6 +3221,14 @@ export const fieldsBeat: BeatFields = {
     name: 'observer.geo.name',
     type: 'keyword',
   },
+  'observer.geo.postal_code': {
+    category: 'observer',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'observer.geo.postal_code',
+    type: 'keyword',
+  },
   'observer.geo.region_iso_code': {
     category: 'observer',
     description: 'Region ISO code.',
@@ -2114,6 +3243,13 @@ export const fieldsBeat: BeatFields = {
     name: 'observer.geo.region_name',
     type: 'keyword',
   },
+  'observer.geo.timezone': {
+    category: 'observer',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'observer.geo.timezone',
+    type: 'keyword',
+  },
   'observer.hostname': {
     category: 'observer',
     description: 'Hostname of the observer.',
@@ -2123,7 +3259,7 @@ export const fieldsBeat: BeatFields = {
   'observer.ingress': {
     category: 'observer',
     description:
-      'Observer.ingress holds information like interface number and name, vlan, and zone information to  classify ingress traffic.  Single armed monitoring such as a network sensor on a span port should  only use observer.ingress to categorize traffic.',
+      'Observer.ingress holds information like interface number and name, vlan, and zone information to classify ingress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',
     name: 'observer.ingress',
     type: 'object',
   },
@@ -2166,7 +3302,7 @@ export const fieldsBeat: BeatFields = {
   'observer.ingress.zone': {
     category: 'observer',
     description:
-      'Network zone of incoming traffic as reported by the observer to categorize the source area of ingress  traffic. e.g. internal, External, DMZ, HR, Legal, etc.',
+      'Network zone of incoming traffic as reported by the observer to categorize the source area of ingress traffic. e.g. internal, External, DMZ, HR, Legal, etc.',
     example: 'DMZ',
     name: 'observer.ingress.zone',
     type: 'keyword',
@@ -2179,7 +3315,9 @@ export const fieldsBeat: BeatFields = {
   },
   'observer.mac': {
     category: 'observer',
-    description: 'MAC addresses of the observer',
+    description:
+      'MAC addresses of the observer. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '["00-00-5E-00-53-23", "00-00-5E-00-53-24"]',
     name: 'observer.mac',
     type: 'keyword',
   },
@@ -2226,6 +3364,14 @@ export const fieldsBeat: BeatFields = {
     name: 'observer.os.platform',
     type: 'keyword',
   },
+  'observer.os.type': {
+    category: 'observer',
+    description:
+      "Use the `os.type` field to categorize the operating system into one of the broad commercial families. One of these following values should be used (lowercase): linux, macos, unix, windows. If the OS you're dealing with is not in the list, the field should not be populated. Please let us know by opening an issue with ECS, to propose its addition.",
+    example: 'macos',
+    name: 'observer.os.type',
+    type: 'keyword',
+  },
   'observer.os.version': {
     category: 'observer',
     description: 'Operating system version as a raw string.',
@@ -2265,6 +3411,66 @@ export const fieldsBeat: BeatFields = {
     category: 'observer',
     description: 'Observer version.',
     name: 'observer.version',
+    type: 'keyword',
+  },
+  'orchestrator.api_version': {
+    category: 'orchestrator',
+    description: 'API version being used to carry out the action',
+    example: 'v1beta1',
+    name: 'orchestrator.api_version',
+    type: 'keyword',
+  },
+  'orchestrator.cluster.name': {
+    category: 'orchestrator',
+    description: 'Name of the cluster.',
+    name: 'orchestrator.cluster.name',
+    type: 'keyword',
+  },
+  'orchestrator.cluster.url': {
+    category: 'orchestrator',
+    description: 'URL of the API used to manage the cluster.',
+    name: 'orchestrator.cluster.url',
+    type: 'keyword',
+  },
+  'orchestrator.cluster.version': {
+    category: 'orchestrator',
+    description: 'The version of the cluster.',
+    name: 'orchestrator.cluster.version',
+    type: 'keyword',
+  },
+  'orchestrator.namespace': {
+    category: 'orchestrator',
+    description: 'Namespace in which the action is taking place.',
+    example: 'kube-system',
+    name: 'orchestrator.namespace',
+    type: 'keyword',
+  },
+  'orchestrator.organization': {
+    category: 'orchestrator',
+    description: 'Organization affected by the event (for multi-tenant orchestrator setups).',
+    example: 'elastic',
+    name: 'orchestrator.organization',
+    type: 'keyword',
+  },
+  'orchestrator.resource.name': {
+    category: 'orchestrator',
+    description: 'Name of the resource being acted upon.',
+    example: 'test-pod-cdcws',
+    name: 'orchestrator.resource.name',
+    type: 'keyword',
+  },
+  'orchestrator.resource.type': {
+    category: 'orchestrator',
+    description: 'Type of resource being acted upon.',
+    example: 'service',
+    name: 'orchestrator.resource.type',
+    type: 'keyword',
+  },
+  'orchestrator.type': {
+    category: 'orchestrator',
+    description: 'Orchestrator cluster type (e.g. kubernetes, nomad or cloudfoundry).',
+    example: 'kubernetes',
+    name: 'orchestrator.type',
     type: 'keyword',
   },
   'organization.id': {
@@ -2312,6 +3518,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Operating system platform (such centos, ubuntu, windows).',
     example: 'darwin',
     name: 'os.platform',
+    type: 'keyword',
+  },
+  'os.type': {
+    category: 'os',
+    description:
+      "Use the `os.type` field to categorize the operating system into one of the broad commercial families. One of these following values should be used (lowercase): linux, macos, unix, windows. If the OS you're dealing with is not in the list, the field should not be populated. Please let us know by opening an issue with ECS, to propose its addition.",
+    example: 'macos',
+    name: 'os.type',
     type: 'keyword',
   },
   'os.version': {
@@ -2415,6 +3629,13 @@ export const fieldsBeat: BeatFields = {
     name: 'package.version',
     type: 'keyword',
   },
+  'pe.architecture': {
+    category: 'pe',
+    description: 'CPU architecture target for the file.',
+    example: 'x64',
+    name: 'pe.architecture',
+    type: 'keyword',
+  },
   'pe.company': {
     category: 'pe',
     description: 'Internal company name of the file, provided at compile-time.',
@@ -2436,6 +3657,14 @@ export const fieldsBeat: BeatFields = {
     name: 'pe.file_version',
     type: 'keyword',
   },
+  'pe.imphash': {
+    category: 'pe',
+    description:
+      'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values. Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
+    example: '0c6803c4e922103c4dca5963aad36ddf',
+    name: 'pe.imphash',
+    type: 'keyword',
+  },
   'pe.original_file_name': {
     category: 'pe',
     description: 'Internal name of the file, provided at compile-time.',
@@ -2454,7 +3683,7 @@ export const fieldsBeat: BeatFields = {
     category: 'process',
     description:
       'Array of process arguments, starting with the absolute path to the executable. May be filtered to protect sensitive information.',
-    example: '["/usr/bin/ssh","-l","user","10.0.0.16"]',
+    example: '["/usr/bin/ssh", "-l", "user", "10.0.0.16"]',
     name: 'process.args',
     type: 'keyword',
   },
@@ -2466,12 +3695,28 @@ export const fieldsBeat: BeatFields = {
     name: 'process.args_count',
     type: 'long',
   },
+  'process.code_signature.digest_algorithm': {
+    category: 'process',
+    description:
+      'The hashing algorithm used to sign the process. This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
+    example: 'sha256',
+    name: 'process.code_signature.digest_algorithm',
+    type: 'keyword',
+  },
   'process.code_signature.exists': {
     category: 'process',
     description: 'Boolean to capture if a signature is present.',
     example: 'true',
     name: 'process.code_signature.exists',
     type: 'boolean',
+  },
+  'process.code_signature.signing_id': {
+    category: 'process',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'process.code_signature.signing_id',
+    type: 'keyword',
   },
   'process.code_signature.status': {
     category: 'process',
@@ -2487,6 +3732,21 @@ export const fieldsBeat: BeatFields = {
     example: 'Microsoft Corporation',
     name: 'process.code_signature.subject_name',
     type: 'keyword',
+  },
+  'process.code_signature.team_id': {
+    category: 'process',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'process.code_signature.team_id',
+    type: 'keyword',
+  },
+  'process.code_signature.timestamp': {
+    category: 'process',
+    description: 'Date and time when the code signature was generated and signed.',
+    example: '2021-01-01T12:10:30Z',
+    name: 'process.code_signature.timestamp',
+    type: 'date',
   },
   'process.code_signature.trusted': {
     category: 'process',
@@ -2510,7 +3770,200 @@ export const fieldsBeat: BeatFields = {
       'Full command line that started the process, including the absolute path to the executable, and all arguments. Some arguments may be filtered to protect sensitive information.',
     example: '/usr/bin/ssh -l user 10.0.0.16',
     name: 'process.command_line',
+    type: 'wildcard',
+  },
+  'process.elf.architecture': {
+    category: 'process',
+    description: 'Machine architecture of the ELF file.',
+    example: 'x86-64',
+    name: 'process.elf.architecture',
     type: 'keyword',
+  },
+  'process.elf.byte_order': {
+    category: 'process',
+    description: 'Byte sequence of ELF file.',
+    example: 'Little Endian',
+    name: 'process.elf.byte_order',
+    type: 'keyword',
+  },
+  'process.elf.cpu_type': {
+    category: 'process',
+    description: 'CPU type of the ELF file.',
+    example: 'Intel',
+    name: 'process.elf.cpu_type',
+    type: 'keyword',
+  },
+  'process.elf.creation_date': {
+    category: 'process',
+    description:
+      "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+    name: 'process.elf.creation_date',
+    type: 'date',
+  },
+  'process.elf.exports': {
+    category: 'process',
+    description: 'List of exported element names and types.',
+    name: 'process.elf.exports',
+    type: 'flattened',
+  },
+  'process.elf.header.abi_version': {
+    category: 'process',
+    description: 'Version of the ELF Application Binary Interface (ABI).',
+    name: 'process.elf.header.abi_version',
+    type: 'keyword',
+  },
+  'process.elf.header.class': {
+    category: 'process',
+    description: 'Header class of the ELF file.',
+    name: 'process.elf.header.class',
+    type: 'keyword',
+  },
+  'process.elf.header.data': {
+    category: 'process',
+    description: 'Data table of the ELF header.',
+    name: 'process.elf.header.data',
+    type: 'keyword',
+  },
+  'process.elf.header.entrypoint': {
+    category: 'process',
+    description: 'Header entrypoint of the ELF file.',
+    name: 'process.elf.header.entrypoint',
+    type: 'long',
+    format: 'string',
+  },
+  'process.elf.header.object_version': {
+    category: 'process',
+    description: '"0x1" for original ELF files.',
+    name: 'process.elf.header.object_version',
+    type: 'keyword',
+  },
+  'process.elf.header.os_abi': {
+    category: 'process',
+    description: 'Application Binary Interface (ABI) of the Linux OS.',
+    name: 'process.elf.header.os_abi',
+    type: 'keyword',
+  },
+  'process.elf.header.type': {
+    category: 'process',
+    description: 'Header type of the ELF file.',
+    name: 'process.elf.header.type',
+    type: 'keyword',
+  },
+  'process.elf.header.version': {
+    category: 'process',
+    description: 'Version of the ELF header.',
+    name: 'process.elf.header.version',
+    type: 'keyword',
+  },
+  'process.elf.imports': {
+    category: 'process',
+    description: 'List of imported element names and types.',
+    name: 'process.elf.imports',
+    type: 'flattened',
+  },
+  'process.elf.sections': {
+    category: 'process',
+    description:
+      'An array containing an object for each section of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
+    name: 'process.elf.sections',
+    type: 'nested',
+  },
+  'process.elf.sections.chi2': {
+    category: 'process',
+    description: 'Chi-square probability distribution of the section.',
+    name: 'process.elf.sections.chi2',
+    type: 'long',
+    format: 'number',
+  },
+  'process.elf.sections.entropy': {
+    category: 'process',
+    description: 'Shannon entropy calculation from the section.',
+    name: 'process.elf.sections.entropy',
+    type: 'long',
+    format: 'number',
+  },
+  'process.elf.sections.flags': {
+    category: 'process',
+    description: 'ELF Section List flags.',
+    name: 'process.elf.sections.flags',
+    type: 'keyword',
+  },
+  'process.elf.sections.name': {
+    category: 'process',
+    description: 'ELF Section List name.',
+    name: 'process.elf.sections.name',
+    type: 'keyword',
+  },
+  'process.elf.sections.physical_offset': {
+    category: 'process',
+    description: 'ELF Section List offset.',
+    name: 'process.elf.sections.physical_offset',
+    type: 'keyword',
+  },
+  'process.elf.sections.physical_size': {
+    category: 'process',
+    description: 'ELF Section List physical size.',
+    name: 'process.elf.sections.physical_size',
+    type: 'long',
+    format: 'bytes',
+  },
+  'process.elf.sections.type': {
+    category: 'process',
+    description: 'ELF Section List type.',
+    name: 'process.elf.sections.type',
+    type: 'keyword',
+  },
+  'process.elf.sections.virtual_address': {
+    category: 'process',
+    description: 'ELF Section List virtual address.',
+    name: 'process.elf.sections.virtual_address',
+    type: 'long',
+    format: 'string',
+  },
+  'process.elf.sections.virtual_size': {
+    category: 'process',
+    description: 'ELF Section List virtual size.',
+    name: 'process.elf.sections.virtual_size',
+    type: 'long',
+    format: 'string',
+  },
+  'process.elf.segments': {
+    category: 'process',
+    description:
+      'An array containing an object for each segment of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
+    name: 'process.elf.segments',
+    type: 'nested',
+  },
+  'process.elf.segments.sections': {
+    category: 'process',
+    description: 'ELF object segment sections.',
+    name: 'process.elf.segments.sections',
+    type: 'keyword',
+  },
+  'process.elf.segments.type': {
+    category: 'process',
+    description: 'ELF object segment type.',
+    name: 'process.elf.segments.type',
+    type: 'keyword',
+  },
+  'process.elf.shared_libraries': {
+    category: 'process',
+    description: 'List of shared libraries used by this ELF object.',
+    name: 'process.elf.shared_libraries',
+    type: 'keyword',
+  },
+  'process.elf.telfhash': {
+    category: 'process',
+    description: 'telfhash symbol hash for ELF file.',
+    name: 'process.elf.telfhash',
+    type: 'keyword',
+  },
+  'process.end': {
+    category: 'process',
+    description: 'The time the process ended.',
+    example: '2016-05-23T08:05:34.853Z',
+    name: 'process.end',
+    type: 'date',
   },
   'process.entity_id': {
     category: 'process',
@@ -2559,6 +4012,12 @@ export const fieldsBeat: BeatFields = {
     name: 'process.hash.sha512',
     type: 'keyword',
   },
+  'process.hash.ssdeep': {
+    category: 'process',
+    description: 'SSDEEP hash.',
+    name: 'process.hash.ssdeep',
+    type: 'keyword',
+  },
   'process.name': {
     category: 'process',
     description: 'Process name. Sometimes called program name or similar.',
@@ -2568,8 +4027,9 @@ export const fieldsBeat: BeatFields = {
   },
   'process.parent.args': {
     category: 'process',
-    description: 'Array of process arguments. May be filtered to protect sensitive information.',
-    example: '["ssh","-l","user","10.0.0.16"]',
+    description:
+      'Array of process arguments, starting with the absolute path to the executable. May be filtered to protect sensitive information.',
+    example: '["/usr/bin/ssh", "-l", "user", "10.0.0.16"]',
     name: 'process.parent.args',
     type: 'keyword',
   },
@@ -2581,12 +4041,28 @@ export const fieldsBeat: BeatFields = {
     name: 'process.parent.args_count',
     type: 'long',
   },
+  'process.parent.code_signature.digest_algorithm': {
+    category: 'process',
+    description:
+      'The hashing algorithm used to sign the process. This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
+    example: 'sha256',
+    name: 'process.parent.code_signature.digest_algorithm',
+    type: 'keyword',
+  },
   'process.parent.code_signature.exists': {
     category: 'process',
     description: 'Boolean to capture if a signature is present.',
     example: 'true',
     name: 'process.parent.code_signature.exists',
     type: 'boolean',
+  },
+  'process.parent.code_signature.signing_id': {
+    category: 'process',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'process.parent.code_signature.signing_id',
+    type: 'keyword',
   },
   'process.parent.code_signature.status': {
     category: 'process',
@@ -2602,6 +4078,21 @@ export const fieldsBeat: BeatFields = {
     example: 'Microsoft Corporation',
     name: 'process.parent.code_signature.subject_name',
     type: 'keyword',
+  },
+  'process.parent.code_signature.team_id': {
+    category: 'process',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'process.parent.code_signature.team_id',
+    type: 'keyword',
+  },
+  'process.parent.code_signature.timestamp': {
+    category: 'process',
+    description: 'Date and time when the code signature was generated and signed.',
+    example: '2021-01-01T12:10:30Z',
+    name: 'process.parent.code_signature.timestamp',
+    type: 'date',
   },
   'process.parent.code_signature.trusted': {
     category: 'process',
@@ -2625,7 +4116,200 @@ export const fieldsBeat: BeatFields = {
       'Full command line that started the process, including the absolute path to the executable, and all arguments. Some arguments may be filtered to protect sensitive information.',
     example: '/usr/bin/ssh -l user 10.0.0.16',
     name: 'process.parent.command_line',
+    type: 'wildcard',
+  },
+  'process.parent.elf.architecture': {
+    category: 'process',
+    description: 'Machine architecture of the ELF file.',
+    example: 'x86-64',
+    name: 'process.parent.elf.architecture',
     type: 'keyword',
+  },
+  'process.parent.elf.byte_order': {
+    category: 'process',
+    description: 'Byte sequence of ELF file.',
+    example: 'Little Endian',
+    name: 'process.parent.elf.byte_order',
+    type: 'keyword',
+  },
+  'process.parent.elf.cpu_type': {
+    category: 'process',
+    description: 'CPU type of the ELF file.',
+    example: 'Intel',
+    name: 'process.parent.elf.cpu_type',
+    type: 'keyword',
+  },
+  'process.parent.elf.creation_date': {
+    category: 'process',
+    description:
+      "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+    name: 'process.parent.elf.creation_date',
+    type: 'date',
+  },
+  'process.parent.elf.exports': {
+    category: 'process',
+    description: 'List of exported element names and types.',
+    name: 'process.parent.elf.exports',
+    type: 'flattened',
+  },
+  'process.parent.elf.header.abi_version': {
+    category: 'process',
+    description: 'Version of the ELF Application Binary Interface (ABI).',
+    name: 'process.parent.elf.header.abi_version',
+    type: 'keyword',
+  },
+  'process.parent.elf.header.class': {
+    category: 'process',
+    description: 'Header class of the ELF file.',
+    name: 'process.parent.elf.header.class',
+    type: 'keyword',
+  },
+  'process.parent.elf.header.data': {
+    category: 'process',
+    description: 'Data table of the ELF header.',
+    name: 'process.parent.elf.header.data',
+    type: 'keyword',
+  },
+  'process.parent.elf.header.entrypoint': {
+    category: 'process',
+    description: 'Header entrypoint of the ELF file.',
+    name: 'process.parent.elf.header.entrypoint',
+    type: 'long',
+    format: 'string',
+  },
+  'process.parent.elf.header.object_version': {
+    category: 'process',
+    description: '"0x1" for original ELF files.',
+    name: 'process.parent.elf.header.object_version',
+    type: 'keyword',
+  },
+  'process.parent.elf.header.os_abi': {
+    category: 'process',
+    description: 'Application Binary Interface (ABI) of the Linux OS.',
+    name: 'process.parent.elf.header.os_abi',
+    type: 'keyword',
+  },
+  'process.parent.elf.header.type': {
+    category: 'process',
+    description: 'Header type of the ELF file.',
+    name: 'process.parent.elf.header.type',
+    type: 'keyword',
+  },
+  'process.parent.elf.header.version': {
+    category: 'process',
+    description: 'Version of the ELF header.',
+    name: 'process.parent.elf.header.version',
+    type: 'keyword',
+  },
+  'process.parent.elf.imports': {
+    category: 'process',
+    description: 'List of imported element names and types.',
+    name: 'process.parent.elf.imports',
+    type: 'flattened',
+  },
+  'process.parent.elf.sections': {
+    category: 'process',
+    description:
+      'An array containing an object for each section of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
+    name: 'process.parent.elf.sections',
+    type: 'nested',
+  },
+  'process.parent.elf.sections.chi2': {
+    category: 'process',
+    description: 'Chi-square probability distribution of the section.',
+    name: 'process.parent.elf.sections.chi2',
+    type: 'long',
+    format: 'number',
+  },
+  'process.parent.elf.sections.entropy': {
+    category: 'process',
+    description: 'Shannon entropy calculation from the section.',
+    name: 'process.parent.elf.sections.entropy',
+    type: 'long',
+    format: 'number',
+  },
+  'process.parent.elf.sections.flags': {
+    category: 'process',
+    description: 'ELF Section List flags.',
+    name: 'process.parent.elf.sections.flags',
+    type: 'keyword',
+  },
+  'process.parent.elf.sections.name': {
+    category: 'process',
+    description: 'ELF Section List name.',
+    name: 'process.parent.elf.sections.name',
+    type: 'keyword',
+  },
+  'process.parent.elf.sections.physical_offset': {
+    category: 'process',
+    description: 'ELF Section List offset.',
+    name: 'process.parent.elf.sections.physical_offset',
+    type: 'keyword',
+  },
+  'process.parent.elf.sections.physical_size': {
+    category: 'process',
+    description: 'ELF Section List physical size.',
+    name: 'process.parent.elf.sections.physical_size',
+    type: 'long',
+    format: 'bytes',
+  },
+  'process.parent.elf.sections.type': {
+    category: 'process',
+    description: 'ELF Section List type.',
+    name: 'process.parent.elf.sections.type',
+    type: 'keyword',
+  },
+  'process.parent.elf.sections.virtual_address': {
+    category: 'process',
+    description: 'ELF Section List virtual address.',
+    name: 'process.parent.elf.sections.virtual_address',
+    type: 'long',
+    format: 'string',
+  },
+  'process.parent.elf.sections.virtual_size': {
+    category: 'process',
+    description: 'ELF Section List virtual size.',
+    name: 'process.parent.elf.sections.virtual_size',
+    type: 'long',
+    format: 'string',
+  },
+  'process.parent.elf.segments': {
+    category: 'process',
+    description:
+      'An array containing an object for each segment of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
+    name: 'process.parent.elf.segments',
+    type: 'nested',
+  },
+  'process.parent.elf.segments.sections': {
+    category: 'process',
+    description: 'ELF object segment sections.',
+    name: 'process.parent.elf.segments.sections',
+    type: 'keyword',
+  },
+  'process.parent.elf.segments.type': {
+    category: 'process',
+    description: 'ELF object segment type.',
+    name: 'process.parent.elf.segments.type',
+    type: 'keyword',
+  },
+  'process.parent.elf.shared_libraries': {
+    category: 'process',
+    description: 'List of shared libraries used by this ELF object.',
+    name: 'process.parent.elf.shared_libraries',
+    type: 'keyword',
+  },
+  'process.parent.elf.telfhash': {
+    category: 'process',
+    description: 'telfhash symbol hash for ELF file.',
+    name: 'process.parent.elf.telfhash',
+    type: 'keyword',
+  },
+  'process.parent.end': {
+    category: 'process',
+    description: 'The time the process ended.',
+    example: '2016-05-23T08:05:34.853Z',
+    name: 'process.parent.end',
+    type: 'date',
   },
   'process.parent.entity_id': {
     category: 'process',
@@ -2674,11 +4358,67 @@ export const fieldsBeat: BeatFields = {
     name: 'process.parent.hash.sha512',
     type: 'keyword',
   },
+  'process.parent.hash.ssdeep': {
+    category: 'process',
+    description: 'SSDEEP hash.',
+    name: 'process.parent.hash.ssdeep',
+    type: 'keyword',
+  },
   'process.parent.name': {
     category: 'process',
     description: 'Process name. Sometimes called program name or similar.',
     example: 'ssh',
     name: 'process.parent.name',
+    type: 'keyword',
+  },
+  'process.parent.pe.architecture': {
+    category: 'process',
+    description: 'CPU architecture target for the file.',
+    example: 'x64',
+    name: 'process.parent.pe.architecture',
+    type: 'keyword',
+  },
+  'process.parent.pe.company': {
+    category: 'process',
+    description: 'Internal company name of the file, provided at compile-time.',
+    example: 'Microsoft Corporation',
+    name: 'process.parent.pe.company',
+    type: 'keyword',
+  },
+  'process.parent.pe.description': {
+    category: 'process',
+    description: 'Internal description of the file, provided at compile-time.',
+    example: 'Paint',
+    name: 'process.parent.pe.description',
+    type: 'keyword',
+  },
+  'process.parent.pe.file_version': {
+    category: 'process',
+    description: 'Internal version of the file, provided at compile-time.',
+    example: '6.3.9600.17415',
+    name: 'process.parent.pe.file_version',
+    type: 'keyword',
+  },
+  'process.parent.pe.imphash': {
+    category: 'process',
+    description:
+      'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values. Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
+    example: '0c6803c4e922103c4dca5963aad36ddf',
+    name: 'process.parent.pe.imphash',
+    type: 'keyword',
+  },
+  'process.parent.pe.original_file_name': {
+    category: 'process',
+    description: 'Internal name of the file, provided at compile-time.',
+    example: 'MSPAINT.EXE',
+    name: 'process.parent.pe.original_file_name',
+    type: 'keyword',
+  },
+  'process.parent.pe.product': {
+    category: 'process',
+    description: 'Internal product name of the file, provided at compile-time.',
+    example: 'Microsoft® Windows® Operating System',
+    name: 'process.parent.pe.product',
     type: 'keyword',
   },
   'process.parent.pgid': {
@@ -2693,14 +4433,6 @@ export const fieldsBeat: BeatFields = {
     description: 'Process id.',
     example: 4242,
     name: 'process.parent.pid',
-    type: 'long',
-    format: 'string',
-  },
-  'process.parent.ppid': {
-    category: 'process',
-    description: "Parent process' pid.",
-    example: 4241,
-    name: 'process.parent.ppid',
     type: 'long',
     format: 'string',
   },
@@ -2747,6 +4479,13 @@ export const fieldsBeat: BeatFields = {
     name: 'process.parent.working_directory',
     type: 'keyword',
   },
+  'process.pe.architecture': {
+    category: 'process',
+    description: 'CPU architecture target for the file.',
+    example: 'x64',
+    name: 'process.pe.architecture',
+    type: 'keyword',
+  },
   'process.pe.company': {
     category: 'process',
     description: 'Internal company name of the file, provided at compile-time.',
@@ -2766,6 +4505,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Internal version of the file, provided at compile-time.',
     example: '6.3.9600.17415',
     name: 'process.pe.file_version',
+    type: 'keyword',
+  },
+  'process.pe.imphash': {
+    category: 'process',
+    description:
+      'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values. Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
+    example: '0c6803c4e922103c4dca5963aad36ddf',
+    name: 'process.pe.imphash',
     type: 'keyword',
   },
   'process.pe.original_file_name': {
@@ -2794,14 +4541,6 @@ export const fieldsBeat: BeatFields = {
     description: 'Process id.',
     example: 4242,
     name: 'process.pid',
-    type: 'long',
-    format: 'string',
-  },
-  'process.ppid': {
-    category: 'process',
-    description: "Parent process' pid.",
-    example: 4241,
-    name: 'process.ppid',
     type: 'long',
     format: 'string',
   },
@@ -2862,7 +4601,7 @@ export const fieldsBeat: BeatFields = {
       'Content when writing string types. Populated as an array when writing string data to the registry. For single string registry types (REG_SZ, REG_EXPAND_SZ), this should be an array with one string. For sequences of string with REG_MULTI_SZ, this array will be variable length. For numeric data, such as REG_DWORD and REG_QWORD, this should be populated with the decimal representation (e.g `"1"`).',
     example: '["C:\\rta\\red_ttp\\bin\\myapp.exe"]',
     name: 'registry.data.strings',
-    type: 'keyword',
+    type: 'wildcard',
   },
   'registry.data.type': {
     category: 'registry',
@@ -2908,6 +4647,13 @@ export const fieldsBeat: BeatFields = {
     name: 'related.hash',
     type: 'keyword',
   },
+  'related.hosts': {
+    category: 'related',
+    description:
+      'All hostnames or other host identifiers seen on your event. Example identifiers include FQDNs, domain names, workstation names, or aliases.',
+    name: 'related.hosts',
+    type: 'keyword',
+  },
   'related.ip': {
     category: 'related',
     description: 'All of the IPs seen on your event.',
@@ -2916,7 +4662,7 @@ export const fieldsBeat: BeatFields = {
   },
   'related.user': {
     category: 'related',
-    description: 'All the user names seen on your event.',
+    description: 'All the user names or other user identifiers seen on the event.',
     name: 'related.user',
     type: 'keyword',
   },
@@ -3040,6 +4786,13 @@ export const fieldsBeat: BeatFields = {
     name: 'server.geo.city_name',
     type: 'keyword',
   },
+  'server.geo.continent_code': {
+    category: 'server',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'server.geo.continent_code',
+    type: 'keyword',
+  },
   'server.geo.continent_name': {
     category: 'server',
     description: 'Name of the continent.',
@@ -3076,6 +4829,14 @@ export const fieldsBeat: BeatFields = {
     name: 'server.geo.name',
     type: 'keyword',
   },
+  'server.geo.postal_code': {
+    category: 'server',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'server.geo.postal_code',
+    type: 'keyword',
+  },
   'server.geo.region_iso_code': {
     category: 'server',
     description: 'Region ISO code.',
@@ -3090,15 +4851,24 @@ export const fieldsBeat: BeatFields = {
     name: 'server.geo.region_name',
     type: 'keyword',
   },
+  'server.geo.timezone': {
+    category: 'server',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'server.geo.timezone',
+    type: 'keyword',
+  },
   'server.ip': {
     category: 'server',
-    description: 'IP address of the server. Can be one or multiple IPv4 or IPv6 addresses.',
+    description: 'IP address of the server (IPv4 or IPv6).',
     name: 'server.ip',
     type: 'ip',
   },
   'server.mac': {
     category: 'server',
-    description: 'MAC address of the server.',
+    description:
+      'MAC address of the server. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '00-00-5E-00-53-23',
     name: 'server.mac',
     type: 'keyword',
   },
@@ -3134,15 +4904,23 @@ export const fieldsBeat: BeatFields = {
   'server.registered_domain': {
     category: 'server',
     description:
-      'The highest registered server domain, stripped of the subdomain. For example, the registered domain for "foo.google.com" is "google.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
-    example: 'google.com',
+      'The highest registered server domain, stripped of the subdomain. For example, the registered domain for "foo.example.com" is "example.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
+    example: 'example.com',
     name: 'server.registered_domain',
+    type: 'keyword',
+  },
+  'server.subdomain': {
+    category: 'server',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain. For example the subdomain portion of "www.east.mydomain.co.uk" is "east". If the domain has multiple levels of subdomain, such as "sub2.sub1.example.com", the subdomain field should contain "sub2.sub1", with no trailing period.',
+    example: 'east',
+    name: 'server.subdomain',
     type: 'keyword',
   },
   'server.top_level_domain': {
     category: 'server',
     description:
-      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for google.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
     example: 'co.uk',
     name: 'server.top_level_domain',
     type: 'keyword',
@@ -3195,15 +4973,39 @@ export const fieldsBeat: BeatFields = {
   },
   'server.user.id': {
     category: 'server',
-    description: 'Unique identifiers of the user.',
+    description: 'Unique identifier of the user.',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
     name: 'server.user.id',
     type: 'keyword',
   },
   'server.user.name': {
     category: 'server',
     description: 'Short name or login of the user.',
-    example: 'albert',
+    example: 'a.einstein',
     name: 'server.user.name',
+    type: 'keyword',
+  },
+  'server.user.roles': {
+    category: 'server',
+    description: 'Array of user roles at the time of the event.',
+    example: '["kibana_admin", "reporting_user"]',
+    name: 'server.user.roles',
+    type: 'keyword',
+  },
+  'service.address': {
+    category: 'service',
+    description:
+      'Address where data about this service was collected from. This should be a URI, network address (ipv4:port or [ipv6]:port) or a resource path (sockets).',
+    example: '172.26.0.2:5432',
+    name: 'service.address',
+    type: 'keyword',
+  },
+  'service.environment': {
+    category: 'service',
+    description:
+      'Identifies the environment where the service is running. If the same service runs in different environments (production, staging, QA, development, etc.), the environment can identify other instances of the same service. Can also group services and applications from the same environment.',
+    example: 'production',
+    name: 'service.environment',
     type: 'keyword',
   },
   'service.ephemeral_id': {
@@ -3238,10 +5040,150 @@ export const fieldsBeat: BeatFields = {
     name: 'service.node.name',
     type: 'keyword',
   },
+  'service.origin.address': {
+    category: 'service',
+    description:
+      'Address where data about this service was collected from. This should be a URI, network address (ipv4:port or [ipv6]:port) or a resource path (sockets).',
+    example: '172.26.0.2:5432',
+    name: 'service.origin.address',
+    type: 'keyword',
+  },
+  'service.origin.environment': {
+    category: 'service',
+    description:
+      'Identifies the environment where the service is running. If the same service runs in different environments (production, staging, QA, development, etc.), the environment can identify other instances of the same service. Can also group services and applications from the same environment.',
+    example: 'production',
+    name: 'service.origin.environment',
+    type: 'keyword',
+  },
+  'service.origin.ephemeral_id': {
+    category: 'service',
+    description:
+      'Ephemeral identifier of this service (if one exists). This id normally changes across restarts, but `service.id` does not.',
+    example: '8a4f500f',
+    name: 'service.origin.ephemeral_id',
+    type: 'keyword',
+  },
+  'service.origin.id': {
+    category: 'service',
+    description:
+      'Unique identifier of the running service. If the service is comprised of many nodes, the `service.id` should be the same for all nodes. This id should uniquely identify the service. This makes it possible to correlate logs and metrics for one specific service, no matter which particular node emitted the event. Note that if you need to see the events from one specific host of the service, you should filter on that `host.name` or `host.id` instead.',
+    example: 'd37e5ebfe0ae6c4972dbe9f0174a1637bb8247f6',
+    name: 'service.origin.id',
+    type: 'keyword',
+  },
+  'service.origin.name': {
+    category: 'service',
+    description:
+      'Name of the service data is collected from. The name of the service is normally user given. This allows for distributed services that run on multiple hosts to correlate the related instances based on the name. In the case of Elasticsearch the `service.name` could contain the cluster name. For Beats the `service.name` is by default a copy of the `service.type` field if no name is specified.',
+    example: 'elasticsearch-metrics',
+    name: 'service.origin.name',
+    type: 'keyword',
+  },
+  'service.origin.node.name': {
+    category: 'service',
+    description:
+      "Name of a service node. This allows for two nodes of the same service running on the same host to be differentiated. Therefore, `service.node.name` should typically be unique across nodes of a given service. In the case of Elasticsearch, the `service.node.name` could contain the unique node name within the Elasticsearch cluster. In cases where the service doesn't have the concept of a node name, the host name or container name can be used to distinguish running instances that make up this service. If those do not provide uniqueness (e.g. multiple instances of the service running on the same host) - the node name can be manually set.",
+    example: 'instance-0000000016',
+    name: 'service.origin.node.name',
+    type: 'keyword',
+  },
+  'service.origin.state': {
+    category: 'service',
+    description: 'Current state of the service.',
+    name: 'service.origin.state',
+    type: 'keyword',
+  },
+  'service.origin.type': {
+    category: 'service',
+    description:
+      'The type of the service data is collected from. The type can be used to group and correlate logs and metrics from one service type. Example: If logs or metrics are collected from Elasticsearch, `service.type` would be `elasticsearch`.',
+    example: 'elasticsearch',
+    name: 'service.origin.type',
+    type: 'keyword',
+  },
+  'service.origin.version': {
+    category: 'service',
+    description:
+      'Version of the service the data was collected from. This allows to look at a data set only for a specific version of a service.',
+    example: '3.2.4',
+    name: 'service.origin.version',
+    type: 'keyword',
+  },
   'service.state': {
     category: 'service',
     description: 'Current state of the service.',
     name: 'service.state',
+    type: 'keyword',
+  },
+  'service.target.address': {
+    category: 'service',
+    description:
+      'Address where data about this service was collected from. This should be a URI, network address (ipv4:port or [ipv6]:port) or a resource path (sockets).',
+    example: '172.26.0.2:5432',
+    name: 'service.target.address',
+    type: 'keyword',
+  },
+  'service.target.environment': {
+    category: 'service',
+    description:
+      'Identifies the environment where the service is running. If the same service runs in different environments (production, staging, QA, development, etc.), the environment can identify other instances of the same service. Can also group services and applications from the same environment.',
+    example: 'production',
+    name: 'service.target.environment',
+    type: 'keyword',
+  },
+  'service.target.ephemeral_id': {
+    category: 'service',
+    description:
+      'Ephemeral identifier of this service (if one exists). This id normally changes across restarts, but `service.id` does not.',
+    example: '8a4f500f',
+    name: 'service.target.ephemeral_id',
+    type: 'keyword',
+  },
+  'service.target.id': {
+    category: 'service',
+    description:
+      'Unique identifier of the running service. If the service is comprised of many nodes, the `service.id` should be the same for all nodes. This id should uniquely identify the service. This makes it possible to correlate logs and metrics for one specific service, no matter which particular node emitted the event. Note that if you need to see the events from one specific host of the service, you should filter on that `host.name` or `host.id` instead.',
+    example: 'd37e5ebfe0ae6c4972dbe9f0174a1637bb8247f6',
+    name: 'service.target.id',
+    type: 'keyword',
+  },
+  'service.target.name': {
+    category: 'service',
+    description:
+      'Name of the service data is collected from. The name of the service is normally user given. This allows for distributed services that run on multiple hosts to correlate the related instances based on the name. In the case of Elasticsearch the `service.name` could contain the cluster name. For Beats the `service.name` is by default a copy of the `service.type` field if no name is specified.',
+    example: 'elasticsearch-metrics',
+    name: 'service.target.name',
+    type: 'keyword',
+  },
+  'service.target.node.name': {
+    category: 'service',
+    description:
+      "Name of a service node. This allows for two nodes of the same service running on the same host to be differentiated. Therefore, `service.node.name` should typically be unique across nodes of a given service. In the case of Elasticsearch, the `service.node.name` could contain the unique node name within the Elasticsearch cluster. In cases where the service doesn't have the concept of a node name, the host name or container name can be used to distinguish running instances that make up this service. If those do not provide uniqueness (e.g. multiple instances of the service running on the same host) - the node name can be manually set.",
+    example: 'instance-0000000016',
+    name: 'service.target.node.name',
+    type: 'keyword',
+  },
+  'service.target.state': {
+    category: 'service',
+    description: 'Current state of the service.',
+    name: 'service.target.state',
+    type: 'keyword',
+  },
+  'service.target.type': {
+    category: 'service',
+    description:
+      'The type of the service data is collected from. The type can be used to group and correlate logs and metrics from one service type. Example: If logs or metrics are collected from Elasticsearch, `service.type` would be `elasticsearch`.',
+    example: 'elasticsearch',
+    name: 'service.target.type',
+    type: 'keyword',
+  },
+  'service.target.version': {
+    category: 'service',
+    description:
+      'Version of the service the data was collected from. This allows to look at a data set only for a specific version of a service.',
+    example: '3.2.4',
+    name: 'service.target.version',
     type: 'keyword',
   },
   'service.type': {
@@ -3303,6 +5245,13 @@ export const fieldsBeat: BeatFields = {
     name: 'source.geo.city_name',
     type: 'keyword',
   },
+  'source.geo.continent_code': {
+    category: 'source',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'source.geo.continent_code',
+    type: 'keyword',
+  },
   'source.geo.continent_name': {
     category: 'source',
     description: 'Name of the continent.',
@@ -3339,6 +5288,14 @@ export const fieldsBeat: BeatFields = {
     name: 'source.geo.name',
     type: 'keyword',
   },
+  'source.geo.postal_code': {
+    category: 'source',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'source.geo.postal_code',
+    type: 'keyword',
+  },
   'source.geo.region_iso_code': {
     category: 'source',
     description: 'Region ISO code.',
@@ -3353,15 +5310,24 @@ export const fieldsBeat: BeatFields = {
     name: 'source.geo.region_name',
     type: 'keyword',
   },
+  'source.geo.timezone': {
+    category: 'source',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'source.geo.timezone',
+    type: 'keyword',
+  },
   'source.ip': {
     category: 'source',
-    description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
+    description: 'IP address of the source (IPv4 or IPv6).',
     name: 'source.ip',
     type: 'ip',
   },
   'source.mac': {
     category: 'source',
-    description: 'MAC address of the source.',
+    description:
+      'MAC address of the source. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '00-00-5E-00-53-23',
     name: 'source.mac',
     type: 'keyword',
   },
@@ -3397,15 +5363,23 @@ export const fieldsBeat: BeatFields = {
   'source.registered_domain': {
     category: 'source',
     description:
-      'The highest registered source domain, stripped of the subdomain. For example, the registered domain for "foo.google.com" is "google.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
-    example: 'google.com',
+      'The highest registered source domain, stripped of the subdomain. For example, the registered domain for "foo.example.com" is "example.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
+    example: 'example.com',
     name: 'source.registered_domain',
+    type: 'keyword',
+  },
+  'source.subdomain': {
+    category: 'source',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain. For example the subdomain portion of "www.east.mydomain.co.uk" is "east". If the domain has multiple levels of subdomain, such as "sub2.sub1.example.com", the subdomain field should contain "sub2.sub1", with no trailing period.',
+    example: 'east',
+    name: 'source.subdomain',
     type: 'keyword',
   },
   'source.top_level_domain': {
     category: 'source',
     description:
-      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for google.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
     example: 'co.uk',
     name: 'source.top_level_domain',
     type: 'keyword',
@@ -3458,15 +5432,1262 @@ export const fieldsBeat: BeatFields = {
   },
   'source.user.id': {
     category: 'source',
-    description: 'Unique identifiers of the user.',
+    description: 'Unique identifier of the user.',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
     name: 'source.user.id',
     type: 'keyword',
   },
   'source.user.name': {
     category: 'source',
     description: 'Short name or login of the user.',
-    example: 'albert',
+    example: 'a.einstein',
     name: 'source.user.name',
+    type: 'keyword',
+  },
+  'source.user.roles': {
+    category: 'source',
+    description: 'Array of user roles at the time of the event.',
+    example: '["kibana_admin", "reporting_user"]',
+    name: 'source.user.roles',
+    type: 'keyword',
+  },
+  'threat.enrichments': {
+    category: 'threat',
+    description:
+      'A list of associated indicators objects enriching the event, and the context of that association/enrichment.',
+    name: 'threat.enrichments',
+    type: 'nested',
+  },
+  'threat.enrichments.indicator': {
+    category: 'threat',
+    description: 'Object containing associated indicators enriching the event.',
+    name: 'threat.enrichments.indicator',
+    type: 'object',
+  },
+  'threat.enrichments.indicator.as.number': {
+    category: 'threat',
+    description:
+      'Unique number allocated to the autonomous system. The autonomous system number (ASN) uniquely identifies each network on the Internet.',
+    example: 15169,
+    name: 'threat.enrichments.indicator.as.number',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.as.organization.name': {
+    category: 'threat',
+    description: 'Organization name.',
+    example: 'Google LLC',
+    name: 'threat.enrichments.indicator.as.organization.name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.confidence': {
+    category: 'threat',
+    description:
+      'Identifies the vendor-neutral confidence rating using the None/Low/Medium/High scale defined in Appendix A of the STIX 2.1 framework. Vendor-specific confidence scales may be added as custom fields. Expected values are:   * Not Specified   * None   * Low   * Medium   * High',
+    example: 'Medium',
+    name: 'threat.enrichments.indicator.confidence',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.description': {
+    category: 'threat',
+    description: 'Describes the type of action conducted by the threat.',
+    example: 'IP x.x.x.x was observed delivering the Angler EK.',
+    name: 'threat.enrichments.indicator.description',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.email.address': {
+    category: 'threat',
+    description: 'Identifies a threat indicator as an email address (irrespective of direction).',
+    example: 'phish@example.com',
+    name: 'threat.enrichments.indicator.email.address',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.accessed': {
+    category: 'threat',
+    description:
+      'Last time the file was accessed. Note that not all filesystems keep track of access time.',
+    name: 'threat.enrichments.indicator.file.accessed',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.file.attributes': {
+    category: 'threat',
+    description:
+      "Array of file attributes. Attributes names will vary by platform. Here's a non-exhaustive list of values that are expected in this field: archive, compressed, directory, encrypted, execute, hidden, read, readonly, system, write.",
+    example: '["readonly", "system"]',
+    name: 'threat.enrichments.indicator.file.attributes',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.code_signature.digest_algorithm': {
+    category: 'threat',
+    description:
+      'The hashing algorithm used to sign the process. This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
+    example: 'sha256',
+    name: 'threat.enrichments.indicator.file.code_signature.digest_algorithm',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.code_signature.exists': {
+    category: 'threat',
+    description: 'Boolean to capture if a signature is present.',
+    example: 'true',
+    name: 'threat.enrichments.indicator.file.code_signature.exists',
+    type: 'boolean',
+  },
+  'threat.enrichments.indicator.file.code_signature.signing_id': {
+    category: 'threat',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'threat.enrichments.indicator.file.code_signature.signing_id',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.code_signature.status': {
+    category: 'threat',
+    description:
+      'Additional information about the certificate status. This is useful for logging cryptographic errors with the certificate validity or trust status. Leave unpopulated if the validity or trust of the certificate was unchecked.',
+    example: 'ERROR_UNTRUSTED_ROOT',
+    name: 'threat.enrichments.indicator.file.code_signature.status',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.code_signature.subject_name': {
+    category: 'threat',
+    description: 'Subject name of the code signer',
+    example: 'Microsoft Corporation',
+    name: 'threat.enrichments.indicator.file.code_signature.subject_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.code_signature.team_id': {
+    category: 'threat',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'threat.enrichments.indicator.file.code_signature.team_id',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.code_signature.timestamp': {
+    category: 'threat',
+    description: 'Date and time when the code signature was generated and signed.',
+    example: '2021-01-01T12:10:30Z',
+    name: 'threat.enrichments.indicator.file.code_signature.timestamp',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.file.code_signature.trusted': {
+    category: 'threat',
+    description:
+      'Stores the trust status of the certificate chain. Validating the trust of the certificate chain may be complicated, and this field should only be populated by tools that actively check the status.',
+    example: 'true',
+    name: 'threat.enrichments.indicator.file.code_signature.trusted',
+    type: 'boolean',
+  },
+  'threat.enrichments.indicator.file.code_signature.valid': {
+    category: 'threat',
+    description:
+      'Boolean to capture if the digital signature is verified against the binary content. Leave unpopulated if a certificate was unchecked.',
+    example: 'true',
+    name: 'threat.enrichments.indicator.file.code_signature.valid',
+    type: 'boolean',
+  },
+  'threat.enrichments.indicator.file.created': {
+    category: 'threat',
+    description: 'File creation time. Note that not all filesystems store the creation time.',
+    name: 'threat.enrichments.indicator.file.created',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.file.ctime': {
+    category: 'threat',
+    description:
+      'Last time the file attributes or metadata changed. Note that changes to the file content will update `mtime`. This implies `ctime` will be adjusted at the same time, since `mtime` is an attribute of the file.',
+    name: 'threat.enrichments.indicator.file.ctime',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.file.device': {
+    category: 'threat',
+    description: 'Device that is the source of the file.',
+    example: 'sda',
+    name: 'threat.enrichments.indicator.file.device',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.directory': {
+    category: 'threat',
+    description:
+      'Directory where the file is located. It should include the drive letter, when appropriate.',
+    example: '/home/alice',
+    name: 'threat.enrichments.indicator.file.directory',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.drive_letter': {
+    category: 'threat',
+    description:
+      'Drive letter where the file is located. This field is only relevant on Windows. The value should be uppercase, and not include the colon.',
+    example: 'C',
+    name: 'threat.enrichments.indicator.file.drive_letter',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.architecture': {
+    category: 'threat',
+    description: 'Machine architecture of the ELF file.',
+    example: 'x86-64',
+    name: 'threat.enrichments.indicator.file.elf.architecture',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.byte_order': {
+    category: 'threat',
+    description: 'Byte sequence of ELF file.',
+    example: 'Little Endian',
+    name: 'threat.enrichments.indicator.file.elf.byte_order',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.cpu_type': {
+    category: 'threat',
+    description: 'CPU type of the ELF file.',
+    example: 'Intel',
+    name: 'threat.enrichments.indicator.file.elf.cpu_type',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.creation_date': {
+    category: 'threat',
+    description:
+      "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+    name: 'threat.enrichments.indicator.file.elf.creation_date',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.file.elf.exports': {
+    category: 'threat',
+    description: 'List of exported element names and types.',
+    name: 'threat.enrichments.indicator.file.elf.exports',
+    type: 'flattened',
+  },
+  'threat.enrichments.indicator.file.elf.header.abi_version': {
+    category: 'threat',
+    description: 'Version of the ELF Application Binary Interface (ABI).',
+    name: 'threat.enrichments.indicator.file.elf.header.abi_version',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.header.class': {
+    category: 'threat',
+    description: 'Header class of the ELF file.',
+    name: 'threat.enrichments.indicator.file.elf.header.class',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.header.data': {
+    category: 'threat',
+    description: 'Data table of the ELF header.',
+    name: 'threat.enrichments.indicator.file.elf.header.data',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.header.entrypoint': {
+    category: 'threat',
+    description: 'Header entrypoint of the ELF file.',
+    name: 'threat.enrichments.indicator.file.elf.header.entrypoint',
+    type: 'long',
+    format: 'string',
+  },
+  'threat.enrichments.indicator.file.elf.header.object_version': {
+    category: 'threat',
+    description: '"0x1" for original ELF files.',
+    name: 'threat.enrichments.indicator.file.elf.header.object_version',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.header.os_abi': {
+    category: 'threat',
+    description: 'Application Binary Interface (ABI) of the Linux OS.',
+    name: 'threat.enrichments.indicator.file.elf.header.os_abi',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.header.type': {
+    category: 'threat',
+    description: 'Header type of the ELF file.',
+    name: 'threat.enrichments.indicator.file.elf.header.type',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.header.version': {
+    category: 'threat',
+    description: 'Version of the ELF header.',
+    name: 'threat.enrichments.indicator.file.elf.header.version',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.imports': {
+    category: 'threat',
+    description: 'List of imported element names and types.',
+    name: 'threat.enrichments.indicator.file.elf.imports',
+    type: 'flattened',
+  },
+  'threat.enrichments.indicator.file.elf.sections': {
+    category: 'threat',
+    description:
+      'An array containing an object for each section of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
+    name: 'threat.enrichments.indicator.file.elf.sections',
+    type: 'nested',
+  },
+  'threat.enrichments.indicator.file.elf.sections.chi2': {
+    category: 'threat',
+    description: 'Chi-square probability distribution of the section.',
+    name: 'threat.enrichments.indicator.file.elf.sections.chi2',
+    type: 'long',
+    format: 'number',
+  },
+  'threat.enrichments.indicator.file.elf.sections.entropy': {
+    category: 'threat',
+    description: 'Shannon entropy calculation from the section.',
+    name: 'threat.enrichments.indicator.file.elf.sections.entropy',
+    type: 'long',
+    format: 'number',
+  },
+  'threat.enrichments.indicator.file.elf.sections.flags': {
+    category: 'threat',
+    description: 'ELF Section List flags.',
+    name: 'threat.enrichments.indicator.file.elf.sections.flags',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.sections.name': {
+    category: 'threat',
+    description: 'ELF Section List name.',
+    name: 'threat.enrichments.indicator.file.elf.sections.name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.sections.physical_offset': {
+    category: 'threat',
+    description: 'ELF Section List offset.',
+    name: 'threat.enrichments.indicator.file.elf.sections.physical_offset',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.sections.physical_size': {
+    category: 'threat',
+    description: 'ELF Section List physical size.',
+    name: 'threat.enrichments.indicator.file.elf.sections.physical_size',
+    type: 'long',
+    format: 'bytes',
+  },
+  'threat.enrichments.indicator.file.elf.sections.type': {
+    category: 'threat',
+    description: 'ELF Section List type.',
+    name: 'threat.enrichments.indicator.file.elf.sections.type',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.sections.virtual_address': {
+    category: 'threat',
+    description: 'ELF Section List virtual address.',
+    name: 'threat.enrichments.indicator.file.elf.sections.virtual_address',
+    type: 'long',
+    format: 'string',
+  },
+  'threat.enrichments.indicator.file.elf.sections.virtual_size': {
+    category: 'threat',
+    description: 'ELF Section List virtual size.',
+    name: 'threat.enrichments.indicator.file.elf.sections.virtual_size',
+    type: 'long',
+    format: 'string',
+  },
+  'threat.enrichments.indicator.file.elf.segments': {
+    category: 'threat',
+    description:
+      'An array containing an object for each segment of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
+    name: 'threat.enrichments.indicator.file.elf.segments',
+    type: 'nested',
+  },
+  'threat.enrichments.indicator.file.elf.segments.sections': {
+    category: 'threat',
+    description: 'ELF object segment sections.',
+    name: 'threat.enrichments.indicator.file.elf.segments.sections',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.segments.type': {
+    category: 'threat',
+    description: 'ELF object segment type.',
+    name: 'threat.enrichments.indicator.file.elf.segments.type',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.shared_libraries': {
+    category: 'threat',
+    description: 'List of shared libraries used by this ELF object.',
+    name: 'threat.enrichments.indicator.file.elf.shared_libraries',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.elf.telfhash': {
+    category: 'threat',
+    description: 'telfhash symbol hash for ELF file.',
+    name: 'threat.enrichments.indicator.file.elf.telfhash',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.extension': {
+    category: 'threat',
+    description:
+      'File extension, excluding the leading dot. Note that when the file name has multiple extensions (example.tar.gz), only the last one should be captured ("gz", not "tar.gz").',
+    example: 'png',
+    name: 'threat.enrichments.indicator.file.extension',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.fork_name': {
+    category: 'threat',
+    description:
+      'A fork is additional data associated with a filesystem object. On Linux, a resource fork is used to store additional data with a filesystem object. A file always has at least one fork for the data portion, and additional forks may exist. On NTFS, this is analogous to an Alternate Data Stream (ADS), and the default data stream for a file is just called $DATA. Zone.Identifier is commonly used by Windows to track contents downloaded from the Internet. An ADS is typically of the form: `C:\\path\\to\\filename.extension:some_fork_name`, and `some_fork_name` is the value that should populate `fork_name`. `filename.extension` should populate `file.name`, and `extension` should populate `file.extension`. The full path, `file.path`, will include the fork name.',
+    example: 'Zone.Identifer',
+    name: 'threat.enrichments.indicator.file.fork_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.gid': {
+    category: 'threat',
+    description: 'Primary group ID (GID) of the file.',
+    example: '1001',
+    name: 'threat.enrichments.indicator.file.gid',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.group': {
+    category: 'threat',
+    description: 'Primary group name of the file.',
+    example: 'alice',
+    name: 'threat.enrichments.indicator.file.group',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.hash.md5': {
+    category: 'threat',
+    description: 'MD5 hash.',
+    name: 'threat.enrichments.indicator.file.hash.md5',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.hash.sha1': {
+    category: 'threat',
+    description: 'SHA1 hash.',
+    name: 'threat.enrichments.indicator.file.hash.sha1',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.hash.sha256': {
+    category: 'threat',
+    description: 'SHA256 hash.',
+    name: 'threat.enrichments.indicator.file.hash.sha256',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.hash.sha512': {
+    category: 'threat',
+    description: 'SHA512 hash.',
+    name: 'threat.enrichments.indicator.file.hash.sha512',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.hash.ssdeep': {
+    category: 'threat',
+    description: 'SSDEEP hash.',
+    name: 'threat.enrichments.indicator.file.hash.ssdeep',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.inode': {
+    category: 'threat',
+    description: 'Inode representing the file in the filesystem.',
+    example: '256383',
+    name: 'threat.enrichments.indicator.file.inode',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.mime_type': {
+    category: 'threat',
+    description:
+      'MIME type should identify the format of the file or stream of bytes using https://www.iana.org/assignments/media-types/media-types.xhtml[IANA official types], where possible. When more than one type is applicable, the most specific type should be used.',
+    name: 'threat.enrichments.indicator.file.mime_type',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.mode': {
+    category: 'threat',
+    description: 'Mode of the file in octal representation.',
+    example: '0640',
+    name: 'threat.enrichments.indicator.file.mode',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.mtime': {
+    category: 'threat',
+    description: 'Last time the file content was modified.',
+    name: 'threat.enrichments.indicator.file.mtime',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.file.name': {
+    category: 'threat',
+    description: 'Name of the file including the extension, without the directory.',
+    example: 'example.png',
+    name: 'threat.enrichments.indicator.file.name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.owner': {
+    category: 'threat',
+    description: "File owner's username.",
+    example: 'alice',
+    name: 'threat.enrichments.indicator.file.owner',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.path': {
+    category: 'threat',
+    description:
+      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
+    example: '/home/alice/example.png',
+    name: 'threat.enrichments.indicator.file.path',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.pe.architecture': {
+    category: 'threat',
+    description: 'CPU architecture target for the file.',
+    example: 'x64',
+    name: 'threat.enrichments.indicator.file.pe.architecture',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.pe.company': {
+    category: 'threat',
+    description: 'Internal company name of the file, provided at compile-time.',
+    example: 'Microsoft Corporation',
+    name: 'threat.enrichments.indicator.file.pe.company',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.pe.description': {
+    category: 'threat',
+    description: 'Internal description of the file, provided at compile-time.',
+    example: 'Paint',
+    name: 'threat.enrichments.indicator.file.pe.description',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.pe.file_version': {
+    category: 'threat',
+    description: 'Internal version of the file, provided at compile-time.',
+    example: '6.3.9600.17415',
+    name: 'threat.enrichments.indicator.file.pe.file_version',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.pe.imphash': {
+    category: 'threat',
+    description:
+      'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values. Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
+    example: '0c6803c4e922103c4dca5963aad36ddf',
+    name: 'threat.enrichments.indicator.file.pe.imphash',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.pe.original_file_name': {
+    category: 'threat',
+    description: 'Internal name of the file, provided at compile-time.',
+    example: 'MSPAINT.EXE',
+    name: 'threat.enrichments.indicator.file.pe.original_file_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.pe.product': {
+    category: 'threat',
+    description: 'Internal product name of the file, provided at compile-time.',
+    example: 'Microsoft® Windows® Operating System',
+    name: 'threat.enrichments.indicator.file.pe.product',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.size': {
+    category: 'threat',
+    description: 'File size in bytes. Only relevant when `file.type` is "file".',
+    example: 16384,
+    name: 'threat.enrichments.indicator.file.size',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.file.target_path': {
+    category: 'threat',
+    description: 'Target path for symlinks.',
+    name: 'threat.enrichments.indicator.file.target_path',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.type': {
+    category: 'threat',
+    description: 'File type (file, dir, or symlink).',
+    example: 'file',
+    name: 'threat.enrichments.indicator.file.type',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.uid': {
+    category: 'threat',
+    description: 'The user ID (UID) or security identifier (SID) of the file owner.',
+    example: '1001',
+    name: 'threat.enrichments.indicator.file.uid',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.alternative_names': {
+    category: 'threat',
+    description:
+      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    example: '*.elastic.co',
+    name: 'threat.enrichments.indicator.file.x509.alternative_names',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.issuer.common_name': {
+    category: 'threat',
+    description: 'List of common name (CN) of issuing certificate authority.',
+    example: 'Example SHA2 High Assurance Server CA',
+    name: 'threat.enrichments.indicator.file.x509.issuer.common_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.issuer.country': {
+    category: 'threat',
+    description: 'List of country (C) codes',
+    example: 'US',
+    name: 'threat.enrichments.indicator.file.x509.issuer.country',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.issuer.distinguished_name': {
+    category: 'threat',
+    description: 'Distinguished name (DN) of issuing certificate authority.',
+    example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+    name: 'threat.enrichments.indicator.file.x509.issuer.distinguished_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.issuer.locality': {
+    category: 'threat',
+    description: 'List of locality names (L)',
+    example: 'Mountain View',
+    name: 'threat.enrichments.indicator.file.x509.issuer.locality',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.issuer.organization': {
+    category: 'threat',
+    description: 'List of organizations (O) of issuing certificate authority.',
+    example: 'Example Inc',
+    name: 'threat.enrichments.indicator.file.x509.issuer.organization',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.issuer.organizational_unit': {
+    category: 'threat',
+    description: 'List of organizational units (OU) of issuing certificate authority.',
+    example: 'www.example.com',
+    name: 'threat.enrichments.indicator.file.x509.issuer.organizational_unit',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.issuer.state_or_province': {
+    category: 'threat',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'threat.enrichments.indicator.file.x509.issuer.state_or_province',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.not_after': {
+    category: 'threat',
+    description: 'Time at which the certificate is no longer considered valid.',
+    example: '"2020-07-16T03:15:39.000Z"',
+    name: 'threat.enrichments.indicator.file.x509.not_after',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.file.x509.not_before': {
+    category: 'threat',
+    description: 'Time at which the certificate is first considered valid.',
+    example: '"2019-08-16T01:40:25.000Z"',
+    name: 'threat.enrichments.indicator.file.x509.not_before',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.file.x509.public_key_algorithm': {
+    category: 'threat',
+    description: 'Algorithm used to generate the public key.',
+    example: 'RSA',
+    name: 'threat.enrichments.indicator.file.x509.public_key_algorithm',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.public_key_curve': {
+    category: 'threat',
+    description:
+      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    example: 'nistp521',
+    name: 'threat.enrichments.indicator.file.x509.public_key_curve',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.public_key_exponent': {
+    category: 'threat',
+    description: 'Exponent used to derive the public key. This is algorithm specific.',
+    example: 65537,
+    name: 'threat.enrichments.indicator.file.x509.public_key_exponent',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.file.x509.public_key_size': {
+    category: 'threat',
+    description: 'The size of the public key space in bits.',
+    example: 2048,
+    name: 'threat.enrichments.indicator.file.x509.public_key_size',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.file.x509.serial_number': {
+    category: 'threat',
+    description:
+      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    example: '55FBB9C7DEBF09809D12CCAA',
+    name: 'threat.enrichments.indicator.file.x509.serial_number',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.signature_algorithm': {
+    category: 'threat',
+    description:
+      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    example: 'SHA256-RSA',
+    name: 'threat.enrichments.indicator.file.x509.signature_algorithm',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.subject.common_name': {
+    category: 'threat',
+    description: 'List of common names (CN) of subject.',
+    example: 'shared.global.example.net',
+    name: 'threat.enrichments.indicator.file.x509.subject.common_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.subject.country': {
+    category: 'threat',
+    description: 'List of country (C) code',
+    example: 'US',
+    name: 'threat.enrichments.indicator.file.x509.subject.country',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.subject.distinguished_name': {
+    category: 'threat',
+    description: 'Distinguished name (DN) of the certificate subject entity.',
+    example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+    name: 'threat.enrichments.indicator.file.x509.subject.distinguished_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.subject.locality': {
+    category: 'threat',
+    description: 'List of locality names (L)',
+    example: 'San Francisco',
+    name: 'threat.enrichments.indicator.file.x509.subject.locality',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.subject.organization': {
+    category: 'threat',
+    description: 'List of organizations (O) of subject.',
+    example: 'Example, Inc.',
+    name: 'threat.enrichments.indicator.file.x509.subject.organization',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.subject.organizational_unit': {
+    category: 'threat',
+    description: 'List of organizational units (OU) of subject.',
+    name: 'threat.enrichments.indicator.file.x509.subject.organizational_unit',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.subject.state_or_province': {
+    category: 'threat',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'threat.enrichments.indicator.file.x509.subject.state_or_province',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.file.x509.version_number': {
+    category: 'threat',
+    description: 'Version of x509 format.',
+    example: 3,
+    name: 'threat.enrichments.indicator.file.x509.version_number',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.first_seen': {
+    category: 'threat',
+    description:
+      'The date and time when intelligence source first reported sighting this indicator.',
+    example: '2020-11-05T17:25:47.000Z',
+    name: 'threat.enrichments.indicator.first_seen',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.geo.city_name': {
+    category: 'threat',
+    description: 'City name.',
+    example: 'Montreal',
+    name: 'threat.enrichments.indicator.geo.city_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.continent_code': {
+    category: 'threat',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'threat.enrichments.indicator.geo.continent_code',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.continent_name': {
+    category: 'threat',
+    description: 'Name of the continent.',
+    example: 'North America',
+    name: 'threat.enrichments.indicator.geo.continent_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.country_iso_code': {
+    category: 'threat',
+    description: 'Country ISO code.',
+    example: 'CA',
+    name: 'threat.enrichments.indicator.geo.country_iso_code',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.country_name': {
+    category: 'threat',
+    description: 'Country name.',
+    example: 'Canada',
+    name: 'threat.enrichments.indicator.geo.country_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.location': {
+    category: 'threat',
+    description: 'Longitude and latitude.',
+    example: '{ "lon": -73.614830, "lat": 45.505918 }',
+    name: 'threat.enrichments.indicator.geo.location',
+    type: 'geo_point',
+  },
+  'threat.enrichments.indicator.geo.name': {
+    category: 'threat',
+    description:
+      'User-defined description of a location, at the level of granularity they care about. Could be the name of their data centers, the floor number, if this describes a local physical entity, city names. Not typically used in automated geolocation.',
+    example: 'boston-dc',
+    name: 'threat.enrichments.indicator.geo.name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.postal_code': {
+    category: 'threat',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'threat.enrichments.indicator.geo.postal_code',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.region_iso_code': {
+    category: 'threat',
+    description: 'Region ISO code.',
+    example: 'CA-QC',
+    name: 'threat.enrichments.indicator.geo.region_iso_code',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.region_name': {
+    category: 'threat',
+    description: 'Region name.',
+    example: 'Quebec',
+    name: 'threat.enrichments.indicator.geo.region_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.geo.timezone': {
+    category: 'threat',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'threat.enrichments.indicator.geo.timezone',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.ip': {
+    category: 'threat',
+    description: 'Identifies a threat indicator as an IP address (irrespective of direction).',
+    example: '1.2.3.4',
+    name: 'threat.enrichments.indicator.ip',
+    type: 'ip',
+  },
+  'threat.enrichments.indicator.last_seen': {
+    category: 'threat',
+    description:
+      'The date and time when intelligence source last reported sighting this indicator.',
+    example: '2020-11-05T17:25:47.000Z',
+    name: 'threat.enrichments.indicator.last_seen',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.marking.tlp': {
+    category: 'threat',
+    description:
+      'Traffic Light Protocol sharing markings. Recommended values are:   * WHITE   * GREEN   * AMBER   * RED',
+    example: 'White',
+    name: 'threat.enrichments.indicator.marking.tlp',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.modified_at': {
+    category: 'threat',
+    description:
+      'The date and time when intelligence source last modified information for this indicator.',
+    example: '2020-11-05T17:25:47.000Z',
+    name: 'threat.enrichments.indicator.modified_at',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.port': {
+    category: 'threat',
+    description: 'Identifies a threat indicator as a port number (irrespective of direction).',
+    example: 443,
+    name: 'threat.enrichments.indicator.port',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.provider': {
+    category: 'threat',
+    description: "The name of the indicator's provider.",
+    example: 'lrz_urlhaus',
+    name: 'threat.enrichments.indicator.provider',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.reference': {
+    category: 'threat',
+    description: 'Reference URL linking to additional information about this indicator.',
+    example: 'https://system.example.com/indicator/0001234',
+    name: 'threat.enrichments.indicator.reference',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.registry.data.bytes': {
+    category: 'threat',
+    description:
+      'Original bytes written with base64 encoding. For Windows registry operations, such as SetValueEx and RegQueryValueEx, this corresponds to the data pointed by `lp_data`. This is optional but provides better recoverability and should be populated for REG_BINARY encoded values.',
+    example: 'ZQBuAC0AVQBTAAAAZQBuAAAAAAA=',
+    name: 'threat.enrichments.indicator.registry.data.bytes',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.registry.data.strings': {
+    category: 'threat',
+    description:
+      'Content when writing string types. Populated as an array when writing string data to the registry. For single string registry types (REG_SZ, REG_EXPAND_SZ), this should be an array with one string. For sequences of string with REG_MULTI_SZ, this array will be variable length. For numeric data, such as REG_DWORD and REG_QWORD, this should be populated with the decimal representation (e.g `"1"`).',
+    example: '["C:\\rta\\red_ttp\\bin\\myapp.exe"]',
+    name: 'threat.enrichments.indicator.registry.data.strings',
+    type: 'wildcard',
+  },
+  'threat.enrichments.indicator.registry.data.type': {
+    category: 'threat',
+    description: 'Standard registry type for encoding contents',
+    example: 'REG_SZ',
+    name: 'threat.enrichments.indicator.registry.data.type',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.registry.hive': {
+    category: 'threat',
+    description: 'Abbreviated name for the hive.',
+    example: 'HKLM',
+    name: 'threat.enrichments.indicator.registry.hive',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.registry.key': {
+    category: 'threat',
+    description: 'Hive-relative path of keys.',
+    example:
+      'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\winword.exe',
+    name: 'threat.enrichments.indicator.registry.key',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.registry.path': {
+    category: 'threat',
+    description: 'Full path, including hive, key and value',
+    example:
+      'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\winword.exe\\Debugger',
+    name: 'threat.enrichments.indicator.registry.path',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.registry.value': {
+    category: 'threat',
+    description: 'Name of the value written.',
+    example: 'Debugger',
+    name: 'threat.enrichments.indicator.registry.value',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.scanner_stats': {
+    category: 'threat',
+    description: 'Count of AV/EDR vendors that successfully detected malicious file or URL.',
+    example: 4,
+    name: 'threat.enrichments.indicator.scanner_stats',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.sightings': {
+    category: 'threat',
+    description: 'Number of times this indicator was observed conducting threat activity.',
+    example: 20,
+    name: 'threat.enrichments.indicator.sightings',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.type': {
+    category: 'threat',
+    description:
+      'Type of indicator as represented by Cyber Observable in STIX 2.0. Recommended values:   * autonomous-system   * artifact   * directory   * domain-name   * email-addr   * file   * ipv4-addr   * ipv6-addr   * mac-addr   * mutex   * port   * process   * software   * url   * user-account   * windows-registry-key   * x509-certificate',
+    example: 'ipv4-addr',
+    name: 'threat.enrichments.indicator.type',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.domain': {
+    category: 'threat',
+    description:
+      'Domain of the url, such as "www.elastic.co". In some cases a URL may refer to an IP and/or port directly, without a domain name. In this case, the IP address would go to the `domain` field. If the URL contains a literal IPv6 address enclosed by `[` and `]` (IETF RFC 2732), the `[` and `]` characters should also be captured in the `domain` field.',
+    example: 'www.elastic.co',
+    name: 'threat.enrichments.indicator.url.domain',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.extension': {
+    category: 'threat',
+    description:
+      'The field contains the file extension from the original request url, excluding the leading dot. The file extension is only set if it exists, as not every url has a file extension. The leading period must not be included. For example, the value must be "png", not ".png". Note that when the file name has multiple extensions (example.tar.gz), only the last one should be captured ("gz", not "tar.gz").',
+    example: 'png',
+    name: 'threat.enrichments.indicator.url.extension',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.fragment': {
+    category: 'threat',
+    description:
+      'Portion of the url after the `#`, such as "top". The `#` is not part of the fragment.',
+    name: 'threat.enrichments.indicator.url.fragment',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.full': {
+    category: 'threat',
+    description:
+      'If full URLs are important to your use case, they should be stored in `url.full`, whether this field is reconstructed or present in the event source.',
+    example: 'https://www.elastic.co:443/search?q=elasticsearch#top',
+    name: 'threat.enrichments.indicator.url.full',
+    type: 'wildcard',
+  },
+  'threat.enrichments.indicator.url.original': {
+    category: 'threat',
+    description:
+      'Unmodified original url as seen in the event source. Note that in network monitoring, the observed URL may be a full URL, whereas in access logs, the URL is often just represented as a path. This field is meant to represent the URL as it was observed, complete or not.',
+    example: 'https://www.elastic.co:443/search?q=elasticsearch#top or /search?q=elasticsearch',
+    name: 'threat.enrichments.indicator.url.original',
+    type: 'wildcard',
+  },
+  'threat.enrichments.indicator.url.password': {
+    category: 'threat',
+    description: 'Password of the request.',
+    name: 'threat.enrichments.indicator.url.password',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.path': {
+    category: 'threat',
+    description: 'Path of the request, such as "/search".',
+    name: 'threat.enrichments.indicator.url.path',
+    type: 'wildcard',
+  },
+  'threat.enrichments.indicator.url.port': {
+    category: 'threat',
+    description: 'Port of the request, such as 443.',
+    example: 443,
+    name: 'threat.enrichments.indicator.url.port',
+    type: 'long',
+    format: 'string',
+  },
+  'threat.enrichments.indicator.url.query': {
+    category: 'threat',
+    description:
+      'The query field describes the query string of the request, such as "q=elasticsearch". The `?` is excluded from the query string. If a URL contains no `?`, there is no query field. If there is a `?` but no query, the query field exists with an empty string. The `exists` query can be used to differentiate between the two cases.',
+    name: 'threat.enrichments.indicator.url.query',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.registered_domain': {
+    category: 'threat',
+    description:
+      'The highest registered url domain, stripped of the subdomain. For example, the registered domain for "foo.example.com" is "example.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
+    example: 'example.com',
+    name: 'threat.enrichments.indicator.url.registered_domain',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.scheme': {
+    category: 'threat',
+    description: 'Scheme of the request, such as "https". Note: The `:` is not part of the scheme.',
+    example: 'https',
+    name: 'threat.enrichments.indicator.url.scheme',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.subdomain': {
+    category: 'threat',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain. For example the subdomain portion of "www.east.mydomain.co.uk" is "east". If the domain has multiple levels of subdomain, such as "sub2.sub1.example.com", the subdomain field should contain "sub2.sub1", with no trailing period.',
+    example: 'east',
+    name: 'threat.enrichments.indicator.url.subdomain',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.top_level_domain': {
+    category: 'threat',
+    description:
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
+    example: 'co.uk',
+    name: 'threat.enrichments.indicator.url.top_level_domain',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.url.username': {
+    category: 'threat',
+    description: 'Username of the request.',
+    name: 'threat.enrichments.indicator.url.username',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.alternative_names': {
+    category: 'threat',
+    description:
+      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    example: '*.elastic.co',
+    name: 'threat.enrichments.indicator.x509.alternative_names',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.issuer.common_name': {
+    category: 'threat',
+    description: 'List of common name (CN) of issuing certificate authority.',
+    example: 'Example SHA2 High Assurance Server CA',
+    name: 'threat.enrichments.indicator.x509.issuer.common_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.issuer.country': {
+    category: 'threat',
+    description: 'List of country (C) codes',
+    example: 'US',
+    name: 'threat.enrichments.indicator.x509.issuer.country',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.issuer.distinguished_name': {
+    category: 'threat',
+    description: 'Distinguished name (DN) of issuing certificate authority.',
+    example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+    name: 'threat.enrichments.indicator.x509.issuer.distinguished_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.issuer.locality': {
+    category: 'threat',
+    description: 'List of locality names (L)',
+    example: 'Mountain View',
+    name: 'threat.enrichments.indicator.x509.issuer.locality',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.issuer.organization': {
+    category: 'threat',
+    description: 'List of organizations (O) of issuing certificate authority.',
+    example: 'Example Inc',
+    name: 'threat.enrichments.indicator.x509.issuer.organization',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.issuer.organizational_unit': {
+    category: 'threat',
+    description: 'List of organizational units (OU) of issuing certificate authority.',
+    example: 'www.example.com',
+    name: 'threat.enrichments.indicator.x509.issuer.organizational_unit',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.issuer.state_or_province': {
+    category: 'threat',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'threat.enrichments.indicator.x509.issuer.state_or_province',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.not_after': {
+    category: 'threat',
+    description: 'Time at which the certificate is no longer considered valid.',
+    example: '"2020-07-16T03:15:39.000Z"',
+    name: 'threat.enrichments.indicator.x509.not_after',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.x509.not_before': {
+    category: 'threat',
+    description: 'Time at which the certificate is first considered valid.',
+    example: '"2019-08-16T01:40:25.000Z"',
+    name: 'threat.enrichments.indicator.x509.not_before',
+    type: 'date',
+  },
+  'threat.enrichments.indicator.x509.public_key_algorithm': {
+    category: 'threat',
+    description: 'Algorithm used to generate the public key.',
+    example: 'RSA',
+    name: 'threat.enrichments.indicator.x509.public_key_algorithm',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.public_key_curve': {
+    category: 'threat',
+    description:
+      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    example: 'nistp521',
+    name: 'threat.enrichments.indicator.x509.public_key_curve',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.public_key_exponent': {
+    category: 'threat',
+    description: 'Exponent used to derive the public key. This is algorithm specific.',
+    example: 65537,
+    name: 'threat.enrichments.indicator.x509.public_key_exponent',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.x509.public_key_size': {
+    category: 'threat',
+    description: 'The size of the public key space in bits.',
+    example: 2048,
+    name: 'threat.enrichments.indicator.x509.public_key_size',
+    type: 'long',
+  },
+  'threat.enrichments.indicator.x509.serial_number': {
+    category: 'threat',
+    description:
+      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    example: '55FBB9C7DEBF09809D12CCAA',
+    name: 'threat.enrichments.indicator.x509.serial_number',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.signature_algorithm': {
+    category: 'threat',
+    description:
+      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    example: 'SHA256-RSA',
+    name: 'threat.enrichments.indicator.x509.signature_algorithm',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.subject.common_name': {
+    category: 'threat',
+    description: 'List of common names (CN) of subject.',
+    example: 'shared.global.example.net',
+    name: 'threat.enrichments.indicator.x509.subject.common_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.subject.country': {
+    category: 'threat',
+    description: 'List of country (C) code',
+    example: 'US',
+    name: 'threat.enrichments.indicator.x509.subject.country',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.subject.distinguished_name': {
+    category: 'threat',
+    description: 'Distinguished name (DN) of the certificate subject entity.',
+    example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+    name: 'threat.enrichments.indicator.x509.subject.distinguished_name',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.subject.locality': {
+    category: 'threat',
+    description: 'List of locality names (L)',
+    example: 'San Francisco',
+    name: 'threat.enrichments.indicator.x509.subject.locality',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.subject.organization': {
+    category: 'threat',
+    description: 'List of organizations (O) of subject.',
+    example: 'Example, Inc.',
+    name: 'threat.enrichments.indicator.x509.subject.organization',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.subject.organizational_unit': {
+    category: 'threat',
+    description: 'List of organizational units (OU) of subject.',
+    name: 'threat.enrichments.indicator.x509.subject.organizational_unit',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.subject.state_or_province': {
+    category: 'threat',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'threat.enrichments.indicator.x509.subject.state_or_province',
+    type: 'keyword',
+  },
+  'threat.enrichments.indicator.x509.version_number': {
+    category: 'threat',
+    description: 'Version of x509 format.',
+    example: 3,
+    name: 'threat.enrichments.indicator.x509.version_number',
+    type: 'keyword',
+  },
+  'threat.enrichments.matched.atomic': {
+    category: 'threat',
+    description:
+      'Identifies the atomic indicator value that matched a local environment endpoint or network event.',
+    example: 'bad-domain.com',
+    name: 'threat.enrichments.matched.atomic',
+    type: 'keyword',
+  },
+  'threat.enrichments.matched.field': {
+    category: 'threat',
+    description:
+      'Identifies the field of the atomic indicator that matched a local environment endpoint or network event.',
+    example: 'file.hash.sha256',
+    name: 'threat.enrichments.matched.field',
+    type: 'keyword',
+  },
+  'threat.enrichments.matched.id': {
+    category: 'threat',
+    description: 'Identifies the _id of the indicator document enriching the event.',
+    example: 'ff93aee5-86a1-4a61-b0e6-0cdc313d01b5',
+    name: 'threat.enrichments.matched.id',
+    type: 'keyword',
+  },
+  'threat.enrichments.matched.index': {
+    category: 'threat',
+    description: 'Identifies the _index of the indicator document enriching the event.',
+    example: 'filebeat-8.0.0-2021.05.23-000011',
+    name: 'threat.enrichments.matched.index',
+    type: 'keyword',
+  },
+  'threat.enrichments.matched.type': {
+    category: 'threat',
+    description:
+      'Identifies the type of match that caused the event to be enriched with the given indicator',
+    example: 'indicator_match_rule',
+    name: 'threat.enrichments.matched.type',
     type: 'keyword',
   },
   'threat.framework': {
@@ -3477,52 +6698,1344 @@ export const fieldsBeat: BeatFields = {
     name: 'threat.framework',
     type: 'keyword',
   },
+  'threat.group.alias': {
+    category: 'threat',
+    description:
+      'The alias(es) of the group for a set of related intrusion activity that are tracked by a common name in the security community. While not required, you can use a MITRE ATT&CK® group alias(es).',
+    example: '[ "Magecart Group 6" ]',
+    name: 'threat.group.alias',
+    type: 'keyword',
+  },
+  'threat.group.id': {
+    category: 'threat',
+    description:
+      'The id of the group for a set of related intrusion activity that are tracked by a common name in the security community. While not required, you can use a MITRE ATT&CK® group id.',
+    example: 'G0037',
+    name: 'threat.group.id',
+    type: 'keyword',
+  },
+  'threat.group.name': {
+    category: 'threat',
+    description:
+      'The name of the group for a set of related intrusion activity that are tracked by a common name in the security community. While not required, you can use a MITRE ATT&CK® group name.',
+    example: 'FIN6',
+    name: 'threat.group.name',
+    type: 'keyword',
+  },
+  'threat.group.reference': {
+    category: 'threat',
+    description:
+      'The reference URL of the group for a set of related intrusion activity that are tracked by a common name in the security community. While not required, you can use a MITRE ATT&CK® group reference URL.',
+    example: 'https://attack.mitre.org/groups/G0037/',
+    name: 'threat.group.reference',
+    type: 'keyword',
+  },
+  'threat.indicator.as.number': {
+    category: 'threat',
+    description:
+      'Unique number allocated to the autonomous system. The autonomous system number (ASN) uniquely identifies each network on the Internet.',
+    example: 15169,
+    name: 'threat.indicator.as.number',
+    type: 'long',
+  },
+  'threat.indicator.as.organization.name': {
+    category: 'threat',
+    description: 'Organization name.',
+    example: 'Google LLC',
+    name: 'threat.indicator.as.organization.name',
+    type: 'keyword',
+  },
+  'threat.indicator.confidence': {
+    category: 'threat',
+    description:
+      'Identifies the vendor-neutral confidence rating using the None/Low/Medium/High scale defined in Appendix A of the STIX 2.1 framework. Vendor-specific confidence scales may be added as custom fields. Expected values are:   * Not Specified   * None   * Low   * Medium   * High',
+    example: 'Medium',
+    name: 'threat.indicator.confidence',
+    type: 'keyword',
+  },
+  'threat.indicator.description': {
+    category: 'threat',
+    description: 'Describes the type of action conducted by the threat.',
+    example: 'IP x.x.x.x was observed delivering the Angler EK.',
+    name: 'threat.indicator.description',
+    type: 'keyword',
+  },
+  'threat.indicator.email.address': {
+    category: 'threat',
+    description: 'Identifies a threat indicator as an email address (irrespective of direction).',
+    example: 'phish@example.com',
+    name: 'threat.indicator.email.address',
+    type: 'keyword',
+  },
+  'threat.indicator.file.accessed': {
+    category: 'threat',
+    description:
+      'Last time the file was accessed. Note that not all filesystems keep track of access time.',
+    name: 'threat.indicator.file.accessed',
+    type: 'date',
+  },
+  'threat.indicator.file.attributes': {
+    category: 'threat',
+    description:
+      "Array of file attributes. Attributes names will vary by platform. Here's a non-exhaustive list of values that are expected in this field: archive, compressed, directory, encrypted, execute, hidden, read, readonly, system, write.",
+    example: '["readonly", "system"]',
+    name: 'threat.indicator.file.attributes',
+    type: 'keyword',
+  },
+  'threat.indicator.file.code_signature.digest_algorithm': {
+    category: 'threat',
+    description:
+      'The hashing algorithm used to sign the process. This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
+    example: 'sha256',
+    name: 'threat.indicator.file.code_signature.digest_algorithm',
+    type: 'keyword',
+  },
+  'threat.indicator.file.code_signature.exists': {
+    category: 'threat',
+    description: 'Boolean to capture if a signature is present.',
+    example: 'true',
+    name: 'threat.indicator.file.code_signature.exists',
+    type: 'boolean',
+  },
+  'threat.indicator.file.code_signature.signing_id': {
+    category: 'threat',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'threat.indicator.file.code_signature.signing_id',
+    type: 'keyword',
+  },
+  'threat.indicator.file.code_signature.status': {
+    category: 'threat',
+    description:
+      'Additional information about the certificate status. This is useful for logging cryptographic errors with the certificate validity or trust status. Leave unpopulated if the validity or trust of the certificate was unchecked.',
+    example: 'ERROR_UNTRUSTED_ROOT',
+    name: 'threat.indicator.file.code_signature.status',
+    type: 'keyword',
+  },
+  'threat.indicator.file.code_signature.subject_name': {
+    category: 'threat',
+    description: 'Subject name of the code signer',
+    example: 'Microsoft Corporation',
+    name: 'threat.indicator.file.code_signature.subject_name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.code_signature.team_id': {
+    category: 'threat',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'threat.indicator.file.code_signature.team_id',
+    type: 'keyword',
+  },
+  'threat.indicator.file.code_signature.timestamp': {
+    category: 'threat',
+    description: 'Date and time when the code signature was generated and signed.',
+    example: '2021-01-01T12:10:30Z',
+    name: 'threat.indicator.file.code_signature.timestamp',
+    type: 'date',
+  },
+  'threat.indicator.file.code_signature.trusted': {
+    category: 'threat',
+    description:
+      'Stores the trust status of the certificate chain. Validating the trust of the certificate chain may be complicated, and this field should only be populated by tools that actively check the status.',
+    example: 'true',
+    name: 'threat.indicator.file.code_signature.trusted',
+    type: 'boolean',
+  },
+  'threat.indicator.file.code_signature.valid': {
+    category: 'threat',
+    description:
+      'Boolean to capture if the digital signature is verified against the binary content. Leave unpopulated if a certificate was unchecked.',
+    example: 'true',
+    name: 'threat.indicator.file.code_signature.valid',
+    type: 'boolean',
+  },
+  'threat.indicator.file.created': {
+    category: 'threat',
+    description: 'File creation time. Note that not all filesystems store the creation time.',
+    name: 'threat.indicator.file.created',
+    type: 'date',
+  },
+  'threat.indicator.file.ctime': {
+    category: 'threat',
+    description:
+      'Last time the file attributes or metadata changed. Note that changes to the file content will update `mtime`. This implies `ctime` will be adjusted at the same time, since `mtime` is an attribute of the file.',
+    name: 'threat.indicator.file.ctime',
+    type: 'date',
+  },
+  'threat.indicator.file.device': {
+    category: 'threat',
+    description: 'Device that is the source of the file.',
+    example: 'sda',
+    name: 'threat.indicator.file.device',
+    type: 'keyword',
+  },
+  'threat.indicator.file.directory': {
+    category: 'threat',
+    description:
+      'Directory where the file is located. It should include the drive letter, when appropriate.',
+    example: '/home/alice',
+    name: 'threat.indicator.file.directory',
+    type: 'keyword',
+  },
+  'threat.indicator.file.drive_letter': {
+    category: 'threat',
+    description:
+      'Drive letter where the file is located. This field is only relevant on Windows. The value should be uppercase, and not include the colon.',
+    example: 'C',
+    name: 'threat.indicator.file.drive_letter',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.architecture': {
+    category: 'threat',
+    description: 'Machine architecture of the ELF file.',
+    example: 'x86-64',
+    name: 'threat.indicator.file.elf.architecture',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.byte_order': {
+    category: 'threat',
+    description: 'Byte sequence of ELF file.',
+    example: 'Little Endian',
+    name: 'threat.indicator.file.elf.byte_order',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.cpu_type': {
+    category: 'threat',
+    description: 'CPU type of the ELF file.',
+    example: 'Intel',
+    name: 'threat.indicator.file.elf.cpu_type',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.creation_date': {
+    category: 'threat',
+    description:
+      "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+    name: 'threat.indicator.file.elf.creation_date',
+    type: 'date',
+  },
+  'threat.indicator.file.elf.exports': {
+    category: 'threat',
+    description: 'List of exported element names and types.',
+    name: 'threat.indicator.file.elf.exports',
+    type: 'flattened',
+  },
+  'threat.indicator.file.elf.header.abi_version': {
+    category: 'threat',
+    description: 'Version of the ELF Application Binary Interface (ABI).',
+    name: 'threat.indicator.file.elf.header.abi_version',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.header.class': {
+    category: 'threat',
+    description: 'Header class of the ELF file.',
+    name: 'threat.indicator.file.elf.header.class',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.header.data': {
+    category: 'threat',
+    description: 'Data table of the ELF header.',
+    name: 'threat.indicator.file.elf.header.data',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.header.entrypoint': {
+    category: 'threat',
+    description: 'Header entrypoint of the ELF file.',
+    name: 'threat.indicator.file.elf.header.entrypoint',
+    type: 'long',
+    format: 'string',
+  },
+  'threat.indicator.file.elf.header.object_version': {
+    category: 'threat',
+    description: '"0x1" for original ELF files.',
+    name: 'threat.indicator.file.elf.header.object_version',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.header.os_abi': {
+    category: 'threat',
+    description: 'Application Binary Interface (ABI) of the Linux OS.',
+    name: 'threat.indicator.file.elf.header.os_abi',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.header.type': {
+    category: 'threat',
+    description: 'Header type of the ELF file.',
+    name: 'threat.indicator.file.elf.header.type',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.header.version': {
+    category: 'threat',
+    description: 'Version of the ELF header.',
+    name: 'threat.indicator.file.elf.header.version',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.imports': {
+    category: 'threat',
+    description: 'List of imported element names and types.',
+    name: 'threat.indicator.file.elf.imports',
+    type: 'flattened',
+  },
+  'threat.indicator.file.elf.sections': {
+    category: 'threat',
+    description:
+      'An array containing an object for each section of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
+    name: 'threat.indicator.file.elf.sections',
+    type: 'nested',
+  },
+  'threat.indicator.file.elf.sections.chi2': {
+    category: 'threat',
+    description: 'Chi-square probability distribution of the section.',
+    name: 'threat.indicator.file.elf.sections.chi2',
+    type: 'long',
+    format: 'number',
+  },
+  'threat.indicator.file.elf.sections.entropy': {
+    category: 'threat',
+    description: 'Shannon entropy calculation from the section.',
+    name: 'threat.indicator.file.elf.sections.entropy',
+    type: 'long',
+    format: 'number',
+  },
+  'threat.indicator.file.elf.sections.flags': {
+    category: 'threat',
+    description: 'ELF Section List flags.',
+    name: 'threat.indicator.file.elf.sections.flags',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.sections.name': {
+    category: 'threat',
+    description: 'ELF Section List name.',
+    name: 'threat.indicator.file.elf.sections.name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.sections.physical_offset': {
+    category: 'threat',
+    description: 'ELF Section List offset.',
+    name: 'threat.indicator.file.elf.sections.physical_offset',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.sections.physical_size': {
+    category: 'threat',
+    description: 'ELF Section List physical size.',
+    name: 'threat.indicator.file.elf.sections.physical_size',
+    type: 'long',
+    format: 'bytes',
+  },
+  'threat.indicator.file.elf.sections.type': {
+    category: 'threat',
+    description: 'ELF Section List type.',
+    name: 'threat.indicator.file.elf.sections.type',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.sections.virtual_address': {
+    category: 'threat',
+    description: 'ELF Section List virtual address.',
+    name: 'threat.indicator.file.elf.sections.virtual_address',
+    type: 'long',
+    format: 'string',
+  },
+  'threat.indicator.file.elf.sections.virtual_size': {
+    category: 'threat',
+    description: 'ELF Section List virtual size.',
+    name: 'threat.indicator.file.elf.sections.virtual_size',
+    type: 'long',
+    format: 'string',
+  },
+  'threat.indicator.file.elf.segments': {
+    category: 'threat',
+    description:
+      'An array containing an object for each segment of the ELF file. The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
+    name: 'threat.indicator.file.elf.segments',
+    type: 'nested',
+  },
+  'threat.indicator.file.elf.segments.sections': {
+    category: 'threat',
+    description: 'ELF object segment sections.',
+    name: 'threat.indicator.file.elf.segments.sections',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.segments.type': {
+    category: 'threat',
+    description: 'ELF object segment type.',
+    name: 'threat.indicator.file.elf.segments.type',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.shared_libraries': {
+    category: 'threat',
+    description: 'List of shared libraries used by this ELF object.',
+    name: 'threat.indicator.file.elf.shared_libraries',
+    type: 'keyword',
+  },
+  'threat.indicator.file.elf.telfhash': {
+    category: 'threat',
+    description: 'telfhash symbol hash for ELF file.',
+    name: 'threat.indicator.file.elf.telfhash',
+    type: 'keyword',
+  },
+  'threat.indicator.file.extension': {
+    category: 'threat',
+    description:
+      'File extension, excluding the leading dot. Note that when the file name has multiple extensions (example.tar.gz), only the last one should be captured ("gz", not "tar.gz").',
+    example: 'png',
+    name: 'threat.indicator.file.extension',
+    type: 'keyword',
+  },
+  'threat.indicator.file.fork_name': {
+    category: 'threat',
+    description:
+      'A fork is additional data associated with a filesystem object. On Linux, a resource fork is used to store additional data with a filesystem object. A file always has at least one fork for the data portion, and additional forks may exist. On NTFS, this is analogous to an Alternate Data Stream (ADS), and the default data stream for a file is just called $DATA. Zone.Identifier is commonly used by Windows to track contents downloaded from the Internet. An ADS is typically of the form: `C:\\path\\to\\filename.extension:some_fork_name`, and `some_fork_name` is the value that should populate `fork_name`. `filename.extension` should populate `file.name`, and `extension` should populate `file.extension`. The full path, `file.path`, will include the fork name.',
+    example: 'Zone.Identifer',
+    name: 'threat.indicator.file.fork_name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.gid': {
+    category: 'threat',
+    description: 'Primary group ID (GID) of the file.',
+    example: '1001',
+    name: 'threat.indicator.file.gid',
+    type: 'keyword',
+  },
+  'threat.indicator.file.group': {
+    category: 'threat',
+    description: 'Primary group name of the file.',
+    example: 'alice',
+    name: 'threat.indicator.file.group',
+    type: 'keyword',
+  },
+  'threat.indicator.file.hash.md5': {
+    category: 'threat',
+    description: 'MD5 hash.',
+    name: 'threat.indicator.file.hash.md5',
+    type: 'keyword',
+  },
+  'threat.indicator.file.hash.sha1': {
+    category: 'threat',
+    description: 'SHA1 hash.',
+    name: 'threat.indicator.file.hash.sha1',
+    type: 'keyword',
+  },
+  'threat.indicator.file.hash.sha256': {
+    category: 'threat',
+    description: 'SHA256 hash.',
+    name: 'threat.indicator.file.hash.sha256',
+    type: 'keyword',
+  },
+  'threat.indicator.file.hash.sha512': {
+    category: 'threat',
+    description: 'SHA512 hash.',
+    name: 'threat.indicator.file.hash.sha512',
+    type: 'keyword',
+  },
+  'threat.indicator.file.hash.ssdeep': {
+    category: 'threat',
+    description: 'SSDEEP hash.',
+    name: 'threat.indicator.file.hash.ssdeep',
+    type: 'keyword',
+  },
+  'threat.indicator.file.inode': {
+    category: 'threat',
+    description: 'Inode representing the file in the filesystem.',
+    example: '256383',
+    name: 'threat.indicator.file.inode',
+    type: 'keyword',
+  },
+  'threat.indicator.file.mime_type': {
+    category: 'threat',
+    description:
+      'MIME type should identify the format of the file or stream of bytes using https://www.iana.org/assignments/media-types/media-types.xhtml[IANA official types], where possible. When more than one type is applicable, the most specific type should be used.',
+    name: 'threat.indicator.file.mime_type',
+    type: 'keyword',
+  },
+  'threat.indicator.file.mode': {
+    category: 'threat',
+    description: 'Mode of the file in octal representation.',
+    example: '0640',
+    name: 'threat.indicator.file.mode',
+    type: 'keyword',
+  },
+  'threat.indicator.file.mtime': {
+    category: 'threat',
+    description: 'Last time the file content was modified.',
+    name: 'threat.indicator.file.mtime',
+    type: 'date',
+  },
+  'threat.indicator.file.name': {
+    category: 'threat',
+    description: 'Name of the file including the extension, without the directory.',
+    example: 'example.png',
+    name: 'threat.indicator.file.name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.owner': {
+    category: 'threat',
+    description: "File owner's username.",
+    example: 'alice',
+    name: 'threat.indicator.file.owner',
+    type: 'keyword',
+  },
+  'threat.indicator.file.path': {
+    category: 'threat',
+    description:
+      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
+    example: '/home/alice/example.png',
+    name: 'threat.indicator.file.path',
+    type: 'keyword',
+  },
+  'threat.indicator.file.pe.architecture': {
+    category: 'threat',
+    description: 'CPU architecture target for the file.',
+    example: 'x64',
+    name: 'threat.indicator.file.pe.architecture',
+    type: 'keyword',
+  },
+  'threat.indicator.file.pe.company': {
+    category: 'threat',
+    description: 'Internal company name of the file, provided at compile-time.',
+    example: 'Microsoft Corporation',
+    name: 'threat.indicator.file.pe.company',
+    type: 'keyword',
+  },
+  'threat.indicator.file.pe.description': {
+    category: 'threat',
+    description: 'Internal description of the file, provided at compile-time.',
+    example: 'Paint',
+    name: 'threat.indicator.file.pe.description',
+    type: 'keyword',
+  },
+  'threat.indicator.file.pe.file_version': {
+    category: 'threat',
+    description: 'Internal version of the file, provided at compile-time.',
+    example: '6.3.9600.17415',
+    name: 'threat.indicator.file.pe.file_version',
+    type: 'keyword',
+  },
+  'threat.indicator.file.pe.imphash': {
+    category: 'threat',
+    description:
+      'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values. Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
+    example: '0c6803c4e922103c4dca5963aad36ddf',
+    name: 'threat.indicator.file.pe.imphash',
+    type: 'keyword',
+  },
+  'threat.indicator.file.pe.original_file_name': {
+    category: 'threat',
+    description: 'Internal name of the file, provided at compile-time.',
+    example: 'MSPAINT.EXE',
+    name: 'threat.indicator.file.pe.original_file_name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.pe.product': {
+    category: 'threat',
+    description: 'Internal product name of the file, provided at compile-time.',
+    example: 'Microsoft® Windows® Operating System',
+    name: 'threat.indicator.file.pe.product',
+    type: 'keyword',
+  },
+  'threat.indicator.file.size': {
+    category: 'threat',
+    description: 'File size in bytes. Only relevant when `file.type` is "file".',
+    example: 16384,
+    name: 'threat.indicator.file.size',
+    type: 'long',
+  },
+  'threat.indicator.file.target_path': {
+    category: 'threat',
+    description: 'Target path for symlinks.',
+    name: 'threat.indicator.file.target_path',
+    type: 'keyword',
+  },
+  'threat.indicator.file.type': {
+    category: 'threat',
+    description: 'File type (file, dir, or symlink).',
+    example: 'file',
+    name: 'threat.indicator.file.type',
+    type: 'keyword',
+  },
+  'threat.indicator.file.uid': {
+    category: 'threat',
+    description: 'The user ID (UID) or security identifier (SID) of the file owner.',
+    example: '1001',
+    name: 'threat.indicator.file.uid',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.alternative_names': {
+    category: 'threat',
+    description:
+      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    example: '*.elastic.co',
+    name: 'threat.indicator.file.x509.alternative_names',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.issuer.common_name': {
+    category: 'threat',
+    description: 'List of common name (CN) of issuing certificate authority.',
+    example: 'Example SHA2 High Assurance Server CA',
+    name: 'threat.indicator.file.x509.issuer.common_name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.issuer.country': {
+    category: 'threat',
+    description: 'List of country (C) codes',
+    example: 'US',
+    name: 'threat.indicator.file.x509.issuer.country',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.issuer.distinguished_name': {
+    category: 'threat',
+    description: 'Distinguished name (DN) of issuing certificate authority.',
+    example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+    name: 'threat.indicator.file.x509.issuer.distinguished_name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.issuer.locality': {
+    category: 'threat',
+    description: 'List of locality names (L)',
+    example: 'Mountain View',
+    name: 'threat.indicator.file.x509.issuer.locality',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.issuer.organization': {
+    category: 'threat',
+    description: 'List of organizations (O) of issuing certificate authority.',
+    example: 'Example Inc',
+    name: 'threat.indicator.file.x509.issuer.organization',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.issuer.organizational_unit': {
+    category: 'threat',
+    description: 'List of organizational units (OU) of issuing certificate authority.',
+    example: 'www.example.com',
+    name: 'threat.indicator.file.x509.issuer.organizational_unit',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.issuer.state_or_province': {
+    category: 'threat',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'threat.indicator.file.x509.issuer.state_or_province',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.not_after': {
+    category: 'threat',
+    description: 'Time at which the certificate is no longer considered valid.',
+    example: '"2020-07-16T03:15:39.000Z"',
+    name: 'threat.indicator.file.x509.not_after',
+    type: 'date',
+  },
+  'threat.indicator.file.x509.not_before': {
+    category: 'threat',
+    description: 'Time at which the certificate is first considered valid.',
+    example: '"2019-08-16T01:40:25.000Z"',
+    name: 'threat.indicator.file.x509.not_before',
+    type: 'date',
+  },
+  'threat.indicator.file.x509.public_key_algorithm': {
+    category: 'threat',
+    description: 'Algorithm used to generate the public key.',
+    example: 'RSA',
+    name: 'threat.indicator.file.x509.public_key_algorithm',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.public_key_curve': {
+    category: 'threat',
+    description:
+      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    example: 'nistp521',
+    name: 'threat.indicator.file.x509.public_key_curve',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.public_key_exponent': {
+    category: 'threat',
+    description: 'Exponent used to derive the public key. This is algorithm specific.',
+    example: 65537,
+    name: 'threat.indicator.file.x509.public_key_exponent',
+    type: 'long',
+  },
+  'threat.indicator.file.x509.public_key_size': {
+    category: 'threat',
+    description: 'The size of the public key space in bits.',
+    example: 2048,
+    name: 'threat.indicator.file.x509.public_key_size',
+    type: 'long',
+  },
+  'threat.indicator.file.x509.serial_number': {
+    category: 'threat',
+    description:
+      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    example: '55FBB9C7DEBF09809D12CCAA',
+    name: 'threat.indicator.file.x509.serial_number',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.signature_algorithm': {
+    category: 'threat',
+    description:
+      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    example: 'SHA256-RSA',
+    name: 'threat.indicator.file.x509.signature_algorithm',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.subject.common_name': {
+    category: 'threat',
+    description: 'List of common names (CN) of subject.',
+    example: 'shared.global.example.net',
+    name: 'threat.indicator.file.x509.subject.common_name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.subject.country': {
+    category: 'threat',
+    description: 'List of country (C) code',
+    example: 'US',
+    name: 'threat.indicator.file.x509.subject.country',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.subject.distinguished_name': {
+    category: 'threat',
+    description: 'Distinguished name (DN) of the certificate subject entity.',
+    example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+    name: 'threat.indicator.file.x509.subject.distinguished_name',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.subject.locality': {
+    category: 'threat',
+    description: 'List of locality names (L)',
+    example: 'San Francisco',
+    name: 'threat.indicator.file.x509.subject.locality',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.subject.organization': {
+    category: 'threat',
+    description: 'List of organizations (O) of subject.',
+    example: 'Example, Inc.',
+    name: 'threat.indicator.file.x509.subject.organization',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.subject.organizational_unit': {
+    category: 'threat',
+    description: 'List of organizational units (OU) of subject.',
+    name: 'threat.indicator.file.x509.subject.organizational_unit',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.subject.state_or_province': {
+    category: 'threat',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'threat.indicator.file.x509.subject.state_or_province',
+    type: 'keyword',
+  },
+  'threat.indicator.file.x509.version_number': {
+    category: 'threat',
+    description: 'Version of x509 format.',
+    example: 3,
+    name: 'threat.indicator.file.x509.version_number',
+    type: 'keyword',
+  },
+  'threat.indicator.first_seen': {
+    category: 'threat',
+    description:
+      'The date and time when intelligence source first reported sighting this indicator.',
+    example: '2020-11-05T17:25:47.000Z',
+    name: 'threat.indicator.first_seen',
+    type: 'date',
+  },
+  'threat.indicator.geo.city_name': {
+    category: 'threat',
+    description: 'City name.',
+    example: 'Montreal',
+    name: 'threat.indicator.geo.city_name',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.continent_code': {
+    category: 'threat',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'threat.indicator.geo.continent_code',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.continent_name': {
+    category: 'threat',
+    description: 'Name of the continent.',
+    example: 'North America',
+    name: 'threat.indicator.geo.continent_name',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.country_iso_code': {
+    category: 'threat',
+    description: 'Country ISO code.',
+    example: 'CA',
+    name: 'threat.indicator.geo.country_iso_code',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.country_name': {
+    category: 'threat',
+    description: 'Country name.',
+    example: 'Canada',
+    name: 'threat.indicator.geo.country_name',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.location': {
+    category: 'threat',
+    description: 'Longitude and latitude.',
+    example: '{ "lon": -73.614830, "lat": 45.505918 }',
+    name: 'threat.indicator.geo.location',
+    type: 'geo_point',
+  },
+  'threat.indicator.geo.name': {
+    category: 'threat',
+    description:
+      'User-defined description of a location, at the level of granularity they care about. Could be the name of their data centers, the floor number, if this describes a local physical entity, city names. Not typically used in automated geolocation.',
+    example: 'boston-dc',
+    name: 'threat.indicator.geo.name',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.postal_code': {
+    category: 'threat',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'threat.indicator.geo.postal_code',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.region_iso_code': {
+    category: 'threat',
+    description: 'Region ISO code.',
+    example: 'CA-QC',
+    name: 'threat.indicator.geo.region_iso_code',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.region_name': {
+    category: 'threat',
+    description: 'Region name.',
+    example: 'Quebec',
+    name: 'threat.indicator.geo.region_name',
+    type: 'keyword',
+  },
+  'threat.indicator.geo.timezone': {
+    category: 'threat',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'threat.indicator.geo.timezone',
+    type: 'keyword',
+  },
+  'threat.indicator.ip': {
+    category: 'threat',
+    description: 'Identifies a threat indicator as an IP address (irrespective of direction).',
+    example: '1.2.3.4',
+    name: 'threat.indicator.ip',
+    type: 'ip',
+  },
+  'threat.indicator.last_seen': {
+    category: 'threat',
+    description:
+      'The date and time when intelligence source last reported sighting this indicator.',
+    example: '2020-11-05T17:25:47.000Z',
+    name: 'threat.indicator.last_seen',
+    type: 'date',
+  },
+  'threat.indicator.marking.tlp': {
+    category: 'threat',
+    description:
+      'Traffic Light Protocol sharing markings. Recommended values are:   * WHITE   * GREEN   * AMBER   * RED',
+    example: 'WHITE',
+    name: 'threat.indicator.marking.tlp',
+    type: 'keyword',
+  },
+  'threat.indicator.modified_at': {
+    category: 'threat',
+    description:
+      'The date and time when intelligence source last modified information for this indicator.',
+    example: '2020-11-05T17:25:47.000Z',
+    name: 'threat.indicator.modified_at',
+    type: 'date',
+  },
+  'threat.indicator.port': {
+    category: 'threat',
+    description: 'Identifies a threat indicator as a port number (irrespective of direction).',
+    example: 443,
+    name: 'threat.indicator.port',
+    type: 'long',
+  },
+  'threat.indicator.provider': {
+    category: 'threat',
+    description: "The name of the indicator's provider.",
+    example: 'lrz_urlhaus',
+    name: 'threat.indicator.provider',
+    type: 'keyword',
+  },
+  'threat.indicator.reference': {
+    category: 'threat',
+    description: 'Reference URL linking to additional information about this indicator.',
+    example: 'https://system.example.com/indicator/0001234',
+    name: 'threat.indicator.reference',
+    type: 'keyword',
+  },
+  'threat.indicator.registry.data.bytes': {
+    category: 'threat',
+    description:
+      'Original bytes written with base64 encoding. For Windows registry operations, such as SetValueEx and RegQueryValueEx, this corresponds to the data pointed by `lp_data`. This is optional but provides better recoverability and should be populated for REG_BINARY encoded values.',
+    example: 'ZQBuAC0AVQBTAAAAZQBuAAAAAAA=',
+    name: 'threat.indicator.registry.data.bytes',
+    type: 'keyword',
+  },
+  'threat.indicator.registry.data.strings': {
+    category: 'threat',
+    description:
+      'Content when writing string types. Populated as an array when writing string data to the registry. For single string registry types (REG_SZ, REG_EXPAND_SZ), this should be an array with one string. For sequences of string with REG_MULTI_SZ, this array will be variable length. For numeric data, such as REG_DWORD and REG_QWORD, this should be populated with the decimal representation (e.g `"1"`).',
+    example: '["C:\\rta\\red_ttp\\bin\\myapp.exe"]',
+    name: 'threat.indicator.registry.data.strings',
+    type: 'wildcard',
+  },
+  'threat.indicator.registry.data.type': {
+    category: 'threat',
+    description: 'Standard registry type for encoding contents',
+    example: 'REG_SZ',
+    name: 'threat.indicator.registry.data.type',
+    type: 'keyword',
+  },
+  'threat.indicator.registry.hive': {
+    category: 'threat',
+    description: 'Abbreviated name for the hive.',
+    example: 'HKLM',
+    name: 'threat.indicator.registry.hive',
+    type: 'keyword',
+  },
+  'threat.indicator.registry.key': {
+    category: 'threat',
+    description: 'Hive-relative path of keys.',
+    example:
+      'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\winword.exe',
+    name: 'threat.indicator.registry.key',
+    type: 'keyword',
+  },
+  'threat.indicator.registry.path': {
+    category: 'threat',
+    description: 'Full path, including hive, key and value',
+    example:
+      'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\winword.exe\\Debugger',
+    name: 'threat.indicator.registry.path',
+    type: 'keyword',
+  },
+  'threat.indicator.registry.value': {
+    category: 'threat',
+    description: 'Name of the value written.',
+    example: 'Debugger',
+    name: 'threat.indicator.registry.value',
+    type: 'keyword',
+  },
+  'threat.indicator.scanner_stats': {
+    category: 'threat',
+    description: 'Count of AV/EDR vendors that successfully detected malicious file or URL.',
+    example: 4,
+    name: 'threat.indicator.scanner_stats',
+    type: 'long',
+  },
+  'threat.indicator.sightings': {
+    category: 'threat',
+    description: 'Number of times this indicator was observed conducting threat activity.',
+    example: 20,
+    name: 'threat.indicator.sightings',
+    type: 'long',
+  },
+  'threat.indicator.type': {
+    category: 'threat',
+    description:
+      'Type of indicator as represented by Cyber Observable in STIX 2.0. Recommended values:   * autonomous-system   * artifact   * directory   * domain-name   * email-addr   * file   * ipv4-addr   * ipv6-addr   * mac-addr   * mutex   * port   * process   * software   * url   * user-account   * windows-registry-key   * x509-certificate',
+    example: 'ipv4-addr',
+    name: 'threat.indicator.type',
+    type: 'keyword',
+  },
+  'threat.indicator.url.domain': {
+    category: 'threat',
+    description:
+      'Domain of the url, such as "www.elastic.co". In some cases a URL may refer to an IP and/or port directly, without a domain name. In this case, the IP address would go to the `domain` field. If the URL contains a literal IPv6 address enclosed by `[` and `]` (IETF RFC 2732), the `[` and `]` characters should also be captured in the `domain` field.',
+    example: 'www.elastic.co',
+    name: 'threat.indicator.url.domain',
+    type: 'keyword',
+  },
+  'threat.indicator.url.extension': {
+    category: 'threat',
+    description:
+      'The field contains the file extension from the original request url, excluding the leading dot. The file extension is only set if it exists, as not every url has a file extension. The leading period must not be included. For example, the value must be "png", not ".png". Note that when the file name has multiple extensions (example.tar.gz), only the last one should be captured ("gz", not "tar.gz").',
+    example: 'png',
+    name: 'threat.indicator.url.extension',
+    type: 'keyword',
+  },
+  'threat.indicator.url.fragment': {
+    category: 'threat',
+    description:
+      'Portion of the url after the `#`, such as "top". The `#` is not part of the fragment.',
+    name: 'threat.indicator.url.fragment',
+    type: 'keyword',
+  },
+  'threat.indicator.url.full': {
+    category: 'threat',
+    description:
+      'If full URLs are important to your use case, they should be stored in `url.full`, whether this field is reconstructed or present in the event source.',
+    example: 'https://www.elastic.co:443/search?q=elasticsearch#top',
+    name: 'threat.indicator.url.full',
+    type: 'wildcard',
+  },
+  'threat.indicator.url.original': {
+    category: 'threat',
+    description:
+      'Unmodified original url as seen in the event source. Note that in network monitoring, the observed URL may be a full URL, whereas in access logs, the URL is often just represented as a path. This field is meant to represent the URL as it was observed, complete or not.',
+    example: 'https://www.elastic.co:443/search?q=elasticsearch#top or /search?q=elasticsearch',
+    name: 'threat.indicator.url.original',
+    type: 'wildcard',
+  },
+  'threat.indicator.url.password': {
+    category: 'threat',
+    description: 'Password of the request.',
+    name: 'threat.indicator.url.password',
+    type: 'keyword',
+  },
+  'threat.indicator.url.path': {
+    category: 'threat',
+    description: 'Path of the request, such as "/search".',
+    name: 'threat.indicator.url.path',
+    type: 'wildcard',
+  },
+  'threat.indicator.url.port': {
+    category: 'threat',
+    description: 'Port of the request, such as 443.',
+    example: 443,
+    name: 'threat.indicator.url.port',
+    type: 'long',
+    format: 'string',
+  },
+  'threat.indicator.url.query': {
+    category: 'threat',
+    description:
+      'The query field describes the query string of the request, such as "q=elasticsearch". The `?` is excluded from the query string. If a URL contains no `?`, there is no query field. If there is a `?` but no query, the query field exists with an empty string. The `exists` query can be used to differentiate between the two cases.',
+    name: 'threat.indicator.url.query',
+    type: 'keyword',
+  },
+  'threat.indicator.url.registered_domain': {
+    category: 'threat',
+    description:
+      'The highest registered url domain, stripped of the subdomain. For example, the registered domain for "foo.example.com" is "example.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
+    example: 'example.com',
+    name: 'threat.indicator.url.registered_domain',
+    type: 'keyword',
+  },
+  'threat.indicator.url.scheme': {
+    category: 'threat',
+    description: 'Scheme of the request, such as "https". Note: The `:` is not part of the scheme.',
+    example: 'https',
+    name: 'threat.indicator.url.scheme',
+    type: 'keyword',
+  },
+  'threat.indicator.url.subdomain': {
+    category: 'threat',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain. For example the subdomain portion of "www.east.mydomain.co.uk" is "east". If the domain has multiple levels of subdomain, such as "sub2.sub1.example.com", the subdomain field should contain "sub2.sub1", with no trailing period.',
+    example: 'east',
+    name: 'threat.indicator.url.subdomain',
+    type: 'keyword',
+  },
+  'threat.indicator.url.top_level_domain': {
+    category: 'threat',
+    description:
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
+    example: 'co.uk',
+    name: 'threat.indicator.url.top_level_domain',
+    type: 'keyword',
+  },
+  'threat.indicator.url.username': {
+    category: 'threat',
+    description: 'Username of the request.',
+    name: 'threat.indicator.url.username',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.alternative_names': {
+    category: 'threat',
+    description:
+      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    example: '*.elastic.co',
+    name: 'threat.indicator.x509.alternative_names',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.issuer.common_name': {
+    category: 'threat',
+    description: 'List of common name (CN) of issuing certificate authority.',
+    example: 'Example SHA2 High Assurance Server CA',
+    name: 'threat.indicator.x509.issuer.common_name',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.issuer.country': {
+    category: 'threat',
+    description: 'List of country (C) codes',
+    example: 'US',
+    name: 'threat.indicator.x509.issuer.country',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.issuer.distinguished_name': {
+    category: 'threat',
+    description: 'Distinguished name (DN) of issuing certificate authority.',
+    example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+    name: 'threat.indicator.x509.issuer.distinguished_name',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.issuer.locality': {
+    category: 'threat',
+    description: 'List of locality names (L)',
+    example: 'Mountain View',
+    name: 'threat.indicator.x509.issuer.locality',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.issuer.organization': {
+    category: 'threat',
+    description: 'List of organizations (O) of issuing certificate authority.',
+    example: 'Example Inc',
+    name: 'threat.indicator.x509.issuer.organization',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.issuer.organizational_unit': {
+    category: 'threat',
+    description: 'List of organizational units (OU) of issuing certificate authority.',
+    example: 'www.example.com',
+    name: 'threat.indicator.x509.issuer.organizational_unit',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.issuer.state_or_province': {
+    category: 'threat',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'threat.indicator.x509.issuer.state_or_province',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.not_after': {
+    category: 'threat',
+    description: 'Time at which the certificate is no longer considered valid.',
+    example: '"2020-07-16T03:15:39.000Z"',
+    name: 'threat.indicator.x509.not_after',
+    type: 'date',
+  },
+  'threat.indicator.x509.not_before': {
+    category: 'threat',
+    description: 'Time at which the certificate is first considered valid.',
+    example: '"2019-08-16T01:40:25.000Z"',
+    name: 'threat.indicator.x509.not_before',
+    type: 'date',
+  },
+  'threat.indicator.x509.public_key_algorithm': {
+    category: 'threat',
+    description: 'Algorithm used to generate the public key.',
+    example: 'RSA',
+    name: 'threat.indicator.x509.public_key_algorithm',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.public_key_curve': {
+    category: 'threat',
+    description:
+      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    example: 'nistp521',
+    name: 'threat.indicator.x509.public_key_curve',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.public_key_exponent': {
+    category: 'threat',
+    description: 'Exponent used to derive the public key. This is algorithm specific.',
+    example: 65537,
+    name: 'threat.indicator.x509.public_key_exponent',
+    type: 'long',
+  },
+  'threat.indicator.x509.public_key_size': {
+    category: 'threat',
+    description: 'The size of the public key space in bits.',
+    example: 2048,
+    name: 'threat.indicator.x509.public_key_size',
+    type: 'long',
+  },
+  'threat.indicator.x509.serial_number': {
+    category: 'threat',
+    description:
+      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    example: '55FBB9C7DEBF09809D12CCAA',
+    name: 'threat.indicator.x509.serial_number',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.signature_algorithm': {
+    category: 'threat',
+    description:
+      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    example: 'SHA256-RSA',
+    name: 'threat.indicator.x509.signature_algorithm',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.subject.common_name': {
+    category: 'threat',
+    description: 'List of common names (CN) of subject.',
+    example: 'shared.global.example.net',
+    name: 'threat.indicator.x509.subject.common_name',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.subject.country': {
+    category: 'threat',
+    description: 'List of country (C) code',
+    example: 'US',
+    name: 'threat.indicator.x509.subject.country',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.subject.distinguished_name': {
+    category: 'threat',
+    description: 'Distinguished name (DN) of the certificate subject entity.',
+    example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+    name: 'threat.indicator.x509.subject.distinguished_name',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.subject.locality': {
+    category: 'threat',
+    description: 'List of locality names (L)',
+    example: 'San Francisco',
+    name: 'threat.indicator.x509.subject.locality',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.subject.organization': {
+    category: 'threat',
+    description: 'List of organizations (O) of subject.',
+    example: 'Example, Inc.',
+    name: 'threat.indicator.x509.subject.organization',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.subject.organizational_unit': {
+    category: 'threat',
+    description: 'List of organizational units (OU) of subject.',
+    name: 'threat.indicator.x509.subject.organizational_unit',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.subject.state_or_province': {
+    category: 'threat',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'threat.indicator.x509.subject.state_or_province',
+    type: 'keyword',
+  },
+  'threat.indicator.x509.version_number': {
+    category: 'threat',
+    description: 'Version of x509 format.',
+    example: 3,
+    name: 'threat.indicator.x509.version_number',
+    type: 'keyword',
+  },
+  'threat.software.alias': {
+    category: 'threat',
+    description:
+      'The alias(es) of the software for a set of related intrusion activity that are tracked by a common name in the security community. While not required, you can use a MITRE ATT&CK® associated software description.',
+    example: '[ "X-Agent" ]',
+    name: 'threat.software.alias',
+    type: 'keyword',
+  },
+  'threat.software.id': {
+    category: 'threat',
+    description:
+      'The id of the software used by this threat to conduct behavior commonly modeled using MITRE ATT&CK®. While not required, you can use a MITRE ATT&CK® software id.',
+    example: 'S0552',
+    name: 'threat.software.id',
+    type: 'keyword',
+  },
+  'threat.software.name': {
+    category: 'threat',
+    description:
+      'The name of the software used by this threat to conduct behavior commonly modeled using MITRE ATT&CK®. While not required, you can use a MITRE ATT&CK® software name.',
+    example: 'AdFind',
+    name: 'threat.software.name',
+    type: 'keyword',
+  },
+  'threat.software.platforms': {
+    category: 'threat',
+    description:
+      'The platforms of the software used by this threat to conduct behavior commonly modeled using MITRE ATT&CK®. Recommended Values:   * AWS   * Azure   * Azure AD   * GCP   * Linux   * macOS   * Network   * Office 365   * SaaS   * Windows  While not required, you can use a MITRE ATT&CK® software platforms.',
+    example: '[ "Windows" ]',
+    name: 'threat.software.platforms',
+    type: 'keyword',
+  },
+  'threat.software.reference': {
+    category: 'threat',
+    description:
+      'The reference URL of the software used by this threat to conduct behavior commonly modeled using MITRE ATT&CK®. While not required, you can use a MITRE ATT&CK® software reference URL.',
+    example: 'https://attack.mitre.org/software/S0552/',
+    name: 'threat.software.reference',
+    type: 'keyword',
+  },
+  'threat.software.type': {
+    category: 'threat',
+    description:
+      'The type of software used by this threat to conduct behavior commonly modeled using MITRE ATT&CK®. Recommended values   * Malware   * Tool   While not required, you can use a MITRE ATT&CK® software type.',
+    example: 'Tool',
+    name: 'threat.software.type',
+    type: 'keyword',
+  },
   'threat.tactic.id': {
     category: 'threat',
     description:
-      'The id of tactic used by this threat. You can use the Mitre ATT&CK Matrix Tactic categorization, for example. (ex. https://attack.mitre.org/tactics/TA0040/ )',
-    example: 'TA0040',
+      'The id of tactic used by this threat. You can use a MITRE ATT&CK® tactic, for example. (ex. https://attack.mitre.org/tactics/TA0002/ )',
+    example: 'TA0002',
     name: 'threat.tactic.id',
     type: 'keyword',
   },
   'threat.tactic.name': {
     category: 'threat',
     description:
-      'Name of the type of tactic used by this threat. You can use the Mitre ATT&CK Matrix Tactic categorization, for example. (ex. https://attack.mitre.org/tactics/TA0040/ )',
-    example: 'impact',
+      'Name of the type of tactic used by this threat. You can use a MITRE ATT&CK® tactic, for example. (ex. https://attack.mitre.org/tactics/TA0002/)',
+    example: 'Execution',
     name: 'threat.tactic.name',
     type: 'keyword',
   },
   'threat.tactic.reference': {
     category: 'threat',
     description:
-      'The reference url of tactic used by this threat. You can use the Mitre ATT&CK Matrix Tactic categorization, for example. (ex. https://attack.mitre.org/tactics/TA0040/ )',
-    example: 'https://attack.mitre.org/tactics/TA0040/',
+      'The reference url of tactic used by this threat. You can use a MITRE ATT&CK® tactic, for example. (ex. https://attack.mitre.org/tactics/TA0002/ )',
+    example: 'https://attack.mitre.org/tactics/TA0002/',
     name: 'threat.tactic.reference',
     type: 'keyword',
   },
   'threat.technique.id': {
     category: 'threat',
     description:
-      'The id of technique used by this tactic. You can use the Mitre ATT&CK Matrix Tactic categorization, for example. (ex. https://attack.mitre.org/techniques/T1499/ )',
-    example: 'T1499',
+      'The id of technique used by this threat. You can use a MITRE ATT&CK® technique, for example. (ex. https://attack.mitre.org/techniques/T1059/)',
+    example: 'T1059',
     name: 'threat.technique.id',
     type: 'keyword',
   },
   'threat.technique.name': {
     category: 'threat',
     description:
-      'The name of technique used by this tactic. You can use the Mitre ATT&CK Matrix Tactic categorization, for example. (ex. https://attack.mitre.org/techniques/T1499/ )',
-    example: 'endpoint denial of service',
+      'The name of technique used by this threat. You can use a MITRE ATT&CK® technique, for example. (ex. https://attack.mitre.org/techniques/T1059/)',
+    example: 'Command and Scripting Interpreter',
     name: 'threat.technique.name',
     type: 'keyword',
   },
   'threat.technique.reference': {
     category: 'threat',
     description:
-      'The reference url of technique used by this tactic. You can use the Mitre ATT&CK Matrix Tactic categorization, for example. (ex. https://attack.mitre.org/techniques/T1499/ )',
-    example: 'https://attack.mitre.org/techniques/T1499/',
+      'The reference url of technique used by this threat. You can use a MITRE ATT&CK® technique, for example. (ex. https://attack.mitre.org/techniques/T1059/)',
+    example: 'https://attack.mitre.org/techniques/T1059/',
     name: 'threat.technique.reference',
+    type: 'keyword',
+  },
+  'threat.technique.subtechnique.id': {
+    category: 'threat',
+    description:
+      'The full id of subtechnique used by this threat. You can use a MITRE ATT&CK® subtechnique, for example. (ex. https://attack.mitre.org/techniques/T1059/001/)',
+    example: 'T1059.001',
+    name: 'threat.technique.subtechnique.id',
+    type: 'keyword',
+  },
+  'threat.technique.subtechnique.name': {
+    category: 'threat',
+    description:
+      'The name of subtechnique used by this threat. You can use a MITRE ATT&CK® subtechnique, for example. (ex. https://attack.mitre.org/techniques/T1059/001/)',
+    example: 'PowerShell',
+    name: 'threat.technique.subtechnique.name',
+    type: 'keyword',
+  },
+  'threat.technique.subtechnique.reference': {
+    category: 'threat',
+    description:
+      'The reference url of subtechnique used by this threat. You can use a MITRE ATT&CK® subtechnique, for example. (ex. https://attack.mitre.org/techniques/T1059/001/)',
+    example: 'https://attack.mitre.org/techniques/T1059/001/',
+    name: 'threat.technique.subtechnique.reference',
     type: 'keyword',
   },
   'tls.cipher': {
@@ -3544,7 +8057,7 @@ export const fieldsBeat: BeatFields = {
     category: 'tls',
     description:
       'Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain.',
-    example: '["MII...","MII..."]',
+    example: '["MII...", "MII..."]',
     name: 'tls.client.certificate_chain',
     type: 'keyword',
   },
@@ -3576,7 +8089,7 @@ export const fieldsBeat: BeatFields = {
     category: 'tls',
     description:
       'Distinguished name of subject of the issuer of the x.509 certificate presented by the client.',
-    example: 'CN=MyDomain Root CA, OU=Infrastructure Team, DC=mydomain, DC=com',
+    example: 'CN=Example Root CA, OU=Infrastructure Team, DC=example, DC=com',
     name: 'tls.client.issuer',
     type: 'keyword',
   },
@@ -3604,7 +8117,7 @@ export const fieldsBeat: BeatFields = {
   'tls.client.server_name': {
     category: 'tls',
     description:
-      'Also called an SNI, this tells the server which hostname to which the client is attempting to connect. When this value is available, it should get copied to `destination.domain`.',
+      'Also called an SNI, this tells the server which hostname to which the client is attempting to connect to. When this value is available, it should get copied to `destination.domain`.',
     example: 'www.elastic.co',
     name: 'tls.client.server_name',
     type: 'keyword',
@@ -3612,7 +8125,7 @@ export const fieldsBeat: BeatFields = {
   'tls.client.subject': {
     category: 'tls',
     description: 'Distinguished name of subject of the x.509 certificate presented by the client.',
-    example: 'CN=myclient, OU=Documentation Team, DC=mydomain, DC=com',
+    example: 'CN=myclient, OU=Documentation Team, DC=example, DC=com',
     name: 'tls.client.subject',
     type: 'keyword',
   },
@@ -3620,8 +8133,179 @@ export const fieldsBeat: BeatFields = {
     category: 'tls',
     description: 'Array of ciphers offered by the client during the client hello.',
     example:
-      '["TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384","..."]',
+      '["TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "..."]',
     name: 'tls.client.supported_ciphers',
+    type: 'keyword',
+  },
+  'tls.client.x509.alternative_names': {
+    category: 'tls',
+    description:
+      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    example: '*.elastic.co',
+    name: 'tls.client.x509.alternative_names',
+    type: 'keyword',
+  },
+  'tls.client.x509.issuer.common_name': {
+    category: 'tls',
+    description: 'List of common name (CN) of issuing certificate authority.',
+    example: 'Example SHA2 High Assurance Server CA',
+    name: 'tls.client.x509.issuer.common_name',
+    type: 'keyword',
+  },
+  'tls.client.x509.issuer.country': {
+    category: 'tls',
+    description: 'List of country (C) codes',
+    example: 'US',
+    name: 'tls.client.x509.issuer.country',
+    type: 'keyword',
+  },
+  'tls.client.x509.issuer.distinguished_name': {
+    category: 'tls',
+    description: 'Distinguished name (DN) of issuing certificate authority.',
+    example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+    name: 'tls.client.x509.issuer.distinguished_name',
+    type: 'keyword',
+  },
+  'tls.client.x509.issuer.locality': {
+    category: 'tls',
+    description: 'List of locality names (L)',
+    example: 'Mountain View',
+    name: 'tls.client.x509.issuer.locality',
+    type: 'keyword',
+  },
+  'tls.client.x509.issuer.organization': {
+    category: 'tls',
+    description: 'List of organizations (O) of issuing certificate authority.',
+    example: 'Example Inc',
+    name: 'tls.client.x509.issuer.organization',
+    type: 'keyword',
+  },
+  'tls.client.x509.issuer.organizational_unit': {
+    category: 'tls',
+    description: 'List of organizational units (OU) of issuing certificate authority.',
+    example: 'www.example.com',
+    name: 'tls.client.x509.issuer.organizational_unit',
+    type: 'keyword',
+  },
+  'tls.client.x509.issuer.state_or_province': {
+    category: 'tls',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'tls.client.x509.issuer.state_or_province',
+    type: 'keyword',
+  },
+  'tls.client.x509.not_after': {
+    category: 'tls',
+    description: 'Time at which the certificate is no longer considered valid.',
+    example: '"2020-07-16T03:15:39.000Z"',
+    name: 'tls.client.x509.not_after',
+    type: 'date',
+  },
+  'tls.client.x509.not_before': {
+    category: 'tls',
+    description: 'Time at which the certificate is first considered valid.',
+    example: '"2019-08-16T01:40:25.000Z"',
+    name: 'tls.client.x509.not_before',
+    type: 'date',
+  },
+  'tls.client.x509.public_key_algorithm': {
+    category: 'tls',
+    description: 'Algorithm used to generate the public key.',
+    example: 'RSA',
+    name: 'tls.client.x509.public_key_algorithm',
+    type: 'keyword',
+  },
+  'tls.client.x509.public_key_curve': {
+    category: 'tls',
+    description:
+      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    example: 'nistp521',
+    name: 'tls.client.x509.public_key_curve',
+    type: 'keyword',
+  },
+  'tls.client.x509.public_key_exponent': {
+    category: 'tls',
+    description: 'Exponent used to derive the public key. This is algorithm specific.',
+    example: 65537,
+    name: 'tls.client.x509.public_key_exponent',
+    type: 'long',
+  },
+  'tls.client.x509.public_key_size': {
+    category: 'tls',
+    description: 'The size of the public key space in bits.',
+    example: 2048,
+    name: 'tls.client.x509.public_key_size',
+    type: 'long',
+  },
+  'tls.client.x509.serial_number': {
+    category: 'tls',
+    description:
+      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    example: '55FBB9C7DEBF09809D12CCAA',
+    name: 'tls.client.x509.serial_number',
+    type: 'keyword',
+  },
+  'tls.client.x509.signature_algorithm': {
+    category: 'tls',
+    description:
+      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    example: 'SHA256-RSA',
+    name: 'tls.client.x509.signature_algorithm',
+    type: 'keyword',
+  },
+  'tls.client.x509.subject.common_name': {
+    category: 'tls',
+    description: 'List of common names (CN) of subject.',
+    example: 'shared.global.example.net',
+    name: 'tls.client.x509.subject.common_name',
+    type: 'keyword',
+  },
+  'tls.client.x509.subject.country': {
+    category: 'tls',
+    description: 'List of country (C) code',
+    example: 'US',
+    name: 'tls.client.x509.subject.country',
+    type: 'keyword',
+  },
+  'tls.client.x509.subject.distinguished_name': {
+    category: 'tls',
+    description: 'Distinguished name (DN) of the certificate subject entity.',
+    example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+    name: 'tls.client.x509.subject.distinguished_name',
+    type: 'keyword',
+  },
+  'tls.client.x509.subject.locality': {
+    category: 'tls',
+    description: 'List of locality names (L)',
+    example: 'San Francisco',
+    name: 'tls.client.x509.subject.locality',
+    type: 'keyword',
+  },
+  'tls.client.x509.subject.organization': {
+    category: 'tls',
+    description: 'List of organizations (O) of subject.',
+    example: 'Example, Inc.',
+    name: 'tls.client.x509.subject.organization',
+    type: 'keyword',
+  },
+  'tls.client.x509.subject.organizational_unit': {
+    category: 'tls',
+    description: 'List of organizational units (OU) of subject.',
+    name: 'tls.client.x509.subject.organizational_unit',
+    type: 'keyword',
+  },
+  'tls.client.x509.subject.state_or_province': {
+    category: 'tls',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'tls.client.x509.subject.state_or_province',
+    type: 'keyword',
+  },
+  'tls.client.x509.version_number': {
+    category: 'tls',
+    description: 'Version of x509 format.',
+    example: 3,
+    name: 'tls.client.x509.version_number',
     type: 'keyword',
   },
   'tls.curve': {
@@ -3665,7 +8349,7 @@ export const fieldsBeat: BeatFields = {
     category: 'tls',
     description:
       'Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain.',
-    example: '["MII...","MII..."]',
+    example: '["MII...", "MII..."]',
     name: 'tls.server.certificate_chain',
     type: 'keyword',
   },
@@ -3696,7 +8380,7 @@ export const fieldsBeat: BeatFields = {
   'tls.server.issuer': {
     category: 'tls',
     description: 'Subject of the issuer of the x.509 certificate presented by the server.',
-    example: 'CN=MyDomain Root CA, OU=Infrastructure Team, DC=mydomain, DC=com',
+    example: 'CN=Example Root CA, OU=Infrastructure Team, DC=example, DC=com',
     name: 'tls.server.issuer',
     type: 'keyword',
   },
@@ -3724,8 +8408,179 @@ export const fieldsBeat: BeatFields = {
   'tls.server.subject': {
     category: 'tls',
     description: 'Subject of the x.509 certificate presented by the server.',
-    example: 'CN=www.mydomain.com, OU=Infrastructure Team, DC=mydomain, DC=com',
+    example: 'CN=www.example.com, OU=Infrastructure Team, DC=example, DC=com',
     name: 'tls.server.subject',
+    type: 'keyword',
+  },
+  'tls.server.x509.alternative_names': {
+    category: 'tls',
+    description:
+      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    example: '*.elastic.co',
+    name: 'tls.server.x509.alternative_names',
+    type: 'keyword',
+  },
+  'tls.server.x509.issuer.common_name': {
+    category: 'tls',
+    description: 'List of common name (CN) of issuing certificate authority.',
+    example: 'Example SHA2 High Assurance Server CA',
+    name: 'tls.server.x509.issuer.common_name',
+    type: 'keyword',
+  },
+  'tls.server.x509.issuer.country': {
+    category: 'tls',
+    description: 'List of country (C) codes',
+    example: 'US',
+    name: 'tls.server.x509.issuer.country',
+    type: 'keyword',
+  },
+  'tls.server.x509.issuer.distinguished_name': {
+    category: 'tls',
+    description: 'Distinguished name (DN) of issuing certificate authority.',
+    example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+    name: 'tls.server.x509.issuer.distinguished_name',
+    type: 'keyword',
+  },
+  'tls.server.x509.issuer.locality': {
+    category: 'tls',
+    description: 'List of locality names (L)',
+    example: 'Mountain View',
+    name: 'tls.server.x509.issuer.locality',
+    type: 'keyword',
+  },
+  'tls.server.x509.issuer.organization': {
+    category: 'tls',
+    description: 'List of organizations (O) of issuing certificate authority.',
+    example: 'Example Inc',
+    name: 'tls.server.x509.issuer.organization',
+    type: 'keyword',
+  },
+  'tls.server.x509.issuer.organizational_unit': {
+    category: 'tls',
+    description: 'List of organizational units (OU) of issuing certificate authority.',
+    example: 'www.example.com',
+    name: 'tls.server.x509.issuer.organizational_unit',
+    type: 'keyword',
+  },
+  'tls.server.x509.issuer.state_or_province': {
+    category: 'tls',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'tls.server.x509.issuer.state_or_province',
+    type: 'keyword',
+  },
+  'tls.server.x509.not_after': {
+    category: 'tls',
+    description: 'Time at which the certificate is no longer considered valid.',
+    example: '"2020-07-16T03:15:39.000Z"',
+    name: 'tls.server.x509.not_after',
+    type: 'date',
+  },
+  'tls.server.x509.not_before': {
+    category: 'tls',
+    description: 'Time at which the certificate is first considered valid.',
+    example: '"2019-08-16T01:40:25.000Z"',
+    name: 'tls.server.x509.not_before',
+    type: 'date',
+  },
+  'tls.server.x509.public_key_algorithm': {
+    category: 'tls',
+    description: 'Algorithm used to generate the public key.',
+    example: 'RSA',
+    name: 'tls.server.x509.public_key_algorithm',
+    type: 'keyword',
+  },
+  'tls.server.x509.public_key_curve': {
+    category: 'tls',
+    description:
+      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    example: 'nistp521',
+    name: 'tls.server.x509.public_key_curve',
+    type: 'keyword',
+  },
+  'tls.server.x509.public_key_exponent': {
+    category: 'tls',
+    description: 'Exponent used to derive the public key. This is algorithm specific.',
+    example: 65537,
+    name: 'tls.server.x509.public_key_exponent',
+    type: 'long',
+  },
+  'tls.server.x509.public_key_size': {
+    category: 'tls',
+    description: 'The size of the public key space in bits.',
+    example: 2048,
+    name: 'tls.server.x509.public_key_size',
+    type: 'long',
+  },
+  'tls.server.x509.serial_number': {
+    category: 'tls',
+    description:
+      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    example: '55FBB9C7DEBF09809D12CCAA',
+    name: 'tls.server.x509.serial_number',
+    type: 'keyword',
+  },
+  'tls.server.x509.signature_algorithm': {
+    category: 'tls',
+    description:
+      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    example: 'SHA256-RSA',
+    name: 'tls.server.x509.signature_algorithm',
+    type: 'keyword',
+  },
+  'tls.server.x509.subject.common_name': {
+    category: 'tls',
+    description: 'List of common names (CN) of subject.',
+    example: 'shared.global.example.net',
+    name: 'tls.server.x509.subject.common_name',
+    type: 'keyword',
+  },
+  'tls.server.x509.subject.country': {
+    category: 'tls',
+    description: 'List of country (C) code',
+    example: 'US',
+    name: 'tls.server.x509.subject.country',
+    type: 'keyword',
+  },
+  'tls.server.x509.subject.distinguished_name': {
+    category: 'tls',
+    description: 'Distinguished name (DN) of the certificate subject entity.',
+    example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+    name: 'tls.server.x509.subject.distinguished_name',
+    type: 'keyword',
+  },
+  'tls.server.x509.subject.locality': {
+    category: 'tls',
+    description: 'List of locality names (L)',
+    example: 'San Francisco',
+    name: 'tls.server.x509.subject.locality',
+    type: 'keyword',
+  },
+  'tls.server.x509.subject.organization': {
+    category: 'tls',
+    description: 'List of organizations (O) of subject.',
+    example: 'Example, Inc.',
+    name: 'tls.server.x509.subject.organization',
+    type: 'keyword',
+  },
+  'tls.server.x509.subject.organizational_unit': {
+    category: 'tls',
+    description: 'List of organizational units (OU) of subject.',
+    name: 'tls.server.x509.subject.organizational_unit',
+    type: 'keyword',
+  },
+  'tls.server.x509.subject.state_or_province': {
+    category: 'tls',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'tls.server.x509.subject.state_or_province',
+    type: 'keyword',
+  },
+  'tls.server.x509.version_number': {
+    category: 'tls',
+    description: 'Version of x509 format.',
+    example: 3,
+    name: 'tls.server.x509.version_number',
     type: 'keyword',
   },
   'tls.version': {
@@ -3742,26 +8597,34 @@ export const fieldsBeat: BeatFields = {
     name: 'tls.version_protocol',
     type: 'keyword',
   },
-  'tracing.trace.id': {
-    category: 'tracing',
+  'span.id': {
+    category: 'span',
+    description:
+      'Unique identifier of the span within the scope of its trace. A span represents an operation within a transaction, such as a request to another service, or a database query.',
+    example: '3ff9a8981b7ccd5a',
+    name: 'span.id',
+    type: 'keyword',
+  },
+  'trace.id': {
+    category: 'trace',
     description:
       'Unique identifier of the trace. A trace groups multiple events like transactions that belong together. For example, a user request handled by multiple inter-connected services.',
     example: '4bf92f3577b34da6a3ce929d0e0e4736',
-    name: 'tracing.trace.id',
+    name: 'trace.id',
     type: 'keyword',
   },
-  'tracing.transaction.id': {
-    category: 'tracing',
+  'transaction.id': {
+    category: 'transaction',
     description:
-      'Unique identifier of the transaction. A transaction is the highest level of work measured within a service, such as a request to a server.',
+      'Unique identifier of the transaction within the scope of its trace. A transaction is the highest level of work measured within a service, such as a request to a server.',
     example: '00f067aa0ba902b7',
-    name: 'tracing.transaction.id',
+    name: 'transaction.id',
     type: 'keyword',
   },
   'url.domain': {
     category: 'url',
     description:
-      'Domain of the url, such as "www.elastic.co". In some cases a URL may refer to an IP and/or port directly, without a domain name. In this case, the IP address would go to the `domain` field.',
+      'Domain of the url, such as "www.elastic.co". In some cases a URL may refer to an IP and/or port directly, without a domain name. In this case, the IP address would go to the `domain` field. If the URL contains a literal IPv6 address enclosed by `[` and `]` (IETF RFC 2732), the `[` and `]` characters should also be captured in the `domain` field.',
     example: 'www.elastic.co',
     name: 'url.domain',
     type: 'keyword',
@@ -3769,7 +8632,7 @@ export const fieldsBeat: BeatFields = {
   'url.extension': {
     category: 'url',
     description:
-      'The field contains the file extension from the original request url. The file extension is only set if it exists, as not every url has a file extension. The leading period must not be included. For example, the value must be "png", not ".png".',
+      'The field contains the file extension from the original request url, excluding the leading dot. The file extension is only set if it exists, as not every url has a file extension. The leading period must not be included. For example, the value must be "png", not ".png". Note that when the file name has multiple extensions (example.tar.gz), only the last one should be captured ("gz", not "tar.gz").',
     example: 'png',
     name: 'url.extension',
     type: 'keyword',
@@ -3787,7 +8650,7 @@ export const fieldsBeat: BeatFields = {
       'If full URLs are important to your use case, they should be stored in `url.full`, whether this field is reconstructed or present in the event source.',
     example: 'https://www.elastic.co:443/search?q=elasticsearch#top',
     name: 'url.full',
-    type: 'keyword',
+    type: 'wildcard',
   },
   'url.original': {
     category: 'url',
@@ -3795,7 +8658,7 @@ export const fieldsBeat: BeatFields = {
       'Unmodified original url as seen in the event source. Note that in network monitoring, the observed URL may be a full URL, whereas in access logs, the URL is often just represented as a path. This field is meant to represent the URL as it was observed, complete or not.',
     example: 'https://www.elastic.co:443/search?q=elasticsearch#top or /search?q=elasticsearch',
     name: 'url.original',
-    type: 'keyword',
+    type: 'wildcard',
   },
   'url.password': {
     category: 'url',
@@ -3807,7 +8670,7 @@ export const fieldsBeat: BeatFields = {
     category: 'url',
     description: 'Path of the request, such as "/search".',
     name: 'url.path',
-    type: 'keyword',
+    type: 'wildcard',
   },
   'url.port': {
     category: 'url',
@@ -3827,8 +8690,8 @@ export const fieldsBeat: BeatFields = {
   'url.registered_domain': {
     category: 'url',
     description:
-      'The highest registered url domain, stripped of the subdomain. For example, the registered domain for "foo.google.com" is "google.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
-    example: 'google.com',
+      'The highest registered url domain, stripped of the subdomain. For example, the registered domain for "foo.example.com" is "example.com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
+    example: 'example.com',
     name: 'url.registered_domain',
     type: 'keyword',
   },
@@ -3839,10 +8702,18 @@ export const fieldsBeat: BeatFields = {
     name: 'url.scheme',
     type: 'keyword',
   },
+  'url.subdomain': {
+    category: 'url',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain. For example the subdomain portion of "www.east.mydomain.co.uk" is "east". If the domain has multiple levels of subdomain, such as "sub2.sub1.example.com", the subdomain field should contain "sub2.sub1", with no trailing period.',
+    example: 'east',
+    name: 'url.subdomain',
+    type: 'keyword',
+  },
   'url.top_level_domain': {
     category: 'url',
     description:
-      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for google.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com". This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
     example: 'co.uk',
     name: 'url.top_level_domain',
     type: 'keyword',
@@ -3853,11 +8724,145 @@ export const fieldsBeat: BeatFields = {
     name: 'url.username',
     type: 'keyword',
   },
+  'user.changes.domain': {
+    category: 'user',
+    description:
+      'Name of the directory the user is a member of. For example, an LDAP or Active Directory domain name.',
+    name: 'user.changes.domain',
+    type: 'keyword',
+  },
+  'user.changes.email': {
+    category: 'user',
+    description: 'User email address.',
+    name: 'user.changes.email',
+    type: 'keyword',
+  },
+  'user.changes.full_name': {
+    category: 'user',
+    description: "User's full name, if available.",
+    example: 'Albert Einstein',
+    name: 'user.changes.full_name',
+    type: 'keyword',
+  },
+  'user.changes.group.domain': {
+    category: 'user',
+    description:
+      'Name of the directory the group is a member of. For example, an LDAP or Active Directory domain name.',
+    name: 'user.changes.group.domain',
+    type: 'keyword',
+  },
+  'user.changes.group.id': {
+    category: 'user',
+    description: 'Unique identifier for the group on the system/platform.',
+    name: 'user.changes.group.id',
+    type: 'keyword',
+  },
+  'user.changes.group.name': {
+    category: 'user',
+    description: 'Name of the group.',
+    name: 'user.changes.group.name',
+    type: 'keyword',
+  },
+  'user.changes.hash': {
+    category: 'user',
+    description:
+      'Unique user hash to correlate information for a user in anonymized form. Useful if `user.id` or `user.name` contain confidential information and cannot be used.',
+    name: 'user.changes.hash',
+    type: 'keyword',
+  },
+  'user.changes.id': {
+    category: 'user',
+    description: 'Unique identifier of the user.',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
+    name: 'user.changes.id',
+    type: 'keyword',
+  },
+  'user.changes.name': {
+    category: 'user',
+    description: 'Short name or login of the user.',
+    example: 'a.einstein',
+    name: 'user.changes.name',
+    type: 'keyword',
+  },
+  'user.changes.roles': {
+    category: 'user',
+    description: 'Array of user roles at the time of the event.',
+    example: '["kibana_admin", "reporting_user"]',
+    name: 'user.changes.roles',
+    type: 'keyword',
+  },
   'user.domain': {
     category: 'user',
     description:
       'Name of the directory the user is a member of. For example, an LDAP or Active Directory domain name.',
     name: 'user.domain',
+    type: 'keyword',
+  },
+  'user.effective.domain': {
+    category: 'user',
+    description:
+      'Name of the directory the user is a member of. For example, an LDAP or Active Directory domain name.',
+    name: 'user.effective.domain',
+    type: 'keyword',
+  },
+  'user.effective.email': {
+    category: 'user',
+    description: 'User email address.',
+    name: 'user.effective.email',
+    type: 'keyword',
+  },
+  'user.effective.full_name': {
+    category: 'user',
+    description: "User's full name, if available.",
+    example: 'Albert Einstein',
+    name: 'user.effective.full_name',
+    type: 'keyword',
+  },
+  'user.effective.group.domain': {
+    category: 'user',
+    description:
+      'Name of the directory the group is a member of. For example, an LDAP or Active Directory domain name.',
+    name: 'user.effective.group.domain',
+    type: 'keyword',
+  },
+  'user.effective.group.id': {
+    category: 'user',
+    description: 'Unique identifier for the group on the system/platform.',
+    name: 'user.effective.group.id',
+    type: 'keyword',
+  },
+  'user.effective.group.name': {
+    category: 'user',
+    description: 'Name of the group.',
+    name: 'user.effective.group.name',
+    type: 'keyword',
+  },
+  'user.effective.hash': {
+    category: 'user',
+    description:
+      'Unique user hash to correlate information for a user in anonymized form. Useful if `user.id` or `user.name` contain confidential information and cannot be used.',
+    name: 'user.effective.hash',
+    type: 'keyword',
+  },
+  'user.effective.id': {
+    category: 'user',
+    description: 'Unique identifier of the user.',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
+    name: 'user.effective.id',
+    type: 'keyword',
+  },
+  'user.effective.name': {
+    category: 'user',
+    description: 'Short name or login of the user.',
+    example: 'a.einstein',
+    name: 'user.effective.name',
+    type: 'keyword',
+  },
+  'user.effective.roles': {
+    category: 'user',
+    description: 'Array of user roles at the time of the event.',
+    example: '["kibana_admin", "reporting_user"]',
+    name: 'user.effective.roles',
     type: 'keyword',
   },
   'user.email': {
@@ -3901,15 +8906,90 @@ export const fieldsBeat: BeatFields = {
   },
   'user.id': {
     category: 'user',
-    description: 'Unique identifiers of the user.',
+    description: 'Unique identifier of the user.',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
     name: 'user.id',
     type: 'keyword',
   },
   'user.name': {
     category: 'user',
     description: 'Short name or login of the user.',
-    example: 'albert',
+    example: 'a.einstein',
     name: 'user.name',
+    type: 'keyword',
+  },
+  'user.roles': {
+    category: 'user',
+    description: 'Array of user roles at the time of the event.',
+    example: '["kibana_admin", "reporting_user"]',
+    name: 'user.roles',
+    type: 'keyword',
+  },
+  'user.target.domain': {
+    category: 'user',
+    description:
+      'Name of the directory the user is a member of. For example, an LDAP or Active Directory domain name.',
+    name: 'user.target.domain',
+    type: 'keyword',
+  },
+  'user.target.email': {
+    category: 'user',
+    description: 'User email address.',
+    name: 'user.target.email',
+    type: 'keyword',
+  },
+  'user.target.full_name': {
+    category: 'user',
+    description: "User's full name, if available.",
+    example: 'Albert Einstein',
+    name: 'user.target.full_name',
+    type: 'keyword',
+  },
+  'user.target.group.domain': {
+    category: 'user',
+    description:
+      'Name of the directory the group is a member of. For example, an LDAP or Active Directory domain name.',
+    name: 'user.target.group.domain',
+    type: 'keyword',
+  },
+  'user.target.group.id': {
+    category: 'user',
+    description: 'Unique identifier for the group on the system/platform.',
+    name: 'user.target.group.id',
+    type: 'keyword',
+  },
+  'user.target.group.name': {
+    category: 'user',
+    description: 'Name of the group.',
+    name: 'user.target.group.name',
+    type: 'keyword',
+  },
+  'user.target.hash': {
+    category: 'user',
+    description:
+      'Unique user hash to correlate information for a user in anonymized form. Useful if `user.id` or `user.name` contain confidential information and cannot be used.',
+    name: 'user.target.hash',
+    type: 'keyword',
+  },
+  'user.target.id': {
+    category: 'user',
+    description: 'Unique identifier of the user.',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
+    name: 'user.target.id',
+    type: 'keyword',
+  },
+  'user.target.name': {
+    category: 'user',
+    description: 'Short name or login of the user.',
+    example: 'a.einstein',
+    name: 'user.target.name',
+    type: 'keyword',
+  },
+  'user.target.roles': {
+    category: 'user',
+    description: 'Array of user roles at the time of the event.',
+    example: '["kibana_admin", "reporting_user"]',
+    name: 'user.target.roles',
     type: 'keyword',
   },
   'user_agent.device.name': {
@@ -3967,6 +9047,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Operating system platform (such centos, ubuntu, windows).',
     example: 'darwin',
     name: 'user_agent.os.platform',
+    type: 'keyword',
+  },
+  'user_agent.os.type': {
+    category: 'user_agent',
+    description:
+      "Use the `os.type` field to categorize the operating system into one of the broad commercial families. One of these following values should be used (lowercase): linux, macos, unix, windows. If the OS you're dealing with is not in the list, the field should not be populated. Please let us know by opening an issue with ECS, to propose its addition.",
+    example: 'macos',
+    name: 'user_agent.os.type',
     type: 'keyword',
   },
   'user_agent.os.version': {
@@ -4098,12 +9186,182 @@ export const fieldsBeat: BeatFields = {
     name: 'vulnerability.severity',
     type: 'keyword',
   },
+  'x509.alternative_names': {
+    category: 'x509',
+    description:
+      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    example: '*.elastic.co',
+    name: 'x509.alternative_names',
+    type: 'keyword',
+  },
+  'x509.issuer.common_name': {
+    category: 'x509',
+    description: 'List of common name (CN) of issuing certificate authority.',
+    example: 'Example SHA2 High Assurance Server CA',
+    name: 'x509.issuer.common_name',
+    type: 'keyword',
+  },
+  'x509.issuer.country': {
+    category: 'x509',
+    description: 'List of country (C) codes',
+    example: 'US',
+    name: 'x509.issuer.country',
+    type: 'keyword',
+  },
+  'x509.issuer.distinguished_name': {
+    category: 'x509',
+    description: 'Distinguished name (DN) of issuing certificate authority.',
+    example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+    name: 'x509.issuer.distinguished_name',
+    type: 'keyword',
+  },
+  'x509.issuer.locality': {
+    category: 'x509',
+    description: 'List of locality names (L)',
+    example: 'Mountain View',
+    name: 'x509.issuer.locality',
+    type: 'keyword',
+  },
+  'x509.issuer.organization': {
+    category: 'x509',
+    description: 'List of organizations (O) of issuing certificate authority.',
+    example: 'Example Inc',
+    name: 'x509.issuer.organization',
+    type: 'keyword',
+  },
+  'x509.issuer.organizational_unit': {
+    category: 'x509',
+    description: 'List of organizational units (OU) of issuing certificate authority.',
+    example: 'www.example.com',
+    name: 'x509.issuer.organizational_unit',
+    type: 'keyword',
+  },
+  'x509.issuer.state_or_province': {
+    category: 'x509',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'x509.issuer.state_or_province',
+    type: 'keyword',
+  },
+  'x509.not_after': {
+    category: 'x509',
+    description: 'Time at which the certificate is no longer considered valid.',
+    example: '"2020-07-16T03:15:39.000Z"',
+    name: 'x509.not_after',
+    type: 'date',
+  },
+  'x509.not_before': {
+    category: 'x509',
+    description: 'Time at which the certificate is first considered valid.',
+    example: '"2019-08-16T01:40:25.000Z"',
+    name: 'x509.not_before',
+    type: 'date',
+  },
+  'x509.public_key_algorithm': {
+    category: 'x509',
+    description: 'Algorithm used to generate the public key.',
+    example: 'RSA',
+    name: 'x509.public_key_algorithm',
+    type: 'keyword',
+  },
+  'x509.public_key_curve': {
+    category: 'x509',
+    description:
+      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    example: 'nistp521',
+    name: 'x509.public_key_curve',
+    type: 'keyword',
+  },
+  'x509.public_key_exponent': {
+    category: 'x509',
+    description: 'Exponent used to derive the public key. This is algorithm specific.',
+    example: 65537,
+    name: 'x509.public_key_exponent',
+    type: 'long',
+  },
+  'x509.public_key_size': {
+    category: 'x509',
+    description: 'The size of the public key space in bits.',
+    example: 2048,
+    name: 'x509.public_key_size',
+    type: 'long',
+  },
+  'x509.serial_number': {
+    category: 'x509',
+    description:
+      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    example: '55FBB9C7DEBF09809D12CCAA',
+    name: 'x509.serial_number',
+    type: 'keyword',
+  },
+  'x509.signature_algorithm': {
+    category: 'x509',
+    description:
+      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    example: 'SHA256-RSA',
+    name: 'x509.signature_algorithm',
+    type: 'keyword',
+  },
+  'x509.subject.common_name': {
+    category: 'x509',
+    description: 'List of common names (CN) of subject.',
+    example: 'shared.global.example.net',
+    name: 'x509.subject.common_name',
+    type: 'keyword',
+  },
+  'x509.subject.country': {
+    category: 'x509',
+    description: 'List of country (C) code',
+    example: 'US',
+    name: 'x509.subject.country',
+    type: 'keyword',
+  },
+  'x509.subject.distinguished_name': {
+    category: 'x509',
+    description: 'Distinguished name (DN) of the certificate subject entity.',
+    example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+    name: 'x509.subject.distinguished_name',
+    type: 'keyword',
+  },
+  'x509.subject.locality': {
+    category: 'x509',
+    description: 'List of locality names (L)',
+    example: 'San Francisco',
+    name: 'x509.subject.locality',
+    type: 'keyword',
+  },
+  'x509.subject.organization': {
+    category: 'x509',
+    description: 'List of organizations (O) of subject.',
+    example: 'Example, Inc.',
+    name: 'x509.subject.organization',
+    type: 'keyword',
+  },
+  'x509.subject.organizational_unit': {
+    category: 'x509',
+    description: 'List of organizational units (OU) of subject.',
+    name: 'x509.subject.organizational_unit',
+    type: 'keyword',
+  },
+  'x509.subject.state_or_province': {
+    category: 'x509',
+    description: 'List of state or province names (ST, S, or P)',
+    example: 'California',
+    name: 'x509.subject.state_or_province',
+    type: 'keyword',
+  },
+  'x509.version_number': {
+    category: 'x509',
+    description: 'Version of x509 format.',
+    example: 3,
+    name: 'x509.version_number',
+    type: 'keyword',
+  },
   'agent.hostname': {
     category: 'agent',
-    description:
-      'Deprecated - use agent.name or agent.id to identify an agent. Hostname of the agent. ',
+    description: 'Deprecated - use agent.name or agent.id to identify an agent. ',
     name: 'agent.hostname',
-    type: 'keyword',
+    type: 'alias',
   },
   'beat.timezone': {
     category: 'beat',
@@ -4131,12 +9389,6 @@ export const fieldsBeat: BeatFields = {
     description: 'Time series instance id',
     name: 'timeseries.instance',
     type: 'keyword',
-  },
-  'cloud.project.id': {
-    category: 'cloud',
-    description: 'Name of the project in Google Cloud. ',
-    example: 'project-x',
-    name: 'cloud.project.id',
   },
   'cloud.image.id': {
     category: 'cloud',
@@ -4232,6 +9484,12 @@ export const fieldsBeat: BeatFields = {
     name: 'kubernetes.pod.uid',
     type: 'keyword',
   },
+  'kubernetes.pod.ip': {
+    category: 'kubernetes',
+    description: 'Kubernetes Pod IP ',
+    name: 'kubernetes.pod.ip',
+    type: 'ip',
+  },
   'kubernetes.namespace': {
     category: 'kubernetes',
     description: 'Kubernetes namespace ',
@@ -4244,6 +9502,12 @@ export const fieldsBeat: BeatFields = {
     name: 'kubernetes.node.name',
     type: 'keyword',
   },
+  'kubernetes.node.hostname': {
+    category: 'kubernetes',
+    description: 'Kubernetes hostname as reported by the node’s kernel ',
+    name: 'kubernetes.node.hostname',
+    type: 'keyword',
+  },
   'kubernetes.labels.*': {
     category: 'kubernetes',
     description: 'Kubernetes labels map ',
@@ -4254,6 +9518,12 @@ export const fieldsBeat: BeatFields = {
     category: 'kubernetes',
     description: 'Kubernetes annotations map ',
     name: 'kubernetes.annotations.*',
+    type: 'object',
+  },
+  'kubernetes.selectors.*': {
+    category: 'kubernetes',
+    description: 'Kubernetes selectors map ',
+    name: 'kubernetes.selectors.*',
     type: 'object',
   },
   'kubernetes.replicaset.name': {
@@ -4276,20 +9546,27 @@ export const fieldsBeat: BeatFields = {
   },
   'kubernetes.container.name': {
     category: 'kubernetes',
-    description: 'Kubernetes container name ',
+    description: 'Kubernetes container name (different than the name from the runtime) ',
     name: 'kubernetes.container.name',
-    type: 'keyword',
-  },
-  'kubernetes.container.image': {
-    category: 'kubernetes',
-    description: 'Kubernetes container image ',
-    name: 'kubernetes.container.image',
     type: 'keyword',
   },
   'process.exe': {
     category: 'process',
     name: 'process.exe',
     type: 'alias',
+  },
+  'process.owner.id': {
+    category: 'process',
+    description: 'Unique identifier of the user.',
+    name: 'process.owner.id',
+    type: 'keyword',
+  },
+  'process.owner.name': {
+    category: 'process',
+    description: 'Short name or login of the user.',
+    example: 'albert',
+    name: 'process.owner.name',
+    type: 'keyword',
   },
   'jolokia.agent.version': {
     category: 'jolokia',
@@ -4392,30 +9669,6 @@ export const fieldsBeat: BeatFields = {
     name: 'user.audit.name',
     type: 'keyword',
   },
-  'user.effective.id': {
-    category: 'user',
-    description: 'Effective user ID.',
-    name: 'user.effective.id',
-    type: 'keyword',
-  },
-  'user.effective.name': {
-    category: 'user',
-    description: 'Effective user name.',
-    name: 'user.effective.name',
-    type: 'keyword',
-  },
-  'user.effective.group.id': {
-    category: 'user',
-    description: 'Effective group ID.',
-    name: 'user.effective.group.id',
-    type: 'keyword',
-  },
-  'user.effective.group.name': {
-    category: 'user',
-    description: 'Effective group name.',
-    name: 'user.effective.group.name',
-    type: 'keyword',
-  },
   'user.filesystem.id': {
     category: 'user',
     description: 'Filesystem user ID.',
@@ -4474,11 +9727,6 @@ export const fieldsBeat: BeatFields = {
     name: 'user.uid',
     type: 'alias',
   },
-  'user.euid': {
-    category: 'user',
-    name: 'user.euid',
-    type: 'alias',
-  },
   'user.fsuid': {
     category: 'user',
     name: 'user.fsuid',
@@ -4492,11 +9740,6 @@ export const fieldsBeat: BeatFields = {
   'user.gid': {
     category: 'user',
     name: 'user.gid',
-    type: 'alias',
-  },
-  'user.egid': {
-    category: 'user',
-    name: 'user.egid',
     type: 'alias',
   },
   'user.sgid': {
@@ -4519,11 +9762,6 @@ export const fieldsBeat: BeatFields = {
     name: 'user.name_map.uid',
     type: 'alias',
   },
-  'user.name_map.euid': {
-    category: 'user',
-    name: 'user.name_map.euid',
-    type: 'alias',
-  },
   'user.name_map.fsuid': {
     category: 'user',
     name: 'user.name_map.fsuid',
@@ -4537,11 +9775,6 @@ export const fieldsBeat: BeatFields = {
   'user.name_map.gid': {
     category: 'user',
     name: 'user.name_map.gid',
-    type: 'alias',
-  },
-  'user.name_map.egid': {
-    category: 'user',
-    name: 'user.name_map.egid',
     type: 'alias',
   },
   'user.name_map.sgid': {
@@ -6273,6 +11506,12 @@ export const fieldsBeat: BeatFields = {
     name: 'system.audit.host.os.kernel',
     type: 'keyword',
   },
+  'system.audit.host.os.type': {
+    category: 'system',
+    description: 'OS type (see ECS os.type). ',
+    name: 'system.audit.host.os.type',
+    type: 'keyword',
+  },
   'system.audit.package.entity_id': {
     category: 'system',
     description:
@@ -6393,13 +11632,6 @@ export const fieldsBeat: BeatFields = {
     description: "The day the user's password was last changed. ",
     name: 'system.audit.user.password.last_changed',
     type: 'date',
-  },
-  'log.file.path': {
-    category: 'log',
-    description:
-      'The file from which the line was read. This field contains the absolute path to the file. For example: `/var/log/system.log`. ',
-    name: 'log.file.path',
-    type: 'keyword',
   },
   'log.source.address': {
     category: 'log',
@@ -6583,141 +11815,6 @@ export const fieldsBeat: BeatFields = {
       'An array of Kafka header strings for this message, in the form "<key>: <value>". ',
     name: 'kafka.headers',
     type: 'array',
-  },
-  'apache2.access.remote_ip': {
-    category: 'apache2',
-    name: 'apache2.access.remote_ip',
-    type: 'alias',
-  },
-  'apache2.access.ssl.protocol': {
-    category: 'apache2',
-    name: 'apache2.access.ssl.protocol',
-    type: 'alias',
-  },
-  'apache2.access.ssl.cipher': {
-    category: 'apache2',
-    name: 'apache2.access.ssl.cipher',
-    type: 'alias',
-  },
-  'apache2.access.body_sent.bytes': {
-    category: 'apache2',
-    name: 'apache2.access.body_sent.bytes',
-    type: 'alias',
-  },
-  'apache2.access.user_name': {
-    category: 'apache2',
-    name: 'apache2.access.user_name',
-    type: 'alias',
-  },
-  'apache2.access.method': {
-    category: 'apache2',
-    name: 'apache2.access.method',
-    type: 'alias',
-  },
-  'apache2.access.url': {
-    category: 'apache2',
-    name: 'apache2.access.url',
-    type: 'alias',
-  },
-  'apache2.access.http_version': {
-    category: 'apache2',
-    name: 'apache2.access.http_version',
-    type: 'alias',
-  },
-  'apache2.access.response_code': {
-    category: 'apache2',
-    name: 'apache2.access.response_code',
-    type: 'alias',
-  },
-  'apache2.access.referrer': {
-    category: 'apache2',
-    name: 'apache2.access.referrer',
-    type: 'alias',
-  },
-  'apache2.access.agent': {
-    category: 'apache2',
-    name: 'apache2.access.agent',
-    type: 'alias',
-  },
-  'apache2.access.user_agent.device': {
-    category: 'apache2',
-    name: 'apache2.access.user_agent.device',
-    type: 'alias',
-  },
-  'apache2.access.user_agent.name': {
-    category: 'apache2',
-    name: 'apache2.access.user_agent.name',
-    type: 'alias',
-  },
-  'apache2.access.user_agent.os': {
-    category: 'apache2',
-    name: 'apache2.access.user_agent.os',
-    type: 'alias',
-  },
-  'apache2.access.user_agent.os_name': {
-    category: 'apache2',
-    name: 'apache2.access.user_agent.os_name',
-    type: 'alias',
-  },
-  'apache2.access.user_agent.original': {
-    category: 'apache2',
-    name: 'apache2.access.user_agent.original',
-    type: 'alias',
-  },
-  'apache2.access.geoip.continent_name': {
-    category: 'apache2',
-    name: 'apache2.access.geoip.continent_name',
-    type: 'alias',
-  },
-  'apache2.access.geoip.country_iso_code': {
-    category: 'apache2',
-    name: 'apache2.access.geoip.country_iso_code',
-    type: 'alias',
-  },
-  'apache2.access.geoip.location': {
-    category: 'apache2',
-    name: 'apache2.access.geoip.location',
-    type: 'alias',
-  },
-  'apache2.access.geoip.region_name': {
-    category: 'apache2',
-    name: 'apache2.access.geoip.region_name',
-    type: 'alias',
-  },
-  'apache2.access.geoip.city_name': {
-    category: 'apache2',
-    name: 'apache2.access.geoip.city_name',
-    type: 'alias',
-  },
-  'apache2.access.geoip.region_iso_code': {
-    category: 'apache2',
-    name: 'apache2.access.geoip.region_iso_code',
-    type: 'alias',
-  },
-  'apache2.error.level': {
-    category: 'apache2',
-    name: 'apache2.error.level',
-    type: 'alias',
-  },
-  'apache2.error.message': {
-    category: 'apache2',
-    name: 'apache2.error.message',
-    type: 'alias',
-  },
-  'apache2.error.pid': {
-    category: 'apache2',
-    name: 'apache2.error.pid',
-    type: 'alias',
-  },
-  'apache2.error.tid': {
-    category: 'apache2',
-    name: 'apache2.error.tid',
-    type: 'alias',
-  },
-  'apache2.error.module': {
-    category: 'apache2',
-    name: 'apache2.error.module',
-    type: 'alias',
   },
   'apache.access.ssl.protocol': {
     category: 'apache',
@@ -7093,6 +12190,21 @@ export const fieldsBeat: BeatFields = {
     name: 'elasticsearch.audit.user.roles',
     type: 'keyword',
   },
+  'elasticsearch.audit.user.run_as.name': {
+    category: 'elasticsearch',
+    name: 'elasticsearch.audit.user.run_as.name',
+    type: 'keyword',
+  },
+  'elasticsearch.audit.user.run_as.realm': {
+    category: 'elasticsearch',
+    name: 'elasticsearch.audit.user.run_as.realm',
+    type: 'keyword',
+  },
+  'elasticsearch.audit.component': {
+    category: 'elasticsearch',
+    name: 'elasticsearch.audit.component',
+    type: 'keyword',
+  },
   'elasticsearch.audit.action': {
     category: 'elasticsearch',
     description: 'The name of the action that was executed',
@@ -7151,6 +12263,11 @@ export const fieldsBeat: BeatFields = {
     category: 'elasticsearch',
     name: 'elasticsearch.audit.message',
     type: 'text',
+  },
+  'elasticsearch.audit.invalidate.apikeys.owned_by_authenticated_user': {
+    category: 'elasticsearch',
+    name: 'elasticsearch.audit.invalidate.apikeys.owned_by_authenticated_user',
+    type: 'boolean',
   },
   'elasticsearch.deprecation': {
     category: 'elasticsearch',
@@ -7930,16 +13047,6 @@ export const fieldsBeat: BeatFields = {
     name: 'iis.error.geoip.region_iso_code',
     type: 'alias',
   },
-  'kafka.log.level': {
-    category: 'kafka',
-    name: 'kafka.log.level',
-    type: 'alias',
-  },
-  'kafka.log.message': {
-    category: 'kafka',
-    name: 'kafka.log.message',
-    type: 'alias',
-  },
   'kafka.log.component': {
     category: 'kafka',
     description: 'Component the log is coming from. ',
@@ -7969,6 +13076,77 @@ export const fieldsBeat: BeatFields = {
     description: 'Message part of the trace. ',
     name: 'kafka.log.trace.message',
     type: 'text',
+  },
+  'kibana.session_id': {
+    category: 'kibana',
+    description:
+      'The ID of the user session associated with this event. Each login attempt results in a unique session id.',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: 'kibana.session_id',
+    type: 'keyword',
+  },
+  'kibana.space_id': {
+    category: 'kibana',
+    description: 'The id of the space associated with this event.',
+    example: 'default',
+    name: 'kibana.space_id',
+    type: 'keyword',
+  },
+  'kibana.saved_object.type': {
+    category: 'kibana',
+    description: 'The type of the saved object associated with this event.',
+    example: 'dashboard',
+    name: 'kibana.saved_object.type',
+    type: 'keyword',
+  },
+  'kibana.saved_object.id': {
+    category: 'kibana',
+    description: 'The id of the saved object associated with this event.',
+    example: '6295bdd0-0a0e-11e7-825f-6748cda7d858',
+    name: 'kibana.saved_object.id',
+    type: 'keyword',
+  },
+  'kibana.add_to_spaces': {
+    category: 'kibana',
+    description: 'The set of space ids that a saved object was shared to.',
+    example: "['default', 'marketing']",
+    name: 'kibana.add_to_spaces',
+    type: 'keyword',
+  },
+  'kibana.delete_from_spaces': {
+    category: 'kibana',
+    description: 'The set of space ids that a saved object was removed from.',
+    example: "['default', 'marketing']",
+    name: 'kibana.delete_from_spaces',
+    type: 'keyword',
+  },
+  'kibana.authentication_provider': {
+    category: 'kibana',
+    description: 'The authentication provider associated with a login event.',
+    example: 'basic1',
+    name: 'kibana.authentication_provider',
+    type: 'keyword',
+  },
+  'kibana.authentication_type': {
+    category: 'kibana',
+    description: 'The authentication provider type associated with a login event.',
+    example: 'basic',
+    name: 'kibana.authentication_type',
+    type: 'keyword',
+  },
+  'kibana.authentication_realm': {
+    category: 'kibana',
+    description: 'The Elasticsearch authentication realm name which fulfilled a login event.',
+    example: 'native',
+    name: 'kibana.authentication_realm',
+    type: 'keyword',
+  },
+  'kibana.lookup_realm': {
+    category: 'kibana',
+    description: 'The Elasticsearch lookup realm which fulfilled a login event.',
+    example: 'native',
+    name: 'kibana.lookup_realm',
+    type: 'keyword',
   },
   'kibana.log.tags': {
     category: 'kibana',
@@ -8039,6 +13217,11 @@ export const fieldsBeat: BeatFields = {
     description: 'key and value debugging information. ',
     name: 'logstash.log.log_event',
     type: 'object',
+  },
+  'logstash.log.log_event.action': {
+    category: 'logstash',
+    name: 'logstash.log.log_event.action',
+    type: 'keyword',
   },
   'logstash.log.pipeline_id': {
     category: 'logstash',
@@ -8138,6 +13321,13 @@ export const fieldsBeat: BeatFields = {
     category: 'mongodb',
     name: 'mongodb.log.message',
     type: 'alias',
+  },
+  'mongodb.log.id': {
+    category: 'mongodb',
+    description: 'Integer representing the unique identifier of the log statement ',
+    example: 4615611,
+    name: 'mongodb.log.id',
+    type: 'long',
   },
   'mysql.thread_id': {
     category: 'mysql',
@@ -8637,6 +13827,34 @@ export const fieldsBeat: BeatFields = {
     name: 'nginx.ingress_controller.remote_ip_list',
     type: 'array',
   },
+  'nginx.ingress_controller.upstream_address_list': {
+    category: 'nginx',
+    description:
+      'An array of the upstream addresses. It is a list because it is common that several upstream servers were contacted during request processing. ',
+    name: 'nginx.ingress_controller.upstream_address_list',
+    type: 'keyword',
+  },
+  'nginx.ingress_controller.upstream.response.length_list': {
+    category: 'nginx',
+    description:
+      'An array of upstream response lengths. It is a list because it is common that several upstream servers were contacted during request processing. ',
+    name: 'nginx.ingress_controller.upstream.response.length_list',
+    type: 'keyword',
+  },
+  'nginx.ingress_controller.upstream.response.time_list': {
+    category: 'nginx',
+    description:
+      'An array of upstream response durations. It is a list because it is common that several upstream servers were contacted during request processing. ',
+    name: 'nginx.ingress_controller.upstream.response.time_list',
+    type: 'keyword',
+  },
+  'nginx.ingress_controller.upstream.response.status_code_list': {
+    category: 'nginx',
+    description:
+      'An array of upstream response status codes. It is a list because it is common that several upstream servers were contacted during request processing. ',
+    name: 'nginx.ingress_controller.upstream.response.status_code_list',
+    type: 'keyword',
+  },
   'nginx.ingress_controller.http.request.length': {
     category: 'nginx',
     description: 'The request length (including request line, header, and request body) ',
@@ -8665,7 +13883,8 @@ export const fieldsBeat: BeatFields = {
   },
   'nginx.ingress_controller.upstream.response.length': {
     category: 'nginx',
-    description: 'The length of the response obtained from the upstream server ',
+    description:
+      'The length of the response obtained from the upstream server. If several servers were contacted during request process, the summary of the multiple response lengths is stored. ',
     name: 'nginx.ingress_controller.upstream.response.length',
     type: 'long',
     format: 'bytes',
@@ -8673,15 +13892,30 @@ export const fieldsBeat: BeatFields = {
   'nginx.ingress_controller.upstream.response.time': {
     category: 'nginx',
     description:
-      'The time spent on receiving the response from the upstream server as seconds with millisecond resolution ',
+      'The time spent on receiving the response from the upstream as seconds with millisecond resolution. If several servers were contacted during request process, the summary of the multiple response times is stored. ',
     name: 'nginx.ingress_controller.upstream.response.time',
     type: 'double',
     format: 'duration',
   },
   'nginx.ingress_controller.upstream.response.status_code': {
     category: 'nginx',
-    description: 'The status code of the response obtained from the upstream server ',
+    description:
+      'The status code of the response obtained from the upstream server. If several servers were contacted during request process, only the status code of the response from the last one is stored in this field. ',
     name: 'nginx.ingress_controller.upstream.response.status_code',
+    type: 'long',
+  },
+  'nginx.ingress_controller.upstream.ip': {
+    category: 'nginx',
+    description:
+      'The IP address of the upstream server. If several servers were contacted during request process, only the last one is stored in this field. ',
+    name: 'nginx.ingress_controller.upstream.ip',
+    type: 'ip',
+  },
+  'nginx.ingress_controller.upstream.port': {
+    category: 'nginx',
+    description:
+      'The port of the upstream server. If several servers were contacted during request process, only the last one is stored in this field. ',
+    name: 'nginx.ingress_controller.upstream.port',
     type: 'long',
   },
   'nginx.ingress_controller.http.request.id': {
@@ -8689,19 +13923,6 @@ export const fieldsBeat: BeatFields = {
     description: 'The randomly generated ID of the request ',
     name: 'nginx.ingress_controller.http.request.id',
     type: 'keyword',
-  },
-  'nginx.ingress_controller.upstream.ip': {
-    category: 'nginx',
-    description:
-      'The IP address of the upstream server. If several servers were contacted during request processing, their addresses are separated by commas. ',
-    name: 'nginx.ingress_controller.upstream.ip',
-    type: 'ip',
-  },
-  'nginx.ingress_controller.upstream.port': {
-    category: 'nginx',
-    description: 'The port of the upstream server. ',
-    name: 'nginx.ingress_controller.upstream.port',
-    type: 'long',
   },
   'nginx.ingress_controller.body_sent.bytes': {
     category: 'nginx',
@@ -8831,6 +14052,78 @@ export const fieldsBeat: BeatFields = {
     name: 'osquery.result.calendar_time',
     type: 'keyword',
   },
+  'pensando.dfw.action': {
+    category: 'pensando',
+    description: 'Action on the flow.  ',
+    name: 'pensando.dfw.action',
+    type: 'keyword',
+  },
+  'pensando.dfw.app_id': {
+    category: 'pensando',
+    description: 'Application ID  ',
+    name: 'pensando.dfw.app_id',
+    type: 'integer',
+  },
+  'pensando.dfw.destination_address': {
+    category: 'pensando',
+    description: 'Address of destination.  ',
+    name: 'pensando.dfw.destination_address',
+    type: 'keyword',
+  },
+  'pensando.dfw.destination_port': {
+    category: 'pensando',
+    description: 'Port of destination.  ',
+    name: 'pensando.dfw.destination_port',
+    type: 'integer',
+  },
+  'pensando.dfw.direction': {
+    category: 'pensando',
+    description: 'Direction of the flow  ',
+    name: 'pensando.dfw.direction',
+    type: 'keyword',
+  },
+  'pensando.dfw.protocol': {
+    category: 'pensando',
+    description: 'Protocol of the flow  ',
+    name: 'pensando.dfw.protocol',
+    type: 'keyword',
+  },
+  'pensando.dfw.rule_id': {
+    category: 'pensando',
+    description: 'Rule ID that was matched.  ',
+    name: 'pensando.dfw.rule_id',
+    type: 'keyword',
+  },
+  'pensando.dfw.session_id': {
+    category: 'pensando',
+    description: 'Session ID of the flow  ',
+    name: 'pensando.dfw.session_id',
+    type: 'integer',
+  },
+  'pensando.dfw.session_state': {
+    category: 'pensando',
+    description: 'Session state of the flow.  ',
+    name: 'pensando.dfw.session_state',
+    type: 'keyword',
+  },
+  'pensando.dfw.source_address': {
+    category: 'pensando',
+    description: 'Source address of the flow.  ',
+    name: 'pensando.dfw.source_address',
+    type: 'keyword',
+  },
+  'pensando.dfw.source_port': {
+    category: 'pensando',
+    description: 'Source port of the flow.  ',
+    name: 'pensando.dfw.source_port',
+    type: 'integer',
+  },
+  'pensando.dfw.timestamp': {
+    category: 'pensando',
+    description: 'Timestamp of the log.  ',
+    name: 'pensando.dfw.timestamp',
+    type: 'date',
+  },
   'postgresql.log.timestamp': {
     category: 'postgresql',
     description: 'The timestamp from the log line. ',
@@ -8838,26 +14131,52 @@ export const fieldsBeat: BeatFields = {
   },
   'postgresql.log.core_id': {
     category: 'postgresql',
-    description: 'Core id ',
+    description:
+      'Core id. (deprecated, there is no core_id in PostgreSQL logs, this is actually session_line_number). ',
     name: 'postgresql.log.core_id',
+    type: 'alias',
+  },
+  'postgresql.log.client_addr': {
+    category: 'postgresql',
+    description: 'Host where the connection originated from. ',
+    example: '127.0.0.1',
+    name: 'postgresql.log.client_addr',
+  },
+  'postgresql.log.client_port': {
+    category: 'postgresql',
+    description: 'Port where the connection originated from. ',
+    example: '59700',
+    name: 'postgresql.log.client_port',
+  },
+  'postgresql.log.session_id': {
+    category: 'postgresql',
+    description: 'PostgreSQL session. ',
+    example: '5ff1dd98.22',
+    name: 'postgresql.log.session_id',
+  },
+  'postgresql.log.session_line_number': {
+    category: 'postgresql',
+    description: 'Line number inside a session. (%l in `log_line_prefix`). ',
+    name: 'postgresql.log.session_line_number',
     type: 'long',
   },
   'postgresql.log.database': {
     category: 'postgresql',
-    description: 'Name of database ',
-    example: 'mydb',
+    description: 'Name of database. ',
+    example: 'postgres',
     name: 'postgresql.log.database',
   },
   'postgresql.log.query': {
     category: 'postgresql',
-    description: 'Query statement. ',
+    description:
+      'Query statement. In the case of CSV parse, look at command_tag to get more context. ',
     example: 'SELECT * FROM users;',
     name: 'postgresql.log.query',
   },
   'postgresql.log.query_step': {
     category: 'postgresql',
     description:
-      'Statement step when using extended query protocol (one of statement, parse, bind or execute) ',
+      'Statement step when using extended query protocol (one of statement, parse, bind or execute). ',
     example: 'parse',
     name: 'postgresql.log.query_step',
   },
@@ -8868,20 +14187,98 @@ export const fieldsBeat: BeatFields = {
     example: 'pdo_stmt_00000001',
     name: 'postgresql.log.query_name',
   },
+  'postgresql.log.command_tag': {
+    category: 'postgresql',
+    description:
+      "Type of session's current command. The complete list can be found at: src/include/tcop/cmdtaglist.h ",
+    example: 'SELECT',
+    name: 'postgresql.log.command_tag',
+  },
+  'postgresql.log.session_start_time': {
+    category: 'postgresql',
+    description: 'Time when this session started. ',
+    name: 'postgresql.log.session_start_time',
+    type: 'date',
+  },
+  'postgresql.log.virtual_transaction_id': {
+    category: 'postgresql',
+    description: 'Backend local transaction id. ',
+    name: 'postgresql.log.virtual_transaction_id',
+  },
+  'postgresql.log.transaction_id': {
+    category: 'postgresql',
+    description: 'The id of current transaction. ',
+    name: 'postgresql.log.transaction_id',
+    type: 'long',
+  },
+  'postgresql.log.sql_state_code': {
+    category: 'postgresql',
+    description:
+      'State code returned by Postgres (if any). See also https://www.postgresql.org/docs/current/errcodes-appendix.html ',
+    name: 'postgresql.log.sql_state_code',
+    type: 'keyword',
+  },
+  'postgresql.log.detail': {
+    category: 'postgresql',
+    description:
+      "More information about the message, parameters in case of a parametrized query. e.g. 'Role \\\"user\\\" does not exist.', 'parameters: $1 = 42', etc. ",
+    name: 'postgresql.log.detail',
+  },
+  'postgresql.log.hint': {
+    category: 'postgresql',
+    description: 'A possible solution to solve an error. ',
+    name: 'postgresql.log.hint',
+  },
+  'postgresql.log.internal_query': {
+    category: 'postgresql',
+    description: 'Internal query that led to the error (if any). ',
+    name: 'postgresql.log.internal_query',
+  },
+  'postgresql.log.internal_query_pos': {
+    category: 'postgresql',
+    description: 'Character count of the internal query (if any). ',
+    name: 'postgresql.log.internal_query_pos',
+    type: 'long',
+  },
+  'postgresql.log.context': {
+    category: 'postgresql',
+    description: 'Error context. ',
+    name: 'postgresql.log.context',
+  },
+  'postgresql.log.query_pos': {
+    category: 'postgresql',
+    description: 'Character count of the error position (if any). ',
+    name: 'postgresql.log.query_pos',
+    type: 'long',
+  },
+  'postgresql.log.location': {
+    category: 'postgresql',
+    description:
+      'Location of the error in the PostgreSQL source code (if log_error_verbosity is set to verbose). ',
+    name: 'postgresql.log.location',
+  },
+  'postgresql.log.application_name': {
+    category: 'postgresql',
+    description: 'Name of the application of this event. It is defined by the client. ',
+    name: 'postgresql.log.application_name',
+  },
+  'postgresql.log.backend_type': {
+    category: 'postgresql',
+    description:
+      'Type of backend of this event. Possible types are autovacuum launcher, autovacuum worker, logical replication launcher, logical replication worker, parallel worker, background writer, client backend, checkpointer, startup, walreceiver, walsender and walwriter. In addition, background workers registered by extensions may have additional types. ',
+    example: 'client backend',
+    name: 'postgresql.log.backend_type',
+  },
   'postgresql.log.error.code': {
     category: 'postgresql',
-    description: 'Error code returned by Postgres (if any)',
+    description:
+      'Error code returned by Postgres (if any). Deprecated: errors can have letters. Use sql_state_code instead. ',
     name: 'postgresql.log.error.code',
-    type: 'long',
+    type: 'alias',
   },
   'postgresql.log.timezone': {
     category: 'postgresql',
     name: 'postgresql.log.timezone',
-    type: 'alias',
-  },
-  'postgresql.log.thread_id': {
-    category: 'postgresql',
-    name: 'postgresql.log.thread_id',
     type: 'alias',
   },
   'postgresql.log.user': {
@@ -8891,6 +14288,9 @@ export const fieldsBeat: BeatFields = {
   },
   'postgresql.log.level': {
     category: 'postgresql',
+    description:
+      'Valid values are DEBUG5, DEBUG4, DEBUG3, DEBUG2, DEBUG1, INFO, NOTICE, WARNING, ERROR, LOG, FATAL, and PANIC. ',
+    example: 'LOG',
     name: 'postgresql.log.level',
     type: 'alias',
   },
@@ -9277,11 +14677,6 @@ export const fieldsBeat: BeatFields = {
     name: 'traefik.access.agent',
     type: 'alias',
   },
-  'traefik.access.user_agent.device': {
-    category: 'traefik',
-    name: 'traefik.access.user_agent.device',
-    type: 'alias',
-  },
   'traefik.access.user_agent.name': {
     category: 'traefik',
     name: 'traefik.access.user_agent.name',
@@ -9537,6 +14932,13 @@ export const fieldsBeat: BeatFields = {
     name: 'aws.cloudtrail.vpc_endpoint_id',
     type: 'keyword',
   },
+  'aws.cloudtrail.event_category': {
+    category: 'aws',
+    description:
+      'Shows the event category that is used in LookupEvents calls.   - For management events, the value is management.  - For data events, the value is data.  - For Insights events, the value is insight.',
+    name: 'aws.cloudtrail.event_category',
+    type: 'keyword',
+  },
   'aws.cloudtrail.console_login.additional_eventdata.mobile_version': {
     category: 'aws',
     description: 'Identifies whether ConsoleLogin was from mobile version',
@@ -9578,6 +14980,86 @@ export const fieldsBeat: BeatFields = {
     category: 'aws',
     description: 'Identifies the service event, including what triggered the event and the result.',
     name: 'aws.cloudtrail.flattened.service_event_details',
+    type: 'flattened',
+  },
+  'aws.cloudtrail.digest.log_files': {
+    category: 'aws',
+    description: 'A list of Logfiles contained in the digest.',
+    name: 'aws.cloudtrail.digest.log_files',
+    type: 'nested',
+  },
+  'aws.cloudtrail.digest.start_time': {
+    category: 'aws',
+    description:
+      'The starting UTC time range that the digest file covers, taking as a reference the time in which log files have been delivered by CloudTrail.',
+    name: 'aws.cloudtrail.digest.start_time',
+    type: 'date',
+  },
+  'aws.cloudtrail.digest.end_time': {
+    category: 'aws',
+    description:
+      'The ending UTC time range that the digest file covers, taking as a reference the time in which log files have been delivered by CloudTrail.',
+    name: 'aws.cloudtrail.digest.end_time',
+    type: 'date',
+  },
+  'aws.cloudtrail.digest.s3_bucket': {
+    category: 'aws',
+    description:
+      'The name of the Amazon S3 bucket to which the current digest file has been delivered.',
+    name: 'aws.cloudtrail.digest.s3_bucket',
+    type: 'keyword',
+  },
+  'aws.cloudtrail.digest.s3_object': {
+    category: 'aws',
+    description:
+      'The Amazon S3 object key (that is, the Amazon S3 bucket location) of the current digest file.',
+    name: 'aws.cloudtrail.digest.s3_object',
+    type: 'keyword',
+  },
+  'aws.cloudtrail.digest.newest_event_time': {
+    category: 'aws',
+    description:
+      'The UTC time of the most recent event among all of the events in the log files in the digest.',
+    name: 'aws.cloudtrail.digest.newest_event_time',
+    type: 'date',
+  },
+  'aws.cloudtrail.digest.oldest_event_time': {
+    category: 'aws',
+    description:
+      'The UTC time of the oldest event among all of the events in the log files in the digest.',
+    name: 'aws.cloudtrail.digest.oldest_event_time',
+    type: 'date',
+  },
+  'aws.cloudtrail.digest.previous_s3_bucket': {
+    category: 'aws',
+    description: 'The Amazon S3 bucket to which the previous digest file was delivered.',
+    name: 'aws.cloudtrail.digest.previous_s3_bucket',
+    type: 'keyword',
+  },
+  'aws.cloudtrail.digest.previous_hash_algorithm': {
+    category: 'aws',
+    description: 'The name of the hash algorithm that was used to hash the previous digest file.',
+    name: 'aws.cloudtrail.digest.previous_hash_algorithm',
+    type: 'keyword',
+  },
+  'aws.cloudtrail.digest.public_key_fingerprint': {
+    category: 'aws',
+    description:
+      'The hexadecimal encoded fingerprint of the public key that matches the private key used to sign this digest file.',
+    name: 'aws.cloudtrail.digest.public_key_fingerprint',
+    type: 'keyword',
+  },
+  'aws.cloudtrail.digest.signature_algorithm': {
+    category: 'aws',
+    description: 'The algorithm used to sign the digest file.',
+    name: 'aws.cloudtrail.digest.signature_algorithm',
+    type: 'keyword',
+  },
+  'aws.cloudtrail.insight_details': {
+    category: 'aws',
+    description:
+      'Shows information about the underlying triggers of an Insights event, such as event source, user agent, statistics, API name, and whether the event is the start or end of the Insights event.',
+    name: 'aws.cloudtrail.insight_details',
     type: 'flattened',
   },
   'aws.cloudwatch.message': {
@@ -9744,6 +15226,30 @@ export const fieldsBeat: BeatFields = {
     category: 'aws',
     description: 'The error reason if the executed action failed. ',
     name: 'aws.elb.error.reason',
+    type: 'keyword',
+  },
+  'aws.elb.target_port': {
+    category: 'aws',
+    description: 'List of IP addresses and ports for the targets that processed this request. ',
+    name: 'aws.elb.target_port',
+    type: 'keyword',
+  },
+  'aws.elb.target_status_code': {
+    category: 'aws',
+    description: 'List of status codes from the responses of the targets. ',
+    name: 'aws.elb.target_status_code',
+    type: 'keyword',
+  },
+  'aws.elb.classification': {
+    category: 'aws',
+    description: 'The classification for desync mitigation. ',
+    name: 'aws.elb.classification',
+    type: 'keyword',
+  },
+  'aws.elb.classification_reason': {
+    category: 'aws',
+    description: 'The classification reason code. ',
+    name: 'aws.elb.classification_reason',
     type: 'keyword',
   },
   'aws.s3access.bucket_owner': {
@@ -9962,11 +15468,23 @@ export const fieldsBeat: BeatFields = {
     name: 'aws.vpcflow.tcp_flags',
     type: 'keyword',
   },
+  'aws.vpcflow.tcp_flags_array': {
+    category: 'aws',
+    description: "List of TCP flags: 'fin, syn, rst, psh, ack, urg' ",
+    name: 'aws.vpcflow.tcp_flags_array',
+    type: 'keyword',
+  },
   'aws.vpcflow.type': {
     category: 'aws',
     description: 'The type of traffic: IPv4, IPv6, or EFA. ',
     name: 'aws.vpcflow.type',
     type: 'keyword',
+  },
+  'awsfargate.log': {
+    category: 'awsfargate',
+    description: 'Fields for Amazon Fargate container logs. ',
+    name: 'awsfargate.log',
+    type: 'group',
   },
   'azure.subscription_id': {
     category: 'azure',
@@ -10136,17 +15654,11 @@ export const fieldsBeat: BeatFields = {
     name: 'azure.activitylogs.event_category',
     type: 'keyword',
   },
-  'azure.activitylogs.properties.service_request_id': {
+  'azure.activitylogs.properties': {
     category: 'azure',
-    description: 'Service Request Id ',
-    name: 'azure.activitylogs.properties.service_request_id',
-    type: 'keyword',
-  },
-  'azure.activitylogs.properties.status_code': {
-    category: 'azure',
-    description: 'Status code ',
-    name: 'azure.activitylogs.properties.status_code',
-    type: 'keyword',
+    description: 'Properties ',
+    name: 'azure.activitylogs.properties',
+    type: 'flattened',
   },
   'azure.auditlogs.category': {
     category: 'azure',
@@ -10334,6 +15846,90 @@ export const fieldsBeat: BeatFields = {
     name: 'azure.auditlogs.properties.initiated_by.user.ipAddress',
     type: 'keyword',
   },
+  'azure.platformlogs.operation_name': {
+    category: 'azure',
+    description: 'Operation name ',
+    name: 'azure.platformlogs.operation_name',
+    type: 'keyword',
+  },
+  'azure.platformlogs.result_type': {
+    category: 'azure',
+    description: 'Result type ',
+    name: 'azure.platformlogs.result_type',
+    type: 'keyword',
+  },
+  'azure.platformlogs.result_signature': {
+    category: 'azure',
+    description: 'Result signature ',
+    name: 'azure.platformlogs.result_signature',
+    type: 'keyword',
+  },
+  'azure.platformlogs.category': {
+    category: 'azure',
+    description: 'Category ',
+    name: 'azure.platformlogs.category',
+    type: 'keyword',
+  },
+  'azure.platformlogs.event_category': {
+    category: 'azure',
+    description: 'Event Category ',
+    name: 'azure.platformlogs.event_category',
+    type: 'keyword',
+  },
+  'azure.platformlogs.status': {
+    category: 'azure',
+    description: 'Status ',
+    name: 'azure.platformlogs.status',
+    type: 'keyword',
+  },
+  'azure.platformlogs.ccpNamespace': {
+    category: 'azure',
+    description: 'ccpNamespace ',
+    name: 'azure.platformlogs.ccpNamespace',
+    type: 'keyword',
+  },
+  'azure.platformlogs.Cloud': {
+    category: 'azure',
+    description: 'Cloud ',
+    name: 'azure.platformlogs.Cloud',
+    type: 'keyword',
+  },
+  'azure.platformlogs.Environment': {
+    category: 'azure',
+    description: 'Environment ',
+    name: 'azure.platformlogs.Environment',
+    type: 'keyword',
+  },
+  'azure.platformlogs.EventTimeString': {
+    category: 'azure',
+    description: 'EventTimeString ',
+    name: 'azure.platformlogs.EventTimeString',
+    type: 'keyword',
+  },
+  'azure.platformlogs.Caller': {
+    category: 'azure',
+    description: 'Caller ',
+    name: 'azure.platformlogs.Caller',
+    type: 'keyword',
+  },
+  'azure.platformlogs.ScaleUnit': {
+    category: 'azure',
+    description: 'ScaleUnit ',
+    name: 'azure.platformlogs.ScaleUnit',
+    type: 'keyword',
+  },
+  'azure.platformlogs.ActivityId': {
+    category: 'azure',
+    description: 'ActivityId ',
+    name: 'azure.platformlogs.ActivityId',
+    type: 'keyword',
+  },
+  'azure.platformlogs.properties': {
+    category: 'azure',
+    description: 'Event inner properties ',
+    name: 'azure.platformlogs.properties',
+    type: 'flattened',
+  },
   'azure.signinlogs.operation_name': {
     category: 'azure',
     description: 'The operation name ',
@@ -10384,13 +15980,13 @@ export const fieldsBeat: BeatFields = {
   },
   'azure.signinlogs.properties.id': {
     category: 'azure',
-    description: 'ID ',
+    description: 'Unique ID representing the sign-in activity. ',
     name: 'azure.signinlogs.properties.id',
     type: 'keyword',
   },
   'azure.signinlogs.properties.created_at': {
     category: 'azure',
-    description: 'Created date time ',
+    description: 'Date and time (UTC) the sign-in was initiated. ',
     name: 'azure.signinlogs.properties.created_at',
     type: 'date',
   },
@@ -10430,11 +16026,11 @@ export const fieldsBeat: BeatFields = {
     name: 'azure.signinlogs.properties.app_display_name',
     type: 'keyword',
   },
-  'azure.signinlogs.properties.ip_address': {
+  'azure.signinlogs.properties.autonomous_system_number': {
     category: 'azure',
-    description: 'Ip address ',
-    name: 'azure.signinlogs.properties.ip_address',
-    type: 'keyword',
+    description: 'Autonomous system number.',
+    name: 'azure.signinlogs.properties.autonomous_system_number',
+    type: 'long',
   },
   'azure.signinlogs.properties.client_app_used': {
     category: 'azure',
@@ -10458,7 +16054,7 @@ export const fieldsBeat: BeatFields = {
     category: 'azure',
     description: 'Is interactive ',
     name: 'azure.signinlogs.properties.is_interactive',
-    type: 'keyword',
+    type: 'boolean',
   },
   'azure.signinlogs.properties.token_issuer_name': {
     category: 'azure',
@@ -10512,7 +16108,7 @@ export const fieldsBeat: BeatFields = {
     category: 'azure',
     description: 'Error code ',
     name: 'azure.signinlogs.properties.status.error_code',
-    type: 'keyword',
+    type: 'long',
   },
   'azure.signinlogs.properties.device_detail.device_id': {
     category: 'azure',
@@ -10544,10 +16140,114 @@ export const fieldsBeat: BeatFields = {
     name: 'azure.signinlogs.properties.device_detail.trust_type',
     type: 'keyword',
   },
+  'azure.signinlogs.properties.applied_conditional_access_policies': {
+    category: 'azure',
+    description:
+      'A list of conditional access policies that are triggered by the corresponding sign-in activity. ',
+    name: 'azure.signinlogs.properties.applied_conditional_access_policies',
+    type: 'array',
+  },
+  'azure.signinlogs.properties.authentication_details': {
+    category: 'azure',
+    description:
+      'The result of the authentication attempt and additional details on the authentication method. ',
+    name: 'azure.signinlogs.properties.authentication_details',
+    type: 'array',
+  },
+  'azure.signinlogs.properties.authentication_processing_details': {
+    category: 'azure',
+    description:
+      'Additional authentication processing details, such as the agent name in case of PTA/PHS or Server/farm name in case of federated authentication. ',
+    name: 'azure.signinlogs.properties.authentication_processing_details',
+    type: 'flattened',
+  },
+  'azure.signinlogs.properties.authentication_requirement': {
+    category: 'azure',
+    description:
+      'This holds the highest level of authentication needed through all the sign-in steps, for sign-in to succeed. ',
+    name: 'azure.signinlogs.properties.authentication_requirement',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.authentication_requirement_policies': {
+    category: 'azure',
+    description:
+      'Set of CA policies that apply to this sign-in, each as CA: policy name, and/or MFA: Per-user ',
+    name: 'azure.signinlogs.properties.authentication_requirement_policies',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.flagged_for_review': {
+    category: 'azure',
+    name: 'azure.signinlogs.properties.flagged_for_review',
+    type: 'boolean',
+  },
+  'azure.signinlogs.properties.home_tenant_id': {
+    category: 'azure',
+    name: 'azure.signinlogs.properties.home_tenant_id',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.network_location_details': {
+    category: 'azure',
+    description: 'The network location details including the type of network used and its names.',
+    name: 'azure.signinlogs.properties.network_location_details',
+    type: 'array',
+  },
+  'azure.signinlogs.properties.resource_id': {
+    category: 'azure',
+    description: 'The identifier of the resource that the user signed in to.',
+    name: 'azure.signinlogs.properties.resource_id',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.resource_tenant_id': {
+    category: 'azure',
+    name: 'azure.signinlogs.properties.resource_tenant_id',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.risk_event_types': {
+    category: 'azure',
+    description:
+      'The list of risk event types associated with the sign-in. Possible values: unlikelyTravel, anonymizedIPAddress, maliciousIPAddress, unfamiliarFeatures, malwareInfectedIPAddress, suspiciousIPAddress, leakedCredentials, investigationsThreatIntelligence, generic, or unknownFutureValue. ',
+    name: 'azure.signinlogs.properties.risk_event_types',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.risk_event_types_v2': {
+    category: 'azure',
+    description:
+      'The list of risk event types associated with the sign-in. Possible values: unlikelyTravel, anonymizedIPAddress, maliciousIPAddress, unfamiliarFeatures, malwareInfectedIPAddress, suspiciousIPAddress, leakedCredentials, investigationsThreatIntelligence, generic, or unknownFutureValue. ',
+    name: 'azure.signinlogs.properties.risk_event_types_v2',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.service_principal_name': {
+    category: 'azure',
+    description:
+      'The application name used for sign-in. This field is populated when you are signing in using an application. ',
+    name: 'azure.signinlogs.properties.service_principal_name',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.user_type': {
+    category: 'azure',
+    name: 'azure.signinlogs.properties.user_type',
+    type: 'keyword',
+  },
   'azure.signinlogs.properties.service_principal_id': {
     category: 'azure',
-    description: 'Status ',
+    description:
+      'The application identifier used for sign-in. This field is populated when you are signing in using an application. ',
     name: 'azure.signinlogs.properties.service_principal_id',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.cross_tenant_access_type': {
+    category: 'azure',
+    name: 'azure.signinlogs.properties.cross_tenant_access_type',
+    type: 'keyword',
+  },
+  'azure.signinlogs.properties.is_tenant_restricted': {
+    category: 'azure',
+    name: 'azure.signinlogs.properties.is_tenant_restricted',
+    type: 'boolean',
+  },
+  'azure.signinlogs.properties.sso_extension_version': {
+    category: 'azure',
+    name: 'azure.signinlogs.properties.sso_extension_version',
     type: 'keyword',
   },
   'network.interface.name': {
@@ -15478,7 +21178,7 @@ export const fieldsBeat: BeatFields = {
   },
   'checkpoint.duration': {
     category: 'checkpoint',
-    description: 'Scan duration.       ',
+    description: 'Scan duration. ',
     name: 'checkpoint.duration',
     type: 'keyword',
   },
@@ -15532,7 +21232,7 @@ export const fieldsBeat: BeatFields = {
   },
   'checkpoint.next_scheduled_scan_date': {
     category: 'checkpoint',
-    description: 'Next scan scheduled time according to time object.      ',
+    description: 'Next scan scheduled time according to time object. ',
     name: 'checkpoint.next_scheduled_scan_date',
     type: 'keyword',
   },
@@ -16552,7 +22252,7 @@ export const fieldsBeat: BeatFields = {
     category: 'checkpoint',
     description: 'Matched object name on source column. ',
     name: 'checkpoint.source_object',
-    type: 'integer',
+    type: 'keyword',
   },
   'checkpoint.destination_object': {
     category: 'checkpoint',
@@ -16608,6 +22308,12 @@ export const fieldsBeat: BeatFields = {
     description: 'Connection drop reason. ',
     name: 'checkpoint.action_reason',
     type: 'integer',
+  },
+  'checkpoint.action_reason_msg': {
+    category: 'checkpoint',
+    description: 'Connection drop reason message. ',
+    name: 'checkpoint.action_reason_msg',
+    type: 'keyword',
   },
   'checkpoint.c_bytes': {
     category: 'checkpoint',
@@ -17047,6 +22753,355 @@ export const fieldsBeat: BeatFields = {
     name: 'checkpoint.trusted_domain',
     type: 'keyword',
   },
+  'cisco.amp.timestamp_nanoseconds': {
+    category: 'cisco',
+    description: 'The timestamp in Epoch nanoseconds. ',
+    name: 'cisco.amp.timestamp_nanoseconds',
+    type: 'date',
+  },
+  'cisco.amp.event_type_id': {
+    category: 'cisco',
+    description: 'A sub ID of the event, depending on event type. ',
+    name: 'cisco.amp.event_type_id',
+    type: 'keyword',
+  },
+  'cisco.amp.detection': {
+    category: 'cisco',
+    description: 'The name of the malware detected. ',
+    name: 'cisco.amp.detection',
+    type: 'keyword',
+  },
+  'cisco.amp.detection_id': {
+    category: 'cisco',
+    description: 'The ID of the detection. ',
+    name: 'cisco.amp.detection_id',
+    type: 'keyword',
+  },
+  'cisco.amp.connector_guid': {
+    category: 'cisco',
+    description: 'The GUID of the connector sending information to AMP. ',
+    name: 'cisco.amp.connector_guid',
+    type: 'keyword',
+  },
+  'cisco.amp.group_guids': {
+    category: 'cisco',
+    description: 'An array of group GUIDS related to the connector sending information to AMP. ',
+    name: 'cisco.amp.group_guids',
+    type: 'keyword',
+  },
+  'cisco.amp.vulnerabilities': {
+    category: 'cisco',
+    description: 'An array of related vulnerabilities to the malicious event. ',
+    name: 'cisco.amp.vulnerabilities',
+    type: 'flattened',
+  },
+  'cisco.amp.scan.description': {
+    category: 'cisco',
+    description:
+      'Description of an event related to a scan being initiated, for example the specific directory name. ',
+    name: 'cisco.amp.scan.description',
+    type: 'keyword',
+  },
+  'cisco.amp.scan.clean': {
+    category: 'cisco',
+    description: 'Boolean value if a scanned file was clean or not. ',
+    name: 'cisco.amp.scan.clean',
+    type: 'boolean',
+  },
+  'cisco.amp.scan.scanned_files': {
+    category: 'cisco',
+    description: 'Count of files scanned in a directory. ',
+    name: 'cisco.amp.scan.scanned_files',
+    type: 'long',
+  },
+  'cisco.amp.scan.scanned_processes': {
+    category: 'cisco',
+    description: 'Count of processes scanned related to a single scan event. ',
+    name: 'cisco.amp.scan.scanned_processes',
+    type: 'long',
+  },
+  'cisco.amp.scan.scanned_paths': {
+    category: 'cisco',
+    description: 'Count of different directories scanned related to a single scan event. ',
+    name: 'cisco.amp.scan.scanned_paths',
+    type: 'long',
+  },
+  'cisco.amp.scan.malicious_detections': {
+    category: 'cisco',
+    description: 'Count of malicious files or documents detected related to a single scan event. ',
+    name: 'cisco.amp.scan.malicious_detections',
+    type: 'long',
+  },
+  'cisco.amp.computer.connector_guid': {
+    category: 'cisco',
+    description:
+      'The GUID of the connector, similar to top level connector_guid, but unique if multiple connectors are involved. ',
+    name: 'cisco.amp.computer.connector_guid',
+    type: 'keyword',
+  },
+  'cisco.amp.computer.external_ip': {
+    category: 'cisco',
+    description: 'The external IP of the related host. ',
+    name: 'cisco.amp.computer.external_ip',
+    type: 'ip',
+  },
+  'cisco.amp.computer.active': {
+    category: 'cisco',
+    description: 'If the current endpoint is active or not. ',
+    name: 'cisco.amp.computer.active',
+    type: 'boolean',
+  },
+  'cisco.amp.computer.network_addresses': {
+    category: 'cisco',
+    description: 'All network interface information on the related host. ',
+    name: 'cisco.amp.computer.network_addresses',
+    type: 'flattened',
+  },
+  'cisco.amp.file.disposition': {
+    category: 'cisco',
+    description: 'Categorization of file, for example "Malicious" or "Clean". ',
+    name: 'cisco.amp.file.disposition',
+    type: 'keyword',
+  },
+  'cisco.amp.network_info.disposition': {
+    category: 'cisco',
+    description:
+      'Categorization of a network event related to a file, for example "Malicious" or "Clean". ',
+    name: 'cisco.amp.network_info.disposition',
+    type: 'keyword',
+  },
+  'cisco.amp.network_info.nfm.direction': {
+    category: 'cisco',
+    description: 'The current direction based on source and destination IP. ',
+    name: 'cisco.amp.network_info.nfm.direction',
+    type: 'keyword',
+  },
+  'cisco.amp.related.mac': {
+    category: 'cisco',
+    description: 'An array of all related MAC addresses. ',
+    name: 'cisco.amp.related.mac',
+    type: 'keyword',
+  },
+  'cisco.amp.related.cve': {
+    category: 'cisco',
+    description: 'An array of all related MAC addresses. ',
+    name: 'cisco.amp.related.cve',
+    type: 'keyword',
+  },
+  'cisco.amp.cloud_ioc.description': {
+    category: 'cisco',
+    description: 'Description of the related IOC for specific IOC events from AMP. ',
+    name: 'cisco.amp.cloud_ioc.description',
+    type: 'keyword',
+  },
+  'cisco.amp.cloud_ioc.short_description': {
+    category: 'cisco',
+    description: 'Short description of the related IOC for specific IOC events from AMP. ',
+    name: 'cisco.amp.cloud_ioc.short_description',
+    type: 'keyword',
+  },
+  'cisco.amp.network_info.parent.disposition': {
+    category: 'cisco',
+    description: 'Categorization of a IOC for example "Malicious" or "Clean". ',
+    name: 'cisco.amp.network_info.parent.disposition',
+    type: 'keyword',
+  },
+  'cisco.amp.network_info.parent.identity.md5': {
+    category: 'cisco',
+    description: 'MD5 hash of the related IOC. ',
+    name: 'cisco.amp.network_info.parent.identity.md5',
+    type: 'keyword',
+  },
+  'cisco.amp.network_info.parent.identity.sha1': {
+    category: 'cisco',
+    description: 'SHA1 hash of the related IOC. ',
+    name: 'cisco.amp.network_info.parent.identity.sha1',
+    type: 'keyword',
+  },
+  'cisco.amp.network_info.parent.identify.sha256': {
+    category: 'cisco',
+    description: 'SHA256 hash of the related IOC. ',
+    name: 'cisco.amp.network_info.parent.identify.sha256',
+    type: 'keyword',
+  },
+  'cisco.amp.file.archived_file.disposition': {
+    category: 'cisco',
+    description:
+      'Categorization of a file archive related to a file, for example "Malicious" or "Clean". ',
+    name: 'cisco.amp.file.archived_file.disposition',
+    type: 'keyword',
+  },
+  'cisco.amp.file.archived_file.identity.md5': {
+    category: 'cisco',
+    description: 'MD5 hash of the archived file related to the malicious event. ',
+    name: 'cisco.amp.file.archived_file.identity.md5',
+    type: 'keyword',
+  },
+  'cisco.amp.file.archived_file.identity.sha1': {
+    category: 'cisco',
+    description: 'SHA1 hash of the archived file related to the malicious event. ',
+    name: 'cisco.amp.file.archived_file.identity.sha1',
+    type: 'keyword',
+  },
+  'cisco.amp.file.archived_file.identity.sha256': {
+    category: 'cisco',
+    description: 'SHA256 hash of the archived file related to the malicious event. ',
+    name: 'cisco.amp.file.archived_file.identity.sha256',
+    type: 'keyword',
+  },
+  'cisco.amp.file.attack_details.application': {
+    category: 'cisco',
+    description: 'The application name related to Exploit Prevention events. ',
+    name: 'cisco.amp.file.attack_details.application',
+    type: 'keyword',
+  },
+  'cisco.amp.file.attack_details.attacked_module': {
+    category: 'cisco',
+    description:
+      'Path to the executable or dll that was attacked and detected by Exploit Prevention. ',
+    name: 'cisco.amp.file.attack_details.attacked_module',
+    type: 'keyword',
+  },
+  'cisco.amp.file.attack_details.base_address': {
+    category: 'cisco',
+    description: 'The base memory address related to the exploit detected. ',
+    name: 'cisco.amp.file.attack_details.base_address',
+    type: 'keyword',
+  },
+  'cisco.amp.file.attack_details.suspicious_files': {
+    category: 'cisco',
+    description: 'An array of related files when an attack is detected by Exploit Prevention. ',
+    name: 'cisco.amp.file.attack_details.suspicious_files',
+    type: 'keyword',
+  },
+  'cisco.amp.file.parent.disposition': {
+    category: 'cisco',
+    description: 'Categorization of parrent, for example "Malicious" or "Clean". ',
+    name: 'cisco.amp.file.parent.disposition',
+    type: 'keyword',
+  },
+  'cisco.amp.error.description': {
+    category: 'cisco',
+    description: 'Description of an endpoint error event. ',
+    name: 'cisco.amp.error.description',
+    type: 'keyword',
+  },
+  'cisco.amp.error.error_code': {
+    category: 'cisco',
+    description: 'The error code describing the related error event. ',
+    name: 'cisco.amp.error.error_code',
+    type: 'keyword',
+  },
+  'cisco.amp.threat_hunting.severity': {
+    category: 'cisco',
+    description:
+      'Severity result of the threat hunt registered to the malicious event. Can be Low-Critical. ',
+    name: 'cisco.amp.threat_hunting.severity',
+    type: 'keyword',
+  },
+  'cisco.amp.threat_hunting.incident_report_guid': {
+    category: 'cisco',
+    description: 'The GUID of the related threat hunting report. ',
+    name: 'cisco.amp.threat_hunting.incident_report_guid',
+    type: 'keyword',
+  },
+  'cisco.amp.threat_hunting.incident_hunt_guid': {
+    category: 'cisco',
+    description: 'The GUID of the related investigation tracking issue. ',
+    name: 'cisco.amp.threat_hunting.incident_hunt_guid',
+    type: 'keyword',
+  },
+  'cisco.amp.threat_hunting.incident_title': {
+    category: 'cisco',
+    description: 'Title of the incident related to the threat hunting activity. ',
+    name: 'cisco.amp.threat_hunting.incident_title',
+    type: 'keyword',
+  },
+  'cisco.amp.threat_hunting.incident_summary': {
+    category: 'cisco',
+    description: 'Summary of the outcome on the threat hunting activity. ',
+    name: 'cisco.amp.threat_hunting.incident_summary',
+    type: 'keyword',
+  },
+  'cisco.amp.threat_hunting.incident_remediation': {
+    category: 'cisco',
+    description: 'Recommendations to resolve the vulnerability or exploited host. ',
+    name: 'cisco.amp.threat_hunting.incident_remediation',
+    type: 'keyword',
+  },
+  'cisco.amp.threat_hunting.incident_id': {
+    category: 'cisco',
+    description: 'The id of the related incident for the threat hunting activity. ',
+    name: 'cisco.amp.threat_hunting.incident_id',
+    type: 'keyword',
+  },
+  'cisco.amp.threat_hunting.incident_end_time': {
+    category: 'cisco',
+    description: 'When the threat hunt finalized or closed. ',
+    name: 'cisco.amp.threat_hunting.incident_end_time',
+    type: 'date',
+  },
+  'cisco.amp.threat_hunting.incident_start_time': {
+    category: 'cisco',
+    description: 'When the threat hunt was initiated. ',
+    name: 'cisco.amp.threat_hunting.incident_start_time',
+    type: 'date',
+  },
+  'cisco.amp.file.attack_details.indicators': {
+    category: 'cisco',
+    description:
+      'Different indicator types that matches the exploit detected, for example different MITRE tactics. ',
+    name: 'cisco.amp.file.attack_details.indicators',
+    type: 'flattened',
+  },
+  'cisco.amp.threat_hunting.tactics': {
+    category: 'cisco',
+    description: 'List of all MITRE tactics related to the incident found. ',
+    name: 'cisco.amp.threat_hunting.tactics',
+    type: 'flattened',
+  },
+  'cisco.amp.threat_hunting.techniques': {
+    category: 'cisco',
+    description: 'List of all MITRE techniques related to the incident found. ',
+    name: 'cisco.amp.threat_hunting.techniques',
+    type: 'flattened',
+  },
+  'cisco.amp.tactics': {
+    category: 'cisco',
+    description: 'List of all MITRE tactics related to the incident found. ',
+    name: 'cisco.amp.tactics',
+    type: 'flattened',
+  },
+  'cisco.amp.mitre_tactics': {
+    category: 'cisco',
+    description: "Array of all related mitre tactic ID's ",
+    name: 'cisco.amp.mitre_tactics',
+    type: 'keyword',
+  },
+  'cisco.amp.techniques': {
+    category: 'cisco',
+    description: 'List of all MITRE techniques related to the incident found. ',
+    name: 'cisco.amp.techniques',
+    type: 'flattened',
+  },
+  'cisco.amp.mitre_techniques': {
+    category: 'cisco',
+    description: "Array of all related mitre technique ID's ",
+    name: 'cisco.amp.mitre_techniques',
+    type: 'keyword',
+  },
+  'cisco.amp.command_line.arguments': {
+    category: 'cisco',
+    description: 'The CLI arguments related to the Cloud Threat IOC reported by Cisco. ',
+    name: 'cisco.amp.command_line.arguments',
+    type: 'keyword',
+  },
+  'cisco.amp.bp_data': {
+    category: 'cisco',
+    description: 'Endpoint isolation information ',
+    name: 'cisco.amp.bp_data',
+    type: 'flattened',
+  },
   'cisco.asa.message_id': {
     category: 'cisco',
     description: 'The Cisco ASA message identifier. ',
@@ -17168,6 +23223,102 @@ export const fieldsBeat: BeatFields = {
     category: 'cisco',
     description: 'The assigned DAP records ',
     name: 'cisco.asa.dap_records',
+    type: 'keyword',
+  },
+  'cisco.asa.command_line_arguments': {
+    category: 'cisco',
+    description: 'The command line arguments logged by the local audit log ',
+    name: 'cisco.asa.command_line_arguments',
+    type: 'keyword',
+  },
+  'cisco.asa.assigned_ip': {
+    category: 'cisco',
+    description: 'The IP address assigned to a VPN client successfully connecting ',
+    name: 'cisco.asa.assigned_ip',
+    type: 'ip',
+  },
+  'cisco.asa.privilege.old': {
+    category: 'cisco',
+    description: 'When a users privilege is changed this is the old value ',
+    name: 'cisco.asa.privilege.old',
+    type: 'keyword',
+  },
+  'cisco.asa.privilege.new': {
+    category: 'cisco',
+    description: 'When a users privilege is changed this is the new value ',
+    name: 'cisco.asa.privilege.new',
+    type: 'keyword',
+  },
+  'cisco.asa.burst.object': {
+    category: 'cisco',
+    description: 'The related object for burst warnings ',
+    name: 'cisco.asa.burst.object',
+    type: 'keyword',
+  },
+  'cisco.asa.burst.id': {
+    category: 'cisco',
+    description: 'The related rate ID for burst warnings ',
+    name: 'cisco.asa.burst.id',
+    type: 'keyword',
+  },
+  'cisco.asa.burst.current_rate': {
+    category: 'cisco',
+    description: 'The current burst rate seen ',
+    name: 'cisco.asa.burst.current_rate',
+    type: 'keyword',
+  },
+  'cisco.asa.burst.configured_rate': {
+    category: 'cisco',
+    description: 'The current configured burst rate ',
+    name: 'cisco.asa.burst.configured_rate',
+    type: 'keyword',
+  },
+  'cisco.asa.burst.avg_rate': {
+    category: 'cisco',
+    description: 'The current average burst rate seen ',
+    name: 'cisco.asa.burst.avg_rate',
+    type: 'keyword',
+  },
+  'cisco.asa.burst.configured_avg_rate': {
+    category: 'cisco',
+    description: 'The current configured average burst rate allowed ',
+    name: 'cisco.asa.burst.configured_avg_rate',
+    type: 'keyword',
+  },
+  'cisco.asa.burst.cumulative_count': {
+    category: 'cisco',
+    description: 'The total count of burst rate hits since the object was created or cleared ',
+    name: 'cisco.asa.burst.cumulative_count',
+    type: 'keyword',
+  },
+  'cisco.asa.termination_user': {
+    category: 'cisco',
+    description: 'AAA name of user requesting termination ',
+    name: 'cisco.asa.termination_user',
+    type: 'keyword',
+  },
+  'cisco.asa.webvpn.group_name': {
+    category: 'cisco',
+    description: 'The WebVPN group name the user belongs to ',
+    name: 'cisco.asa.webvpn.group_name',
+    type: 'keyword',
+  },
+  'cisco.asa.termination_initiator': {
+    category: 'cisco',
+    description: 'Interface name of the side that initiated the teardown ',
+    name: 'cisco.asa.termination_initiator',
+    type: 'keyword',
+  },
+  'cisco.asa.tunnel_type': {
+    category: 'cisco',
+    description: 'SA type (remote access or L2L) ',
+    name: 'cisco.asa.tunnel_type',
+    type: 'keyword',
+  },
+  'cisco.asa.session_type': {
+    category: 'cisco',
+    description: 'Session type (for example, IPsec or UDP) ',
+    name: 'cisco.asa.session_type',
     type: 'keyword',
   },
   'cisco.ftd.message_id': {
@@ -17299,6 +23450,24 @@ export const fieldsBeat: BeatFields = {
     name: 'cisco.ftd.dap_records',
     type: 'keyword',
   },
+  'cisco.ftd.termination_user': {
+    category: 'cisco',
+    description: 'AAA name of user requesting termination ',
+    name: 'cisco.ftd.termination_user',
+    type: 'keyword',
+  },
+  'cisco.ftd.webvpn.group_name': {
+    category: 'cisco',
+    description: 'The WebVPN group name the user belongs to ',
+    name: 'cisco.ftd.webvpn.group_name',
+    type: 'keyword',
+  },
+  'cisco.ftd.termination_initiator': {
+    category: 'cisco',
+    description: 'Interface name of the side that initiated the teardown ',
+    name: 'cisco.ftd.termination_initiator',
+    type: 'keyword',
+  },
   'cisco.ios.access_list': {
     category: 'cisco',
     description: 'Name of the IP access list. ',
@@ -17313,10 +23482,94 @@ export const fieldsBeat: BeatFields = {
     name: 'cisco.ios.facility',
     type: 'keyword',
   },
-  'coredns.id': {
-    category: 'coredns',
-    description: 'id of the DNS transaction ',
-    name: 'coredns.id',
+  'cisco.umbrella.identities': {
+    category: 'cisco',
+    description: 'An array of the different identities related to the event. ',
+    name: 'cisco.umbrella.identities',
+    type: 'keyword',
+  },
+  'cisco.umbrella.categories': {
+    category: 'cisco',
+    description: 'The security or content categories that the destination matches. ',
+    name: 'cisco.umbrella.categories',
+    type: 'keyword',
+  },
+  'cisco.umbrella.policy_identity_type': {
+    category: 'cisco',
+    description:
+      'The first identity type matched with this request. Available in version 3 and above. ',
+    name: 'cisco.umbrella.policy_identity_type',
+    type: 'keyword',
+  },
+  'cisco.umbrella.identity_types': {
+    category: 'cisco',
+    description:
+      'The type of identity that made the request. For example, Roaming Computer or Network. ',
+    name: 'cisco.umbrella.identity_types',
+    type: 'keyword',
+  },
+  'cisco.umbrella.blocked_categories': {
+    category: 'cisco',
+    description:
+      'The categories that resulted in the destination being blocked. Available in version 4 and above. ',
+    name: 'cisco.umbrella.blocked_categories',
+    type: 'keyword',
+  },
+  'cisco.umbrella.content_type': {
+    category: 'cisco',
+    description: 'The type of web content, typically text/html. ',
+    name: 'cisco.umbrella.content_type',
+    type: 'keyword',
+  },
+  'cisco.umbrella.sha_sha256': {
+    category: 'cisco',
+    description: 'Hex digest of the response content. ',
+    name: 'cisco.umbrella.sha_sha256',
+    type: 'keyword',
+  },
+  'cisco.umbrella.av_detections': {
+    category: 'cisco',
+    description: 'The detection name according to the antivirus engine used in file inspection. ',
+    name: 'cisco.umbrella.av_detections',
+    type: 'keyword',
+  },
+  'cisco.umbrella.puas': {
+    category: 'cisco',
+    description:
+      'A list of all potentially unwanted application (PUA) results for the proxied file as returned by the antivirus scanner. ',
+    name: 'cisco.umbrella.puas',
+    type: 'keyword',
+  },
+  'cisco.umbrella.amp_disposition': {
+    category: 'cisco',
+    description:
+      'The status of the files proxied and scanned by Cisco Advanced Malware Protection (AMP) as part of the Umbrella File Inspection feature; can be Clean, Malicious or Unknown. ',
+    name: 'cisco.umbrella.amp_disposition',
+    type: 'keyword',
+  },
+  'cisco.umbrella.amp_malware_name': {
+    category: 'cisco',
+    description: 'If Malicious, the name of the malware according to AMP. ',
+    name: 'cisco.umbrella.amp_malware_name',
+    type: 'keyword',
+  },
+  'cisco.umbrella.amp_score': {
+    category: 'cisco',
+    description:
+      'The score of the malware from AMP. This field is not currently used and will be blank. ',
+    name: 'cisco.umbrella.amp_score',
+    type: 'keyword',
+  },
+  'cisco.umbrella.datacenter': {
+    category: 'cisco',
+    description: 'The name of the Umbrella Data Center that processed the user-generated traffic. ',
+    name: 'cisco.umbrella.datacenter',
+    type: 'keyword',
+  },
+  'cisco.umbrella.origin_id': {
+    category: 'cisco',
+    description: 'The unique identity of the network tunnel. ',
+    name: 'cisco.umbrella.origin_id',
     type: 'keyword',
   },
   'coredns.query.size': {
@@ -17326,48 +23579,12 @@ export const fieldsBeat: BeatFields = {
     type: 'integer',
     format: 'bytes',
   },
-  'coredns.query.class': {
-    category: 'coredns',
-    description: 'DNS query class ',
-    name: 'coredns.query.class',
-    type: 'keyword',
-  },
-  'coredns.query.name': {
-    category: 'coredns',
-    description: 'DNS query name ',
-    name: 'coredns.query.name',
-    type: 'keyword',
-  },
-  'coredns.query.type': {
-    category: 'coredns',
-    description: 'DNS query type ',
-    name: 'coredns.query.type',
-    type: 'keyword',
-  },
-  'coredns.response.code': {
-    category: 'coredns',
-    description: 'DNS response code ',
-    name: 'coredns.response.code',
-    type: 'keyword',
-  },
-  'coredns.response.flags': {
-    category: 'coredns',
-    description: 'DNS response flags ',
-    name: 'coredns.response.flags',
-    type: 'keyword',
-  },
   'coredns.response.size': {
     category: 'coredns',
     description: 'size of the DNS response ',
     name: 'coredns.response.size',
     type: 'integer',
     format: 'bytes',
-  },
-  'coredns.dnssec_ok': {
-    category: 'coredns',
-    description: 'dnssec flag ',
-    name: 'coredns.dnssec_ok',
-    type: 'boolean',
   },
   'crowdstrike.metadata.eventType': {
     category: 'crowdstrike',
@@ -17903,6 +24120,387 @@ export const fieldsBeat: BeatFields = {
     category: 'crowdstrike',
     description: 'Commands run in a remote session. ',
     name: 'crowdstrike.event.Commands',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.action': {
+    category: 'cyberarkpas',
+    description: 'A description of the audit record.',
+    name: 'cyberarkpas.audit.action',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.address': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.address',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.cpm_disabled': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.cpm_disabled',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.cpm_error_details': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.cpm_error_details',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.cpm_status': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.cpm_status',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.creation_method': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.creation_method',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.customer': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.customer',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.database': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.database',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.device_type': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.device_type',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.dual_account_status': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.dual_account_status',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.group_name': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.group_name',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.in_process': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.in_process',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.index': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.index',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_fail_date': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_fail_date',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_success_change': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_success_change',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_success_reconciliation': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_success_reconciliation',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_success_verification': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_success_verification',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_task': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_task',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.logon_domain': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.logon_domain',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.policy_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.policy_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.port': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.port',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.privcloud': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.privcloud',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.reset_immediately': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.reset_immediately',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.retries_count': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.retries_count',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.sequence_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.sequence_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.tags': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.tags',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.user_dn': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.user_dn',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.user_name': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.user_name',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.virtual_username': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.virtual_username',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.other': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.other',
+    type: 'flattened',
+  },
+  'cyberarkpas.audit.category': {
+    category: 'cyberarkpas',
+    description: 'The category name (for category-related operations).',
+    name: 'cyberarkpas.audit.category',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.desc': {
+    category: 'cyberarkpas',
+    description: 'A static value that displays a description of the audit codes.',
+    name: 'cyberarkpas.audit.desc',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.ad_process_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.ad_process_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.ad_process_name': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.ad_process_name',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.application_type': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.application_type',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.command': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.command',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.connection_component_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.connection_component_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.dst_host': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.dst_host',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.logon_account': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.logon_account',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.managed_account': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.managed_account',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.process_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.process_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.process_name': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.process_name',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.protocol': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.protocol',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.psmid': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.psmid',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.session_duration': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.session_duration',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.session_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.session_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.src_host': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.src_host',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.username': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.username',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.other': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.other',
+    type: 'flattened',
+  },
+  'cyberarkpas.audit.file': {
+    category: 'cyberarkpas',
+    description: 'The name of the target file.',
+    name: 'cyberarkpas.audit.file',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.gateway_station': {
+    category: 'cyberarkpas',
+    description: 'The IP of the web application machine (PVWA).',
+    name: 'cyberarkpas.audit.gateway_station',
+    type: 'ip',
+  },
+  'cyberarkpas.audit.hostname': {
+    category: 'cyberarkpas',
+    description: 'The hostname, in upper case.',
+    example: 'MY-COMPUTER',
+    name: 'cyberarkpas.audit.hostname',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.iso_timestamp': {
+    category: 'cyberarkpas',
+    description: 'The timestamp, in ISO Timestamp format (RFC 3339).',
+    example: '"2013-06-25T10:47:19.000Z"',
+    name: 'cyberarkpas.audit.iso_timestamp',
+    type: 'date',
+  },
+  'cyberarkpas.audit.issuer': {
+    category: 'cyberarkpas',
+    description:
+      'The Vault user who wrote the audit. This is usually the user who performed the operation.',
+    name: 'cyberarkpas.audit.issuer',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.location': {
+    category: 'cyberarkpas',
+    description: 'The target Location (for Location operations).',
+    name: 'cyberarkpas.audit.location',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.message': {
+    category: 'cyberarkpas',
+    description: 'A description of the audit records (same information as in the Desc field).',
+    name: 'cyberarkpas.audit.message',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.message_id': {
+    category: 'cyberarkpas',
+    description: 'The code ID of the audit records.',
+    name: 'cyberarkpas.audit.message_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.product': {
+    category: 'cyberarkpas',
+    description: 'A static value that represents the product.',
+    name: 'cyberarkpas.audit.product',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.pvwa_details': {
+    category: 'cyberarkpas',
+    description: 'Specific details of the PVWA audit records.',
+    name: 'cyberarkpas.audit.pvwa_details',
+    type: 'flattened',
+  },
+  'cyberarkpas.audit.raw': {
+    category: 'cyberarkpas',
+    description:
+      'Raw XML for the original audit record. Only present when XSLT file has debugging enabled. ',
+    name: 'cyberarkpas.audit.raw',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.reason': {
+    category: 'cyberarkpas',
+    description: 'The reason entered by the user.',
+    name: 'cyberarkpas.audit.reason',
+    type: 'text',
+  },
+  'cyberarkpas.audit.rfc5424': {
+    category: 'cyberarkpas',
+    description: 'Whether the syslog format complies with RFC5424.',
+    example: 'yes',
+    name: 'cyberarkpas.audit.rfc5424',
+    type: 'boolean',
+  },
+  'cyberarkpas.audit.safe': {
+    category: 'cyberarkpas',
+    description: 'The name of the target Safe.',
+    name: 'cyberarkpas.audit.safe',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.severity': {
+    category: 'cyberarkpas',
+    description: 'The severity of the audit records.',
+    name: 'cyberarkpas.audit.severity',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.source_user': {
+    category: 'cyberarkpas',
+    description: 'The name of the Vault user who performed the operation.',
+    name: 'cyberarkpas.audit.source_user',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.station': {
+    category: 'cyberarkpas',
+    description:
+      'The IP from where the operation was performed. For PVWA sessions, this will be the real client machine IP.',
+    name: 'cyberarkpas.audit.station',
+    type: 'ip',
+  },
+  'cyberarkpas.audit.target_user': {
+    category: 'cyberarkpas',
+    description: 'The name of the Vault user on which the operation was performed.',
+    name: 'cyberarkpas.audit.target_user',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.timestamp': {
+    category: 'cyberarkpas',
+    description: 'The timestamp, in MMM DD HH:MM:SS format.',
+    example: 'Jun 25 10:47:19',
+    name: 'cyberarkpas.audit.timestamp',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.vendor': {
+    category: 'cyberarkpas',
+    description: 'A static value that represents the vendor.',
+    name: 'cyberarkpas.audit.vendor',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.version': {
+    category: 'cyberarkpas',
+    description: 'A static value that represents the version of the Vault.',
+    name: 'cyberarkpas.audit.version',
     type: 'keyword',
   },
   'envoyproxy.log_type': {
@@ -18848,6 +25446,12 @@ export const fieldsBeat: BeatFields = {
     name: 'fortinet.firewall.esptransform',
     type: 'keyword',
   },
+  'fortinet.firewall.eventtype': {
+    category: 'fortinet',
+    description: 'UTM Event Type ',
+    name: 'fortinet.firewall.eventtype',
+    type: 'keyword',
+  },
   'fortinet.firewall.exch': {
     category: 'fortinet',
     description: 'Mail Exchanges from DNS response answer section ',
@@ -19284,7 +25888,7 @@ export const fieldsBeat: BeatFields = {
     category: 'fortinet',
     description: 'Memory usage system statistics ',
     name: 'fortinet.firewall.mem',
-    type: 'keyword',
+    type: 'integer',
   },
   'fortinet.firewall.meshmode': {
     category: 'fortinet',
@@ -20336,6 +26940,12 @@ export const fieldsBeat: BeatFields = {
     name: 'fortinet.firewall.utmaction',
     type: 'keyword',
   },
+  'fortinet.firewall.utmref': {
+    category: 'fortinet',
+    description: 'Reference to UTM ',
+    name: 'fortinet.firewall.utmref',
+    type: 'keyword',
+  },
   'fortinet.firewall.vap': {
     category: 'fortinet',
     description: 'Virtual AP ',
@@ -20522,1157 +27132,1157 @@ export const fieldsBeat: BeatFields = {
     name: 'fortinet.firewall.xid',
     type: 'integer',
   },
-  'googlecloud.destination.instance.project_id': {
-    category: 'googlecloud',
+  'gcp.destination.instance.project_id': {
+    category: 'gcp',
     description: 'ID of the project containing the VM. ',
-    name: 'googlecloud.destination.instance.project_id',
+    name: 'gcp.destination.instance.project_id',
     type: 'keyword',
   },
-  'googlecloud.destination.instance.region': {
-    category: 'googlecloud',
+  'gcp.destination.instance.region': {
+    category: 'gcp',
     description: 'Region of the VM. ',
-    name: 'googlecloud.destination.instance.region',
+    name: 'gcp.destination.instance.region',
     type: 'keyword',
   },
-  'googlecloud.destination.instance.zone': {
-    category: 'googlecloud',
+  'gcp.destination.instance.zone': {
+    category: 'gcp',
     description: 'Zone of the VM. ',
-    name: 'googlecloud.destination.instance.zone',
+    name: 'gcp.destination.instance.zone',
     type: 'keyword',
   },
-  'googlecloud.destination.vpc.project_id': {
-    category: 'googlecloud',
+  'gcp.destination.vpc.project_id': {
+    category: 'gcp',
     description: 'ID of the project containing the VM. ',
-    name: 'googlecloud.destination.vpc.project_id',
+    name: 'gcp.destination.vpc.project_id',
     type: 'keyword',
   },
-  'googlecloud.destination.vpc.vpc_name': {
-    category: 'googlecloud',
+  'gcp.destination.vpc.vpc_name': {
+    category: 'gcp',
     description: 'VPC on which the VM is operating. ',
-    name: 'googlecloud.destination.vpc.vpc_name',
+    name: 'gcp.destination.vpc.vpc_name',
     type: 'keyword',
   },
-  'googlecloud.destination.vpc.subnetwork_name': {
-    category: 'googlecloud',
+  'gcp.destination.vpc.subnetwork_name': {
+    category: 'gcp',
     description: 'Subnetwork on which the VM is operating. ',
-    name: 'googlecloud.destination.vpc.subnetwork_name',
+    name: 'gcp.destination.vpc.subnetwork_name',
     type: 'keyword',
   },
-  'googlecloud.source.instance.project_id': {
-    category: 'googlecloud',
+  'gcp.source.instance.project_id': {
+    category: 'gcp',
     description: 'ID of the project containing the VM. ',
-    name: 'googlecloud.source.instance.project_id',
+    name: 'gcp.source.instance.project_id',
     type: 'keyword',
   },
-  'googlecloud.source.instance.region': {
-    category: 'googlecloud',
+  'gcp.source.instance.region': {
+    category: 'gcp',
     description: 'Region of the VM. ',
-    name: 'googlecloud.source.instance.region',
+    name: 'gcp.source.instance.region',
     type: 'keyword',
   },
-  'googlecloud.source.instance.zone': {
-    category: 'googlecloud',
+  'gcp.source.instance.zone': {
+    category: 'gcp',
     description: 'Zone of the VM. ',
-    name: 'googlecloud.source.instance.zone',
+    name: 'gcp.source.instance.zone',
     type: 'keyword',
   },
-  'googlecloud.source.vpc.project_id': {
-    category: 'googlecloud',
+  'gcp.source.vpc.project_id': {
+    category: 'gcp',
     description: 'ID of the project containing the VM. ',
-    name: 'googlecloud.source.vpc.project_id',
+    name: 'gcp.source.vpc.project_id',
     type: 'keyword',
   },
-  'googlecloud.source.vpc.vpc_name': {
-    category: 'googlecloud',
+  'gcp.source.vpc.vpc_name': {
+    category: 'gcp',
     description: 'VPC on which the VM is operating. ',
-    name: 'googlecloud.source.vpc.vpc_name',
+    name: 'gcp.source.vpc.vpc_name',
     type: 'keyword',
   },
-  'googlecloud.source.vpc.subnetwork_name': {
-    category: 'googlecloud',
+  'gcp.source.vpc.subnetwork_name': {
+    category: 'gcp',
     description: 'Subnetwork on which the VM is operating. ',
-    name: 'googlecloud.source.vpc.subnetwork_name',
+    name: 'gcp.source.vpc.subnetwork_name',
     type: 'keyword',
   },
-  'googlecloud.audit.type': {
-    category: 'googlecloud',
+  'gcp.audit.type': {
+    category: 'gcp',
     description: 'Type property. ',
-    name: 'googlecloud.audit.type',
+    name: 'gcp.audit.type',
     type: 'keyword',
   },
-  'googlecloud.audit.authentication_info.principal_email': {
-    category: 'googlecloud',
+  'gcp.audit.authentication_info.principal_email': {
+    category: 'gcp',
     description: 'The email address of the authenticated user making the request.  ',
-    name: 'googlecloud.audit.authentication_info.principal_email',
+    name: 'gcp.audit.authentication_info.principal_email',
     type: 'keyword',
   },
-  'googlecloud.audit.authentication_info.authority_selector': {
-    category: 'googlecloud',
+  'gcp.audit.authentication_info.authority_selector': {
+    category: 'gcp',
     description:
       'The authority selector specified by the requestor, if any. It is not guaranteed  that the principal was allowed to use this authority.  ',
-    name: 'googlecloud.audit.authentication_info.authority_selector',
+    name: 'gcp.audit.authentication_info.authority_selector',
     type: 'keyword',
   },
-  'googlecloud.audit.authorization_info.permission': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.permission': {
+    category: 'gcp',
     description: 'The required IAM permission.  ',
-    name: 'googlecloud.audit.authorization_info.permission',
+    name: 'gcp.audit.authorization_info.permission',
     type: 'keyword',
   },
-  'googlecloud.audit.authorization_info.granted': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.granted': {
+    category: 'gcp',
     description: 'Whether or not authorization for resource and permission was granted.  ',
-    name: 'googlecloud.audit.authorization_info.granted',
+    name: 'gcp.audit.authorization_info.granted',
     type: 'boolean',
   },
-  'googlecloud.audit.authorization_info.resource_attributes.service': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.resource_attributes.service': {
+    category: 'gcp',
     description: 'The name of the service. ',
-    name: 'googlecloud.audit.authorization_info.resource_attributes.service',
+    name: 'gcp.audit.authorization_info.resource_attributes.service',
     type: 'keyword',
   },
-  'googlecloud.audit.authorization_info.resource_attributes.name': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.resource_attributes.name': {
+    category: 'gcp',
     description: 'The name of the resource. ',
-    name: 'googlecloud.audit.authorization_info.resource_attributes.name',
+    name: 'gcp.audit.authorization_info.resource_attributes.name',
     type: 'keyword',
   },
-  'googlecloud.audit.authorization_info.resource_attributes.type': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.resource_attributes.type': {
+    category: 'gcp',
     description: 'The type of the resource. ',
-    name: 'googlecloud.audit.authorization_info.resource_attributes.type',
+    name: 'gcp.audit.authorization_info.resource_attributes.type',
     type: 'keyword',
   },
-  'googlecloud.audit.method_name': {
-    category: 'googlecloud',
+  'gcp.audit.method_name': {
+    category: 'gcp',
     description:
       "The name of the service method or operation. For API calls, this  should be the name of the API method.  For example, 'google.datastore.v1.Datastore.RunQuery'. ",
-    name: 'googlecloud.audit.method_name',
+    name: 'gcp.audit.method_name',
     type: 'keyword',
   },
-  'googlecloud.audit.num_response_items': {
-    category: 'googlecloud',
+  'gcp.audit.num_response_items': {
+    category: 'gcp',
     description: 'The number of items returned from a List or Query API method, if applicable. ',
-    name: 'googlecloud.audit.num_response_items',
+    name: 'gcp.audit.num_response_items',
     type: 'long',
   },
-  'googlecloud.audit.request.proto_name': {
-    category: 'googlecloud',
+  'gcp.audit.request.proto_name': {
+    category: 'gcp',
     description: 'Type property of the request. ',
-    name: 'googlecloud.audit.request.proto_name',
+    name: 'gcp.audit.request.proto_name',
     type: 'keyword',
   },
-  'googlecloud.audit.request.filter': {
-    category: 'googlecloud',
+  'gcp.audit.request.filter': {
+    category: 'gcp',
     description: 'Filter of the request. ',
-    name: 'googlecloud.audit.request.filter',
+    name: 'gcp.audit.request.filter',
     type: 'keyword',
   },
-  'googlecloud.audit.request.name': {
-    category: 'googlecloud',
+  'gcp.audit.request.name': {
+    category: 'gcp',
     description: 'Name of the request.  ',
-    name: 'googlecloud.audit.request.name',
+    name: 'gcp.audit.request.name',
     type: 'keyword',
   },
-  'googlecloud.audit.request.resource_name': {
-    category: 'googlecloud',
+  'gcp.audit.request.resource_name': {
+    category: 'gcp',
     description: 'Name of the request resource.  ',
-    name: 'googlecloud.audit.request.resource_name',
+    name: 'gcp.audit.request.resource_name',
     type: 'keyword',
   },
-  'googlecloud.audit.request_metadata.caller_ip': {
-    category: 'googlecloud',
+  'gcp.audit.request_metadata.caller_ip': {
+    category: 'gcp',
     description: 'The IP address of the caller.  ',
-    name: 'googlecloud.audit.request_metadata.caller_ip',
+    name: 'gcp.audit.request_metadata.caller_ip',
     type: 'ip',
   },
-  'googlecloud.audit.request_metadata.caller_supplied_user_agent': {
-    category: 'googlecloud',
+  'gcp.audit.request_metadata.caller_supplied_user_agent': {
+    category: 'gcp',
     description:
       'The user agent of the caller. This information is not authenticated and  should be treated accordingly. ',
-    name: 'googlecloud.audit.request_metadata.caller_supplied_user_agent',
+    name: 'gcp.audit.request_metadata.caller_supplied_user_agent',
     type: 'keyword',
   },
-  'googlecloud.audit.response.proto_name': {
-    category: 'googlecloud',
+  'gcp.audit.response.proto_name': {
+    category: 'gcp',
     description: 'Type property of the response. ',
-    name: 'googlecloud.audit.response.proto_name',
+    name: 'gcp.audit.response.proto_name',
     type: 'keyword',
   },
-  'googlecloud.audit.response.details.group': {
-    category: 'googlecloud',
+  'gcp.audit.response.details.group': {
+    category: 'gcp',
     description: 'The name of the group. ',
-    name: 'googlecloud.audit.response.details.group',
+    name: 'gcp.audit.response.details.group',
     type: 'keyword',
   },
-  'googlecloud.audit.response.details.kind': {
-    category: 'googlecloud',
+  'gcp.audit.response.details.kind': {
+    category: 'gcp',
     description: 'The kind of the response details. ',
-    name: 'googlecloud.audit.response.details.kind',
+    name: 'gcp.audit.response.details.kind',
     type: 'keyword',
   },
-  'googlecloud.audit.response.details.name': {
-    category: 'googlecloud',
+  'gcp.audit.response.details.name': {
+    category: 'gcp',
     description: 'The name of the response details. ',
-    name: 'googlecloud.audit.response.details.name',
+    name: 'gcp.audit.response.details.name',
     type: 'keyword',
   },
-  'googlecloud.audit.response.details.uid': {
-    category: 'googlecloud',
+  'gcp.audit.response.details.uid': {
+    category: 'gcp',
     description: 'The uid of the response details. ',
-    name: 'googlecloud.audit.response.details.uid',
+    name: 'gcp.audit.response.details.uid',
     type: 'keyword',
   },
-  'googlecloud.audit.response.status': {
-    category: 'googlecloud',
+  'gcp.audit.response.status': {
+    category: 'gcp',
     description: 'Status of the response.  ',
-    name: 'googlecloud.audit.response.status',
+    name: 'gcp.audit.response.status',
     type: 'keyword',
   },
-  'googlecloud.audit.resource_name': {
-    category: 'googlecloud',
+  'gcp.audit.resource_name': {
+    category: 'gcp',
     description:
       "The resource or collection that is the target of the operation.  The name is a scheme-less URI, not including the API service name.  For example, 'shelves/SHELF_ID/books'. ",
-    name: 'googlecloud.audit.resource_name',
+    name: 'gcp.audit.resource_name',
     type: 'keyword',
   },
-  'googlecloud.audit.resource_location.current_locations': {
-    category: 'googlecloud',
+  'gcp.audit.resource_location.current_locations': {
+    category: 'gcp',
     description: 'Current locations of the resource. ',
-    name: 'googlecloud.audit.resource_location.current_locations',
+    name: 'gcp.audit.resource_location.current_locations',
     type: 'keyword',
   },
-  'googlecloud.audit.service_name': {
-    category: 'googlecloud',
+  'gcp.audit.service_name': {
+    category: 'gcp',
     description:
       'The name of the API service performing the operation.  For example, datastore.googleapis.com. ',
-    name: 'googlecloud.audit.service_name',
+    name: 'gcp.audit.service_name',
     type: 'keyword',
   },
-  'googlecloud.audit.status.code': {
-    category: 'googlecloud',
+  'gcp.audit.status.code': {
+    category: 'gcp',
     description: 'The status code, which should be an enum value of google.rpc.Code.  ',
-    name: 'googlecloud.audit.status.code',
+    name: 'gcp.audit.status.code',
     type: 'integer',
   },
-  'googlecloud.audit.status.message': {
-    category: 'googlecloud',
+  'gcp.audit.status.message': {
+    category: 'gcp',
     description:
       'A developer-facing error message, which should be in English. Any user-facing  error message should be localized and sent in the google.rpc.Status.details  field, or localized by the client.  ',
-    name: 'googlecloud.audit.status.message',
+    name: 'gcp.audit.status.message',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.priority': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.priority': {
+    category: 'gcp',
     description: 'The priority for the firewall rule.',
-    name: 'googlecloud.firewall.rule_details.priority',
+    name: 'gcp.firewall.rule_details.priority',
     type: 'long',
   },
-  'googlecloud.firewall.rule_details.action': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.action': {
+    category: 'gcp',
     description: 'Action that the rule performs on match.',
-    name: 'googlecloud.firewall.rule_details.action',
+    name: 'gcp.firewall.rule_details.action',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.direction': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.direction': {
+    category: 'gcp',
     description: 'Direction of traffic that matches this rule.',
-    name: 'googlecloud.firewall.rule_details.direction',
+    name: 'gcp.firewall.rule_details.direction',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.reference': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.reference': {
+    category: 'gcp',
     description: 'Reference to the firewall rule.',
-    name: 'googlecloud.firewall.rule_details.reference',
+    name: 'gcp.firewall.rule_details.reference',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.source_range': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.source_range': {
+    category: 'gcp',
     description: 'List of source ranges that the firewall rule applies to.',
-    name: 'googlecloud.firewall.rule_details.source_range',
+    name: 'gcp.firewall.rule_details.source_range',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.destination_range': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.destination_range': {
+    category: 'gcp',
     description: 'List of destination ranges that the firewall applies to.',
-    name: 'googlecloud.firewall.rule_details.destination_range',
+    name: 'gcp.firewall.rule_details.destination_range',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.source_tag': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.source_tag': {
+    category: 'gcp',
     description: 'List of all the source tags that the firewall rule applies to. ',
-    name: 'googlecloud.firewall.rule_details.source_tag',
+    name: 'gcp.firewall.rule_details.source_tag',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.target_tag': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.target_tag': {
+    category: 'gcp',
     description: 'List of all the target tags that the firewall rule applies to. ',
-    name: 'googlecloud.firewall.rule_details.target_tag',
+    name: 'gcp.firewall.rule_details.target_tag',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.ip_port_info': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.ip_port_info': {
+    category: 'gcp',
     description: 'List of ip protocols and applicable port ranges for rules. ',
-    name: 'googlecloud.firewall.rule_details.ip_port_info',
+    name: 'gcp.firewall.rule_details.ip_port_info',
     type: 'array',
   },
-  'googlecloud.firewall.rule_details.source_service_account': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.source_service_account': {
+    category: 'gcp',
     description: 'List of all the source service accounts that the firewall rule applies to. ',
-    name: 'googlecloud.firewall.rule_details.source_service_account',
+    name: 'gcp.firewall.rule_details.source_service_account',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.target_service_account': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.target_service_account': {
+    category: 'gcp',
     description: 'List of all the target service accounts that the firewall rule applies to. ',
-    name: 'googlecloud.firewall.rule_details.target_service_account',
+    name: 'gcp.firewall.rule_details.target_service_account',
     type: 'keyword',
   },
-  'googlecloud.vpcflow.reporter': {
-    category: 'googlecloud',
+  'gcp.vpcflow.reporter': {
+    category: 'gcp',
     description: "The side which reported the flow. Can be either 'SRC' or 'DEST'. ",
-    name: 'googlecloud.vpcflow.reporter',
+    name: 'gcp.vpcflow.reporter',
     type: 'keyword',
   },
-  'googlecloud.vpcflow.rtt.ms': {
-    category: 'googlecloud',
+  'gcp.vpcflow.rtt.ms': {
+    category: 'gcp',
     description:
       'Latency as measured (for TCP flows only) during the time interval. This is the time elapsed between sending a SEQ and receiving a corresponding ACK and it contains the network RTT as well as the application related delay. ',
-    name: 'googlecloud.vpcflow.rtt.ms',
+    name: 'gcp.vpcflow.rtt.ms',
     type: 'long',
   },
-  'gsuite.actor.type': {
-    category: 'gsuite',
+  'google_workspace.actor.type': {
+    category: 'google_workspace',
     description:
       'The type of actor. Values can be:   *USER*: Another user in the same domain.   *EXTERNAL_USER*: A user outside the domain.   *KEY*: A non-human actor. ',
-    name: 'gsuite.actor.type',
+    name: 'google_workspace.actor.type',
     type: 'keyword',
   },
-  'gsuite.actor.key': {
-    category: 'gsuite',
+  'google_workspace.actor.key': {
+    category: 'google_workspace',
     description:
       'Only present when `actor.type` is `KEY`. Can be the `consumer_key` of the requestor for OAuth 2LO API requests or an identifier for robot accounts. ',
-    name: 'gsuite.actor.key',
+    name: 'google_workspace.actor.key',
     type: 'keyword',
   },
-  'gsuite.event.type': {
-    category: 'gsuite',
+  'google_workspace.event.type': {
+    category: 'google_workspace',
     description:
-      'The type of GSuite event, mapped from `items[].events[].type` in the original payload. Each fileset can have a different set of values for it, more details can be found at https://developers.google.com/admin-sdk/reports/v1/reference/activities/list ',
+      'The type of Google Workspace event, mapped from `items[].events[].type` in the original payload. Each fileset can have a different set of values for it, more details can be found at https://developers.google.com/admin-sdk/reports/v1/reference/activities/list ',
     example: 'audit#activity',
-    name: 'gsuite.event.type',
+    name: 'google_workspace.event.type',
     type: 'keyword',
   },
-  'gsuite.kind': {
-    category: 'gsuite',
+  'google_workspace.kind': {
+    category: 'google_workspace',
     description:
       'The type of API resource, mapped from `kind` in the original payload. More details can be found at https://developers.google.com/admin-sdk/reports/v1/reference/activities/list ',
     example: 'audit#activity',
-    name: 'gsuite.kind',
+    name: 'google_workspace.kind',
     type: 'keyword',
   },
-  'gsuite.organization.domain': {
-    category: 'gsuite',
+  'google_workspace.organization.domain': {
+    category: 'google_workspace',
     description: "The domain that is affected by the report's event. ",
-    name: 'gsuite.organization.domain',
+    name: 'google_workspace.organization.domain',
     type: 'keyword',
   },
-  'gsuite.admin.application.edition': {
-    category: 'gsuite',
-    description: 'The GSuite edition.',
-    name: 'gsuite.admin.application.edition',
+  'google_workspace.admin.application.edition': {
+    category: 'google_workspace',
+    description: 'The Google Workspace edition.',
+    name: 'google_workspace.admin.application.edition',
     type: 'keyword',
   },
-  'gsuite.admin.application.name': {
-    category: 'gsuite',
+  'google_workspace.admin.application.name': {
+    category: 'google_workspace',
     description: "The application's name.",
-    name: 'gsuite.admin.application.name',
+    name: 'google_workspace.admin.application.name',
     type: 'keyword',
   },
-  'gsuite.admin.application.enabled': {
-    category: 'gsuite',
+  'google_workspace.admin.application.enabled': {
+    category: 'google_workspace',
     description: 'The enabled application.',
-    name: 'gsuite.admin.application.enabled',
+    name: 'google_workspace.admin.application.enabled',
     type: 'keyword',
   },
-  'gsuite.admin.application.licences_order_number': {
-    category: 'gsuite',
+  'google_workspace.admin.application.licences_order_number': {
+    category: 'google_workspace',
     description: 'Order number used to redeem licenses.',
-    name: 'gsuite.admin.application.licences_order_number',
+    name: 'google_workspace.admin.application.licences_order_number',
     type: 'keyword',
   },
-  'gsuite.admin.application.licences_purchased': {
-    category: 'gsuite',
+  'google_workspace.admin.application.licences_purchased': {
+    category: 'google_workspace',
     description: 'Number of licences purchased.',
-    name: 'gsuite.admin.application.licences_purchased',
+    name: 'google_workspace.admin.application.licences_purchased',
     type: 'keyword',
   },
-  'gsuite.admin.application.id': {
-    category: 'gsuite',
+  'google_workspace.admin.application.id': {
+    category: 'google_workspace',
     description: 'The application ID.',
-    name: 'gsuite.admin.application.id',
+    name: 'google_workspace.admin.application.id',
     type: 'keyword',
   },
-  'gsuite.admin.application.asp_id': {
-    category: 'gsuite',
+  'google_workspace.admin.application.asp_id': {
+    category: 'google_workspace',
     description: 'The application specific password ID.',
-    name: 'gsuite.admin.application.asp_id',
+    name: 'google_workspace.admin.application.asp_id',
     type: 'keyword',
   },
-  'gsuite.admin.application.package_id': {
-    category: 'gsuite',
+  'google_workspace.admin.application.package_id': {
+    category: 'google_workspace',
     description: 'The mobile application package ID.',
-    name: 'gsuite.admin.application.package_id',
+    name: 'google_workspace.admin.application.package_id',
     type: 'keyword',
   },
-  'gsuite.admin.group.email': {
-    category: 'gsuite',
+  'google_workspace.admin.group.email': {
+    category: 'google_workspace',
     description: "The group's primary email address.",
-    name: 'gsuite.admin.group.email',
+    name: 'google_workspace.admin.group.email',
     type: 'keyword',
   },
-  'gsuite.admin.new_value': {
-    category: 'gsuite',
+  'google_workspace.admin.new_value': {
+    category: 'google_workspace',
     description: 'The new value for the setting.',
-    name: 'gsuite.admin.new_value',
+    name: 'google_workspace.admin.new_value',
     type: 'keyword',
   },
-  'gsuite.admin.old_value': {
-    category: 'gsuite',
+  'google_workspace.admin.old_value': {
+    category: 'google_workspace',
     description: 'The old value for the setting.',
-    name: 'gsuite.admin.old_value',
+    name: 'google_workspace.admin.old_value',
     type: 'keyword',
   },
-  'gsuite.admin.org_unit.name': {
-    category: 'gsuite',
+  'google_workspace.admin.org_unit.name': {
+    category: 'google_workspace',
     description: 'The organizational unit name.',
-    name: 'gsuite.admin.org_unit.name',
+    name: 'google_workspace.admin.org_unit.name',
     type: 'keyword',
   },
-  'gsuite.admin.org_unit.full': {
-    category: 'gsuite',
+  'google_workspace.admin.org_unit.full': {
+    category: 'google_workspace',
     description: 'The org unit full path including the root org unit name.',
-    name: 'gsuite.admin.org_unit.full',
+    name: 'google_workspace.admin.org_unit.full',
     type: 'keyword',
   },
-  'gsuite.admin.setting.name': {
-    category: 'gsuite',
+  'google_workspace.admin.setting.name': {
+    category: 'google_workspace',
     description: 'The setting name.',
-    name: 'gsuite.admin.setting.name',
+    name: 'google_workspace.admin.setting.name',
     type: 'keyword',
   },
-  'gsuite.admin.user_defined_setting.name': {
-    category: 'gsuite',
+  'google_workspace.admin.user_defined_setting.name': {
+    category: 'google_workspace',
     description: 'The name of the user-defined setting.',
-    name: 'gsuite.admin.user_defined_setting.name',
+    name: 'google_workspace.admin.user_defined_setting.name',
     type: 'keyword',
   },
-  'gsuite.admin.setting.description': {
-    category: 'gsuite',
+  'google_workspace.admin.setting.description': {
+    category: 'google_workspace',
     description: 'The setting name.',
-    name: 'gsuite.admin.setting.description',
+    name: 'google_workspace.admin.setting.description',
     type: 'keyword',
   },
-  'gsuite.admin.group.priorities': {
-    category: 'gsuite',
+  'google_workspace.admin.group.priorities': {
+    category: 'google_workspace',
     description: 'Group priorities.',
-    name: 'gsuite.admin.group.priorities',
+    name: 'google_workspace.admin.group.priorities',
     type: 'keyword',
   },
-  'gsuite.admin.domain.alias': {
-    category: 'gsuite',
+  'google_workspace.admin.domain.alias': {
+    category: 'google_workspace',
     description: 'The domain alias.',
-    name: 'gsuite.admin.domain.alias',
+    name: 'google_workspace.admin.domain.alias',
     type: 'keyword',
   },
-  'gsuite.admin.domain.name': {
-    category: 'gsuite',
+  'google_workspace.admin.domain.name': {
+    category: 'google_workspace',
     description: 'The primary domain name.',
-    name: 'gsuite.admin.domain.name',
+    name: 'google_workspace.admin.domain.name',
     type: 'keyword',
   },
-  'gsuite.admin.domain.secondary_name': {
-    category: 'gsuite',
+  'google_workspace.admin.domain.secondary_name': {
+    category: 'google_workspace',
     description: 'The secondary domain name.',
-    name: 'gsuite.admin.domain.secondary_name',
+    name: 'google_workspace.admin.domain.secondary_name',
     type: 'keyword',
   },
-  'gsuite.admin.managed_configuration': {
-    category: 'gsuite',
+  'google_workspace.admin.managed_configuration': {
+    category: 'google_workspace',
     description: 'The name of the managed configuration.',
-    name: 'gsuite.admin.managed_configuration',
+    name: 'google_workspace.admin.managed_configuration',
     type: 'keyword',
   },
-  'gsuite.admin.non_featured_services_selection': {
-    category: 'gsuite',
+  'google_workspace.admin.non_featured_services_selection': {
+    category: 'google_workspace',
     description:
       'Non-featured services selection. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-application-settings#FLASHLIGHT_EDU_NON_FEATURED_SERVICES_SELECTED ',
-    name: 'gsuite.admin.non_featured_services_selection',
+    name: 'google_workspace.admin.non_featured_services_selection',
     type: 'keyword',
   },
-  'gsuite.admin.field': {
-    category: 'gsuite',
+  'google_workspace.admin.field': {
+    category: 'google_workspace',
     description: 'The name of the field.',
-    name: 'gsuite.admin.field',
+    name: 'google_workspace.admin.field',
     type: 'keyword',
   },
-  'gsuite.admin.resource.id': {
-    category: 'gsuite',
+  'google_workspace.admin.resource.id': {
+    category: 'google_workspace',
     description: 'The name of the resource identifier.',
-    name: 'gsuite.admin.resource.id',
+    name: 'google_workspace.admin.resource.id',
     type: 'keyword',
   },
-  'gsuite.admin.user.email': {
-    category: 'gsuite',
+  'google_workspace.admin.user.email': {
+    category: 'google_workspace',
     description: "The user's primary email address.",
-    name: 'gsuite.admin.user.email',
+    name: 'google_workspace.admin.user.email',
     type: 'keyword',
   },
-  'gsuite.admin.user.nickname': {
-    category: 'gsuite',
+  'google_workspace.admin.user.nickname': {
+    category: 'google_workspace',
     description: "The user's nickname.",
-    name: 'gsuite.admin.user.nickname',
+    name: 'google_workspace.admin.user.nickname',
     type: 'keyword',
   },
-  'gsuite.admin.user.birthdate': {
-    category: 'gsuite',
+  'google_workspace.admin.user.birthdate': {
+    category: 'google_workspace',
     description: "The user's birth date.",
-    name: 'gsuite.admin.user.birthdate',
+    name: 'google_workspace.admin.user.birthdate',
     type: 'date',
   },
-  'gsuite.admin.gateway.name': {
-    category: 'gsuite',
+  'google_workspace.admin.gateway.name': {
+    category: 'google_workspace',
     description: 'Gateway name. Present on some chat settings.',
-    name: 'gsuite.admin.gateway.name',
+    name: 'google_workspace.admin.gateway.name',
     type: 'keyword',
   },
-  'gsuite.admin.chrome_os.session_type': {
-    category: 'gsuite',
+  'google_workspace.admin.chrome_os.session_type': {
+    category: 'google_workspace',
     description: 'Chrome OS session type.',
-    name: 'gsuite.admin.chrome_os.session_type',
+    name: 'google_workspace.admin.chrome_os.session_type',
     type: 'keyword',
   },
-  'gsuite.admin.device.serial_number': {
-    category: 'gsuite',
+  'google_workspace.admin.device.serial_number': {
+    category: 'google_workspace',
     description: 'Device serial number.',
-    name: 'gsuite.admin.device.serial_number',
+    name: 'google_workspace.admin.device.serial_number',
     type: 'keyword',
   },
-  'gsuite.admin.device.id': {
-    category: 'gsuite',
-    name: 'gsuite.admin.device.id',
+  'google_workspace.admin.device.id': {
+    category: 'google_workspace',
+    name: 'google_workspace.admin.device.id',
     type: 'keyword',
   },
-  'gsuite.admin.device.type': {
-    category: 'gsuite',
+  'google_workspace.admin.device.type': {
+    category: 'google_workspace',
     description: 'Device type.',
-    name: 'gsuite.admin.device.type',
+    name: 'google_workspace.admin.device.type',
     type: 'keyword',
   },
-  'gsuite.admin.print_server.name': {
-    category: 'gsuite',
+  'google_workspace.admin.print_server.name': {
+    category: 'google_workspace',
     description: 'The name of the print server.',
-    name: 'gsuite.admin.print_server.name',
+    name: 'google_workspace.admin.print_server.name',
     type: 'keyword',
   },
-  'gsuite.admin.printer.name': {
-    category: 'gsuite',
+  'google_workspace.admin.printer.name': {
+    category: 'google_workspace',
     description: 'The name of the printer.',
-    name: 'gsuite.admin.printer.name',
+    name: 'google_workspace.admin.printer.name',
     type: 'keyword',
   },
-  'gsuite.admin.device.command_details': {
-    category: 'gsuite',
+  'google_workspace.admin.device.command_details': {
+    category: 'google_workspace',
     description: 'Command details.',
-    name: 'gsuite.admin.device.command_details',
+    name: 'google_workspace.admin.device.command_details',
     type: 'keyword',
   },
-  'gsuite.admin.role.id': {
-    category: 'gsuite',
+  'google_workspace.admin.role.id': {
+    category: 'google_workspace',
     description: 'Unique identifier for this role privilege.',
-    name: 'gsuite.admin.role.id',
+    name: 'google_workspace.admin.role.id',
     type: 'keyword',
   },
-  'gsuite.admin.role.name': {
-    category: 'gsuite',
+  'google_workspace.admin.role.name': {
+    category: 'google_workspace',
     description:
       'The role name. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-delegated-admin-settings ',
-    name: 'gsuite.admin.role.name',
+    name: 'google_workspace.admin.role.name',
     type: 'keyword',
   },
-  'gsuite.admin.privilege.name': {
-    category: 'gsuite',
+  'google_workspace.admin.privilege.name': {
+    category: 'google_workspace',
     description: 'Privilege name.',
-    name: 'gsuite.admin.privilege.name',
+    name: 'google_workspace.admin.privilege.name',
     type: 'keyword',
   },
-  'gsuite.admin.service.name': {
-    category: 'gsuite',
+  'google_workspace.admin.service.name': {
+    category: 'google_workspace',
     description: 'The service name.',
-    name: 'gsuite.admin.service.name',
+    name: 'google_workspace.admin.service.name',
     type: 'keyword',
   },
-  'gsuite.admin.url.name': {
-    category: 'gsuite',
+  'google_workspace.admin.url.name': {
+    category: 'google_workspace',
     description: 'The website name.',
-    name: 'gsuite.admin.url.name',
+    name: 'google_workspace.admin.url.name',
     type: 'keyword',
   },
-  'gsuite.admin.product.name': {
-    category: 'gsuite',
+  'google_workspace.admin.product.name': {
+    category: 'google_workspace',
     description: 'The product name.',
-    name: 'gsuite.admin.product.name',
+    name: 'google_workspace.admin.product.name',
     type: 'keyword',
   },
-  'gsuite.admin.product.sku': {
-    category: 'gsuite',
+  'google_workspace.admin.product.sku': {
+    category: 'google_workspace',
     description: 'The product SKU.',
-    name: 'gsuite.admin.product.sku',
+    name: 'google_workspace.admin.product.sku',
     type: 'keyword',
   },
-  'gsuite.admin.bulk_upload.failed': {
-    category: 'gsuite',
+  'google_workspace.admin.bulk_upload.failed': {
+    category: 'google_workspace',
     description: 'Number of failed records in bulk upload operation.',
-    name: 'gsuite.admin.bulk_upload.failed',
+    name: 'google_workspace.admin.bulk_upload.failed',
     type: 'long',
   },
-  'gsuite.admin.bulk_upload.total': {
-    category: 'gsuite',
+  'google_workspace.admin.bulk_upload.total': {
+    category: 'google_workspace',
     description: 'Number of total records in bulk upload operation.',
-    name: 'gsuite.admin.bulk_upload.total',
+    name: 'google_workspace.admin.bulk_upload.total',
     type: 'long',
   },
-  'gsuite.admin.group.allowed_list': {
-    category: 'gsuite',
+  'google_workspace.admin.group.allowed_list': {
+    category: 'google_workspace',
     description: 'Names of allow-listed groups.',
-    name: 'gsuite.admin.group.allowed_list',
+    name: 'google_workspace.admin.group.allowed_list',
     type: 'keyword',
   },
-  'gsuite.admin.email.quarantine_name': {
-    category: 'gsuite',
+  'google_workspace.admin.email.quarantine_name': {
+    category: 'google_workspace',
     description: 'The name of the quarantine.',
-    name: 'gsuite.admin.email.quarantine_name',
+    name: 'google_workspace.admin.email.quarantine_name',
     type: 'keyword',
   },
-  'gsuite.admin.email.log_search_filter.message_id': {
-    category: 'gsuite',
+  'google_workspace.admin.email.log_search_filter.message_id': {
+    category: 'google_workspace',
     description: "The log search filter's email message ID.",
-    name: 'gsuite.admin.email.log_search_filter.message_id',
+    name: 'google_workspace.admin.email.log_search_filter.message_id',
     type: 'keyword',
   },
-  'gsuite.admin.email.log_search_filter.start_date': {
-    category: 'gsuite',
+  'google_workspace.admin.email.log_search_filter.start_date': {
+    category: 'google_workspace',
     description: "The log search filter's start date.",
-    name: 'gsuite.admin.email.log_search_filter.start_date',
+    name: 'google_workspace.admin.email.log_search_filter.start_date',
     type: 'date',
   },
-  'gsuite.admin.email.log_search_filter.end_date': {
-    category: 'gsuite',
+  'google_workspace.admin.email.log_search_filter.end_date': {
+    category: 'google_workspace',
     description: "The log search filter's ending date.",
-    name: 'gsuite.admin.email.log_search_filter.end_date',
+    name: 'google_workspace.admin.email.log_search_filter.end_date',
     type: 'date',
   },
-  'gsuite.admin.email.log_search_filter.recipient.value': {
-    category: 'gsuite',
+  'google_workspace.admin.email.log_search_filter.recipient.value': {
+    category: 'google_workspace',
     description: "The log search filter's email recipient.",
-    name: 'gsuite.admin.email.log_search_filter.recipient.value',
+    name: 'google_workspace.admin.email.log_search_filter.recipient.value',
     type: 'keyword',
   },
-  'gsuite.admin.email.log_search_filter.sender.value': {
-    category: 'gsuite',
+  'google_workspace.admin.email.log_search_filter.sender.value': {
+    category: 'google_workspace',
     description: "The log search filter's email sender.",
-    name: 'gsuite.admin.email.log_search_filter.sender.value',
+    name: 'google_workspace.admin.email.log_search_filter.sender.value',
     type: 'keyword',
   },
-  'gsuite.admin.email.log_search_filter.recipient.ip': {
-    category: 'gsuite',
+  'google_workspace.admin.email.log_search_filter.recipient.ip': {
+    category: 'google_workspace',
     description: "The log search filter's email recipient's IP address.",
-    name: 'gsuite.admin.email.log_search_filter.recipient.ip',
+    name: 'google_workspace.admin.email.log_search_filter.recipient.ip',
     type: 'ip',
   },
-  'gsuite.admin.email.log_search_filter.sender.ip': {
-    category: 'gsuite',
+  'google_workspace.admin.email.log_search_filter.sender.ip': {
+    category: 'google_workspace',
     description: "The log search filter's email sender's IP address.",
-    name: 'gsuite.admin.email.log_search_filter.sender.ip',
+    name: 'google_workspace.admin.email.log_search_filter.sender.ip',
     type: 'ip',
   },
-  'gsuite.admin.chrome_licenses.enabled': {
-    category: 'gsuite',
+  'google_workspace.admin.chrome_licenses.enabled': {
+    category: 'google_workspace',
     description:
       'Licences enabled. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-org-settings ',
-    name: 'gsuite.admin.chrome_licenses.enabled',
+    name: 'google_workspace.admin.chrome_licenses.enabled',
     type: 'keyword',
   },
-  'gsuite.admin.chrome_licenses.allowed': {
-    category: 'gsuite',
+  'google_workspace.admin.chrome_licenses.allowed': {
+    category: 'google_workspace',
     description:
       'Licences enabled. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-org-settings ',
-    name: 'gsuite.admin.chrome_licenses.allowed',
+    name: 'google_workspace.admin.chrome_licenses.allowed',
     type: 'keyword',
   },
-  'gsuite.admin.oauth2.service.name': {
-    category: 'gsuite',
+  'google_workspace.admin.oauth2.service.name': {
+    category: 'google_workspace',
     description:
       'OAuth2 service name. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-security-settings ',
-    name: 'gsuite.admin.oauth2.service.name',
+    name: 'google_workspace.admin.oauth2.service.name',
     type: 'keyword',
   },
-  'gsuite.admin.oauth2.application.id': {
-    category: 'gsuite',
+  'google_workspace.admin.oauth2.application.id': {
+    category: 'google_workspace',
     description: 'OAuth2 application ID.',
-    name: 'gsuite.admin.oauth2.application.id',
+    name: 'google_workspace.admin.oauth2.application.id',
     type: 'keyword',
   },
-  'gsuite.admin.oauth2.application.name': {
-    category: 'gsuite',
+  'google_workspace.admin.oauth2.application.name': {
+    category: 'google_workspace',
     description: 'OAuth2 application name.',
-    name: 'gsuite.admin.oauth2.application.name',
+    name: 'google_workspace.admin.oauth2.application.name',
     type: 'keyword',
   },
-  'gsuite.admin.oauth2.application.type': {
-    category: 'gsuite',
+  'google_workspace.admin.oauth2.application.type': {
+    category: 'google_workspace',
     description:
       'OAuth2 application type. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-security-settings ',
-    name: 'gsuite.admin.oauth2.application.type',
+    name: 'google_workspace.admin.oauth2.application.type',
     type: 'keyword',
   },
-  'gsuite.admin.verification_method': {
-    category: 'gsuite',
+  'google_workspace.admin.verification_method': {
+    category: 'google_workspace',
     description:
       'Related verification method. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-security-settings and https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-domain-settings ',
-    name: 'gsuite.admin.verification_method',
+    name: 'google_workspace.admin.verification_method',
     type: 'keyword',
   },
-  'gsuite.admin.alert.name': {
-    category: 'gsuite',
+  'google_workspace.admin.alert.name': {
+    category: 'google_workspace',
     description: 'The alert name.',
-    name: 'gsuite.admin.alert.name',
+    name: 'google_workspace.admin.alert.name',
     type: 'keyword',
   },
-  'gsuite.admin.rule.name': {
-    category: 'gsuite',
+  'google_workspace.admin.rule.name': {
+    category: 'google_workspace',
     description: 'The rule name.',
-    name: 'gsuite.admin.rule.name',
+    name: 'google_workspace.admin.rule.name',
     type: 'keyword',
   },
-  'gsuite.admin.api.client.name': {
-    category: 'gsuite',
+  'google_workspace.admin.api.client.name': {
+    category: 'google_workspace',
     description: 'The API client name.',
-    name: 'gsuite.admin.api.client.name',
+    name: 'google_workspace.admin.api.client.name',
     type: 'keyword',
   },
-  'gsuite.admin.api.scopes': {
-    category: 'gsuite',
+  'google_workspace.admin.api.scopes': {
+    category: 'google_workspace',
     description: 'The API scopes.',
-    name: 'gsuite.admin.api.scopes',
+    name: 'google_workspace.admin.api.scopes',
     type: 'keyword',
   },
-  'gsuite.admin.mdm.token': {
-    category: 'gsuite',
+  'google_workspace.admin.mdm.token': {
+    category: 'google_workspace',
     description: 'The MDM vendor enrollment token.',
-    name: 'gsuite.admin.mdm.token',
+    name: 'google_workspace.admin.mdm.token',
     type: 'keyword',
   },
-  'gsuite.admin.mdm.vendor': {
-    category: 'gsuite',
+  'google_workspace.admin.mdm.vendor': {
+    category: 'google_workspace',
     description: "The MDM vendor's name.",
-    name: 'gsuite.admin.mdm.vendor',
+    name: 'google_workspace.admin.mdm.vendor',
     type: 'keyword',
   },
-  'gsuite.admin.info_type': {
-    category: 'gsuite',
+  'google_workspace.admin.info_type': {
+    category: 'google_workspace',
     description:
       'This will be used to state what kind of information was changed. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-domain-settings ',
-    name: 'gsuite.admin.info_type',
+    name: 'google_workspace.admin.info_type',
     type: 'keyword',
   },
-  'gsuite.admin.email_monitor.dest_email': {
-    category: 'gsuite',
+  'google_workspace.admin.email_monitor.dest_email': {
+    category: 'google_workspace',
     description: 'The destination address of the email monitor.',
-    name: 'gsuite.admin.email_monitor.dest_email',
+    name: 'google_workspace.admin.email_monitor.dest_email',
     type: 'keyword',
   },
-  'gsuite.admin.email_monitor.level.chat': {
-    category: 'gsuite',
+  'google_workspace.admin.email_monitor.level.chat': {
+    category: 'google_workspace',
     description: 'The chat email monitor level.',
-    name: 'gsuite.admin.email_monitor.level.chat',
+    name: 'google_workspace.admin.email_monitor.level.chat',
     type: 'keyword',
   },
-  'gsuite.admin.email_monitor.level.draft': {
-    category: 'gsuite',
+  'google_workspace.admin.email_monitor.level.draft': {
+    category: 'google_workspace',
     description: 'The draft email monitor level.',
-    name: 'gsuite.admin.email_monitor.level.draft',
+    name: 'google_workspace.admin.email_monitor.level.draft',
     type: 'keyword',
   },
-  'gsuite.admin.email_monitor.level.incoming': {
-    category: 'gsuite',
+  'google_workspace.admin.email_monitor.level.incoming': {
+    category: 'google_workspace',
     description: 'The incoming email monitor level.',
-    name: 'gsuite.admin.email_monitor.level.incoming',
+    name: 'google_workspace.admin.email_monitor.level.incoming',
     type: 'keyword',
   },
-  'gsuite.admin.email_monitor.level.outgoing': {
-    category: 'gsuite',
+  'google_workspace.admin.email_monitor.level.outgoing': {
+    category: 'google_workspace',
     description: 'The outgoing email monitor level.',
-    name: 'gsuite.admin.email_monitor.level.outgoing',
+    name: 'google_workspace.admin.email_monitor.level.outgoing',
     type: 'keyword',
   },
-  'gsuite.admin.email_dump.include_deleted': {
-    category: 'gsuite',
+  'google_workspace.admin.email_dump.include_deleted': {
+    category: 'google_workspace',
     description: 'Indicates if deleted emails are included in the export.',
-    name: 'gsuite.admin.email_dump.include_deleted',
+    name: 'google_workspace.admin.email_dump.include_deleted',
     type: 'boolean',
   },
-  'gsuite.admin.email_dump.package_content': {
-    category: 'gsuite',
+  'google_workspace.admin.email_dump.package_content': {
+    category: 'google_workspace',
     description: 'The contents of the mailbox package.',
-    name: 'gsuite.admin.email_dump.package_content',
+    name: 'google_workspace.admin.email_dump.package_content',
     type: 'keyword',
   },
-  'gsuite.admin.email_dump.query': {
-    category: 'gsuite',
+  'google_workspace.admin.email_dump.query': {
+    category: 'google_workspace',
     description: 'The search query used for the dump.',
-    name: 'gsuite.admin.email_dump.query',
+    name: 'google_workspace.admin.email_dump.query',
     type: 'keyword',
   },
-  'gsuite.admin.request.id': {
-    category: 'gsuite',
+  'google_workspace.admin.request.id': {
+    category: 'google_workspace',
     description: 'The request ID.',
-    name: 'gsuite.admin.request.id',
+    name: 'google_workspace.admin.request.id',
     type: 'keyword',
   },
-  'gsuite.admin.mobile.action.id': {
-    category: 'gsuite',
+  'google_workspace.admin.mobile.action.id': {
+    category: 'google_workspace',
     description: "The mobile device action's ID.",
-    name: 'gsuite.admin.mobile.action.id',
+    name: 'google_workspace.admin.mobile.action.id',
     type: 'keyword',
   },
-  'gsuite.admin.mobile.action.type': {
-    category: 'gsuite',
+  'google_workspace.admin.mobile.action.type': {
+    category: 'google_workspace',
     description:
       "The mobile device action's type. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-mobile-settings ",
-    name: 'gsuite.admin.mobile.action.type',
+    name: 'google_workspace.admin.mobile.action.type',
     type: 'keyword',
   },
-  'gsuite.admin.mobile.certificate.name': {
-    category: 'gsuite',
+  'google_workspace.admin.mobile.certificate.name': {
+    category: 'google_workspace',
     description: 'The mobile certificate common name.',
-    name: 'gsuite.admin.mobile.certificate.name',
+    name: 'google_workspace.admin.mobile.certificate.name',
     type: 'keyword',
   },
-  'gsuite.admin.mobile.company_owned_devices': {
-    category: 'gsuite',
+  'google_workspace.admin.mobile.company_owned_devices': {
+    category: 'google_workspace',
     description: 'The number of devices a company owns.',
-    name: 'gsuite.admin.mobile.company_owned_devices',
+    name: 'google_workspace.admin.mobile.company_owned_devices',
     type: 'long',
   },
-  'gsuite.admin.distribution.entity.name': {
-    category: 'gsuite',
+  'google_workspace.admin.distribution.entity.name': {
+    category: 'google_workspace',
     description:
       'The distribution entity value, which can be a group name or an org-unit name. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-mobile-settings ',
-    name: 'gsuite.admin.distribution.entity.name',
+    name: 'google_workspace.admin.distribution.entity.name',
     type: 'keyword',
   },
-  'gsuite.admin.distribution.entity.type': {
-    category: 'gsuite',
+  'google_workspace.admin.distribution.entity.type': {
+    category: 'google_workspace',
     description:
       'The distribution entity type, which can be a group or an org-unit. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/admin-mobile-settings ',
-    name: 'gsuite.admin.distribution.entity.type',
+    name: 'google_workspace.admin.distribution.entity.type',
     type: 'keyword',
   },
-  'gsuite.drive.billable': {
-    category: 'gsuite',
+  'google_workspace.drive.billable': {
+    category: 'google_workspace',
     description: 'Whether this activity is billable.',
-    name: 'gsuite.drive.billable',
+    name: 'google_workspace.drive.billable',
     type: 'boolean',
   },
-  'gsuite.drive.source_folder_id': {
-    category: 'gsuite',
-    name: 'gsuite.drive.source_folder_id',
+  'google_workspace.drive.source_folder_id': {
+    category: 'google_workspace',
+    name: 'google_workspace.drive.source_folder_id',
     type: 'keyword',
   },
-  'gsuite.drive.source_folder_title': {
-    category: 'gsuite',
-    name: 'gsuite.drive.source_folder_title',
+  'google_workspace.drive.source_folder_title': {
+    category: 'google_workspace',
+    name: 'google_workspace.drive.source_folder_title',
     type: 'keyword',
   },
-  'gsuite.drive.destination_folder_id': {
-    category: 'gsuite',
-    name: 'gsuite.drive.destination_folder_id',
+  'google_workspace.drive.destination_folder_id': {
+    category: 'google_workspace',
+    name: 'google_workspace.drive.destination_folder_id',
     type: 'keyword',
   },
-  'gsuite.drive.destination_folder_title': {
-    category: 'gsuite',
-    name: 'gsuite.drive.destination_folder_title',
+  'google_workspace.drive.destination_folder_title': {
+    category: 'google_workspace',
+    name: 'google_workspace.drive.destination_folder_title',
     type: 'keyword',
   },
-  'gsuite.drive.file.id': {
-    category: 'gsuite',
-    name: 'gsuite.drive.file.id',
+  'google_workspace.drive.file.id': {
+    category: 'google_workspace',
+    name: 'google_workspace.drive.file.id',
     type: 'keyword',
   },
-  'gsuite.drive.file.type': {
-    category: 'gsuite',
+  'google_workspace.drive.file.type': {
+    category: 'google_workspace',
     description:
       'Document Drive type. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/drive ',
-    name: 'gsuite.drive.file.type',
+    name: 'google_workspace.drive.file.type',
     type: 'keyword',
   },
-  'gsuite.drive.originating_app_id': {
-    category: 'gsuite',
+  'google_workspace.drive.originating_app_id': {
+    category: 'google_workspace',
     description: 'The Google Cloud Project ID of the application that performed the action. ',
-    name: 'gsuite.drive.originating_app_id',
+    name: 'google_workspace.drive.originating_app_id',
     type: 'keyword',
   },
-  'gsuite.drive.file.owner.email': {
-    category: 'gsuite',
-    name: 'gsuite.drive.file.owner.email',
+  'google_workspace.drive.file.owner.email': {
+    category: 'google_workspace',
+    name: 'google_workspace.drive.file.owner.email',
     type: 'keyword',
   },
-  'gsuite.drive.file.owner.is_shared_drive': {
-    category: 'gsuite',
+  'google_workspace.drive.file.owner.is_shared_drive': {
+    category: 'google_workspace',
     description: 'Boolean flag denoting whether owner is a shared drive. ',
-    name: 'gsuite.drive.file.owner.is_shared_drive',
+    name: 'google_workspace.drive.file.owner.is_shared_drive',
     type: 'boolean',
   },
-  'gsuite.drive.primary_event': {
-    category: 'gsuite',
+  'google_workspace.drive.primary_event': {
+    category: 'google_workspace',
     description:
       'Whether this is a primary event. A single user action in Drive may generate several events. ',
-    name: 'gsuite.drive.primary_event',
+    name: 'google_workspace.drive.primary_event',
     type: 'boolean',
   },
-  'gsuite.drive.shared_drive_id': {
-    category: 'gsuite',
+  'google_workspace.drive.shared_drive_id': {
+    category: 'google_workspace',
     description:
       'The unique identifier of the Team Drive. Only populated for for events relating to a Team Drive or item contained inside a Team Drive. ',
-    name: 'gsuite.drive.shared_drive_id',
+    name: 'google_workspace.drive.shared_drive_id',
     type: 'keyword',
   },
-  'gsuite.drive.visibility': {
-    category: 'gsuite',
+  'google_workspace.drive.visibility': {
+    category: 'google_workspace',
     description:
       'Visibility of target file. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/drive ',
-    name: 'gsuite.drive.visibility',
+    name: 'google_workspace.drive.visibility',
     type: 'keyword',
   },
-  'gsuite.drive.new_value': {
-    category: 'gsuite',
+  'google_workspace.drive.new_value': {
+    category: 'google_workspace',
     description:
       'When a setting or property of the file changes, the new value for it will appear here. ',
-    name: 'gsuite.drive.new_value',
+    name: 'google_workspace.drive.new_value',
     type: 'keyword',
   },
-  'gsuite.drive.old_value': {
-    category: 'gsuite',
+  'google_workspace.drive.old_value': {
+    category: 'google_workspace',
     description:
       'When a setting or property of the file changes, the old value for it will appear here. ',
-    name: 'gsuite.drive.old_value',
+    name: 'google_workspace.drive.old_value',
     type: 'keyword',
   },
-  'gsuite.drive.sheets_import_range_recipient_doc': {
-    category: 'gsuite',
+  'google_workspace.drive.sheets_import_range_recipient_doc': {
+    category: 'google_workspace',
     description: 'Doc ID of the recipient of a sheets import range.',
-    name: 'gsuite.drive.sheets_import_range_recipient_doc',
+    name: 'google_workspace.drive.sheets_import_range_recipient_doc',
     type: 'keyword',
   },
-  'gsuite.drive.old_visibility': {
-    category: 'gsuite',
+  'google_workspace.drive.old_visibility': {
+    category: 'google_workspace',
     description: 'When visibility changes, this holds the old value. ',
-    name: 'gsuite.drive.old_visibility',
+    name: 'google_workspace.drive.old_visibility',
     type: 'keyword',
   },
-  'gsuite.drive.visibility_change': {
-    category: 'gsuite',
+  'google_workspace.drive.visibility_change': {
+    category: 'google_workspace',
     description: 'When visibility changes, this holds the new overall visibility of the file. ',
-    name: 'gsuite.drive.visibility_change',
+    name: 'google_workspace.drive.visibility_change',
     type: 'keyword',
   },
-  'gsuite.drive.target_domain': {
-    category: 'gsuite',
+  'google_workspace.drive.target_domain': {
+    category: 'google_workspace',
     description:
       'The domain for which the acccess scope was changed. This can also be the alias all to indicate the access scope was changed for all domains that have visibility for this document. ',
-    name: 'gsuite.drive.target_domain',
+    name: 'google_workspace.drive.target_domain',
     type: 'keyword',
   },
-  'gsuite.drive.added_role': {
-    category: 'gsuite',
+  'google_workspace.drive.added_role': {
+    category: 'google_workspace',
     description:
       'Added membership role of a user/group in a Team Drive. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/drive ',
-    name: 'gsuite.drive.added_role',
+    name: 'google_workspace.drive.added_role',
     type: 'keyword',
   },
-  'gsuite.drive.membership_change_type': {
-    category: 'gsuite',
+  'google_workspace.drive.membership_change_type': {
+    category: 'google_workspace',
     description:
       'Type of change in Team Drive membership of a user/group. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/drive ',
-    name: 'gsuite.drive.membership_change_type',
+    name: 'google_workspace.drive.membership_change_type',
     type: 'keyword',
   },
-  'gsuite.drive.shared_drive_settings_change_type': {
-    category: 'gsuite',
+  'google_workspace.drive.shared_drive_settings_change_type': {
+    category: 'google_workspace',
     description:
       'Type of change in Team Drive settings. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/drive ',
-    name: 'gsuite.drive.shared_drive_settings_change_type',
+    name: 'google_workspace.drive.shared_drive_settings_change_type',
     type: 'keyword',
   },
-  'gsuite.drive.removed_role': {
-    category: 'gsuite',
+  'google_workspace.drive.removed_role': {
+    category: 'google_workspace',
     description:
       'Removed membership role of a user/group in a Team Drive. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/drive ',
-    name: 'gsuite.drive.removed_role',
+    name: 'google_workspace.drive.removed_role',
     type: 'keyword',
   },
-  'gsuite.drive.target': {
-    category: 'gsuite',
+  'google_workspace.drive.target': {
+    category: 'google_workspace',
     description: 'Target user or group.',
-    name: 'gsuite.drive.target',
+    name: 'google_workspace.drive.target',
     type: 'keyword',
   },
-  'gsuite.groups.acl_permission': {
-    category: 'gsuite',
+  'google_workspace.groups.acl_permission': {
+    category: 'google_workspace',
     description:
       'Group permission setting updated. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/groups ',
-    name: 'gsuite.groups.acl_permission',
+    name: 'google_workspace.groups.acl_permission',
     type: 'keyword',
   },
-  'gsuite.groups.email': {
-    category: 'gsuite',
+  'google_workspace.groups.email': {
+    category: 'google_workspace',
     description: 'Group email. ',
-    name: 'gsuite.groups.email',
+    name: 'google_workspace.groups.email',
     type: 'keyword',
   },
-  'gsuite.groups.member.email': {
-    category: 'gsuite',
+  'google_workspace.groups.member.email': {
+    category: 'google_workspace',
     description: 'Member email. ',
-    name: 'gsuite.groups.member.email',
+    name: 'google_workspace.groups.member.email',
     type: 'keyword',
   },
-  'gsuite.groups.member.role': {
-    category: 'gsuite',
+  'google_workspace.groups.member.role': {
+    category: 'google_workspace',
     description:
       'Member role. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/groups ',
-    name: 'gsuite.groups.member.role',
+    name: 'google_workspace.groups.member.role',
     type: 'keyword',
   },
-  'gsuite.groups.setting': {
-    category: 'gsuite',
+  'google_workspace.groups.setting': {
+    category: 'google_workspace',
     description:
       'Group setting updated. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/groups ',
-    name: 'gsuite.groups.setting',
+    name: 'google_workspace.groups.setting',
     type: 'keyword',
   },
-  'gsuite.groups.new_value': {
-    category: 'gsuite',
+  'google_workspace.groups.new_value': {
+    category: 'google_workspace',
     description:
       'New value(s) of the group setting. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/groups ',
-    name: 'gsuite.groups.new_value',
+    name: 'google_workspace.groups.new_value',
     type: 'keyword',
   },
-  'gsuite.groups.old_value': {
-    category: 'gsuite',
+  'google_workspace.groups.old_value': {
+    category: 'google_workspace',
     description:
       'Old value(s) of the group setting. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/groups',
-    name: 'gsuite.groups.old_value',
+    name: 'google_workspace.groups.old_value',
     type: 'keyword',
   },
-  'gsuite.groups.value': {
-    category: 'gsuite',
+  'google_workspace.groups.value': {
+    category: 'google_workspace',
     description:
       'Value of the group setting. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/groups ',
-    name: 'gsuite.groups.value',
+    name: 'google_workspace.groups.value',
     type: 'keyword',
   },
-  'gsuite.groups.message.id': {
-    category: 'gsuite',
+  'google_workspace.groups.message.id': {
+    category: 'google_workspace',
     description: 'SMTP message Id of an email message. Present for moderation events. ',
-    name: 'gsuite.groups.message.id',
+    name: 'google_workspace.groups.message.id',
     type: 'keyword',
   },
-  'gsuite.groups.message.moderation_action': {
-    category: 'gsuite',
+  'google_workspace.groups.message.moderation_action': {
+    category: 'google_workspace',
     description: 'Message moderation action. Possible values are `approved` and `rejected`. ',
-    name: 'gsuite.groups.message.moderation_action',
+    name: 'google_workspace.groups.message.moderation_action',
     type: 'keyword',
   },
-  'gsuite.groups.status': {
-    category: 'gsuite',
+  'google_workspace.groups.status': {
+    category: 'google_workspace',
     description:
       'A status describing the output of an operation. Possible values are `failed` and `succeeded`. ',
-    name: 'gsuite.groups.status',
+    name: 'google_workspace.groups.status',
     type: 'keyword',
   },
-  'gsuite.login.affected_email_address': {
-    category: 'gsuite',
-    name: 'gsuite.login.affected_email_address',
+  'google_workspace.login.affected_email_address': {
+    category: 'google_workspace',
+    name: 'google_workspace.login.affected_email_address',
     type: 'keyword',
   },
-  'gsuite.login.challenge_method': {
-    category: 'gsuite',
+  'google_workspace.login.challenge_method': {
+    category: 'google_workspace',
     description:
       'Login challenge method. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/login. ',
-    name: 'gsuite.login.challenge_method',
+    name: 'google_workspace.login.challenge_method',
     type: 'keyword',
   },
-  'gsuite.login.failure_type': {
-    category: 'gsuite',
+  'google_workspace.login.failure_type': {
+    category: 'google_workspace',
     description:
       'Login failure type. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/login. ',
-    name: 'gsuite.login.failure_type',
+    name: 'google_workspace.login.failure_type',
     type: 'keyword',
   },
-  'gsuite.login.type': {
-    category: 'gsuite',
+  'google_workspace.login.type': {
+    category: 'google_workspace',
     description:
       'Login credentials type. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/login. ',
-    name: 'gsuite.login.type',
+    name: 'google_workspace.login.type',
     type: 'keyword',
   },
-  'gsuite.login.is_second_factor': {
-    category: 'gsuite',
-    name: 'gsuite.login.is_second_factor',
+  'google_workspace.login.is_second_factor': {
+    category: 'google_workspace',
+    name: 'google_workspace.login.is_second_factor',
     type: 'boolean',
   },
-  'gsuite.login.is_suspicious': {
-    category: 'gsuite',
-    name: 'gsuite.login.is_suspicious',
+  'google_workspace.login.is_suspicious': {
+    category: 'google_workspace',
+    name: 'google_workspace.login.is_suspicious',
     type: 'boolean',
   },
-  'gsuite.saml.application_name': {
-    category: 'gsuite',
+  'google_workspace.saml.application_name': {
+    category: 'google_workspace',
     description: 'Saml SP application name. ',
-    name: 'gsuite.saml.application_name',
+    name: 'google_workspace.saml.application_name',
     type: 'keyword',
   },
-  'gsuite.saml.failure_type': {
-    category: 'gsuite',
+  'google_workspace.saml.failure_type': {
+    category: 'google_workspace',
     description:
       'Login failure type. For a list of possible values refer to https://developers.google.com/admin-sdk/reports/v1/appendix/activity/saml. ',
-    name: 'gsuite.saml.failure_type',
+    name: 'google_workspace.saml.failure_type',
     type: 'keyword',
   },
-  'gsuite.saml.initiated_by': {
-    category: 'gsuite',
+  'google_workspace.saml.initiated_by': {
+    category: 'google_workspace',
     description: 'Requester of SAML authentication. ',
-    name: 'gsuite.saml.initiated_by',
+    name: 'google_workspace.saml.initiated_by',
     type: 'keyword',
   },
-  'gsuite.saml.orgunit_path': {
-    category: 'gsuite',
+  'google_workspace.saml.orgunit_path': {
+    category: 'google_workspace',
     description: 'User orgunit. ',
-    name: 'gsuite.saml.orgunit_path',
+    name: 'google_workspace.saml.orgunit_path',
     type: 'keyword',
   },
-  'gsuite.saml.status_code': {
-    category: 'gsuite',
+  'google_workspace.saml.status_code': {
+    category: 'google_workspace',
     description: 'SAML status code. ',
-    name: 'gsuite.saml.status_code',
-    type: 'long',
+    name: 'google_workspace.saml.status_code',
+    type: 'keyword',
   },
-  'gsuite.saml.second_level_status_code': {
-    category: 'gsuite',
+  'google_workspace.saml.second_level_status_code': {
+    category: 'google_workspace',
     description: 'SAML second level status code. ',
-    name: 'gsuite.saml.second_level_status_code',
-    type: 'long',
+    name: 'google_workspace.saml.second_level_status_code',
+    type: 'keyword',
   },
   'ibmmq.errorlog.installation': {
     category: 'ibmmq',
@@ -21893,6 +28503,582 @@ export const fieldsBeat: BeatFields = {
     name: 'iptables.ubiquiti.rule_set',
     type: 'keyword',
   },
+  'juniper.srx.reason': {
+    category: 'juniper',
+    description: 'reason ',
+    name: 'juniper.srx.reason',
+    type: 'keyword',
+  },
+  'juniper.srx.connection_tag': {
+    category: 'juniper',
+    description: 'connection tag ',
+    name: 'juniper.srx.connection_tag',
+    type: 'keyword',
+  },
+  'juniper.srx.service_name': {
+    category: 'juniper',
+    description: 'service name ',
+    name: 'juniper.srx.service_name',
+    type: 'keyword',
+  },
+  'juniper.srx.nat_connection_tag': {
+    category: 'juniper',
+    description: 'nat connection tag ',
+    name: 'juniper.srx.nat_connection_tag',
+    type: 'keyword',
+  },
+  'juniper.srx.src_nat_rule_type': {
+    category: 'juniper',
+    description: 'src nat rule type ',
+    name: 'juniper.srx.src_nat_rule_type',
+    type: 'keyword',
+  },
+  'juniper.srx.src_nat_rule_name': {
+    category: 'juniper',
+    description: 'src nat rule name ',
+    name: 'juniper.srx.src_nat_rule_name',
+    type: 'keyword',
+  },
+  'juniper.srx.dst_nat_rule_type': {
+    category: 'juniper',
+    description: 'dst nat rule type ',
+    name: 'juniper.srx.dst_nat_rule_type',
+    type: 'keyword',
+  },
+  'juniper.srx.dst_nat_rule_name': {
+    category: 'juniper',
+    description: 'dst nat rule name ',
+    name: 'juniper.srx.dst_nat_rule_name',
+    type: 'keyword',
+  },
+  'juniper.srx.protocol_id': {
+    category: 'juniper',
+    description: 'protocol id ',
+    name: 'juniper.srx.protocol_id',
+    type: 'keyword',
+  },
+  'juniper.srx.policy_name': {
+    category: 'juniper',
+    description: 'policy name ',
+    name: 'juniper.srx.policy_name',
+    type: 'keyword',
+  },
+  'juniper.srx.session_id_32': {
+    category: 'juniper',
+    description: 'session id 32 ',
+    name: 'juniper.srx.session_id_32',
+    type: 'keyword',
+  },
+  'juniper.srx.session_id': {
+    category: 'juniper',
+    description: 'session id ',
+    name: 'juniper.srx.session_id',
+    type: 'keyword',
+  },
+  'juniper.srx.outbound_packets': {
+    category: 'juniper',
+    description: 'packets from client ',
+    name: 'juniper.srx.outbound_packets',
+    type: 'integer',
+  },
+  'juniper.srx.outbound_bytes': {
+    category: 'juniper',
+    description: 'bytes from client ',
+    name: 'juniper.srx.outbound_bytes',
+    type: 'integer',
+  },
+  'juniper.srx.inbound_packets': {
+    category: 'juniper',
+    description: 'packets from server ',
+    name: 'juniper.srx.inbound_packets',
+    type: 'integer',
+  },
+  'juniper.srx.inbound_bytes': {
+    category: 'juniper',
+    description: 'bytes from server ',
+    name: 'juniper.srx.inbound_bytes',
+    type: 'integer',
+  },
+  'juniper.srx.elapsed_time': {
+    category: 'juniper',
+    description: 'elapsed time ',
+    name: 'juniper.srx.elapsed_time',
+    type: 'date',
+  },
+  'juniper.srx.application': {
+    category: 'juniper',
+    description: 'application ',
+    name: 'juniper.srx.application',
+    type: 'keyword',
+  },
+  'juniper.srx.nested_application': {
+    category: 'juniper',
+    description: 'nested application ',
+    name: 'juniper.srx.nested_application',
+    type: 'keyword',
+  },
+  'juniper.srx.username': {
+    category: 'juniper',
+    description: 'username ',
+    name: 'juniper.srx.username',
+    type: 'keyword',
+  },
+  'juniper.srx.roles': {
+    category: 'juniper',
+    description: 'roles ',
+    name: 'juniper.srx.roles',
+    type: 'keyword',
+  },
+  'juniper.srx.encrypted': {
+    category: 'juniper',
+    description: 'encrypted ',
+    name: 'juniper.srx.encrypted',
+    type: 'keyword',
+  },
+  'juniper.srx.application_category': {
+    category: 'juniper',
+    description: 'application category ',
+    name: 'juniper.srx.application_category',
+    type: 'keyword',
+  },
+  'juniper.srx.application_sub_category': {
+    category: 'juniper',
+    description: 'application sub category ',
+    name: 'juniper.srx.application_sub_category',
+    type: 'keyword',
+  },
+  'juniper.srx.application_characteristics': {
+    category: 'juniper',
+    description: 'application characteristics ',
+    name: 'juniper.srx.application_characteristics',
+    type: 'keyword',
+  },
+  'juniper.srx.secure_web_proxy_session_type': {
+    category: 'juniper',
+    description: 'secure web proxy session type ',
+    name: 'juniper.srx.secure_web_proxy_session_type',
+    type: 'keyword',
+  },
+  'juniper.srx.peer_session_id': {
+    category: 'juniper',
+    description: 'peer session id ',
+    name: 'juniper.srx.peer_session_id',
+    type: 'keyword',
+  },
+  'juniper.srx.peer_source_address': {
+    category: 'juniper',
+    description: 'peer source address ',
+    name: 'juniper.srx.peer_source_address',
+    type: 'ip',
+  },
+  'juniper.srx.peer_source_port': {
+    category: 'juniper',
+    description: 'peer source port ',
+    name: 'juniper.srx.peer_source_port',
+    type: 'integer',
+  },
+  'juniper.srx.peer_destination_address': {
+    category: 'juniper',
+    description: 'peer destination address ',
+    name: 'juniper.srx.peer_destination_address',
+    type: 'ip',
+  },
+  'juniper.srx.peer_destination_port': {
+    category: 'juniper',
+    description: 'peer destination port ',
+    name: 'juniper.srx.peer_destination_port',
+    type: 'integer',
+  },
+  'juniper.srx.hostname': {
+    category: 'juniper',
+    description: 'hostname ',
+    name: 'juniper.srx.hostname',
+    type: 'keyword',
+  },
+  'juniper.srx.src_vrf_grp': {
+    category: 'juniper',
+    description: 'src_vrf_grp ',
+    name: 'juniper.srx.src_vrf_grp',
+    type: 'keyword',
+  },
+  'juniper.srx.dst_vrf_grp': {
+    category: 'juniper',
+    description: 'dst_vrf_grp ',
+    name: 'juniper.srx.dst_vrf_grp',
+    type: 'keyword',
+  },
+  'juniper.srx.icmp_type': {
+    category: 'juniper',
+    description: 'icmp type ',
+    name: 'juniper.srx.icmp_type',
+    type: 'integer',
+  },
+  'juniper.srx.process': {
+    category: 'juniper',
+    description: 'process that generated the message ',
+    name: 'juniper.srx.process',
+    type: 'keyword',
+  },
+  'juniper.srx.apbr_rule_type': {
+    category: 'juniper',
+    description: 'apbr rule type ',
+    name: 'juniper.srx.apbr_rule_type',
+    type: 'keyword',
+  },
+  'juniper.srx.dscp_value': {
+    category: 'juniper',
+    description: 'apbr rule type ',
+    name: 'juniper.srx.dscp_value',
+    type: 'integer',
+  },
+  'juniper.srx.logical_system_name': {
+    category: 'juniper',
+    description: 'logical system name ',
+    name: 'juniper.srx.logical_system_name',
+    type: 'keyword',
+  },
+  'juniper.srx.profile_name': {
+    category: 'juniper',
+    description: 'profile name ',
+    name: 'juniper.srx.profile_name',
+    type: 'keyword',
+  },
+  'juniper.srx.routing_instance': {
+    category: 'juniper',
+    description: 'routing instance ',
+    name: 'juniper.srx.routing_instance',
+    type: 'keyword',
+  },
+  'juniper.srx.rule_name': {
+    category: 'juniper',
+    description: 'rule name ',
+    name: 'juniper.srx.rule_name',
+    type: 'keyword',
+  },
+  'juniper.srx.uplink_tx_bytes': {
+    category: 'juniper',
+    description: 'uplink tx bytes ',
+    name: 'juniper.srx.uplink_tx_bytes',
+    type: 'integer',
+  },
+  'juniper.srx.uplink_rx_bytes': {
+    category: 'juniper',
+    description: 'uplink rx bytes ',
+    name: 'juniper.srx.uplink_rx_bytes',
+    type: 'integer',
+  },
+  'juniper.srx.obj': {
+    category: 'juniper',
+    description: 'url path ',
+    name: 'juniper.srx.obj',
+    type: 'keyword',
+  },
+  'juniper.srx.url': {
+    category: 'juniper',
+    description: 'url domain ',
+    name: 'juniper.srx.url',
+    type: 'keyword',
+  },
+  'juniper.srx.profile': {
+    category: 'juniper',
+    description: 'filter profile ',
+    name: 'juniper.srx.profile',
+    type: 'keyword',
+  },
+  'juniper.srx.category': {
+    category: 'juniper',
+    description: 'filter category ',
+    name: 'juniper.srx.category',
+    type: 'keyword',
+  },
+  'juniper.srx.filename': {
+    category: 'juniper',
+    description: 'filename ',
+    name: 'juniper.srx.filename',
+    type: 'keyword',
+  },
+  'juniper.srx.temporary_filename': {
+    category: 'juniper',
+    description: 'temporary_filename ',
+    name: 'juniper.srx.temporary_filename',
+    type: 'keyword',
+  },
+  'juniper.srx.name': {
+    category: 'juniper',
+    description: 'name ',
+    name: 'juniper.srx.name',
+    type: 'keyword',
+  },
+  'juniper.srx.error_message': {
+    category: 'juniper',
+    description: 'error_message ',
+    name: 'juniper.srx.error_message',
+    type: 'keyword',
+  },
+  'juniper.srx.error_code': {
+    category: 'juniper',
+    description: 'error_code ',
+    name: 'juniper.srx.error_code',
+    type: 'keyword',
+  },
+  'juniper.srx.action': {
+    category: 'juniper',
+    description: 'action ',
+    name: 'juniper.srx.action',
+    type: 'keyword',
+  },
+  'juniper.srx.protocol': {
+    category: 'juniper',
+    description: 'protocol ',
+    name: 'juniper.srx.protocol',
+    type: 'keyword',
+  },
+  'juniper.srx.protocol_name': {
+    category: 'juniper',
+    description: 'protocol name ',
+    name: 'juniper.srx.protocol_name',
+    type: 'keyword',
+  },
+  'juniper.srx.type': {
+    category: 'juniper',
+    description: 'type ',
+    name: 'juniper.srx.type',
+    type: 'keyword',
+  },
+  'juniper.srx.repeat_count': {
+    category: 'juniper',
+    description: 'repeat count ',
+    name: 'juniper.srx.repeat_count',
+    type: 'integer',
+  },
+  'juniper.srx.alert': {
+    category: 'juniper',
+    description: 'repeat alert ',
+    name: 'juniper.srx.alert',
+    type: 'keyword',
+  },
+  'juniper.srx.message_type': {
+    category: 'juniper',
+    description: 'message type ',
+    name: 'juniper.srx.message_type',
+    type: 'keyword',
+  },
+  'juniper.srx.threat_severity': {
+    category: 'juniper',
+    description: 'threat severity ',
+    name: 'juniper.srx.threat_severity',
+    type: 'keyword',
+  },
+  'juniper.srx.application_name': {
+    category: 'juniper',
+    description: 'application name ',
+    name: 'juniper.srx.application_name',
+    type: 'keyword',
+  },
+  'juniper.srx.attack_name': {
+    category: 'juniper',
+    description: 'attack name ',
+    name: 'juniper.srx.attack_name',
+    type: 'keyword',
+  },
+  'juniper.srx.index': {
+    category: 'juniper',
+    description: 'index ',
+    name: 'juniper.srx.index',
+    type: 'keyword',
+  },
+  'juniper.srx.message': {
+    category: 'juniper',
+    description: 'mesagge ',
+    name: 'juniper.srx.message',
+    type: 'keyword',
+  },
+  'juniper.srx.epoch_time': {
+    category: 'juniper',
+    description: 'epoch time ',
+    name: 'juniper.srx.epoch_time',
+    type: 'date',
+  },
+  'juniper.srx.packet_log_id': {
+    category: 'juniper',
+    description: 'packet log id ',
+    name: 'juniper.srx.packet_log_id',
+    type: 'integer',
+  },
+  'juniper.srx.export_id': {
+    category: 'juniper',
+    description: 'packet log id ',
+    name: 'juniper.srx.export_id',
+    type: 'integer',
+  },
+  'juniper.srx.ddos_application_name': {
+    category: 'juniper',
+    description: 'ddos application name ',
+    name: 'juniper.srx.ddos_application_name',
+    type: 'keyword',
+  },
+  'juniper.srx.connection_hit_rate': {
+    category: 'juniper',
+    description: 'connection hit rate ',
+    name: 'juniper.srx.connection_hit_rate',
+    type: 'integer',
+  },
+  'juniper.srx.time_scope': {
+    category: 'juniper',
+    description: 'time scope ',
+    name: 'juniper.srx.time_scope',
+    type: 'keyword',
+  },
+  'juniper.srx.context_hit_rate': {
+    category: 'juniper',
+    description: 'context hit rate ',
+    name: 'juniper.srx.context_hit_rate',
+    type: 'integer',
+  },
+  'juniper.srx.context_value_hit_rate': {
+    category: 'juniper',
+    description: 'context value hit rate ',
+    name: 'juniper.srx.context_value_hit_rate',
+    type: 'integer',
+  },
+  'juniper.srx.time_count': {
+    category: 'juniper',
+    description: 'time count ',
+    name: 'juniper.srx.time_count',
+    type: 'integer',
+  },
+  'juniper.srx.time_period': {
+    category: 'juniper',
+    description: 'time period ',
+    name: 'juniper.srx.time_period',
+    type: 'integer',
+  },
+  'juniper.srx.context_value': {
+    category: 'juniper',
+    description: 'context value ',
+    name: 'juniper.srx.context_value',
+    type: 'keyword',
+  },
+  'juniper.srx.context_name': {
+    category: 'juniper',
+    description: 'context name ',
+    name: 'juniper.srx.context_name',
+    type: 'keyword',
+  },
+  'juniper.srx.ruleebase_name': {
+    category: 'juniper',
+    description: 'ruleebase name ',
+    name: 'juniper.srx.ruleebase_name',
+    type: 'keyword',
+  },
+  'juniper.srx.verdict_source': {
+    category: 'juniper',
+    description: 'verdict source ',
+    name: 'juniper.srx.verdict_source',
+    type: 'keyword',
+  },
+  'juniper.srx.verdict_number': {
+    category: 'juniper',
+    description: 'verdict number ',
+    name: 'juniper.srx.verdict_number',
+    type: 'integer',
+  },
+  'juniper.srx.file_category': {
+    category: 'juniper',
+    description: 'file category ',
+    name: 'juniper.srx.file_category',
+    type: 'keyword',
+  },
+  'juniper.srx.sample_sha256': {
+    category: 'juniper',
+    description: 'sample sha256 ',
+    name: 'juniper.srx.sample_sha256',
+    type: 'keyword',
+  },
+  'juniper.srx.malware_info': {
+    category: 'juniper',
+    description: 'malware info ',
+    name: 'juniper.srx.malware_info',
+    type: 'keyword',
+  },
+  'juniper.srx.client_ip': {
+    category: 'juniper',
+    description: 'client ip ',
+    name: 'juniper.srx.client_ip',
+    type: 'ip',
+  },
+  'juniper.srx.tenant_id': {
+    category: 'juniper',
+    description: 'tenant id ',
+    name: 'juniper.srx.tenant_id',
+    type: 'keyword',
+  },
+  'juniper.srx.timestamp': {
+    category: 'juniper',
+    description: 'timestamp ',
+    name: 'juniper.srx.timestamp',
+    type: 'date',
+  },
+  'juniper.srx.th': {
+    category: 'juniper',
+    description: 'th ',
+    name: 'juniper.srx.th',
+    type: 'keyword',
+  },
+  'juniper.srx.status': {
+    category: 'juniper',
+    description: 'status ',
+    name: 'juniper.srx.status',
+    type: 'keyword',
+  },
+  'juniper.srx.state': {
+    category: 'juniper',
+    description: 'state ',
+    name: 'juniper.srx.state',
+    type: 'keyword',
+  },
+  'juniper.srx.file_hash_lookup': {
+    category: 'juniper',
+    description: 'file hash lookup ',
+    name: 'juniper.srx.file_hash_lookup',
+    type: 'keyword',
+  },
+  'juniper.srx.file_name': {
+    category: 'juniper',
+    description: 'file name ',
+    name: 'juniper.srx.file_name',
+    type: 'keyword',
+  },
+  'juniper.srx.action_detail': {
+    category: 'juniper',
+    description: 'action detail ',
+    name: 'juniper.srx.action_detail',
+    type: 'keyword',
+  },
+  'juniper.srx.sub_category': {
+    category: 'juniper',
+    description: 'sub category ',
+    name: 'juniper.srx.sub_category',
+    type: 'keyword',
+  },
+  'juniper.srx.feed_name': {
+    category: 'juniper',
+    description: 'feed name ',
+    name: 'juniper.srx.feed_name',
+    type: 'keyword',
+  },
+  'juniper.srx.occur_count': {
+    category: 'juniper',
+    description: 'occur count ',
+    name: 'juniper.srx.occur_count',
+    type: 'integer',
+  },
+  'juniper.srx.tag': {
+    category: 'juniper',
+    description: 'system log message tag, which uniquely identifies the message. ',
+    name: 'juniper.srx.tag',
+    type: 'keyword',
+  },
   'microsoft.defender_atp.lastUpdateTime': {
     category: 'microsoft',
     description: 'The date and time (in UTC) the alert was last updated. ',
@@ -21997,6 +29183,267 @@ export const fieldsBeat: BeatFields = {
     description: 'Principal name of the user involved in the alert ',
     name: 'microsoft.defender_atp.evidence.userPrincipalName',
     type: 'keyword',
+  },
+  'microsoft.m365_defender.incidentId': {
+    category: 'microsoft',
+    description: 'Unique identifier to represent the incident. ',
+    name: 'microsoft.m365_defender.incidentId',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.redirectIncidentId': {
+    category: 'microsoft',
+    description:
+      'Only populated in case an incident is being grouped together with another incident, as part of the incident processing logic. ',
+    name: 'microsoft.m365_defender.redirectIncidentId',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.incidentName': {
+    category: 'microsoft',
+    description: 'Name of the Incident. ',
+    name: 'microsoft.m365_defender.incidentName',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.determination': {
+    category: 'microsoft',
+    description:
+      'Specifies the determination of the incident. The property values are: NotAvailable, Apt, Malware, SecurityPersonnel, SecurityTesting, UnwantedSoftware, Other. ',
+    name: 'microsoft.m365_defender.determination',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.investigationState': {
+    category: 'microsoft',
+    description: 'The current state of the Investigation. ',
+    name: 'microsoft.m365_defender.investigationState',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.assignedTo': {
+    category: 'microsoft',
+    description: 'Owner of the alert. ',
+    name: 'microsoft.m365_defender.assignedTo',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.tags': {
+    category: 'microsoft',
+    description:
+      'Array of custom tags associated with an incident, for example to flag a group of incidents with a common characteristic. ',
+    name: 'microsoft.m365_defender.tags',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.status': {
+    category: 'microsoft',
+    description:
+      "Specifies the current status of the alert. Possible values are: 'Unknown', 'New', 'InProgress' and 'Resolved'. ",
+    name: 'microsoft.m365_defender.status',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.classification': {
+    category: 'microsoft',
+    description:
+      "Specification of the alert. Possible values are: 'Unknown', 'FalsePositive', 'TruePositive'. ",
+    name: 'microsoft.m365_defender.classification',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.incidentId': {
+    category: 'microsoft',
+    description: 'Unique identifier to represent the incident this alert is associated with. ',
+    name: 'microsoft.m365_defender.alerts.incidentId',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.resolvedTime': {
+    category: 'microsoft',
+    description: 'Time when alert was resolved. ',
+    name: 'microsoft.m365_defender.alerts.resolvedTime',
+    type: 'date',
+  },
+  'microsoft.m365_defender.alerts.status': {
+    category: 'microsoft',
+    description: 'Categorize alerts (as New, Active, or Resolved). ',
+    name: 'microsoft.m365_defender.alerts.status',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.severity': {
+    category: 'microsoft',
+    description: 'The severity of the related alert. ',
+    name: 'microsoft.m365_defender.alerts.severity',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.creationTime': {
+    category: 'microsoft',
+    description: 'Time when alert was first created. ',
+    name: 'microsoft.m365_defender.alerts.creationTime',
+    type: 'date',
+  },
+  'microsoft.m365_defender.alerts.lastUpdatedTime': {
+    category: 'microsoft',
+    description: 'Time when alert was last updated. ',
+    name: 'microsoft.m365_defender.alerts.lastUpdatedTime',
+    type: 'date',
+  },
+  'microsoft.m365_defender.alerts.investigationId': {
+    category: 'microsoft',
+    description: 'The automated investigation id triggered by this alert. ',
+    name: 'microsoft.m365_defender.alerts.investigationId',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.userSid': {
+    category: 'microsoft',
+    description: 'The SID of the related user ',
+    name: 'microsoft.m365_defender.alerts.userSid',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.detectionSource': {
+    category: 'microsoft',
+    description: 'The service that initially detected the threat. ',
+    name: 'microsoft.m365_defender.alerts.detectionSource',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.classification': {
+    category: 'microsoft',
+    description:
+      'The specification for the incident. The property values are: Unknown, FalsePositive, TruePositive or null. ',
+    name: 'microsoft.m365_defender.alerts.classification',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.investigationState': {
+    category: 'microsoft',
+    description: "Information on the investigation's current status. ",
+    name: 'microsoft.m365_defender.alerts.investigationState',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.determination': {
+    category: 'microsoft',
+    description:
+      'Specifies the determination of the incident. The property values are: NotAvailable, Apt, Malware, SecurityPersonnel, SecurityTesting, UnwantedSoftware, Other or null ',
+    name: 'microsoft.m365_defender.alerts.determination',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.assignedTo': {
+    category: 'microsoft',
+    description: 'Owner of the incident, or null if no owner is assigned. ',
+    name: 'microsoft.m365_defender.alerts.assignedTo',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.actorName': {
+    category: 'microsoft',
+    description: 'The activity group, if any, the associated with this alert. ',
+    name: 'microsoft.m365_defender.alerts.actorName',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.threatFamilyName': {
+    category: 'microsoft',
+    description: 'Threat family associated with this alert. ',
+    name: 'microsoft.m365_defender.alerts.threatFamilyName',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.mitreTechniques': {
+    category: 'microsoft',
+    description: 'The attack techniques, as aligned with the MITRE ATT&CK™ framework. ',
+    name: 'microsoft.m365_defender.alerts.mitreTechniques',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.entityType': {
+    category: 'microsoft',
+    description:
+      'Entities that have been identified to be part of, or related to, a given alert. The properties values are: User, Ip, Url, File, Process, MailBox, MailMessage, MailCluster, Registry. ',
+    name: 'microsoft.m365_defender.alerts.entities.entityType',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.accountName': {
+    category: 'microsoft',
+    description: 'Account name of the related user. ',
+    name: 'microsoft.m365_defender.alerts.entities.accountName',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.mailboxDisplayName': {
+    category: 'microsoft',
+    description: 'The display name of the related mailbox. ',
+    name: 'microsoft.m365_defender.alerts.entities.mailboxDisplayName',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.mailboxAddress': {
+    category: 'microsoft',
+    description: 'The mail address of the related mailbox. ',
+    name: 'microsoft.m365_defender.alerts.entities.mailboxAddress',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.clusterBy': {
+    category: 'microsoft',
+    description: 'A list of metadata if the entityType is MailCluster. ',
+    name: 'microsoft.m365_defender.alerts.entities.clusterBy',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.sender': {
+    category: 'microsoft',
+    description: 'The sender for the related email message. ',
+    name: 'microsoft.m365_defender.alerts.entities.sender',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.recipient': {
+    category: 'microsoft',
+    description: 'The recipient for the related email message. ',
+    name: 'microsoft.m365_defender.alerts.entities.recipient',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.subject': {
+    category: 'microsoft',
+    description: 'The subject for the related email message. ',
+    name: 'microsoft.m365_defender.alerts.entities.subject',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.deliveryAction': {
+    category: 'microsoft',
+    description: 'The delivery status for the related email message. ',
+    name: 'microsoft.m365_defender.alerts.entities.deliveryAction',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.securityGroupId': {
+    category: 'microsoft',
+    description: 'The Security Group ID for the user related to the email message. ',
+    name: 'microsoft.m365_defender.alerts.entities.securityGroupId',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.securityGroupName': {
+    category: 'microsoft',
+    description: 'The Security Group Name for the user related to the email message. ',
+    name: 'microsoft.m365_defender.alerts.entities.securityGroupName',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.registryHive': {
+    category: 'microsoft',
+    description:
+      'Reference to which Hive in registry the event is related to, if eventType is registry. Example: HKEY_LOCAL_MACHINE. ',
+    name: 'microsoft.m365_defender.alerts.entities.registryHive',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.registryKey': {
+    category: 'microsoft',
+    description: 'Reference to the related registry key to the event. ',
+    name: 'microsoft.m365_defender.alerts.entities.registryKey',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.registryValueType': {
+    category: 'microsoft',
+    description: 'Value type of the registry key/value pair related to the event. ',
+    name: 'microsoft.m365_defender.alerts.entities.registryValueType',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.deviceId': {
+    category: 'microsoft',
+    description: 'The unique ID of the device related to the event. ',
+    name: 'microsoft.m365_defender.alerts.entities.deviceId',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.entities.ipAddress': {
+    category: 'microsoft',
+    description: 'The related IP address to the event. ',
+    name: 'microsoft.m365_defender.alerts.entities.ipAddress',
+    type: 'keyword',
+  },
+  'microsoft.m365_defender.alerts.devices': {
+    category: 'microsoft',
+    description: 'The devices related to the investigation. ',
+    name: 'microsoft.m365_defender.alerts.devices',
+    type: 'flattened',
   },
   'misp.attack_pattern.id': {
     category: 'misp',
@@ -22592,6 +30039,166 @@ export const fieldsBeat: BeatFields = {
     name: 'mssql.log.origin',
     type: 'keyword',
   },
+  'mysqlenterprise.audit.class': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing the event class. The class defines the type of event, when taken together with the event item that specifies the event subclass. ',
+    name: 'mysqlenterprise.audit.class',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.connection_id': {
+    category: 'mysqlenterprise',
+    description:
+      'An integer representing the client connection identifier. This is the same as the value returned by the CONNECTION_ID() function within the session. ',
+    name: 'mysqlenterprise.audit.connection_id',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.id': {
+    category: 'mysqlenterprise',
+    description: 'An unsigned integer representing an event ID. ',
+    name: 'mysqlenterprise.audit.id',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.connection_data.connection_type': {
+    category: 'mysqlenterprise',
+    description:
+      'The security state of the connection to the server. Permitted values are tcp/ip (TCP/IP connection established without encryption), ssl (TCP/IP connection established with encryption), socket (Unix socket file connection), named_pipe (Windows named pipe connection), and shared_memory (Windows shared memory connection). ',
+    name: 'mysqlenterprise.audit.connection_data.connection_type',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.connection_data.status': {
+    category: 'mysqlenterprise',
+    description:
+      'An integer representing the command status: 0 for success, nonzero if an error occurred. ',
+    name: 'mysqlenterprise.audit.connection_data.status',
+    type: 'long',
+  },
+  'mysqlenterprise.audit.connection_data.db': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing a database name. For connection_data, it is the default database. For table_access_data, it is the table database. ',
+    name: 'mysqlenterprise.audit.connection_data.db',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.connection_data.connection_attributes': {
+    category: 'mysqlenterprise',
+    description: 'Connection attributes that might be passed by different MySQL Clients. ',
+    name: 'mysqlenterprise.audit.connection_data.connection_attributes',
+    type: 'flattened',
+  },
+  'mysqlenterprise.audit.general_data.command': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing the type of instruction that generated the audit event, such as a command that the server received from a client. ',
+    name: 'mysqlenterprise.audit.general_data.command',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.general_data.sql_command': {
+    category: 'mysqlenterprise',
+    description: 'A string that indicates the SQL statement type. ',
+    name: 'mysqlenterprise.audit.general_data.sql_command',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.general_data.query': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing the text of an SQL statement. The value can be empty. Long values may be truncated. The string, like the audit log file itself, is written using UTF-8 (up to 4 bytes per character), so the value may be the result of conversion. ',
+    name: 'mysqlenterprise.audit.general_data.query',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.general_data.status': {
+    category: 'mysqlenterprise',
+    description:
+      'An integer representing the command status: 0 for success, nonzero if an error occurred. This is the same as the value of the mysql_errno() C API function. ',
+    name: 'mysqlenterprise.audit.general_data.status',
+    type: 'long',
+  },
+  'mysqlenterprise.audit.login.user': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing the information indicating how a client connected to the server. ',
+    name: 'mysqlenterprise.audit.login.user',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.login.proxy': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing the proxy user. The value is empty if user proxying is not in effect. ',
+    name: 'mysqlenterprise.audit.login.proxy',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.shutdown_data.server_id': {
+    category: 'mysqlenterprise',
+    description:
+      'An integer representing the server ID. This is the same as the value of the server_id system variable. ',
+    name: 'mysqlenterprise.audit.shutdown_data.server_id',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.startup_data.server_id': {
+    category: 'mysqlenterprise',
+    description:
+      'An integer representing the server ID. This is the same as the value of the server_id system variable. ',
+    name: 'mysqlenterprise.audit.startup_data.server_id',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.startup_data.mysql_version': {
+    category: 'mysqlenterprise',
+    description:
+      'An integer representing the server ID. This is the same as the value of the server_id system variable. ',
+    name: 'mysqlenterprise.audit.startup_data.mysql_version',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.table_access_data.db': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing a database name. For connection_data, it is the default database. For table_access_data, it is the table database. ',
+    name: 'mysqlenterprise.audit.table_access_data.db',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.table_access_data.table': {
+    category: 'mysqlenterprise',
+    description: 'A string representing a table name. ',
+    name: 'mysqlenterprise.audit.table_access_data.table',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.table_access_data.query': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing the text of an SQL statement. The value can be empty. Long values may be truncated. The string, like the audit log file itself, is written using UTF-8 (up to 4 bytes per character), so the value may be the result of conversion. ',
+    name: 'mysqlenterprise.audit.table_access_data.query',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.table_access_data.sql_command': {
+    category: 'mysqlenterprise',
+    description: 'A string that indicates the SQL statement type. ',
+    name: 'mysqlenterprise.audit.table_access_data.sql_command',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.account.user': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing the user that the server authenticated the client as. This is the user name that the server uses for privilege checking. ',
+    name: 'mysqlenterprise.audit.account.user',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.account.host': {
+    category: 'mysqlenterprise',
+    description: 'A string representing the client host name. ',
+    name: 'mysqlenterprise.audit.account.host',
+    type: 'keyword',
+  },
+  'mysqlenterprise.audit.login.os': {
+    category: 'mysqlenterprise',
+    description:
+      'A string representing the external user name used during the authentication process, as set by the plugin used to authenticate the client. ',
+    name: 'mysqlenterprise.audit.login.os',
+    type: 'keyword',
+  },
+  'o365.audit.AADGroupId': {
+    category: 'o365',
+    name: 'o365.audit.AADGroupId',
+    type: 'keyword',
+  },
   'o365.audit.Actor.ID': {
     category: 'o365',
     name: 'o365.audit.Actor.ID',
@@ -22697,6 +30304,11 @@ export const fieldsBeat: BeatFields = {
     name: 'o365.audit.Comments',
     type: 'text',
   },
+  'o365.audit.CommunicationType': {
+    category: 'o365',
+    name: 'o365.audit.CommunicationType',
+    type: 'keyword',
+  },
   'o365.audit.CorrelationId': {
     category: 'o365',
     name: 'o365.audit.CorrelationId',
@@ -22722,9 +30334,19 @@ export const fieldsBeat: BeatFields = {
     name: 'o365.audit.DataType',
     type: 'keyword',
   },
+  'o365.audit.DoNotDistributeEvent': {
+    category: 'o365',
+    name: 'o365.audit.DoNotDistributeEvent',
+    type: 'boolean',
+  },
   'o365.audit.EntityType': {
     category: 'o365',
     name: 'o365.audit.EntityType',
+    type: 'keyword',
+  },
+  'o365.audit.ErrorNumber': {
+    category: 'o365',
+    name: 'o365.audit.ErrorNumber',
     type: 'keyword',
   },
   'o365.audit.EventData': {
@@ -22751,6 +30373,11 @@ export const fieldsBeat: BeatFields = {
     category: 'o365',
     name: 'o365.audit.ExternalAccess',
     type: 'keyword',
+  },
+  'o365.audit.FromApp': {
+    category: 'o365',
+    name: 'o365.audit.FromApp',
+    type: 'boolean',
   },
   'o365.audit.GroupName': {
     category: 'o365',
@@ -22787,6 +30414,11 @@ export const fieldsBeat: BeatFields = {
     name: 'o365.audit.IntraSystemId',
     type: 'keyword',
   },
+  'o365.audit.IsDocLib': {
+    category: 'o365',
+    name: 'o365.audit.IsDocLib',
+    type: 'boolean',
+  },
   'o365.audit.Item.*': {
     category: 'o365',
     name: 'o365.audit.Item.*',
@@ -22796,6 +30428,11 @@ export const fieldsBeat: BeatFields = {
     category: 'o365',
     name: 'o365.audit.Item.*.*',
     type: 'object',
+  },
+  'o365.audit.ItemCount': {
+    category: 'o365',
+    name: 'o365.audit.ItemCount',
+    type: 'long',
   },
   'o365.audit.ItemName': {
     category: 'o365',
@@ -22807,9 +30444,34 @@ export const fieldsBeat: BeatFields = {
     name: 'o365.audit.ItemType',
     type: 'keyword',
   },
+  'o365.audit.ListBaseTemplateType': {
+    category: 'o365',
+    name: 'o365.audit.ListBaseTemplateType',
+    type: 'keyword',
+  },
+  'o365.audit.ListBaseType': {
+    category: 'o365',
+    name: 'o365.audit.ListBaseType',
+    type: 'keyword',
+  },
+  'o365.audit.ListColor': {
+    category: 'o365',
+    name: 'o365.audit.ListColor',
+    type: 'keyword',
+  },
+  'o365.audit.ListIcon': {
+    category: 'o365',
+    name: 'o365.audit.ListIcon',
+    type: 'keyword',
+  },
   'o365.audit.ListId': {
     category: 'o365',
     name: 'o365.audit.ListId',
+    type: 'keyword',
+  },
+  'o365.audit.ListTitle': {
+    category: 'o365',
+    name: 'o365.audit.ListTitle',
     type: 'keyword',
   },
   'o365.audit.ListItemUniqueId': {
@@ -23015,6 +30677,11 @@ export const fieldsBeat: BeatFields = {
   'o365.audit.TeamGuid': {
     category: 'o365',
     name: 'o365.audit.TeamGuid',
+    type: 'keyword',
+  },
+  'o365.audit.TemplateTypeId': {
+    category: 'o365',
+    name: 'o365.audit.TemplateTypeId',
     type: 'keyword',
   },
   'o365.audit.UniqueSharingId': {
@@ -23237,6 +30904,78 @@ export const fieldsBeat: BeatFields = {
     name: 'okta.debug_context.debug_data.url',
     type: 'keyword',
   },
+  'okta.debug_context.debug_data.suspicious_activity.browser': {
+    category: 'okta',
+    description: 'The browser used. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.browser',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_city': {
+    category: 'okta',
+    description: 'The city where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_city',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_country': {
+    category: 'okta',
+    description: 'The country where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_country',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_id': {
+    category: 'okta',
+    description: 'The event ID. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_id',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_ip': {
+    category: 'okta',
+    description: 'The IP of the suspicious event. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_ip',
+    type: 'ip',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_latitude': {
+    category: 'okta',
+    description: 'The latitude where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_latitude',
+    type: 'float',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_longitude': {
+    category: 'okta',
+    description: 'The longitude where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_longitude',
+    type: 'float',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_state': {
+    category: 'okta',
+    description: 'The state where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_state',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_transaction_id': {
+    category: 'okta',
+    description: 'The event transaction ID. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_transaction_id',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_type': {
+    category: 'okta',
+    description: 'The event type. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_type',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.os': {
+    category: 'okta',
+    description: 'The OS of the system from where the suspicious activity occured. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.os',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.timestamp': {
+    category: 'okta',
+    description: 'The timestamp of when the activity occurred. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.timestamp',
+    type: 'date',
+  },
   'okta.authentication_context.authentication_provider': {
     category: 'okta',
     description:
@@ -23366,6 +31105,89 @@ export const fieldsBeat: BeatFields = {
     name: 'okta.request.ip_chain.geographical_context.geolocation',
     type: 'geo_point',
   },
+  'oracle.database_audit.status': {
+    category: 'oracle',
+    description: 'Database Audit Status. ',
+    name: 'oracle.database_audit.status',
+    type: 'keyword',
+  },
+  'oracle.database_audit.session_id': {
+    category: 'oracle',
+    description: 'Indicates the audit session ID number. ',
+    name: 'oracle.database_audit.session_id',
+    type: 'keyword',
+  },
+  'oracle.database_audit.client.terminal': {
+    category: 'oracle',
+    description: 'If available, the client terminal type, for example "pty". ',
+    name: 'oracle.database_audit.client.terminal',
+    type: 'keyword',
+  },
+  'oracle.database_audit.client.address': {
+    category: 'oracle',
+    description: 'The IP Address or Domain used by the client. ',
+    name: 'oracle.database_audit.client.address',
+    type: 'keyword',
+  },
+  'oracle.database_audit.client.user': {
+    category: 'oracle',
+    description: 'The user running the client or connection to the database. ',
+    name: 'oracle.database_audit.client.user',
+    type: 'keyword',
+  },
+  'oracle.database_audit.database.user': {
+    category: 'oracle',
+    description: 'The database user used to authenticate. ',
+    name: 'oracle.database_audit.database.user',
+    type: 'keyword',
+  },
+  'oracle.database_audit.privilege': {
+    category: 'oracle',
+    description: 'The privilege group related to the database user. ',
+    name: 'oracle.database_audit.privilege',
+    type: 'keyword',
+  },
+  'oracle.database_audit.entry.id': {
+    category: 'oracle',
+    description:
+      'Indicates the current audit entry number, assigned to each audit trail record. The audit entry.id sequence number is shared between fine-grained audit records and regular audit records. ',
+    name: 'oracle.database_audit.entry.id',
+    type: 'keyword',
+  },
+  'oracle.database_audit.database.host': {
+    category: 'oracle',
+    description: 'Client host machine name. ',
+    name: 'oracle.database_audit.database.host',
+    type: 'keyword',
+  },
+  'oracle.database_audit.action': {
+    category: 'oracle',
+    description:
+      'The action performed during the audit event. This could for example be the raw query. ',
+    name: 'oracle.database_audit.action',
+    type: 'keyword',
+  },
+  'oracle.database_audit.action_number': {
+    category: 'oracle',
+    description:
+      'Action is a numeric value representing the action the user performed. The corresponding name of the action type is in the AUDIT_ACTIONS table. For example, action 100 refers to LOGON. ',
+    name: 'oracle.database_audit.action_number',
+    type: 'keyword',
+  },
+  'oracle.database_audit.database.id': {
+    category: 'oracle',
+    description:
+      'Database identifier calculated when the database is created. It corresponds to the DBID column of the V$DATABASE data dictionary view. ',
+    name: 'oracle.database_audit.database.id',
+    type: 'keyword',
+  },
+  'oracle.database_audit.length': {
+    category: 'oracle',
+    description:
+      'Refers to the total number of bytes used in this audit record. This number includes the trailing newline bytes (\\n), if any, at the end of the audit record. ',
+    name: 'oracle.database_audit.length',
+    type: 'long',
+  },
   'panw.panos.ruleset': {
     category: 'panw',
     description: 'Name of the rule that matched this session. ',
@@ -23419,6 +31241,12 @@ export const fieldsBeat: BeatFields = {
     description: 'Post-NAT destination port. ',
     name: 'panw.panos.destination.nat.port',
     type: 'long',
+  },
+  'panw.panos.endreason': {
+    category: 'panw',
+    description: 'The reason a session terminated. ',
+    name: 'panw.panos.endreason',
+    type: 'keyword',
   },
   'panw.panos.network.pcap_id': {
     category: 'panw',
@@ -23482,11 +31310,444 @@ export const fieldsBeat: BeatFields = {
     name: 'panw.panos.action',
     type: 'keyword',
   },
+  'panw.panos.type': {
+    category: 'panw',
+    description: 'Specifies the type of the log',
+    name: 'panw.panos.type',
+  },
+  'panw.panos.sub_type': {
+    category: 'panw',
+    description: 'Specifies the sub type of the log',
+    name: 'panw.panos.sub_type',
+  },
+  'panw.panos.virtual_sys': {
+    category: 'panw',
+    description: 'Virtual system instance ',
+    name: 'panw.panos.virtual_sys',
+    type: 'keyword',
+  },
+  'panw.panos.client_os_ver': {
+    category: 'panw',
+    description: 'The client device’s OS version. ',
+    name: 'panw.panos.client_os_ver',
+    type: 'keyword',
+  },
+  'panw.panos.client_os': {
+    category: 'panw',
+    description: 'The client device’s OS version. ',
+    name: 'panw.panos.client_os',
+    type: 'keyword',
+  },
+  'panw.panos.client_ver': {
+    category: 'panw',
+    description: 'The client’s GlobalProtect app version. ',
+    name: 'panw.panos.client_ver',
+    type: 'keyword',
+  },
+  'panw.panos.stage': {
+    category: 'panw',
+    description: 'A string showing the stage of the connection ',
+    example: 'before-login',
+    name: 'panw.panos.stage',
+    type: 'keyword',
+  },
+  'panw.panos.actionflags': {
+    category: 'panw',
+    description: 'A bit field indicating if the log was forwarded to Panorama. ',
+    name: 'panw.panos.actionflags',
+    type: 'keyword',
+  },
+  'panw.panos.error': {
+    category: 'panw',
+    description: 'A string showing that error that has occurred in any event. ',
+    name: 'panw.panos.error',
+    type: 'keyword',
+  },
+  'panw.panos.error_code': {
+    category: 'panw',
+    description: 'An integer associated with any errors that occurred. ',
+    name: 'panw.panos.error_code',
+    type: 'integer',
+  },
+  'panw.panos.repeatcnt': {
+    category: 'panw',
+    description:
+      'The number of sessions with the same source IP address, destination IP address, application, and subtype that GlobalProtect has detected within the last five seconds.An integer associated with any errors that occurred. ',
+    name: 'panw.panos.repeatcnt',
+    type: 'integer',
+  },
+  'panw.panos.serial_number': {
+    category: 'panw',
+    description: 'The serial number of the user’s machine or device. ',
+    name: 'panw.panos.serial_number',
+    type: 'keyword',
+  },
+  'panw.panos.auth_method': {
+    category: 'panw',
+    description: 'A string showing the authentication type ',
+    example: 'LDAP',
+    name: 'panw.panos.auth_method',
+    type: 'keyword',
+  },
+  'panw.panos.datasource': {
+    category: 'panw',
+    description: 'Source from which mapping information is collected. ',
+    name: 'panw.panos.datasource',
+    type: 'keyword',
+  },
+  'panw.panos.datasourcetype': {
+    category: 'panw',
+    description: 'Mechanism used to identify the IP/User mappings within a data source. ',
+    name: 'panw.panos.datasourcetype',
+    type: 'keyword',
+  },
+  'panw.panos.datasourcename': {
+    category: 'panw',
+    description: 'User-ID source that sends the IP (Port)-User Mapping. ',
+    name: 'panw.panos.datasourcename',
+    type: 'keyword',
+  },
+  'panw.panos.factorno': {
+    category: 'panw',
+    description: 'Indicates the use of primary authentication (1) or additional factors (2, 3). ',
+    name: 'panw.panos.factorno',
+    type: 'integer',
+  },
+  'panw.panos.factortype': {
+    category: 'panw',
+    description: 'Vendor used to authenticate a user when Multi Factor authentication is present. ',
+    name: 'panw.panos.factortype',
+    type: 'keyword',
+  },
+  'panw.panos.factorcompletiontime': {
+    category: 'panw',
+    description: 'Time the authentication was completed. ',
+    name: 'panw.panos.factorcompletiontime',
+    type: 'date',
+  },
+  'panw.panos.ugflags': {
+    category: 'panw',
+    description:
+      'Displays whether the user group that was found during user group mapping. Supported values are: User Group Found—Indicates whether the user could be mapped to a group. Duplicate User—Indicates whether duplicate users were found in a user group. Displays N/A if no user group is found. ',
+    name: 'panw.panos.ugflags',
+    type: 'keyword',
+  },
+  'panw.panos.device_group_hierarchy.level_1': {
+    category: 'panw',
+    description:
+      'A sequence of identification numbers that indicate the device group’s location within a device group hierarchy. The firewall (or virtual system) generating the log includes the identification number of each ancestor in its device group hierarchy. The shared device group (level 0) is not included in this structure. If the log values are 12, 34, 45, 0, it means that the log was generated by a firewall (or virtual system) that belongs to device group 45, and its ancestors are 34, and 12. ',
+    name: 'panw.panos.device_group_hierarchy.level_1',
+    type: 'keyword',
+  },
+  'panw.panos.device_group_hierarchy.level_2': {
+    category: 'panw',
+    description:
+      'A sequence of identification numbers that indicate the device group’s location within a device group hierarchy. The firewall (or virtual system) generating the log includes the identification number of each ancestor in its device group hierarchy. The shared device group (level 0) is not included in this structure. If the log values are 12, 34, 45, 0, it means that the log was generated by a firewall (or virtual system) that belongs to device group 45, and its ancestors are 34, and 12. ',
+    name: 'panw.panos.device_group_hierarchy.level_2',
+    type: 'keyword',
+  },
+  'panw.panos.device_group_hierarchy.level_3': {
+    category: 'panw',
+    description:
+      'A sequence of identification numbers that indicate the device group’s location within a device group hierarchy. The firewall (or virtual system) generating the log includes the identification number of each ancestor in its device group hierarchy. The shared device group (level 0) is not included in this structure. If the log values are 12, 34, 45, 0, it means that the log was generated by a firewall (or virtual system) that belongs to device group 45, and its ancestors are 34, and 12. ',
+    name: 'panw.panos.device_group_hierarchy.level_3',
+    type: 'keyword',
+  },
+  'panw.panos.device_group_hierarchy.level_4': {
+    category: 'panw',
+    description:
+      'A sequence of identification numbers that indicate the device group’s location within a device group hierarchy. The firewall (or virtual system) generating the log includes the identification number of each ancestor in its device group hierarchy. The shared device group (level 0) is not included in this structure. If the log values are 12, 34, 45, 0, it means that the log was generated by a firewall (or virtual system) that belongs to device group 45, and its ancestors are 34, and 12. ',
+    name: 'panw.panos.device_group_hierarchy.level_4',
+    type: 'keyword',
+  },
+  'panw.panos.timeout': {
+    category: 'panw',
+    description: 'Timeout after which the IP/User Mappings are cleared. ',
+    name: 'panw.panos.timeout',
+    type: 'integer',
+  },
+  'panw.panos.vsys_id': {
+    category: 'panw',
+    description: 'A unique identifier for a virtual system on a Palo Alto Networks firewall. ',
+    name: 'panw.panos.vsys_id',
+    type: 'keyword',
+  },
+  'panw.panos.vsys_name': {
+    category: 'panw',
+    description:
+      'The name of the virtual system associated with the session; only valid on firewalls enabled for multiple virtual systems. ',
+    name: 'panw.panos.vsys_name',
+    type: 'keyword',
+  },
+  'panw.panos.description': {
+    category: 'panw',
+    description: 'Additional information for any event that has occurred. ',
+    name: 'panw.panos.description',
+    type: 'keyword',
+  },
+  'panw.panos.tunnel_type': {
+    category: 'panw',
+    description: 'The type of tunnel (either SSLVPN or IPSec). ',
+    name: 'panw.panos.tunnel_type',
+    type: 'keyword',
+  },
+  'panw.panos.connect_method': {
+    category: 'panw',
+    description: 'A string showing the how the GlobalProtect app connects to Gateway ',
+    name: 'panw.panos.connect_method',
+    type: 'keyword',
+  },
+  'panw.panos.matchname': {
+    category: 'panw',
+    description: 'Name of the HIP object or profile. ',
+    name: 'panw.panos.matchname',
+    type: 'keyword',
+  },
+  'panw.panos.matchtype': {
+    category: 'panw',
+    description: 'Whether the hip field represents a HIP object or a HIP profile. ',
+    name: 'panw.panos.matchtype',
+    type: 'keyword',
+  },
+  'panw.panos.priority': {
+    category: 'panw',
+    description:
+      'The priority order of the gateway that is based on highest (1), high (2), medium (3), low (4), or lowest (5) to which the GlobalProtect app can connect. ',
+    name: 'panw.panos.priority',
+    type: 'keyword',
+  },
+  'panw.panos.response_time': {
+    category: 'panw',
+    description:
+      'The SSL response time of the selected gateway that is measured in milliseconds on the endpoint during tunnel setup. ',
+    name: 'panw.panos.response_time',
+    type: 'keyword',
+  },
+  'panw.panos.attempted_gateways': {
+    category: 'panw',
+    description:
+      'The fields that are collected for each gateway connection attempt with the gateway name, SSL response time, and priority ',
+    name: 'panw.panos.attempted_gateways',
+    type: 'keyword',
+  },
+  'panw.panos.gateway': {
+    category: 'panw',
+    description: 'The name of the gateway that is specified on the portal configuration. ',
+    name: 'panw.panos.gateway',
+    type: 'keyword',
+  },
+  'panw.panos.selection_type': {
+    category: 'panw',
+    description: 'The connection method that is selected to connect to the gateway. ',
+    name: 'panw.panos.selection_type',
+    type: 'keyword',
+  },
   'rabbitmq.log.pid': {
     category: 'rabbitmq',
     description: 'The Erlang process id',
     example: '<0.222.0>',
     name: 'rabbitmq.log.pid',
+    type: 'keyword',
+  },
+  'snyk.projects': {
+    category: 'snyk',
+    description: 'Array with all related projects objects. ',
+    name: 'snyk.projects',
+    type: 'flattened',
+  },
+  'snyk.related.projects': {
+    category: 'snyk',
+    description: "Array of all the related project ID's. ",
+    name: 'snyk.related.projects',
+    type: 'keyword',
+  },
+  'snyk.audit.org_id': {
+    category: 'snyk',
+    description: 'ID of the related Organization related to the event. ',
+    name: 'snyk.audit.org_id',
+    type: 'keyword',
+  },
+  'snyk.audit.project_id': {
+    category: 'snyk',
+    description: 'ID of the project related to the event. ',
+    name: 'snyk.audit.project_id',
+    type: 'keyword',
+  },
+  'snyk.audit.content': {
+    category: 'snyk',
+    description: 'Overview of the content that was changed, both old and new values. ',
+    name: 'snyk.audit.content',
+    type: 'flattened',
+  },
+  'snyk.vulnerabilities.cvss3': {
+    category: 'snyk',
+    description: 'CSSv3 scores. ',
+    name: 'snyk.vulnerabilities.cvss3',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.disclosure_time': {
+    category: 'snyk',
+    description:
+      'The time this vulnerability was originally disclosed to the package maintainers. ',
+    name: 'snyk.vulnerabilities.disclosure_time',
+    type: 'date',
+  },
+  'snyk.vulnerabilities.exploit_maturity': {
+    category: 'snyk',
+    description: 'The Snyk exploit maturity level. ',
+    name: 'snyk.vulnerabilities.exploit_maturity',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.id': {
+    category: 'snyk',
+    description: 'The vulnerability reference ID. ',
+    name: 'snyk.vulnerabilities.id',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.is_ignored': {
+    category: 'snyk',
+    description: 'If the vulnerability report has been ignored. ',
+    name: 'snyk.vulnerabilities.is_ignored',
+    type: 'boolean',
+  },
+  'snyk.vulnerabilities.is_patchable': {
+    category: 'snyk',
+    description: 'If vulnerability is fixable by using a Snyk supplied patch. ',
+    name: 'snyk.vulnerabilities.is_patchable',
+    type: 'boolean',
+  },
+  'snyk.vulnerabilities.is_patched': {
+    category: 'snyk',
+    description: 'If the vulnerability has been patched. ',
+    name: 'snyk.vulnerabilities.is_patched',
+    type: 'boolean',
+  },
+  'snyk.vulnerabilities.is_pinnable': {
+    category: 'snyk',
+    description: 'If the vulnerability is fixable by pinning a transitive dependency. ',
+    name: 'snyk.vulnerabilities.is_pinnable',
+    type: 'boolean',
+  },
+  'snyk.vulnerabilities.is_upgradable': {
+    category: 'snyk',
+    description: 'If the vulnerability fixable by upgrading a dependency. ',
+    name: 'snyk.vulnerabilities.is_upgradable',
+    type: 'boolean',
+  },
+  'snyk.vulnerabilities.language': {
+    category: 'snyk',
+    description: "The package's programming language. ",
+    name: 'snyk.vulnerabilities.language',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.package': {
+    category: 'snyk',
+    description: 'The package identifier according to its package manager. ',
+    name: 'snyk.vulnerabilities.package',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.package_manager': {
+    category: 'snyk',
+    description: 'The package manager. ',
+    name: 'snyk.vulnerabilities.package_manager',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.patches': {
+    category: 'snyk',
+    description: 'Patches required to resolve the issue created by Snyk. ',
+    name: 'snyk.vulnerabilities.patches',
+    type: 'flattened',
+  },
+  'snyk.vulnerabilities.priority_score': {
+    category: 'snyk',
+    description: 'The CVS priority score. ',
+    name: 'snyk.vulnerabilities.priority_score',
+    type: 'long',
+  },
+  'snyk.vulnerabilities.publication_time': {
+    category: 'snyk',
+    description: 'The vulnerability publication time. ',
+    name: 'snyk.vulnerabilities.publication_time',
+    type: 'date',
+  },
+  'snyk.vulnerabilities.jira_issue_url': {
+    category: 'snyk',
+    description: 'Link to the related Jira issue. ',
+    name: 'snyk.vulnerabilities.jira_issue_url',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.original_severity': {
+    category: 'snyk',
+    description: 'The original severity of the vulnerability. ',
+    name: 'snyk.vulnerabilities.original_severity',
+    type: 'long',
+  },
+  'snyk.vulnerabilities.reachability': {
+    category: 'snyk',
+    description:
+      'If the vulnerable function from the library is used in the code scanned. Can either be No Info, Potentially reachable and Reachable. ',
+    name: 'snyk.vulnerabilities.reachability',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.title': {
+    category: 'snyk',
+    description: 'The issue title. ',
+    name: 'snyk.vulnerabilities.title',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.type': {
+    category: 'snyk',
+    description: 'The issue type. Can be either "license" or "vulnerability". ',
+    name: 'snyk.vulnerabilities.type',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.unique_severities_list': {
+    category: 'snyk',
+    description: 'A list of related unique severities. ',
+    name: 'snyk.vulnerabilities.unique_severities_list',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.version': {
+    category: 'snyk',
+    description: 'The package version this issue is applicable to. ',
+    name: 'snyk.vulnerabilities.version',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.introduced_date': {
+    category: 'snyk',
+    description: 'The date the vulnerability was initially found. ',
+    name: 'snyk.vulnerabilities.introduced_date',
+    type: 'date',
+  },
+  'snyk.vulnerabilities.is_fixed': {
+    category: 'snyk',
+    description: 'If the related vulnerability has been resolved. ',
+    name: 'snyk.vulnerabilities.is_fixed',
+    type: 'boolean',
+  },
+  'snyk.vulnerabilities.credit': {
+    category: 'snyk',
+    description: 'Reference to the person that original found the vulnerability. ',
+    name: 'snyk.vulnerabilities.credit',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.semver': {
+    category: 'snyk',
+    description:
+      'One or more semver ranges this issue is applicable to. The format varies according to package manager. ',
+    name: 'snyk.vulnerabilities.semver',
+    type: 'flattened',
+  },
+  'snyk.vulnerabilities.identifiers.alternative': {
+    category: 'snyk',
+    description: 'Additional vulnerability identifiers. ',
+    name: 'snyk.vulnerabilities.identifiers.alternative',
+    type: 'keyword',
+  },
+  'snyk.vulnerabilities.identifiers.cwe': {
+    category: 'snyk',
+    description: 'CWE vulnerability identifiers. ',
+    name: 'snyk.vulnerabilities.identifiers.cwe',
     type: 'keyword',
   },
   'sophos.xg.device': {
@@ -23753,10 +32014,10 @@ export const fieldsBeat: BeatFields = {
     name: 'sophos.xg.recv_bytes',
     type: 'long',
   },
-  'sophos.xg.trans_src_ ip': {
+  'sophos.xg.trans_src_ip': {
     category: 'sophos',
     description: 'Translated source IP address for outgoing traffic ',
-    name: 'sophos.xg.trans_src_ ip',
+    name: 'sophos.xg.trans_src_ip',
     type: 'ip',
   },
   'sophos.xg.trans_src_port': {
@@ -23963,16 +32224,16 @@ export const fieldsBeat: BeatFields = {
     name: 'sophos.xg.virus',
     type: 'keyword',
   },
-  'sophos.xg.FTP_url': {
+  'sophos.xg.ftp_url': {
     category: 'sophos',
     description: 'FTP URL from which virus was downloaded ',
-    name: 'sophos.xg.FTP_url',
+    name: 'sophos.xg.ftp_url',
     type: 'keyword',
   },
-  'sophos.xg.FTP_direction': {
+  'sophos.xg.ftp_direction': {
     category: 'sophos',
     description: 'Direction of FTP transfer: Upload or Download ',
-    name: 'sophos.xg.FTP_direction',
+    name: 'sophos.xg.ftp_direction',
     type: 'keyword',
   },
   'sophos.xg.filesize': {
@@ -24605,6 +32866,24 @@ export const fieldsBeat: BeatFields = {
     name: 'sophos.xg.clients_conn_ssid',
     type: 'keyword',
   },
+  'sophos.xg.sqli': {
+    category: 'sophos',
+    description: 'The related SQLI caught by the WAF ',
+    name: 'sophos.xg.sqli',
+    type: 'keyword',
+  },
+  'sophos.xg.xss': {
+    category: 'sophos',
+    description: 'The related XSS caught by the WAF ',
+    name: 'sophos.xg.xss',
+    type: 'keyword',
+  },
+  'sophos.xg.ether_type': {
+    category: 'sophos',
+    description: 'The ethernet frame type ',
+    name: 'sophos.xg.ether_type',
+    type: 'keyword',
+  },
   'suricata.eve.event_type': {
     category: 'suricata',
     name: 'suricata.eve.event_type',
@@ -24665,11 +32944,6 @@ export const fieldsBeat: BeatFields = {
     name: 'suricata.eve.fileinfo.sha1',
     type: 'keyword',
   },
-  'suricata.eve.fileinfo.filename': {
-    category: 'suricata',
-    name: 'suricata.eve.fileinfo.filename',
-    type: 'alias',
-  },
   'suricata.eve.fileinfo.tx_id': {
     category: 'suricata',
     name: 'suricata.eve.fileinfo.tx_id',
@@ -24700,40 +32974,15 @@ export const fieldsBeat: BeatFields = {
     name: 'suricata.eve.fileinfo.md5',
     type: 'keyword',
   },
-  'suricata.eve.fileinfo.size': {
-    category: 'suricata',
-    name: 'suricata.eve.fileinfo.size',
-    type: 'alias',
-  },
   'suricata.eve.icmp_type': {
     category: 'suricata',
     name: 'suricata.eve.icmp_type',
     type: 'long',
   },
-  'suricata.eve.dest_port': {
-    category: 'suricata',
-    name: 'suricata.eve.dest_port',
-    type: 'alias',
-  },
-  'suricata.eve.src_port': {
-    category: 'suricata',
-    name: 'suricata.eve.src_port',
-    type: 'alias',
-  },
-  'suricata.eve.proto': {
-    category: 'suricata',
-    name: 'suricata.eve.proto',
-    type: 'alias',
-  },
   'suricata.eve.pcap_cnt': {
     category: 'suricata',
     name: 'suricata.eve.pcap_cnt',
     type: 'long',
-  },
-  'suricata.eve.src_ip': {
-    category: 'suricata',
-    name: 'suricata.eve.src_ip',
-    type: 'alias',
   },
   'suricata.eve.dns.type': {
     category: 'suricata',
@@ -24785,85 +33034,41 @@ export const fieldsBeat: BeatFields = {
     name: 'suricata.eve.email.status',
     type: 'keyword',
   },
-  'suricata.eve.dest_ip': {
-    category: 'suricata',
-    name: 'suricata.eve.dest_ip',
-    type: 'alias',
-  },
   'suricata.eve.icmp_code': {
     category: 'suricata',
     name: 'suricata.eve.icmp_code',
     type: 'long',
-  },
-  'suricata.eve.http.status': {
-    category: 'suricata',
-    name: 'suricata.eve.http.status',
-    type: 'alias',
   },
   'suricata.eve.http.redirect': {
     category: 'suricata',
     name: 'suricata.eve.http.redirect',
     type: 'keyword',
   },
-  'suricata.eve.http.http_user_agent': {
-    category: 'suricata',
-    name: 'suricata.eve.http.http_user_agent',
-    type: 'alias',
-  },
   'suricata.eve.http.protocol': {
     category: 'suricata',
     name: 'suricata.eve.http.protocol',
     type: 'keyword',
-  },
-  'suricata.eve.http.http_refer': {
-    category: 'suricata',
-    name: 'suricata.eve.http.http_refer',
-    type: 'alias',
-  },
-  'suricata.eve.http.url': {
-    category: 'suricata',
-    name: 'suricata.eve.http.url',
-    type: 'alias',
-  },
-  'suricata.eve.http.hostname': {
-    category: 'suricata',
-    name: 'suricata.eve.http.hostname',
-    type: 'alias',
-  },
-  'suricata.eve.http.length': {
-    category: 'suricata',
-    name: 'suricata.eve.http.length',
-    type: 'alias',
-  },
-  'suricata.eve.http.http_method': {
-    category: 'suricata',
-    name: 'suricata.eve.http.http_method',
-    type: 'alias',
   },
   'suricata.eve.http.http_content_type': {
     category: 'suricata',
     name: 'suricata.eve.http.http_content_type',
     type: 'keyword',
   },
-  'suricata.eve.timestamp': {
-    category: 'suricata',
-    name: 'suricata.eve.timestamp',
-    type: 'alias',
-  },
   'suricata.eve.in_iface': {
     category: 'suricata',
     name: 'suricata.eve.in_iface',
     type: 'keyword',
   },
+  'suricata.eve.alert.metadata': {
+    category: 'suricata',
+    description: 'Metadata about the alert.',
+    name: 'suricata.eve.alert.metadata',
+    type: 'flattened',
+  },
   'suricata.eve.alert.category': {
     category: 'suricata',
     name: 'suricata.eve.alert.category',
     type: 'keyword',
-  },
-  'suricata.eve.alert.severity': {
-    category: 'suricata',
-    name: 'suricata.eve.alert.severity',
-    type: 'alias',
   },
   'suricata.eve.alert.rev': {
     category: 'suricata',
@@ -24880,15 +33085,135 @@ export const fieldsBeat: BeatFields = {
     name: 'suricata.eve.alert.signature',
     type: 'keyword',
   },
-  'suricata.eve.alert.action': {
-    category: 'suricata',
-    name: 'suricata.eve.alert.action',
-    type: 'alias',
-  },
   'suricata.eve.alert.signature_id': {
     category: 'suricata',
     name: 'suricata.eve.alert.signature_id',
     type: 'long',
+  },
+  'suricata.eve.alert.protocols': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.protocols',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.attack_target': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.attack_target',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.capec_id': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.capec_id',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cwe_id': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cwe_id',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.malware': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.malware',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cve': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cve',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cvss_v2_base': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cvss_v2_base',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cvss_v2_temporal': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cvss_v2_temporal',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cvss_v3_base': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cvss_v3_base',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cvss_v3_temporal': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cvss_v3_temporal',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.priority': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.priority',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.hostile': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.hostile',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.infected': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.infected',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.created_at': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.created_at',
+    type: 'date',
+  },
+  'suricata.eve.alert.updated_at': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.updated_at',
+    type: 'date',
+  },
+  'suricata.eve.alert.classtype': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.classtype',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.rule_source': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.rule_source',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.sid': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.sid',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.affected_product': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.affected_product',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.deployment': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.deployment',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.former_category': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.former_category',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.mitre_tool_id': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.mitre_tool_id',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.performance_impact': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.performance_impact',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.signature_severity': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.signature_severity',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.tag': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.tag',
+    type: 'keyword',
   },
   'suricata.eve.ssh.client.proto_version': {
     category: 'suricata',
@@ -25560,21 +33885,6 @@ export const fieldsBeat: BeatFields = {
     name: 'suricata.eve.app_proto_ts',
     type: 'keyword',
   },
-  'suricata.eve.flow.bytes_toclient': {
-    category: 'suricata',
-    name: 'suricata.eve.flow.bytes_toclient',
-    type: 'alias',
-  },
-  'suricata.eve.flow.start': {
-    category: 'suricata',
-    name: 'suricata.eve.flow.start',
-    type: 'alias',
-  },
-  'suricata.eve.flow.pkts_toclient': {
-    category: 'suricata',
-    name: 'suricata.eve.flow.pkts_toclient',
-    type: 'alias',
-  },
   'suricata.eve.flow.age': {
     category: 'suricata',
     name: 'suricata.eve.flow.age',
@@ -25585,35 +33895,15 @@ export const fieldsBeat: BeatFields = {
     name: 'suricata.eve.flow.state',
     type: 'keyword',
   },
-  'suricata.eve.flow.bytes_toserver': {
-    category: 'suricata',
-    name: 'suricata.eve.flow.bytes_toserver',
-    type: 'alias',
-  },
   'suricata.eve.flow.reason': {
     category: 'suricata',
     name: 'suricata.eve.flow.reason',
     type: 'keyword',
   },
-  'suricata.eve.flow.pkts_toserver': {
-    category: 'suricata',
-    name: 'suricata.eve.flow.pkts_toserver',
-    type: 'alias',
-  },
-  'suricata.eve.flow.end': {
-    category: 'suricata',
-    name: 'suricata.eve.flow.end',
-    type: 'date',
-  },
   'suricata.eve.flow.alerted': {
     category: 'suricata',
     name: 'suricata.eve.flow.alerted',
     type: 'boolean',
-  },
-  'suricata.eve.app_proto': {
-    category: 'suricata',
-    name: 'suricata.eve.app_proto',
-    type: 'alias',
   },
   'suricata.eve.tx_id': {
     category: 'suricata',
@@ -26971,6 +35261,85 @@ export const fieldsBeat: BeatFields = {
     name: 'zeek.ntlm.server.name.tree',
     type: 'keyword',
   },
+  'zeek.ntp.version': {
+    category: 'zeek',
+    description: 'The NTP version number (1, 2, 3, 4). ',
+    name: 'zeek.ntp.version',
+    type: 'integer',
+  },
+  'zeek.ntp.mode': {
+    category: 'zeek',
+    description: 'The NTP mode being used. ',
+    name: 'zeek.ntp.mode',
+    type: 'integer',
+  },
+  'zeek.ntp.stratum': {
+    category: 'zeek',
+    description: 'The stratum (primary server, secondary server, etc.). ',
+    name: 'zeek.ntp.stratum',
+    type: 'integer',
+  },
+  'zeek.ntp.poll': {
+    category: 'zeek',
+    description: 'The maximum interval between successive messages in seconds. ',
+    name: 'zeek.ntp.poll',
+    type: 'double',
+  },
+  'zeek.ntp.precision': {
+    category: 'zeek',
+    description: 'The precision of the system clock in seconds. ',
+    name: 'zeek.ntp.precision',
+    type: 'double',
+  },
+  'zeek.ntp.root_delay': {
+    category: 'zeek',
+    description: 'Total round-trip delay to the reference clock in seconds. ',
+    name: 'zeek.ntp.root_delay',
+    type: 'double',
+  },
+  'zeek.ntp.root_disp': {
+    category: 'zeek',
+    description: 'Total dispersion to the reference clock in seconds. ',
+    name: 'zeek.ntp.root_disp',
+    type: 'double',
+  },
+  'zeek.ntp.ref_id': {
+    category: 'zeek',
+    description:
+      'For stratum 0, 4 character string used for debugging. For stratum 1, ID assigned to the reference clock by IANA. Above stratum 1, when using IPv4, the IP address of the reference clock. Note that the NTP protocol did not originally specify a large enough field to represent IPv6 addresses, so they use the first four bytes of the MD5 hash of the reference clock’s IPv6 address (i.e. an IPv4 address here is not necessarily IPv4). ',
+    name: 'zeek.ntp.ref_id',
+    type: 'keyword',
+  },
+  'zeek.ntp.ref_time': {
+    category: 'zeek',
+    description: 'Time when the system clock was last set or correct. ',
+    name: 'zeek.ntp.ref_time',
+    type: 'date',
+  },
+  'zeek.ntp.org_time': {
+    category: 'zeek',
+    description: 'Time at the client when the request departed for the NTP server. ',
+    name: 'zeek.ntp.org_time',
+    type: 'date',
+  },
+  'zeek.ntp.rec_time': {
+    category: 'zeek',
+    description: 'Time at the server when the request arrived from the NTP client. ',
+    name: 'zeek.ntp.rec_time',
+    type: 'date',
+  },
+  'zeek.ntp.xmt_time': {
+    category: 'zeek',
+    description: 'Time at the server when the response departed for the NTP client. ',
+    name: 'zeek.ntp.xmt_time',
+    type: 'date',
+  },
+  'zeek.ntp.num_exts': {
+    category: 'zeek',
+    description: 'Number of extension fields (which are not currently parsed). ',
+    name: 'zeek.ntp.num_exts',
+    type: 'integer',
+  },
   'zeek.ocsp.file_id': {
     category: 'zeek',
     description: 'File id of the OCSP reply. ',
@@ -27356,6 +35725,42 @@ export const fieldsBeat: BeatFields = {
     category: 'zeek',
     description: 'Height of the screen that is being shared. ',
     name: 'zeek.rfb.height',
+    type: 'integer',
+  },
+  'zeek.signature.note': {
+    category: 'zeek',
+    description: 'Notice associated with signature event. ',
+    name: 'zeek.signature.note',
+    type: 'keyword',
+  },
+  'zeek.signature.sig_id': {
+    category: 'zeek',
+    description: 'The name of the signature that matched. ',
+    name: 'zeek.signature.sig_id',
+    type: 'keyword',
+  },
+  'zeek.signature.event_msg': {
+    category: 'zeek',
+    description: 'A more descriptive message of the signature-matching event. ',
+    name: 'zeek.signature.event_msg',
+    type: 'keyword',
+  },
+  'zeek.signature.sub_msg': {
+    category: 'zeek',
+    description: 'Extracted payload data or extra message. ',
+    name: 'zeek.signature.sub_msg',
+    type: 'keyword',
+  },
+  'zeek.signature.sig_count': {
+    category: 'zeek',
+    description: 'Number of sigs, usually from summary count. ',
+    name: 'zeek.signature.sig_count',
+    type: 'integer',
+  },
+  'zeek.signature.host_count': {
+    category: 'zeek',
+    description: 'Number of hosts, from a summary count. ',
+    name: 'zeek.signature.host_count',
     type: 'integer',
   },
   'zeek.sip.transaction_depth': {
@@ -28650,23 +37055,1022 @@ export const fieldsBeat: BeatFields = {
     name: 'zeek.x509.log_cert',
     type: 'boolean',
   },
-  'awscloudwatch.log_group': {
-    category: 'awscloudwatch',
+  'zookeeper.audit.session': {
+    category: 'zookeeper',
+    description: 'Client session id ',
+    name: 'zookeeper.audit.session',
+    type: 'keyword',
+  },
+  'zookeeper.audit.znode': {
+    category: 'zookeeper',
+    description: 'Path of the znode ',
+    name: 'zookeeper.audit.znode',
+    type: 'keyword',
+  },
+  'zookeeper.audit.znode_type': {
+    category: 'zookeeper',
+    description: 'Type of znode in case of creation operation ',
+    name: 'zookeeper.audit.znode_type',
+    type: 'keyword',
+  },
+  'zookeeper.audit.acl': {
+    category: 'zookeeper',
+    description:
+      'String representation of znode ACL like cdrwa(create, delete,read, write, admin). This is logged only for setAcl operation ',
+    name: 'zookeeper.audit.acl',
+    type: 'keyword',
+  },
+  'zookeeper.audit.result': {
+    category: 'zookeeper',
+    description:
+      'Result of the operation. Possible values are (success/failure/invoked). Result "invoked" is used for serverStop operation because stop is logged before ensuring that server actually stopped. ',
+    name: 'zookeeper.audit.result',
+    type: 'keyword',
+  },
+  'zookeeper.audit.user': {
+    category: 'zookeeper',
+    description: 'Comma separated list of users who are associate with a client session ',
+    name: 'zookeeper.audit.user',
+    type: 'keyword',
+  },
+  'zookeeper.log': {
+    category: 'zookeeper',
+    description: 'ZooKeeper logs. ',
+    name: 'zookeeper.log',
+    type: 'group',
+  },
+  'zoom.master_account_id': {
+    category: 'zoom',
+    description: 'Master Account related to a specific Sub Account ',
+    name: 'zoom.master_account_id',
+    type: 'keyword',
+  },
+  'zoom.sub_account_id': {
+    category: 'zoom',
+    description: 'Related Sub Account ',
+    name: 'zoom.sub_account_id',
+    type: 'keyword',
+  },
+  'zoom.operator_id': {
+    category: 'zoom',
+    description: 'UserID that triggered the event ',
+    name: 'zoom.operator_id',
+    type: 'keyword',
+  },
+  'zoom.operator': {
+    category: 'zoom',
+    description: 'Username/Email related to the user that triggered the event ',
+    name: 'zoom.operator',
+    type: 'keyword',
+  },
+  'zoom.account_id': {
+    category: 'zoom',
+    description: 'Related accountID to the event ',
+    name: 'zoom.account_id',
+    type: 'keyword',
+  },
+  'zoom.timestamp': {
+    category: 'zoom',
+    description: 'Timestamp related to the event ',
+    name: 'zoom.timestamp',
+    type: 'date',
+  },
+  'zoom.creation_type': {
+    category: 'zoom',
+    description: 'Creation type ',
+    name: 'zoom.creation_type',
+    type: 'keyword',
+  },
+  'zoom.account.owner_id': {
+    category: 'zoom',
+    description: 'UserID of the user whose sub account was created/disassociated ',
+    name: 'zoom.account.owner_id',
+    type: 'keyword',
+  },
+  'zoom.account.email': {
+    category: 'zoom',
+    description: 'Email related to the user the action was performed on ',
+    name: 'zoom.account.email',
+    type: 'keyword',
+  },
+  'zoom.account.owner_email': {
+    category: 'zoom',
+    description: 'Email of the user whose sub account was created/disassociated ',
+    name: 'zoom.account.owner_email',
+    type: 'keyword',
+  },
+  'zoom.account.account_name': {
+    category: 'zoom',
+    description: 'When an account name is updated, this is the new value set ',
+    name: 'zoom.account.account_name',
+    type: 'keyword',
+  },
+  'zoom.account.account_alias': {
+    category: 'zoom',
+    description: 'When an account alias is updated, this is the new value set ',
+    name: 'zoom.account.account_alias',
+    type: 'keyword',
+  },
+  'zoom.account.account_support_name': {
+    category: 'zoom',
+    description: 'When an account support_name is updated, this is the new value set ',
+    name: 'zoom.account.account_support_name',
+    type: 'keyword',
+  },
+  'zoom.account.account_support_email': {
+    category: 'zoom',
+    description: 'When an account support_email is updated, this is the new value set ',
+    name: 'zoom.account.account_support_email',
+    type: 'keyword',
+  },
+  'zoom.chat_channel.name': {
+    category: 'zoom',
+    description: 'The name of the channel that has been added/modified/deleted ',
+    name: 'zoom.chat_channel.name',
+    type: 'keyword',
+  },
+  'zoom.chat_channel.id': {
+    category: 'zoom',
+    description: 'The ID of the channel that has been added/modified/deleted ',
+    name: 'zoom.chat_channel.id',
+    type: 'keyword',
+  },
+  'zoom.chat_channel.type': {
+    category: 'zoom',
+    description:
+      'Type of channel related to the event. Can be 1(Invite-Only), 2(Private) or 3(Public) ',
+    name: 'zoom.chat_channel.type',
+    type: 'keyword',
+  },
+  'zoom.chat_message.id': {
+    category: 'zoom',
+    description: 'Unique ID of the related chat message ',
+    name: 'zoom.chat_message.id',
+    type: 'keyword',
+  },
+  'zoom.chat_message.type': {
+    category: 'zoom',
+    description: 'Type of message, can be either "to_contact" or "to_channel" ',
+    name: 'zoom.chat_message.type',
+    type: 'keyword',
+  },
+  'zoom.chat_message.session_id': {
+    category: 'zoom',
+    description: 'SessionID for the channel related to the message ',
+    name: 'zoom.chat_message.session_id',
+    type: 'keyword',
+  },
+  'zoom.chat_message.contact_email': {
+    category: 'zoom',
+    description: 'Email address related to the user sending the message ',
+    name: 'zoom.chat_message.contact_email',
+    type: 'keyword',
+  },
+  'zoom.chat_message.contact_id': {
+    category: 'zoom',
+    description: 'UserID belonging to the user receiving a message ',
+    name: 'zoom.chat_message.contact_id',
+    type: 'keyword',
+  },
+  'zoom.chat_message.channel_id': {
+    category: 'zoom',
+    description: 'ChannelID related to the message ',
+    name: 'zoom.chat_message.channel_id',
+    type: 'keyword',
+  },
+  'zoom.chat_message.channel_name': {
+    category: 'zoom',
+    description: 'Channel name related to the message ',
+    name: 'zoom.chat_message.channel_name',
+    type: 'keyword',
+  },
+  'zoom.chat_message.message': {
+    category: 'zoom',
+    description: 'A string containing the full message that was sent ',
+    name: 'zoom.chat_message.message',
+    type: 'keyword',
+  },
+  'zoom.meeting.id': {
+    category: 'zoom',
+    description: 'Unique ID of the related meeting ',
+    name: 'zoom.meeting.id',
+    type: 'keyword',
+  },
+  'zoom.meeting.uuid': {
+    category: 'zoom',
+    description: 'The UUID of the related meeting ',
+    name: 'zoom.meeting.uuid',
+    type: 'keyword',
+  },
+  'zoom.meeting.host_id': {
+    category: 'zoom',
+    description: 'The UserID of the configured meeting host ',
+    name: 'zoom.meeting.host_id',
+    type: 'keyword',
+  },
+  'zoom.meeting.topic': {
+    category: 'zoom',
+    description: 'Topic of the related meeting ',
+    name: 'zoom.meeting.topic',
+    type: 'keyword',
+  },
+  'zoom.meeting.type': {
+    category: 'zoom',
+    description: 'Type of meeting created ',
+    name: 'zoom.meeting.type',
+    type: 'keyword',
+  },
+  'zoom.meeting.start_time': {
+    category: 'zoom',
+    description: 'Date and time the meeting started ',
+    name: 'zoom.meeting.start_time',
+    type: 'date',
+  },
+  'zoom.meeting.timezone': {
+    category: 'zoom',
+    description: 'Which timezone is used for the meeting timestamps ',
+    name: 'zoom.meeting.timezone',
+    type: 'keyword',
+  },
+  'zoom.meeting.duration': {
+    category: 'zoom',
+    description: 'The duration of a meeting in minutes ',
+    name: 'zoom.meeting.duration',
+    type: 'long',
+  },
+  'zoom.meeting.issues': {
+    category: 'zoom',
+    description:
+      'When a user reports an issue with the meeting, for example: "Unstable audio quality" ',
+    name: 'zoom.meeting.issues',
+    type: 'keyword',
+  },
+  'zoom.meeting.password': {
+    category: 'zoom',
+    description: 'Password related to the meeting ',
+    name: 'zoom.meeting.password',
+    type: 'keyword',
+  },
+  'zoom.phone.id': {
+    category: 'zoom',
+    description: 'Unique ID for the phone or conversation ',
+    name: 'zoom.phone.id',
+    type: 'keyword',
+  },
+  'zoom.phone.user_id': {
+    category: 'zoom',
+    description: 'UserID for the phone owner related to a Call Log being completed ',
+    name: 'zoom.phone.user_id',
+    type: 'keyword',
+  },
+  'zoom.phone.download_url': {
+    category: 'zoom',
+    description: 'Download URL for the voicemail ',
+    name: 'zoom.phone.download_url',
+    type: 'keyword',
+  },
+  'zoom.phone.ringing_start_time': {
+    category: 'zoom',
+    description: 'The timestamp when a ringtone was established to the callee ',
+    name: 'zoom.phone.ringing_start_time',
+    type: 'date',
+  },
+  'zoom.phone.connected_start_time': {
+    category: 'zoom',
+    description: 'The date and time when a ringtone was established to the callee ',
+    name: 'zoom.phone.connected_start_time',
+    type: 'date',
+  },
+  'zoom.phone.answer_start_time': {
+    category: 'zoom',
+    description: 'The date and time when the call was answered ',
+    name: 'zoom.phone.answer_start_time',
+    type: 'date',
+  },
+  'zoom.phone.call_end_time': {
+    category: 'zoom',
+    description: 'The date and time when the call ended ',
+    name: 'zoom.phone.call_end_time',
+    type: 'date',
+  },
+  'zoom.phone.call_id': {
+    category: 'zoom',
+    description: 'Unique ID of the related call ',
+    name: 'zoom.phone.call_id',
+    type: 'keyword',
+  },
+  'zoom.phone.duration': {
+    category: 'zoom',
+    description: 'Duration of a voicemail in minutes ',
+    name: 'zoom.phone.duration',
+    type: 'long',
+  },
+  'zoom.phone.caller.id': {
+    category: 'zoom',
+    description: 'UserID of the caller related to the voicemail/call ',
+    name: 'zoom.phone.caller.id',
+    type: 'keyword',
+  },
+  'zoom.phone.caller.user_id': {
+    category: 'zoom',
+    description: 'UserID of the person which initiated the call ',
+    name: 'zoom.phone.caller.user_id',
+    type: 'keyword',
+  },
+  'zoom.phone.caller.number_type': {
+    category: 'zoom',
+    description: 'The type of number, can be 1(Internal) or 2(External) ',
+    name: 'zoom.phone.caller.number_type',
+    type: 'keyword',
+  },
+  'zoom.phone.caller.name': {
+    category: 'zoom',
+    description: 'The name of the related callee ',
+    name: 'zoom.phone.caller.name',
+    type: 'keyword',
+  },
+  'zoom.phone.caller.phone_number': {
+    category: 'zoom',
+    description: 'Phone Number of the caller related to the call ',
+    name: 'zoom.phone.caller.phone_number',
+    type: 'keyword',
+  },
+  'zoom.phone.caller.extension_type': {
+    category: 'zoom',
+    description:
+      'Extension type of the caller number, can be user, callQueue, autoReceptionist or shareLineGroup ',
+    name: 'zoom.phone.caller.extension_type',
+    type: 'keyword',
+  },
+  'zoom.phone.caller.extension_number': {
+    category: 'zoom',
+    description: 'Extension number of the caller ',
+    name: 'zoom.phone.caller.extension_number',
+    type: 'keyword',
+  },
+  'zoom.phone.caller.timezone': {
+    category: 'zoom',
+    description: 'Timezone of the caller ',
+    name: 'zoom.phone.caller.timezone',
+    type: 'keyword',
+  },
+  'zoom.phone.caller.device_type': {
+    category: 'zoom',
+    description: 'Device type used by the caller ',
+    name: 'zoom.phone.caller.device_type',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.id': {
+    category: 'zoom',
+    description: 'UserID of the callee related to the voicemail/call ',
+    name: 'zoom.phone.callee.id',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.user_id': {
+    category: 'zoom',
+    description: 'UserID of the related callee of a voicemail/call ',
+    name: 'zoom.phone.callee.user_id',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.name': {
+    category: 'zoom',
+    description: 'The name of the related callee ',
+    name: 'zoom.phone.callee.name',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.number_type': {
+    category: 'zoom',
+    description: 'The type of number, can be 1(Internal) or 2(External) ',
+    name: 'zoom.phone.callee.number_type',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.phone_number': {
+    category: 'zoom',
+    description: 'Phone Number of the callee related to the call ',
+    name: 'zoom.phone.callee.phone_number',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.extension_type': {
+    category: 'zoom',
+    description:
+      'Extension type of the callee number, can be user, callQueue, autoReceptionist or shareLineGroup ',
+    name: 'zoom.phone.callee.extension_type',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.extension_number': {
+    category: 'zoom',
+    description: 'Extension number of the callee related to the call ',
+    name: 'zoom.phone.callee.extension_number',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.timezone': {
+    category: 'zoom',
+    description: 'Timezone of the callee related to the call ',
+    name: 'zoom.phone.callee.timezone',
+    type: 'keyword',
+  },
+  'zoom.phone.callee.device_type': {
+    category: 'zoom',
+    description: 'Device type used by the callee related to the call ',
+    name: 'zoom.phone.callee.device_type',
+    type: 'keyword',
+  },
+  'zoom.phone.date_time': {
+    category: 'zoom',
+    description: 'Date and time of the related phone event ',
+    name: 'zoom.phone.date_time',
+    type: 'date',
+  },
+  'zoom.recording.id': {
+    category: 'zoom',
+    description: 'Unique ID of the related recording ',
+    name: 'zoom.recording.id',
+    type: 'keyword',
+  },
+  'zoom.recording.uuid': {
+    category: 'zoom',
+    description: 'UUID of the related recording ',
+    name: 'zoom.recording.uuid',
+    type: 'keyword',
+  },
+  'zoom.recording.host_id': {
+    category: 'zoom',
+    description: 'UserID of the host of the meeting that was recorded ',
+    name: 'zoom.recording.host_id',
+    type: 'keyword',
+  },
+  'zoom.recording.topic': {
+    category: 'zoom',
+    description: 'Topic of the meeting related to the recording ',
+    name: 'zoom.recording.topic',
+    type: 'keyword',
+  },
+  'zoom.recording.type': {
+    category: 'zoom',
+    description:
+      'Type of recording, can be multiple type of values, please check Zoom documentation ',
+    name: 'zoom.recording.type',
+    type: 'keyword',
+  },
+  'zoom.recording.start_time': {
+    category: 'zoom',
+    description: 'The date and time when the recording started ',
+    name: 'zoom.recording.start_time',
+    type: 'date',
+  },
+  'zoom.recording.timezone': {
+    category: 'zoom',
+    description: 'The timezone used for the recording date ',
+    name: 'zoom.recording.timezone',
+    type: 'keyword',
+  },
+  'zoom.recording.duration': {
+    category: 'zoom',
+    description: 'Duration of the recording in minutes ',
+    name: 'zoom.recording.duration',
+    type: 'long',
+  },
+  'zoom.recording.share_url': {
+    category: 'zoom',
+    description: 'The URL to access the recording ',
+    name: 'zoom.recording.share_url',
+    type: 'keyword',
+  },
+  'zoom.recording.total_size': {
+    category: 'zoom',
+    description: 'Total size of the recording in bytes ',
+    name: 'zoom.recording.total_size',
+    type: 'long',
+  },
+  'zoom.recording.recording_count': {
+    category: 'zoom',
+    description: 'Number of recording files related to the recording ',
+    name: 'zoom.recording.recording_count',
+    type: 'long',
+  },
+  'zoom.recording.recording_file.recording_start': {
+    category: 'zoom',
+    description: 'The date and time the recording started ',
+    name: 'zoom.recording.recording_file.recording_start',
+    type: 'date',
+  },
+  'zoom.recording.recording_file.recording_end': {
+    category: 'zoom',
+    description: 'The date and time the recording finished ',
+    name: 'zoom.recording.recording_file.recording_end',
+    type: 'date',
+  },
+  'zoom.recording.host_email': {
+    category: 'zoom',
+    description: 'Email address of the host related to the meeting that was recorded ',
+    name: 'zoom.recording.host_email',
+    type: 'keyword',
+  },
+  'zoom.user.id': {
+    category: 'zoom',
+    description: 'UserID related to the user event ',
+    name: 'zoom.user.id',
+    type: 'keyword',
+  },
+  'zoom.user.first_name': {
+    category: 'zoom',
+    description: 'User first name related to the user event ',
+    name: 'zoom.user.first_name',
+    type: 'keyword',
+  },
+  'zoom.user.last_name': {
+    category: 'zoom',
+    description: 'User last name related to the user event ',
+    name: 'zoom.user.last_name',
+    type: 'keyword',
+  },
+  'zoom.user.email': {
+    category: 'zoom',
+    description: 'User email related to the user event ',
+    name: 'zoom.user.email',
+    type: 'keyword',
+  },
+  'zoom.user.type': {
+    category: 'zoom',
+    description: 'User type related to the user event ',
+    name: 'zoom.user.type',
+    type: 'keyword',
+  },
+  'zoom.user.phone_number': {
+    category: 'zoom',
+    description: 'User phone number related to the user event ',
+    name: 'zoom.user.phone_number',
+    type: 'keyword',
+  },
+  'zoom.user.phone_country': {
+    category: 'zoom',
+    description: 'User country code related to the user event ',
+    name: 'zoom.user.phone_country',
+    type: 'keyword',
+  },
+  'zoom.user.company': {
+    category: 'zoom',
+    description: 'User company related to the user event ',
+    name: 'zoom.user.company',
+    type: 'keyword',
+  },
+  'zoom.user.pmi': {
+    category: 'zoom',
+    description: 'User personal meeting ID related to the user event ',
+    name: 'zoom.user.pmi',
+    type: 'keyword',
+  },
+  'zoom.user.use_pmi': {
+    category: 'zoom',
+    description: 'If a user has PMI enabled ',
+    name: 'zoom.user.use_pmi',
+    type: 'boolean',
+  },
+  'zoom.user.pic_url': {
+    category: 'zoom',
+    description: 'Full URL to the profile picture used by the user ',
+    name: 'zoom.user.pic_url',
+    type: 'keyword',
+  },
+  'zoom.user.vanity_name': {
+    category: 'zoom',
+    description: 'Name of the personal meeting room related to the user event ',
+    name: 'zoom.user.vanity_name',
+    type: 'keyword',
+  },
+  'zoom.user.timezone': {
+    category: 'zoom',
+    description: 'Timezone configured for the user ',
+    name: 'zoom.user.timezone',
+    type: 'keyword',
+  },
+  'zoom.user.language': {
+    category: 'zoom',
+    description: 'Language configured for the user ',
+    name: 'zoom.user.language',
+    type: 'keyword',
+  },
+  'zoom.user.host_key': {
+    category: 'zoom',
+    description: 'Host key set for the user ',
+    name: 'zoom.user.host_key',
+    type: 'keyword',
+  },
+  'zoom.user.role': {
+    category: 'zoom',
+    description: 'The configured role for the user ',
+    name: 'zoom.user.role',
+    type: 'keyword',
+  },
+  'zoom.user.dept': {
+    category: 'zoom',
+    description: 'The configured departement for the user ',
+    name: 'zoom.user.dept',
+    type: 'keyword',
+  },
+  'zoom.user.presence_status': {
+    category: 'zoom',
+    description: 'Current presence status of user ',
+    name: 'zoom.user.presence_status',
+    type: 'keyword',
+  },
+  'zoom.user.personal_notes': {
+    category: 'zoom',
+    description: 'Personal notes for the User ',
+    name: 'zoom.user.personal_notes',
+    type: 'keyword',
+  },
+  'zoom.user.client_type': {
+    category: 'zoom',
+    description: 'Type of client used by the user. Can be browser, mac, win, iphone or android ',
+    name: 'zoom.user.client_type',
+    type: 'keyword',
+  },
+  'zoom.user.version': {
+    category: 'zoom',
+    description: 'Version of the client used by the user ',
+    name: 'zoom.user.version',
+    type: 'keyword',
+  },
+  'zoom.webinar.id': {
+    category: 'zoom',
+    description: 'Unique ID for the related webinar ',
+    name: 'zoom.webinar.id',
+    type: 'keyword',
+  },
+  'zoom.webinar.join_url': {
+    category: 'zoom',
+    description: 'The URL configured to join the webinar ',
+    name: 'zoom.webinar.join_url',
+    type: 'keyword',
+  },
+  'zoom.webinar.uuid': {
+    category: 'zoom',
+    description: 'UUID for the related webinar ',
+    name: 'zoom.webinar.uuid',
+    type: 'keyword',
+  },
+  'zoom.webinar.host_id': {
+    category: 'zoom',
+    description: 'UserID for the configured host of the webinar ',
+    name: 'zoom.webinar.host_id',
+    type: 'keyword',
+  },
+  'zoom.webinar.topic': {
+    category: 'zoom',
+    description: 'Meeting topic of the related webinar ',
+    name: 'zoom.webinar.topic',
+    type: 'keyword',
+  },
+  'zoom.webinar.type': {
+    category: 'zoom',
+    description:
+      'Type of webinar created. Can be either 5(Webinar), 6(Recurring webinar without fixed time) or 9(Recurring webinar with fixed time) ',
+    name: 'zoom.webinar.type',
+    type: 'keyword',
+  },
+  'zoom.webinar.start_time': {
+    category: 'zoom',
+    description: 'The date and time when the webinar started ',
+    name: 'zoom.webinar.start_time',
+    type: 'date',
+  },
+  'zoom.webinar.timezone': {
+    category: 'zoom',
+    description: 'Timezone used for the dates related to the webinar ',
+    name: 'zoom.webinar.timezone',
+    type: 'keyword',
+  },
+  'zoom.webinar.duration': {
+    category: 'zoom',
+    description: 'Duration of the webinar in minutes ',
+    name: 'zoom.webinar.duration',
+    type: 'long',
+  },
+  'zoom.webinar.agenda': {
+    category: 'zoom',
+    description: 'The configured agenda of the webinar ',
+    name: 'zoom.webinar.agenda',
+    type: 'keyword',
+  },
+  'zoom.webinar.password': {
+    category: 'zoom',
+    description: 'Password configured to access the webinar ',
+    name: 'zoom.webinar.password',
+    type: 'keyword',
+  },
+  'zoom.webinar.issues': {
+    category: 'zoom',
+    description: 'Any reported issues about a webinar is reported in this field ',
+    name: 'zoom.webinar.issues',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.id': {
+    category: 'zoom',
+    description: 'Unique ID of the Zoom room ',
+    name: 'zoom.zoomroom.id',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.room_name': {
+    category: 'zoom',
+    description: 'The configured name of the Zoom room ',
+    name: 'zoom.zoomroom.room_name',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.calendar_name': {
+    category: 'zoom',
+    description: 'Calendar name of the Zoom room ',
+    name: 'zoom.zoomroom.calendar_name',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.calendar_id': {
+    category: 'zoom',
+    description: 'Unique ID of the calendar used by the Zoom room ',
+    name: 'zoom.zoomroom.calendar_id',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.event_id': {
+    category: 'zoom',
+    description: 'Unique ID of the calendar event associated with the Zoom Room ',
+    name: 'zoom.zoomroom.event_id',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.change_key': {
+    category: 'zoom',
+    description:
+      'Key used by Microsoft products integration that represents a specific version of a calendar ',
+    name: 'zoom.zoomroom.change_key',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.resource_email': {
+    category: 'zoom',
+    description: 'Email address associated with the calendar in use by the Zoom room ',
+    name: 'zoom.zoomroom.resource_email',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.email': {
+    category: 'zoom',
+    description: 'Email address associated with the Zoom room itself ',
+    name: 'zoom.zoomroom.email',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.issue': {
+    category: 'zoom',
+    description: 'Any reported alerts or issues related to the Zoom room or its equipment ',
+    name: 'zoom.zoomroom.issue',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.alert_type': {
+    category: 'zoom',
+    description:
+      'An integer value representing the type of alert. The list of alert types can be found in the Zoom documentation ',
+    name: 'zoom.zoomroom.alert_type',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.component': {
+    category: 'zoom',
+    description:
+      'An integer value representing the type of equipment or component, The list of component types can be found in the Zoom documentation ',
+    name: 'zoom.zoomroom.component',
+    type: 'keyword',
+  },
+  'zoom.zoomroom.alert_kind': {
+    category: 'zoom',
+    description:
+      'An integer value showing if the Zoom room alert has been either 1(Triggered) or 2(Cleared) ',
+    name: 'zoom.zoomroom.alert_kind',
+    type: 'keyword',
+  },
+  'zoom.registrant.id': {
+    category: 'zoom',
+    description: 'Unique ID of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.id',
+    type: 'keyword',
+  },
+  'zoom.registrant.status': {
+    category: 'zoom',
+    description: 'Status of the specific user registration ',
+    name: 'zoom.registrant.status',
+    type: 'keyword',
+  },
+  'zoom.registrant.email': {
+    category: 'zoom',
+    description: 'Email of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.email',
+    type: 'keyword',
+  },
+  'zoom.registrant.first_name': {
+    category: 'zoom',
+    description: 'First name of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.first_name',
+    type: 'keyword',
+  },
+  'zoom.registrant.last_name': {
+    category: 'zoom',
+    description: 'Last name of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.last_name',
+    type: 'keyword',
+  },
+  'zoom.registrant.address': {
+    category: 'zoom',
+    description: 'Address of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.address',
+    type: 'keyword',
+  },
+  'zoom.registrant.city': {
+    category: 'zoom',
+    description: 'City of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.city',
+    type: 'keyword',
+  },
+  'zoom.registrant.country': {
+    category: 'zoom',
+    description: 'Country of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.country',
+    type: 'keyword',
+  },
+  'zoom.registrant.zip': {
+    category: 'zoom',
+    description: 'Zip code of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.zip',
+    type: 'keyword',
+  },
+  'zoom.registrant.state': {
+    category: 'zoom',
+    description: 'State of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.state',
+    type: 'keyword',
+  },
+  'zoom.registrant.phone': {
+    category: 'zoom',
+    description: 'Phone number of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.phone',
+    type: 'keyword',
+  },
+  'zoom.registrant.industry': {
+    category: 'zoom',
+    description: 'Related industry of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.industry',
+    type: 'keyword',
+  },
+  'zoom.registrant.org': {
+    category: 'zoom',
+    description: 'Organization related to the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.org',
+    type: 'keyword',
+  },
+  'zoom.registrant.job_title': {
+    category: 'zoom',
+    description: 'Job title of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.job_title',
+    type: 'keyword',
+  },
+  'zoom.registrant.purchasing_time_frame': {
+    category: 'zoom',
+    description: 'Choosen purchase timeframe of the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.purchasing_time_frame',
+    type: 'keyword',
+  },
+  'zoom.registrant.role_in_purchase_process': {
+    category: 'zoom',
+    description:
+      'Choosen role in a purchase process related to the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.role_in_purchase_process',
+    type: 'keyword',
+  },
+  'zoom.registrant.no_of_employees': {
+    category: 'zoom',
+    description: 'Number of employees choosen by the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.no_of_employees',
+    type: 'keyword',
+  },
+  'zoom.registrant.comments': {
+    category: 'zoom',
+    description: 'Comments left by the user registering to a meeting or webinar ',
+    name: 'zoom.registrant.comments',
+    type: 'keyword',
+  },
+  'zoom.registrant.join_url': {
+    category: 'zoom',
+    description: 'The URL that the registrant can use to join the webinar ',
+    name: 'zoom.registrant.join_url',
+    type: 'keyword',
+  },
+  'zoom.participant.id': {
+    category: 'zoom',
+    description: 'Unique ID of the participant related to a meeting ',
+    name: 'zoom.participant.id',
+    type: 'keyword',
+  },
+  'zoom.participant.user_id': {
+    category: 'zoom',
+    description: 'UserID of the participant related to a meeting ',
+    name: 'zoom.participant.user_id',
+    type: 'keyword',
+  },
+  'zoom.participant.user_name': {
+    category: 'zoom',
+    description: 'Username of the participant related to a meeting ',
+    name: 'zoom.participant.user_name',
+    type: 'keyword',
+  },
+  'zoom.participant.join_time': {
+    category: 'zoom',
+    description: 'The date and time a participant joined a meeting ',
+    name: 'zoom.participant.join_time',
+    type: 'date',
+  },
+  'zoom.participant.leave_time': {
+    category: 'zoom',
+    description: 'The date and time a participant left a meeting ',
+    name: 'zoom.participant.leave_time',
+    type: 'date',
+  },
+  'zoom.participant.sharing_details.link_source': {
+    category: 'zoom',
+    description: 'Method of sharing with dropbox integration ',
+    name: 'zoom.participant.sharing_details.link_source',
+    type: 'keyword',
+  },
+  'zoom.participant.sharing_details.content': {
+    category: 'zoom',
+    description: 'Type of content that was shared ',
+    name: 'zoom.participant.sharing_details.content',
+    type: 'keyword',
+  },
+  'zoom.participant.sharing_details.file_link': {
+    category: 'zoom',
+    description: 'The file link that was shared ',
+    name: 'zoom.participant.sharing_details.file_link',
+    type: 'keyword',
+  },
+  'zoom.participant.sharing_details.date_time': {
+    category: 'zoom',
+    description: 'Timestamp the sharing started ',
+    name: 'zoom.participant.sharing_details.date_time',
+    type: 'keyword',
+  },
+  'zoom.participant.sharing_details.source': {
+    category: 'zoom',
+    description: 'The file source that was share ',
+    name: 'zoom.participant.sharing_details.source',
+    type: 'keyword',
+  },
+  'zoom.old_values': {
+    category: 'zoom',
+    description:
+      'Includes the old values when updating a object like user, meeting, account or webinar ',
+    name: 'zoom.old_values',
+    type: 'flattened',
+  },
+  'zoom.settings': {
+    category: 'zoom',
+    description:
+      'The current active settings related to a object like user, meeting, account or webinar ',
+    name: 'zoom.settings',
+    type: 'flattened',
+  },
+  'aws-cloudwatch.log_group': {
+    category: 'aws-cloudwatch',
     description: 'The name of the log group to which this event belongs.',
-    name: 'awscloudwatch.log_group',
+    name: 'aws-cloudwatch.log_group',
     type: 'keyword',
   },
-  'awscloudwatch.log_stream': {
-    category: 'awscloudwatch',
+  'aws-cloudwatch.log_stream': {
+    category: 'aws-cloudwatch',
     description: 'The name of the log stream to which this event belongs.',
-    name: 'awscloudwatch.log_stream',
+    name: 'aws-cloudwatch.log_stream',
     type: 'keyword',
   },
-  'awscloudwatch.ingestion_time': {
-    category: 'awscloudwatch',
+  'aws-cloudwatch.ingestion_time': {
+    category: 'aws-cloudwatch',
     description: 'The time the event was ingested in AWS CloudWatch.',
-    name: 'awscloudwatch.ingestion_time',
+    name: 'aws-cloudwatch.ingestion_time',
     type: 'keyword',
+  },
+  'bucket.name': {
+    category: 'bucket',
+    description: 'Name of the S3 bucket that this log retrieved from. ',
+    name: 'bucket.name',
+    type: 'keyword',
+  },
+  'bucket.arn': {
+    category: 'bucket',
+    description: 'ARN of the S3 bucket that this log retrieved from. ',
+    name: 'bucket.arn',
+    type: 'keyword',
+  },
+  'object.key': {
+    category: 'object',
+    description: 'Name of the S3 object that this log retrieved from. ',
+    name: 'object.key',
+    type: 'keyword',
+  },
+  metadata: {
+    category: 'base',
+    description: 'AWS S3 object metadata values.',
+    name: 'metadata',
+    type: 'flattened',
   },
   'netflow.type': {
     category: 'netflow',
@@ -28704,84 +38108,294 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.exporter.version',
     type: 'integer',
   },
-  'netflow.octet_delta_count': {
+  'netflow.absolute_error': {
     category: 'netflow',
-    name: 'netflow.octet_delta_count',
+    name: 'netflow.absolute_error',
+    type: 'double',
+  },
+  'netflow.address_pool_high_threshold': {
+    category: 'netflow',
+    name: 'netflow.address_pool_high_threshold',
     type: 'long',
   },
-  'netflow.packet_delta_count': {
+  'netflow.address_pool_low_threshold': {
     category: 'netflow',
-    name: 'netflow.packet_delta_count',
+    name: 'netflow.address_pool_low_threshold',
     type: 'long',
   },
-  'netflow.delta_flow_count': {
+  'netflow.address_port_mapping_high_threshold': {
     category: 'netflow',
-    name: 'netflow.delta_flow_count',
+    name: 'netflow.address_port_mapping_high_threshold',
     type: 'long',
   },
-  'netflow.protocol_identifier': {
+  'netflow.address_port_mapping_low_threshold': {
     category: 'netflow',
-    name: 'netflow.protocol_identifier',
-    type: 'short',
+    name: 'netflow.address_port_mapping_low_threshold',
+    type: 'long',
   },
-  'netflow.ip_class_of_service': {
+  'netflow.address_port_mapping_per_user_high_threshold': {
     category: 'netflow',
-    name: 'netflow.ip_class_of_service',
-    type: 'short',
+    name: 'netflow.address_port_mapping_per_user_high_threshold',
+    type: 'long',
   },
-  'netflow.tcp_control_bits': {
+  'netflow.afc_protocol': {
     category: 'netflow',
-    name: 'netflow.tcp_control_bits',
+    name: 'netflow.afc_protocol',
     type: 'integer',
   },
-  'netflow.source_transport_port': {
+  'netflow.afc_protocol_name': {
     category: 'netflow',
-    name: 'netflow.source_transport_port',
+    name: 'netflow.afc_protocol_name',
+    type: 'keyword',
+  },
+  'netflow.anonymization_flags': {
+    category: 'netflow',
+    name: 'netflow.anonymization_flags',
     type: 'integer',
   },
-  'netflow.source_ipv4_address': {
+  'netflow.anonymization_technique': {
     category: 'netflow',
-    name: 'netflow.source_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.source_ipv4_prefix_length': {
-    category: 'netflow',
-    name: 'netflow.source_ipv4_prefix_length',
-    type: 'short',
-  },
-  'netflow.ingress_interface': {
-    category: 'netflow',
-    name: 'netflow.ingress_interface',
-    type: 'long',
-  },
-  'netflow.destination_transport_port': {
-    category: 'netflow',
-    name: 'netflow.destination_transport_port',
+    name: 'netflow.anonymization_technique',
     type: 'integer',
   },
-  'netflow.destination_ipv4_address': {
+  'netflow.application_business-relevance': {
     category: 'netflow',
-    name: 'netflow.destination_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.destination_ipv4_prefix_length': {
-    category: 'netflow',
-    name: 'netflow.destination_ipv4_prefix_length',
-    type: 'short',
-  },
-  'netflow.egress_interface': {
-    category: 'netflow',
-    name: 'netflow.egress_interface',
+    name: 'netflow.application_business-relevance',
     type: 'long',
   },
-  'netflow.ip_next_hop_ipv4_address': {
+  'netflow.application_category_name': {
     category: 'netflow',
-    name: 'netflow.ip_next_hop_ipv4_address',
-    type: 'ip',
+    name: 'netflow.application_category_name',
+    type: 'keyword',
   },
-  'netflow.bgp_source_as_number': {
+  'netflow.application_description': {
     category: 'netflow',
-    name: 'netflow.bgp_source_as_number',
+    name: 'netflow.application_description',
+    type: 'keyword',
+  },
+  'netflow.application_group_name': {
+    category: 'netflow',
+    name: 'netflow.application_group_name',
+    type: 'keyword',
+  },
+  'netflow.application_http_uri_statistics': {
+    category: 'netflow',
+    name: 'netflow.application_http_uri_statistics',
+    type: 'short',
+  },
+  'netflow.application_http_user-agent': {
+    category: 'netflow',
+    name: 'netflow.application_http_user-agent',
+    type: 'short',
+  },
+  'netflow.application_id': {
+    category: 'netflow',
+    name: 'netflow.application_id',
+    type: 'short',
+  },
+  'netflow.application_name': {
+    category: 'netflow',
+    name: 'netflow.application_name',
+    type: 'keyword',
+  },
+  'netflow.application_sub_category_name': {
+    category: 'netflow',
+    name: 'netflow.application_sub_category_name',
+    type: 'keyword',
+  },
+  'netflow.application_traffic-class': {
+    category: 'netflow',
+    name: 'netflow.application_traffic-class',
+    type: 'long',
+  },
+  'netflow.art_client_network_time_maximum': {
+    category: 'netflow',
+    name: 'netflow.art_client_network_time_maximum',
+    type: 'long',
+  },
+  'netflow.art_client_network_time_minimum': {
+    category: 'netflow',
+    name: 'netflow.art_client_network_time_minimum',
+    type: 'long',
+  },
+  'netflow.art_client_network_time_sum': {
+    category: 'netflow',
+    name: 'netflow.art_client_network_time_sum',
+    type: 'long',
+  },
+  'netflow.art_clientpackets': {
+    category: 'netflow',
+    name: 'netflow.art_clientpackets',
+    type: 'long',
+  },
+  'netflow.art_count_late_responses': {
+    category: 'netflow',
+    name: 'netflow.art_count_late_responses',
+    type: 'long',
+  },
+  'netflow.art_count_new_connections': {
+    category: 'netflow',
+    name: 'netflow.art_count_new_connections',
+    type: 'long',
+  },
+  'netflow.art_count_responses': {
+    category: 'netflow',
+    name: 'netflow.art_count_responses',
+    type: 'long',
+  },
+  'netflow.art_count_responses_histogram_bucket1': {
+    category: 'netflow',
+    name: 'netflow.art_count_responses_histogram_bucket1',
+    type: 'long',
+  },
+  'netflow.art_count_responses_histogram_bucket2': {
+    category: 'netflow',
+    name: 'netflow.art_count_responses_histogram_bucket2',
+    type: 'long',
+  },
+  'netflow.art_count_responses_histogram_bucket3': {
+    category: 'netflow',
+    name: 'netflow.art_count_responses_histogram_bucket3',
+    type: 'long',
+  },
+  'netflow.art_count_responses_histogram_bucket4': {
+    category: 'netflow',
+    name: 'netflow.art_count_responses_histogram_bucket4',
+    type: 'long',
+  },
+  'netflow.art_count_responses_histogram_bucket5': {
+    category: 'netflow',
+    name: 'netflow.art_count_responses_histogram_bucket5',
+    type: 'long',
+  },
+  'netflow.art_count_responses_histogram_bucket6': {
+    category: 'netflow',
+    name: 'netflow.art_count_responses_histogram_bucket6',
+    type: 'long',
+  },
+  'netflow.art_count_responses_histogram_bucket7': {
+    category: 'netflow',
+    name: 'netflow.art_count_responses_histogram_bucket7',
+    type: 'long',
+  },
+  'netflow.art_count_retransmissions': {
+    category: 'netflow',
+    name: 'netflow.art_count_retransmissions',
+    type: 'long',
+  },
+  'netflow.art_count_transactions': {
+    category: 'netflow',
+    name: 'netflow.art_count_transactions',
+    type: 'long',
+  },
+  'netflow.art_network_time_maximum': {
+    category: 'netflow',
+    name: 'netflow.art_network_time_maximum',
+    type: 'long',
+  },
+  'netflow.art_network_time_minimum': {
+    category: 'netflow',
+    name: 'netflow.art_network_time_minimum',
+    type: 'long',
+  },
+  'netflow.art_network_time_sum': {
+    category: 'netflow',
+    name: 'netflow.art_network_time_sum',
+    type: 'long',
+  },
+  'netflow.art_response_time_maximum': {
+    category: 'netflow',
+    name: 'netflow.art_response_time_maximum',
+    type: 'long',
+  },
+  'netflow.art_response_time_minimum': {
+    category: 'netflow',
+    name: 'netflow.art_response_time_minimum',
+    type: 'long',
+  },
+  'netflow.art_response_time_sum': {
+    category: 'netflow',
+    name: 'netflow.art_response_time_sum',
+    type: 'long',
+  },
+  'netflow.art_server_network_time_maximum': {
+    category: 'netflow',
+    name: 'netflow.art_server_network_time_maximum',
+    type: 'long',
+  },
+  'netflow.art_server_network_time_minimum': {
+    category: 'netflow',
+    name: 'netflow.art_server_network_time_minimum',
+    type: 'long',
+  },
+  'netflow.art_server_network_time_sum': {
+    category: 'netflow',
+    name: 'netflow.art_server_network_time_sum',
+    type: 'long',
+  },
+  'netflow.art_server_response_time_maximum': {
+    category: 'netflow',
+    name: 'netflow.art_server_response_time_maximum',
+    type: 'long',
+  },
+  'netflow.art_server_response_time_minimum': {
+    category: 'netflow',
+    name: 'netflow.art_server_response_time_minimum',
+    type: 'long',
+  },
+  'netflow.art_server_response_time_sum': {
+    category: 'netflow',
+    name: 'netflow.art_server_response_time_sum',
+    type: 'long',
+  },
+  'netflow.art_serverpackets': {
+    category: 'netflow',
+    name: 'netflow.art_serverpackets',
+    type: 'long',
+  },
+  'netflow.art_total_response_time_maximum': {
+    category: 'netflow',
+    name: 'netflow.art_total_response_time_maximum',
+    type: 'long',
+  },
+  'netflow.art_total_response_time_minimum': {
+    category: 'netflow',
+    name: 'netflow.art_total_response_time_minimum',
+    type: 'long',
+  },
+  'netflow.art_total_response_time_sum': {
+    category: 'netflow',
+    name: 'netflow.art_total_response_time_sum',
+    type: 'long',
+  },
+  'netflow.art_total_transaction_time_maximum': {
+    category: 'netflow',
+    name: 'netflow.art_total_transaction_time_maximum',
+    type: 'long',
+  },
+  'netflow.art_total_transaction_time_minimum': {
+    category: 'netflow',
+    name: 'netflow.art_total_transaction_time_minimum',
+    type: 'long',
+  },
+  'netflow.art_total_transaction_time_sum': {
+    category: 'netflow',
+    name: 'netflow.art_total_transaction_time_sum',
+    type: 'long',
+  },
+  'netflow.assembled_fragment_count': {
+    category: 'netflow',
+    name: 'netflow.assembled_fragment_count',
+    type: 'long',
+  },
+  'netflow.audit_counter': {
+    category: 'netflow',
+    name: 'netflow.audit_counter',
+    type: 'long',
+  },
+  'netflow.average_interarrival_time': {
+    category: 'netflow',
+    name: 'netflow.average_interarrival_time',
     type: 'long',
   },
   'netflow.bgp_destination_as_number': {
@@ -28789,229 +38403,14 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.bgp_destination_as_number',
     type: 'long',
   },
+  'netflow.bgp_next_adjacent_as_number': {
+    category: 'netflow',
+    name: 'netflow.bgp_next_adjacent_as_number',
+    type: 'long',
+  },
   'netflow.bgp_next_hop_ipv4_address': {
     category: 'netflow',
     name: 'netflow.bgp_next_hop_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.post_mcast_packet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.post_mcast_packet_delta_count',
-    type: 'long',
-  },
-  'netflow.post_mcast_octet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.post_mcast_octet_delta_count',
-    type: 'long',
-  },
-  'netflow.flow_end_sys_up_time': {
-    category: 'netflow',
-    name: 'netflow.flow_end_sys_up_time',
-    type: 'long',
-  },
-  'netflow.flow_start_sys_up_time': {
-    category: 'netflow',
-    name: 'netflow.flow_start_sys_up_time',
-    type: 'long',
-  },
-  'netflow.post_octet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.post_octet_delta_count',
-    type: 'long',
-  },
-  'netflow.post_packet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.post_packet_delta_count',
-    type: 'long',
-  },
-  'netflow.minimum_ip_total_length': {
-    category: 'netflow',
-    name: 'netflow.minimum_ip_total_length',
-    type: 'long',
-  },
-  'netflow.maximum_ip_total_length': {
-    category: 'netflow',
-    name: 'netflow.maximum_ip_total_length',
-    type: 'long',
-  },
-  'netflow.source_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.source_ipv6_address',
-    type: 'ip',
-  },
-  'netflow.destination_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.destination_ipv6_address',
-    type: 'ip',
-  },
-  'netflow.source_ipv6_prefix_length': {
-    category: 'netflow',
-    name: 'netflow.source_ipv6_prefix_length',
-    type: 'short',
-  },
-  'netflow.destination_ipv6_prefix_length': {
-    category: 'netflow',
-    name: 'netflow.destination_ipv6_prefix_length',
-    type: 'short',
-  },
-  'netflow.flow_label_ipv6': {
-    category: 'netflow',
-    name: 'netflow.flow_label_ipv6',
-    type: 'long',
-  },
-  'netflow.icmp_type_code_ipv4': {
-    category: 'netflow',
-    name: 'netflow.icmp_type_code_ipv4',
-    type: 'integer',
-  },
-  'netflow.igmp_type': {
-    category: 'netflow',
-    name: 'netflow.igmp_type',
-    type: 'short',
-  },
-  'netflow.sampling_interval': {
-    category: 'netflow',
-    name: 'netflow.sampling_interval',
-    type: 'long',
-  },
-  'netflow.sampling_algorithm': {
-    category: 'netflow',
-    name: 'netflow.sampling_algorithm',
-    type: 'short',
-  },
-  'netflow.flow_active_timeout': {
-    category: 'netflow',
-    name: 'netflow.flow_active_timeout',
-    type: 'integer',
-  },
-  'netflow.flow_idle_timeout': {
-    category: 'netflow',
-    name: 'netflow.flow_idle_timeout',
-    type: 'integer',
-  },
-  'netflow.engine_type': {
-    category: 'netflow',
-    name: 'netflow.engine_type',
-    type: 'short',
-  },
-  'netflow.engine_id': {
-    category: 'netflow',
-    name: 'netflow.engine_id',
-    type: 'short',
-  },
-  'netflow.exported_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.exported_octet_total_count',
-    type: 'long',
-  },
-  'netflow.exported_message_total_count': {
-    category: 'netflow',
-    name: 'netflow.exported_message_total_count',
-    type: 'long',
-  },
-  'netflow.exported_flow_record_total_count': {
-    category: 'netflow',
-    name: 'netflow.exported_flow_record_total_count',
-    type: 'long',
-  },
-  'netflow.ipv4_router_sc': {
-    category: 'netflow',
-    name: 'netflow.ipv4_router_sc',
-    type: 'ip',
-  },
-  'netflow.source_ipv4_prefix': {
-    category: 'netflow',
-    name: 'netflow.source_ipv4_prefix',
-    type: 'ip',
-  },
-  'netflow.destination_ipv4_prefix': {
-    category: 'netflow',
-    name: 'netflow.destination_ipv4_prefix',
-    type: 'ip',
-  },
-  'netflow.mpls_top_label_type': {
-    category: 'netflow',
-    name: 'netflow.mpls_top_label_type',
-    type: 'short',
-  },
-  'netflow.mpls_top_label_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.mpls_top_label_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.sampler_id': {
-    category: 'netflow',
-    name: 'netflow.sampler_id',
-    type: 'short',
-  },
-  'netflow.sampler_mode': {
-    category: 'netflow',
-    name: 'netflow.sampler_mode',
-    type: 'short',
-  },
-  'netflow.sampler_random_interval': {
-    category: 'netflow',
-    name: 'netflow.sampler_random_interval',
-    type: 'long',
-  },
-  'netflow.class_id': {
-    category: 'netflow',
-    name: 'netflow.class_id',
-    type: 'long',
-  },
-  'netflow.minimum_ttl': {
-    category: 'netflow',
-    name: 'netflow.minimum_ttl',
-    type: 'short',
-  },
-  'netflow.maximum_ttl': {
-    category: 'netflow',
-    name: 'netflow.maximum_ttl',
-    type: 'short',
-  },
-  'netflow.fragment_identification': {
-    category: 'netflow',
-    name: 'netflow.fragment_identification',
-    type: 'long',
-  },
-  'netflow.post_ip_class_of_service': {
-    category: 'netflow',
-    name: 'netflow.post_ip_class_of_service',
-    type: 'short',
-  },
-  'netflow.source_mac_address': {
-    category: 'netflow',
-    name: 'netflow.source_mac_address',
-    type: 'keyword',
-  },
-  'netflow.post_destination_mac_address': {
-    category: 'netflow',
-    name: 'netflow.post_destination_mac_address',
-    type: 'keyword',
-  },
-  'netflow.vlan_id': {
-    category: 'netflow',
-    name: 'netflow.vlan_id',
-    type: 'integer',
-  },
-  'netflow.post_vlan_id': {
-    category: 'netflow',
-    name: 'netflow.post_vlan_id',
-    type: 'integer',
-  },
-  'netflow.ip_version': {
-    category: 'netflow',
-    name: 'netflow.ip_version',
-    type: 'short',
-  },
-  'netflow.flow_direction': {
-    category: 'netflow',
-    name: 'netflow.flow_direction',
-    type: 'short',
-  },
-  'netflow.ip_next_hop_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.ip_next_hop_ipv6_address',
     type: 'ip',
   },
   'netflow.bgp_next_hop_ipv6_address': {
@@ -29019,14 +38418,1749 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.bgp_next_hop_ipv6_address',
     type: 'ip',
   },
+  'netflow.bgp_prev_adjacent_as_number': {
+    category: 'netflow',
+    name: 'netflow.bgp_prev_adjacent_as_number',
+    type: 'long',
+  },
+  'netflow.bgp_source_as_number': {
+    category: 'netflow',
+    name: 'netflow.bgp_source_as_number',
+    type: 'long',
+  },
+  'netflow.bgp_validity_state': {
+    category: 'netflow',
+    name: 'netflow.bgp_validity_state',
+    type: 'short',
+  },
+  'netflow.biflow_direction': {
+    category: 'netflow',
+    name: 'netflow.biflow_direction',
+    type: 'short',
+  },
+  'netflow.bind_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.bind_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.bind_transport_port': {
+    category: 'netflow',
+    name: 'netflow.bind_transport_port',
+    type: 'integer',
+  },
+  'netflow.class_id': {
+    category: 'netflow',
+    name: 'netflow.class_id',
+    type: 'long',
+  },
+  'netflow.class_name': {
+    category: 'netflow',
+    name: 'netflow.class_name',
+    type: 'keyword',
+  },
+  'netflow.classification_engine_id': {
+    category: 'netflow',
+    name: 'netflow.classification_engine_id',
+    type: 'short',
+  },
+  'netflow.collection_time_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.collection_time_milliseconds',
+    type: 'date',
+  },
+  'netflow.collector_certificate': {
+    category: 'netflow',
+    name: 'netflow.collector_certificate',
+    type: 'short',
+  },
+  'netflow.collector_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.collector_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.collector_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.collector_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.collector_transport_port': {
+    category: 'netflow',
+    name: 'netflow.collector_transport_port',
+    type: 'integer',
+  },
+  'netflow.common_properties_id': {
+    category: 'netflow',
+    name: 'netflow.common_properties_id',
+    type: 'long',
+  },
+  'netflow.confidence_level': {
+    category: 'netflow',
+    name: 'netflow.confidence_level',
+    type: 'double',
+  },
+  'netflow.conn_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.conn_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.conn_transport_port': {
+    category: 'netflow',
+    name: 'netflow.conn_transport_port',
+    type: 'integer',
+  },
+  'netflow.connection_sum_duration_seconds': {
+    category: 'netflow',
+    name: 'netflow.connection_sum_duration_seconds',
+    type: 'long',
+  },
+  'netflow.connection_transaction_id': {
+    category: 'netflow',
+    name: 'netflow.connection_transaction_id',
+    type: 'long',
+  },
+  'netflow.conntrack_id': {
+    category: 'netflow',
+    name: 'netflow.conntrack_id',
+    type: 'long',
+  },
+  'netflow.data_byte_count': {
+    category: 'netflow',
+    name: 'netflow.data_byte_count',
+    type: 'long',
+  },
+  'netflow.data_link_frame_section': {
+    category: 'netflow',
+    name: 'netflow.data_link_frame_section',
+    type: 'short',
+  },
+  'netflow.data_link_frame_size': {
+    category: 'netflow',
+    name: 'netflow.data_link_frame_size',
+    type: 'integer',
+  },
+  'netflow.data_link_frame_type': {
+    category: 'netflow',
+    name: 'netflow.data_link_frame_type',
+    type: 'integer',
+  },
+  'netflow.data_records_reliability': {
+    category: 'netflow',
+    name: 'netflow.data_records_reliability',
+    type: 'boolean',
+  },
+  'netflow.delta_flow_count': {
+    category: 'netflow',
+    name: 'netflow.delta_flow_count',
+    type: 'long',
+  },
+  'netflow.destination_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.destination_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.destination_ipv4_prefix': {
+    category: 'netflow',
+    name: 'netflow.destination_ipv4_prefix',
+    type: 'ip',
+  },
+  'netflow.destination_ipv4_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.destination_ipv4_prefix_length',
+    type: 'short',
+  },
+  'netflow.destination_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.destination_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.destination_ipv6_prefix': {
+    category: 'netflow',
+    name: 'netflow.destination_ipv6_prefix',
+    type: 'ip',
+  },
+  'netflow.destination_ipv6_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.destination_ipv6_prefix_length',
+    type: 'short',
+  },
+  'netflow.destination_mac_address': {
+    category: 'netflow',
+    name: 'netflow.destination_mac_address',
+    type: 'keyword',
+  },
+  'netflow.destination_transport_port': {
+    category: 'netflow',
+    name: 'netflow.destination_transport_port',
+    type: 'integer',
+  },
+  'netflow.digest_hash_value': {
+    category: 'netflow',
+    name: 'netflow.digest_hash_value',
+    type: 'long',
+  },
+  'netflow.distinct_count_of_destination_ip_address': {
+    category: 'netflow',
+    name: 'netflow.distinct_count_of_destination_ip_address',
+    type: 'long',
+  },
+  'netflow.distinct_count_of_destination_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.distinct_count_of_destination_ipv4_address',
+    type: 'long',
+  },
+  'netflow.distinct_count_of_destination_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.distinct_count_of_destination_ipv6_address',
+    type: 'long',
+  },
+  'netflow.distinct_count_of_source_ip_address': {
+    category: 'netflow',
+    name: 'netflow.distinct_count_of_source_ip_address',
+    type: 'long',
+  },
+  'netflow.distinct_count_of_source_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.distinct_count_of_source_ipv4_address',
+    type: 'long',
+  },
+  'netflow.distinct_count_of_source_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.distinct_count_of_source_ipv6_address',
+    type: 'long',
+  },
+  'netflow.dns_authoritative': {
+    category: 'netflow',
+    name: 'netflow.dns_authoritative',
+    type: 'short',
+  },
+  'netflow.dns_cname': {
+    category: 'netflow',
+    name: 'netflow.dns_cname',
+    type: 'keyword',
+  },
+  'netflow.dns_id': {
+    category: 'netflow',
+    name: 'netflow.dns_id',
+    type: 'integer',
+  },
+  'netflow.dns_mx_exchange': {
+    category: 'netflow',
+    name: 'netflow.dns_mx_exchange',
+    type: 'keyword',
+  },
+  'netflow.dns_mx_preference': {
+    category: 'netflow',
+    name: 'netflow.dns_mx_preference',
+    type: 'integer',
+  },
+  'netflow.dns_nsd_name': {
+    category: 'netflow',
+    name: 'netflow.dns_nsd_name',
+    type: 'keyword',
+  },
+  'netflow.dns_nx_domain': {
+    category: 'netflow',
+    name: 'netflow.dns_nx_domain',
+    type: 'short',
+  },
+  'netflow.dns_ptrd_name': {
+    category: 'netflow',
+    name: 'netflow.dns_ptrd_name',
+    type: 'keyword',
+  },
+  'netflow.dns_qname': {
+    category: 'netflow',
+    name: 'netflow.dns_qname',
+    type: 'keyword',
+  },
+  'netflow.dns_qr_type': {
+    category: 'netflow',
+    name: 'netflow.dns_qr_type',
+    type: 'integer',
+  },
+  'netflow.dns_query_response': {
+    category: 'netflow',
+    name: 'netflow.dns_query_response',
+    type: 'short',
+  },
+  'netflow.dns_rr_section': {
+    category: 'netflow',
+    name: 'netflow.dns_rr_section',
+    type: 'short',
+  },
+  'netflow.dns_soa_expire': {
+    category: 'netflow',
+    name: 'netflow.dns_soa_expire',
+    type: 'long',
+  },
+  'netflow.dns_soa_minimum': {
+    category: 'netflow',
+    name: 'netflow.dns_soa_minimum',
+    type: 'long',
+  },
+  'netflow.dns_soa_refresh': {
+    category: 'netflow',
+    name: 'netflow.dns_soa_refresh',
+    type: 'long',
+  },
+  'netflow.dns_soa_retry': {
+    category: 'netflow',
+    name: 'netflow.dns_soa_retry',
+    type: 'long',
+  },
+  'netflow.dns_soa_serial': {
+    category: 'netflow',
+    name: 'netflow.dns_soa_serial',
+    type: 'long',
+  },
+  'netflow.dns_soam_name': {
+    category: 'netflow',
+    name: 'netflow.dns_soam_name',
+    type: 'keyword',
+  },
+  'netflow.dns_soar_name': {
+    category: 'netflow',
+    name: 'netflow.dns_soar_name',
+    type: 'keyword',
+  },
+  'netflow.dns_srv_port': {
+    category: 'netflow',
+    name: 'netflow.dns_srv_port',
+    type: 'integer',
+  },
+  'netflow.dns_srv_priority': {
+    category: 'netflow',
+    name: 'netflow.dns_srv_priority',
+    type: 'integer',
+  },
+  'netflow.dns_srv_target': {
+    category: 'netflow',
+    name: 'netflow.dns_srv_target',
+    type: 'integer',
+  },
+  'netflow.dns_srv_weight': {
+    category: 'netflow',
+    name: 'netflow.dns_srv_weight',
+    type: 'integer',
+  },
+  'netflow.dns_ttl': {
+    category: 'netflow',
+    name: 'netflow.dns_ttl',
+    type: 'long',
+  },
+  'netflow.dns_txt_data': {
+    category: 'netflow',
+    name: 'netflow.dns_txt_data',
+    type: 'keyword',
+  },
+  'netflow.dot1q_customer_dei': {
+    category: 'netflow',
+    name: 'netflow.dot1q_customer_dei',
+    type: 'boolean',
+  },
+  'netflow.dot1q_customer_destination_mac_address': {
+    category: 'netflow',
+    name: 'netflow.dot1q_customer_destination_mac_address',
+    type: 'keyword',
+  },
+  'netflow.dot1q_customer_priority': {
+    category: 'netflow',
+    name: 'netflow.dot1q_customer_priority',
+    type: 'short',
+  },
+  'netflow.dot1q_customer_source_mac_address': {
+    category: 'netflow',
+    name: 'netflow.dot1q_customer_source_mac_address',
+    type: 'keyword',
+  },
+  'netflow.dot1q_customer_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.dot1q_customer_vlan_id',
+    type: 'integer',
+  },
+  'netflow.dot1q_dei': {
+    category: 'netflow',
+    name: 'netflow.dot1q_dei',
+    type: 'boolean',
+  },
+  'netflow.dot1q_priority': {
+    category: 'netflow',
+    name: 'netflow.dot1q_priority',
+    type: 'short',
+  },
+  'netflow.dot1q_service_instance_id': {
+    category: 'netflow',
+    name: 'netflow.dot1q_service_instance_id',
+    type: 'long',
+  },
+  'netflow.dot1q_service_instance_priority': {
+    category: 'netflow',
+    name: 'netflow.dot1q_service_instance_priority',
+    type: 'short',
+  },
+  'netflow.dot1q_service_instance_tag': {
+    category: 'netflow',
+    name: 'netflow.dot1q_service_instance_tag',
+    type: 'short',
+  },
+  'netflow.dot1q_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.dot1q_vlan_id',
+    type: 'integer',
+  },
+  'netflow.dropped_layer2_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.dropped_layer2_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.dropped_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.dropped_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.dropped_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.dropped_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.dropped_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.dropped_octet_total_count',
+    type: 'long',
+  },
+  'netflow.dropped_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.dropped_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.dropped_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.dropped_packet_total_count',
+    type: 'long',
+  },
+  'netflow.dst_traffic_index': {
+    category: 'netflow',
+    name: 'netflow.dst_traffic_index',
+    type: 'long',
+  },
+  'netflow.egress_broadcast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.egress_broadcast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.egress_interface': {
+    category: 'netflow',
+    name: 'netflow.egress_interface',
+    type: 'long',
+  },
+  'netflow.egress_interface_type': {
+    category: 'netflow',
+    name: 'netflow.egress_interface_type',
+    type: 'long',
+  },
+  'netflow.egress_physical_interface': {
+    category: 'netflow',
+    name: 'netflow.egress_physical_interface',
+    type: 'long',
+  },
+  'netflow.egress_unicast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.egress_unicast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.egress_vrfid': {
+    category: 'netflow',
+    name: 'netflow.egress_vrfid',
+    type: 'long',
+  },
+  'netflow.encrypted_technology': {
+    category: 'netflow',
+    name: 'netflow.encrypted_technology',
+    type: 'keyword',
+  },
+  'netflow.engine_id': {
+    category: 'netflow',
+    name: 'netflow.engine_id',
+    type: 'short',
+  },
+  'netflow.engine_type': {
+    category: 'netflow',
+    name: 'netflow.engine_type',
+    type: 'short',
+  },
+  'netflow.ethernet_header_length': {
+    category: 'netflow',
+    name: 'netflow.ethernet_header_length',
+    type: 'short',
+  },
+  'netflow.ethernet_payload_length': {
+    category: 'netflow',
+    name: 'netflow.ethernet_payload_length',
+    type: 'integer',
+  },
+  'netflow.ethernet_total_length': {
+    category: 'netflow',
+    name: 'netflow.ethernet_total_length',
+    type: 'integer',
+  },
+  'netflow.ethernet_type': {
+    category: 'netflow',
+    name: 'netflow.ethernet_type',
+    type: 'integer',
+  },
+  'netflow.expired_fragment_count': {
+    category: 'netflow',
+    name: 'netflow.expired_fragment_count',
+    type: 'long',
+  },
+  'netflow.export_interface': {
+    category: 'netflow',
+    name: 'netflow.export_interface',
+    type: 'long',
+  },
+  'netflow.export_protocol_version': {
+    category: 'netflow',
+    name: 'netflow.export_protocol_version',
+    type: 'short',
+  },
+  'netflow.export_sctp_stream_id': {
+    category: 'netflow',
+    name: 'netflow.export_sctp_stream_id',
+    type: 'integer',
+  },
+  'netflow.export_transport_protocol': {
+    category: 'netflow',
+    name: 'netflow.export_transport_protocol',
+    type: 'short',
+  },
+  'netflow.exported_flow_record_total_count': {
+    category: 'netflow',
+    name: 'netflow.exported_flow_record_total_count',
+    type: 'long',
+  },
+  'netflow.exported_message_total_count': {
+    category: 'netflow',
+    name: 'netflow.exported_message_total_count',
+    type: 'long',
+  },
+  'netflow.exported_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.exported_octet_total_count',
+    type: 'long',
+  },
+  'netflow.exporter_certificate': {
+    category: 'netflow',
+    name: 'netflow.exporter_certificate',
+    type: 'short',
+  },
+  'netflow.exporter_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.exporter_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.exporter_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.exporter_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.exporter_transport_port': {
+    category: 'netflow',
+    name: 'netflow.exporter_transport_port',
+    type: 'integer',
+  },
+  'netflow.exporting_process_id': {
+    category: 'netflow',
+    name: 'netflow.exporting_process_id',
+    type: 'long',
+  },
+  'netflow.external_address_realm': {
+    category: 'netflow',
+    name: 'netflow.external_address_realm',
+    type: 'short',
+  },
+  'netflow.firewall_event': {
+    category: 'netflow',
+    name: 'netflow.firewall_event',
+    type: 'short',
+  },
+  'netflow.first_eight_non_empty_packet_directions': {
+    category: 'netflow',
+    name: 'netflow.first_eight_non_empty_packet_directions',
+    type: 'short',
+  },
+  'netflow.first_non_empty_packet_size': {
+    category: 'netflow',
+    name: 'netflow.first_non_empty_packet_size',
+    type: 'integer',
+  },
+  'netflow.first_packet_banner': {
+    category: 'netflow',
+    name: 'netflow.first_packet_banner',
+    type: 'keyword',
+  },
+  'netflow.flags_and_sampler_id': {
+    category: 'netflow',
+    name: 'netflow.flags_and_sampler_id',
+    type: 'long',
+  },
+  'netflow.flow_active_timeout': {
+    category: 'netflow',
+    name: 'netflow.flow_active_timeout',
+    type: 'integer',
+  },
+  'netflow.flow_attributes': {
+    category: 'netflow',
+    name: 'netflow.flow_attributes',
+    type: 'integer',
+  },
+  'netflow.flow_direction': {
+    category: 'netflow',
+    name: 'netflow.flow_direction',
+    type: 'short',
+  },
+  'netflow.flow_duration_microseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_duration_microseconds',
+    type: 'long',
+  },
+  'netflow.flow_duration_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_duration_milliseconds',
+    type: 'long',
+  },
+  'netflow.flow_end_delta_microseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_end_delta_microseconds',
+    type: 'long',
+  },
+  'netflow.flow_end_microseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_end_microseconds',
+    type: 'date',
+  },
+  'netflow.flow_end_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_end_milliseconds',
+    type: 'date',
+  },
+  'netflow.flow_end_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_end_nanoseconds',
+    type: 'date',
+  },
+  'netflow.flow_end_reason': {
+    category: 'netflow',
+    name: 'netflow.flow_end_reason',
+    type: 'short',
+  },
+  'netflow.flow_end_seconds': {
+    category: 'netflow',
+    name: 'netflow.flow_end_seconds',
+    type: 'date',
+  },
+  'netflow.flow_end_sys_up_time': {
+    category: 'netflow',
+    name: 'netflow.flow_end_sys_up_time',
+    type: 'long',
+  },
+  'netflow.flow_id': {
+    category: 'netflow',
+    name: 'netflow.flow_id',
+    type: 'long',
+  },
+  'netflow.flow_idle_timeout': {
+    category: 'netflow',
+    name: 'netflow.flow_idle_timeout',
+    type: 'integer',
+  },
+  'netflow.flow_key_indicator': {
+    category: 'netflow',
+    name: 'netflow.flow_key_indicator',
+    type: 'long',
+  },
+  'netflow.flow_label_ipv6': {
+    category: 'netflow',
+    name: 'netflow.flow_label_ipv6',
+    type: 'long',
+  },
+  'netflow.flow_sampling_time_interval': {
+    category: 'netflow',
+    name: 'netflow.flow_sampling_time_interval',
+    type: 'long',
+  },
+  'netflow.flow_sampling_time_spacing': {
+    category: 'netflow',
+    name: 'netflow.flow_sampling_time_spacing',
+    type: 'long',
+  },
+  'netflow.flow_selected_flow_delta_count': {
+    category: 'netflow',
+    name: 'netflow.flow_selected_flow_delta_count',
+    type: 'long',
+  },
+  'netflow.flow_selected_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.flow_selected_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.flow_selected_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.flow_selected_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.flow_selector_algorithm': {
+    category: 'netflow',
+    name: 'netflow.flow_selector_algorithm',
+    type: 'integer',
+  },
+  'netflow.flow_start_delta_microseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_start_delta_microseconds',
+    type: 'long',
+  },
+  'netflow.flow_start_microseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_start_microseconds',
+    type: 'date',
+  },
+  'netflow.flow_start_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_start_milliseconds',
+    type: 'date',
+  },
+  'netflow.flow_start_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.flow_start_nanoseconds',
+    type: 'date',
+  },
+  'netflow.flow_start_seconds': {
+    category: 'netflow',
+    name: 'netflow.flow_start_seconds',
+    type: 'date',
+  },
+  'netflow.flow_start_sys_up_time': {
+    category: 'netflow',
+    name: 'netflow.flow_start_sys_up_time',
+    type: 'long',
+  },
+  'netflow.flow_table_flush_event_count': {
+    category: 'netflow',
+    name: 'netflow.flow_table_flush_event_count',
+    type: 'long',
+  },
+  'netflow.flow_table_peak_count': {
+    category: 'netflow',
+    name: 'netflow.flow_table_peak_count',
+    type: 'long',
+  },
+  'netflow.forwarding_status': {
+    category: 'netflow',
+    name: 'netflow.forwarding_status',
+    type: 'short',
+  },
+  'netflow.fragment_flags': {
+    category: 'netflow',
+    name: 'netflow.fragment_flags',
+    type: 'short',
+  },
+  'netflow.fragment_identification': {
+    category: 'netflow',
+    name: 'netflow.fragment_identification',
+    type: 'long',
+  },
+  'netflow.fragment_offset': {
+    category: 'netflow',
+    name: 'netflow.fragment_offset',
+    type: 'integer',
+  },
+  'netflow.fw_blackout_secs': {
+    category: 'netflow',
+    name: 'netflow.fw_blackout_secs',
+    type: 'long',
+  },
+  'netflow.fw_configured_value': {
+    category: 'netflow',
+    name: 'netflow.fw_configured_value',
+    type: 'long',
+  },
+  'netflow.fw_cts_src_sgt': {
+    category: 'netflow',
+    name: 'netflow.fw_cts_src_sgt',
+    type: 'long',
+  },
+  'netflow.fw_event_level': {
+    category: 'netflow',
+    name: 'netflow.fw_event_level',
+    type: 'long',
+  },
+  'netflow.fw_event_level_id': {
+    category: 'netflow',
+    name: 'netflow.fw_event_level_id',
+    type: 'long',
+  },
+  'netflow.fw_ext_event': {
+    category: 'netflow',
+    name: 'netflow.fw_ext_event',
+    type: 'integer',
+  },
+  'netflow.fw_ext_event_alt': {
+    category: 'netflow',
+    name: 'netflow.fw_ext_event_alt',
+    type: 'long',
+  },
+  'netflow.fw_ext_event_desc': {
+    category: 'netflow',
+    name: 'netflow.fw_ext_event_desc',
+    type: 'keyword',
+  },
+  'netflow.fw_half_open_count': {
+    category: 'netflow',
+    name: 'netflow.fw_half_open_count',
+    type: 'long',
+  },
+  'netflow.fw_half_open_high': {
+    category: 'netflow',
+    name: 'netflow.fw_half_open_high',
+    type: 'long',
+  },
+  'netflow.fw_half_open_rate': {
+    category: 'netflow',
+    name: 'netflow.fw_half_open_rate',
+    type: 'long',
+  },
+  'netflow.fw_max_sessions': {
+    category: 'netflow',
+    name: 'netflow.fw_max_sessions',
+    type: 'long',
+  },
+  'netflow.fw_rule': {
+    category: 'netflow',
+    name: 'netflow.fw_rule',
+    type: 'keyword',
+  },
+  'netflow.fw_summary_pkt_count': {
+    category: 'netflow',
+    name: 'netflow.fw_summary_pkt_count',
+    type: 'long',
+  },
+  'netflow.fw_zone_pair_id': {
+    category: 'netflow',
+    name: 'netflow.fw_zone_pair_id',
+    type: 'long',
+  },
+  'netflow.fw_zone_pair_name': {
+    category: 'netflow',
+    name: 'netflow.fw_zone_pair_name',
+    type: 'long',
+  },
+  'netflow.global_address_mapping_high_threshold': {
+    category: 'netflow',
+    name: 'netflow.global_address_mapping_high_threshold',
+    type: 'long',
+  },
+  'netflow.gre_key': {
+    category: 'netflow',
+    name: 'netflow.gre_key',
+    type: 'long',
+  },
+  'netflow.hash_digest_output': {
+    category: 'netflow',
+    name: 'netflow.hash_digest_output',
+    type: 'boolean',
+  },
+  'netflow.hash_flow_domain': {
+    category: 'netflow',
+    name: 'netflow.hash_flow_domain',
+    type: 'integer',
+  },
+  'netflow.hash_initialiser_value': {
+    category: 'netflow',
+    name: 'netflow.hash_initialiser_value',
+    type: 'long',
+  },
+  'netflow.hash_ip_payload_offset': {
+    category: 'netflow',
+    name: 'netflow.hash_ip_payload_offset',
+    type: 'long',
+  },
+  'netflow.hash_ip_payload_size': {
+    category: 'netflow',
+    name: 'netflow.hash_ip_payload_size',
+    type: 'long',
+  },
+  'netflow.hash_output_range_max': {
+    category: 'netflow',
+    name: 'netflow.hash_output_range_max',
+    type: 'long',
+  },
+  'netflow.hash_output_range_min': {
+    category: 'netflow',
+    name: 'netflow.hash_output_range_min',
+    type: 'long',
+  },
+  'netflow.hash_selected_range_max': {
+    category: 'netflow',
+    name: 'netflow.hash_selected_range_max',
+    type: 'long',
+  },
+  'netflow.hash_selected_range_min': {
+    category: 'netflow',
+    name: 'netflow.hash_selected_range_min',
+    type: 'long',
+  },
+  'netflow.http_content_type': {
+    category: 'netflow',
+    name: 'netflow.http_content_type',
+    type: 'keyword',
+  },
+  'netflow.http_message_version': {
+    category: 'netflow',
+    name: 'netflow.http_message_version',
+    type: 'keyword',
+  },
+  'netflow.http_reason_phrase': {
+    category: 'netflow',
+    name: 'netflow.http_reason_phrase',
+    type: 'keyword',
+  },
+  'netflow.http_request_host': {
+    category: 'netflow',
+    name: 'netflow.http_request_host',
+    type: 'keyword',
+  },
+  'netflow.http_request_method': {
+    category: 'netflow',
+    name: 'netflow.http_request_method',
+    type: 'keyword',
+  },
+  'netflow.http_request_target': {
+    category: 'netflow',
+    name: 'netflow.http_request_target',
+    type: 'keyword',
+  },
+  'netflow.http_status_code': {
+    category: 'netflow',
+    name: 'netflow.http_status_code',
+    type: 'integer',
+  },
+  'netflow.http_user_agent': {
+    category: 'netflow',
+    name: 'netflow.http_user_agent',
+    type: 'keyword',
+  },
+  'netflow.icmp_code_ipv4': {
+    category: 'netflow',
+    name: 'netflow.icmp_code_ipv4',
+    type: 'short',
+  },
+  'netflow.icmp_code_ipv6': {
+    category: 'netflow',
+    name: 'netflow.icmp_code_ipv6',
+    type: 'short',
+  },
+  'netflow.icmp_type_code_ipv4': {
+    category: 'netflow',
+    name: 'netflow.icmp_type_code_ipv4',
+    type: 'integer',
+  },
+  'netflow.icmp_type_code_ipv6': {
+    category: 'netflow',
+    name: 'netflow.icmp_type_code_ipv6',
+    type: 'integer',
+  },
+  'netflow.icmp_type_ipv4': {
+    category: 'netflow',
+    name: 'netflow.icmp_type_ipv4',
+    type: 'short',
+  },
+  'netflow.icmp_type_ipv6': {
+    category: 'netflow',
+    name: 'netflow.icmp_type_ipv6',
+    type: 'short',
+  },
+  'netflow.igmp_type': {
+    category: 'netflow',
+    name: 'netflow.igmp_type',
+    type: 'short',
+  },
+  'netflow.ignored_data_record_total_count': {
+    category: 'netflow',
+    name: 'netflow.ignored_data_record_total_count',
+    type: 'long',
+  },
+  'netflow.ignored_layer2_frame_total_count': {
+    category: 'netflow',
+    name: 'netflow.ignored_layer2_frame_total_count',
+    type: 'long',
+  },
+  'netflow.ignored_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.ignored_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.ignored_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.ignored_octet_total_count',
+    type: 'long',
+  },
+  'netflow.ignored_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.ignored_packet_total_count',
+    type: 'long',
+  },
+  'netflow.information_element_data_type': {
+    category: 'netflow',
+    name: 'netflow.information_element_data_type',
+    type: 'short',
+  },
+  'netflow.information_element_description': {
+    category: 'netflow',
+    name: 'netflow.information_element_description',
+    type: 'keyword',
+  },
+  'netflow.information_element_id': {
+    category: 'netflow',
+    name: 'netflow.information_element_id',
+    type: 'integer',
+  },
+  'netflow.information_element_index': {
+    category: 'netflow',
+    name: 'netflow.information_element_index',
+    type: 'integer',
+  },
+  'netflow.information_element_name': {
+    category: 'netflow',
+    name: 'netflow.information_element_name',
+    type: 'keyword',
+  },
+  'netflow.information_element_range_begin': {
+    category: 'netflow',
+    name: 'netflow.information_element_range_begin',
+    type: 'long',
+  },
+  'netflow.information_element_range_end': {
+    category: 'netflow',
+    name: 'netflow.information_element_range_end',
+    type: 'long',
+  },
+  'netflow.information_element_semantics': {
+    category: 'netflow',
+    name: 'netflow.information_element_semantics',
+    type: 'short',
+  },
+  'netflow.information_element_units': {
+    category: 'netflow',
+    name: 'netflow.information_element_units',
+    type: 'integer',
+  },
+  'netflow.ingress_broadcast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.ingress_broadcast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.ingress_interface': {
+    category: 'netflow',
+    name: 'netflow.ingress_interface',
+    type: 'long',
+  },
+  'netflow.ingress_interface_type': {
+    category: 'netflow',
+    name: 'netflow.ingress_interface_type',
+    type: 'long',
+  },
+  'netflow.ingress_multicast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.ingress_multicast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.ingress_physical_interface': {
+    category: 'netflow',
+    name: 'netflow.ingress_physical_interface',
+    type: 'long',
+  },
+  'netflow.ingress_unicast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.ingress_unicast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.ingress_vrfid': {
+    category: 'netflow',
+    name: 'netflow.ingress_vrfid',
+    type: 'long',
+  },
+  'netflow.initial_tcp_flags': {
+    category: 'netflow',
+    name: 'netflow.initial_tcp_flags',
+    type: 'short',
+  },
+  'netflow.initiator_octets': {
+    category: 'netflow',
+    name: 'netflow.initiator_octets',
+    type: 'long',
+  },
+  'netflow.initiator_packets': {
+    category: 'netflow',
+    name: 'netflow.initiator_packets',
+    type: 'long',
+  },
+  'netflow.interface_description': {
+    category: 'netflow',
+    name: 'netflow.interface_description',
+    type: 'keyword',
+  },
+  'netflow.interface_name': {
+    category: 'netflow',
+    name: 'netflow.interface_name',
+    type: 'keyword',
+  },
+  'netflow.intermediate_process_id': {
+    category: 'netflow',
+    name: 'netflow.intermediate_process_id',
+    type: 'long',
+  },
+  'netflow.internal_address_realm': {
+    category: 'netflow',
+    name: 'netflow.internal_address_realm',
+    type: 'short',
+  },
+  'netflow.ip_class_of_service': {
+    category: 'netflow',
+    name: 'netflow.ip_class_of_service',
+    type: 'short',
+  },
+  'netflow.ip_diff_serv_code_point': {
+    category: 'netflow',
+    name: 'netflow.ip_diff_serv_code_point',
+    type: 'short',
+  },
+  'netflow.ip_header_length': {
+    category: 'netflow',
+    name: 'netflow.ip_header_length',
+    type: 'short',
+  },
+  'netflow.ip_header_packet_section': {
+    category: 'netflow',
+    name: 'netflow.ip_header_packet_section',
+    type: 'short',
+  },
+  'netflow.ip_next_hop_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.ip_next_hop_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.ip_next_hop_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.ip_next_hop_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.ip_payload_length': {
+    category: 'netflow',
+    name: 'netflow.ip_payload_length',
+    type: 'long',
+  },
+  'netflow.ip_payload_packet_section': {
+    category: 'netflow',
+    name: 'netflow.ip_payload_packet_section',
+    type: 'short',
+  },
+  'netflow.ip_precedence': {
+    category: 'netflow',
+    name: 'netflow.ip_precedence',
+    type: 'short',
+  },
+  'netflow.ip_sec_spi': {
+    category: 'netflow',
+    name: 'netflow.ip_sec_spi',
+    type: 'long',
+  },
+  'netflow.ip_total_length': {
+    category: 'netflow',
+    name: 'netflow.ip_total_length',
+    type: 'long',
+  },
+  'netflow.ip_ttl': {
+    category: 'netflow',
+    name: 'netflow.ip_ttl',
+    type: 'short',
+  },
+  'netflow.ip_version': {
+    category: 'netflow',
+    name: 'netflow.ip_version',
+    type: 'short',
+  },
+  'netflow.ipv4_ihl': {
+    category: 'netflow',
+    name: 'netflow.ipv4_ihl',
+    type: 'short',
+  },
+  'netflow.ipv4_options': {
+    category: 'netflow',
+    name: 'netflow.ipv4_options',
+    type: 'long',
+  },
+  'netflow.ipv4_router_sc': {
+    category: 'netflow',
+    name: 'netflow.ipv4_router_sc',
+    type: 'ip',
+  },
   'netflow.ipv6_extension_headers': {
     category: 'netflow',
     name: 'netflow.ipv6_extension_headers',
     type: 'long',
   },
-  'netflow.mpls_top_label_stack_section': {
+  'netflow.is_multicast': {
     category: 'netflow',
-    name: 'netflow.mpls_top_label_stack_section',
+    name: 'netflow.is_multicast',
+    type: 'short',
+  },
+  'netflow.ixia_browser_id': {
+    category: 'netflow',
+    name: 'netflow.ixia_browser_id',
+    type: 'short',
+  },
+  'netflow.ixia_browser_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_browser_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_device_id': {
+    category: 'netflow',
+    name: 'netflow.ixia_device_id',
+    type: 'short',
+  },
+  'netflow.ixia_device_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_device_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_dns_answer': {
+    category: 'netflow',
+    name: 'netflow.ixia_dns_answer',
+    type: 'keyword',
+  },
+  'netflow.ixia_dns_classes': {
+    category: 'netflow',
+    name: 'netflow.ixia_dns_classes',
+    type: 'keyword',
+  },
+  'netflow.ixia_dns_query': {
+    category: 'netflow',
+    name: 'netflow.ixia_dns_query',
+    type: 'keyword',
+  },
+  'netflow.ixia_dns_record_txt': {
+    category: 'netflow',
+    name: 'netflow.ixia_dns_record_txt',
+    type: 'keyword',
+  },
+  'netflow.ixia_dst_as_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_dst_as_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_dst_city_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_dst_city_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_dst_country_code': {
+    category: 'netflow',
+    name: 'netflow.ixia_dst_country_code',
+    type: 'keyword',
+  },
+  'netflow.ixia_dst_country_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_dst_country_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_dst_latitude': {
+    category: 'netflow',
+    name: 'netflow.ixia_dst_latitude',
+    type: 'float',
+  },
+  'netflow.ixia_dst_longitude': {
+    category: 'netflow',
+    name: 'netflow.ixia_dst_longitude',
+    type: 'float',
+  },
+  'netflow.ixia_dst_region_code': {
+    category: 'netflow',
+    name: 'netflow.ixia_dst_region_code',
+    type: 'keyword',
+  },
+  'netflow.ixia_dst_region_node': {
+    category: 'netflow',
+    name: 'netflow.ixia_dst_region_node',
+    type: 'keyword',
+  },
+  'netflow.ixia_encrypt_cipher': {
+    category: 'netflow',
+    name: 'netflow.ixia_encrypt_cipher',
+    type: 'keyword',
+  },
+  'netflow.ixia_encrypt_key_length': {
+    category: 'netflow',
+    name: 'netflow.ixia_encrypt_key_length',
+    type: 'integer',
+  },
+  'netflow.ixia_encrypt_type': {
+    category: 'netflow',
+    name: 'netflow.ixia_encrypt_type',
+    type: 'keyword',
+  },
+  'netflow.ixia_http_host_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_http_host_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_http_uri': {
+    category: 'netflow',
+    name: 'netflow.ixia_http_uri',
+    type: 'keyword',
+  },
+  'netflow.ixia_http_user_agent': {
+    category: 'netflow',
+    name: 'netflow.ixia_http_user_agent',
+    type: 'keyword',
+  },
+  'netflow.ixia_imsi_subscriber': {
+    category: 'netflow',
+    name: 'netflow.ixia_imsi_subscriber',
+    type: 'keyword',
+  },
+  'netflow.ixia_l7_app_id': {
+    category: 'netflow',
+    name: 'netflow.ixia_l7_app_id',
+    type: 'long',
+  },
+  'netflow.ixia_l7_app_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_l7_app_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_latency': {
+    category: 'netflow',
+    name: 'netflow.ixia_latency',
+    type: 'long',
+  },
+  'netflow.ixia_rev_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.ixia_rev_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.ixia_rev_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.ixia_rev_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.ixia_src_as_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_src_as_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_src_city_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_src_city_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_src_country_code': {
+    category: 'netflow',
+    name: 'netflow.ixia_src_country_code',
+    type: 'keyword',
+  },
+  'netflow.ixia_src_country_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_src_country_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_src_latitude': {
+    category: 'netflow',
+    name: 'netflow.ixia_src_latitude',
+    type: 'float',
+  },
+  'netflow.ixia_src_longitude': {
+    category: 'netflow',
+    name: 'netflow.ixia_src_longitude',
+    type: 'float',
+  },
+  'netflow.ixia_src_region_code': {
+    category: 'netflow',
+    name: 'netflow.ixia_src_region_code',
+    type: 'keyword',
+  },
+  'netflow.ixia_src_region_name': {
+    category: 'netflow',
+    name: 'netflow.ixia_src_region_name',
+    type: 'keyword',
+  },
+  'netflow.ixia_threat_ipv4': {
+    category: 'netflow',
+    name: 'netflow.ixia_threat_ipv4',
+    type: 'ip',
+  },
+  'netflow.ixia_threat_ipv6': {
+    category: 'netflow',
+    name: 'netflow.ixia_threat_ipv6',
+    type: 'ip',
+  },
+  'netflow.ixia_threat_type': {
+    category: 'netflow',
+    name: 'netflow.ixia_threat_type',
+    type: 'keyword',
+  },
+  'netflow.large_packet_count': {
+    category: 'netflow',
+    name: 'netflow.large_packet_count',
+    type: 'long',
+  },
+  'netflow.layer2_frame_delta_count': {
+    category: 'netflow',
+    name: 'netflow.layer2_frame_delta_count',
+    type: 'long',
+  },
+  'netflow.layer2_frame_total_count': {
+    category: 'netflow',
+    name: 'netflow.layer2_frame_total_count',
+    type: 'long',
+  },
+  'netflow.layer2_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.layer2_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.layer2_octet_delta_sum_of_squares': {
+    category: 'netflow',
+    name: 'netflow.layer2_octet_delta_sum_of_squares',
+    type: 'long',
+  },
+  'netflow.layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.layer2_octet_total_sum_of_squares': {
+    category: 'netflow',
+    name: 'netflow.layer2_octet_total_sum_of_squares',
+    type: 'long',
+  },
+  'netflow.layer2_segment_id': {
+    category: 'netflow',
+    name: 'netflow.layer2_segment_id',
+    type: 'long',
+  },
+  'netflow.layer2packet_section_data': {
+    category: 'netflow',
+    name: 'netflow.layer2packet_section_data',
+    type: 'short',
+  },
+  'netflow.layer2packet_section_offset': {
+    category: 'netflow',
+    name: 'netflow.layer2packet_section_offset',
+    type: 'integer',
+  },
+  'netflow.layer2packet_section_size': {
+    category: 'netflow',
+    name: 'netflow.layer2packet_section_size',
+    type: 'integer',
+  },
+  'netflow.line_card_id': {
+    category: 'netflow',
+    name: 'netflow.line_card_id',
+    type: 'long',
+  },
+  'netflow.log_op': {
+    category: 'netflow',
+    name: 'netflow.log_op',
+    type: 'short',
+  },
+  'netflow.lower_ci_limit': {
+    category: 'netflow',
+    name: 'netflow.lower_ci_limit',
+    type: 'double',
+  },
+  'netflow.mark': {
+    category: 'netflow',
+    name: 'netflow.mark',
+    type: 'long',
+  },
+  'netflow.max_bib_entries': {
+    category: 'netflow',
+    name: 'netflow.max_bib_entries',
+    type: 'long',
+  },
+  'netflow.max_entries_per_user': {
+    category: 'netflow',
+    name: 'netflow.max_entries_per_user',
+    type: 'long',
+  },
+  'netflow.max_export_seconds': {
+    category: 'netflow',
+    name: 'netflow.max_export_seconds',
+    type: 'date',
+  },
+  'netflow.max_flow_end_microseconds': {
+    category: 'netflow',
+    name: 'netflow.max_flow_end_microseconds',
+    type: 'date',
+  },
+  'netflow.max_flow_end_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.max_flow_end_milliseconds',
+    type: 'date',
+  },
+  'netflow.max_flow_end_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.max_flow_end_nanoseconds',
+    type: 'date',
+  },
+  'netflow.max_flow_end_seconds': {
+    category: 'netflow',
+    name: 'netflow.max_flow_end_seconds',
+    type: 'date',
+  },
+  'netflow.max_fragments_pending_reassembly': {
+    category: 'netflow',
+    name: 'netflow.max_fragments_pending_reassembly',
+    type: 'long',
+  },
+  'netflow.max_packet_size': {
+    category: 'netflow',
+    name: 'netflow.max_packet_size',
+    type: 'integer',
+  },
+  'netflow.max_session_entries': {
+    category: 'netflow',
+    name: 'netflow.max_session_entries',
+    type: 'long',
+  },
+  'netflow.max_subscribers': {
+    category: 'netflow',
+    name: 'netflow.max_subscribers',
+    type: 'long',
+  },
+  'netflow.maximum_ip_total_length': {
+    category: 'netflow',
+    name: 'netflow.maximum_ip_total_length',
+    type: 'long',
+  },
+  'netflow.maximum_layer2_total_length': {
+    category: 'netflow',
+    name: 'netflow.maximum_layer2_total_length',
+    type: 'long',
+  },
+  'netflow.maximum_ttl': {
+    category: 'netflow',
+    name: 'netflow.maximum_ttl',
+    type: 'short',
+  },
+  'netflow.mean_flow_rate': {
+    category: 'netflow',
+    name: 'netflow.mean_flow_rate',
+    type: 'long',
+  },
+  'netflow.mean_packet_rate': {
+    category: 'netflow',
+    name: 'netflow.mean_packet_rate',
+    type: 'long',
+  },
+  'netflow.message_md5_checksum': {
+    category: 'netflow',
+    name: 'netflow.message_md5_checksum',
+    type: 'short',
+  },
+  'netflow.message_scope': {
+    category: 'netflow',
+    name: 'netflow.message_scope',
+    type: 'short',
+  },
+  'netflow.metering_process_id': {
+    category: 'netflow',
+    name: 'netflow.metering_process_id',
+    type: 'long',
+  },
+  'netflow.metro_evc_id': {
+    category: 'netflow',
+    name: 'netflow.metro_evc_id',
+    type: 'keyword',
+  },
+  'netflow.metro_evc_type': {
+    category: 'netflow',
+    name: 'netflow.metro_evc_type',
+    type: 'short',
+  },
+  'netflow.mib_capture_time_semantics': {
+    category: 'netflow',
+    name: 'netflow.mib_capture_time_semantics',
+    type: 'short',
+  },
+  'netflow.mib_context_engine_id': {
+    category: 'netflow',
+    name: 'netflow.mib_context_engine_id',
+    type: 'short',
+  },
+  'netflow.mib_context_name': {
+    category: 'netflow',
+    name: 'netflow.mib_context_name',
+    type: 'keyword',
+  },
+  'netflow.mib_index_indicator': {
+    category: 'netflow',
+    name: 'netflow.mib_index_indicator',
+    type: 'long',
+  },
+  'netflow.mib_module_name': {
+    category: 'netflow',
+    name: 'netflow.mib_module_name',
+    type: 'keyword',
+  },
+  'netflow.mib_object_description': {
+    category: 'netflow',
+    name: 'netflow.mib_object_description',
+    type: 'keyword',
+  },
+  'netflow.mib_object_identifier': {
+    category: 'netflow',
+    name: 'netflow.mib_object_identifier',
+    type: 'short',
+  },
+  'netflow.mib_object_name': {
+    category: 'netflow',
+    name: 'netflow.mib_object_name',
+    type: 'keyword',
+  },
+  'netflow.mib_object_syntax': {
+    category: 'netflow',
+    name: 'netflow.mib_object_syntax',
+    type: 'keyword',
+  },
+  'netflow.mib_object_value_bits': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_bits',
+    type: 'short',
+  },
+  'netflow.mib_object_value_counter': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_counter',
+    type: 'long',
+  },
+  'netflow.mib_object_value_gauge': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_gauge',
+    type: 'long',
+  },
+  'netflow.mib_object_value_integer': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_integer',
+    type: 'integer',
+  },
+  'netflow.mib_object_value_ip_address': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_ip_address',
+    type: 'ip',
+  },
+  'netflow.mib_object_value_octet_string': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_octet_string',
+    type: 'short',
+  },
+  'netflow.mib_object_value_oid': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_oid',
+    type: 'short',
+  },
+  'netflow.mib_object_value_time_ticks': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_time_ticks',
+    type: 'long',
+  },
+  'netflow.mib_object_value_unsigned': {
+    category: 'netflow',
+    name: 'netflow.mib_object_value_unsigned',
+    type: 'long',
+  },
+  'netflow.mib_sub_identifier': {
+    category: 'netflow',
+    name: 'netflow.mib_sub_identifier',
+    type: 'long',
+  },
+  'netflow.min_export_seconds': {
+    category: 'netflow',
+    name: 'netflow.min_export_seconds',
+    type: 'date',
+  },
+  'netflow.min_flow_start_microseconds': {
+    category: 'netflow',
+    name: 'netflow.min_flow_start_microseconds',
+    type: 'date',
+  },
+  'netflow.min_flow_start_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.min_flow_start_milliseconds',
+    type: 'date',
+  },
+  'netflow.min_flow_start_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.min_flow_start_nanoseconds',
+    type: 'date',
+  },
+  'netflow.min_flow_start_seconds': {
+    category: 'netflow',
+    name: 'netflow.min_flow_start_seconds',
+    type: 'date',
+  },
+  'netflow.minimum_ip_total_length': {
+    category: 'netflow',
+    name: 'netflow.minimum_ip_total_length',
+    type: 'long',
+  },
+  'netflow.minimum_layer2_total_length': {
+    category: 'netflow',
+    name: 'netflow.minimum_layer2_total_length',
+    type: 'long',
+  },
+  'netflow.minimum_ttl': {
+    category: 'netflow',
+    name: 'netflow.minimum_ttl',
+    type: 'short',
+  },
+  'netflow.mobile_imsi': {
+    category: 'netflow',
+    name: 'netflow.mobile_imsi',
+    type: 'keyword',
+  },
+  'netflow.mobile_msisdn': {
+    category: 'netflow',
+    name: 'netflow.mobile_msisdn',
+    type: 'keyword',
+  },
+  'netflow.monitoring_interval_end_milli_seconds': {
+    category: 'netflow',
+    name: 'netflow.monitoring_interval_end_milli_seconds',
+    type: 'date',
+  },
+  'netflow.monitoring_interval_start_milli_seconds': {
+    category: 'netflow',
+    name: 'netflow.monitoring_interval_start_milli_seconds',
+    type: 'date',
+  },
+  'netflow.mpls_label_stack_depth': {
+    category: 'netflow',
+    name: 'netflow.mpls_label_stack_depth',
+    type: 'long',
+  },
+  'netflow.mpls_label_stack_length': {
+    category: 'netflow',
+    name: 'netflow.mpls_label_stack_length',
+    type: 'long',
+  },
+  'netflow.mpls_label_stack_section': {
+    category: 'netflow',
+    name: 'netflow.mpls_label_stack_section',
+    type: 'short',
+  },
+  'netflow.mpls_label_stack_section10': {
+    category: 'netflow',
+    name: 'netflow.mpls_label_stack_section10',
     type: 'short',
   },
   'netflow.mpls_label_stack_section2': {
@@ -29069,59 +40203,49 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.mpls_label_stack_section9',
     type: 'short',
   },
-  'netflow.mpls_label_stack_section10': {
+  'netflow.mpls_payload_length': {
     category: 'netflow',
-    name: 'netflow.mpls_label_stack_section10',
+    name: 'netflow.mpls_payload_length',
+    type: 'long',
+  },
+  'netflow.mpls_payload_packet_section': {
+    category: 'netflow',
+    name: 'netflow.mpls_payload_packet_section',
     type: 'short',
   },
-  'netflow.destination_mac_address': {
+  'netflow.mpls_top_label_exp': {
     category: 'netflow',
-    name: 'netflow.destination_mac_address',
-    type: 'keyword',
+    name: 'netflow.mpls_top_label_exp',
+    type: 'short',
   },
-  'netflow.post_source_mac_address': {
+  'netflow.mpls_top_label_ipv4_address': {
     category: 'netflow',
-    name: 'netflow.post_source_mac_address',
-    type: 'keyword',
+    name: 'netflow.mpls_top_label_ipv4_address',
+    type: 'ip',
   },
-  'netflow.interface_name': {
+  'netflow.mpls_top_label_ipv6_address': {
     category: 'netflow',
-    name: 'netflow.interface_name',
-    type: 'keyword',
+    name: 'netflow.mpls_top_label_ipv6_address',
+    type: 'ip',
   },
-  'netflow.interface_description': {
+  'netflow.mpls_top_label_prefix_length': {
     category: 'netflow',
-    name: 'netflow.interface_description',
-    type: 'keyword',
+    name: 'netflow.mpls_top_label_prefix_length',
+    type: 'short',
   },
-  'netflow.sampler_name': {
+  'netflow.mpls_top_label_stack_section': {
     category: 'netflow',
-    name: 'netflow.sampler_name',
-    type: 'keyword',
+    name: 'netflow.mpls_top_label_stack_section',
+    type: 'short',
   },
-  'netflow.octet_total_count': {
+  'netflow.mpls_top_label_ttl': {
     category: 'netflow',
-    name: 'netflow.octet_total_count',
-    type: 'long',
+    name: 'netflow.mpls_top_label_ttl',
+    type: 'short',
   },
-  'netflow.packet_total_count': {
+  'netflow.mpls_top_label_type': {
     category: 'netflow',
-    name: 'netflow.packet_total_count',
-    type: 'long',
-  },
-  'netflow.flags_and_sampler_id': {
-    category: 'netflow',
-    name: 'netflow.flags_and_sampler_id',
-    type: 'long',
-  },
-  'netflow.fragment_offset': {
-    category: 'netflow',
-    name: 'netflow.fragment_offset',
-    type: 'integer',
-  },
-  'netflow.forwarding_status': {
-    category: 'netflow',
-    name: 'netflow.forwarding_status',
+    name: 'netflow.mpls_top_label_type',
     type: 'short',
   },
   'netflow.mpls_vpn_route_distinguisher': {
@@ -29129,845 +40253,60 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.mpls_vpn_route_distinguisher',
     type: 'short',
   },
-  'netflow.mpls_top_label_prefix_length': {
+  'netflow.mptcp_address_id': {
     category: 'netflow',
-    name: 'netflow.mpls_top_label_prefix_length',
+    name: 'netflow.mptcp_address_id',
     type: 'short',
   },
-  'netflow.src_traffic_index': {
+  'netflow.mptcp_flags': {
     category: 'netflow',
-    name: 'netflow.src_traffic_index',
+    name: 'netflow.mptcp_flags',
+    type: 'short',
+  },
+  'netflow.mptcp_initial_data_sequence_number': {
+    category: 'netflow',
+    name: 'netflow.mptcp_initial_data_sequence_number',
     type: 'long',
   },
-  'netflow.dst_traffic_index': {
+  'netflow.mptcp_maximum_segment_size': {
     category: 'netflow',
-    name: 'netflow.dst_traffic_index',
+    name: 'netflow.mptcp_maximum_segment_size',
+    type: 'integer',
+  },
+  'netflow.mptcp_receiver_token': {
+    category: 'netflow',
+    name: 'netflow.mptcp_receiver_token',
     type: 'long',
-  },
-  'netflow.application_description': {
-    category: 'netflow',
-    name: 'netflow.application_description',
-    type: 'keyword',
-  },
-  'netflow.application_id': {
-    category: 'netflow',
-    name: 'netflow.application_id',
-    type: 'short',
-  },
-  'netflow.application_name': {
-    category: 'netflow',
-    name: 'netflow.application_name',
-    type: 'keyword',
-  },
-  'netflow.post_ip_diff_serv_code_point': {
-    category: 'netflow',
-    name: 'netflow.post_ip_diff_serv_code_point',
-    type: 'short',
   },
   'netflow.multicast_replication_factor': {
     category: 'netflow',
     name: 'netflow.multicast_replication_factor',
     type: 'long',
   },
-  'netflow.class_name': {
+  'netflow.nat_event': {
     category: 'netflow',
-    name: 'netflow.class_name',
-    type: 'keyword',
-  },
-  'netflow.classification_engine_id': {
-    category: 'netflow',
-    name: 'netflow.classification_engine_id',
+    name: 'netflow.nat_event',
     type: 'short',
   },
-  'netflow.layer2packet_section_offset': {
+  'netflow.nat_inside_svcid': {
     category: 'netflow',
-    name: 'netflow.layer2packet_section_offset',
+    name: 'netflow.nat_inside_svcid',
     type: 'integer',
   },
-  'netflow.layer2packet_section_size': {
+  'netflow.nat_instance_id': {
     category: 'netflow',
-    name: 'netflow.layer2packet_section_size',
-    type: 'integer',
-  },
-  'netflow.layer2packet_section_data': {
-    category: 'netflow',
-    name: 'netflow.layer2packet_section_data',
-    type: 'short',
-  },
-  'netflow.bgp_next_adjacent_as_number': {
-    category: 'netflow',
-    name: 'netflow.bgp_next_adjacent_as_number',
+    name: 'netflow.nat_instance_id',
     type: 'long',
-  },
-  'netflow.bgp_prev_adjacent_as_number': {
-    category: 'netflow',
-    name: 'netflow.bgp_prev_adjacent_as_number',
-    type: 'long',
-  },
-  'netflow.exporter_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.exporter_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.exporter_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.exporter_ipv6_address',
-    type: 'ip',
-  },
-  'netflow.dropped_octet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.dropped_octet_delta_count',
-    type: 'long',
-  },
-  'netflow.dropped_packet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.dropped_packet_delta_count',
-    type: 'long',
-  },
-  'netflow.dropped_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.dropped_octet_total_count',
-    type: 'long',
-  },
-  'netflow.dropped_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.dropped_packet_total_count',
-    type: 'long',
-  },
-  'netflow.flow_end_reason': {
-    category: 'netflow',
-    name: 'netflow.flow_end_reason',
-    type: 'short',
-  },
-  'netflow.common_properties_id': {
-    category: 'netflow',
-    name: 'netflow.common_properties_id',
-    type: 'long',
-  },
-  'netflow.observation_point_id': {
-    category: 'netflow',
-    name: 'netflow.observation_point_id',
-    type: 'long',
-  },
-  'netflow.icmp_type_code_ipv6': {
-    category: 'netflow',
-    name: 'netflow.icmp_type_code_ipv6',
-    type: 'integer',
-  },
-  'netflow.mpls_top_label_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.mpls_top_label_ipv6_address',
-    type: 'ip',
-  },
-  'netflow.line_card_id': {
-    category: 'netflow',
-    name: 'netflow.line_card_id',
-    type: 'long',
-  },
-  'netflow.port_id': {
-    category: 'netflow',
-    name: 'netflow.port_id',
-    type: 'long',
-  },
-  'netflow.metering_process_id': {
-    category: 'netflow',
-    name: 'netflow.metering_process_id',
-    type: 'long',
-  },
-  'netflow.exporting_process_id': {
-    category: 'netflow',
-    name: 'netflow.exporting_process_id',
-    type: 'long',
-  },
-  'netflow.template_id': {
-    category: 'netflow',
-    name: 'netflow.template_id',
-    type: 'integer',
-  },
-  'netflow.wlan_channel_id': {
-    category: 'netflow',
-    name: 'netflow.wlan_channel_id',
-    type: 'short',
-  },
-  'netflow.wlan_ssid': {
-    category: 'netflow',
-    name: 'netflow.wlan_ssid',
-    type: 'keyword',
-  },
-  'netflow.flow_id': {
-    category: 'netflow',
-    name: 'netflow.flow_id',
-    type: 'long',
-  },
-  'netflow.observation_domain_id': {
-    category: 'netflow',
-    name: 'netflow.observation_domain_id',
-    type: 'long',
-  },
-  'netflow.flow_start_seconds': {
-    category: 'netflow',
-    name: 'netflow.flow_start_seconds',
-    type: 'date',
-  },
-  'netflow.flow_end_seconds': {
-    category: 'netflow',
-    name: 'netflow.flow_end_seconds',
-    type: 'date',
-  },
-  'netflow.flow_start_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_start_milliseconds',
-    type: 'date',
-  },
-  'netflow.flow_end_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_end_milliseconds',
-    type: 'date',
-  },
-  'netflow.flow_start_microseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_start_microseconds',
-    type: 'date',
-  },
-  'netflow.flow_end_microseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_end_microseconds',
-    type: 'date',
-  },
-  'netflow.flow_start_nanoseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_start_nanoseconds',
-    type: 'date',
-  },
-  'netflow.flow_end_nanoseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_end_nanoseconds',
-    type: 'date',
-  },
-  'netflow.flow_start_delta_microseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_start_delta_microseconds',
-    type: 'long',
-  },
-  'netflow.flow_end_delta_microseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_end_delta_microseconds',
-    type: 'long',
-  },
-  'netflow.system_init_time_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.system_init_time_milliseconds',
-    type: 'date',
-  },
-  'netflow.flow_duration_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_duration_milliseconds',
-    type: 'long',
-  },
-  'netflow.flow_duration_microseconds': {
-    category: 'netflow',
-    name: 'netflow.flow_duration_microseconds',
-    type: 'long',
-  },
-  'netflow.observed_flow_total_count': {
-    category: 'netflow',
-    name: 'netflow.observed_flow_total_count',
-    type: 'long',
-  },
-  'netflow.ignored_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.ignored_packet_total_count',
-    type: 'long',
-  },
-  'netflow.ignored_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.ignored_octet_total_count',
-    type: 'long',
-  },
-  'netflow.not_sent_flow_total_count': {
-    category: 'netflow',
-    name: 'netflow.not_sent_flow_total_count',
-    type: 'long',
-  },
-  'netflow.not_sent_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.not_sent_packet_total_count',
-    type: 'long',
-  },
-  'netflow.not_sent_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.not_sent_octet_total_count',
-    type: 'long',
-  },
-  'netflow.destination_ipv6_prefix': {
-    category: 'netflow',
-    name: 'netflow.destination_ipv6_prefix',
-    type: 'ip',
-  },
-  'netflow.source_ipv6_prefix': {
-    category: 'netflow',
-    name: 'netflow.source_ipv6_prefix',
-    type: 'ip',
-  },
-  'netflow.post_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.post_octet_total_count',
-    type: 'long',
-  },
-  'netflow.post_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.post_packet_total_count',
-    type: 'long',
-  },
-  'netflow.flow_key_indicator': {
-    category: 'netflow',
-    name: 'netflow.flow_key_indicator',
-    type: 'long',
-  },
-  'netflow.post_mcast_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.post_mcast_packet_total_count',
-    type: 'long',
-  },
-  'netflow.post_mcast_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.post_mcast_octet_total_count',
-    type: 'long',
-  },
-  'netflow.icmp_type_ipv4': {
-    category: 'netflow',
-    name: 'netflow.icmp_type_ipv4',
-    type: 'short',
-  },
-  'netflow.icmp_code_ipv4': {
-    category: 'netflow',
-    name: 'netflow.icmp_code_ipv4',
-    type: 'short',
-  },
-  'netflow.icmp_type_ipv6': {
-    category: 'netflow',
-    name: 'netflow.icmp_type_ipv6',
-    type: 'short',
-  },
-  'netflow.icmp_code_ipv6': {
-    category: 'netflow',
-    name: 'netflow.icmp_code_ipv6',
-    type: 'short',
-  },
-  'netflow.udp_source_port': {
-    category: 'netflow',
-    name: 'netflow.udp_source_port',
-    type: 'integer',
-  },
-  'netflow.udp_destination_port': {
-    category: 'netflow',
-    name: 'netflow.udp_destination_port',
-    type: 'integer',
-  },
-  'netflow.tcp_source_port': {
-    category: 'netflow',
-    name: 'netflow.tcp_source_port',
-    type: 'integer',
-  },
-  'netflow.tcp_destination_port': {
-    category: 'netflow',
-    name: 'netflow.tcp_destination_port',
-    type: 'integer',
-  },
-  'netflow.tcp_sequence_number': {
-    category: 'netflow',
-    name: 'netflow.tcp_sequence_number',
-    type: 'long',
-  },
-  'netflow.tcp_acknowledgement_number': {
-    category: 'netflow',
-    name: 'netflow.tcp_acknowledgement_number',
-    type: 'long',
-  },
-  'netflow.tcp_window_size': {
-    category: 'netflow',
-    name: 'netflow.tcp_window_size',
-    type: 'integer',
-  },
-  'netflow.tcp_urgent_pointer': {
-    category: 'netflow',
-    name: 'netflow.tcp_urgent_pointer',
-    type: 'integer',
-  },
-  'netflow.tcp_header_length': {
-    category: 'netflow',
-    name: 'netflow.tcp_header_length',
-    type: 'short',
-  },
-  'netflow.ip_header_length': {
-    category: 'netflow',
-    name: 'netflow.ip_header_length',
-    type: 'short',
-  },
-  'netflow.total_length_ipv4': {
-    category: 'netflow',
-    name: 'netflow.total_length_ipv4',
-    type: 'integer',
-  },
-  'netflow.payload_length_ipv6': {
-    category: 'netflow',
-    name: 'netflow.payload_length_ipv6',
-    type: 'integer',
-  },
-  'netflow.ip_ttl': {
-    category: 'netflow',
-    name: 'netflow.ip_ttl',
-    type: 'short',
-  },
-  'netflow.next_header_ipv6': {
-    category: 'netflow',
-    name: 'netflow.next_header_ipv6',
-    type: 'short',
-  },
-  'netflow.mpls_payload_length': {
-    category: 'netflow',
-    name: 'netflow.mpls_payload_length',
-    type: 'long',
-  },
-  'netflow.ip_diff_serv_code_point': {
-    category: 'netflow',
-    name: 'netflow.ip_diff_serv_code_point',
-    type: 'short',
-  },
-  'netflow.ip_precedence': {
-    category: 'netflow',
-    name: 'netflow.ip_precedence',
-    type: 'short',
-  },
-  'netflow.fragment_flags': {
-    category: 'netflow',
-    name: 'netflow.fragment_flags',
-    type: 'short',
-  },
-  'netflow.octet_delta_sum_of_squares': {
-    category: 'netflow',
-    name: 'netflow.octet_delta_sum_of_squares',
-    type: 'long',
-  },
-  'netflow.octet_total_sum_of_squares': {
-    category: 'netflow',
-    name: 'netflow.octet_total_sum_of_squares',
-    type: 'long',
-  },
-  'netflow.mpls_top_label_ttl': {
-    category: 'netflow',
-    name: 'netflow.mpls_top_label_ttl',
-    type: 'short',
-  },
-  'netflow.mpls_label_stack_length': {
-    category: 'netflow',
-    name: 'netflow.mpls_label_stack_length',
-    type: 'long',
-  },
-  'netflow.mpls_label_stack_depth': {
-    category: 'netflow',
-    name: 'netflow.mpls_label_stack_depth',
-    type: 'long',
-  },
-  'netflow.mpls_top_label_exp': {
-    category: 'netflow',
-    name: 'netflow.mpls_top_label_exp',
-    type: 'short',
-  },
-  'netflow.ip_payload_length': {
-    category: 'netflow',
-    name: 'netflow.ip_payload_length',
-    type: 'long',
-  },
-  'netflow.udp_message_length': {
-    category: 'netflow',
-    name: 'netflow.udp_message_length',
-    type: 'integer',
-  },
-  'netflow.is_multicast': {
-    category: 'netflow',
-    name: 'netflow.is_multicast',
-    type: 'short',
-  },
-  'netflow.ipv4_ihl': {
-    category: 'netflow',
-    name: 'netflow.ipv4_ihl',
-    type: 'short',
-  },
-  'netflow.ipv4_options': {
-    category: 'netflow',
-    name: 'netflow.ipv4_options',
-    type: 'long',
-  },
-  'netflow.tcp_options': {
-    category: 'netflow',
-    name: 'netflow.tcp_options',
-    type: 'long',
-  },
-  'netflow.padding_octets': {
-    category: 'netflow',
-    name: 'netflow.padding_octets',
-    type: 'short',
-  },
-  'netflow.collector_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.collector_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.collector_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.collector_ipv6_address',
-    type: 'ip',
-  },
-  'netflow.export_interface': {
-    category: 'netflow',
-    name: 'netflow.export_interface',
-    type: 'long',
-  },
-  'netflow.export_protocol_version': {
-    category: 'netflow',
-    name: 'netflow.export_protocol_version',
-    type: 'short',
-  },
-  'netflow.export_transport_protocol': {
-    category: 'netflow',
-    name: 'netflow.export_transport_protocol',
-    type: 'short',
-  },
-  'netflow.collector_transport_port': {
-    category: 'netflow',
-    name: 'netflow.collector_transport_port',
-    type: 'integer',
-  },
-  'netflow.exporter_transport_port': {
-    category: 'netflow',
-    name: 'netflow.exporter_transport_port',
-    type: 'integer',
-  },
-  'netflow.tcp_syn_total_count': {
-    category: 'netflow',
-    name: 'netflow.tcp_syn_total_count',
-    type: 'long',
-  },
-  'netflow.tcp_fin_total_count': {
-    category: 'netflow',
-    name: 'netflow.tcp_fin_total_count',
-    type: 'long',
-  },
-  'netflow.tcp_rst_total_count': {
-    category: 'netflow',
-    name: 'netflow.tcp_rst_total_count',
-    type: 'long',
-  },
-  'netflow.tcp_psh_total_count': {
-    category: 'netflow',
-    name: 'netflow.tcp_psh_total_count',
-    type: 'long',
-  },
-  'netflow.tcp_ack_total_count': {
-    category: 'netflow',
-    name: 'netflow.tcp_ack_total_count',
-    type: 'long',
-  },
-  'netflow.tcp_urg_total_count': {
-    category: 'netflow',
-    name: 'netflow.tcp_urg_total_count',
-    type: 'long',
-  },
-  'netflow.ip_total_length': {
-    category: 'netflow',
-    name: 'netflow.ip_total_length',
-    type: 'long',
-  },
-  'netflow.post_nat_source_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.post_nat_source_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.post_nat_destination_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.post_nat_destination_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.post_napt_source_transport_port': {
-    category: 'netflow',
-    name: 'netflow.post_napt_source_transport_port',
-    type: 'integer',
-  },
-  'netflow.post_napt_destination_transport_port': {
-    category: 'netflow',
-    name: 'netflow.post_napt_destination_transport_port',
-    type: 'integer',
   },
   'netflow.nat_originating_address_realm': {
     category: 'netflow',
     name: 'netflow.nat_originating_address_realm',
     type: 'short',
   },
-  'netflow.nat_event': {
+  'netflow.nat_outside_svcid': {
     category: 'netflow',
-    name: 'netflow.nat_event',
-    type: 'short',
-  },
-  'netflow.initiator_octets': {
-    category: 'netflow',
-    name: 'netflow.initiator_octets',
-    type: 'long',
-  },
-  'netflow.responder_octets': {
-    category: 'netflow',
-    name: 'netflow.responder_octets',
-    type: 'long',
-  },
-  'netflow.firewall_event': {
-    category: 'netflow',
-    name: 'netflow.firewall_event',
-    type: 'short',
-  },
-  'netflow.ingress_vrfid': {
-    category: 'netflow',
-    name: 'netflow.ingress_vrfid',
-    type: 'long',
-  },
-  'netflow.egress_vrfid': {
-    category: 'netflow',
-    name: 'netflow.egress_vrfid',
-    type: 'long',
-  },
-  'netflow.vr_fname': {
-    category: 'netflow',
-    name: 'netflow.vr_fname',
-    type: 'keyword',
-  },
-  'netflow.post_mpls_top_label_exp': {
-    category: 'netflow',
-    name: 'netflow.post_mpls_top_label_exp',
-    type: 'short',
-  },
-  'netflow.tcp_window_scale': {
-    category: 'netflow',
-    name: 'netflow.tcp_window_scale',
+    name: 'netflow.nat_outside_svcid',
     type: 'integer',
-  },
-  'netflow.biflow_direction': {
-    category: 'netflow',
-    name: 'netflow.biflow_direction',
-    type: 'short',
-  },
-  'netflow.ethernet_header_length': {
-    category: 'netflow',
-    name: 'netflow.ethernet_header_length',
-    type: 'short',
-  },
-  'netflow.ethernet_payload_length': {
-    category: 'netflow',
-    name: 'netflow.ethernet_payload_length',
-    type: 'integer',
-  },
-  'netflow.ethernet_total_length': {
-    category: 'netflow',
-    name: 'netflow.ethernet_total_length',
-    type: 'integer',
-  },
-  'netflow.dot1q_vlan_id': {
-    category: 'netflow',
-    name: 'netflow.dot1q_vlan_id',
-    type: 'integer',
-  },
-  'netflow.dot1q_priority': {
-    category: 'netflow',
-    name: 'netflow.dot1q_priority',
-    type: 'short',
-  },
-  'netflow.dot1q_customer_vlan_id': {
-    category: 'netflow',
-    name: 'netflow.dot1q_customer_vlan_id',
-    type: 'integer',
-  },
-  'netflow.dot1q_customer_priority': {
-    category: 'netflow',
-    name: 'netflow.dot1q_customer_priority',
-    type: 'short',
-  },
-  'netflow.metro_evc_id': {
-    category: 'netflow',
-    name: 'netflow.metro_evc_id',
-    type: 'keyword',
-  },
-  'netflow.metro_evc_type': {
-    category: 'netflow',
-    name: 'netflow.metro_evc_type',
-    type: 'short',
-  },
-  'netflow.pseudo_wire_id': {
-    category: 'netflow',
-    name: 'netflow.pseudo_wire_id',
-    type: 'long',
-  },
-  'netflow.pseudo_wire_type': {
-    category: 'netflow',
-    name: 'netflow.pseudo_wire_type',
-    type: 'integer',
-  },
-  'netflow.pseudo_wire_control_word': {
-    category: 'netflow',
-    name: 'netflow.pseudo_wire_control_word',
-    type: 'long',
-  },
-  'netflow.ingress_physical_interface': {
-    category: 'netflow',
-    name: 'netflow.ingress_physical_interface',
-    type: 'long',
-  },
-  'netflow.egress_physical_interface': {
-    category: 'netflow',
-    name: 'netflow.egress_physical_interface',
-    type: 'long',
-  },
-  'netflow.post_dot1q_vlan_id': {
-    category: 'netflow',
-    name: 'netflow.post_dot1q_vlan_id',
-    type: 'integer',
-  },
-  'netflow.post_dot1q_customer_vlan_id': {
-    category: 'netflow',
-    name: 'netflow.post_dot1q_customer_vlan_id',
-    type: 'integer',
-  },
-  'netflow.ethernet_type': {
-    category: 'netflow',
-    name: 'netflow.ethernet_type',
-    type: 'integer',
-  },
-  'netflow.post_ip_precedence': {
-    category: 'netflow',
-    name: 'netflow.post_ip_precedence',
-    type: 'short',
-  },
-  'netflow.collection_time_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.collection_time_milliseconds',
-    type: 'date',
-  },
-  'netflow.export_sctp_stream_id': {
-    category: 'netflow',
-    name: 'netflow.export_sctp_stream_id',
-    type: 'integer',
-  },
-  'netflow.max_export_seconds': {
-    category: 'netflow',
-    name: 'netflow.max_export_seconds',
-    type: 'date',
-  },
-  'netflow.max_flow_end_seconds': {
-    category: 'netflow',
-    name: 'netflow.max_flow_end_seconds',
-    type: 'date',
-  },
-  'netflow.message_md5_checksum': {
-    category: 'netflow',
-    name: 'netflow.message_md5_checksum',
-    type: 'short',
-  },
-  'netflow.message_scope': {
-    category: 'netflow',
-    name: 'netflow.message_scope',
-    type: 'short',
-  },
-  'netflow.min_export_seconds': {
-    category: 'netflow',
-    name: 'netflow.min_export_seconds',
-    type: 'date',
-  },
-  'netflow.min_flow_start_seconds': {
-    category: 'netflow',
-    name: 'netflow.min_flow_start_seconds',
-    type: 'date',
-  },
-  'netflow.opaque_octets': {
-    category: 'netflow',
-    name: 'netflow.opaque_octets',
-    type: 'short',
-  },
-  'netflow.session_scope': {
-    category: 'netflow',
-    name: 'netflow.session_scope',
-    type: 'short',
-  },
-  'netflow.max_flow_end_microseconds': {
-    category: 'netflow',
-    name: 'netflow.max_flow_end_microseconds',
-    type: 'date',
-  },
-  'netflow.max_flow_end_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.max_flow_end_milliseconds',
-    type: 'date',
-  },
-  'netflow.max_flow_end_nanoseconds': {
-    category: 'netflow',
-    name: 'netflow.max_flow_end_nanoseconds',
-    type: 'date',
-  },
-  'netflow.min_flow_start_microseconds': {
-    category: 'netflow',
-    name: 'netflow.min_flow_start_microseconds',
-    type: 'date',
-  },
-  'netflow.min_flow_start_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.min_flow_start_milliseconds',
-    type: 'date',
-  },
-  'netflow.min_flow_start_nanoseconds': {
-    category: 'netflow',
-    name: 'netflow.min_flow_start_nanoseconds',
-    type: 'date',
-  },
-  'netflow.collector_certificate': {
-    category: 'netflow',
-    name: 'netflow.collector_certificate',
-    type: 'short',
-  },
-  'netflow.exporter_certificate': {
-    category: 'netflow',
-    name: 'netflow.exporter_certificate',
-    type: 'short',
-  },
-  'netflow.data_records_reliability': {
-    category: 'netflow',
-    name: 'netflow.data_records_reliability',
-    type: 'boolean',
-  },
-  'netflow.observation_point_type': {
-    category: 'netflow',
-    name: 'netflow.observation_point_type',
-    type: 'short',
-  },
-  'netflow.new_connection_delta_count': {
-    category: 'netflow',
-    name: 'netflow.new_connection_delta_count',
-    type: 'long',
-  },
-  'netflow.connection_sum_duration_seconds': {
-    category: 'netflow',
-    name: 'netflow.connection_sum_duration_seconds',
-    type: 'long',
-  },
-  'netflow.connection_transaction_id': {
-    category: 'netflow',
-    name: 'netflow.connection_transaction_id',
-    type: 'long',
-  },
-  'netflow.post_nat_source_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.post_nat_source_ipv6_address',
-    type: 'ip',
-  },
-  'netflow.post_nat_destination_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.post_nat_destination_ipv6_address',
-    type: 'ip',
   },
   'netflow.nat_pool_id': {
     category: 'netflow',
@@ -29979,49 +40318,19 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.nat_pool_name',
     type: 'keyword',
   },
-  'netflow.anonymization_flags': {
+  'netflow.nat_quota_exceeded_event': {
     category: 'netflow',
-    name: 'netflow.anonymization_flags',
-    type: 'integer',
-  },
-  'netflow.anonymization_technique': {
-    category: 'netflow',
-    name: 'netflow.anonymization_technique',
-    type: 'integer',
-  },
-  'netflow.information_element_index': {
-    category: 'netflow',
-    name: 'netflow.information_element_index',
-    type: 'integer',
-  },
-  'netflow.p2p_technology': {
-    category: 'netflow',
-    name: 'netflow.p2p_technology',
-    type: 'keyword',
-  },
-  'netflow.tunnel_technology': {
-    category: 'netflow',
-    name: 'netflow.tunnel_technology',
-    type: 'keyword',
-  },
-  'netflow.encrypted_technology': {
-    category: 'netflow',
-    name: 'netflow.encrypted_technology',
-    type: 'keyword',
-  },
-  'netflow.bgp_validity_state': {
-    category: 'netflow',
-    name: 'netflow.bgp_validity_state',
-    type: 'short',
-  },
-  'netflow.ip_sec_spi': {
-    category: 'netflow',
-    name: 'netflow.ip_sec_spi',
+    name: 'netflow.nat_quota_exceeded_event',
     type: 'long',
   },
-  'netflow.gre_key': {
+  'netflow.nat_sub_string': {
     category: 'netflow',
-    name: 'netflow.gre_key',
+    name: 'netflow.nat_sub_string',
+    type: 'keyword',
+  },
+  'netflow.nat_threshold_event': {
+    category: 'netflow',
+    name: 'netflow.nat_threshold_event',
     type: 'long',
   },
   'netflow.nat_type': {
@@ -30029,14 +40338,1149 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.nat_type',
     type: 'short',
   },
-  'netflow.initiator_packets': {
+  'netflow.netscale_ica_client_version': {
     category: 'netflow',
-    name: 'netflow.initiator_packets',
+    name: 'netflow.netscale_ica_client_version',
+    type: 'keyword',
+  },
+  'netflow.netscaler_aaa_username': {
+    category: 'netflow',
+    name: 'netflow.netscaler_aaa_username',
+    type: 'keyword',
+  },
+  'netflow.netscaler_app_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_app_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_app_name_app_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_app_name_app_id',
     type: 'long',
   },
-  'netflow.responder_packets': {
+  'netflow.netscaler_app_name_incarnation_number': {
     category: 'netflow',
-    name: 'netflow.responder_packets',
+    name: 'netflow.netscaler_app_name_incarnation_number',
+    type: 'long',
+  },
+  'netflow.netscaler_app_template_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_app_template_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_app_unit_name_app_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_app_unit_name_app_id',
+    type: 'long',
+  },
+  'netflow.netscaler_application_startup_duration': {
+    category: 'netflow',
+    name: 'netflow.netscaler_application_startup_duration',
+    type: 'long',
+  },
+  'netflow.netscaler_application_startup_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_application_startup_time',
+    type: 'long',
+  },
+  'netflow.netscaler_cache_redir_client_connection_core_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_cache_redir_client_connection_core_id',
+    type: 'long',
+  },
+  'netflow.netscaler_cache_redir_client_connection_transaction_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_cache_redir_client_connection_transaction_id',
+    type: 'long',
+  },
+  'netflow.netscaler_client_rtt': {
+    category: 'netflow',
+    name: 'netflow.netscaler_client_rtt',
+    type: 'long',
+  },
+  'netflow.netscaler_connection_chain_hop_count': {
+    category: 'netflow',
+    name: 'netflow.netscaler_connection_chain_hop_count',
+    type: 'long',
+  },
+  'netflow.netscaler_connection_chain_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_connection_chain_id',
+    type: 'short',
+  },
+  'netflow.netscaler_connection_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_connection_id',
+    type: 'long',
+  },
+  'netflow.netscaler_current_license_consumed': {
+    category: 'netflow',
+    name: 'netflow.netscaler_current_license_consumed',
+    type: 'long',
+  },
+  'netflow.netscaler_db_clt_host_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_clt_host_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_db_database_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_database_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_db_login_flags': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_login_flags',
+    type: 'long',
+  },
+  'netflow.netscaler_db_protocol_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_protocol_name',
+    type: 'short',
+  },
+  'netflow.netscaler_db_req_string': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_req_string',
+    type: 'keyword',
+  },
+  'netflow.netscaler_db_req_type': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_req_type',
+    type: 'short',
+  },
+  'netflow.netscaler_db_resp_length': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_resp_length',
+    type: 'long',
+  },
+  'netflow.netscaler_db_resp_status': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_resp_status',
+    type: 'long',
+  },
+  'netflow.netscaler_db_resp_status_string': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_resp_status_string',
+    type: 'keyword',
+  },
+  'netflow.netscaler_db_user_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_db_user_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_flow_flags': {
+    category: 'netflow',
+    name: 'netflow.netscaler_flow_flags',
+    type: 'long',
+  },
+  'netflow.netscaler_http_client_interaction_end_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_client_interaction_end_time',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_client_interaction_start_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_client_interaction_start_time',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_client_render_end_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_client_render_end_time',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_client_render_start_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_client_render_start_time',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_content_type': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_content_type',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_domain_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_domain_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_authorization': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_authorization',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_cookie': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_cookie',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_forw_fb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_forw_fb',
+    type: 'long',
+  },
+  'netflow.netscaler_http_req_forw_lb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_forw_lb',
+    type: 'long',
+  },
+  'netflow.netscaler_http_req_host': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_host',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_method': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_method',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_rcv_fb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_rcv_fb',
+    type: 'long',
+  },
+  'netflow.netscaler_http_req_rcv_lb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_rcv_lb',
+    type: 'long',
+  },
+  'netflow.netscaler_http_req_referer': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_referer',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_url': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_url',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_user_agent': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_user_agent',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_via': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_via',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_req_xforwarded_for': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_req_xforwarded_for',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_res_forw_fb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_res_forw_fb',
+    type: 'long',
+  },
+  'netflow.netscaler_http_res_forw_lb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_res_forw_lb',
+    type: 'long',
+  },
+  'netflow.netscaler_http_res_location': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_res_location',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_res_rcv_fb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_res_rcv_fb',
+    type: 'long',
+  },
+  'netflow.netscaler_http_res_rcv_lb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_res_rcv_lb',
+    type: 'long',
+  },
+  'netflow.netscaler_http_res_set_cookie': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_res_set_cookie',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_res_set_cookie2': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_res_set_cookie2',
+    type: 'keyword',
+  },
+  'netflow.netscaler_http_rsp_len': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_rsp_len',
+    type: 'long',
+  },
+  'netflow.netscaler_http_rsp_status': {
+    category: 'netflow',
+    name: 'netflow.netscaler_http_rsp_status',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_app_module_path': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_app_module_path',
+    type: 'keyword',
+  },
+  'netflow.netscaler_ica_app_process_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_app_process_id',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_application_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_application_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_ica_application_termination_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_application_termination_time',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_application_termination_type': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_application_termination_type',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_channel_id1': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id1',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id1_bytes': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id1_bytes',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id2': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id2',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id2_bytes': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id2_bytes',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id3': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id3',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id3_bytes': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id3_bytes',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id4': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id4',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id4_bytes': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id4_bytes',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id5': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id5',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_channel_id5_bytes': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_channel_id5_bytes',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_client_host_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_client_host_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_ica_client_ip': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_client_ip',
+    type: 'ip',
+  },
+  'netflow.netscaler_ica_client_launcher': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_client_launcher',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_client_side_rto_count': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_client_side_rto_count',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_client_side_window_size': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_client_side_window_size',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_client_type': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_client_type',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_clientside_delay': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_clientside_delay',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_clientside_jitter': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_clientside_jitter',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_clientside_packets_retransmit': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_clientside_packets_retransmit',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_clientside_rtt': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_clientside_rtt',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_clientside_rx_bytes': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_clientside_rx_bytes',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_clientside_srtt': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_clientside_srtt',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_clientside_tx_bytes': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_clientside_tx_bytes',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_connection_priority': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_connection_priority',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_device_serial_no': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_device_serial_no',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_domain_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_domain_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_ica_flags': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_flags',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_host_delay': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_host_delay',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_l7_client_latency': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_l7_client_latency',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_l7_server_latency': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_l7_server_latency',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_launch_mechanism': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_launch_mechanism',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_network_update_end_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_network_update_end_time',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_network_update_start_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_network_update_start_time',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_rtt': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_rtt',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_server_name': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_server_name',
+    type: 'keyword',
+  },
+  'netflow.netscaler_ica_server_side_rto_count': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_server_side_rto_count',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_server_side_window_size': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_server_side_window_size',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_serverside_delay': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_serverside_delay',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_serverside_jitter': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_serverside_jitter',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_serverside_packets_retransmit': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_serverside_packets_retransmit',
+    type: 'integer',
+  },
+  'netflow.netscaler_ica_serverside_rtt': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_serverside_rtt',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_serverside_srtt': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_serverside_srtt',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_session_end_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_session_end_time',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_session_guid': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_session_guid',
+    type: 'short',
+  },
+  'netflow.netscaler_ica_session_reconnects': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_session_reconnects',
+    type: 'short',
+  },
+  'netflow.netscaler_ica_session_setup_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_session_setup_time',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_session_update_begin_sec': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_session_update_begin_sec',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_session_update_end_sec': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_session_update_end_sec',
+    type: 'long',
+  },
+  'netflow.netscaler_ica_username': {
+    category: 'netflow',
+    name: 'netflow.netscaler_ica_username',
+    type: 'keyword',
+  },
+  'netflow.netscaler_license_type': {
+    category: 'netflow',
+    name: 'netflow.netscaler_license_type',
+    type: 'short',
+  },
+  'netflow.netscaler_main_page_core_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_main_page_core_id',
+    type: 'long',
+  },
+  'netflow.netscaler_main_page_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_main_page_id',
+    type: 'long',
+  },
+  'netflow.netscaler_max_license_count': {
+    category: 'netflow',
+    name: 'netflow.netscaler_max_license_count',
+    type: 'long',
+  },
+  'netflow.netscaler_msi_client_cookie': {
+    category: 'netflow',
+    name: 'netflow.netscaler_msi_client_cookie',
+    type: 'short',
+  },
+  'netflow.netscaler_round_trip_time': {
+    category: 'netflow',
+    name: 'netflow.netscaler_round_trip_time',
+    type: 'long',
+  },
+  'netflow.netscaler_server_ttfb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_server_ttfb',
+    type: 'long',
+  },
+  'netflow.netscaler_server_ttlb': {
+    category: 'netflow',
+    name: 'netflow.netscaler_server_ttlb',
+    type: 'long',
+  },
+  'netflow.netscaler_syslog_message': {
+    category: 'netflow',
+    name: 'netflow.netscaler_syslog_message',
+    type: 'keyword',
+  },
+  'netflow.netscaler_syslog_priority': {
+    category: 'netflow',
+    name: 'netflow.netscaler_syslog_priority',
+    type: 'short',
+  },
+  'netflow.netscaler_syslog_timestamp': {
+    category: 'netflow',
+    name: 'netflow.netscaler_syslog_timestamp',
+    type: 'long',
+  },
+  'netflow.netscaler_transaction_id': {
+    category: 'netflow',
+    name: 'netflow.netscaler_transaction_id',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown270': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown270',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown271': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown271',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown272': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown272',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown273': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown273',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown274': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown274',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown275': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown275',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown276': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown276',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown277': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown277',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown278': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown278',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown279': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown279',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown280': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown280',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown281': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown281',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown282': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown282',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown283': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown283',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown284': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown284',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown285': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown285',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown286': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown286',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown287': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown287',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown288': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown288',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown289': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown289',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown290': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown290',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown291': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown291',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown292': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown292',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown293': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown293',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown294': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown294',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown295': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown295',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown296': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown296',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown297': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown297',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown298': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown298',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown299': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown299',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown300': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown300',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown301': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown301',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown302': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown302',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown303': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown303',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown304': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown304',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown305': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown305',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown306': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown306',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown307': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown307',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown308': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown308',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown309': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown309',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown310': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown310',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown311': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown311',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown312': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown312',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown313': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown313',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown314': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown314',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown315': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown315',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown316': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown316',
+    type: 'keyword',
+  },
+  'netflow.netscaler_unknown317': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown317',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown318': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown318',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown319': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown319',
+    type: 'keyword',
+  },
+  'netflow.netscaler_unknown320': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown320',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown321': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown321',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown322': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown322',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown323': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown323',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown324': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown324',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown325': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown325',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown326': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown326',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown327': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown327',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown328': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown328',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown329': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown329',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown330': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown330',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown331': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown331',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown332': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown332',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown333': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown333',
+    type: 'keyword',
+  },
+  'netflow.netscaler_unknown334': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown334',
+    type: 'keyword',
+  },
+  'netflow.netscaler_unknown335': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown335',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown336': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown336',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown337': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown337',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown338': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown338',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown339': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown339',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown340': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown340',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown341': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown341',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown342': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown342',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown343': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown343',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown344': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown344',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown345': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown345',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown346': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown346',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown347': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown347',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown348': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown348',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown349': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown349',
+    type: 'keyword',
+  },
+  'netflow.netscaler_unknown350': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown350',
+    type: 'keyword',
+  },
+  'netflow.netscaler_unknown351': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown351',
+    type: 'keyword',
+  },
+  'netflow.netscaler_unknown352': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown352',
+    type: 'integer',
+  },
+  'netflow.netscaler_unknown353': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown353',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown354': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown354',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown355': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown355',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown356': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown356',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown357': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown357',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown363': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown363',
+    type: 'short',
+  },
+  'netflow.netscaler_unknown383': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown383',
+    type: 'short',
+  },
+  'netflow.netscaler_unknown391': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown391',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown398': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown398',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown404': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown404',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown405': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown405',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown427': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown427',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown429': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown429',
+    type: 'short',
+  },
+  'netflow.netscaler_unknown432': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown432',
+    type: 'short',
+  },
+  'netflow.netscaler_unknown433': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown433',
+    type: 'short',
+  },
+  'netflow.netscaler_unknown453': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown453',
+    type: 'long',
+  },
+  'netflow.netscaler_unknown465': {
+    category: 'netflow',
+    name: 'netflow.netscaler_unknown465',
+    type: 'long',
+  },
+  'netflow.new_connection_delta_count': {
+    category: 'netflow',
+    name: 'netflow.new_connection_delta_count',
+    type: 'long',
+  },
+  'netflow.next_header_ipv6': {
+    category: 'netflow',
+    name: 'netflow.next_header_ipv6',
+    type: 'short',
+  },
+  'netflow.non_empty_packet_count': {
+    category: 'netflow',
+    name: 'netflow.non_empty_packet_count',
+    type: 'long',
+  },
+  'netflow.not_sent_flow_total_count': {
+    category: 'netflow',
+    name: 'netflow.not_sent_flow_total_count',
+    type: 'long',
+  },
+  'netflow.not_sent_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.not_sent_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.not_sent_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.not_sent_octet_total_count',
+    type: 'long',
+  },
+  'netflow.not_sent_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.not_sent_packet_total_count',
+    type: 'long',
+  },
+  'netflow.observation_domain_id': {
+    category: 'netflow',
+    name: 'netflow.observation_domain_id',
     type: 'long',
   },
   'netflow.observation_domain_name': {
@@ -30044,25 +41488,2645 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.observation_domain_name',
     type: 'keyword',
   },
-  'netflow.selection_sequence_id': {
+  'netflow.observation_point_id': {
     category: 'netflow',
-    name: 'netflow.selection_sequence_id',
+    name: 'netflow.observation_point_id',
     type: 'long',
   },
-  'netflow.selector_id': {
+  'netflow.observation_point_type': {
     category: 'netflow',
-    name: 'netflow.selector_id',
+    name: 'netflow.observation_point_type',
+    type: 'short',
+  },
+  'netflow.observation_time_microseconds': {
+    category: 'netflow',
+    name: 'netflow.observation_time_microseconds',
+    type: 'date',
+  },
+  'netflow.observation_time_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.observation_time_milliseconds',
+    type: 'date',
+  },
+  'netflow.observation_time_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.observation_time_nanoseconds',
+    type: 'date',
+  },
+  'netflow.observation_time_seconds': {
+    category: 'netflow',
+    name: 'netflow.observation_time_seconds',
+    type: 'date',
+  },
+  'netflow.observed_flow_total_count': {
+    category: 'netflow',
+    name: 'netflow.observed_flow_total_count',
     type: 'long',
   },
-  'netflow.information_element_id': {
+  'netflow.octet_delta_count': {
     category: 'netflow',
-    name: 'netflow.information_element_id',
+    name: 'netflow.octet_delta_count',
+    type: 'long',
+  },
+  'netflow.octet_delta_sum_of_squares': {
+    category: 'netflow',
+    name: 'netflow.octet_delta_sum_of_squares',
+    type: 'long',
+  },
+  'netflow.octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.octet_total_count',
+    type: 'long',
+  },
+  'netflow.octet_total_sum_of_squares': {
+    category: 'netflow',
+    name: 'netflow.octet_total_sum_of_squares',
+    type: 'long',
+  },
+  'netflow.opaque_octets': {
+    category: 'netflow',
+    name: 'netflow.opaque_octets',
+    type: 'short',
+  },
+  'netflow.original_exporter_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.original_exporter_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.original_exporter_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.original_exporter_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.original_flows_completed': {
+    category: 'netflow',
+    name: 'netflow.original_flows_completed',
+    type: 'long',
+  },
+  'netflow.original_flows_initiated': {
+    category: 'netflow',
+    name: 'netflow.original_flows_initiated',
+    type: 'long',
+  },
+  'netflow.original_flows_present': {
+    category: 'netflow',
+    name: 'netflow.original_flows_present',
+    type: 'long',
+  },
+  'netflow.original_observation_domain_id': {
+    category: 'netflow',
+    name: 'netflow.original_observation_domain_id',
+    type: 'long',
+  },
+  'netflow.os_finger_print': {
+    category: 'netflow',
+    name: 'netflow.os_finger_print',
+    type: 'keyword',
+  },
+  'netflow.os_name': {
+    category: 'netflow',
+    name: 'netflow.os_name',
+    type: 'keyword',
+  },
+  'netflow.os_version': {
+    category: 'netflow',
+    name: 'netflow.os_version',
+    type: 'keyword',
+  },
+  'netflow.p2p_technology': {
+    category: 'netflow',
+    name: 'netflow.p2p_technology',
+    type: 'keyword',
+  },
+  'netflow.packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.packet_delta_count',
+    type: 'long',
+  },
+  'netflow.packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.packet_total_count',
+    type: 'long',
+  },
+  'netflow.padding_octets': {
+    category: 'netflow',
+    name: 'netflow.padding_octets',
+    type: 'short',
+  },
+  'netflow.payload': {
+    category: 'netflow',
+    name: 'netflow.payload',
+    type: 'keyword',
+  },
+  'netflow.payload_entropy': {
+    category: 'netflow',
+    name: 'netflow.payload_entropy',
+    type: 'short',
+  },
+  'netflow.payload_length_ipv6': {
+    category: 'netflow',
+    name: 'netflow.payload_length_ipv6',
     type: 'integer',
   },
-  'netflow.selector_algorithm': {
+  'netflow.policy_qos_classification_hierarchy': {
     category: 'netflow',
-    name: 'netflow.selector_algorithm',
+    name: 'netflow.policy_qos_classification_hierarchy',
+    type: 'long',
+  },
+  'netflow.policy_qos_queue_index': {
+    category: 'netflow',
+    name: 'netflow.policy_qos_queue_index',
+    type: 'long',
+  },
+  'netflow.policy_qos_queuedrops': {
+    category: 'netflow',
+    name: 'netflow.policy_qos_queuedrops',
+    type: 'long',
+  },
+  'netflow.policy_qos_queueindex': {
+    category: 'netflow',
+    name: 'netflow.policy_qos_queueindex',
+    type: 'long',
+  },
+  'netflow.port_id': {
+    category: 'netflow',
+    name: 'netflow.port_id',
+    type: 'long',
+  },
+  'netflow.port_range_end': {
+    category: 'netflow',
+    name: 'netflow.port_range_end',
     type: 'integer',
+  },
+  'netflow.port_range_num_ports': {
+    category: 'netflow',
+    name: 'netflow.port_range_num_ports',
+    type: 'integer',
+  },
+  'netflow.port_range_start': {
+    category: 'netflow',
+    name: 'netflow.port_range_start',
+    type: 'integer',
+  },
+  'netflow.port_range_step_size': {
+    category: 'netflow',
+    name: 'netflow.port_range_step_size',
+    type: 'integer',
+  },
+  'netflow.post_destination_mac_address': {
+    category: 'netflow',
+    name: 'netflow.post_destination_mac_address',
+    type: 'keyword',
+  },
+  'netflow.post_dot1q_customer_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.post_dot1q_customer_vlan_id',
+    type: 'integer',
+  },
+  'netflow.post_dot1q_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.post_dot1q_vlan_id',
+    type: 'integer',
+  },
+  'netflow.post_ip_class_of_service': {
+    category: 'netflow',
+    name: 'netflow.post_ip_class_of_service',
+    type: 'short',
+  },
+  'netflow.post_ip_diff_serv_code_point': {
+    category: 'netflow',
+    name: 'netflow.post_ip_diff_serv_code_point',
+    type: 'short',
+  },
+  'netflow.post_ip_precedence': {
+    category: 'netflow',
+    name: 'netflow.post_ip_precedence',
+    type: 'short',
+  },
+  'netflow.post_layer2_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.post_layer2_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.post_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.post_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.post_mcast_layer2_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.post_mcast_layer2_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.post_mcast_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.post_mcast_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.post_mcast_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.post_mcast_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.post_mcast_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.post_mcast_octet_total_count',
+    type: 'long',
+  },
+  'netflow.post_mcast_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.post_mcast_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.post_mcast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.post_mcast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.post_mpls_top_label_exp': {
+    category: 'netflow',
+    name: 'netflow.post_mpls_top_label_exp',
+    type: 'short',
+  },
+  'netflow.post_napt_destination_transport_port': {
+    category: 'netflow',
+    name: 'netflow.post_napt_destination_transport_port',
+    type: 'integer',
+  },
+  'netflow.post_napt_source_transport_port': {
+    category: 'netflow',
+    name: 'netflow.post_napt_source_transport_port',
+    type: 'integer',
+  },
+  'netflow.post_nat_destination_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.post_nat_destination_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.post_nat_destination_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.post_nat_destination_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.post_nat_source_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.post_nat_source_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.post_nat_source_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.post_nat_source_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.post_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.post_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.post_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.post_octet_total_count',
+    type: 'long',
+  },
+  'netflow.post_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.post_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.post_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.post_packet_total_count',
+    type: 'long',
+  },
+  'netflow.post_source_mac_address': {
+    category: 'netflow',
+    name: 'netflow.post_source_mac_address',
+    type: 'keyword',
+  },
+  'netflow.post_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.post_vlan_id',
+    type: 'integer',
+  },
+  'netflow.private_enterprise_number': {
+    category: 'netflow',
+    name: 'netflow.private_enterprise_number',
+    type: 'long',
+  },
+  'netflow.procera_apn': {
+    category: 'netflow',
+    name: 'netflow.procera_apn',
+    type: 'keyword',
+  },
+  'netflow.procera_base_service': {
+    category: 'netflow',
+    name: 'netflow.procera_base_service',
+    type: 'keyword',
+  },
+  'netflow.procera_content_categories': {
+    category: 'netflow',
+    name: 'netflow.procera_content_categories',
+    type: 'keyword',
+  },
+  'netflow.procera_device_id': {
+    category: 'netflow',
+    name: 'netflow.procera_device_id',
+    type: 'long',
+  },
+  'netflow.procera_external_rtt': {
+    category: 'netflow',
+    name: 'netflow.procera_external_rtt',
+    type: 'integer',
+  },
+  'netflow.procera_flow_behavior': {
+    category: 'netflow',
+    name: 'netflow.procera_flow_behavior',
+    type: 'keyword',
+  },
+  'netflow.procera_ggsn': {
+    category: 'netflow',
+    name: 'netflow.procera_ggsn',
+    type: 'keyword',
+  },
+  'netflow.procera_http_content_type': {
+    category: 'netflow',
+    name: 'netflow.procera_http_content_type',
+    type: 'keyword',
+  },
+  'netflow.procera_http_file_length': {
+    category: 'netflow',
+    name: 'netflow.procera_http_file_length',
+    type: 'long',
+  },
+  'netflow.procera_http_language': {
+    category: 'netflow',
+    name: 'netflow.procera_http_language',
+    type: 'keyword',
+  },
+  'netflow.procera_http_location': {
+    category: 'netflow',
+    name: 'netflow.procera_http_location',
+    type: 'keyword',
+  },
+  'netflow.procera_http_referer': {
+    category: 'netflow',
+    name: 'netflow.procera_http_referer',
+    type: 'keyword',
+  },
+  'netflow.procera_http_request_method': {
+    category: 'netflow',
+    name: 'netflow.procera_http_request_method',
+    type: 'keyword',
+  },
+  'netflow.procera_http_request_version': {
+    category: 'netflow',
+    name: 'netflow.procera_http_request_version',
+    type: 'keyword',
+  },
+  'netflow.procera_http_response_status': {
+    category: 'netflow',
+    name: 'netflow.procera_http_response_status',
+    type: 'integer',
+  },
+  'netflow.procera_http_url': {
+    category: 'netflow',
+    name: 'netflow.procera_http_url',
+    type: 'keyword',
+  },
+  'netflow.procera_http_user_agent': {
+    category: 'netflow',
+    name: 'netflow.procera_http_user_agent',
+    type: 'keyword',
+  },
+  'netflow.procera_imsi': {
+    category: 'netflow',
+    name: 'netflow.procera_imsi',
+    type: 'long',
+  },
+  'netflow.procera_incoming_octets': {
+    category: 'netflow',
+    name: 'netflow.procera_incoming_octets',
+    type: 'long',
+  },
+  'netflow.procera_incoming_packets': {
+    category: 'netflow',
+    name: 'netflow.procera_incoming_packets',
+    type: 'long',
+  },
+  'netflow.procera_incoming_shaping_drops': {
+    category: 'netflow',
+    name: 'netflow.procera_incoming_shaping_drops',
+    type: 'long',
+  },
+  'netflow.procera_incoming_shaping_latency': {
+    category: 'netflow',
+    name: 'netflow.procera_incoming_shaping_latency',
+    type: 'integer',
+  },
+  'netflow.procera_internal_rtt': {
+    category: 'netflow',
+    name: 'netflow.procera_internal_rtt',
+    type: 'integer',
+  },
+  'netflow.procera_local_ipv4_host': {
+    category: 'netflow',
+    name: 'netflow.procera_local_ipv4_host',
+    type: 'ip',
+  },
+  'netflow.procera_local_ipv6_host': {
+    category: 'netflow',
+    name: 'netflow.procera_local_ipv6_host',
+    type: 'ip',
+  },
+  'netflow.procera_msisdn': {
+    category: 'netflow',
+    name: 'netflow.procera_msisdn',
+    type: 'long',
+  },
+  'netflow.procera_outgoing_octets': {
+    category: 'netflow',
+    name: 'netflow.procera_outgoing_octets',
+    type: 'long',
+  },
+  'netflow.procera_outgoing_packets': {
+    category: 'netflow',
+    name: 'netflow.procera_outgoing_packets',
+    type: 'long',
+  },
+  'netflow.procera_outgoing_shaping_drops': {
+    category: 'netflow',
+    name: 'netflow.procera_outgoing_shaping_drops',
+    type: 'long',
+  },
+  'netflow.procera_outgoing_shaping_latency': {
+    category: 'netflow',
+    name: 'netflow.procera_outgoing_shaping_latency',
+    type: 'integer',
+  },
+  'netflow.procera_property': {
+    category: 'netflow',
+    name: 'netflow.procera_property',
+    type: 'keyword',
+  },
+  'netflow.procera_qoe_incoming_external': {
+    category: 'netflow',
+    name: 'netflow.procera_qoe_incoming_external',
+    type: 'float',
+  },
+  'netflow.procera_qoe_incoming_internal': {
+    category: 'netflow',
+    name: 'netflow.procera_qoe_incoming_internal',
+    type: 'float',
+  },
+  'netflow.procera_qoe_outgoing_external': {
+    category: 'netflow',
+    name: 'netflow.procera_qoe_outgoing_external',
+    type: 'float',
+  },
+  'netflow.procera_qoe_outgoing_internal': {
+    category: 'netflow',
+    name: 'netflow.procera_qoe_outgoing_internal',
+    type: 'float',
+  },
+  'netflow.procera_rat': {
+    category: 'netflow',
+    name: 'netflow.procera_rat',
+    type: 'keyword',
+  },
+  'netflow.procera_remote_ipv4_host': {
+    category: 'netflow',
+    name: 'netflow.procera_remote_ipv4_host',
+    type: 'ip',
+  },
+  'netflow.procera_remote_ipv6_host': {
+    category: 'netflow',
+    name: 'netflow.procera_remote_ipv6_host',
+    type: 'ip',
+  },
+  'netflow.procera_rnc': {
+    category: 'netflow',
+    name: 'netflow.procera_rnc',
+    type: 'integer',
+  },
+  'netflow.procera_server_hostname': {
+    category: 'netflow',
+    name: 'netflow.procera_server_hostname',
+    type: 'keyword',
+  },
+  'netflow.procera_service': {
+    category: 'netflow',
+    name: 'netflow.procera_service',
+    type: 'keyword',
+  },
+  'netflow.procera_sgsn': {
+    category: 'netflow',
+    name: 'netflow.procera_sgsn',
+    type: 'keyword',
+  },
+  'netflow.procera_subscriber_identifier': {
+    category: 'netflow',
+    name: 'netflow.procera_subscriber_identifier',
+    type: 'keyword',
+  },
+  'netflow.procera_template_name': {
+    category: 'netflow',
+    name: 'netflow.procera_template_name',
+    type: 'keyword',
+  },
+  'netflow.procera_user_location_information': {
+    category: 'netflow',
+    name: 'netflow.procera_user_location_information',
+    type: 'keyword',
+  },
+  'netflow.protocol_identifier': {
+    category: 'netflow',
+    name: 'netflow.protocol_identifier',
+    type: 'short',
+  },
+  'netflow.pseudo_wire_control_word': {
+    category: 'netflow',
+    name: 'netflow.pseudo_wire_control_word',
+    type: 'long',
+  },
+  'netflow.pseudo_wire_destination_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.pseudo_wire_destination_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.pseudo_wire_id': {
+    category: 'netflow',
+    name: 'netflow.pseudo_wire_id',
+    type: 'long',
+  },
+  'netflow.pseudo_wire_type': {
+    category: 'netflow',
+    name: 'netflow.pseudo_wire_type',
+    type: 'integer',
+  },
+  'netflow.reason': {
+    category: 'netflow',
+    name: 'netflow.reason',
+    type: 'long',
+  },
+  'netflow.reason_text': {
+    category: 'netflow',
+    name: 'netflow.reason_text',
+    type: 'keyword',
+  },
+  'netflow.relative_error': {
+    category: 'netflow',
+    name: 'netflow.relative_error',
+    type: 'double',
+  },
+  'netflow.responder_octets': {
+    category: 'netflow',
+    name: 'netflow.responder_octets',
+    type: 'long',
+  },
+  'netflow.responder_packets': {
+    category: 'netflow',
+    name: 'netflow.responder_packets',
+    type: 'long',
+  },
+  'netflow.reverse_absolute_error': {
+    category: 'netflow',
+    name: 'netflow.reverse_absolute_error',
+    type: 'double',
+  },
+  'netflow.reverse_anonymization_flags': {
+    category: 'netflow',
+    name: 'netflow.reverse_anonymization_flags',
+    type: 'integer',
+  },
+  'netflow.reverse_anonymization_technique': {
+    category: 'netflow',
+    name: 'netflow.reverse_anonymization_technique',
+    type: 'integer',
+  },
+  'netflow.reverse_application_category_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_application_category_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_application_description': {
+    category: 'netflow',
+    name: 'netflow.reverse_application_description',
+    type: 'keyword',
+  },
+  'netflow.reverse_application_group_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_application_group_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_application_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_application_id',
+    type: 'keyword',
+  },
+  'netflow.reverse_application_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_application_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_application_sub_category_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_application_sub_category_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_average_interarrival_time': {
+    category: 'netflow',
+    name: 'netflow.reverse_average_interarrival_time',
+    type: 'long',
+  },
+  'netflow.reverse_bgp_destination_as_number': {
+    category: 'netflow',
+    name: 'netflow.reverse_bgp_destination_as_number',
+    type: 'long',
+  },
+  'netflow.reverse_bgp_next_adjacent_as_number': {
+    category: 'netflow',
+    name: 'netflow.reverse_bgp_next_adjacent_as_number',
+    type: 'long',
+  },
+  'netflow.reverse_bgp_next_hop_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_bgp_next_hop_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_bgp_next_hop_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_bgp_next_hop_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.reverse_bgp_prev_adjacent_as_number': {
+    category: 'netflow',
+    name: 'netflow.reverse_bgp_prev_adjacent_as_number',
+    type: 'long',
+  },
+  'netflow.reverse_bgp_source_as_number': {
+    category: 'netflow',
+    name: 'netflow.reverse_bgp_source_as_number',
+    type: 'long',
+  },
+  'netflow.reverse_bgp_validity_state': {
+    category: 'netflow',
+    name: 'netflow.reverse_bgp_validity_state',
+    type: 'short',
+  },
+  'netflow.reverse_class_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_class_id',
+    type: 'short',
+  },
+  'netflow.reverse_class_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_class_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_classification_engine_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_classification_engine_id',
+    type: 'short',
+  },
+  'netflow.reverse_collection_time_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_collection_time_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_collector_certificate': {
+    category: 'netflow',
+    name: 'netflow.reverse_collector_certificate',
+    type: 'keyword',
+  },
+  'netflow.reverse_confidence_level': {
+    category: 'netflow',
+    name: 'netflow.reverse_confidence_level',
+    type: 'double',
+  },
+  'netflow.reverse_connection_sum_duration_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_connection_sum_duration_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_connection_transaction_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_connection_transaction_id',
+    type: 'long',
+  },
+  'netflow.reverse_data_byte_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_data_byte_count',
+    type: 'long',
+  },
+  'netflow.reverse_data_link_frame_section': {
+    category: 'netflow',
+    name: 'netflow.reverse_data_link_frame_section',
+    type: 'keyword',
+  },
+  'netflow.reverse_data_link_frame_size': {
+    category: 'netflow',
+    name: 'netflow.reverse_data_link_frame_size',
+    type: 'integer',
+  },
+  'netflow.reverse_data_link_frame_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_data_link_frame_type',
+    type: 'integer',
+  },
+  'netflow.reverse_data_records_reliability': {
+    category: 'netflow',
+    name: 'netflow.reverse_data_records_reliability',
+    type: 'short',
+  },
+  'netflow.reverse_delta_flow_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_delta_flow_count',
+    type: 'long',
+  },
+  'netflow.reverse_destination_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_destination_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_destination_ipv4_prefix': {
+    category: 'netflow',
+    name: 'netflow.reverse_destination_ipv4_prefix',
+    type: 'ip',
+  },
+  'netflow.reverse_destination_ipv4_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_destination_ipv4_prefix_length',
+    type: 'short',
+  },
+  'netflow.reverse_destination_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_destination_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.reverse_destination_ipv6_prefix': {
+    category: 'netflow',
+    name: 'netflow.reverse_destination_ipv6_prefix',
+    type: 'ip',
+  },
+  'netflow.reverse_destination_ipv6_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_destination_ipv6_prefix_length',
+    type: 'short',
+  },
+  'netflow.reverse_destination_mac_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_destination_mac_address',
+    type: 'keyword',
+  },
+  'netflow.reverse_destination_transport_port': {
+    category: 'netflow',
+    name: 'netflow.reverse_destination_transport_port',
+    type: 'integer',
+  },
+  'netflow.reverse_digest_hash_value': {
+    category: 'netflow',
+    name: 'netflow.reverse_digest_hash_value',
+    type: 'long',
+  },
+  'netflow.reverse_distinct_count_of_destination_ip_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_distinct_count_of_destination_ip_address',
+    type: 'long',
+  },
+  'netflow.reverse_distinct_count_of_destination_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_distinct_count_of_destination_ipv4_address',
+    type: 'long',
+  },
+  'netflow.reverse_distinct_count_of_destination_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_distinct_count_of_destination_ipv6_address',
+    type: 'long',
+  },
+  'netflow.reverse_distinct_count_of_source_ip_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_distinct_count_of_source_ip_address',
+    type: 'long',
+  },
+  'netflow.reverse_distinct_count_of_source_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_distinct_count_of_source_ipv4_address',
+    type: 'long',
+  },
+  'netflow.reverse_distinct_count_of_source_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_distinct_count_of_source_ipv6_address',
+    type: 'long',
+  },
+  'netflow.reverse_dot1q_customer_dei': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_customer_dei',
+    type: 'short',
+  },
+  'netflow.reverse_dot1q_customer_destination_mac_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_customer_destination_mac_address',
+    type: 'keyword',
+  },
+  'netflow.reverse_dot1q_customer_priority': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_customer_priority',
+    type: 'short',
+  },
+  'netflow.reverse_dot1q_customer_source_mac_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_customer_source_mac_address',
+    type: 'keyword',
+  },
+  'netflow.reverse_dot1q_customer_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_customer_vlan_id',
+    type: 'integer',
+  },
+  'netflow.reverse_dot1q_dei': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_dei',
+    type: 'short',
+  },
+  'netflow.reverse_dot1q_priority': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_priority',
+    type: 'short',
+  },
+  'netflow.reverse_dot1q_service_instance_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_service_instance_id',
+    type: 'long',
+  },
+  'netflow.reverse_dot1q_service_instance_priority': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_service_instance_priority',
+    type: 'short',
+  },
+  'netflow.reverse_dot1q_service_instance_tag': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_service_instance_tag',
+    type: 'keyword',
+  },
+  'netflow.reverse_dot1q_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_dot1q_vlan_id',
+    type: 'integer',
+  },
+  'netflow.reverse_dropped_layer2_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_dropped_layer2_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_dropped_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_dropped_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_dropped_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_dropped_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_dropped_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_dropped_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_dropped_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_dropped_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_dropped_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_dropped_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_dst_traffic_index': {
+    category: 'netflow',
+    name: 'netflow.reverse_dst_traffic_index',
+    type: 'long',
+  },
+  'netflow.reverse_egress_broadcast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_egress_broadcast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_egress_interface': {
+    category: 'netflow',
+    name: 'netflow.reverse_egress_interface',
+    type: 'long',
+  },
+  'netflow.reverse_egress_interface_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_egress_interface_type',
+    type: 'long',
+  },
+  'netflow.reverse_egress_physical_interface': {
+    category: 'netflow',
+    name: 'netflow.reverse_egress_physical_interface',
+    type: 'long',
+  },
+  'netflow.reverse_egress_unicast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_egress_unicast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_egress_vrfid': {
+    category: 'netflow',
+    name: 'netflow.reverse_egress_vrfid',
+    type: 'long',
+  },
+  'netflow.reverse_encrypted_technology': {
+    category: 'netflow',
+    name: 'netflow.reverse_encrypted_technology',
+    type: 'keyword',
+  },
+  'netflow.reverse_engine_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_engine_id',
+    type: 'short',
+  },
+  'netflow.reverse_engine_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_engine_type',
+    type: 'short',
+  },
+  'netflow.reverse_ethernet_header_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_ethernet_header_length',
+    type: 'short',
+  },
+  'netflow.reverse_ethernet_payload_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_ethernet_payload_length',
+    type: 'integer',
+  },
+  'netflow.reverse_ethernet_total_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_ethernet_total_length',
+    type: 'integer',
+  },
+  'netflow.reverse_ethernet_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_ethernet_type',
+    type: 'integer',
+  },
+  'netflow.reverse_export_sctp_stream_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_export_sctp_stream_id',
+    type: 'integer',
+  },
+  'netflow.reverse_exporter_certificate': {
+    category: 'netflow',
+    name: 'netflow.reverse_exporter_certificate',
+    type: 'keyword',
+  },
+  'netflow.reverse_exporting_process_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_exporting_process_id',
+    type: 'long',
+  },
+  'netflow.reverse_firewall_event': {
+    category: 'netflow',
+    name: 'netflow.reverse_firewall_event',
+    type: 'short',
+  },
+  'netflow.reverse_first_non_empty_packet_size': {
+    category: 'netflow',
+    name: 'netflow.reverse_first_non_empty_packet_size',
+    type: 'integer',
+  },
+  'netflow.reverse_first_packet_banner': {
+    category: 'netflow',
+    name: 'netflow.reverse_first_packet_banner',
+    type: 'keyword',
+  },
+  'netflow.reverse_flags_and_sampler_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_flags_and_sampler_id',
+    type: 'long',
+  },
+  'netflow.reverse_flow_active_timeout': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_active_timeout',
+    type: 'integer',
+  },
+  'netflow.reverse_flow_attributes': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_attributes',
+    type: 'integer',
+  },
+  'netflow.reverse_flow_delta_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_delta_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_direction': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_direction',
+    type: 'short',
+  },
+  'netflow.reverse_flow_duration_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_duration_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_duration_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_duration_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_end_delta_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_end_delta_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_end_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_end_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_end_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_end_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_end_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_end_nanoseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_end_reason': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_end_reason',
+    type: 'short',
+  },
+  'netflow.reverse_flow_end_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_end_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_end_sys_up_time': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_end_sys_up_time',
+    type: 'long',
+  },
+  'netflow.reverse_flow_idle_timeout': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_idle_timeout',
+    type: 'integer',
+  },
+  'netflow.reverse_flow_label_ipv6': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_label_ipv6',
+    type: 'long',
+  },
+  'netflow.reverse_flow_sampling_time_interval': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_sampling_time_interval',
+    type: 'long',
+  },
+  'netflow.reverse_flow_sampling_time_spacing': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_sampling_time_spacing',
+    type: 'long',
+  },
+  'netflow.reverse_flow_selected_flow_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_selected_flow_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_flow_selected_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_selected_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_flow_selected_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_selected_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_flow_selector_algorithm': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_selector_algorithm',
+    type: 'integer',
+  },
+  'netflow.reverse_flow_start_delta_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_start_delta_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_start_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_start_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_start_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_start_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_start_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_start_nanoseconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_start_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_start_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_flow_start_sys_up_time': {
+    category: 'netflow',
+    name: 'netflow.reverse_flow_start_sys_up_time',
+    type: 'long',
+  },
+  'netflow.reverse_forwarding_status': {
+    category: 'netflow',
+    name: 'netflow.reverse_forwarding_status',
+    type: 'long',
+  },
+  'netflow.reverse_fragment_flags': {
+    category: 'netflow',
+    name: 'netflow.reverse_fragment_flags',
+    type: 'short',
+  },
+  'netflow.reverse_fragment_identification': {
+    category: 'netflow',
+    name: 'netflow.reverse_fragment_identification',
+    type: 'long',
+  },
+  'netflow.reverse_fragment_offset': {
+    category: 'netflow',
+    name: 'netflow.reverse_fragment_offset',
+    type: 'integer',
+  },
+  'netflow.reverse_gre_key': {
+    category: 'netflow',
+    name: 'netflow.reverse_gre_key',
+    type: 'long',
+  },
+  'netflow.reverse_hash_digest_output': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_digest_output',
+    type: 'short',
+  },
+  'netflow.reverse_hash_flow_domain': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_flow_domain',
+    type: 'integer',
+  },
+  'netflow.reverse_hash_initialiser_value': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_initialiser_value',
+    type: 'long',
+  },
+  'netflow.reverse_hash_ip_payload_offset': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_ip_payload_offset',
+    type: 'long',
+  },
+  'netflow.reverse_hash_ip_payload_size': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_ip_payload_size',
+    type: 'long',
+  },
+  'netflow.reverse_hash_output_range_max': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_output_range_max',
+    type: 'long',
+  },
+  'netflow.reverse_hash_output_range_min': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_output_range_min',
+    type: 'long',
+  },
+  'netflow.reverse_hash_selected_range_max': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_selected_range_max',
+    type: 'long',
+  },
+  'netflow.reverse_hash_selected_range_min': {
+    category: 'netflow',
+    name: 'netflow.reverse_hash_selected_range_min',
+    type: 'long',
+  },
+  'netflow.reverse_icmp_code_ipv4': {
+    category: 'netflow',
+    name: 'netflow.reverse_icmp_code_ipv4',
+    type: 'short',
+  },
+  'netflow.reverse_icmp_code_ipv6': {
+    category: 'netflow',
+    name: 'netflow.reverse_icmp_code_ipv6',
+    type: 'short',
+  },
+  'netflow.reverse_icmp_type_code_ipv4': {
+    category: 'netflow',
+    name: 'netflow.reverse_icmp_type_code_ipv4',
+    type: 'integer',
+  },
+  'netflow.reverse_icmp_type_code_ipv6': {
+    category: 'netflow',
+    name: 'netflow.reverse_icmp_type_code_ipv6',
+    type: 'integer',
+  },
+  'netflow.reverse_icmp_type_ipv4': {
+    category: 'netflow',
+    name: 'netflow.reverse_icmp_type_ipv4',
+    type: 'short',
+  },
+  'netflow.reverse_icmp_type_ipv6': {
+    category: 'netflow',
+    name: 'netflow.reverse_icmp_type_ipv6',
+    type: 'short',
+  },
+  'netflow.reverse_igmp_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_igmp_type',
+    type: 'short',
+  },
+  'netflow.reverse_ignored_data_record_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_ignored_data_record_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_ignored_layer2_frame_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_ignored_layer2_frame_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_ignored_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_ignored_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_information_element_data_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_data_type',
+    type: 'short',
+  },
+  'netflow.reverse_information_element_description': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_description',
+    type: 'keyword',
+  },
+  'netflow.reverse_information_element_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_id',
+    type: 'integer',
+  },
+  'netflow.reverse_information_element_index': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_index',
+    type: 'integer',
+  },
+  'netflow.reverse_information_element_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_information_element_range_begin': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_range_begin',
+    type: 'long',
+  },
+  'netflow.reverse_information_element_range_end': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_range_end',
+    type: 'long',
+  },
+  'netflow.reverse_information_element_semantics': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_semantics',
+    type: 'short',
+  },
+  'netflow.reverse_information_element_units': {
+    category: 'netflow',
+    name: 'netflow.reverse_information_element_units',
+    type: 'integer',
+  },
+  'netflow.reverse_ingress_broadcast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_ingress_broadcast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_ingress_interface': {
+    category: 'netflow',
+    name: 'netflow.reverse_ingress_interface',
+    type: 'long',
+  },
+  'netflow.reverse_ingress_interface_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_ingress_interface_type',
+    type: 'long',
+  },
+  'netflow.reverse_ingress_multicast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_ingress_multicast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_ingress_physical_interface': {
+    category: 'netflow',
+    name: 'netflow.reverse_ingress_physical_interface',
+    type: 'long',
+  },
+  'netflow.reverse_ingress_unicast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_ingress_unicast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_ingress_vrfid': {
+    category: 'netflow',
+    name: 'netflow.reverse_ingress_vrfid',
+    type: 'long',
+  },
+  'netflow.reverse_initial_tcp_flags': {
+    category: 'netflow',
+    name: 'netflow.reverse_initial_tcp_flags',
+    type: 'short',
+  },
+  'netflow.reverse_initiator_octets': {
+    category: 'netflow',
+    name: 'netflow.reverse_initiator_octets',
+    type: 'long',
+  },
+  'netflow.reverse_initiator_packets': {
+    category: 'netflow',
+    name: 'netflow.reverse_initiator_packets',
+    type: 'long',
+  },
+  'netflow.reverse_interface_description': {
+    category: 'netflow',
+    name: 'netflow.reverse_interface_description',
+    type: 'keyword',
+  },
+  'netflow.reverse_interface_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_interface_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_intermediate_process_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_intermediate_process_id',
+    type: 'long',
+  },
+  'netflow.reverse_ip_class_of_service': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_class_of_service',
+    type: 'short',
+  },
+  'netflow.reverse_ip_diff_serv_code_point': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_diff_serv_code_point',
+    type: 'short',
+  },
+  'netflow.reverse_ip_header_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_header_length',
+    type: 'short',
+  },
+  'netflow.reverse_ip_header_packet_section': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_header_packet_section',
+    type: 'keyword',
+  },
+  'netflow.reverse_ip_next_hop_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_next_hop_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_ip_next_hop_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_next_hop_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.reverse_ip_payload_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_payload_length',
+    type: 'long',
+  },
+  'netflow.reverse_ip_payload_packet_section': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_payload_packet_section',
+    type: 'keyword',
+  },
+  'netflow.reverse_ip_precedence': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_precedence',
+    type: 'short',
+  },
+  'netflow.reverse_ip_sec_spi': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_sec_spi',
+    type: 'long',
+  },
+  'netflow.reverse_ip_total_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_total_length',
+    type: 'long',
+  },
+  'netflow.reverse_ip_ttl': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_ttl',
+    type: 'short',
+  },
+  'netflow.reverse_ip_version': {
+    category: 'netflow',
+    name: 'netflow.reverse_ip_version',
+    type: 'short',
+  },
+  'netflow.reverse_ipv4_ihl': {
+    category: 'netflow',
+    name: 'netflow.reverse_ipv4_ihl',
+    type: 'short',
+  },
+  'netflow.reverse_ipv4_options': {
+    category: 'netflow',
+    name: 'netflow.reverse_ipv4_options',
+    type: 'long',
+  },
+  'netflow.reverse_ipv4_router_sc': {
+    category: 'netflow',
+    name: 'netflow.reverse_ipv4_router_sc',
+    type: 'ip',
+  },
+  'netflow.reverse_ipv6_extension_headers': {
+    category: 'netflow',
+    name: 'netflow.reverse_ipv6_extension_headers',
+    type: 'long',
+  },
+  'netflow.reverse_is_multicast': {
+    category: 'netflow',
+    name: 'netflow.reverse_is_multicast',
+    type: 'short',
+  },
+  'netflow.reverse_large_packet_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_large_packet_count',
+    type: 'long',
+  },
+  'netflow.reverse_layer2_frame_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2_frame_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_layer2_frame_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2_frame_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_layer2_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_layer2_octet_delta_sum_of_squares': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2_octet_delta_sum_of_squares',
+    type: 'long',
+  },
+  'netflow.reverse_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_layer2_octet_total_sum_of_squares': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2_octet_total_sum_of_squares',
+    type: 'long',
+  },
+  'netflow.reverse_layer2_segment_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2_segment_id',
+    type: 'long',
+  },
+  'netflow.reverse_layer2packet_section_data': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2packet_section_data',
+    type: 'keyword',
+  },
+  'netflow.reverse_layer2packet_section_offset': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2packet_section_offset',
+    type: 'integer',
+  },
+  'netflow.reverse_layer2packet_section_size': {
+    category: 'netflow',
+    name: 'netflow.reverse_layer2packet_section_size',
+    type: 'integer',
+  },
+  'netflow.reverse_line_card_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_line_card_id',
+    type: 'long',
+  },
+  'netflow.reverse_lower_ci_limit': {
+    category: 'netflow',
+    name: 'netflow.reverse_lower_ci_limit',
+    type: 'double',
+  },
+  'netflow.reverse_max_export_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_max_export_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_max_flow_end_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_max_flow_end_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_max_flow_end_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_max_flow_end_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_max_flow_end_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_max_flow_end_nanoseconds',
+    type: 'long',
+  },
+  'netflow.reverse_max_flow_end_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_max_flow_end_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_max_packet_size': {
+    category: 'netflow',
+    name: 'netflow.reverse_max_packet_size',
+    type: 'integer',
+  },
+  'netflow.reverse_maximum_ip_total_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_maximum_ip_total_length',
+    type: 'long',
+  },
+  'netflow.reverse_maximum_layer2_total_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_maximum_layer2_total_length',
+    type: 'long',
+  },
+  'netflow.reverse_maximum_ttl': {
+    category: 'netflow',
+    name: 'netflow.reverse_maximum_ttl',
+    type: 'short',
+  },
+  'netflow.reverse_message_md5_checksum': {
+    category: 'netflow',
+    name: 'netflow.reverse_message_md5_checksum',
+    type: 'keyword',
+  },
+  'netflow.reverse_message_scope': {
+    category: 'netflow',
+    name: 'netflow.reverse_message_scope',
+    type: 'short',
+  },
+  'netflow.reverse_metering_process_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_metering_process_id',
+    type: 'long',
+  },
+  'netflow.reverse_metro_evc_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_metro_evc_id',
+    type: 'keyword',
+  },
+  'netflow.reverse_metro_evc_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_metro_evc_type',
+    type: 'short',
+  },
+  'netflow.reverse_min_export_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_min_export_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_min_flow_start_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_min_flow_start_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_min_flow_start_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_min_flow_start_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_min_flow_start_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_min_flow_start_nanoseconds',
+    type: 'long',
+  },
+  'netflow.reverse_min_flow_start_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_min_flow_start_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_minimum_ip_total_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_minimum_ip_total_length',
+    type: 'long',
+  },
+  'netflow.reverse_minimum_layer2_total_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_minimum_layer2_total_length',
+    type: 'long',
+  },
+  'netflow.reverse_minimum_ttl': {
+    category: 'netflow',
+    name: 'netflow.reverse_minimum_ttl',
+    type: 'short',
+  },
+  'netflow.reverse_monitoring_interval_end_milli_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_monitoring_interval_end_milli_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_monitoring_interval_start_milli_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_monitoring_interval_start_milli_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_mpls_label_stack_depth': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_depth',
+    type: 'long',
+  },
+  'netflow.reverse_mpls_label_stack_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_length',
+    type: 'long',
+  },
+  'netflow.reverse_mpls_label_stack_section': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section10': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section10',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section2': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section2',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section3': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section3',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section4': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section4',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section5': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section5',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section6': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section6',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section7': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section7',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section8': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section8',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_label_stack_section9': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_label_stack_section9',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_payload_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_payload_length',
+    type: 'long',
+  },
+  'netflow.reverse_mpls_payload_packet_section': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_payload_packet_section',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_top_label_exp': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_top_label_exp',
+    type: 'short',
+  },
+  'netflow.reverse_mpls_top_label_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_top_label_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_mpls_top_label_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_top_label_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.reverse_mpls_top_label_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_top_label_prefix_length',
+    type: 'short',
+  },
+  'netflow.reverse_mpls_top_label_stack_section': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_top_label_stack_section',
+    type: 'keyword',
+  },
+  'netflow.reverse_mpls_top_label_ttl': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_top_label_ttl',
+    type: 'short',
+  },
+  'netflow.reverse_mpls_top_label_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_top_label_type',
+    type: 'short',
+  },
+  'netflow.reverse_mpls_vpn_route_distinguisher': {
+    category: 'netflow',
+    name: 'netflow.reverse_mpls_vpn_route_distinguisher',
+    type: 'keyword',
+  },
+  'netflow.reverse_multicast_replication_factor': {
+    category: 'netflow',
+    name: 'netflow.reverse_multicast_replication_factor',
+    type: 'long',
+  },
+  'netflow.reverse_nat_event': {
+    category: 'netflow',
+    name: 'netflow.reverse_nat_event',
+    type: 'short',
+  },
+  'netflow.reverse_nat_originating_address_realm': {
+    category: 'netflow',
+    name: 'netflow.reverse_nat_originating_address_realm',
+    type: 'short',
+  },
+  'netflow.reverse_nat_pool_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_nat_pool_id',
+    type: 'long',
+  },
+  'netflow.reverse_nat_pool_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_nat_pool_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_nat_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_nat_type',
+    type: 'short',
+  },
+  'netflow.reverse_new_connection_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_new_connection_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_next_header_ipv6': {
+    category: 'netflow',
+    name: 'netflow.reverse_next_header_ipv6',
+    type: 'short',
+  },
+  'netflow.reverse_non_empty_packet_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_non_empty_packet_count',
+    type: 'long',
+  },
+  'netflow.reverse_not_sent_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_not_sent_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_observation_domain_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_observation_domain_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_observation_point_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_observation_point_id',
+    type: 'long',
+  },
+  'netflow.reverse_observation_point_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_observation_point_type',
+    type: 'short',
+  },
+  'netflow.reverse_observation_time_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_observation_time_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_observation_time_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_observation_time_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_observation_time_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_observation_time_nanoseconds',
+    type: 'long',
+  },
+  'netflow.reverse_observation_time_seconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_observation_time_seconds',
+    type: 'long',
+  },
+  'netflow.reverse_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_octet_delta_sum_of_squares': {
+    category: 'netflow',
+    name: 'netflow.reverse_octet_delta_sum_of_squares',
+    type: 'long',
+  },
+  'netflow.reverse_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_octet_total_sum_of_squares': {
+    category: 'netflow',
+    name: 'netflow.reverse_octet_total_sum_of_squares',
+    type: 'long',
+  },
+  'netflow.reverse_opaque_octets': {
+    category: 'netflow',
+    name: 'netflow.reverse_opaque_octets',
+    type: 'keyword',
+  },
+  'netflow.reverse_original_exporter_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_original_exporter_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_original_exporter_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_original_exporter_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.reverse_original_flows_completed': {
+    category: 'netflow',
+    name: 'netflow.reverse_original_flows_completed',
+    type: 'long',
+  },
+  'netflow.reverse_original_flows_initiated': {
+    category: 'netflow',
+    name: 'netflow.reverse_original_flows_initiated',
+    type: 'long',
+  },
+  'netflow.reverse_original_flows_present': {
+    category: 'netflow',
+    name: 'netflow.reverse_original_flows_present',
+    type: 'long',
+  },
+  'netflow.reverse_original_observation_domain_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_original_observation_domain_id',
+    type: 'long',
+  },
+  'netflow.reverse_os_finger_print': {
+    category: 'netflow',
+    name: 'netflow.reverse_os_finger_print',
+    type: 'keyword',
+  },
+  'netflow.reverse_os_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_os_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_os_version': {
+    category: 'netflow',
+    name: 'netflow.reverse_os_version',
+    type: 'keyword',
+  },
+  'netflow.reverse_p2p_technology': {
+    category: 'netflow',
+    name: 'netflow.reverse_p2p_technology',
+    type: 'keyword',
+  },
+  'netflow.reverse_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_payload': {
+    category: 'netflow',
+    name: 'netflow.reverse_payload',
+    type: 'keyword',
+  },
+  'netflow.reverse_payload_entropy': {
+    category: 'netflow',
+    name: 'netflow.reverse_payload_entropy',
+    type: 'short',
+  },
+  'netflow.reverse_payload_length_ipv6': {
+    category: 'netflow',
+    name: 'netflow.reverse_payload_length_ipv6',
+    type: 'integer',
+  },
+  'netflow.reverse_port_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_port_id',
+    type: 'long',
+  },
+  'netflow.reverse_port_range_end': {
+    category: 'netflow',
+    name: 'netflow.reverse_port_range_end',
+    type: 'integer',
+  },
+  'netflow.reverse_port_range_num_ports': {
+    category: 'netflow',
+    name: 'netflow.reverse_port_range_num_ports',
+    type: 'integer',
+  },
+  'netflow.reverse_port_range_start': {
+    category: 'netflow',
+    name: 'netflow.reverse_port_range_start',
+    type: 'integer',
+  },
+  'netflow.reverse_port_range_step_size': {
+    category: 'netflow',
+    name: 'netflow.reverse_port_range_step_size',
+    type: 'integer',
+  },
+  'netflow.reverse_post_destination_mac_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_destination_mac_address',
+    type: 'keyword',
+  },
+  'netflow.reverse_post_dot1q_customer_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_dot1q_customer_vlan_id',
+    type: 'integer',
+  },
+  'netflow.reverse_post_dot1q_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_dot1q_vlan_id',
+    type: 'integer',
+  },
+  'netflow.reverse_post_ip_class_of_service': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_ip_class_of_service',
+    type: 'short',
+  },
+  'netflow.reverse_post_ip_diff_serv_code_point': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_ip_diff_serv_code_point',
+    type: 'short',
+  },
+  'netflow.reverse_post_ip_precedence': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_ip_precedence',
+    type: 'short',
+  },
+  'netflow.reverse_post_layer2_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_layer2_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_mcast_layer2_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_mcast_layer2_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_mcast_layer2_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_mcast_layer2_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_mcast_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_mcast_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_mcast_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_mcast_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_mcast_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_mcast_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_mcast_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_mcast_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_mpls_top_label_exp': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_mpls_top_label_exp',
+    type: 'short',
+  },
+  'netflow.reverse_post_napt_destination_transport_port': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_napt_destination_transport_port',
+    type: 'integer',
+  },
+  'netflow.reverse_post_napt_source_transport_port': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_napt_source_transport_port',
+    type: 'integer',
+  },
+  'netflow.reverse_post_nat_destination_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_nat_destination_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_post_nat_destination_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_nat_destination_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.reverse_post_nat_source_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_nat_source_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_post_nat_source_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_nat_source_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.reverse_post_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_octet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_octet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_packet_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_packet_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_post_source_mac_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_source_mac_address',
+    type: 'keyword',
+  },
+  'netflow.reverse_post_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_post_vlan_id',
+    type: 'integer',
+  },
+  'netflow.reverse_private_enterprise_number': {
+    category: 'netflow',
+    name: 'netflow.reverse_private_enterprise_number',
+    type: 'long',
+  },
+  'netflow.reverse_protocol_identifier': {
+    category: 'netflow',
+    name: 'netflow.reverse_protocol_identifier',
+    type: 'short',
+  },
+  'netflow.reverse_pseudo_wire_control_word': {
+    category: 'netflow',
+    name: 'netflow.reverse_pseudo_wire_control_word',
+    type: 'long',
+  },
+  'netflow.reverse_pseudo_wire_destination_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_pseudo_wire_destination_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_pseudo_wire_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_pseudo_wire_id',
+    type: 'long',
+  },
+  'netflow.reverse_pseudo_wire_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_pseudo_wire_type',
+    type: 'integer',
+  },
+  'netflow.reverse_relative_error': {
+    category: 'netflow',
+    name: 'netflow.reverse_relative_error',
+    type: 'double',
+  },
+  'netflow.reverse_responder_octets': {
+    category: 'netflow',
+    name: 'netflow.reverse_responder_octets',
+    type: 'long',
+  },
+  'netflow.reverse_responder_packets': {
+    category: 'netflow',
+    name: 'netflow.reverse_responder_packets',
+    type: 'long',
+  },
+  'netflow.reverse_rfc3550_jitter_microseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_rfc3550_jitter_microseconds',
+    type: 'long',
+  },
+  'netflow.reverse_rfc3550_jitter_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_rfc3550_jitter_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_rfc3550_jitter_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_rfc3550_jitter_nanoseconds',
+    type: 'long',
+  },
+  'netflow.reverse_rtp_payload_type': {
+    category: 'netflow',
+    name: 'netflow.reverse_rtp_payload_type',
+    type: 'short',
+  },
+  'netflow.reverse_rtp_sequence_number': {
+    category: 'netflow',
+    name: 'netflow.reverse_rtp_sequence_number',
+    type: 'integer',
+  },
+  'netflow.reverse_sampler_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampler_id',
+    type: 'short',
+  },
+  'netflow.reverse_sampler_mode': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampler_mode',
+    type: 'short',
+  },
+  'netflow.reverse_sampler_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampler_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_sampler_random_interval': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampler_random_interval',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_algorithm': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_algorithm',
+    type: 'short',
+  },
+  'netflow.reverse_sampling_flow_interval': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_flow_interval',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_flow_spacing': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_flow_spacing',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_interval': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_interval',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_packet_interval': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_packet_interval',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_packet_space': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_packet_space',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_population': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_population',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_probability': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_probability',
+    type: 'double',
+  },
+  'netflow.reverse_sampling_size': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_size',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_time_interval': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_time_interval',
+    type: 'long',
+  },
+  'netflow.reverse_sampling_time_space': {
+    category: 'netflow',
+    name: 'netflow.reverse_sampling_time_space',
+    type: 'long',
+  },
+  'netflow.reverse_second_packet_banner': {
+    category: 'netflow',
+    name: 'netflow.reverse_second_packet_banner',
+    type: 'keyword',
+  },
+  'netflow.reverse_section_exported_octets': {
+    category: 'netflow',
+    name: 'netflow.reverse_section_exported_octets',
+    type: 'integer',
+  },
+  'netflow.reverse_section_offset': {
+    category: 'netflow',
+    name: 'netflow.reverse_section_offset',
+    type: 'integer',
+  },
+  'netflow.reverse_selection_sequence_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_selection_sequence_id',
+    type: 'long',
+  },
+  'netflow.reverse_selector_algorithm': {
+    category: 'netflow',
+    name: 'netflow.reverse_selector_algorithm',
+    type: 'integer',
+  },
+  'netflow.reverse_selector_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_selector_id',
+    type: 'long',
+  },
+  'netflow.reverse_selector_id_total_flows_observed': {
+    category: 'netflow',
+    name: 'netflow.reverse_selector_id_total_flows_observed',
+    type: 'long',
+  },
+  'netflow.reverse_selector_id_total_flows_selected': {
+    category: 'netflow',
+    name: 'netflow.reverse_selector_id_total_flows_selected',
+    type: 'long',
+  },
+  'netflow.reverse_selector_id_total_pkts_observed': {
+    category: 'netflow',
+    name: 'netflow.reverse_selector_id_total_pkts_observed',
+    type: 'long',
+  },
+  'netflow.reverse_selector_id_total_pkts_selected': {
+    category: 'netflow',
+    name: 'netflow.reverse_selector_id_total_pkts_selected',
+    type: 'long',
+  },
+  'netflow.reverse_selector_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_selector_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_session_scope': {
+    category: 'netflow',
+    name: 'netflow.reverse_session_scope',
+    type: 'short',
+  },
+  'netflow.reverse_small_packet_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_small_packet_count',
+    type: 'long',
+  },
+  'netflow.reverse_source_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_source_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_source_ipv4_prefix': {
+    category: 'netflow',
+    name: 'netflow.reverse_source_ipv4_prefix',
+    type: 'ip',
+  },
+  'netflow.reverse_source_ipv4_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_source_ipv4_prefix_length',
+    type: 'short',
+  },
+  'netflow.reverse_source_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_source_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.reverse_source_ipv6_prefix': {
+    category: 'netflow',
+    name: 'netflow.reverse_source_ipv6_prefix',
+    type: 'ip',
+  },
+  'netflow.reverse_source_ipv6_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_source_ipv6_prefix_length',
+    type: 'short',
+  },
+  'netflow.reverse_source_mac_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_source_mac_address',
+    type: 'keyword',
+  },
+  'netflow.reverse_source_transport_port': {
+    category: 'netflow',
+    name: 'netflow.reverse_source_transport_port',
+    type: 'integer',
+  },
+  'netflow.reverse_src_traffic_index': {
+    category: 'netflow',
+    name: 'netflow.reverse_src_traffic_index',
+    type: 'long',
+  },
+  'netflow.reverse_sta_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_sta_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.reverse_sta_mac_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_sta_mac_address',
+    type: 'keyword',
+  },
+  'netflow.reverse_standard_deviation_interarrival_time': {
+    category: 'netflow',
+    name: 'netflow.reverse_standard_deviation_interarrival_time',
+    type: 'long',
+  },
+  'netflow.reverse_standard_deviation_payload_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_standard_deviation_payload_length',
+    type: 'integer',
+  },
+  'netflow.reverse_system_init_time_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.reverse_system_init_time_milliseconds',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_ack_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_ack_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_acknowledgement_number': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_acknowledgement_number',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_control_bits': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_control_bits',
+    type: 'integer',
+  },
+  'netflow.reverse_tcp_destination_port': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_destination_port',
+    type: 'integer',
+  },
+  'netflow.reverse_tcp_fin_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_fin_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_header_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_header_length',
+    type: 'short',
+  },
+  'netflow.reverse_tcp_options': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_options',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_psh_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_psh_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_rst_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_rst_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_sequence_number': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_sequence_number',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_source_port': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_source_port',
+    type: 'integer',
+  },
+  'netflow.reverse_tcp_syn_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_syn_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_urg_total_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_urg_total_count',
+    type: 'long',
+  },
+  'netflow.reverse_tcp_urgent_pointer': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_urgent_pointer',
+    type: 'integer',
+  },
+  'netflow.reverse_tcp_window_scale': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_window_scale',
+    type: 'integer',
+  },
+  'netflow.reverse_tcp_window_size': {
+    category: 'netflow',
+    name: 'netflow.reverse_tcp_window_size',
+    type: 'integer',
+  },
+  'netflow.reverse_total_length_ipv4': {
+    category: 'netflow',
+    name: 'netflow.reverse_total_length_ipv4',
+    type: 'integer',
+  },
+  'netflow.reverse_transport_octet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_transport_octet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_transport_packet_delta_count': {
+    category: 'netflow',
+    name: 'netflow.reverse_transport_packet_delta_count',
+    type: 'long',
+  },
+  'netflow.reverse_tunnel_technology': {
+    category: 'netflow',
+    name: 'netflow.reverse_tunnel_technology',
+    type: 'keyword',
+  },
+  'netflow.reverse_udp_destination_port': {
+    category: 'netflow',
+    name: 'netflow.reverse_udp_destination_port',
+    type: 'integer',
+  },
+  'netflow.reverse_udp_message_length': {
+    category: 'netflow',
+    name: 'netflow.reverse_udp_message_length',
+    type: 'integer',
+  },
+  'netflow.reverse_udp_source_port': {
+    category: 'netflow',
+    name: 'netflow.reverse_udp_source_port',
+    type: 'integer',
+  },
+  'netflow.reverse_union_tcp_flags': {
+    category: 'netflow',
+    name: 'netflow.reverse_union_tcp_flags',
+    type: 'short',
+  },
+  'netflow.reverse_upper_ci_limit': {
+    category: 'netflow',
+    name: 'netflow.reverse_upper_ci_limit',
+    type: 'double',
+  },
+  'netflow.reverse_user_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_user_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_value_distribution_method': {
+    category: 'netflow',
+    name: 'netflow.reverse_value_distribution_method',
+    type: 'short',
+  },
+  'netflow.reverse_virtual_station_interface_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_virtual_station_interface_id',
+    type: 'keyword',
+  },
+  'netflow.reverse_virtual_station_interface_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_virtual_station_interface_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_virtual_station_name': {
+    category: 'netflow',
+    name: 'netflow.reverse_virtual_station_name',
+    type: 'keyword',
+  },
+  'netflow.reverse_virtual_station_uuid': {
+    category: 'netflow',
+    name: 'netflow.reverse_virtual_station_uuid',
+    type: 'keyword',
+  },
+  'netflow.reverse_vlan_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_vlan_id',
+    type: 'integer',
+  },
+  'netflow.reverse_vr_fname': {
+    category: 'netflow',
+    name: 'netflow.reverse_vr_fname',
+    type: 'keyword',
+  },
+  'netflow.reverse_wlan_channel_id': {
+    category: 'netflow',
+    name: 'netflow.reverse_wlan_channel_id',
+    type: 'short',
+  },
+  'netflow.reverse_wlan_ssid': {
+    category: 'netflow',
+    name: 'netflow.reverse_wlan_ssid',
+    type: 'keyword',
+  },
+  'netflow.reverse_wtp_mac_address': {
+    category: 'netflow',
+    name: 'netflow.reverse_wtp_mac_address',
+    type: 'keyword',
+  },
+  'netflow.rfc3550_jitter_microseconds': {
+    category: 'netflow',
+    name: 'netflow.rfc3550_jitter_microseconds',
+    type: 'long',
+  },
+  'netflow.rfc3550_jitter_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.rfc3550_jitter_milliseconds',
+    type: 'long',
+  },
+  'netflow.rfc3550_jitter_nanoseconds': {
+    category: 'netflow',
+    name: 'netflow.rfc3550_jitter_nanoseconds',
+    type: 'long',
+  },
+  'netflow.rtp_payload_type': {
+    category: 'netflow',
+    name: 'netflow.rtp_payload_type',
+    type: 'short',
+  },
+  'netflow.rtp_sequence_number': {
+    category: 'netflow',
+    name: 'netflow.rtp_sequence_number',
+    type: 'integer',
+  },
+  'netflow.sampler_id': {
+    category: 'netflow',
+    name: 'netflow.sampler_id',
+    type: 'short',
+  },
+  'netflow.sampler_mode': {
+    category: 'netflow',
+    name: 'netflow.sampler_mode',
+    type: 'short',
+  },
+  'netflow.sampler_name': {
+    category: 'netflow',
+    name: 'netflow.sampler_name',
+    type: 'keyword',
+  },
+  'netflow.sampler_random_interval': {
+    category: 'netflow',
+    name: 'netflow.sampler_random_interval',
+    type: 'long',
+  },
+  'netflow.sampling_algorithm': {
+    category: 'netflow',
+    name: 'netflow.sampling_algorithm',
+    type: 'short',
+  },
+  'netflow.sampling_flow_interval': {
+    category: 'netflow',
+    name: 'netflow.sampling_flow_interval',
+    type: 'long',
+  },
+  'netflow.sampling_flow_spacing': {
+    category: 'netflow',
+    name: 'netflow.sampling_flow_spacing',
+    type: 'long',
+  },
+  'netflow.sampling_interval': {
+    category: 'netflow',
+    name: 'netflow.sampling_interval',
+    type: 'long',
   },
   'netflow.sampling_packet_interval': {
     category: 'netflow',
@@ -30072,21 +44136,6 @@ export const fieldsBeat: BeatFields = {
   'netflow.sampling_packet_space': {
     category: 'netflow',
     name: 'netflow.sampling_packet_space',
-    type: 'long',
-  },
-  'netflow.sampling_time_interval': {
-    category: 'netflow',
-    name: 'netflow.sampling_time_interval',
-    type: 'long',
-  },
-  'netflow.sampling_time_space': {
-    category: 'netflow',
-    name: 'netflow.sampling_time_space',
-    type: 'long',
-  },
-  'netflow.sampling_size': {
-    category: 'netflow',
-    name: 'netflow.sampling_size',
     type: 'long',
   },
   'netflow.sampling_population': {
@@ -30099,414 +44148,49 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.sampling_probability',
     type: 'double',
   },
-  'netflow.data_link_frame_size': {
+  'netflow.sampling_size': {
     category: 'netflow',
-    name: 'netflow.data_link_frame_size',
+    name: 'netflow.sampling_size',
+    type: 'long',
+  },
+  'netflow.sampling_time_interval': {
+    category: 'netflow',
+    name: 'netflow.sampling_time_interval',
+    type: 'long',
+  },
+  'netflow.sampling_time_space': {
+    category: 'netflow',
+    name: 'netflow.sampling_time_space',
+    type: 'long',
+  },
+  'netflow.second_packet_banner': {
+    category: 'netflow',
+    name: 'netflow.second_packet_banner',
+    type: 'keyword',
+  },
+  'netflow.section_exported_octets': {
+    category: 'netflow',
+    name: 'netflow.section_exported_octets',
     type: 'integer',
   },
-  'netflow.ip_header_packet_section': {
+  'netflow.section_offset': {
     category: 'netflow',
-    name: 'netflow.ip_header_packet_section',
-    type: 'short',
-  },
-  'netflow.ip_payload_packet_section': {
-    category: 'netflow',
-    name: 'netflow.ip_payload_packet_section',
-    type: 'short',
-  },
-  'netflow.data_link_frame_section': {
-    category: 'netflow',
-    name: 'netflow.data_link_frame_section',
-    type: 'short',
-  },
-  'netflow.mpls_label_stack_section': {
-    category: 'netflow',
-    name: 'netflow.mpls_label_stack_section',
-    type: 'short',
-  },
-  'netflow.mpls_payload_packet_section': {
-    category: 'netflow',
-    name: 'netflow.mpls_payload_packet_section',
-    type: 'short',
-  },
-  'netflow.selector_id_total_pkts_observed': {
-    category: 'netflow',
-    name: 'netflow.selector_id_total_pkts_observed',
-    type: 'long',
-  },
-  'netflow.selector_id_total_pkts_selected': {
-    category: 'netflow',
-    name: 'netflow.selector_id_total_pkts_selected',
-    type: 'long',
-  },
-  'netflow.absolute_error': {
-    category: 'netflow',
-    name: 'netflow.absolute_error',
-    type: 'double',
-  },
-  'netflow.relative_error': {
-    category: 'netflow',
-    name: 'netflow.relative_error',
-    type: 'double',
-  },
-  'netflow.observation_time_seconds': {
-    category: 'netflow',
-    name: 'netflow.observation_time_seconds',
-    type: 'date',
-  },
-  'netflow.observation_time_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.observation_time_milliseconds',
-    type: 'date',
-  },
-  'netflow.observation_time_microseconds': {
-    category: 'netflow',
-    name: 'netflow.observation_time_microseconds',
-    type: 'date',
-  },
-  'netflow.observation_time_nanoseconds': {
-    category: 'netflow',
-    name: 'netflow.observation_time_nanoseconds',
-    type: 'date',
-  },
-  'netflow.digest_hash_value': {
-    category: 'netflow',
-    name: 'netflow.digest_hash_value',
-    type: 'long',
-  },
-  'netflow.hash_ip_payload_offset': {
-    category: 'netflow',
-    name: 'netflow.hash_ip_payload_offset',
-    type: 'long',
-  },
-  'netflow.hash_ip_payload_size': {
-    category: 'netflow',
-    name: 'netflow.hash_ip_payload_size',
-    type: 'long',
-  },
-  'netflow.hash_output_range_min': {
-    category: 'netflow',
-    name: 'netflow.hash_output_range_min',
-    type: 'long',
-  },
-  'netflow.hash_output_range_max': {
-    category: 'netflow',
-    name: 'netflow.hash_output_range_max',
-    type: 'long',
-  },
-  'netflow.hash_selected_range_min': {
-    category: 'netflow',
-    name: 'netflow.hash_selected_range_min',
-    type: 'long',
-  },
-  'netflow.hash_selected_range_max': {
-    category: 'netflow',
-    name: 'netflow.hash_selected_range_max',
-    type: 'long',
-  },
-  'netflow.hash_digest_output': {
-    category: 'netflow',
-    name: 'netflow.hash_digest_output',
-    type: 'boolean',
-  },
-  'netflow.hash_initialiser_value': {
-    category: 'netflow',
-    name: 'netflow.hash_initialiser_value',
-    type: 'long',
-  },
-  'netflow.selector_name': {
-    category: 'netflow',
-    name: 'netflow.selector_name',
-    type: 'keyword',
-  },
-  'netflow.upper_ci_limit': {
-    category: 'netflow',
-    name: 'netflow.upper_ci_limit',
-    type: 'double',
-  },
-  'netflow.lower_ci_limit': {
-    category: 'netflow',
-    name: 'netflow.lower_ci_limit',
-    type: 'double',
-  },
-  'netflow.confidence_level': {
-    category: 'netflow',
-    name: 'netflow.confidence_level',
-    type: 'double',
-  },
-  'netflow.information_element_data_type': {
-    category: 'netflow',
-    name: 'netflow.information_element_data_type',
-    type: 'short',
-  },
-  'netflow.information_element_description': {
-    category: 'netflow',
-    name: 'netflow.information_element_description',
-    type: 'keyword',
-  },
-  'netflow.information_element_name': {
-    category: 'netflow',
-    name: 'netflow.information_element_name',
-    type: 'keyword',
-  },
-  'netflow.information_element_range_begin': {
-    category: 'netflow',
-    name: 'netflow.information_element_range_begin',
-    type: 'long',
-  },
-  'netflow.information_element_range_end': {
-    category: 'netflow',
-    name: 'netflow.information_element_range_end',
-    type: 'long',
-  },
-  'netflow.information_element_semantics': {
-    category: 'netflow',
-    name: 'netflow.information_element_semantics',
-    type: 'short',
-  },
-  'netflow.information_element_units': {
-    category: 'netflow',
-    name: 'netflow.information_element_units',
+    name: 'netflow.section_offset',
     type: 'integer',
   },
-  'netflow.private_enterprise_number': {
+  'netflow.selection_sequence_id': {
     category: 'netflow',
-    name: 'netflow.private_enterprise_number',
+    name: 'netflow.selection_sequence_id',
     type: 'long',
   },
-  'netflow.virtual_station_interface_id': {
+  'netflow.selector_algorithm': {
     category: 'netflow',
-    name: 'netflow.virtual_station_interface_id',
-    type: 'short',
-  },
-  'netflow.virtual_station_interface_name': {
-    category: 'netflow',
-    name: 'netflow.virtual_station_interface_name',
-    type: 'keyword',
-  },
-  'netflow.virtual_station_uuid': {
-    category: 'netflow',
-    name: 'netflow.virtual_station_uuid',
-    type: 'short',
-  },
-  'netflow.virtual_station_name': {
-    category: 'netflow',
-    name: 'netflow.virtual_station_name',
-    type: 'keyword',
-  },
-  'netflow.layer2_segment_id': {
-    category: 'netflow',
-    name: 'netflow.layer2_segment_id',
-    type: 'long',
-  },
-  'netflow.layer2_octet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.layer2_octet_delta_count',
-    type: 'long',
-  },
-  'netflow.layer2_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.layer2_octet_total_count',
-    type: 'long',
-  },
-  'netflow.ingress_unicast_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.ingress_unicast_packet_total_count',
-    type: 'long',
-  },
-  'netflow.ingress_multicast_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.ingress_multicast_packet_total_count',
-    type: 'long',
-  },
-  'netflow.ingress_broadcast_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.ingress_broadcast_packet_total_count',
-    type: 'long',
-  },
-  'netflow.egress_unicast_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.egress_unicast_packet_total_count',
-    type: 'long',
-  },
-  'netflow.egress_broadcast_packet_total_count': {
-    category: 'netflow',
-    name: 'netflow.egress_broadcast_packet_total_count',
-    type: 'long',
-  },
-  'netflow.monitoring_interval_start_milli_seconds': {
-    category: 'netflow',
-    name: 'netflow.monitoring_interval_start_milli_seconds',
-    type: 'date',
-  },
-  'netflow.monitoring_interval_end_milli_seconds': {
-    category: 'netflow',
-    name: 'netflow.monitoring_interval_end_milli_seconds',
-    type: 'date',
-  },
-  'netflow.port_range_start': {
-    category: 'netflow',
-    name: 'netflow.port_range_start',
+    name: 'netflow.selector_algorithm',
     type: 'integer',
   },
-  'netflow.port_range_end': {
+  'netflow.selector_id': {
     category: 'netflow',
-    name: 'netflow.port_range_end',
-    type: 'integer',
-  },
-  'netflow.port_range_step_size': {
-    category: 'netflow',
-    name: 'netflow.port_range_step_size',
-    type: 'integer',
-  },
-  'netflow.port_range_num_ports': {
-    category: 'netflow',
-    name: 'netflow.port_range_num_ports',
-    type: 'integer',
-  },
-  'netflow.sta_mac_address': {
-    category: 'netflow',
-    name: 'netflow.sta_mac_address',
-    type: 'keyword',
-  },
-  'netflow.sta_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.sta_ipv4_address',
-    type: 'ip',
-  },
-  'netflow.wtp_mac_address': {
-    category: 'netflow',
-    name: 'netflow.wtp_mac_address',
-    type: 'keyword',
-  },
-  'netflow.ingress_interface_type': {
-    category: 'netflow',
-    name: 'netflow.ingress_interface_type',
-    type: 'long',
-  },
-  'netflow.egress_interface_type': {
-    category: 'netflow',
-    name: 'netflow.egress_interface_type',
-    type: 'long',
-  },
-  'netflow.rtp_sequence_number': {
-    category: 'netflow',
-    name: 'netflow.rtp_sequence_number',
-    type: 'integer',
-  },
-  'netflow.user_name': {
-    category: 'netflow',
-    name: 'netflow.user_name',
-    type: 'keyword',
-  },
-  'netflow.application_category_name': {
-    category: 'netflow',
-    name: 'netflow.application_category_name',
-    type: 'keyword',
-  },
-  'netflow.application_sub_category_name': {
-    category: 'netflow',
-    name: 'netflow.application_sub_category_name',
-    type: 'keyword',
-  },
-  'netflow.application_group_name': {
-    category: 'netflow',
-    name: 'netflow.application_group_name',
-    type: 'keyword',
-  },
-  'netflow.original_flows_present': {
-    category: 'netflow',
-    name: 'netflow.original_flows_present',
-    type: 'long',
-  },
-  'netflow.original_flows_initiated': {
-    category: 'netflow',
-    name: 'netflow.original_flows_initiated',
-    type: 'long',
-  },
-  'netflow.original_flows_completed': {
-    category: 'netflow',
-    name: 'netflow.original_flows_completed',
-    type: 'long',
-  },
-  'netflow.distinct_count_of_source_ip_address': {
-    category: 'netflow',
-    name: 'netflow.distinct_count_of_source_ip_address',
-    type: 'long',
-  },
-  'netflow.distinct_count_of_destination_ip_address': {
-    category: 'netflow',
-    name: 'netflow.distinct_count_of_destination_ip_address',
-    type: 'long',
-  },
-  'netflow.distinct_count_of_source_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.distinct_count_of_source_ipv4_address',
-    type: 'long',
-  },
-  'netflow.distinct_count_of_destination_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.distinct_count_of_destination_ipv4_address',
-    type: 'long',
-  },
-  'netflow.distinct_count_of_source_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.distinct_count_of_source_ipv6_address',
-    type: 'long',
-  },
-  'netflow.distinct_count_of_destination_ipv6_address': {
-    category: 'netflow',
-    name: 'netflow.distinct_count_of_destination_ipv6_address',
-    type: 'long',
-  },
-  'netflow.value_distribution_method': {
-    category: 'netflow',
-    name: 'netflow.value_distribution_method',
-    type: 'short',
-  },
-  'netflow.rfc3550_jitter_milliseconds': {
-    category: 'netflow',
-    name: 'netflow.rfc3550_jitter_milliseconds',
-    type: 'long',
-  },
-  'netflow.rfc3550_jitter_microseconds': {
-    category: 'netflow',
-    name: 'netflow.rfc3550_jitter_microseconds',
-    type: 'long',
-  },
-  'netflow.rfc3550_jitter_nanoseconds': {
-    category: 'netflow',
-    name: 'netflow.rfc3550_jitter_nanoseconds',
-    type: 'long',
-  },
-  'netflow.dot1q_dei': {
-    category: 'netflow',
-    name: 'netflow.dot1q_dei',
-    type: 'boolean',
-  },
-  'netflow.dot1q_customer_dei': {
-    category: 'netflow',
-    name: 'netflow.dot1q_customer_dei',
-    type: 'boolean',
-  },
-  'netflow.flow_selector_algorithm': {
-    category: 'netflow',
-    name: 'netflow.flow_selector_algorithm',
-    type: 'integer',
-  },
-  'netflow.flow_selected_octet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.flow_selected_octet_delta_count',
-    type: 'long',
-  },
-  'netflow.flow_selected_packet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.flow_selected_packet_delta_count',
-    type: 'long',
-  },
-  'netflow.flow_selected_flow_delta_count': {
-    category: 'netflow',
-    name: 'netflow.flow_selected_flow_delta_count',
+    name: 'netflow.selector_id',
     type: 'long',
   },
   'netflow.selector_id_total_flows_observed': {
@@ -30519,30 +44203,305 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.selector_id_total_flows_selected',
     type: 'long',
   },
-  'netflow.sampling_flow_interval': {
+  'netflow.selector_id_total_pkts_observed': {
     category: 'netflow',
-    name: 'netflow.sampling_flow_interval',
+    name: 'netflow.selector_id_total_pkts_observed',
     type: 'long',
   },
-  'netflow.sampling_flow_spacing': {
+  'netflow.selector_id_total_pkts_selected': {
     category: 'netflow',
-    name: 'netflow.sampling_flow_spacing',
+    name: 'netflow.selector_id_total_pkts_selected',
     type: 'long',
   },
-  'netflow.flow_sampling_time_interval': {
+  'netflow.selector_name': {
     category: 'netflow',
-    name: 'netflow.flow_sampling_time_interval',
-    type: 'long',
+    name: 'netflow.selector_name',
+    type: 'keyword',
   },
-  'netflow.flow_sampling_time_spacing': {
+  'netflow.service_name': {
     category: 'netflow',
-    name: 'netflow.flow_sampling_time_spacing',
-    type: 'long',
+    name: 'netflow.service_name',
+    type: 'keyword',
   },
-  'netflow.hash_flow_domain': {
+  'netflow.session_scope': {
     category: 'netflow',
-    name: 'netflow.hash_flow_domain',
+    name: 'netflow.session_scope',
+    type: 'short',
+  },
+  'netflow.silk_app_label': {
+    category: 'netflow',
+    name: 'netflow.silk_app_label',
     type: 'integer',
+  },
+  'netflow.small_packet_count': {
+    category: 'netflow',
+    name: 'netflow.small_packet_count',
+    type: 'long',
+  },
+  'netflow.source_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.source_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.source_ipv4_prefix': {
+    category: 'netflow',
+    name: 'netflow.source_ipv4_prefix',
+    type: 'ip',
+  },
+  'netflow.source_ipv4_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.source_ipv4_prefix_length',
+    type: 'short',
+  },
+  'netflow.source_ipv6_address': {
+    category: 'netflow',
+    name: 'netflow.source_ipv6_address',
+    type: 'ip',
+  },
+  'netflow.source_ipv6_prefix': {
+    category: 'netflow',
+    name: 'netflow.source_ipv6_prefix',
+    type: 'ip',
+  },
+  'netflow.source_ipv6_prefix_length': {
+    category: 'netflow',
+    name: 'netflow.source_ipv6_prefix_length',
+    type: 'short',
+  },
+  'netflow.source_mac_address': {
+    category: 'netflow',
+    name: 'netflow.source_mac_address',
+    type: 'keyword',
+  },
+  'netflow.source_transport_port': {
+    category: 'netflow',
+    name: 'netflow.source_transport_port',
+    type: 'integer',
+  },
+  'netflow.source_transport_ports_limit': {
+    category: 'netflow',
+    name: 'netflow.source_transport_ports_limit',
+    type: 'integer',
+  },
+  'netflow.src_traffic_index': {
+    category: 'netflow',
+    name: 'netflow.src_traffic_index',
+    type: 'long',
+  },
+  'netflow.ssl_cert_serial_number': {
+    category: 'netflow',
+    name: 'netflow.ssl_cert_serial_number',
+    type: 'keyword',
+  },
+  'netflow.ssl_cert_signature': {
+    category: 'netflow',
+    name: 'netflow.ssl_cert_signature',
+    type: 'keyword',
+  },
+  'netflow.ssl_cert_validity_not_after': {
+    category: 'netflow',
+    name: 'netflow.ssl_cert_validity_not_after',
+    type: 'keyword',
+  },
+  'netflow.ssl_cert_validity_not_before': {
+    category: 'netflow',
+    name: 'netflow.ssl_cert_validity_not_before',
+    type: 'keyword',
+  },
+  'netflow.ssl_cert_version': {
+    category: 'netflow',
+    name: 'netflow.ssl_cert_version',
+    type: 'short',
+  },
+  'netflow.ssl_certificate_hash': {
+    category: 'netflow',
+    name: 'netflow.ssl_certificate_hash',
+    type: 'keyword',
+  },
+  'netflow.ssl_cipher': {
+    category: 'netflow',
+    name: 'netflow.ssl_cipher',
+    type: 'keyword',
+  },
+  'netflow.ssl_client_version': {
+    category: 'netflow',
+    name: 'netflow.ssl_client_version',
+    type: 'short',
+  },
+  'netflow.ssl_compression_method': {
+    category: 'netflow',
+    name: 'netflow.ssl_compression_method',
+    type: 'short',
+  },
+  'netflow.ssl_object_type': {
+    category: 'netflow',
+    name: 'netflow.ssl_object_type',
+    type: 'keyword',
+  },
+  'netflow.ssl_object_value': {
+    category: 'netflow',
+    name: 'netflow.ssl_object_value',
+    type: 'keyword',
+  },
+  'netflow.ssl_public_key_algorithm': {
+    category: 'netflow',
+    name: 'netflow.ssl_public_key_algorithm',
+    type: 'keyword',
+  },
+  'netflow.ssl_public_key_length': {
+    category: 'netflow',
+    name: 'netflow.ssl_public_key_length',
+    type: 'keyword',
+  },
+  'netflow.ssl_server_cipher': {
+    category: 'netflow',
+    name: 'netflow.ssl_server_cipher',
+    type: 'long',
+  },
+  'netflow.ssl_server_name': {
+    category: 'netflow',
+    name: 'netflow.ssl_server_name',
+    type: 'keyword',
+  },
+  'netflow.sta_ipv4_address': {
+    category: 'netflow',
+    name: 'netflow.sta_ipv4_address',
+    type: 'ip',
+  },
+  'netflow.sta_mac_address': {
+    category: 'netflow',
+    name: 'netflow.sta_mac_address',
+    type: 'keyword',
+  },
+  'netflow.standard_deviation_interarrival_time': {
+    category: 'netflow',
+    name: 'netflow.standard_deviation_interarrival_time',
+    type: 'long',
+  },
+  'netflow.standard_deviation_payload_length': {
+    category: 'netflow',
+    name: 'netflow.standard_deviation_payload_length',
+    type: 'short',
+  },
+  'netflow.system_init_time_milliseconds': {
+    category: 'netflow',
+    name: 'netflow.system_init_time_milliseconds',
+    type: 'date',
+  },
+  'netflow.tcp_ack_total_count': {
+    category: 'netflow',
+    name: 'netflow.tcp_ack_total_count',
+    type: 'long',
+  },
+  'netflow.tcp_acknowledgement_number': {
+    category: 'netflow',
+    name: 'netflow.tcp_acknowledgement_number',
+    type: 'long',
+  },
+  'netflow.tcp_control_bits': {
+    category: 'netflow',
+    name: 'netflow.tcp_control_bits',
+    type: 'integer',
+  },
+  'netflow.tcp_destination_port': {
+    category: 'netflow',
+    name: 'netflow.tcp_destination_port',
+    type: 'integer',
+  },
+  'netflow.tcp_fin_total_count': {
+    category: 'netflow',
+    name: 'netflow.tcp_fin_total_count',
+    type: 'long',
+  },
+  'netflow.tcp_header_length': {
+    category: 'netflow',
+    name: 'netflow.tcp_header_length',
+    type: 'short',
+  },
+  'netflow.tcp_options': {
+    category: 'netflow',
+    name: 'netflow.tcp_options',
+    type: 'long',
+  },
+  'netflow.tcp_psh_total_count': {
+    category: 'netflow',
+    name: 'netflow.tcp_psh_total_count',
+    type: 'long',
+  },
+  'netflow.tcp_rst_total_count': {
+    category: 'netflow',
+    name: 'netflow.tcp_rst_total_count',
+    type: 'long',
+  },
+  'netflow.tcp_sequence_number': {
+    category: 'netflow',
+    name: 'netflow.tcp_sequence_number',
+    type: 'long',
+  },
+  'netflow.tcp_source_port': {
+    category: 'netflow',
+    name: 'netflow.tcp_source_port',
+    type: 'integer',
+  },
+  'netflow.tcp_syn_total_count': {
+    category: 'netflow',
+    name: 'netflow.tcp_syn_total_count',
+    type: 'long',
+  },
+  'netflow.tcp_urg_total_count': {
+    category: 'netflow',
+    name: 'netflow.tcp_urg_total_count',
+    type: 'long',
+  },
+  'netflow.tcp_urgent_pointer': {
+    category: 'netflow',
+    name: 'netflow.tcp_urgent_pointer',
+    type: 'integer',
+  },
+  'netflow.tcp_window_scale': {
+    category: 'netflow',
+    name: 'netflow.tcp_window_scale',
+    type: 'integer',
+  },
+  'netflow.tcp_window_size': {
+    category: 'netflow',
+    name: 'netflow.tcp_window_size',
+    type: 'integer',
+  },
+  'netflow.template_id': {
+    category: 'netflow',
+    name: 'netflow.template_id',
+    type: 'integer',
+  },
+  'netflow.tftp_filename': {
+    category: 'netflow',
+    name: 'netflow.tftp_filename',
+    type: 'keyword',
+  },
+  'netflow.tftp_mode': {
+    category: 'netflow',
+    name: 'netflow.tftp_mode',
+    type: 'keyword',
+  },
+  'netflow.timestamp': {
+    category: 'netflow',
+    name: 'netflow.timestamp',
+    type: 'long',
+  },
+  'netflow.timestamp_absolute_monitoring-interval': {
+    category: 'netflow',
+    name: 'netflow.timestamp_absolute_monitoring-interval',
+    type: 'long',
+  },
+  'netflow.total_length_ipv4': {
+    category: 'netflow',
+    name: 'netflow.total_length_ipv4',
+    type: 'integer',
+  },
+  'netflow.traffic_type': {
+    category: 'netflow',
+    name: 'netflow.traffic_type',
+    type: 'short',
   },
   'netflow.transport_octet_delta_count': {
     category: 'netflow',
@@ -30554,397 +44513,180 @@ export const fieldsBeat: BeatFields = {
     name: 'netflow.transport_packet_delta_count',
     type: 'long',
   },
-  'netflow.original_exporter_ipv4_address': {
+  'netflow.tunnel_technology': {
     category: 'netflow',
-    name: 'netflow.original_exporter_ipv4_address',
+    name: 'netflow.tunnel_technology',
+    type: 'keyword',
+  },
+  'netflow.udp_destination_port': {
+    category: 'netflow',
+    name: 'netflow.udp_destination_port',
+    type: 'integer',
+  },
+  'netflow.udp_message_length': {
+    category: 'netflow',
+    name: 'netflow.udp_message_length',
+    type: 'integer',
+  },
+  'netflow.udp_source_port': {
+    category: 'netflow',
+    name: 'netflow.udp_source_port',
+    type: 'integer',
+  },
+  'netflow.union_tcp_flags': {
+    category: 'netflow',
+    name: 'netflow.union_tcp_flags',
+    type: 'short',
+  },
+  'netflow.upper_ci_limit': {
+    category: 'netflow',
+    name: 'netflow.upper_ci_limit',
+    type: 'double',
+  },
+  'netflow.user_name': {
+    category: 'netflow',
+    name: 'netflow.user_name',
+    type: 'keyword',
+  },
+  'netflow.username': {
+    category: 'netflow',
+    name: 'netflow.username',
+    type: 'keyword',
+  },
+  'netflow.value_distribution_method': {
+    category: 'netflow',
+    name: 'netflow.value_distribution_method',
+    type: 'short',
+  },
+  'netflow.viptela_vpn_id': {
+    category: 'netflow',
+    name: 'netflow.viptela_vpn_id',
+    type: 'long',
+  },
+  'netflow.virtual_station_interface_id': {
+    category: 'netflow',
+    name: 'netflow.virtual_station_interface_id',
+    type: 'short',
+  },
+  'netflow.virtual_station_interface_name': {
+    category: 'netflow',
+    name: 'netflow.virtual_station_interface_name',
+    type: 'keyword',
+  },
+  'netflow.virtual_station_name': {
+    category: 'netflow',
+    name: 'netflow.virtual_station_name',
+    type: 'keyword',
+  },
+  'netflow.virtual_station_uuid': {
+    category: 'netflow',
+    name: 'netflow.virtual_station_uuid',
+    type: 'short',
+  },
+  'netflow.vlan_id': {
+    category: 'netflow',
+    name: 'netflow.vlan_id',
+    type: 'integer',
+  },
+  'netflow.vmware_egress_interface_attr': {
+    category: 'netflow',
+    name: 'netflow.vmware_egress_interface_attr',
+    type: 'integer',
+  },
+  'netflow.vmware_ingress_interface_attr': {
+    category: 'netflow',
+    name: 'netflow.vmware_ingress_interface_attr',
+    type: 'integer',
+  },
+  'netflow.vmware_tenant_dest_ipv4': {
+    category: 'netflow',
+    name: 'netflow.vmware_tenant_dest_ipv4',
     type: 'ip',
   },
-  'netflow.original_exporter_ipv6_address': {
+  'netflow.vmware_tenant_dest_ipv6': {
     category: 'netflow',
-    name: 'netflow.original_exporter_ipv6_address',
+    name: 'netflow.vmware_tenant_dest_ipv6',
     type: 'ip',
   },
-  'netflow.original_observation_domain_id': {
+  'netflow.vmware_tenant_dest_port': {
     category: 'netflow',
-    name: 'netflow.original_observation_domain_id',
-    type: 'long',
-  },
-  'netflow.intermediate_process_id': {
-    category: 'netflow',
-    name: 'netflow.intermediate_process_id',
-    type: 'long',
-  },
-  'netflow.ignored_data_record_total_count': {
-    category: 'netflow',
-    name: 'netflow.ignored_data_record_total_count',
-    type: 'long',
-  },
-  'netflow.data_link_frame_type': {
-    category: 'netflow',
-    name: 'netflow.data_link_frame_type',
+    name: 'netflow.vmware_tenant_dest_port',
     type: 'integer',
   },
-  'netflow.section_offset': {
+  'netflow.vmware_tenant_protocol': {
     category: 'netflow',
-    name: 'netflow.section_offset',
-    type: 'integer',
-  },
-  'netflow.section_exported_octets': {
-    category: 'netflow',
-    name: 'netflow.section_exported_octets',
-    type: 'integer',
-  },
-  'netflow.dot1q_service_instance_tag': {
-    category: 'netflow',
-    name: 'netflow.dot1q_service_instance_tag',
+    name: 'netflow.vmware_tenant_protocol',
     type: 'short',
   },
-  'netflow.dot1q_service_instance_id': {
+  'netflow.vmware_tenant_source_ipv4': {
     category: 'netflow',
-    name: 'netflow.dot1q_service_instance_id',
-    type: 'long',
-  },
-  'netflow.dot1q_service_instance_priority': {
-    category: 'netflow',
-    name: 'netflow.dot1q_service_instance_priority',
-    type: 'short',
-  },
-  'netflow.dot1q_customer_source_mac_address': {
-    category: 'netflow',
-    name: 'netflow.dot1q_customer_source_mac_address',
-    type: 'keyword',
-  },
-  'netflow.dot1q_customer_destination_mac_address': {
-    category: 'netflow',
-    name: 'netflow.dot1q_customer_destination_mac_address',
-    type: 'keyword',
-  },
-  'netflow.post_layer2_octet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.post_layer2_octet_delta_count',
-    type: 'long',
-  },
-  'netflow.post_mcast_layer2_octet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.post_mcast_layer2_octet_delta_count',
-    type: 'long',
-  },
-  'netflow.post_layer2_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.post_layer2_octet_total_count',
-    type: 'long',
-  },
-  'netflow.post_mcast_layer2_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.post_mcast_layer2_octet_total_count',
-    type: 'long',
-  },
-  'netflow.minimum_layer2_total_length': {
-    category: 'netflow',
-    name: 'netflow.minimum_layer2_total_length',
-    type: 'long',
-  },
-  'netflow.maximum_layer2_total_length': {
-    category: 'netflow',
-    name: 'netflow.maximum_layer2_total_length',
-    type: 'long',
-  },
-  'netflow.dropped_layer2_octet_delta_count': {
-    category: 'netflow',
-    name: 'netflow.dropped_layer2_octet_delta_count',
-    type: 'long',
-  },
-  'netflow.dropped_layer2_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.dropped_layer2_octet_total_count',
-    type: 'long',
-  },
-  'netflow.ignored_layer2_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.ignored_layer2_octet_total_count',
-    type: 'long',
-  },
-  'netflow.not_sent_layer2_octet_total_count': {
-    category: 'netflow',
-    name: 'netflow.not_sent_layer2_octet_total_count',
-    type: 'long',
-  },
-  'netflow.layer2_octet_delta_sum_of_squares': {
-    category: 'netflow',
-    name: 'netflow.layer2_octet_delta_sum_of_squares',
-    type: 'long',
-  },
-  'netflow.layer2_octet_total_sum_of_squares': {
-    category: 'netflow',
-    name: 'netflow.layer2_octet_total_sum_of_squares',
-    type: 'long',
-  },
-  'netflow.layer2_frame_delta_count': {
-    category: 'netflow',
-    name: 'netflow.layer2_frame_delta_count',
-    type: 'long',
-  },
-  'netflow.layer2_frame_total_count': {
-    category: 'netflow',
-    name: 'netflow.layer2_frame_total_count',
-    type: 'long',
-  },
-  'netflow.pseudo_wire_destination_ipv4_address': {
-    category: 'netflow',
-    name: 'netflow.pseudo_wire_destination_ipv4_address',
+    name: 'netflow.vmware_tenant_source_ipv4',
     type: 'ip',
   },
-  'netflow.ignored_layer2_frame_total_count': {
+  'netflow.vmware_tenant_source_ipv6': {
     category: 'netflow',
-    name: 'netflow.ignored_layer2_frame_total_count',
-    type: 'long',
-  },
-  'netflow.mib_object_value_integer': {
-    category: 'netflow',
-    name: 'netflow.mib_object_value_integer',
-    type: 'integer',
-  },
-  'netflow.mib_object_value_octet_string': {
-    category: 'netflow',
-    name: 'netflow.mib_object_value_octet_string',
-    type: 'short',
-  },
-  'netflow.mib_object_value_oid': {
-    category: 'netflow',
-    name: 'netflow.mib_object_value_oid',
-    type: 'short',
-  },
-  'netflow.mib_object_value_bits': {
-    category: 'netflow',
-    name: 'netflow.mib_object_value_bits',
-    type: 'short',
-  },
-  'netflow.mib_object_value_ip_address': {
-    category: 'netflow',
-    name: 'netflow.mib_object_value_ip_address',
+    name: 'netflow.vmware_tenant_source_ipv6',
     type: 'ip',
   },
-  'netflow.mib_object_value_counter': {
+  'netflow.vmware_tenant_source_port': {
     category: 'netflow',
-    name: 'netflow.mib_object_value_counter',
-    type: 'long',
-  },
-  'netflow.mib_object_value_gauge': {
-    category: 'netflow',
-    name: 'netflow.mib_object_value_gauge',
-    type: 'long',
-  },
-  'netflow.mib_object_value_time_ticks': {
-    category: 'netflow',
-    name: 'netflow.mib_object_value_time_ticks',
-    type: 'long',
-  },
-  'netflow.mib_object_value_unsigned': {
-    category: 'netflow',
-    name: 'netflow.mib_object_value_unsigned',
-    type: 'long',
-  },
-  'netflow.mib_object_identifier': {
-    category: 'netflow',
-    name: 'netflow.mib_object_identifier',
-    type: 'short',
-  },
-  'netflow.mib_sub_identifier': {
-    category: 'netflow',
-    name: 'netflow.mib_sub_identifier',
-    type: 'long',
-  },
-  'netflow.mib_index_indicator': {
-    category: 'netflow',
-    name: 'netflow.mib_index_indicator',
-    type: 'long',
-  },
-  'netflow.mib_capture_time_semantics': {
-    category: 'netflow',
-    name: 'netflow.mib_capture_time_semantics',
-    type: 'short',
-  },
-  'netflow.mib_context_engine_id': {
-    category: 'netflow',
-    name: 'netflow.mib_context_engine_id',
-    type: 'short',
-  },
-  'netflow.mib_context_name': {
-    category: 'netflow',
-    name: 'netflow.mib_context_name',
-    type: 'keyword',
-  },
-  'netflow.mib_object_name': {
-    category: 'netflow',
-    name: 'netflow.mib_object_name',
-    type: 'keyword',
-  },
-  'netflow.mib_object_description': {
-    category: 'netflow',
-    name: 'netflow.mib_object_description',
-    type: 'keyword',
-  },
-  'netflow.mib_object_syntax': {
-    category: 'netflow',
-    name: 'netflow.mib_object_syntax',
-    type: 'keyword',
-  },
-  'netflow.mib_module_name': {
-    category: 'netflow',
-    name: 'netflow.mib_module_name',
-    type: 'keyword',
-  },
-  'netflow.mobile_imsi': {
-    category: 'netflow',
-    name: 'netflow.mobile_imsi',
-    type: 'keyword',
-  },
-  'netflow.mobile_msisdn': {
-    category: 'netflow',
-    name: 'netflow.mobile_msisdn',
-    type: 'keyword',
-  },
-  'netflow.http_status_code': {
-    category: 'netflow',
-    name: 'netflow.http_status_code',
+    name: 'netflow.vmware_tenant_source_port',
     type: 'integer',
   },
-  'netflow.source_transport_ports_limit': {
+  'netflow.vmware_vxlan_export_role': {
     category: 'netflow',
-    name: 'netflow.source_transport_ports_limit',
-    type: 'integer',
-  },
-  'netflow.http_request_method': {
-    category: 'netflow',
-    name: 'netflow.http_request_method',
-    type: 'keyword',
-  },
-  'netflow.http_request_host': {
-    category: 'netflow',
-    name: 'netflow.http_request_host',
-    type: 'keyword',
-  },
-  'netflow.http_request_target': {
-    category: 'netflow',
-    name: 'netflow.http_request_target',
-    type: 'keyword',
-  },
-  'netflow.http_message_version': {
-    category: 'netflow',
-    name: 'netflow.http_message_version',
-    type: 'keyword',
-  },
-  'netflow.nat_instance_id': {
-    category: 'netflow',
-    name: 'netflow.nat_instance_id',
-    type: 'long',
-  },
-  'netflow.internal_address_realm': {
-    category: 'netflow',
-    name: 'netflow.internal_address_realm',
+    name: 'netflow.vmware_vxlan_export_role',
     type: 'short',
-  },
-  'netflow.external_address_realm': {
-    category: 'netflow',
-    name: 'netflow.external_address_realm',
-    type: 'short',
-  },
-  'netflow.nat_quota_exceeded_event': {
-    category: 'netflow',
-    name: 'netflow.nat_quota_exceeded_event',
-    type: 'long',
-  },
-  'netflow.nat_threshold_event': {
-    category: 'netflow',
-    name: 'netflow.nat_threshold_event',
-    type: 'long',
-  },
-  'netflow.http_user_agent': {
-    category: 'netflow',
-    name: 'netflow.http_user_agent',
-    type: 'keyword',
-  },
-  'netflow.http_content_type': {
-    category: 'netflow',
-    name: 'netflow.http_content_type',
-    type: 'keyword',
-  },
-  'netflow.http_reason_phrase': {
-    category: 'netflow',
-    name: 'netflow.http_reason_phrase',
-    type: 'keyword',
-  },
-  'netflow.max_session_entries': {
-    category: 'netflow',
-    name: 'netflow.max_session_entries',
-    type: 'long',
-  },
-  'netflow.max_bib_entries': {
-    category: 'netflow',
-    name: 'netflow.max_bib_entries',
-    type: 'long',
-  },
-  'netflow.max_entries_per_user': {
-    category: 'netflow',
-    name: 'netflow.max_entries_per_user',
-    type: 'long',
-  },
-  'netflow.max_subscribers': {
-    category: 'netflow',
-    name: 'netflow.max_subscribers',
-    type: 'long',
-  },
-  'netflow.max_fragments_pending_reassembly': {
-    category: 'netflow',
-    name: 'netflow.max_fragments_pending_reassembly',
-    type: 'long',
-  },
-  'netflow.address_pool_high_threshold': {
-    category: 'netflow',
-    name: 'netflow.address_pool_high_threshold',
-    type: 'long',
-  },
-  'netflow.address_pool_low_threshold': {
-    category: 'netflow',
-    name: 'netflow.address_pool_low_threshold',
-    type: 'long',
-  },
-  'netflow.address_port_mapping_high_threshold': {
-    category: 'netflow',
-    name: 'netflow.address_port_mapping_high_threshold',
-    type: 'long',
-  },
-  'netflow.address_port_mapping_low_threshold': {
-    category: 'netflow',
-    name: 'netflow.address_port_mapping_low_threshold',
-    type: 'long',
-  },
-  'netflow.address_port_mapping_per_user_high_threshold': {
-    category: 'netflow',
-    name: 'netflow.address_port_mapping_per_user_high_threshold',
-    type: 'long',
-  },
-  'netflow.global_address_mapping_high_threshold': {
-    category: 'netflow',
-    name: 'netflow.global_address_mapping_high_threshold',
-    type: 'long',
   },
   'netflow.vpn_identifier': {
     category: 'netflow',
     name: 'netflow.vpn_identifier',
     type: 'short',
   },
-  bucket_name: {
-    category: 'base',
-    description: 'Name of the S3 bucket that this log retrieved from. ',
-    name: 'bucket_name',
+  'netflow.vr_fname': {
+    category: 'netflow',
+    name: 'netflow.vr_fname',
     type: 'keyword',
   },
-  object_key: {
-    category: 'base',
-    description: 'Name of the S3 object that this log retrieved from. ',
-    name: 'object_key',
+  'netflow.waasoptimization_segment': {
+    category: 'netflow',
+    name: 'netflow.waasoptimization_segment',
+    type: 'short',
+  },
+  'netflow.wlan_channel_id': {
+    category: 'netflow',
+    name: 'netflow.wlan_channel_id',
+    type: 'short',
+  },
+  'netflow.wlan_ssid': {
+    category: 'netflow',
+    name: 'netflow.wlan_ssid',
     type: 'keyword',
+  },
+  'netflow.wtp_mac_address': {
+    category: 'netflow',
+    name: 'netflow.wtp_mac_address',
+    type: 'keyword',
+  },
+  'netflow.xlate_destination_address_ip_v4': {
+    category: 'netflow',
+    name: 'netflow.xlate_destination_address_ip_v4',
+    type: 'ip',
+  },
+  'netflow.xlate_destination_port': {
+    category: 'netflow',
+    name: 'netflow.xlate_destination_port',
+    type: 'integer',
+  },
+  'netflow.xlate_source_address_ip_v4': {
+    category: 'netflow',
+    name: 'netflow.xlate_source_address_ip_v4',
+    type: 'ip',
+  },
+  'netflow.xlate_source_port': {
+    category: 'netflow',
+    name: 'netflow.xlate_source_port',
+    type: 'integer',
   },
   'cef.version': {
     category: 'cef',
@@ -33954,6 +47696,392 @@ export const fieldsBeat: BeatFields = {
       'If the Redis command has resulted in an error, this field contains the error message returned by the Redis server. ',
     name: 'redis.error',
   },
+  'sip.code': {
+    category: 'sip',
+    description: 'Response status code.',
+    name: 'sip.code',
+    type: 'keyword',
+  },
+  'sip.method': {
+    category: 'sip',
+    description: 'Request method.',
+    name: 'sip.method',
+    type: 'keyword',
+  },
+  'sip.status': {
+    category: 'sip',
+    description: 'Response status phrase.',
+    name: 'sip.status',
+    type: 'keyword',
+  },
+  'sip.type': {
+    category: 'sip',
+    description: 'Either request or response.',
+    name: 'sip.type',
+    type: 'keyword',
+  },
+  'sip.version': {
+    category: 'sip',
+    description: 'SIP protocol version.',
+    name: 'sip.version',
+    type: 'keyword',
+  },
+  'sip.uri.original': {
+    category: 'sip',
+    description: 'The original URI.',
+    name: 'sip.uri.original',
+    type: 'keyword',
+  },
+  'sip.uri.scheme': {
+    category: 'sip',
+    description: 'The URI scheme.',
+    name: 'sip.uri.scheme',
+    type: 'keyword',
+  },
+  'sip.uri.username': {
+    category: 'sip',
+    description: 'The URI user name.',
+    name: 'sip.uri.username',
+    type: 'keyword',
+  },
+  'sip.uri.host': {
+    category: 'sip',
+    description: 'The URI host.',
+    name: 'sip.uri.host',
+    type: 'keyword',
+  },
+  'sip.uri.port': {
+    category: 'sip',
+    description: 'The URI port.',
+    name: 'sip.uri.port',
+    type: 'keyword',
+  },
+  'sip.accept': {
+    category: 'sip',
+    description: 'Accept header value.',
+    name: 'sip.accept',
+    type: 'keyword',
+  },
+  'sip.allow': {
+    category: 'sip',
+    description: 'Allowed methods.',
+    name: 'sip.allow',
+    type: 'keyword',
+  },
+  'sip.call_id': {
+    category: 'sip',
+    description: 'Call ID.',
+    name: 'sip.call_id',
+    type: 'keyword',
+  },
+  'sip.content_length': {
+    category: 'sip',
+    name: 'sip.content_length',
+    type: 'long',
+  },
+  'sip.content_type': {
+    category: 'sip',
+    name: 'sip.content_type',
+    type: 'keyword',
+  },
+  'sip.max_forwards': {
+    category: 'sip',
+    name: 'sip.max_forwards',
+    type: 'long',
+  },
+  'sip.supported': {
+    category: 'sip',
+    description: 'Supported methods.',
+    name: 'sip.supported',
+    type: 'keyword',
+  },
+  'sip.user_agent.original': {
+    category: 'sip',
+    name: 'sip.user_agent.original',
+    type: 'keyword',
+  },
+  'sip.private.uri.original': {
+    category: 'sip',
+    description: 'Private original URI.',
+    name: 'sip.private.uri.original',
+    type: 'keyword',
+  },
+  'sip.private.uri.scheme': {
+    category: 'sip',
+    description: 'Private URI scheme.',
+    name: 'sip.private.uri.scheme',
+    type: 'keyword',
+  },
+  'sip.private.uri.username': {
+    category: 'sip',
+    description: 'Private URI user name.',
+    name: 'sip.private.uri.username',
+    type: 'keyword',
+  },
+  'sip.private.uri.host': {
+    category: 'sip',
+    description: 'Private URI host.',
+    name: 'sip.private.uri.host',
+    type: 'keyword',
+  },
+  'sip.private.uri.port': {
+    category: 'sip',
+    description: 'Private URI port.',
+    name: 'sip.private.uri.port',
+    type: 'keyword',
+  },
+  'sip.cseq.code': {
+    category: 'sip',
+    description: 'Sequence code.',
+    name: 'sip.cseq.code',
+    type: 'keyword',
+  },
+  'sip.cseq.method': {
+    category: 'sip',
+    description: 'Sequence method.',
+    name: 'sip.cseq.method',
+    type: 'keyword',
+  },
+  'sip.via.original': {
+    category: 'sip',
+    description: 'The original Via value.',
+    name: 'sip.via.original',
+    type: 'keyword',
+  },
+  'sip.to.display_info': {
+    category: 'sip',
+    description: 'To display info',
+    name: 'sip.to.display_info',
+    type: 'keyword',
+  },
+  'sip.to.uri.original': {
+    category: 'sip',
+    description: 'To original URI',
+    name: 'sip.to.uri.original',
+    type: 'keyword',
+  },
+  'sip.to.uri.scheme': {
+    category: 'sip',
+    description: 'To URI scheme',
+    name: 'sip.to.uri.scheme',
+    type: 'keyword',
+  },
+  'sip.to.uri.username': {
+    category: 'sip',
+    description: 'To URI user name',
+    name: 'sip.to.uri.username',
+    type: 'keyword',
+  },
+  'sip.to.uri.host': {
+    category: 'sip',
+    description: 'To URI host',
+    name: 'sip.to.uri.host',
+    type: 'keyword',
+  },
+  'sip.to.uri.port': {
+    category: 'sip',
+    description: 'To URI port',
+    name: 'sip.to.uri.port',
+    type: 'keyword',
+  },
+  'sip.to.tag': {
+    category: 'sip',
+    description: 'To tag',
+    name: 'sip.to.tag',
+    type: 'keyword',
+  },
+  'sip.from.display_info': {
+    category: 'sip',
+    description: 'From display info',
+    name: 'sip.from.display_info',
+    type: 'keyword',
+  },
+  'sip.from.uri.original': {
+    category: 'sip',
+    description: 'From original URI',
+    name: 'sip.from.uri.original',
+    type: 'keyword',
+  },
+  'sip.from.uri.scheme': {
+    category: 'sip',
+    description: 'From URI scheme',
+    name: 'sip.from.uri.scheme',
+    type: 'keyword',
+  },
+  'sip.from.uri.username': {
+    category: 'sip',
+    description: 'From URI user name',
+    name: 'sip.from.uri.username',
+    type: 'keyword',
+  },
+  'sip.from.uri.host': {
+    category: 'sip',
+    description: 'From URI host',
+    name: 'sip.from.uri.host',
+    type: 'keyword',
+  },
+  'sip.from.uri.port': {
+    category: 'sip',
+    description: 'From URI port',
+    name: 'sip.from.uri.port',
+    type: 'keyword',
+  },
+  'sip.from.tag': {
+    category: 'sip',
+    description: 'From tag',
+    name: 'sip.from.tag',
+    type: 'keyword',
+  },
+  'sip.contact.display_info': {
+    category: 'sip',
+    description: 'Contact display info',
+    name: 'sip.contact.display_info',
+    type: 'keyword',
+  },
+  'sip.contact.uri.original': {
+    category: 'sip',
+    description: 'Contact original URI',
+    name: 'sip.contact.uri.original',
+    type: 'keyword',
+  },
+  'sip.contact.uri.scheme': {
+    category: 'sip',
+    description: 'Contat URI scheme',
+    name: 'sip.contact.uri.scheme',
+    type: 'keyword',
+  },
+  'sip.contact.uri.username': {
+    category: 'sip',
+    description: 'Contact URI user name',
+    name: 'sip.contact.uri.username',
+    type: 'keyword',
+  },
+  'sip.contact.uri.host': {
+    category: 'sip',
+    description: 'Contact URI host',
+    name: 'sip.contact.uri.host',
+    type: 'keyword',
+  },
+  'sip.contact.uri.port': {
+    category: 'sip',
+    description: 'Contact URI port',
+    name: 'sip.contact.uri.port',
+    type: 'keyword',
+  },
+  'sip.contact.transport': {
+    category: 'sip',
+    description: 'Contact transport',
+    name: 'sip.contact.transport',
+    type: 'keyword',
+  },
+  'sip.contact.line': {
+    category: 'sip',
+    description: 'Contact line',
+    name: 'sip.contact.line',
+    type: 'keyword',
+  },
+  'sip.contact.expires': {
+    category: 'sip',
+    description: 'Contact expires',
+    name: 'sip.contact.expires',
+    type: 'keyword',
+  },
+  'sip.contact.q': {
+    category: 'sip',
+    description: 'Contact Q',
+    name: 'sip.contact.q',
+    type: 'keyword',
+  },
+  'sip.auth.scheme': {
+    category: 'sip',
+    description: 'Auth scheme',
+    name: 'sip.auth.scheme',
+    type: 'keyword',
+  },
+  'sip.auth.realm': {
+    category: 'sip',
+    description: 'Auth realm',
+    name: 'sip.auth.realm',
+    type: 'keyword',
+  },
+  'sip.auth.uri.original': {
+    category: 'sip',
+    description: 'Auth original URI',
+    name: 'sip.auth.uri.original',
+    type: 'keyword',
+  },
+  'sip.auth.uri.scheme': {
+    category: 'sip',
+    description: 'Auth URI scheme',
+    name: 'sip.auth.uri.scheme',
+    type: 'keyword',
+  },
+  'sip.auth.uri.host': {
+    category: 'sip',
+    description: 'Auth URI host',
+    name: 'sip.auth.uri.host',
+    type: 'keyword',
+  },
+  'sip.auth.uri.port': {
+    category: 'sip',
+    description: 'Auth URI port',
+    name: 'sip.auth.uri.port',
+    type: 'keyword',
+  },
+  'sip.sdp.version': {
+    category: 'sip',
+    description: 'SDP version',
+    name: 'sip.sdp.version',
+    type: 'keyword',
+  },
+  'sip.sdp.owner.username': {
+    category: 'sip',
+    description: 'SDP owner user name',
+    name: 'sip.sdp.owner.username',
+    type: 'keyword',
+  },
+  'sip.sdp.owner.session_id': {
+    category: 'sip',
+    description: 'SDP owner session ID',
+    name: 'sip.sdp.owner.session_id',
+    type: 'keyword',
+  },
+  'sip.sdp.owner.version': {
+    category: 'sip',
+    description: 'SDP owner version',
+    name: 'sip.sdp.owner.version',
+    type: 'keyword',
+  },
+  'sip.sdp.owner.ip': {
+    category: 'sip',
+    description: 'SDP owner IP',
+    name: 'sip.sdp.owner.ip',
+    type: 'ip',
+  },
+  'sip.sdp.session.name': {
+    category: 'sip',
+    description: 'SDP session name',
+    name: 'sip.sdp.session.name',
+    type: 'keyword',
+  },
+  'sip.sdp.connection.info': {
+    category: 'sip',
+    description: 'SDP connection info',
+    name: 'sip.sdp.connection.info',
+    type: 'keyword',
+  },
+  'sip.sdp.connection.address': {
+    category: 'sip',
+    description: 'SDP connection address',
+    name: 'sip.sdp.connection.address',
+    type: 'keyword',
+  },
+  'sip.sdp.body.original': {
+    category: 'sip',
+    description: 'SDP original body',
+    name: 'sip.sdp.body.original',
+    type: 'keyword',
+  },
   'thrift.params': {
     category: 'thrift',
     description:
@@ -33984,172 +48112,16 @@ export const fieldsBeat: BeatFields = {
     name: 'tls.client.x509.version',
     type: 'keyword',
   },
-  'tls.client.x509.version_number': {
-    category: 'tls',
-    description: 'Version of x509 format.',
-    example: 3,
-    name: 'tls.client.x509.version_number',
-    type: 'keyword',
-  },
-  'tls.client.x509.serial_number': {
-    category: 'tls',
-    description:
-      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters. ',
-    example: '55FBB9C7DEBF09809D12CCAA',
-    name: 'tls.client.x509.serial_number',
-    type: 'keyword',
-  },
-  'tls.client.x509.issuer.distinguished_name': {
-    category: 'tls',
-    description: 'Distinguished name (DN) of issuing certificate authority.',
-    example: 'C=US, O=DigiCert Inc, OU=www.digicert.com, CN=DigiCert SHA2 High Assurance Server CA',
-    name: 'tls.client.x509.issuer.distinguished_name',
-    type: 'keyword',
-  },
-  'tls.client.x509.issuer.common_name': {
-    category: 'tls',
-    description: 'List of common name (CN) of issuing certificate authority.',
-    example: 'DigiCert SHA2 High Assurance Server CA',
-    name: 'tls.client.x509.issuer.common_name',
-    type: 'keyword',
-  },
-  'tls.client.x509.issuer.organizational_unit': {
-    category: 'tls',
-    description: 'List of organizational units (OU) of issuing certificate authority.',
-    example: 'www.digicert.com',
-    name: 'tls.client.x509.issuer.organizational_unit',
-    type: 'keyword',
-  },
-  'tls.client.x509.issuer.organization': {
-    category: 'tls',
-    description: 'List of organizations (O) of issuing certificate authority.',
-    example: 'DigiCert Inc',
-    name: 'tls.client.x509.issuer.organization',
-    type: 'keyword',
-  },
-  'tls.client.x509.issuer.locality': {
-    category: 'tls',
-    description: 'List of locality names (L)',
-    example: 'Mountain View',
-    name: 'tls.client.x509.issuer.locality',
-    type: 'keyword',
-  },
   'tls.client.x509.issuer.province': {
     category: 'tls',
     description: 'Province or region within country.',
     name: 'tls.client.x509.issuer.province',
     type: 'keyword',
   },
-  'tls.client.x509.issuer.state_or_province': {
-    category: 'tls',
-    description: 'List of state or province names (ST, S, or P)',
-    example: 'California',
-    name: 'tls.client.x509.issuer.state_or_province',
-    type: 'keyword',
-  },
-  'tls.client.x509.issuer.country': {
-    category: 'tls',
-    description: 'List of country (C) codes',
-    example: 'US',
-    name: 'tls.client.x509.issuer.country',
-    type: 'keyword',
-  },
-  'tls.client.x509.signature_algorithm': {
-    category: 'tls',
-    description:
-      'Identifier for certificate signature algorithm. Recommend using names found in Go Lang Crypto library (See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353).',
-    example: 'SHA256-RSA',
-    name: 'tls.client.x509.signature_algorithm',
-    type: 'keyword',
-  },
-  'tls.client.x509.not_before': {
-    category: 'tls',
-    description: 'Time at which the certificate is first considered valid.',
-    example: '"2019-08-16T01:40:25.000Z"',
-    name: 'tls.client.x509.not_before',
-    type: 'date',
-  },
-  'tls.client.x509.not_after': {
-    category: 'tls',
-    description: 'Time at which the certificate is no longer considered valid.',
-    example: '"2020-07-16T03:15:39.000Z"',
-    name: 'tls.client.x509.not_after',
-    type: 'date',
-  },
-  'tls.client.x509.subject.distinguished_name': {
-    category: 'tls',
-    description: 'Distinguished name (DN) of the certificate subject entity.',
-    example: 'C=US, ST=California, L=San Francisco, O=Fastly, Inc., CN=r2.shared.global.fastly.net',
-    name: 'tls.client.x509.subject.distinguished_name',
-    type: 'keyword',
-  },
-  'tls.client.x509.subject.common_name': {
-    category: 'tls',
-    description: 'List of common names (CN) of subject.',
-    example: 'r2.shared.global.fastly.net',
-    name: 'tls.client.x509.subject.common_name',
-    type: 'keyword',
-  },
-  'tls.client.x509.subject.organizational_unit': {
-    category: 'tls',
-    description: 'List of organizational units (OU) of subject.',
-    name: 'tls.client.x509.subject.organizational_unit',
-    type: 'keyword',
-  },
-  'tls.client.x509.subject.organization': {
-    category: 'tls',
-    description: 'List of organizations (O) of subject.',
-    example: 'Fastly, Inc.',
-    name: 'tls.client.x509.subject.organization',
-    type: 'keyword',
-  },
-  'tls.client.x509.subject.locality': {
-    category: 'tls',
-    description: 'List of locality names (L)',
-    example: 'San Francisco',
-    name: 'tls.client.x509.subject.locality',
-    type: 'keyword',
-  },
   'tls.client.x509.subject.province': {
     category: 'tls',
     description: 'Province or region within country.',
     name: 'tls.client.x509.subject.province',
-    type: 'keyword',
-  },
-  'tls.client.x509.subject.state_or_province': {
-    category: 'tls',
-    description: 'List of state or province names (ST, S, or P)',
-    example: 'California',
-    name: 'tls.client.x509.subject.state_or_province',
-    type: 'keyword',
-  },
-  'tls.client.x509.subject.country': {
-    category: 'tls',
-    description: 'List of country (C) code',
-    example: 'US',
-    name: 'tls.client.x509.subject.country',
-    type: 'keyword',
-  },
-  'tls.client.x509.public_key_algorithm': {
-    category: 'tls',
-    description: 'Algorithm used to generate the public key.',
-    example: 'RSA',
-    name: 'tls.client.x509.public_key_algorithm',
-    type: 'keyword',
-  },
-  'tls.client.x509.public_key_size': {
-    category: 'tls',
-    description: 'The size of the public key space in bits.',
-    example: 2048,
-    name: 'tls.client.x509.public_key_size',
-    type: 'long',
-  },
-  'tls.client.x509.alternative_names': {
-    category: 'tls',
-    description:
-      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
-    example: '*.elastic.co',
-    name: 'tls.client.x509.alternative_names',
     type: 'keyword',
   },
   'tls.server.x509.version': {
@@ -34159,172 +48131,16 @@ export const fieldsBeat: BeatFields = {
     name: 'tls.server.x509.version',
     type: 'keyword',
   },
-  'tls.server.x509.version_number': {
-    category: 'tls',
-    description: 'Version of x509 format.',
-    example: 3,
-    name: 'tls.server.x509.version_number',
-    type: 'keyword',
-  },
-  'tls.server.x509.serial_number': {
-    category: 'tls',
-    description:
-      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters. ',
-    example: '55FBB9C7DEBF09809D12CCAA',
-    name: 'tls.server.x509.serial_number',
-    type: 'keyword',
-  },
-  'tls.server.x509.issuer.distinguished_name': {
-    category: 'tls',
-    description: 'Distinguished name (DN) of issuing certificate authority.',
-    example: 'C=US, O=DigiCert Inc, OU=www.digicert.com, CN=DigiCert SHA2 High Assurance Server CA',
-    name: 'tls.server.x509.issuer.distinguished_name',
-    type: 'keyword',
-  },
-  'tls.server.x509.issuer.common_name': {
-    category: 'tls',
-    description: 'List of common name (CN) of issuing certificate authority.',
-    example: 'DigiCert SHA2 High Assurance Server CA',
-    name: 'tls.server.x509.issuer.common_name',
-    type: 'keyword',
-  },
-  'tls.server.x509.issuer.organizational_unit': {
-    category: 'tls',
-    description: 'List of organizational units (OU) of issuing certificate authority.',
-    example: 'www.digicert.com',
-    name: 'tls.server.x509.issuer.organizational_unit',
-    type: 'keyword',
-  },
-  'tls.server.x509.issuer.organization': {
-    category: 'tls',
-    description: 'List of organizations (O) of issuing certificate authority.',
-    example: 'DigiCert Inc',
-    name: 'tls.server.x509.issuer.organization',
-    type: 'keyword',
-  },
-  'tls.server.x509.issuer.locality': {
-    category: 'tls',
-    description: 'List of locality names (L)',
-    example: 'Mountain View',
-    name: 'tls.server.x509.issuer.locality',
-    type: 'keyword',
-  },
   'tls.server.x509.issuer.province': {
     category: 'tls',
     description: 'Province or region within country.',
     name: 'tls.server.x509.issuer.province',
     type: 'keyword',
   },
-  'tls.server.x509.issuer.state_or_province': {
-    category: 'tls',
-    description: 'List of state or province names (ST, S, or P)',
-    example: 'California',
-    name: 'tls.server.x509.issuer.state_or_province',
-    type: 'keyword',
-  },
-  'tls.server.x509.issuer.country': {
-    category: 'tls',
-    description: 'List of country (C) codes',
-    example: 'US',
-    name: 'tls.server.x509.issuer.country',
-    type: 'keyword',
-  },
-  'tls.server.x509.signature_algorithm': {
-    category: 'tls',
-    description:
-      'Identifier for certificate signature algorithm. Recommend using names found in Go Lang Crypto library (See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353).',
-    example: 'SHA256-RSA',
-    name: 'tls.server.x509.signature_algorithm',
-    type: 'keyword',
-  },
-  'tls.server.x509.not_before': {
-    category: 'tls',
-    description: 'Time at which the certificate is first considered valid.',
-    example: '"2019-08-16T01:40:25.000Z"',
-    name: 'tls.server.x509.not_before',
-    type: 'date',
-  },
-  'tls.server.x509.not_after': {
-    category: 'tls',
-    description: 'Time at which the certificate is no longer considered valid.',
-    example: '"2020-07-16T03:15:39.000Z"',
-    name: 'tls.server.x509.not_after',
-    type: 'date',
-  },
-  'tls.server.x509.subject.distinguished_name': {
-    category: 'tls',
-    description: 'Distinguished name (DN) of the certificate subject entity.',
-    example: 'C=US, ST=California, L=San Francisco, O=Fastly, Inc., CN=r2.shared.global.fastly.net',
-    name: 'tls.server.x509.subject.distinguished_name',
-    type: 'keyword',
-  },
-  'tls.server.x509.subject.common_name': {
-    category: 'tls',
-    description: 'List of common names (CN) of subject.',
-    example: 'r2.shared.global.fastly.net',
-    name: 'tls.server.x509.subject.common_name',
-    type: 'keyword',
-  },
-  'tls.server.x509.subject.organizational_unit': {
-    category: 'tls',
-    description: 'List of organizational units (OU) of subject.',
-    name: 'tls.server.x509.subject.organizational_unit',
-    type: 'keyword',
-  },
-  'tls.server.x509.subject.organization': {
-    category: 'tls',
-    description: 'List of organizations (O) of subject.',
-    example: 'Fastly, Inc.',
-    name: 'tls.server.x509.subject.organization',
-    type: 'keyword',
-  },
-  'tls.server.x509.subject.locality': {
-    category: 'tls',
-    description: 'List of locality names (L)',
-    example: 'San Francisco',
-    name: 'tls.server.x509.subject.locality',
-    type: 'keyword',
-  },
   'tls.server.x509.subject.province': {
     category: 'tls',
     description: 'Province or region within country.',
     name: 'tls.server.x509.subject.province',
-    type: 'keyword',
-  },
-  'tls.server.x509.subject.state_or_province': {
-    category: 'tls',
-    description: 'List of state or province names (ST, S, or P)',
-    example: 'California',
-    name: 'tls.server.x509.subject.state_or_province',
-    type: 'keyword',
-  },
-  'tls.server.x509.subject.country': {
-    category: 'tls',
-    description: 'List of country (C) code',
-    example: 'US',
-    name: 'tls.server.x509.subject.country',
-    type: 'keyword',
-  },
-  'tls.server.x509.public_key_algorithm': {
-    category: 'tls',
-    description: 'Algorithm used to generate the public key.',
-    example: 'RSA',
-    name: 'tls.server.x509.public_key_algorithm',
-    type: 'keyword',
-  },
-  'tls.server.x509.public_key_size': {
-    category: 'tls',
-    description: 'The size of the public key space in bits.',
-    example: 2048,
-    name: 'tls.server.x509.public_key_size',
-    type: 'long',
-  },
-  'tls.server.x509.alternative_names': {
-    category: 'tls',
-    description:
-      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
-    example: '*.elastic.co',
-    name: 'tls.server.x509.alternative_names',
     type: 'keyword',
   },
   'tls.detailed.version': {
@@ -34472,300 +48288,6 @@ export const fieldsBeat: BeatFields = {
     name: 'tls.detailed.server_hello.extensions._unparsed_',
     type: 'keyword',
   },
-  'tls.detailed.client_certificate.version': {
-    category: 'tls',
-    description: 'X509 format version.',
-    name: 'tls.detailed.client_certificate.version',
-    type: 'long',
-  },
-  'tls.detailed.client_certificate.version_number': {
-    category: 'tls',
-    description: 'Version of x509 format.',
-    example: 3,
-    name: 'tls.detailed.client_certificate.version_number',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.serial_number': {
-    category: 'tls',
-    description: "The certificate's serial number.",
-    name: 'tls.detailed.client_certificate.serial_number',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.not_before': {
-    category: 'tls',
-    description: 'Date before which the certificate is not valid.',
-    name: 'tls.detailed.client_certificate.not_before',
-    type: 'date',
-  },
-  'tls.detailed.client_certificate.not_after': {
-    category: 'tls',
-    description: 'Date after which the certificate expires.',
-    name: 'tls.detailed.client_certificate.not_after',
-    type: 'date',
-  },
-  'tls.detailed.client_certificate.public_key_algorithm': {
-    category: 'tls',
-    description: "The algorithm used for this certificate's public key. One of RSA, DSA or ECDSA. ",
-    name: 'tls.detailed.client_certificate.public_key_algorithm',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.public_key_size': {
-    category: 'tls',
-    description: 'Size of the public key.',
-    name: 'tls.detailed.client_certificate.public_key_size',
-    type: 'long',
-  },
-  'tls.detailed.client_certificate.signature_algorithm': {
-    category: 'tls',
-    description: "The algorithm used for the certificate's signature. ",
-    name: 'tls.detailed.client_certificate.signature_algorithm',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.alternative_names': {
-    category: 'tls',
-    description: 'Subject Alternative Names for this certificate.',
-    name: 'tls.detailed.client_certificate.alternative_names',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.subject.country': {
-    category: 'tls',
-    description: 'Country code.',
-    name: 'tls.detailed.client_certificate.subject.country',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.subject.organization': {
-    category: 'tls',
-    description: 'Organization name.',
-    name: 'tls.detailed.client_certificate.subject.organization',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.subject.organizational_unit': {
-    category: 'tls',
-    description: 'Unit within organization.',
-    name: 'tls.detailed.client_certificate.subject.organizational_unit',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.subject.province': {
-    category: 'tls',
-    description: 'Province or region within country.',
-    name: 'tls.detailed.client_certificate.subject.province',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.subject.common_name': {
-    category: 'tls',
-    description: 'Name or host name identified by the certificate.',
-    name: 'tls.detailed.client_certificate.subject.common_name',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.subject.locality': {
-    category: 'tls',
-    description: 'Locality.',
-    name: 'tls.detailed.client_certificate.subject.locality',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.subject.distinguished_name': {
-    category: 'tls',
-    description: 'Distinguished name (DN) of the certificate subject entity.',
-    example: 'C=US, ST=California, L=San Francisco, O=Fastly, Inc., CN=r2.shared.global.fastly.net',
-    name: 'tls.detailed.client_certificate.subject.distinguished_name',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.issuer.country': {
-    category: 'tls',
-    description: 'Country code.',
-    name: 'tls.detailed.client_certificate.issuer.country',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.issuer.organization': {
-    category: 'tls',
-    description: 'Organization name.',
-    name: 'tls.detailed.client_certificate.issuer.organization',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.issuer.organizational_unit': {
-    category: 'tls',
-    description: 'Unit within organization.',
-    name: 'tls.detailed.client_certificate.issuer.organizational_unit',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.issuer.province': {
-    category: 'tls',
-    description: 'Province or region within country.',
-    name: 'tls.detailed.client_certificate.issuer.province',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.issuer.common_name': {
-    category: 'tls',
-    description: 'Name or host name identified by the certificate.',
-    name: 'tls.detailed.client_certificate.issuer.common_name',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.issuer.locality': {
-    category: 'tls',
-    description: 'Locality.',
-    name: 'tls.detailed.client_certificate.issuer.locality',
-    type: 'keyword',
-  },
-  'tls.detailed.client_certificate.issuer.distinguished_name': {
-    category: 'tls',
-    description: 'Distinguished name (DN) of the certificate issuer entity.',
-    example: 'C=US, ST=California, L=San Francisco, O=Fastly, Inc., CN=r2.shared.global.fastly.net',
-    name: 'tls.detailed.client_certificate.issuer.distinguished_name',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.version': {
-    category: 'tls',
-    description: 'X509 format version.',
-    name: 'tls.detailed.server_certificate.version',
-    type: 'long',
-  },
-  'tls.detailed.server_certificate.version_number': {
-    category: 'tls',
-    description: 'Version of x509 format.',
-    example: 3,
-    name: 'tls.detailed.server_certificate.version_number',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.serial_number': {
-    category: 'tls',
-    description: "The certificate's serial number.",
-    name: 'tls.detailed.server_certificate.serial_number',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.not_before': {
-    category: 'tls',
-    description: 'Date before which the certificate is not valid.',
-    name: 'tls.detailed.server_certificate.not_before',
-    type: 'date',
-  },
-  'tls.detailed.server_certificate.not_after': {
-    category: 'tls',
-    description: 'Date after which the certificate expires.',
-    name: 'tls.detailed.server_certificate.not_after',
-    type: 'date',
-  },
-  'tls.detailed.server_certificate.public_key_algorithm': {
-    category: 'tls',
-    description: "The algorithm used for this certificate's public key. One of RSA, DSA or ECDSA. ",
-    name: 'tls.detailed.server_certificate.public_key_algorithm',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.public_key_size': {
-    category: 'tls',
-    description: 'Size of the public key.',
-    name: 'tls.detailed.server_certificate.public_key_size',
-    type: 'long',
-  },
-  'tls.detailed.server_certificate.signature_algorithm': {
-    category: 'tls',
-    description: "The algorithm used for the certificate's signature. ",
-    name: 'tls.detailed.server_certificate.signature_algorithm',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.alternative_names': {
-    category: 'tls',
-    description: 'Subject Alternative Names for this certificate.',
-    name: 'tls.detailed.server_certificate.alternative_names',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.subject.country': {
-    category: 'tls',
-    description: 'Country code.',
-    name: 'tls.detailed.server_certificate.subject.country',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.subject.organization': {
-    category: 'tls',
-    description: 'Organization name.',
-    name: 'tls.detailed.server_certificate.subject.organization',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.subject.organizational_unit': {
-    category: 'tls',
-    description: 'Unit within organization.',
-    name: 'tls.detailed.server_certificate.subject.organizational_unit',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.subject.province': {
-    category: 'tls',
-    description: 'Province or region within country.',
-    name: 'tls.detailed.server_certificate.subject.province',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.subject.state_or_province': {
-    category: 'tls',
-    description: 'Province or region within country.',
-    name: 'tls.detailed.server_certificate.subject.state_or_province',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.subject.common_name': {
-    category: 'tls',
-    description: 'Name or host name identified by the certificate.',
-    name: 'tls.detailed.server_certificate.subject.common_name',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.subject.locality': {
-    category: 'tls',
-    description: 'Locality.',
-    name: 'tls.detailed.server_certificate.subject.locality',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.subject.distinguished_name': {
-    category: 'tls',
-    description: 'Distinguished name (DN) of the certificate subject entity.',
-    example: 'C=US, ST=California, L=San Francisco, O=Fastly, Inc., CN=r2.shared.global.fastly.net',
-    name: 'tls.detailed.server_certificate.subject.distinguished_name',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.issuer.country': {
-    category: 'tls',
-    description: 'Country code.',
-    name: 'tls.detailed.server_certificate.issuer.country',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.issuer.organization': {
-    category: 'tls',
-    description: 'Organization name.',
-    name: 'tls.detailed.server_certificate.issuer.organization',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.issuer.organizational_unit': {
-    category: 'tls',
-    description: 'Unit within organization.',
-    name: 'tls.detailed.server_certificate.issuer.organizational_unit',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.issuer.province': {
-    category: 'tls',
-    description: 'Province or region within country.',
-    name: 'tls.detailed.server_certificate.issuer.province',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.issuer.state_or_province': {
-    category: 'tls',
-    description: 'Province or region within country.',
-    name: 'tls.detailed.server_certificate.issuer.state_or_province',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.issuer.common_name': {
-    category: 'tls',
-    description: 'Name or host name identified by the certificate.',
-    name: 'tls.detailed.server_certificate.issuer.common_name',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.issuer.locality': {
-    category: 'tls',
-    description: 'Locality.',
-    name: 'tls.detailed.server_certificate.issuer.locality',
-    type: 'keyword',
-  },
-  'tls.detailed.server_certificate.issuer.distinguished_name': {
-    category: 'tls',
-    description: 'Distinguished name (DN) of the certificate issuer entity.',
-    example: 'C=US, ST=California, L=San Francisco, O=Fastly, Inc., CN=r2.shared.global.fastly.net',
-    name: 'tls.detailed.server_certificate.issuer.distinguished_name',
-    type: 'keyword',
-  },
   'tls.detailed.server_certificate_chain': {
     category: 'tls',
     description: 'Chain of trust for the server certificate.',
@@ -34784,340 +48306,10 @@ export const fieldsBeat: BeatFields = {
     name: 'tls.detailed.alert_types',
     type: 'keyword',
   },
-  'tls.handshake_completed': {
-    category: 'tls',
-    name: 'tls.handshake_completed',
-    type: 'alias',
-  },
-  'tls.client_hello.supported_ciphers': {
-    category: 'tls',
-    name: 'tls.client_hello.supported_ciphers',
-    type: 'alias',
-  },
-  'tls.server_hello.selected_cipher': {
-    category: 'tls',
-    name: 'tls.server_hello.selected_cipher',
-    type: 'alias',
-  },
-  'tls.fingerprints.ja3': {
-    category: 'tls',
-    name: 'tls.fingerprints.ja3',
-    type: 'alias',
-  },
-  'tls.resumption_method': {
-    category: 'tls',
-    name: 'tls.resumption_method',
-    type: 'alias',
-  },
-  'tls.client_certificate_requested': {
-    category: 'tls',
-    name: 'tls.client_certificate_requested',
-    type: 'alias',
-  },
-  'tls.client_hello.version': {
-    category: 'tls',
-    name: 'tls.client_hello.version',
-    type: 'alias',
-  },
-  'tls.client_hello.session_id': {
-    category: 'tls',
-    name: 'tls.client_hello.session_id',
-    type: 'alias',
-  },
-  'tls.client_hello.supported_compression_methods': {
-    category: 'tls',
-    name: 'tls.client_hello.supported_compression_methods',
-    type: 'alias',
-  },
-  'tls.client_hello.extensions.server_name_indication': {
-    category: 'tls',
-    name: 'tls.client_hello.extensions.server_name_indication',
-    type: 'alias',
-  },
-  'tls.client_hello.extensions.application_layer_protocol_negotiation': {
-    category: 'tls',
-    name: 'tls.client_hello.extensions.application_layer_protocol_negotiation',
-    type: 'alias',
-  },
-  'tls.client_hello.extensions.session_ticket': {
-    category: 'tls',
-    name: 'tls.client_hello.extensions.session_ticket',
-    type: 'alias',
-  },
-  'tls.client_hello.extensions.supported_versions': {
-    category: 'tls',
-    name: 'tls.client_hello.extensions.supported_versions',
-    type: 'alias',
-  },
-  'tls.client_hello.extensions.supported_groups': {
-    category: 'tls',
-    name: 'tls.client_hello.extensions.supported_groups',
-    type: 'alias',
-  },
-  'tls.client_hello.extensions.signature_algorithms': {
-    category: 'tls',
-    name: 'tls.client_hello.extensions.signature_algorithms',
-    type: 'alias',
-  },
-  'tls.client_hello.extensions.ec_points_formats': {
-    category: 'tls',
-    name: 'tls.client_hello.extensions.ec_points_formats',
-    type: 'alias',
-  },
-  'tls.client_hello.extensions._unparsed_': {
-    category: 'tls',
-    name: 'tls.client_hello.extensions._unparsed_',
-    type: 'alias',
-  },
-  'tls.server_hello.version': {
-    category: 'tls',
-    name: 'tls.server_hello.version',
-    type: 'alias',
-  },
-  'tls.server_hello.selected_compression_method': {
-    category: 'tls',
-    name: 'tls.server_hello.selected_compression_method',
-    type: 'alias',
-  },
-  'tls.server_hello.session_id': {
-    category: 'tls',
-    name: 'tls.server_hello.session_id',
-    type: 'alias',
-  },
-  'tls.server_hello.extensions.application_layer_protocol_negotiation': {
-    category: 'tls',
-    name: 'tls.server_hello.extensions.application_layer_protocol_negotiation',
-    type: 'alias',
-  },
-  'tls.server_hello.extensions.session_ticket': {
-    category: 'tls',
-    name: 'tls.server_hello.extensions.session_ticket',
-    type: 'alias',
-  },
-  'tls.server_hello.extensions.supported_versions': {
-    category: 'tls',
-    name: 'tls.server_hello.extensions.supported_versions',
-    type: 'alias',
-  },
-  'tls.server_hello.extensions.ec_points_formats': {
-    category: 'tls',
-    name: 'tls.server_hello.extensions.ec_points_formats',
-    type: 'alias',
-  },
-  'tls.server_hello.extensions._unparsed_': {
-    category: 'tls',
-    name: 'tls.server_hello.extensions._unparsed_',
-    type: 'alias',
-  },
-  'tls.client_certificate.version': {
-    category: 'tls',
-    name: 'tls.client_certificate.version',
-    type: 'alias',
-  },
-  'tls.client_certificate.serial_number': {
-    category: 'tls',
-    name: 'tls.client_certificate.serial_number',
-    type: 'alias',
-  },
-  'tls.client_certificate.not_before': {
-    category: 'tls',
-    name: 'tls.client_certificate.not_before',
-    type: 'alias',
-  },
-  'tls.client_certificate.not_after': {
-    category: 'tls',
-    name: 'tls.client_certificate.not_after',
-    type: 'alias',
-  },
-  'tls.client_certificate.public_key_algorithm': {
-    category: 'tls',
-    name: 'tls.client_certificate.public_key_algorithm',
-    type: 'alias',
-  },
-  'tls.client_certificate.public_key_size': {
-    category: 'tls',
-    name: 'tls.client_certificate.public_key_size',
-    type: 'alias',
-  },
-  'tls.client_certificate.signature_algorithm': {
-    category: 'tls',
-    name: 'tls.client_certificate.signature_algorithm',
-    type: 'alias',
-  },
-  'tls.client_certificate.alternative_names': {
-    category: 'tls',
-    name: 'tls.client_certificate.alternative_names',
-    type: 'alias',
-  },
-  'tls.client_certificate.subject.country': {
-    category: 'tls',
-    name: 'tls.client_certificate.subject.country',
-    type: 'alias',
-  },
-  'tls.client_certificate.subject.organization': {
-    category: 'tls',
-    name: 'tls.client_certificate.subject.organization',
-    type: 'alias',
-  },
-  'tls.client_certificate.subject.organizational_unit': {
-    category: 'tls',
-    name: 'tls.client_certificate.subject.organizational_unit',
-    type: 'alias',
-  },
-  'tls.client_certificate.subject.province': {
-    category: 'tls',
-    name: 'tls.client_certificate.subject.province',
-    type: 'alias',
-  },
-  'tls.client_certificate.subject.common_name': {
-    category: 'tls',
-    name: 'tls.client_certificate.subject.common_name',
-    type: 'alias',
-  },
-  'tls.client_certificate.subject.locality': {
-    category: 'tls',
-    name: 'tls.client_certificate.subject.locality',
-    type: 'alias',
-  },
-  'tls.client_certificate.issuer.country': {
-    category: 'tls',
-    name: 'tls.client_certificate.issuer.country',
-    type: 'alias',
-  },
-  'tls.client_certificate.issuer.organization': {
-    category: 'tls',
-    name: 'tls.client_certificate.issuer.organization',
-    type: 'alias',
-  },
-  'tls.client_certificate.issuer.organizational_unit': {
-    category: 'tls',
-    name: 'tls.client_certificate.issuer.organizational_unit',
-    type: 'alias',
-  },
-  'tls.client_certificate.issuer.province': {
-    category: 'tls',
-    name: 'tls.client_certificate.issuer.province',
-    type: 'alias',
-  },
-  'tls.client_certificate.issuer.common_name': {
-    category: 'tls',
-    name: 'tls.client_certificate.issuer.common_name',
-    type: 'alias',
-  },
-  'tls.client_certificate.issuer.locality': {
-    category: 'tls',
-    name: 'tls.client_certificate.issuer.locality',
-    type: 'alias',
-  },
-  'tls.server_certificate.version': {
-    category: 'tls',
-    name: 'tls.server_certificate.version',
-    type: 'alias',
-  },
-  'tls.server_certificate.serial_number': {
-    category: 'tls',
-    name: 'tls.server_certificate.serial_number',
-    type: 'alias',
-  },
-  'tls.server_certificate.not_before': {
-    category: 'tls',
-    name: 'tls.server_certificate.not_before',
-    type: 'alias',
-  },
-  'tls.server_certificate.not_after': {
-    category: 'tls',
-    name: 'tls.server_certificate.not_after',
-    type: 'alias',
-  },
-  'tls.server_certificate.public_key_algorithm': {
-    category: 'tls',
-    name: 'tls.server_certificate.public_key_algorithm',
-    type: 'alias',
-  },
-  'tls.server_certificate.public_key_size': {
-    category: 'tls',
-    name: 'tls.server_certificate.public_key_size',
-    type: 'alias',
-  },
-  'tls.server_certificate.signature_algorithm': {
-    category: 'tls',
-    name: 'tls.server_certificate.signature_algorithm',
-    type: 'alias',
-  },
-  'tls.server_certificate.alternative_names': {
-    category: 'tls',
-    name: 'tls.server_certificate.alternative_names',
-    type: 'alias',
-  },
-  'tls.server_certificate.subject.country': {
-    category: 'tls',
-    name: 'tls.server_certificate.subject.country',
-    type: 'alias',
-  },
-  'tls.server_certificate.subject.organization': {
-    category: 'tls',
-    name: 'tls.server_certificate.subject.organization',
-    type: 'alias',
-  },
-  'tls.server_certificate.subject.organizational_unit': {
-    category: 'tls',
-    name: 'tls.server_certificate.subject.organizational_unit',
-    type: 'alias',
-  },
-  'tls.server_certificate.subject.province': {
-    category: 'tls',
-    name: 'tls.server_certificate.subject.province',
-    type: 'alias',
-  },
-  'tls.server_certificate.subject.common_name': {
-    category: 'tls',
-    name: 'tls.server_certificate.subject.common_name',
-    type: 'alias',
-  },
-  'tls.server_certificate.subject.locality': {
-    category: 'tls',
-    name: 'tls.server_certificate.subject.locality',
-    type: 'alias',
-  },
-  'tls.server_certificate.issuer.country': {
-    category: 'tls',
-    name: 'tls.server_certificate.issuer.country',
-    type: 'alias',
-  },
-  'tls.server_certificate.issuer.organization': {
-    category: 'tls',
-    name: 'tls.server_certificate.issuer.organization',
-    type: 'alias',
-  },
-  'tls.server_certificate.issuer.organizational_unit': {
-    category: 'tls',
-    name: 'tls.server_certificate.issuer.organizational_unit',
-    type: 'alias',
-  },
-  'tls.server_certificate.issuer.province': {
-    category: 'tls',
-    name: 'tls.server_certificate.issuer.province',
-    type: 'alias',
-  },
-  'tls.server_certificate.issuer.common_name': {
-    category: 'tls',
-    name: 'tls.server_certificate.issuer.common_name',
-    type: 'alias',
-  },
-  'tls.server_certificate.issuer.locality': {
-    category: 'tls',
-    name: 'tls.server_certificate.issuer.locality',
-    type: 'alias',
-  },
-  'tls.alert_types': {
-    category: 'tls',
-    name: 'tls.alert_types',
-    type: 'alias',
-  },
   'winlog.api': {
     category: 'winlog',
     description:
-      'The event log API type used to read the record. The possible values are "wineventlog" for the Windows Event Log API or "eventlogging" for the Event Logging API. The Event Logging API was designed for Windows Server 2003 or Windows 2000 operating systems. In Windows Vista, the event logging infrastructure was redesigned. On Windows Vista or later operating systems, the Windows Event Log API is used. Winlogbeat automatically detects which API to use for reading event logs. ',
+      'The event log API type used to read the record. The possible values are "wineventlog" for the Windows Event Log API or "wineventlog-experimental" for its experimental implementation. ',
     name: 'winlog.api',
   },
   'winlog.activity_id': {
@@ -35762,6 +48954,12 @@ export const fieldsBeat: BeatFields = {
       'The task defined in the event. Task and opcode are typically used to identify the location in the application from where the event was logged. The category used by the Event Logging API (on pre Windows Vista operating systems) is written to this field. ',
     name: 'winlog.task',
     type: 'keyword',
+  },
+  'winlog.time_created': {
+    category: 'winlog',
+    description: 'The event creation time. ',
+    name: 'winlog.time_created',
+    type: 'date',
   },
   'winlog.process.thread.id': {
     category: 'winlog',

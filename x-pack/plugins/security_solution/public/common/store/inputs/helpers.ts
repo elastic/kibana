@@ -109,7 +109,14 @@ export const upsertQuery = ({
             ]
           : [
               ...state[inputId].queries,
-              { id, inspect, isInspected: false, loading, refetch, selectedInspectIndex: 0 },
+              {
+                id,
+                inspect,
+                isInspected: false,
+                loading,
+                refetch,
+                selectedInspectIndex: 0,
+              },
             ],
     },
   };

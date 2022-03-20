@@ -16,8 +16,11 @@ const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
 
 export const navTabsHostDetails = (
   hostName: string,
-  hasMlUserPermissions: boolean
+  hasMlUserPermissions: boolean,
+  isRiskyHostsEnabled: boolean
 ): HostDetailsNavTab => {
+  const hiddenTabs = [];
+
   const hostDetailsNavTabs = {
     [HostsTableType.authentications]: {
       id: HostsTableType.authentications,
@@ -49,9 +52,21 @@ export const navTabsHostDetails = (
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
       disabled: false,
     },
+    [HostsTableType.risk]: {
+      id: HostsTableType.risk,
+      name: i18n.NAVIGATION_HOST_RISK_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.risk),
+      disabled: false,
+    },
   };
 
-  return hasMlUserPermissions
-    ? hostDetailsNavTabs
-    : omit(HostsTableType.anomalies, hostDetailsNavTabs);
+  if (!hasMlUserPermissions) {
+    hiddenTabs.push(HostsTableType.anomalies);
+  }
+
+  if (!isRiskyHostsEnabled) {
+    hiddenTabs.push(HostsTableType.risk);
+  }
+
+  return omit(hiddenTabs, hostDetailsNavTabs);
 };

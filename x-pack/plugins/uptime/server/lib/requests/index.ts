@@ -25,12 +25,14 @@ import { getNetworkEvents } from './get_network_events';
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
 import { getLastSuccessfulCheck } from './get_last_successful_check';
 import { getJourneyScreenshotBlocks } from './get_journey_screenshot_blocks';
+import { getSyntheticsMonitor } from './get_monitor';
 
 export const requests = {
   getCerts,
   getIndexPattern,
   getLatestMonitor,
   getMonitorAvailability,
+  getSyntheticsMonitor,
   getMonitorDurationChart,
   getMonitorDetails,
   getMonitorLocations,

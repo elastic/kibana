@@ -44,6 +44,7 @@ import type {
   InternalExecutionContextStart,
 } from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
+import { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
 
 /** @internal */
 export interface InternalCorePreboot {
@@ -60,6 +61,7 @@ export interface InternalCorePreboot {
 export interface InternalCoreSetup {
   capabilities: CapabilitiesSetup;
   context: ContextSetup;
+  docLinks: DocLinksServiceSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   executionContext: InternalExecutionContextSetup;
@@ -82,6 +84,7 @@ export interface InternalCoreSetup {
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
   elasticsearch: InternalElasticsearchServiceStart;
+  docLinks: DocLinksServiceStart;
   http: InternalHttpServiceStart;
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;

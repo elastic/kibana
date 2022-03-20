@@ -1,10 +1,10 @@
 {
   "baseUrl": "http://localhost:5620",
-  "defaultCommandTimeout": 6000,
-  "execTimeout": 12000,
+  "defaultCommandTimeout": 60000,
+  "execTimeout": 120000,
   "pageLoadTimeout": 12000,
   "retries": {
-    "runMode": 2
+    "runMode": 0
   },
   "screenshotsFolder": "../../../target/kibana-osquery/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
@@ -12,5 +12,10 @@
   "videosFolder": "../../../target/kibana-osquery/cypress/videos",
   "viewportHeight": 900,
   "viewportWidth": 1440,
-  "experimentalStudio": true
+  "experimentalStudio": true,
+  "env": {
+    "cypress-react-selector": {
+      "root": "#osquery-app"
+    }
+  }
 }

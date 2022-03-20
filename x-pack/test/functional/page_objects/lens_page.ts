@@ -204,7 +204,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForVisualization();
     },
 
     /**
@@ -254,9 +254,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForField(field: string) {
-      await retry.try(async () => {
-        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
-      });
+      await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
     },
 
     async waitForMissingDataViewWarning() {
@@ -289,6 +287,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async pressMetaKey(metaKey: 'shift' | 'alt' | 'ctrl') {
+      const metaToAction = {
+        shift: 'duplicate',
+        alt: 'swap',
+        ctrl: 'combine',
+      };
+      const waitTime = 1000;
+      log.debug(`Wait ${waitTime}ms for the extra dop options to show up`);
+      await setTimeoutAsync(waitTime);
+      const browserKey =
+        metaKey === 'shift'
+          ? browser.keys.SHIFT
+          : metaKey === 'alt'
+          ? browser.keys.ALT
+          : browser.keys.COMMAND;
+      log.debug(`Press ${metaKey} with keyboard`);
+      await retry.try(async () => {
+        await browser.pressKeys(browserKey);
+        await find.existsByCssSelector(
+          `.lnsDragDrop__extraDrop > [data-test-subj="lnsDragDrop-${metaToAction[metaKey]}"].lnsDragDrop-isActiveDropTarget`
+        );
+      });
+    },
+
     /**
      * Copies field to chosen destination that is defined by distance of `steps`
      * (right arrow presses) from it
@@ -297,7 +319,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param steps - number of steps user has to press right
      * @param reverse - defines the direction of going through drops
      * */
-    async dragFieldWithKeyboard(fieldName: string, steps = 1, reverse = false) {
+    async dragFieldWithKeyboard(
+      fieldName: string,
+      steps = 1,
+      reverse = false,
+      metaKey?: 'shift' | 'alt' | 'ctrl'
+    ) {
       const field = await find.byCssSelector(
         `[data-test-subj="lnsDragDrop_draggable-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
@@ -308,6 +335,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
+      }
+      if (metaKey) {
+        this.pressMetaKey(metaKey);
       }
       await browser.pressKeys(browser.keys.ENTER);
       await this.waitForLensDragDropToFinish();
@@ -323,7 +353,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param steps - number of steps of presses right or left
      * @param reverse - defines the direction of going through drops
      * */
-    async dimensionKeyboardDragDrop(group: string, index = 0, steps = 1, reverse = false) {
+    async dimensionKeyboardDragDrop(
+      group: string,
+      index = 0,
+      steps = 1,
+      reverse = false,
+      metaKey?: 'shift' | 'alt' | 'ctrl'
+    ) {
       const elements = await find.allByCssSelector(
         `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
@@ -332,6 +368,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
+      }
+      if (metaKey) {
+        this.pressMetaKey(metaKey);
       }
       await browser.pressKeys(browser.keys.ENTER);
 
@@ -389,7 +428,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Drags field to dimension trigger
+     * Drags from a dimension to another dimension trigger
      *
      * @param from - the selector of the dimension being moved
      * @param to - the selector of the dimension being dropped to
@@ -468,12 +507,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await comboBox.setCustom('indexPattern-dimension-time-shift', shift);
     },
 
+    async enableFilter() {
+      await testSubjects.click('indexPattern-advanced-popover');
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-filter-by-enable');
+      });
+    },
+
+    async setFilterBy(queryString: string) {
+      this.typeFilter(queryString);
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-filters-existingFilterTrigger');
+      });
+    },
+
+    async typeFilter(queryString: string) {
+      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
+      await queryInput.type(queryString);
+    },
+
     async hasFixAction() {
       return await testSubjects.exists('errorFixAction');
     },
 
     async useFixAction() {
       await testSubjects.click('errorFixAction');
+      await this.waitForVisualization();
     },
 
     async isTopLevelAggregation() {
@@ -490,8 +549,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async addFilterToAgg(queryString: string) {
       await testSubjects.click('lns-newBucket-add');
-      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
-      await queryInput.type(queryString);
+      this.typeFilter(queryString);
       // Problem here is that after typing in the queryInput a dropdown will fetch the server
       // with suggestions and show up. Depending on the cursor position and some other factors
       // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
@@ -514,11 +572,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const lastIndex = (
         await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
       ).length;
-      await testSubjects.click('indexPattern-terms-add-field');
-      // count the number of defined terms
-      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
-      await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, field);
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-terms-add-field');
+        // count the number of defined terms
+        const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`, 1000);
+        await comboBox.openOptionsList(target);
+        await comboBox.setElement(target, field);
+      });
     },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
@@ -872,7 +932,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${colIndex}"]`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-row-index="${rowIndex}"]`
       );
     },
 
@@ -992,8 +1052,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param count - expected count of metric
      */
     async assertMetric(title: string, count: string) {
-      await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
-      await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+      await this.assertExactText('[data-test-subj="metric_label"]', title);
+      await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
     async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
@@ -1001,7 +1061,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getMetricStyle() {
-      const el = await testSubjects.find('lns_metric_value');
+      const el = await testSubjects.find('metric_value');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1090,9 +1150,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       expect(focusedElementText).to.eql(name);
     },
 
-    async waitForVisualization() {
+    async waitForVisualization(visDataTestSubj?: string) {
       async function getRenderingCount() {
-        const visualizationContainer = await testSubjects.find('lnsVisualizationContainer');
+        const visualizationContainer = await testSubjects.find(
+          visDataTestSubj || 'lnsVisualizationContainer'
+        );
         const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
         return Number(renderingCount);
       }
@@ -1177,13 +1239,38 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Drags field to dimension trigger to extra drop type
+     * Drags from a dimension to another dimension trigger to extra drop type
      *
      * @param from - the selector of the dimension being moved
      * @param to - the selector of the main drop type of dimension being dropped to
      * @param type - extra drop type
      * */
-    async dragDimensionToExtraDropType(from: string, to: string, type: 'duplicate' | 'swap') {
+    async dragFieldToExtraDropType(
+      field: string,
+      to: string,
+      type: 'duplicate' | 'swap' | 'combine'
+    ) {
+      const from = `lnsFieldListPanelField-${field}`;
+      await this.dragEnterDrop(
+        testSubjects.getCssSelector(from),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop`),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Drags from a dimension to another dimension trigger to extra drop type
+     *
+     * @param from - the selector of the dimension being moved
+     * @param to - the selector of the main drop type of dimension being dropped to
+     * @param type - extra drop type
+     * */
+    async dragDimensionToExtraDropType(
+      from: string,
+      to: string,
+      type: 'duplicate' | 'swap' | 'combine'
+    ) {
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
@@ -1242,6 +1329,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     hasEmptySizeRatioButtonGroup() {
       return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
+    },
+
+    getAutoApplyToggleExists() {
+      return testSubjects.exists('lensToggleAutoApply');
+    },
+
+    enableAutoApply() {
+      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'check');
+    },
+
+    disableAutoApply() {
+      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'uncheck');
+    },
+
+    getAutoApplyEnabled() {
+      return testSubjects.isEuiSwitchChecked('lensToggleAutoApply');
+    },
+
+    async applyChanges(throughSuggestions = false) {
+      const applyButtonSelector = throughSuggestions
+        ? 'lnsSuggestionApplyChanges'
+        : 'lensApplyChanges';
+      await testSubjects.waitForEnabled(applyButtonSelector);
+      await testSubjects.click(applyButtonSelector);
+    },
+
+    async getAreSuggestionsPromptingToApply() {
+      return testSubjects.exists('lnsSuggestionApplyChanges');
     },
   });
 }

@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/100968
-  describe.skip('Kibana spaces page meets a11y validations', () => {
+  describe('Kibana spaces page meets a11y validations', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
@@ -52,7 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // EUI issue - https://github.com/elastic/eui/issues/3999
     it('a11y test for color picker', async () => {
       await PageObjects.spaceSelector.clickColorPicker();
       await a11y.testAppSnapshot();

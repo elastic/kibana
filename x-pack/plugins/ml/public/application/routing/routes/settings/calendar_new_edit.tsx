@@ -7,13 +7,9 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { NavigateToPath } from '../../../contexts/kibana';
-
+import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-
-import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
@@ -21,7 +17,7 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { NewCalendar } from '../../../settings/calendars';
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 
@@ -39,16 +35,19 @@ export const newCalendarRouteFactory = (
   basePath: string
 ): MlRoute => ({
   path: '/settings/calendars_list/new_calendar',
+  title: i18n.translate('xpack.ml.settings.createCalendar.docTitle', {
+    defaultMessage: 'Create Calendar',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list/new_calendar', navigateToPath),
     },
   ],
 });
@@ -58,6 +57,9 @@ export const editCalendarRouteFactory = (
   basePath: string
 ): MlRoute => ({
   path: '/settings/calendars_list/edit_calendar/:calendarId',
+  title: i18n.translate('xpack.ml.settings.editCalendar.docTitle', {
+    defaultMessage: 'Edit Calendar',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -67,7 +69,6 @@ export const editCalendarRouteFactory = (
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list/edit_calendar', navigateToPath),
     },
   ],
 });

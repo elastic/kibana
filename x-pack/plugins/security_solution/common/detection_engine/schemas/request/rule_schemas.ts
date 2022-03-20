@@ -60,21 +60,14 @@ import {
   enabled,
   outcome,
   alias_target_id,
+  alias_purpose,
   updated_at,
   updated_by,
   created_at,
   created_by,
-  ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
   namespace,
-  last_gap,
-  bulk_create_time_durations,
-  search_after_time_durations,
-} from '../common/schemas';
+  ruleExecutionSummary,
+} from '../common';
 
 export const createSchema = <
   Required extends t.Props,
@@ -157,6 +150,7 @@ const baseParams = {
     license,
     outcome,
     alias_target_id,
+    alias_purpose,
     output_index,
     timeline_id,
     timeline_title,
@@ -419,16 +413,9 @@ const responseRequiredFields = {
   created_at,
   created_by,
 };
+
 const responseOptionalFields = {
-  status: ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
-  last_gap,
-  bulk_create_time_durations,
-  search_after_time_durations,
+  execution_summary: ruleExecutionSummary,
 };
 
 export const fullResponseSchema = t.intersection([
@@ -443,9 +430,11 @@ export interface RulePreviewLogs {
   errors: string[];
   warnings: string[];
   startedAt?: string;
+  duration: number;
 }
 
 export interface PreviewResponse {
   previewId: string | undefined;
   logs: RulePreviewLogs[] | undefined;
+  isAborted: boolean | undefined;
 }

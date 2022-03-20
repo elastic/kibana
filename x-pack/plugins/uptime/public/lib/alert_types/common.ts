@@ -38,3 +38,7 @@ export const getMonitorRouteFromMonitorId = ({
         : {}),
     },
   });
+
+export const getUrlForAlert = (id: string, basePath: string) => {
+  return basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + id;
+};

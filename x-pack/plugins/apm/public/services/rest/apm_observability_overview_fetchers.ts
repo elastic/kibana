@@ -9,7 +9,7 @@ import {
   ApmFetchDataResponse,
   FetchDataParams,
 } from '../../../../observability/public';
-import { callApmApi } from './createCallApmApi';
+import { callApmApi } from './create_call_apm_api';
 
 export const fetchObservabilityOverviewPageData = async ({
   absoluteTime,
@@ -17,8 +17,7 @@ export const fetchObservabilityOverviewPageData = async ({
   bucketSize,
   intervalString,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
-  const data = await callApmApi({
-    endpoint: 'GET /internal/apm/observability_overview',
+  const data = await callApmApi('GET /internal/apm/observability_overview', {
     signal: null,
     params: {
       query: {
@@ -53,8 +52,7 @@ export const fetchObservabilityOverviewPageData = async ({
 };
 
 export async function getHasData() {
-  return await callApmApi({
-    endpoint: 'GET /internal/apm/observability_overview/has_data',
+  return await callApmApi('GET /internal/apm/observability_overview/has_data', {
     signal: null,
   });
 }

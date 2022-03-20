@@ -70,12 +70,12 @@ export default ({ getService }: FtrProviderContext) => {
     requestBody: object,
     expectedResponsecode: number
   ): Promise<any> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post('/api/ml/jobs/jobs_exist')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(requestBody)
-      .expect(expectedResponsecode);
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(expectedResponsecode, status, body);
 
     return body;
   }
@@ -89,6 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('sets up jobs', async () => {

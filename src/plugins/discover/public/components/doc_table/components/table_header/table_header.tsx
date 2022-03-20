@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { DataView } from 'src/plugins/data/common';
+import React, { useMemo } from 'react';
+import type { DataView } from 'src/plugins/data_views/public';
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
 import { getDefaultSort } from '../../lib/get_default_sort';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import { FORMATS_UI_SETTINGS } from '../../../../../../field_formats/common';
 
 interface Props {
   columns: string[];
-  defaultSortOrder: string;
-  hideTimeColumn: boolean;
   indexPattern: DataView;
-  isShortDots: boolean;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
@@ -26,15 +26,21 @@ interface Props {
 
 export function TableHeader({
   columns,
-  defaultSortOrder,
-  hideTimeColumn,
   indexPattern,
-  isShortDots,
   onChangeSortOrder,
   onMoveColumn,
   onRemoveColumn,
   sortOrder,
 }: Props) {
+  const { uiSettings } = useDiscoverServices();
+  const [defaultSortOrder, hideTimeColumn, isShortDots] = useMemo(
+    () => [
+      uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+      uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+      uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
+    ],
+    [uiSettings]
+  );
   const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
 
   return (

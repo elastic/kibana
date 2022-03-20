@@ -11,7 +11,8 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   JobType,
-  ML_SAVED_OBJECT_TYPE,
+  TrainedModelType,
+  ML_JOB_SAVED_OBJECT_TYPE,
   SavedObjectResult,
 } from '../../../../common/types/saved_objects';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '../../../../../spaces/public';
@@ -21,17 +22,21 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 interface Props {
   spacesApi: SpacesPluginStart;
   spaceIds: string[];
-  jobId: string;
-  jobType: JobType;
+  id: string;
+  jobType: JobType | TrainedModelType;
   refresh(): void;
 }
 
 const ALL_SPACES_ID = '*';
-const objectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.objectNoun', {
+const jobObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.jobObjectNoun', {
   defaultMessage: 'job',
 });
 
-export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, refresh }) => {
+const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.modelObjectNoun', {
+  defaultMessage: 'trained model',
+});
+
+export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, id, jobType, refresh }) => {
   const { displayErrorToast } = useToastNotificationService();
 
   const [showFlyout, setShowFlyout] = useState(false);
@@ -45,13 +50,18 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
     const spacesToRemove = spacesToAdd.includes(ALL_SPACES_ID) ? [] : spacesToMaybeRemove;
 
     if (spacesToAdd.length || spacesToRemove.length) {
-      const resp = await ml.savedObjects.updateJobsSpaces(
-        jobType,
-        [jobId],
-        spacesToAdd,
-        spacesToRemove
-      );
-      handleApplySpaces(resp);
+      if (jobType === 'trained-model') {
+        const resp = await ml.savedObjects.updateModelsSpaces([id], spacesToAdd, spacesToRemove);
+        handleApplySpaces(resp);
+      } else {
+        const resp = await ml.savedObjects.updateJobsSpaces(
+          jobType,
+          [id],
+          spacesToAdd,
+          spacesToRemove
+        );
+        handleApplySpaces(resp);
+      }
     }
     onClose();
   }
@@ -62,11 +72,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
   }
 
   function handleApplySpaces(resp: SavedObjectResult) {
-    Object.entries(resp).forEach(([id, { success, error }]) => {
+    Object.entries(resp).forEach(([errorId, { success, error }]) => {
       if (success === false) {
         const title = i18n.translate('xpack.ml.management.jobsSpacesList.updateSpaces.error', {
           defaultMessage: 'Error updating {id}',
-          values: { id },
+          values: { id: errorId },
         });
         displayErrorToast(error, title);
       }
@@ -80,11 +90,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
   const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     savedObjectTarget: {
-      type: ML_SAVED_OBJECT_TYPE,
-      id: jobId,
+      type: ML_JOB_SAVED_OBJECT_TYPE,
+      id,
       namespaces: spaceIds,
-      title: jobId,
-      noun: objectNoun,
+      title: id,
+      noun: jobType === 'trained-model' ? modelObjectNoun : jobObjectNoun,
     },
     behaviorContext: 'outside-space',
     changeSpacesHandler,

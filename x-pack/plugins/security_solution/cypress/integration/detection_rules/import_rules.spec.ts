@@ -5,29 +5,18 @@
  * 2.0.
  */
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import {
-  getRulesImportToast,
-  importRules,
-  importRulesWithOverwriteAll,
-} from '../../tasks/alerts_detection_rules';
+import { TOASTER } from '../../screens/alerts_detection_rules';
+import { importRules, importRulesWithOverwriteAll } from '../../tasks/alerts_detection_rules';
 import { cleanKibana, reload } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Import rules', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', '/api/detection_engine/rules/_import*').as('import');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   it('Imports a custom rule with exceptions', function () {
@@ -35,7 +24,10 @@ describe('Import rules', () => {
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      getRulesImportToast(['Successfully imported 1 rule', 'Successfully imported 2 exceptions.']);
+      cy.get(TOASTER).should(
+        'have.text',
+        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+      );
     });
   });
 
@@ -51,7 +43,7 @@ describe('Import rules', () => {
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      getRulesImportToast(['Failed to import 1 rule', 'Failed to import 2 exceptions']);
+      cy.get(TOASTER).should('have.text', 'Failed to import 1 ruleFailed to import 2 exceptions');
     });
   });
 
@@ -67,7 +59,10 @@ describe('Import rules', () => {
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      getRulesImportToast(['Successfully imported 1 rule', 'Successfully imported 2 exceptions.']);
+      cy.get(TOASTER).should(
+        'have.text',
+        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+      );
     });
   });
 });

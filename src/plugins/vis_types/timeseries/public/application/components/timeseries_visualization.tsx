@@ -190,6 +190,7 @@ function TimeseriesVisualization({
             onUiState={handleUiState}
             syncColors={syncColors}
             palettesService={palettesService}
+            indexPattern={indexPattern}
             fieldFormatMap={indexPattern?.fieldFormatMap}
           />
         </Suspense>

@@ -88,7 +88,7 @@ describe('DomainsTable', () => {
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
 
     expect(wrapper.find(EuiBasicTable).prop('pagination')).toEqual({
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
       pageIndex: 0,
       pageSize: 10,
       totalItemCount: 0,

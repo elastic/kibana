@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
@@ -13,7 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
-import { APP_UI_ID } from '../../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../../common/constants';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -27,9 +27,12 @@ import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
-import { useKibana } from '../../lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import { useCreateFieldButton } from '../../../timelines/components/create_field_button';
+import {
+  useFieldBrowserOptions,
+  FieldEditorActions,
+} from '../../../timelines/components/fields_browser';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -106,9 +109,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   unit,
 }) => {
   const dispatch = useDispatch();
-  const { timelines: timelinesUi } = useKibana().services;
+  const { timelines: timelinesUi, cases } = useKibana().services;
   const {
     browserFields,
+    dataViewId,
     docValueFields,
     indexPattern,
     runtimeMappings,
@@ -121,6 +125,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
+  const editorActionsRef = useRef<FieldEditorActions>(null);
+
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
@@ -137,6 +143,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     }
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
+      if (editorActionsRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        editorActionsRef.current.closeEditor();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -167,64 +177,74 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
-  const createFieldComponent = useCreateFieldButton(scopeId, id);
+  const fieldBrowserOptions = useFieldBrowserOptions({
+    sourcererScope: scopeId,
+    timelineId: id,
+    editorActionsRef,
+  });
+
+  const casesPermissions = useGetUserCasesPermissions();
+  const CasesContext = cases.ui.getCasesContext();
 
   return (
     <>
-      <FullScreenContainer $isFullScreen={globalFullScreen}>
-        <InspectButtonContainer>
-          {timelinesUi.getTGrid<'embedded'>({
-            additionalFilters,
-            appId: APP_UI_ID,
-            browserFields,
-            bulkActions,
-            columns,
-            dataProviders,
-            defaultCellActions,
-            deletedEventIds,
-            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            docValueFields,
-            end,
-            entityType,
-            filters: globalFilters,
-            filterStatus: currentFilter,
-            globalFullScreen,
-            graphEventId,
-            graphOverlay,
-            hasAlertsCrud,
-            id,
-            indexNames: selectedPatterns,
-            indexPattern,
-            isLive,
-            isLoadingIndexPattern,
-            itemsPerPage,
-            itemsPerPageOptions,
-            kqlMode,
-            leadingControlColumns,
-            onRuleChange,
-            query,
-            renderCellValue,
-            rowRenderers,
-            runtimeMappings,
-            setQuery,
-            sort,
-            start,
-            tGridEventRenderedViewEnabled,
-            trailingControlColumns,
-            type: 'embedded',
-            unit,
-            createFieldComponent,
-          })}
-        </InspectButtonContainer>
-      </FullScreenContainer>
-      <DetailsPanel
-        browserFields={browserFields}
-        entityType={entityType}
-        docValueFields={docValueFields}
-        isFlyoutView
-        runtimeMappings={runtimeMappings}
-        timelineId={id}
-      />
+      <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
+        <FullScreenContainer $isFullScreen={globalFullScreen}>
+          <InspectButtonContainer>
+            {timelinesUi.getTGrid<'embedded'>({
+              additionalFilters,
+              appId: APP_UI_ID,
+              browserFields,
+              bulkActions,
+              columns,
+              dataProviders,
+              dataViewId,
+              defaultCellActions,
+              deletedEventIds,
+              disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+              docValueFields,
+              end,
+              entityType,
+              fieldBrowserOptions,
+              filters: globalFilters,
+              filterStatus: currentFilter,
+              globalFullScreen,
+              graphEventId,
+              graphOverlay,
+              hasAlertsCrud,
+              id,
+              indexNames: selectedPatterns,
+              indexPattern,
+              isLive,
+              isLoadingIndexPattern,
+              itemsPerPage,
+              itemsPerPageOptions,
+              kqlMode,
+              leadingControlColumns,
+              onRuleChange,
+              query,
+              renderCellValue,
+              rowRenderers,
+              runtimeMappings,
+              setQuery,
+              sort,
+              start,
+              tGridEventRenderedViewEnabled,
+              trailingControlColumns,
+              type: 'embedded',
+              unit,
+            })}
+          </InspectButtonContainer>
+        </FullScreenContainer>
+        <DetailsPanel
+          browserFields={browserFields}
+          entityType={entityType}
+          docValueFields={docValueFields}
+          isFlyoutView
+          runtimeMappings={runtimeMappings}
+          timelineId={id}
+        />
+      </CasesContext>
     </>
   );
 };

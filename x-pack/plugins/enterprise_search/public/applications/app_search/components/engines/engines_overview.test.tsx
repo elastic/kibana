@@ -119,6 +119,18 @@ describe('EnginesOverview', () => {
       expect(actions.loadMetaEngines).toHaveBeenCalled();
     });
 
+    it('renders meta engines even if there is no indexed engine', () => {
+      setMockValues({
+        ...valuesWithEngines,
+        hasPlatinumLicense: true,
+        engines: [],
+      });
+      const wrapper = shallow(<EnginesOverview />);
+
+      expect(wrapper.find(MetaEnginesTable)).toHaveLength(1);
+      expect(actions.loadMetaEngines).toHaveBeenCalled();
+    });
+
     describe('meta engine creation', () => {
       it('renders a create meta engine action when the user can create meta engines', () => {
         setMockValues({
@@ -141,19 +153,6 @@ describe('EnginesOverview', () => {
 
         expect(wrapper.find('[data-test-subj="appSearchMetaEngines"]').prop('action')).toBeFalsy();
       });
-    });
-  });
-
-  describe('when an account does not have a platinum license', () => {
-    it('renders a license call to action in place of the meta engines table', () => {
-      setMockValues({
-        ...valuesWithEngines,
-        hasPlatinumLicense: false,
-      });
-      const wrapper = shallow(<EnginesOverview />);
-
-      expect(wrapper.find('[data-test-subj="metaEnginesLicenseCTA"]')).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="appSearchMetaEngines"]')).toHaveLength(0);
     });
   });
 

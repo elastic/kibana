@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
+import {
+  ENDPOINT_BLOCKLISTS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
 import { State } from '../../../../common/store';
 import {
@@ -16,17 +20,12 @@ import {
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
 } from '../../../common/constants';
 import {
+  getPolicyBlocklistsPath,
   getPolicyDetailsArtifactsListPath,
   getPolicyEventFiltersPath,
+  getPolicyHostIsolationExceptionsPath,
 } from '../../../common/routing';
-import {
-  getCurrentArtifactsLocation,
-  getUpdateArtifacts,
-  getUpdateArtifactsLoaded,
-  getUpdateArtifactsIsFailed,
-  policyIdFromParams,
-} from '../store/policy_details/selectors';
-import { useToasts } from '../../../../common/lib/kibana';
+import { getCurrentArtifactsLocation, policyIdFromParams } from '../store/policy_details/selectors';
 
 /**
  * Narrows global state down to the PolicyDetailsState before calling the provided Policy Details Selector
@@ -65,66 +64,40 @@ export function usePolicyDetailsNavigateCallback() {
   );
 }
 
-export function usePolicyDetailsEventFiltersNavigateCallback() {
+export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const history = useHistory();
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
-  return useCallback(
-    (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
-      history.push(
-        getPolicyEventFiltersPath(policyId, {
+  const getPath = useCallback(
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) => {
+      if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
+        return getPolicyDetailsArtifactsListPath(policyId, {
           ...location,
           ...args,
-        })
-      ),
-    [history, location, policyId]
+        });
+      } else if (listId === ENDPOINT_EVENT_FILTERS_LIST_ID) {
+        return getPolicyEventFiltersPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else if (listId === ENDPOINT_BLOCKLISTS_LIST_ID) {
+        return getPolicyBlocklistsPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else {
+        return getPolicyHostIsolationExceptionsPath(policyId, {
+          ...location,
+          ...args,
+        });
+      }
+    },
+    [listId, location, policyId]
+  );
+
+  return useCallback(
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) => history.push(getPath(args)),
+    [getPath, history]
   );
 }
-
-export const usePolicyTrustedAppsNotification = () => {
-  const updateSuccessfull = usePolicyDetailsSelector(getUpdateArtifactsLoaded);
-  const updateFailed = usePolicyDetailsSelector(getUpdateArtifactsIsFailed);
-  const updatedArtifacts = usePolicyDetailsSelector(getUpdateArtifacts);
-  const toasts = useToasts();
-  const [wasAlreadyHandled] = useState(new WeakSet());
-
-  if (updateSuccessfull && updatedArtifacts && !wasAlreadyHandled.has(updatedArtifacts)) {
-    wasAlreadyHandled.add(updatedArtifacts);
-    const updateCount = updatedArtifacts.length;
-
-    toasts.addSuccess({
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.title',
-        {
-          defaultMessage: 'Success',
-        }
-      ),
-      text:
-        updateCount > 1
-          ? i18n.translate(
-              'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.textMultiples',
-              {
-                defaultMessage: '{count} trusted applications have been added to your list.',
-                values: { count: updateCount },
-              }
-            )
-          : i18n.translate(
-              'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.textSingle',
-              {
-                defaultMessage: '"{name}" has been added to your trusted applications list.',
-                values: { name: updatedArtifacts[0].data.name },
-              }
-            ),
-    });
-  } else if (updateFailed) {
-    toasts.addDanger(
-      i18n.translate(
-        'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastError.text',
-        {
-          defaultMessage: `An error occurred updating artifacts`,
-        }
-      )
-    );
-  }
-};

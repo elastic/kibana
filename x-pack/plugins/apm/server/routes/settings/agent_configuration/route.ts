@@ -7,10 +7,9 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { maxSuggestions } from '../../../../../observability/common';
 import { setupRequest } from '../../../lib/helpers/setup_request';
-import { getServiceNames } from './get_service_names';
 import { createOrUpdateConfiguration } from './create_or_update_configuration';
 import { searchConfigurations } from './search_configurations';
 import { findExactConfiguration } from './find_exact_configuration';
@@ -25,14 +24,19 @@ import {
   agentConfigurationIntakeRt,
 } from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
-import { createApmServerRouteRepository } from '../../apm_routes/create_apm_server_route_repository';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/agent-configuration',
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    configurations: Array<
+      import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration
+    >;
+  }> => {
     const setup = await setupRequest(resources);
     const configurations = await listConfigurations({ setup });
     return { configurations };
@@ -46,7 +50,11 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
     query: serviceRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<
+    import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration
+  > => {
     const setup = await setupRequest(resources);
     const { params, logger } = resources;
 
@@ -78,7 +86,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
       service: serviceRt,
     }),
   }),
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ result: string }> => {
     const setup = await setupRequest(resources);
     const { params, logger, core, telemetryUsageCounter } = resources;
 
@@ -128,7 +136,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),
     t.type({ body: agentConfigurationIntakeRt }),
   ]),
-  handler: async (resources) => {
+  handler: async (resources): Promise<void> => {
     const setup = await setupRequest(resources);
     const { params, logger, core, telemetryUsageCounter } = resources;
     const { body, query } = params;
@@ -187,7 +195,16 @@ const agentConfigurationSearchRoute = createApmServerRoute({
     body: searchParamsRt,
   }),
   options: { tags: ['access:apm'], disableTelemetry: true },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<
+    | import('./../../../../../../../src/core/types/elasticsearch/search').SearchHit<
+        import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration,
+        undefined,
+        undefined
+      >
+    | null
+  > => {
     const { params, logger } = resources;
 
     const {
@@ -238,33 +255,6 @@ const agentConfigurationSearchRoute = createApmServerRoute({
  * Utility endpoints (not documented as part of the public API)
  */
 
-// get list of services
-const listAgentConfigurationServicesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/services',
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { start, end } = resources.params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
-      kuery: '',
-      start,
-      end,
-    });
-    const size = await resources.context.core.uiSettings.client.get<number>(
-      maxSuggestions
-    );
-    const serviceNames = await getServiceNames({
-      searchAggregatedTransactions,
-      setup,
-      size,
-    });
-
-    return { serviceNames };
-  },
-});
-
 // get environments for service
 const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/agent-configuration/environments',
@@ -272,7 +262,11 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
     query: t.partial({ serviceName: t.string }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    environments: Array<{ name: string; alreadyConfigured: boolean }>;
+  }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
 
@@ -305,7 +299,7 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
     query: t.type({ serviceName: t.string }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ agentName: string | undefined }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.query;
@@ -314,13 +308,12 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   },
 });
 
-export const agentConfigurationRouteRepository =
-  createApmServerRouteRepository()
-    .add(agentConfigurationRoute)
-    .add(getSingleAgentConfigurationRoute)
-    .add(deleteAgentConfigurationRoute)
-    .add(createOrUpdateAgentConfigurationRoute)
-    .add(agentConfigurationSearchRoute)
-    .add(listAgentConfigurationServicesRoute)
-    .add(listAgentConfigurationEnvironmentsRoute)
-    .add(agentConfigurationAgentNameRoute);
+export const agentConfigurationRouteRepository = {
+  ...agentConfigurationRoute,
+  ...getSingleAgentConfigurationRoute,
+  ...deleteAgentConfigurationRoute,
+  ...createOrUpdateAgentConfigurationRoute,
+  ...agentConfigurationSearchRoute,
+  ...listAgentConfigurationEnvironmentsRoute,
+  ...agentConfigurationAgentNameRoute,
+};

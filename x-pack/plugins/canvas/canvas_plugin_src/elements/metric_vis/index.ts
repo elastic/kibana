@@ -12,9 +12,10 @@ export const metricVis: ElementFactory = () => ({
   type: 'chart',
   help: 'Metric visualization',
   icon: 'visMetric',
-  expression: `filters
-  | demodata
-  | head 1
-  | metricVis metric={visdimension "percent_uptime"} colorMode="Labels"
-  | render`,
+  expression: `kibana
+| selectFilter
+| demodata
+| head 1
+| metricVis metric={visdimension "percent_uptime"} colorMode="Labels"
+| render`,
 });

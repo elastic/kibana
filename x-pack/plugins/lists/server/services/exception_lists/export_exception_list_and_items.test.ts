@@ -5,44 +5,49 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 
 import { exportExceptionListAndItems } from './export_exception_list_and_items';
-import { findExceptionListItem } from './find_exception_list_item';
+import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { getExceptionList } from './get_exception_list';
 
 jest.mock('./get_exception_list');
-jest.mock('./find_exception_list_item');
+jest.mock('./find_exception_list_item_point_in_time_finder');
 
 describe('export_exception_list_and_items', () => {
   describe('exportExceptionListAndItems', () => {
     test('it should return null if no matching exception list found', async () => {
       (getExceptionList as jest.Mock).mockResolvedValue(null);
-      (findExceptionListItem as jest.Mock).mockResolvedValue({ data: [] });
+      (findExceptionListItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+        ({ executeFunctionOnStream }) => {
+          executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
+        }
+      );
 
       const result = await exportExceptionListAndItems({
         id: '123',
         listId: 'non-existent',
         namespaceType: 'single',
-        savedObjectsClient: {} as SavedObjectsClientContract,
+        savedObjectsClient: savedObjectsClientMock.create(),
       });
       expect(result).toBeNull();
     });
 
     test('it should return stringified list and items', async () => {
       (getExceptionList as jest.Mock).mockResolvedValue(getExceptionListSchemaMock());
-      (findExceptionListItem as jest.Mock).mockResolvedValue({
-        data: [getExceptionListItemSchemaMock()],
-      });
-
+      (findExceptionListItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+        ({ executeFunctionOnStream }) => {
+          executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
+        }
+      );
       const result = await exportExceptionListAndItems({
         id: '123',
         listId: 'non-existent',
         namespaceType: 'single',
-        savedObjectsClient: {} as SavedObjectsClientContract,
+        savedObjectsClient: savedObjectsClientMock.create(),
       });
       expect(result?.exportData).toEqual(
         `${JSON.stringify(getExceptionListSchemaMock())}\n${JSON.stringify(

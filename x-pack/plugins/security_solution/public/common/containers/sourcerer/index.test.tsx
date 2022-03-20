@@ -54,11 +54,12 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 
 const mockSearch = jest.fn();
 
+const mockAddWarning = jest.fn();
 jest.mock('../../lib/kibana', () => ({
   useToasts: () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
-    addWarning: jest.fn(),
+    addWarning: mockAddWarning,
   }),
   useKibana: () => ({
     services: {
@@ -195,6 +196,38 @@ describe('Sourcerer Hooks', () => {
       });
     });
   });
+
+  it('calls addWarning if defaultDataView has an error', async () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          signalIndexName: null,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            error: true,
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+
+      await waitFor(() => {
+        expect(mockAddWarning).toHaveBeenNthCalledWith(1, {
+          text: 'Users with write permission need to access the Elastic Security app to initialize the app source data.',
+          title: 'Write role required to generate data',
+        });
+      });
+    });
+  });
+
   it('handles detections page', async () => {
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({

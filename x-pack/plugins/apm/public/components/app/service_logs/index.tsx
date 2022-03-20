@@ -13,7 +13,7 @@ import moment from 'moment';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LogStream } from '../../../../../infra/public';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 import {
   CONTAINER_ID,
@@ -35,18 +35,20 @@ export function ServiceLogs() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/infrastructure',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end]

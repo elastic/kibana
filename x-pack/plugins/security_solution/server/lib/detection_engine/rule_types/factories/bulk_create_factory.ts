@@ -6,6 +6,7 @@
  */
 
 import { performance } from 'perf_hooks';
+import { isEmpty } from 'lodash';
 
 import { Logger } from 'kibana/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
@@ -44,7 +45,7 @@ export const bulkCreateFactory =
 
     const start = performance.now();
 
-    const { createdAlerts } = await alertWithPersistence(
+    const { createdAlerts, errors } = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         _id: doc._id,
         // `fields` should have already been merged into `doc._source`
@@ -61,11 +62,24 @@ export const bulkCreateFactory =
       )
     );
 
-    return {
-      errors: [],
-      success: true,
-      bulkCreateDuration: makeFloatString(end - start),
-      createdItemsCount: createdAlerts.length,
-      createdItems: createdAlerts,
-    };
+    if (!isEmpty(errors)) {
+      logger.debug(
+        buildRuleMessage(`[-] bulkResponse had errors with responses of: ${JSON.stringify(errors)}`)
+      );
+      return {
+        errors: Object.keys(errors),
+        success: false,
+        bulkCreateDuration: makeFloatString(end - start),
+        createdItemsCount: createdAlerts.length,
+        createdItems: createdAlerts,
+      };
+    } else {
+      return {
+        errors: [],
+        success: true,
+        bulkCreateDuration: makeFloatString(end - start),
+        createdItemsCount: createdAlerts.length,
+        createdItems: createdAlerts,
+      };
+    }
   };

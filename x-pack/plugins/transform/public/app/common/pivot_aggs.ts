@@ -28,6 +28,7 @@ export function isPivotSupportedAggs(arg: unknown): arg is PivotSupportedAggs {
 }
 
 export const PERCENTILES_AGG_DEFAULT_PERCENTS = [1, 5, 25, 50, 75, 95, 99];
+export const TERMS_AGG_DEFAULT_SIZE = 10;
 
 export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.ATTACHMENT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
@@ -45,6 +46,7 @@ export const pivotAggsFieldSupport = {
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
     PIVOT_SUPPORTED_AGGS.FILTER,
     PIVOT_SUPPORTED_AGGS.TOP_METRICS,
+    PIVOT_SUPPORTED_AGGS.TERMS,
   ],
   [KBN_FIELD_TYPES.MURMUR3]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.NUMBER]: [
@@ -63,6 +65,7 @@ export const pivotAggsFieldSupport = {
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
     PIVOT_SUPPORTED_AGGS.FILTER,
     PIVOT_SUPPORTED_AGGS.TOP_METRICS,
+    PIVOT_SUPPORTED_AGGS.TERMS,
   ],
   [KBN_FIELD_TYPES._SOURCE]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.UNKNOWN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
@@ -226,9 +229,15 @@ interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
   percents: number[];
 }
 
+interface PivotAggsConfigTerms extends PivotAggsConfigWithUiBase {
+  agg: typeof PIVOT_SUPPORTED_AGGS.TERMS;
+  size: number;
+}
+
 export type PivotAggsConfigWithUiSupport =
   | PivotAggsConfigWithUiBase
   | PivotAggsConfigPercentiles
+  | PivotAggsConfigTerms
   | PivotAggsConfigWithExtendedForm;
 
 export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiSupport {
@@ -256,6 +265,10 @@ export function isPivotAggsConfigPercentiles(arg: unknown): arg is PivotAggsConf
     isPopulatedObject(arg, ['agg', 'field', 'percents']) &&
     arg.agg === PIVOT_SUPPORTED_AGGS.PERCENTILES
   );
+}
+
+export function isPivotAggsConfigTerms(arg: unknown): arg is PivotAggsConfigTerms {
+  return isPopulatedObject(arg, ['agg', 'field', 'size']) && arg.agg === PIVOT_SUPPORTED_AGGS.TERMS;
 }
 
 export type PivotAggsConfig = PivotAggsConfigBase | PivotAggsConfigWithUiSupport;

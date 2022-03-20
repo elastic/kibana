@@ -27,12 +27,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { Storage } from '../../../../../../kibana_utils/public';
 import { usePager } from '../../../../utils/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
-import { flattenHit } from '../../../../../../data/common';
+import { flattenHit } from '../../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
-import { getServices } from '../../../../kibana_services';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
 import { getFieldsToShow } from '../../../../utils/get_fields_to_show';
 import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
@@ -108,7 +108,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const { storage, uiSettings } = getServices();
+  const { storage, uiSettings, fieldFormats } = useDiscoverServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
   const isSingleDocView = !filter;
@@ -178,21 +178,28 @@ export const DocViewerTable = ({
           onTogglePinned,
         },
         value: {
-          formattedValue: formatFieldValue(flattened[field], hit, dataView, fieldMapping),
+          formattedValue: formatFieldValue(
+            flattened[field],
+            hit,
+            fieldFormats,
+            dataView,
+            fieldMapping
+          ),
           ignored,
         },
       };
     },
     [
-      columns,
-      filter,
-      flattened,
-      hit,
-      dataView,
       mapping,
+      dataView,
+      hit,
       onToggleColumn,
-      onTogglePinned,
+      filter,
+      columns,
+      flattened,
       pinnedFields,
+      onTogglePinned,
+      fieldFormats,
     ]
   );
 

@@ -97,7 +97,7 @@ export function BreakdownChart({
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
         <Settings
-          tooltip={{ stickTo: 'top' }}
+          tooltip={{ stickTo: 'top', showNullValues: true }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
@@ -171,7 +171,12 @@ export function BreakdownChart({
           })
         ) : (
           // When timeseries is empty, loads an AreaSeries chart to show the default empty message.
-          <AreaSeries id="empty_chart" data={[]} />
+          <AreaSeries
+            id="empty_chart"
+            xAccessor="x"
+            yAccessors={['y']}
+            data={[]}
+          />
         )}
       </Chart>
     </ChartContainer>

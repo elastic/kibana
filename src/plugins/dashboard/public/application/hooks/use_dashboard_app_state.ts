@@ -8,13 +8,14 @@
 
 import _ from 'lodash';
 import { History } from 'history';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 
 import { DashboardConstants } from '../..';
 import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
+import { DataView } from '../../services/data_views';
 import { getNewDashboardTitle } from '../../dashboard_strings';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
@@ -30,7 +31,7 @@ import {
   tryDestroyDashboardContainer,
   syncDashboardContainerInput,
   savedObjectToDashboardState,
-  syncDashboardIndexPatterns,
+  syncDashboardDataViews,
   syncDashboardFilterState,
   loadSavedDashboardState,
   buildDashboardContainer,
@@ -81,7 +82,7 @@ export const useDashboardAppState = ({
     core,
     chrome,
     embeddable,
-    indexPatterns,
+    dataViews,
     usageCollection,
     savedDashboards,
     initializerContext,
@@ -121,7 +122,7 @@ export const useDashboardAppState = ({
       search,
       history,
       embeddable,
-      indexPatterns,
+      dataViews,
       notifications,
       kibanaVersion,
       savedDashboards,
@@ -158,10 +159,11 @@ export const useDashboardAppState = ({
           savedDashboard.id,
           savedDashboard.aliasId
         );
+        const aliasPurpose = savedDashboard.aliasPurpose;
         if (screenshotModeService?.isScreenshotMode()) {
           scopedHistory().replace(path);
         } else {
-          await spacesService?.ui.redirectLegacyUrl(path);
+          await spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
         }
         // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
         return;
@@ -184,7 +186,7 @@ export const useDashboardAppState = ({
       // Backwards compatible way of detecting that we are taking a screenshot
       const legacyPrintLayoutDetected =
         screenshotModeService?.isScreenshotMode() &&
-        screenshotModeService.getScreenshotLayout() === 'print';
+        screenshotModeService.getScreenshotContext('layout') === 'print';
 
       const initialDashboardState = {
         ...savedDashboardState,
@@ -219,11 +221,7 @@ export const useDashboardAppState = ({
         savedDashboard,
         data,
         executionContext: {
-          type: 'application',
-          name: 'dashboard',
-          id: savedDashboard.id ?? 'unsaved_dashboard',
           description: savedDashboard.title,
-          url: history.location.pathname,
         },
       });
       if (canceled || !dashboardContainer) {
@@ -234,11 +232,11 @@ export const useDashboardAppState = ({
       /**
        * Start syncing index patterns between the Query Service and the Dashboard Container.
        */
-      const indexPatternsSubscription = syncDashboardIndexPatterns({
+      const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
-        indexPatterns: dashboardBuildContext.indexPatterns,
-        onUpdateIndexPatterns: (newIndexPatterns) =>
-          setDashboardAppState((s) => ({ ...s, indexPatterns: newIndexPatterns })),
+        dataViews: dashboardBuildContext.dataViews,
+        onUpdateDataViews: (newDataViews: DataView[]) =>
+          setDashboardAppState((s) => ({ ...s, dataViews: newDataViews })),
       });
 
       /**
@@ -261,37 +259,47 @@ export const useDashboardAppState = ({
         dashboardAppState.$onDashboardStateChange,
         dashboardBuildContext.$checkForUnsavedChanges,
       ])
-        .pipe(debounceTime(DashboardConstants.CHANGE_CHECK_DEBOUNCE))
-        .subscribe((states) => {
-          const [lastSaved, current] = states;
-          const unsavedChanges = diffDashboardState(lastSaved, current);
+        .pipe(
+          debounceTime(DashboardConstants.CHANGE_CHECK_DEBOUNCE),
+          switchMap((states) => {
+            return new Observable((observer) => {
+              const [lastSaved, current] = states;
+              diffDashboardState({
+                getEmbeddable: (id: string) => dashboardContainer.untilEmbeddableLoaded(id),
+                originalState: lastSaved,
+                newState: current,
+              }).then((unsavedChanges) => {
+                if (observer.closed) return;
+                const savedTimeChanged =
+                  lastSaved.timeRestore &&
+                  (!areTimeRangesEqual(
+                    {
+                      from: savedDashboard?.timeFrom,
+                      to: savedDashboard?.timeTo,
+                    },
+                    timefilter.getTime()
+                  ) ||
+                    !areRefreshIntervalsEqual(
+                      savedDashboard?.refreshInterval,
+                      timefilter.getRefreshInterval()
+                    ));
 
-          const savedTimeChanged =
-            lastSaved.timeRestore &&
-            (!areTimeRangesEqual(
-              {
-                from: savedDashboard?.timeFrom,
-                to: savedDashboard?.timeTo,
-              },
-              timefilter.getTime()
-            ) ||
-              !areRefreshIntervalsEqual(
-                savedDashboard?.refreshInterval,
-                timefilter.getRefreshInterval()
-              ));
+                /**
+                 * changes to the dashboard should only be considered 'unsaved changes' when
+                 * editing the dashboard
+                 */
+                const hasUnsavedChanges =
+                  current.viewMode === ViewMode.EDIT &&
+                  (Object.keys(unsavedChanges).length > 0 || savedTimeChanged);
+                setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
-          /**
-           * changes to the dashboard should only be considered 'unsaved changes' when
-           * editing the dashboard
-           */
-          const hasUnsavedChanges =
-            current.viewMode === ViewMode.EDIT &&
-            (Object.keys(unsavedChanges).length > 0 || savedTimeChanged);
-          setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
-
-          unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
-          dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);
-        });
+                unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
+                dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);
+              });
+            });
+          })
+        )
+        .subscribe();
 
       /**
        * initialize the last saved state, and build a callback which can be used to update
@@ -329,7 +337,7 @@ export const useDashboardAppState = ({
         stopWatchingAppStateInUrl();
         stopSyncingDashboardFilterState();
         lastSavedSubscription.unsubscribe();
-        indexPatternsSubscription.unsubscribe();
+        dataViewsSubscription.unsubscribe();
         tryDestroyDashboardContainer(dashboardContainer);
         setDashboardAppState((state) => ({
           ...state,
@@ -358,7 +366,7 @@ export const useDashboardAppState = ({
     usageCollection,
     scopedHistory,
     notifications,
-    indexPatterns,
+    dataViews,
     kibanaVersion,
     embeddable,
     docTitle,

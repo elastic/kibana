@@ -7,17 +7,24 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenuData } from '../../../../../../navigation/public';
-import { ISearchSource, Query } from '../../../../../../data/common';
+import { ISearchSource, Query } from '../../../../../../data/public';
 import { GetStateReturn } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 
 setHeaderActionMenuMounter(jest.fn());
+
+jest.mock('../../../../../../kibana_react/public', () => ({
+  ...jest.requireActual('../../../../../../kibana_react/public'),
+  useKibana: () => ({
+    services: jest.requireActual('../../../../__mocks__/services').discoverServiceMock,
+  }),
+}));
 
 function getProps(savePermissions = true): DiscoverTopNavProps {
   discoverServiceMock.capabilities.discover!.save = savePermissions;
@@ -27,7 +34,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     indexPattern: indexPatternMock,
     savedSearch: savedSearchMock,
     navigateTo: jest.fn(),
-    services: discoverServiceMock,
     query: {} as Query,
     savedQuery: '',
     updateQuery: jest.fn(),

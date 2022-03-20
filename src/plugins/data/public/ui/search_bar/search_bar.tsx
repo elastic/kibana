@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import { get, isEqual } from 'lodash';
 import { EuiIconProps } from '@elastic/eui';
+import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Query, Filter } from '@kbn/es-query';
@@ -186,6 +187,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
+  componentWillUnmount() {
+    this.renderSavedQueryManagement.clear();
+  }
+
   private shouldRenderQueryBar() {
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryInput =
@@ -343,18 +348,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public render() {
-    const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
-      <SavedQueryManagementComponent
-        showSaveQuery={this.props.showSaveQuery}
-        loadedSavedQuery={this.props.savedQuery}
-        onSave={this.onInitiateSave}
-        onSaveAsNew={this.onInitiateSaveNew}
-        onLoad={this.onLoadSavedQuery}
-        savedQueryService={this.savedQueryService}
-        onClearSavedQuery={this.props.onClearSavedQuery}
-      />
-    );
-
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
     let queryBar;
@@ -368,7 +361,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
+          prepend={
+            this.props.showFilterBar && this.state.query
+              ? this.renderSavedQueryManagement(
+                  this.props.onClearSavedQuery,
+                  this.props.showSaveQuery,
+                  this.props.savedQuery
+                )
+              : undefined
+          }
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -398,7 +399,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let filterBar;
     if (this.shouldRenderFilterBar()) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
 
@@ -447,6 +447,28 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       </div>
     );
   }
+
+  private renderSavedQueryManagement = memoizeOne(
+    (
+      onClearSavedQuery: SearchBarOwnProps['onClearSavedQuery'],
+      showSaveQuery: SearchBarOwnProps['showSaveQuery'],
+      savedQuery: SearchBarOwnProps['savedQuery']
+    ) => {
+      const savedQueryManagement = onClearSavedQuery && (
+        <SavedQueryManagementComponent
+          showSaveQuery={showSaveQuery}
+          loadedSavedQuery={savedQuery}
+          onSave={this.onInitiateSave}
+          onSaveAsNew={this.onInitiateSaveNew}
+          onLoad={this.onLoadSavedQuery}
+          savedQueryService={this.savedQueryService}
+          onClearSavedQuery={onClearSavedQuery}
+        />
+      );
+
+      return savedQueryManagement;
+    }
+  );
 }
 
 // Needed for React.lazy

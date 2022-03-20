@@ -10,6 +10,8 @@ import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NotificationsStart } from 'src/core/public';
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from 'kibana/public';
 
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import type { PackageInfo } from '../../../types';
@@ -30,7 +32,13 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
-function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
+function usePackageInstall({
+  notifications,
+  theme$,
+}: {
+  notifications: NotificationsStart;
+  theme$: Observable<CoreTheme>;
+}) {
   const history = useHistory();
   const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
@@ -77,13 +85,15 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
               id="xpack.fleet.integrations.packageInstallErrorTitle"
               defaultMessage="Failed to install {title} package"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageInstallErrorDescription"
               defaultMessage="Something went wrong while trying to install this package. Please try again later."
-            />
+            />,
+            { theme$ }
           ),
           iconType: 'alert',
         });
@@ -102,19 +112,28 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
               id="xpack.fleet.integrations.packageInstallSuccessTitle"
               defaultMessage="Installed {title}"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageInstallSuccessDescription"
               defaultMessage="Successfully installed {title}"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
         });
       }
     },
-    [getPackageInstallStatus, notifications.toasts, setPackageInstallStatus, getPath, history]
+    [
+      getPackageInstallStatus,
+      notifications.toasts,
+      setPackageInstallStatus,
+      getPath,
+      history,
+      theme$,
+    ]
   );
 
   const uninstallPackage = useCallback(
@@ -135,13 +154,15 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
               id="xpack.fleet.integrations.packageUninstallErrorTitle"
               defaultMessage="Failed to uninstall {title} package"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageUninstallErrorDescription"
               defaultMessage="Something went wrong while trying to uninstall this package. Please try again later."
-            />
+            />,
+            { theme$ }
           ),
           iconType: 'alert',
         });
@@ -154,14 +175,16 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
               id="xpack.fleet.integrations.packageUninstallSuccessTitle"
               defaultMessage="Uninstalled {title}"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageUninstallSuccessDescription"
               defaultMessage="Successfully uninstalled {title}"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
         });
         if (redirectToVersion !== version) {
@@ -172,7 +195,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         }
       }
     },
-    [notifications.toasts, setPackageInstallStatus, getPath, history]
+    [notifications.toasts, setPackageInstallStatus, getPath, history, theme$]
   );
 
   return {

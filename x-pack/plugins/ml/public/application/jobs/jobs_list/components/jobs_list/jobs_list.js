@@ -24,10 +24,12 @@ import {
   EuiIcon,
   EuiScreenReaderOnly,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
+import { isManagedJob } from '../../../jobs_utils';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
@@ -169,7 +171,31 @@ export class JobsList extends Component {
         truncateText: false,
         width: '15%',
         scope: 'row',
-        render: isManagementTable ? (id) => this.getJobIdLink(id) : undefined,
+        render: isManagementTable
+          ? (id) => this.getJobIdLink(id)
+          : (id, item) => {
+              if (!isManagedJob(item)) return id;
+
+              return (
+                <>
+                  <span>
+                    {id} &nbsp;
+                    <EuiToolTip
+                      content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
+                        defaultMessage:
+                          'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+                      })}
+                    >
+                      <EuiBadge color="hollow" data-test-subj="mlJobListRowManagedLabel" size="xs">
+                        {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
+                          defaultMessage: 'Managed',
+                        })}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  </span>
+                </>
+              );
+            },
       },
       {
         field: 'auditMessage',
@@ -292,7 +318,7 @@ export class JobsList extends Component {
             <JobSpacesList
               spacesApi={spacesApi}
               spaceIds={item.spaceIds}
-              jobId={item.id}
+              id={item.id}
               jobType="anomaly-detector"
               refresh={this.props.refreshJobs}
             />
@@ -340,6 +366,8 @@ export class JobsList extends Component {
           this.props.showDeleteJobModal,
           this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
+          this.props.showCloseJobsConfirmModal,
+          this.props.showStopDatafeedsConfirmModal,
           this.props.refreshJobs,
           this.props.showCreateAlertFlyout
         ),
@@ -414,7 +442,9 @@ JobsList.propTypes = {
   showEditJobFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
+  showCloseJobsConfirmModal: PropTypes.func,
   showCreateAlertFlyout: PropTypes.func,
+  showStopDatafeedsConfirmModal: PropTypes.func,
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,

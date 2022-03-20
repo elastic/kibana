@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ThrottlingFields } from './throttling_fields';
-import { DataStream, BrowserAdvancedFields, BrowserSimpleFields, Validation } from '../types';
+import {
+  DataStream,
+  BrowserAdvancedFields,
+  BrowserSimpleFields,
+  Validation,
+  ConfigKey,
+} from '../types';
 import {
   BrowserAdvancedFieldsContextProvider,
   BrowserSimpleFieldsContextProvider,
@@ -31,16 +38,18 @@ describe('<ThrottlingFields />', () => {
     defaultValues = defaultConfig,
     defaultSimpleFields = defaultBrowserSimpleFields,
     validate = defaultValidation,
+    onFieldBlur,
   }: {
     defaultValues?: BrowserAdvancedFields;
     defaultSimpleFields?: BrowserSimpleFields;
     validate?: Validation;
+    onFieldBlur?: (field: ConfigKey) => void;
   }) => {
     return (
       <IntlProvider locale="en">
         <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
           <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>
-            <ThrottlingFields validate={validate} />
+            <ThrottlingFields validate={validate} onFieldBlur={onFieldBlur} />
           </BrowserAdvancedFieldsContextProvider>
         </BrowserSimpleFieldsContextProvider>
       </IntlProvider>
@@ -94,6 +103,39 @@ describe('<ThrottlingFields />', () => {
       userEvent.clear(latency);
       userEvent.type(latency, '1339');
       expect(latency.value).toEqual('1339');
+    });
+  });
+
+  describe('calls onBlur on fields', () => {
+    const onFieldBlur = jest.fn();
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('for the enable switch', () => {
+      const { getByTestId } = render(<WrappedComponent onFieldBlur={onFieldBlur} />);
+
+      const enableSwitch = getByTestId('syntheticsBrowserIsThrottlingEnabled');
+      fireEvent.focus(enableSwitch);
+      fireEvent.blur(enableSwitch);
+      expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.IS_THROTTLING_ENABLED);
+    });
+
+    it('for throttling inputs', () => {
+      const { getByLabelText } = render(<WrappedComponent onFieldBlur={onFieldBlur} />);
+
+      const downloadSpeed = getByLabelText('Download Speed') as HTMLInputElement;
+      const uploadSpeed = getByLabelText('Upload Speed') as HTMLInputElement;
+      const latency = getByLabelText('Latency') as HTMLInputElement;
+
+      fireEvent.blur(downloadSpeed);
+      fireEvent.blur(uploadSpeed);
+      fireEvent.blur(latency);
+
+      expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.DOWNLOAD_SPEED);
+      expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.UPLOAD_SPEED);
+      expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.LATENCY);
     });
   });
 

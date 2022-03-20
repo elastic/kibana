@@ -22,7 +22,10 @@ export type { QueryDslQueryContainer };
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-export interface RuntimeField {
+
+export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
+
+export interface RuntimeFieldBase {
   type: RuntimeType;
   script?: {
     source: string;
@@ -30,9 +33,42 @@ export interface RuntimeField {
 }
 
 /**
+ * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
+ */
+export interface RuntimeFieldSpec extends RuntimeFieldBase {
+  fields?: Record<
+    string,
+    {
+      // It is not recursive, we can't create a composite inside a composite.
+      type: RuntimeTypeExceptComposite;
+    }
+  >;
+}
+
+export interface FieldConfiguration {
+  format?: SerializedFieldFormat | null;
+  customLabel?: string;
+  popularity?: number;
+}
+
+/**
+ * This is the RuntimeField interface enhanced with Data view field
+ * configuration: field format definition, customLabel or popularity.
+ *
+ * @see {@link RuntimeField}
+ */
+export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
+  fields?: Record<string, RuntimeFieldSubField>;
+}
+
+export interface RuntimeFieldSubField extends FieldConfiguration {
+  type: RuntimeTypeExceptComposite;
+}
+
+/**
  * @deprecated
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
- * Use IndexPattern or IndexPatternSpec instead
+ * Use DataView or DataViewSpec instead
  */
 export interface IIndexPattern extends DataViewBase {
   title: string;
@@ -145,11 +181,6 @@ export interface IDataViewsApiClient {
   hasUserIndexPattern: () => Promise<boolean>;
 }
 
-/**
- * @deprecated Use IDataViewsApiClient. All index pattern interfaces were renamed.
- */
-export type IIndexPatternsApiClient = IDataViewsApiClient;
-
 export type { SavedObject };
 
 export type AggregationRestrictions = Record<
@@ -221,18 +252,13 @@ export interface FieldSpec extends DataViewFieldBase {
   readFromDocValues?: boolean;
   indexed?: boolean;
   customLabel?: string;
-  runtimeField?: RuntimeField;
+  runtimeField?: RuntimeFieldSpec;
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
 }
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
-
-/**
- * @deprecated Use DataViewFieldMap. All index pattern interfaces were renamed.
- */
-export type IndexPatternFieldMap = DataViewFieldMap;
 
 /**
  * Static index pattern format
@@ -254,16 +280,18 @@ export interface DataViewSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
-  runtimeFieldMap?: Record<string, RuntimeField>;
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
+  namespaces?: string[];
 }
-
-/**
- * @deprecated Use DataViewSpec. All index pattern interfaces were renamed.
- */
-export type IndexPatternSpec = DataViewSpec;
 
 export interface SourceFilter {
   value: string;
+}
+
+export interface HasDataService {
+  hasESData: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
+  hasDataView: () => Promise<boolean>;
 }

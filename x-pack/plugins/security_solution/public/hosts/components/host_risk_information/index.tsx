@@ -21,22 +21,26 @@ import {
   EuiButton,
   EuiSpacer,
   EuiBasicTableColumn,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback } from 'react';
-import { HostRiskSeverity } from '../../../../common/search_strategy';
+import React from 'react';
+
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
-import { HostRiskScore } from '../common/host_risk_score';
+
 import * as i18n from './translations';
+import { useOnOpenCloseHandler } from '../../../helper_hooks';
+import { RiskScore } from '../../../common/components/severity/common';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
     field: 'classification',
     name: i18n.INFORMATION_CLASSIFICATION_HEADER,
-    render: (riskScore?: HostRiskSeverity) => {
+    render: (riskScore?: RiskSeverity) => {
       if (riskScore != null) {
-        return <HostRiskScore severity={riskScore} hideBackgroundColor />;
+        return <RiskScore severity={riskScore} hideBackgroundColor />;
       }
     },
   },
@@ -48,29 +52,21 @@ const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
 
 interface TableItem {
   range?: string;
-  classification: HostRiskSeverity;
+  classification: RiskSeverity;
 }
 
 const tableItems: TableItem[] = [
-  { classification: HostRiskSeverity.critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
-  { classification: HostRiskSeverity.high, range: '70 - 90 ' },
-  { classification: HostRiskSeverity.moderate, range: '40 - 70' },
-  { classification: HostRiskSeverity.low, range: '20 - 40' },
-  { classification: HostRiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
+  { classification: RiskSeverity.critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
+  { classification: RiskSeverity.high, range: '70 - 90 ' },
+  { classification: RiskSeverity.moderate, range: '40 - 70' },
+  { classification: RiskSeverity.low, range: '20 - 40' },
+  { classification: RiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
 
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 
-export const HostRiskInformation = () => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
-  const handleOnClose = useCallback(() => {
-    setIsFlyoutVisible(false);
-  }, []);
-
-  const handleOnOpen = useCallback(() => {
-    setIsFlyoutVisible(true);
-  }, []);
+export const HostRiskInformationButtonIcon = () => {
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   return (
     <>
@@ -81,8 +77,21 @@ export const HostRiskInformation = () => {
         aria-label={i18n.INFORMATION_ARIA_LABEL}
         onClick={handleOnOpen}
         className={HOST_RISK_INFO_BUTTON_CLASS}
-        data-test-subj="open-risk-information-flyout"
+        data-test-subj="open-risk-information-flyout-trigger"
       />
+      {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
+    </>
+  );
+};
+
+export const HostRiskInformationButtonEmpty = () => {
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
+
+  return (
+    <>
+      <EuiButtonEmpty onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
+        {i18n.INFO_BUTTON_TEXT}
+      </EuiButtonEmpty>
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
@@ -94,7 +103,13 @@ const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
   });
 
   return (
-    <EuiFlyout ownFocus onClose={handleOnClose} aria-labelledby={simpleFlyoutTitleId} size={450}>
+    <EuiFlyout
+      ownFocus
+      onClose={handleOnClose}
+      aria-labelledby={simpleFlyoutTitleId}
+      size={450}
+      data-test-subj="open-risk-information-flyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={simpleFlyoutTitleId}>{i18n.TITLE}</h2>

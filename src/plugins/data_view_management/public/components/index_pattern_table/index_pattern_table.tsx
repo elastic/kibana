@@ -5,26 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { css } from '@emotion/react';
+
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
+  EuiLink,
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
+import { SpacesList } from './spaces_list';
+import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
 
 const pagination = {
   initialPageSize: 10,
@@ -35,15 +35,6 @@ const sorting = {
   sort: {
     field: 'title',
     direction: 'asc' as const,
-  },
-};
-
-const search = {
-  box: {
-    incremental: true,
-    schema: {
-      fields: { title: { type: 'string' } },
-    },
   },
 };
 
@@ -60,14 +51,12 @@ const securityDataView = i18n.translate(
 
 const securitySolution = 'security-solution';
 
-const flexItemStyles = css`
-  justify-content: center;
-`;
-
 interface Props extends RouteComponentProps {
   canSave: boolean;
   showCreateDialog?: boolean;
 }
+
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const IndexPatternTable = ({
   history,
@@ -79,34 +68,64 @@ export const IndexPatternTable = ({
     uiSettings,
     indexPatternManagementStart,
     chrome,
-    data,
+    dataViews,
     IndexPatternEditor,
+    spaces,
   } = useKibana<IndexPatternManagmentContext>().services;
+  const [query, setQuery] = useState('');
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
 
+  const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
+    if (!error) {
+      setQuery(queryText);
+    }
+  };
+
+  const search = {
+    query,
+    onChange: handleOnChange,
+    box: {
+      incremental: true,
+      schema: {
+        fields: { title: { type: 'string' } },
+      },
+    },
+  };
+
+  const loadDataViews = useCallback(async () => {
+    setIsLoadingIndexPatterns(true);
+    const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
+      uiSettings.get('defaultIndex'),
+      dataViews
+    );
+    setIndexPatterns(gettedIndexPatterns);
+    setIsLoadingIndexPatterns(false);
+    return gettedIndexPatterns;
+  }, [dataViews, uiSettings]);
+
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
     (async function () {
-      const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-        uiSettings.get('defaultIndex'),
-        data.dataViews
-      );
-      setIndexPatterns(gettedIndexPatterns);
-      setIsLoadingIndexPatterns(false);
+      const gettedIndexPatterns = await loadDataViews();
       if (
         gettedIndexPatterns.length === 0 ||
-        !(await data.dataViews.hasUserDataView().catch(() => false))
+        !(await dataViews.hasUserDataView().catch(() => false))
       ) {
         setShowCreateDialog(true);
       }
     })();
-  }, [indexPatternManagementStart, uiSettings, data]);
+  }, [indexPatternManagementStart, uiSettings, dataViews, loadDataViews]);
 
   chrome.docTitle.change(title);
 
   const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+
+  const ContextWrapper = useMemo(
+    () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
+    [spaces]
+  );
 
   const columns = [
     {
@@ -114,39 +133,40 @@ export const IndexPatternTable = ({
       name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
         defaultMessage: 'Name',
       }),
-      render: (
-        name: string,
-        index: {
-          id: string;
-          tags?: Array<{
-            key: string;
-            name: string;
-          }>;
-        }
-      ) => (
-        <>
-          <EuiFlexGroup gutterSize="s" wrap>
-            <EuiFlexItem grow={false} css={flexItemStyles}>
-              <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
-                {name}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {index.id && index.id.indexOf(securitySolution) === 0 && (
-              <EuiFlexItem grow={false} css={flexItemStyles}>
-                <EuiBadge>{securityDataView}</EuiBadge>
-              </EuiFlexItem>
-            )}
-            {index.tags &&
-              index.tags.map(({ key: tagKey, name: tagName }) => (
-                <EuiFlexItem grow={false} css={flexItemStyles} key={tagKey}>
-                  <EuiBadge>{tagName}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-          </EuiFlexGroup>
-        </>
+      render: (name: string, dataView: IndexPatternTableItem) => (
+        <div>
+          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
+          {dataView?.id?.indexOf(securitySolution) === 0 && (
+            <>
+              &emsp;<EuiBadge>{securityDataView}</EuiBadge>
+            </>
+          )}
+          {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
+            <>
+              &emsp;<EuiBadge key={tagKey}>{tagName}</EuiBadge>
+            </>
+          ))}
+        </div>
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
+    },
+    {
+      field: 'namespaces',
+      name: 'spaces',
+      render: (name: string, dataView: IndexPatternTableItem) => {
+        return spaces ? (
+          <SpacesList
+            spacesApi={spaces}
+            spaceIds={dataView.namespaces || []}
+            id={dataView.id}
+            title={dataView.title}
+            refresh={loadDataViews}
+          />
+        ) : (
+          <></>
+        );
+      },
     },
   ];
 
@@ -197,17 +217,18 @@ export const IndexPatternTable = ({
       />
 
       <EuiSpacer size="l" />
-
-      <EuiInMemoryTable
-        allowNeutralSort={false}
-        itemId="id"
-        isSelectable={false}
-        items={indexPatterns}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        search={search}
-      />
+      <ContextWrapper>
+        <EuiInMemoryTable
+          allowNeutralSort={false}
+          itemId="id"
+          isSelectable={false}
+          items={indexPatterns}
+          columns={columns}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+        />
+      </ContextWrapper>
       {displayIndexPatternEditor}
     </div>
   );

@@ -15,7 +15,6 @@ import {
   loginAndWaitForPageWithoutDateRange,
   waitForPageWithoutDateRange,
 } from '../../tasks/login';
-import { waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createCustomRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
@@ -38,7 +37,6 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
     // Otherwise the app will be disabled and show a "welcome"-like page.
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
-    waitForAlertsIndexToBeCreated();
 
     // After that we can login as a soc manager.
     login(ROLES.soc_manager);
@@ -52,7 +50,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
         // need admin callouts being shown.
         cy.intercept('GET', '/api/detection_engine/index', {
           index_mapping_outdated: true,
-          name: '.siem-signals-default',
+          name: '.alerts-security.alerts-default',
         });
       });
       context('On Detections home page', () => {
@@ -102,7 +100,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
         // need admin callouts being shown.
         cy.intercept('GET', '/api/detection_engine/index', {
           index_mapping_outdated: false,
-          name: '.siem-signals-default',
+          name: '.alerts-security.alerts-default',
         });
       });
       context('On Detections home page', () => {
@@ -152,7 +150,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
         // need admin callouts being shown.
         cy.intercept('GET', '/api/detection_engine/index', {
           index_mapping_outdated: null,
-          name: '.siem-signals-default',
+          name: '.alerts-security.alerts-default',
         });
       });
       context('On Detections home page', () => {

@@ -37,21 +37,22 @@ export function useTransactionBreakdown({
   } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionName,
-              transactionType,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionName,
+                transactionType,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [

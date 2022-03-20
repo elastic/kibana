@@ -7,7 +7,7 @@
   "optionalPlugins": ["home", "usageCollection"],
   "requiredBundles": ["kibanaReact", "kibanaUtils", "home"],
   "owner": {
-    "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
   }
 }

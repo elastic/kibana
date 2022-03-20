@@ -13,7 +13,6 @@ import { PickByValue } from 'utility-types';
 import { correlationsRouteRepository } from '../correlations/route';
 import { alertsChartPreviewRouteRepository } from '../alerts/route';
 import { backendsRouteRepository } from '../backends/route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentsRouteRepository } from '../environments/route';
 import { errorsRouteRepository } from '../errors/route';
 import { apmFleetRouteRepository } from '../fleet/route';
@@ -24,6 +23,7 @@ import { observabilityOverviewRouteRepository } from '../observability_overview/
 import { rumRouteRepository } from '../rum_client/route';
 import { fallbackToTransactionsRouteRepository } from '../fallback_to_transactions/route';
 import { serviceRouteRepository } from '../services/route';
+import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
 import { serviceNodeRouteRepository } from '../service_nodes/route';
 import { agentConfigurationRouteRepository } from '../settings/agent_configuration/route';
@@ -33,47 +33,47 @@ import { customLinkRouteRepository } from '../settings/custom_link/route';
 import { sourceMapsRouteRepository } from '../source_maps/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
-import { APMRouteHandlerResources } from '../typings';
-import { historicalDataRouteRepository } from '../historical_data';
+import { historicalDataRouteRepository } from '../historical_data/route';
 import { eventMetadataRouteRepository } from '../event_metadata/route';
 import { suggestionsRouteRepository } from '../suggestions/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 
 const getTypedGlobalApmServerRouteRepository = () => {
-  const repository = createApmServerRouteRepository()
-    .merge(dataViewRouteRepository)
-    .merge(environmentsRouteRepository)
-    .merge(errorsRouteRepository)
-    .merge(latencyDistributionRouteRepository)
-    .merge(metricsRouteRepository)
-    .merge(observabilityOverviewRouteRepository)
-    .merge(rumRouteRepository)
-    .merge(serviceMapRouteRepository)
-    .merge(serviceNodeRouteRepository)
-    .merge(serviceRouteRepository)
-    .merge(suggestionsRouteRepository)
-    .merge(traceRouteRepository)
-    .merge(transactionRouteRepository)
-    .merge(alertsChartPreviewRouteRepository)
-    .merge(agentConfigurationRouteRepository)
-    .merge(anomalyDetectionRouteRepository)
-    .merge(apmIndicesRouteRepository)
-    .merge(customLinkRouteRepository)
-    .merge(sourceMapsRouteRepository)
-    .merge(apmFleetRouteRepository)
-    .merge(backendsRouteRepository)
-    .merge(correlationsRouteRepository)
-    .merge(fallbackToTransactionsRouteRepository)
-    .merge(historicalDataRouteRepository)
-    .merge(eventMetadataRouteRepository)
-    .merge(eventMetadataRouteRepository)
-    .merge(agentKeysRouteRepository);
+  const repository = {
+    ...dataViewRouteRepository,
+    ...environmentsRouteRepository,
+    ...errorsRouteRepository,
+    ...latencyDistributionRouteRepository,
+    ...metricsRouteRepository,
+    ...observabilityOverviewRouteRepository,
+    ...rumRouteRepository,
+    ...serviceMapRouteRepository,
+    ...serviceNodeRouteRepository,
+    ...serviceRouteRepository,
+    ...serviceGroupRouteRepository,
+    ...suggestionsRouteRepository,
+    ...traceRouteRepository,
+    ...transactionRouteRepository,
+    ...alertsChartPreviewRouteRepository,
+    ...agentConfigurationRouteRepository,
+    ...anomalyDetectionRouteRepository,
+    ...apmIndicesRouteRepository,
+    ...customLinkRouteRepository,
+    ...sourceMapsRouteRepository,
+    ...apmFleetRouteRepository,
+    ...backendsRouteRepository,
+    ...correlationsRouteRepository,
+    ...fallbackToTransactionsRouteRepository,
+    ...historicalDataRouteRepository,
+    ...eventMetadataRouteRepository,
+    ...agentKeysRouteRepository,
+  };
 
   return repository;
 };
 
-const getGlobalApmServerRouteRepository = () => {
-  return getTypedGlobalApmServerRouteRepository() as ServerRouteRepository<APMRouteHandlerResources>;
+const getGlobalApmServerRouteRepository = (): ServerRouteRepository => {
+  return getTypedGlobalApmServerRouteRepository();
 };
 
 export type APMServerRouteRepository = ReturnType<

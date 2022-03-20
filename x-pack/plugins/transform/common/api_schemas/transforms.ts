@@ -34,6 +34,7 @@ export type GetTransformsRequestSchema = TypeOf<typeof getTransformsRequestSchem
 export interface GetTransformsResponseSchema {
   count: number;
   transforms: TransformConfigUnion[];
+  errors?: Array<{ reason: string; type: string }>;
 }
 
 // schemas shared by parts of the preview, create and update endpoint

@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     await PageObjects.lens.switchToVisualization('lnsMetric');
 
-    await PageObjects.lens.waitForVisualization();
+    await PageObjects.lens.waitForVisualization('mtrVis');
     await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
   };
 
@@ -59,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
     await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
     await PageObjects.lens.goToTimeRange();
+    await PageObjects.lens.waitForVisualization('mtrVis');
     await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
   };
 
@@ -255,7 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization();
 
-      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+      await PageObjects.lens.switchToVisualization('heatmap', 'heat');
 
       await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
@@ -275,7 +276,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('dashboard no-access privileges', () => {
         before(async () => {
           await PageObjects.common.navigateToApp('visualize');
-          await security.testUser.setRoles(['test_logstash_reader', 'global_visualize_all'], true);
+          await security.testUser.setRoles(['test_logstash_reader', 'global_visualize_all']);
         });
 
         after(async () => {
@@ -304,10 +305,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.switchToVisualization('lnsMetric');
 
-          await PageObjects.lens.waitForVisualization();
+          await PageObjects.lens.waitForVisualization('mtrVis');
           await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
-          await PageObjects.lens.waitForVisualization();
+          await PageObjects.lens.waitForVisualization('mtrVis');
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');
@@ -317,10 +318,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('dashboard read-only privileges', () => {
         before(async () => {
-          await security.testUser.setRoles(
-            ['test_logstash_reader', 'global_visualize_all', 'global_dashboard_read'],
-            true
-          );
+          await security.testUser.setRoles([
+            'test_logstash_reader',
+            'global_visualize_all',
+            'global_dashboard_read',
+          ]);
         });
 
         after(async () => {
@@ -349,10 +351,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.switchToVisualization('lnsMetric');
 
-          await PageObjects.lens.waitForVisualization();
+          await PageObjects.lens.waitForVisualization('mtrVis');
           await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
-          await PageObjects.lens.waitForVisualization();
+          await PageObjects.lens.waitForVisualization('mtrVis');
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');

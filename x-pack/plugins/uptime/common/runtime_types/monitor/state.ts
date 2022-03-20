@@ -27,6 +27,7 @@ export const StateType = t.intersection([
     monitor: t.intersection([
       t.partial({
         name: t.string,
+        duration: t.type({ us: t.number }),
       }),
       t.type({
         type: t.string,
@@ -73,6 +74,7 @@ export const MonitorSummaryType = t.intersection([
   t.partial({
     histogram: HistogramType,
     minInterval: t.number,
+    configId: t.string,
   }),
 ]);
 

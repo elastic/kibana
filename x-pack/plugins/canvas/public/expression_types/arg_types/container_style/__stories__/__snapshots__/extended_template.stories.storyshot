@@ -39,6 +39,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Padding
             </label>
@@ -79,6 +80,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Opacity
             </label>
@@ -164,6 +166,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Overflow
             </label>
@@ -247,6 +250,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Thickness
             </label>
@@ -287,6 +291,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Style
             </label>
@@ -322,6 +327,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Radius
             </label>
@@ -367,6 +373,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Color
             </label>
@@ -446,6 +453,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Padding
           </label>
@@ -486,6 +494,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Opacity
           </label>
@@ -571,6 +580,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Overflow
           </label>
@@ -653,6 +663,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Thickness
           </label>
@@ -693,6 +704,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Style
           </label>
@@ -728,6 +740,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Radius
           </label>
@@ -773,6 +786,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Color
           </label>
@@ -863,6 +877,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Padding
             </label>
@@ -903,6 +918,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Opacity
             </label>
@@ -988,6 +1004,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Overflow
             </label>
@@ -1071,6 +1088,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Thickness
             </label>
@@ -1111,6 +1129,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Style
             </label>
@@ -1146,6 +1165,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Radius
             </label>
@@ -1191,6 +1211,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               Color
             </label>

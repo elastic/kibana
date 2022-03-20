@@ -83,6 +83,7 @@ const StyledHoverActionsContainer = styled.div<{
 const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
   min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
   padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
+  position: relative;
 `;
 
 interface Props {
@@ -96,6 +97,7 @@ interface Props {
   enableOverflowButton?: boolean;
   field: string;
   goGetTimelineId?: (args: boolean) => void;
+  hideAddToTimeline?: boolean;
   hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
@@ -136,6 +138,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     field,
     goGetTimelineId,
     isObjectArray,
+    hideAddToTimeline = false,
     hideTopN = false,
     onFilterAdded,
     ownFocus,
@@ -217,6 +220,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
       handleHoverActionClicked,
+      hideAddToTimeline,
       hideTopN,
       isCaseView,
       isObjectArray,

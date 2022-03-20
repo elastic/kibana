@@ -15,8 +15,7 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { InvalidatePendingApiKey } from '../../types';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
@@ -26,7 +25,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -37,6 +36,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  minimumScheduleInterval: '1m',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -242,6 +242,7 @@ describe('enable()', () => {
           lastDuration: 0,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
+          warning: null,
         },
       },
       {
@@ -353,6 +354,7 @@ describe('enable()', () => {
           lastDuration: 0,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
+          warning: null,
         },
       },
       {
@@ -521,6 +523,7 @@ describe('enable()', () => {
           lastDuration: 0,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
+          warning: null,
         },
       },
       {

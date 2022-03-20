@@ -111,6 +111,7 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
+    endpointContext.service.getFeatureUsageService().notifyUsage('HOST_ISOLATION');
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
 
     // fetch the Agent IDs to send the commands to
@@ -183,12 +184,15 @@ export const isolationRequestHandler = function (
     // write the action request to the new endpoint index
     if (doesLogsEndpointActionsDsExist) {
       try {
-        logsEndpointActionsResult = await esClient.index<LogsEndpointAction>({
-          index: `${ENDPOINT_ACTIONS_DS}-default`,
-          body: {
-            ...doc,
+        logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
+          {
+            index: `${ENDPOINT_ACTIONS_DS}-default`,
+            body: {
+              ...doc,
+            },
           },
-        });
+          { meta: true }
+        );
         if (logsEndpointActionsResult.statusCode !== 201) {
           return res.customError({
             statusCode: 500,
@@ -207,16 +211,19 @@ export const isolationRequestHandler = function (
 
     // write actions to .fleet-actions index
     try {
-      fleetActionIndexResult = await esClient.index<EndpointAction>({
-        index: AGENT_ACTIONS_INDEX,
-        body: {
-          ...doc.EndpointActions,
-          '@timestamp': doc['@timestamp'],
-          agents,
-          timeout: 300, // 5 minutes
-          user_id: doc.user.id,
+      fleetActionIndexResult = await esClient.index<EndpointAction>(
+        {
+          index: AGENT_ACTIONS_INDEX,
+          body: {
+            ...doc.EndpointActions,
+            '@timestamp': doc['@timestamp'],
+            agents,
+            timeout: 300, // 5 minutes
+            user_id: doc.user.id,
+          },
         },
-      });
+        { meta: true }
+      );
 
       if (fleetActionIndexResult.statusCode !== 201) {
         return res.customError({

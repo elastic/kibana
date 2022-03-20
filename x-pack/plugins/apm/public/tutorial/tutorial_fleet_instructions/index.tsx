@@ -23,7 +23,7 @@ import {
   isPrereleaseVersion,
   SUPPORTED_APM_PACKAGE_VERSION,
 } from '../../../common/fleet';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 interface Props {
   http: HttpStart;

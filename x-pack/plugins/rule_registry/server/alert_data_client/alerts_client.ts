@@ -21,7 +21,7 @@ import {
   InlineScript,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
+import { AlertTypeParams } from '../../../alerting/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -39,6 +39,7 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
+import { getAuthzFilter, getSpacesFilter } from '../lib';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -59,6 +60,7 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
       source?.fields?.[SPACE_IDS][0] != null)
   );
 };
+
 export interface ConstructorOptions {
   logger: Logger;
   authorization: PublicMethodsOf<AlertingAuthorization>;
@@ -267,16 +269,16 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit))) {
+      if (!result?.hits.hits.every((hit) => isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
         throw Boom.badData(errorMessage);
       }
 
-      if (result?.body?.hits?.hits != null && result?.body.hits.hits.length > 0) {
-        await this.ensureAllAuthorized(result.body.hits.hits, operation);
+      if (result?.hits?.hits != null && result?.hits.hits.length > 0) {
+        await this.ensureAllAuthorized(result.hits.hits, operation);
 
-        result?.body.hits.hits.map((item) =>
+        result?.hits.hits.map((item) =>
           this.auditLogger?.log(
             alertAuditEvent({
               action: operationAlertAuditActionMap[operation],
@@ -287,7 +289,7 @@ export class AlertsClient {
         );
       }
 
-      return result.body;
+      return result;
     } catch (error) {
       const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${query}" and operation ${operation} \nError: ${error}`;
       this.logger.error(errorMessage);
@@ -319,7 +321,7 @@ export class AlertsClient {
         },
       });
 
-      await this.ensureAllAuthorized(mgetRes.body.docs, operation);
+      await this.ensureAllAuthorized(mgetRes.docs, operation);
 
       for (const id of ids) {
         this.auditLogger?.log(
@@ -331,7 +333,7 @@ export class AlertsClient {
         );
       }
 
-      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
+      const bulkUpdateRequest = mgetRes.docs.flatMap((item) => {
         // @ts-expect-error doesn't handle error branch in MGetResponse
         const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
         return [
@@ -368,14 +370,8 @@ export class AlertsClient {
     config: EsQueryConfig
   ) {
     try {
-      const { filter: authzFilter } = await this.authorization.getAuthorizationFilter(
-        AlertingAuthorizationEntity.Alert,
-        {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: { consumer: ALERT_RULE_CONSUMER, ruleTypeId: ALERT_RULE_TYPE_ID },
-        },
-        operation
-      );
+      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
+      const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       let esQuery;
       if (id != null) {
         esQuery = { query: `_id:${id}`, language: 'kuery' };
@@ -387,10 +383,7 @@ export class AlertsClient {
       const builtQuery = buildEsQuery(
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-        [
-          authzFilter as unknown as Filter,
-          { query: { term: { [SPACE_IDS]: alertSpaceId } } } as unknown as Filter,
-        ],
+        [authzFilter, spacesFilter],
         config
       );
       if (query != null && typeof query === 'object') {
@@ -525,7 +518,7 @@ export class AlertsClient {
         alert?.hits.hits[0]._source,
         status as STATUS_VALUES
       );
-      const { body: response } = await this.esClient.update<ParsedTechnicalFields>({
+      const response = await this.esClient.update<ParsedTechnicalFields>({
         ...decodeVersion(_version),
         id,
         index,

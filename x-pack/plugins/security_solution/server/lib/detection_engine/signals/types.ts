@@ -21,7 +21,6 @@ import {
 } from '../../../../../alerting/server';
 import { TermAggregationBucket } from '../../types';
 import {
-  EqlSearchResponse,
   BaseHit,
   RuleAlertAction,
   SearchTypes,
@@ -30,7 +29,7 @@ import {
 import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
-import { TelemetryEventsSender } from '../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
@@ -115,12 +114,16 @@ export interface SignalSource {
     };
     rule: {
       id: string;
+      description?: string;
       false_positives?: string[];
       immutable?: boolean;
     };
     /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
     depth?: number;
     original_time?: string;
+    /** signal.reason was introduced in 7.15 and pre-7.15 signals do not have it. */
+    reason?: string;
+    status?: string;
     threshold_result?: ThresholdResult;
   };
   kibana?: SearchTypes;
@@ -180,10 +183,9 @@ export type WrappedEventHit = BaseHit<EventHit>;
 export type AlertSearchResponse = estypes.SearchResponse<RACAlert>;
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
+export type AlertSourceHit = estypes.SearchHit<RACAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
-
-export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
 export type RuleExecutorOptions = AlertExecutorOptions<
   RuleParams,
@@ -309,7 +311,7 @@ export interface SearchAfterAndBulkCreateParams {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
   signalsIndex: string;
@@ -356,6 +358,7 @@ export interface MultiAggBucket {
   }>;
   docCount: number;
   maxTimestamp: string;
+  minTimestamp: string;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

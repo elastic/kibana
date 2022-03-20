@@ -12,12 +12,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
-import { getServices } from '../../../../kibana_services';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { useEsDocSearch } from '../../../../utils/use_es_doc_search';
-import { DataView } from '../../../../../../data_views/common';
+import { DataView } from '../../../../../../data_views/public';
 import { ElasticRequestState } from '../../../../application/doc/types';
+import { getHeight } from './get_height';
 
 interface SourceViewerProps {
   id: string;
@@ -26,6 +27,12 @@ interface SourceViewerProps {
   hasLineNumbers: boolean;
   width?: number;
 }
+
+// Ihe number of lines displayed without scrolling used for classic table, which renders the component
+// inline limitation was necessary to enable virtualized scrolling, which improves performance
+export const MAX_LINES_CLASSIC_TABLE = 500;
+// Displayed margin of the code editor to the window bottom when rendered in the document explorer flyout
+export const MARGIN_BOTTOM = 25;
 
 export const DocViewerSource = ({
   id,
@@ -36,7 +43,9 @@ export const DocViewerSource = ({
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
-  const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const { uiSettings } = useDiscoverServices();
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const useDocExplorer = !uiSettings.get(DOC_TABLE_LEGACY);
   const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,
@@ -61,16 +70,18 @@ export const DocViewerSource = ({
       return;
     }
 
-    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-    const lineCount = editor.getModel()?.getLineCount() || 1;
-    const height = editor.getTopForLineNumber(lineCount + 1) + lineHeight;
+    const height = getHeight(editor, useDocExplorer);
+    if (height === 0) {
+      return;
+    }
+
     if (!jsonValue || jsonValue === '') {
       editorElement.style.height = '0px';
     } else {
       editorElement.style.height = `${height}px`;
     }
     editor.layout();
-  }, [editor, jsonValue]);
+  }, [editor, jsonValue, useDocExplorer]);
 
   const loadingState = (
     <div className="sourceViewer__loading">

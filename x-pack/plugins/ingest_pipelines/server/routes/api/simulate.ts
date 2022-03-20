@@ -34,7 +34,7 @@ export const registerSimulateRoute = ({
       const { pipeline, documents, verbose } = req.body;
 
       try {
-        const { body: response } = await clusterClient.asCurrentUser.ingest.simulate({
+        const response = await clusterClient.asCurrentUser.ingest.simulate({
           verbose,
           body: {
             pipeline,

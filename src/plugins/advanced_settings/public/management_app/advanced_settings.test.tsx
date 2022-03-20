@@ -9,7 +9,7 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test/jest';
+import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import dedent from 'dedent';
 import {
   PublicUiSettingsParams,
@@ -252,7 +252,7 @@ describe('AdvancedSettings', () => {
         history={mockHistory}
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        docLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
@@ -275,7 +275,7 @@ describe('AdvancedSettings', () => {
         history={mockHistory}
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        docLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
@@ -302,7 +302,7 @@ describe('AdvancedSettings', () => {
           history={mockHistory}
           enableSaving={false}
           toasts={toasts}
-          dockLinks={docLinksServiceMock.createStartContract().links}
+          docLinks={docLinksServiceMock.createStartContract().links}
           uiSettings={mockConfig().core.uiSettings}
           componentRegistry={new ComponentRegistry().start}
           theme={themeServiceMock.createStartContract().theme$}

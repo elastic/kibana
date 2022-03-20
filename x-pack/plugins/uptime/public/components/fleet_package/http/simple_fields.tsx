@@ -5,27 +5,36 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import { EuiFieldNumber, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import { ConfigKey, Validation } from '../types';
+import React, { memo, useCallback } from 'react';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 import { useHTTPSimpleFieldsContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
-import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
+import { ConfigKey, Validation } from '../types';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const HTTPSimpleFields = memo<Props>(({ validate }) => {
+export const HTTPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields } = useHTTPSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
-    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
-  };
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
 
   return (
-    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
+    <SimpleFieldsWrapper
+      fields={fields}
+      validate={validate}
+      onInputChange={handleInputChange}
+      onFieldBlur={onFieldBlur}
+    >
       <EuiFormRow
         label={
           <FormattedMessage
@@ -46,6 +55,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
           onChange={(event) =>
             handleInputChange({ value: event.target.value, configKey: ConfigKey.URLS })
           }
+          onBlur={() => onFieldBlur(ConfigKey.URLS)}
           data-test-subj="syntheticsUrlField"
         />
       </EuiFormRow>
@@ -54,14 +64,14 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >
@@ -72,6 +82,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.SCHEDULE,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
           number={fields[ConfigKey.SCHEDULE].number}
           unit={fields[ConfigKey.SCHEDULE].unit}
         />
@@ -107,6 +118,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.MAX_REDIRECTS,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.MAX_REDIRECTS)}
         />
       </EuiFormRow>
     </SimpleFieldsWrapper>

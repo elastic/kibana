@@ -17,7 +17,6 @@ import {
 export interface InitialAppData {
   enterpriseSearchVersion?: string;
   kibanaVersion?: string;
-  errorConnectingMessage?: string;
   readOnlyMode?: boolean;
   searchOAuth?: SearchOAuth;
   configuredLimits?: ConfiguredLimits;
@@ -51,3 +50,5 @@ export interface MetaPage {
 export interface Meta {
   page: MetaPage;
 }
+
+export type { ElasticsearchIndex } from './indices';

@@ -26,9 +26,9 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { DetailView } from './detail_view';
-import { ErrorDistribution } from './Distribution';
+import { ErrorDistribution } from './distribution';
 
 const Titles = euiStyled.div`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
@@ -112,7 +112,7 @@ export function ErrorGroupDetails() {
 
   const {
     path: { groupId },
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -129,6 +129,7 @@ export function ErrorGroupDetails() {
         rangeTo,
         environment,
         kuery,
+        serviceGroup,
       },
     }),
   });
@@ -136,21 +137,23 @@ export function ErrorGroupDetails() {
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
-          params: {
-            path: {
-              serviceName,
-              groupId,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/{groupId}',
+          {
+            params: {
+              path: {
+                serviceName,
+                groupId,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end, groupId]

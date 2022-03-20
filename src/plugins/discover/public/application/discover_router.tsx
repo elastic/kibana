@@ -16,41 +16,35 @@ import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
-import { DiscoverMainProps } from './main/discover_main_route';
 
-export const discoverRouter = (services: DiscoverServices, history: History) => {
-  const mainRouteProps: DiscoverMainProps = {
-    services,
-    history,
-  };
-
-  return (
-    <KibanaContextProvider services={services}>
-      <EuiErrorBoundary>
-        <Router history={history} data-test-subj="discover-react-router">
-          <Switch>
-            <Route
-              path="/context/:indexPatternId/:id"
-              children={<ContextAppRoute services={services} />}
-            />
-            <Route
-              path="/doc/:indexPattern/:index/:type"
-              render={(props) => (
-                <Redirect
-                  to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
-                />
-              )}
-            />
-            <Route
-              path="/doc/:indexPatternId/:index"
-              children={<SingleDocRoute services={services} />}
-            />
-            <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
-            <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
-            <NotFoundRoute services={services} />
-          </Switch>
-        </Router>
-      </EuiErrorBoundary>
-    </KibanaContextProvider>
-  );
-};
+export const discoverRouter = (services: DiscoverServices, history: History) => (
+  <KibanaContextProvider services={services}>
+    <EuiErrorBoundary>
+      <Router history={history} data-test-subj="discover-react-router">
+        <Switch>
+          <Route path="/context/:indexPatternId/:id">
+            <ContextAppRoute />
+          </Route>
+          <Route
+            path="/doc/:indexPattern/:index/:type"
+            render={(props) => (
+              <Redirect
+                to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
+              />
+            )}
+          />
+          <Route path="/doc/:indexPatternId/:index">
+            <SingleDocRoute />
+          </Route>
+          <Route path="/view/:id">
+            <DiscoverMainRoute />
+          </Route>
+          <Route path="/" exact>
+            <DiscoverMainRoute />
+          </Route>
+          <NotFoundRoute />
+        </Switch>
+      </Router>
+    </EuiErrorBoundary>
+  </KibanaContextProvider>
+);

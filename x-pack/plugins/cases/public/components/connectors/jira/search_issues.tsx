@@ -92,5 +92,6 @@ const SearchIssuesComponent: React.FC<Props> = ({ selectedValue, actionConnector
     />
   );
 };
+SearchIssuesComponent.displayName = 'SearchIssues';
 
 export const SearchIssues = memo(SearchIssuesComponent);

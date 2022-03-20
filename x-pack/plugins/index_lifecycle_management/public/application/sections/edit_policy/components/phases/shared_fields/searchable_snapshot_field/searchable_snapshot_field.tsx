@@ -25,7 +25,11 @@ export interface Props {
   canBeDisabled?: boolean;
 }
 
-const geti18nTexts = (phase: Props['phase']) => {
+const geti18nTexts = (
+  phase: Props['phase'],
+  fullyMountedSearchableSnapshotLink: string,
+  partiallyMountedSearchableSnapshotLink: string
+) => {
   switch (phase) {
     // Hot and cold phases both create fully mounted snapshots.
     case 'hot':
@@ -42,7 +46,7 @@ const geti18nTexts = (phase: Props['phase']) => {
             id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
             defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. You can reduce the number of replicas and rely on the snapshot for resiliency. {learnMoreLink}"
             values={{
-              learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
+              learnMoreLink: <LearnMoreLink docPath={fullyMountedSearchableSnapshotLink} />,
             }}
           />
         ),
@@ -66,9 +70,7 @@ const geti18nTexts = (phase: Props['phase']) => {
             id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.partiallyMountedSearchableSnapshotField.description"
             defaultMessage="Convert to a partially-mounted index that caches the index metadata. Data is retrieved from the snapshot as needed to process search requests. This minimizes the index footprint while keeping all of your data fully searchable. {learnMoreLink}"
             values={{
-              learnMoreLink: (
-                <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
-              ),
+              learnMoreLink: <LearnMoreLink docPath={partiallyMountedSearchableSnapshotLink} />,
             }}
           />
         ),
@@ -85,7 +87,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   canBeDisabled = true,
 }) => {
   const {
-    services: { cloud, getUrlForApp },
+    services: { cloud, docLinks, getUrlForApp },
   } = useKibana();
   const { policy, license, isNewPolicy } = useEditPolicyContext();
   const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
@@ -109,8 +111,14 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
         policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
     )
   );
-
-  const i18nTexts = geti18nTexts(phase);
+  const fullyMountedSearchableSnapshotLink = docLinks.links.elasticsearch.ilmSearchableSnapshot;
+  const partiallyMountedSearchableSnapshotLink =
+    docLinks.links.elasticsearch.searchableSnapshotSharedCache;
+  const i18nTexts = geti18nTexts(
+    phase,
+    fullyMountedSearchableSnapshotLink,
+    partiallyMountedSearchableSnapshotLink
+  );
 
   useEffect(() => {
     if (isDisabledDueToLicense) {

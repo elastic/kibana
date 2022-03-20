@@ -37,7 +37,7 @@ export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
       };
 
       const esFields = await client.fieldCaps(config).then((resp) => {
-        return mapValues(resp.body.fields, (types) => {
+        return mapValues(resp.fields, (types) => {
           if (keys(types).length > 1) {
             return 'conflict';
           }

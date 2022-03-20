@@ -29,10 +29,11 @@ export type UrlStateType =
   | 'administration'
   | 'alerts'
   | 'cases'
+  | 'detection_response'
   | 'exceptions'
   | 'host'
+  | 'users'
   | 'network'
   | 'overview'
   | 'rules'
-  | 'timeline'
-  | 'ueba';
+  | 'timeline';

@@ -19,7 +19,9 @@ export type HeatmapLayerState = HeatmapArguments & {
   shape: ChartShapes;
 };
 
+export type Palette = PaletteOutput<CustomPaletteParams> & { accessor: string };
+
 export type HeatmapVisualizationState = HeatmapLayerState & {
   // need to store the current accessor to reset the color stops at accessor change
-  palette?: PaletteOutput<CustomPaletteParams> & { accessor: string };
+  palette?: Palette;
 };

@@ -13,17 +13,16 @@ import {
   DATA_COLLECTION_SETUP_STEP,
 } from '../screens/integrations';
 
-export const addIntegration = () => {
+export const addIntegration = (agentPolicy = 'Default Fleet Server policy') => {
   cy.getBySel(ADD_POLICY_BTN).click();
   cy.getBySel(DATA_COLLECTION_SETUP_STEP).find('.euiLoadingSpinner').should('not.exist');
+  cy.getBySel('agentPolicySelect').select(agentPolicy);
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   closeModalIfVisible();
-
-  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN, { timeout: 60000 }).should('not.exist');
 };
 
-function closeModalIfVisible() {
+export function closeModalIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(CONFIRM_MODAL_BTN_SEL).length) {
       cy.getBySel(CONFIRM_MODAL_BTN).click();

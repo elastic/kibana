@@ -62,11 +62,11 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
           >
             <div>
               <FormattedMessage
-                defaultMessage="The index pattern associated with this object no longer exists."
+                defaultMessage="The data view associated with this object no longer exists."
                 id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
                 values={Object {}}
               >
-                The index pattern associated with this object no longer exists.
+                The data view associated with this object no longer exists.
               </FormattedMessage>
             </div>
             <div>
@@ -199,11 +199,11 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
           >
             <div>
               <FormattedMessage
-                defaultMessage="A field associated with this object no longer exists in the index pattern."
+                defaultMessage="A field associated with this object no longer exists in the data view."
                 id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
                 values={Object {}}
               >
-                A field associated with this object no longer exists in the index pattern.
+                A field associated with this object no longer exists in the data view.
               </FormattedMessage>
             </div>
             <div>

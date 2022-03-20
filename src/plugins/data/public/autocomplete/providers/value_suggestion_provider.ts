@@ -103,9 +103,16 @@ export const setupValueSuggestionProvider = (
       useTimeRange ?? core!.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
     const { title } = indexPattern;
 
+    const isVersionFieldType = field.type === 'string' && field.esTypes?.includes('version');
+
     if (field.type === 'boolean') {
       return [true, false];
-    } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
+    } else if (
+      !shouldSuggestValues ||
+      !field.aggregatable ||
+      field.type !== 'string' ||
+      isVersionFieldType // suggestions don't work for version fields
+    ) {
       return [];
     }
 

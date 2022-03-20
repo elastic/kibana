@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { toMountPoint, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityAppServices } from '../../../../application/types';
 import {
@@ -21,11 +21,22 @@ import { observabilityFeatureId, observabilityAppId } from '../../../../../commo
 import { parseRelativeDate } from '../components/date_range_picker';
 
 export interface AddToCaseProps {
-  timeRange: { from: string; to: string };
+  appId?: 'securitySolutionUI' | 'observability';
+  autoOpen?: boolean;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
+  owner?: string;
+  setAutoOpen?: (val: boolean) => void;
+  timeRange: { from: string; to: string };
 }
 
-export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
+export function AddToCaseAction({
+  appId,
+  autoOpen,
+  lensAttributes,
+  owner = observabilityFeatureId,
+  setAutoOpen,
+  timeRange,
+}: AddToCaseProps) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
   const {
@@ -38,14 +49,14 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
     (theCase) =>
       toMountPoint(
         <CaseToastText
-          linkUrl={getUrlForApp(observabilityAppId, {
+          linkUrl={getUrlForApp(appId ?? observabilityAppId, {
             deepLinkId: CasesDeepLinkId.cases,
             path: generateCaseViewPath({ detailName: theCase.id }),
           })}
         />,
         { theme$: theme?.theme$ }
       ),
-    [getUrlForApp, theme?.theme$]
+    [appId, getUrlForApp, theme?.theme$]
   );
 
   const absoluteFromDate = parseRelativeDate(timeRange.from);
@@ -58,36 +69,52 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
       from: absoluteFromDate?.toISOString() ?? '',
       to: absoluteToDate?.toISOString() ?? '',
     },
+    appId,
+    owner,
   });
 
   const getAllCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
     onRowClick: onCaseClicked,
     userCanCrud: true,
-    owner: [observabilityFeatureId],
+    owner: [owner],
     onClose: () => {
       setIsCasesOpen(false);
     },
   };
 
+  useEffect(() => {
+    if (autoOpen) {
+      setIsCasesOpen(true);
+    }
+  }, [autoOpen, setIsCasesOpen]);
+
+  useEffect(() => {
+    if (!isCasesOpen) {
+      setAutoOpen?.(false);
+    }
+  }, [isCasesOpen, setAutoOpen]);
+
   return (
     <>
-      <EuiButtonEmpty
-        size="s"
-        isLoading={isSaving}
-        isDisabled={lensAttributes === null}
-        onClick={() => {
-          if (lensAttributes) {
-            setIsCasesOpen(true);
-          }
-        }}
-      >
-        {i18n.translate('xpack.observability.expView.heading.addToCase', {
-          defaultMessage: 'Add to case',
-        })}
-      </EuiButtonEmpty>
+      {typeof autoOpen === 'undefined' && (
+        <EuiButtonEmpty
+          size="s"
+          isLoading={isSaving}
+          isDisabled={lensAttributes === null}
+          onClick={() => {
+            if (lensAttributes) {
+              setIsCasesOpen(true);
+            }
+          }}
+        >
+          {i18n.translate('xpack.observability.expView.heading.addToCase', {
+            defaultMessage: 'Add to case',
+          })}
+        </EuiButtonEmpty>
+      )}
       {isCasesOpen &&
         lensAttributes &&
-        cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
+        cases.ui.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 }

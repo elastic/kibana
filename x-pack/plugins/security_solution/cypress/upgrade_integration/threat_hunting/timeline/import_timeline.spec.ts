@@ -17,7 +17,6 @@ import {
   NOTE_DESCRIPTION,
   NOTE_PREVIEW,
   NOTES_TAB_BUTTON,
-  PINNED_EVENT_TABLE_CELL,
   PINNED_TAB_BUTTON,
   PROCESS_KPI,
   QUERY_EVENT_TABLE_CELL,
@@ -44,7 +43,7 @@ import {
   deleteTimeline,
   goToCorrelationTab,
   goToNotesTab,
-  goToPinnedTab,
+  setKibanaTimezoneToUTC,
 } from '../../../tasks/timeline';
 import { expandNotes, importTimeline, openTimeline } from '../../../tasks/timelines';
 
@@ -54,8 +53,8 @@ const timeline = '7_15_timeline.ndjson';
 const username = 'elastic';
 
 const timelineDetails = {
-  dateStart: 'Oct 11, 2020 @ 00:00:00.000',
-  dateEnd: 'Oct 11, 2030 @ 17:13:15.851',
+  dateStart: 'Oct 10, 2020 @ 22:00:00.000',
+  dateEnd: 'Oct 11, 2030 @ 15:13:15.851',
   queryTab: 'Query4',
   correlationTab: 'Correlation',
   analyzerTab: 'Analyzer',
@@ -74,7 +73,7 @@ const detectionAlert = {
 };
 
 const event = {
-  timestamp: 'Nov 4, 2021 @ 11:09:29.438',
+  timestamp: 'Nov 4, 2021 @ 10:09:29.438',
   message: '—',
   eventCategory: 'file',
   eventAction: 'initial_scan',
@@ -88,6 +87,7 @@ describe('Import timeline after upgrade', () => {
   before(() => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     importTimeline(timeline);
+    setKibanaTimezoneToUTC();
   });
 
   after(() => {
@@ -189,17 +189,5 @@ describe('Import timeline after upgrade', () => {
       cy.get(NOTE_DESCRIPTION).invoke('text').should('match', descriptionRegex);
       cy.get(NOTE_PREVIEW).last().invoke('text').should('match', noteRegex);
     });
-  });
-
-  it('Displays the correct timeline details inside the pinned tab', () => {
-    goToPinnedTab();
-
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(1).should('contain', detectionAlert.message);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(2).should('contain', detectionAlert.eventCategory);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(3).should('contain', detectionAlert.eventAction);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(4).should('contain', detectionAlert.hostName);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(5).should('contain', detectionAlert.sourceIp);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(6).should('contain', detectionAlert.destinationIp);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(7).should('contain', detectionAlert.userName);
   });
 });

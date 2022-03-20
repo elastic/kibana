@@ -114,7 +114,7 @@ describe('Fleet trusted apps card', () => {
   it('should render correctly with policyId', async () => {
     TrustedAppsHttpServiceMock.mockImplementationOnce(() => {
       return {
-        getTrustedAppsList: () => () => promise,
+        getTrustedAppsSummary: () => () => promise,
       };
     });
     const component = await renderComponent({ policyId: 'policy-1' });

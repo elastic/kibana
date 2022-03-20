@@ -19,7 +19,6 @@ import { deleteCustomLink } from './delete_custom_link';
 import { getTransaction } from './get_transaction';
 import { listCustomLinks } from './list_custom_links';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../../apm_routes/create_apm_server_route_repository';
 
 const customLinkTransactionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/custom_links/transaction',
@@ -27,7 +26,11 @@ const customLinkTransactionRoute = createApmServerRoute({
   params: t.partial({
     query: filterOptionsRt,
   }),
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<
+    import('./../../../../typings/es_schemas/ui/transaction').Transaction
+  > => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { query } = params;
@@ -43,7 +46,13 @@ const listCustomLinksRoute = createApmServerRoute({
   params: t.partial({
     query: filterOptionsRt,
   }),
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    customLinks: Array<
+      import('./../../../../common/custom_link/custom_link_types').CustomLink
+    >;
+  }> => {
     const { context, params } = resources;
     if (!isActiveGoldLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -65,7 +74,7 @@ const createCustomLinkRoute = createApmServerRoute({
     body: payloadRt,
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     if (!isActiveGoldLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -93,7 +102,7 @@ const updateCustomLinkRoute = createApmServerRoute({
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
-  handler: async (resources) => {
+  handler: async (resources): Promise<void> => {
     const { params, context } = resources;
 
     if (!isActiveGoldLicense(context.licensing.license)) {
@@ -122,7 +131,7 @@ const deleteCustomLinkRoute = createApmServerRoute({
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ result: string }> => {
     const { context, params } = resources;
 
     if (!isActiveGoldLicense(context.licensing.license)) {
@@ -138,9 +147,10 @@ const deleteCustomLinkRoute = createApmServerRoute({
   },
 });
 
-export const customLinkRouteRepository = createApmServerRouteRepository()
-  .add(customLinkTransactionRoute)
-  .add(listCustomLinksRoute)
-  .add(createCustomLinkRoute)
-  .add(updateCustomLinkRoute)
-  .add(deleteCustomLinkRoute);
+export const customLinkRouteRepository = {
+  ...customLinkTransactionRoute,
+  ...listCustomLinksRoute,
+  ...createCustomLinkRoute,
+  ...updateCustomLinkRoute,
+  ...deleteCustomLinkRoute,
+};

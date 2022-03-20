@@ -4,8 +4,9 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+export BUILD_TS_REFS_DISABLE=false
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+node scripts/build_kibana_platform_plugins.js
 
 export JOB=kibana-osquery-cypress
 
@@ -16,5 +17,5 @@ cd "$XPACK_DIR"
 checks-reporter-with-killswitch "Osquery Cypress Tests" \
  node scripts/functional_tests \
    --debug --bail \
-   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
    --config test/osquery_cypress/cli_config.ts
+

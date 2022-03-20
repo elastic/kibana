@@ -17,10 +17,11 @@ import {
   SavedObjectAttribute,
   SavedObjectReference,
 } from '../../../../../src/core/server';
-import { RawRule, RawAlertAction } from '../types';
+import { RawRule, RawAlertAction, RawRuleExecutionStatus } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
+import { getMappedParams } from '../../server/rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -57,6 +58,9 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRu
 // Deprecated in 8.0
 export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
+
+export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
+  (Object.values(ruleTypeMappings) as string[]).includes(doc.attributes.alertTypeId);
 
 /**
  * Returns true if the alert type is that of "siem.notifications" which is a legacy notification system that was deprecated in 7.16.0
@@ -131,9 +135,21 @@ export function getMigrations(
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
     pipeMigrations(
       addThreatIndicatorPathToThreatMatchRules,
-      addRACRuleTypes,
+      addSecuritySolutionAADRuleTypes,
       fixInventoryThresholdGroupId
     )
+  );
+
+  const migrationRules801 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addSecuritySolutionAADRuleTypeTags)
+  );
+
+  const migrationRules820 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addMappedParams)
   );
 
   return {
@@ -145,6 +161,8 @@ export function getMigrations(
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
     '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
+    '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
+    '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
   };
 }
 
@@ -262,7 +280,7 @@ function initializeExecutionStatus(
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
-      },
+      } as RawRuleExecutionStatus,
     },
   };
 }
@@ -652,7 +670,7 @@ function setLegacyId(doc: SavedObjectUnsanitizedDoc<RawRule>): SavedObjectUnsani
   };
 }
 
-function addRACRuleTypes(
+function addSecuritySolutionAADRuleTypes(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
   const ruleType = doc.attributes.params.type;
@@ -662,10 +680,33 @@ function addRACRuleTypes(
         attributes: {
           ...doc.attributes,
           alertTypeId: ruleTypeMappings[ruleType],
+          enabled: false,
           params: {
             ...doc.attributes.params,
             outputIndex: '',
           },
+        },
+      }
+    : doc;
+}
+
+function addSecuritySolutionAADRuleTypeTags(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const ruleType = doc.attributes.params.type;
+  return isDetectionEngineAADRuleType(doc) && isRuleType(ruleType)
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          // If the rule is disabled at this point, then the rule has not been re-enabled after
+          // running the 8.0.0 migrations. If `doc.attributes.scheduledTaskId` exists, then the
+          // rule was enabled prior to running the migration. Thus we know we should add the
+          // tag to indicate it was auto-disabled.
+          tags:
+            !doc.attributes.enabled && doc.attributes.scheduledTaskId
+              ? [...(doc.attributes.tags ?? []), 'auto_disabled_8.0']
+              : doc.attributes.tags ?? [],
         },
       }
     : doc;
@@ -787,6 +828,28 @@ function fixInventoryThresholdGroupId(
   } else {
     return doc;
   }
+}
+
+function addMappedParams(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { params },
+  } = doc;
+
+  const mappedParams = getMappedParams(params);
+
+  if (Object.keys(mappedParams).length) {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        mapped_params: mappedParams,
+      },
+    };
+  }
+
+  return doc;
 }
 
 function getCorrespondingAction(

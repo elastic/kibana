@@ -9,8 +9,10 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
+import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { AlertSearchResponse } from '../alerts/types';
 import { useQueryAlerts } from '../alerts/use_query';
 import { fetchRuleById } from './api';
 import { transformInput } from './transforms';
@@ -41,9 +43,20 @@ interface AlertHit {
   };
 }
 
-const fetchWithOptionslSignal = withOptionalSignal(fetchRuleById);
+// TODO: Create proper types for nested/flattened RACRule once contract w/ Fields API is finalized.
+interface RACRule {
+  kibana: {
+    alert: {
+      rule: {
+        parameters?: {};
+      };
+    };
+  };
+}
 
-const useFetchRule = () => useAsync(fetchWithOptionslSignal);
+const fetchWithOptionsSignal = withOptionalSignal(fetchRuleById);
+
+const useFetchRule = () => useAsync(fetchWithOptionsSignal);
 
 const buildLastAlertQuery = (ruleId: string) => ({
   query: {
@@ -94,10 +107,11 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   }, [addError, error]);
 
   const rule = useMemo<Rule | undefined>(() => {
-    const hit = alertsData?.hits.hits[0];
     const result = isExistingRule
       ? ruleData
-      : hit?._source.signal?.rule ?? hit?._source.kibana?.alert?.rule;
+      : alertsData == null
+      ? undefined
+      : transformRuleFromAlertHit(alertsData);
     if (result) {
       return transformInput(result);
     }
@@ -110,4 +124,28 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
     rule: rule ?? null,
     isExistingRule,
   };
+};
+
+/**
+ * Transforms an alertHit into a Rule
+ * @param data raw response containing single alert
+ */
+export const transformRuleFromAlertHit = (data: AlertSearchResponse): Rule | undefined => {
+  const hit = data?.hits.hits[0] as AlertHit | undefined;
+
+  // If pre 8.x alert, pull directly from alertHit
+  const rule = hit?._source.signal?.rule ?? hit?._source.kibana?.alert?.rule;
+
+  // If rule undefined, response likely flattened
+  if (rule == null) {
+    const expandedRuleWithParams = expandDottedObject(hit?._source ?? {}) as RACRule;
+    const expandedRule = {
+      ...expandedRuleWithParams?.kibana?.alert?.rule,
+      ...expandedRuleWithParams?.kibana?.alert?.rule?.parameters,
+    };
+    delete expandedRule.parameters;
+    return expandedRule as Rule;
+  }
+
+  return rule;
 };

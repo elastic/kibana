@@ -16,6 +16,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -39,6 +40,7 @@ import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
+  FormulaPublicApi,
 } from './indexpattern_datasource';
 import type {
   XyVisualization as XyVisualizationType,
@@ -67,11 +69,18 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
+import { VISUALIZE_EDITOR_TRIGGER } from '../../../../src/plugins/visualizations/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
-import type { VisualizationType } from './types';
+import type {
+  Visualization,
+  VisualizationType,
+  EditorFrameSetup,
+  LensTopNavMenuEntryGenerator,
+} from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
+import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
@@ -85,6 +94,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
+import type { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -96,10 +106,12 @@ export interface LensPluginSetupDependencies {
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  discover?: DiscoverSetup;
 }
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
@@ -114,6 +126,35 @@ export interface LensPluginStartDependencies {
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
+  discover?: DiscoverStart;
+}
+
+export interface LensPublicSetup {
+  /**
+   * Register 3rd party visualization type
+   * See `x-pack/examples/3rd_party_lens_vis` for exemplary usage.
+   *
+   * In case the visualization is a function returning a promise, it will only be called once Lens is actually requiring it.
+   * This can be used to lazy-load parts of the code to keep the initial bundle as small as possible.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  registerVisualization: <T>(
+    visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  ) => void;
+  /**
+   * Register a generic menu entry shown in the top nav
+   * See `x-pack/examples/3rd_party_lens_navigation_prompt` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  registerTopNavMenuEntryGenerator: (
+    navigationPromptGenerator: LensTopNavMenuEntryGenerator
+  ) => void;
 }
 
 export interface LensPublicStart {
@@ -160,17 +201,27 @@ export interface LensPublicStart {
    * Method which returns xy VisualizationTypes array keeping this async as to not impact page load bundle
    */
   getXyVisTypes: () => Promise<VisualizationType[]>;
+
+  /**
+   * API which returns state helpers keeping this async as to not impact page load bundle
+   */
+  stateHelperApi: () => Promise<{
+    formula: FormulaPublicApi;
+  }>;
 }
 
 export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
   private editorFrameService: EditorFrameServiceType | undefined;
+  private editorFrameSetup: EditorFrameSetup | undefined;
+  private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
   private gaugeVisualization: GaugeVisualizationType | undefined;
+  private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
 
   private stopReportManager?: () => void;
 
@@ -202,7 +253,6 @@ export class LensPlugin {
         fieldFormats,
         plugins.fieldFormats.deserialize
       );
-
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
 
       return {
@@ -212,8 +262,9 @@ export class LensPlugin {
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
+        injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
-        indexPatternService: plugins.data.indexPatterns,
+        indexPatternService: plugins.dataViews,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
@@ -240,10 +291,10 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultDataView = async () => {
+    const ensureDefaultDataView = () => {
       // make sure a default index pattern exists
       // if not, the page will be redirected to management and visualize won't be rendered
-      await startServices().plugins.data.indexPatterns.ensureDefaultDataView();
+      startServices().plugins.dataViews.ensureDefaultDataView();
     };
 
     core.application.register({
@@ -253,26 +304,29 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
-        await this.initParts(
-          core,
-          data,
-          charts,
-          expressions,
-          fieldFormats,
-          deps.fieldFormats.deserialize
-        );
+        await Promise.all([
+          this.initParts(
+            core,
+            data,
+            charts,
+            expressions,
+            fieldFormats,
+            deps.fieldFormats.deserialize
+          ),
+          ensureDefaultDataView(),
+        ]);
 
         const { mountApp, stopReportManager, getLensAttributeService } = await import(
           './async_services'
         );
-        const frameStart = this.editorFrameService!.start(coreStart, deps);
-
         this.stopReportManager = stopReportManager;
-        await ensureDefaultDataView();
+
+        const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),
           getPresentationUtilContext,
+          topNavMenuEntryGenerators: this.topNavMenuEntries,
         });
       },
     });
@@ -292,6 +346,20 @@ export class LensPlugin {
     }
 
     urlForwarding.forwardApp('lens', 'lens');
+
+    return {
+      registerVisualization: (vis: Visualization | (() => Promise<Visualization>)) => {
+        if (this.editorFrameSetup) {
+          this.editorFrameSetup.registerVisualization(vis);
+        } else {
+          // queue visualizations if editor frame is not yet ready as it's loaded async
+          this.queuedVisualizations.push(vis);
+        }
+      },
+      registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
+        this.topNavMenuEntries.push(menuEntryGenerator);
+      },
+    };
   }
 
   private async initParts(
@@ -342,6 +410,11 @@ export class LensPlugin {
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);
     this.gaugeVisualization.setup(core, dependencies);
+
+    this.queuedVisualizations.forEach((queuedVis) => {
+      editorFrameSetupInterface.registerVisualization(queuedVis);
+    });
+    this.editorFrameSetup = editorFrameSetupInterface;
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
@@ -352,6 +425,11 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_FIELD_TRIGGER,
       visualizeFieldAction(core.application)
+    );
+
+    startDependencies.uiActions.addTriggerAction(
+      VISUALIZE_EDITOR_TRIGGER,
+      visualizeTSVBAction(core.application)
     );
 
     return {
@@ -385,6 +463,14 @@ export class LensPlugin {
       getXyVisTypes: async () => {
         const { visualizationTypes } = await import('./xy_visualization/types');
         return visualizationTypes;
+      },
+
+      stateHelperApi: async () => {
+        const { createFormulaPublicApi } = await import('./async_services');
+
+        return {
+          formula: createFormulaPublicApi(),
+        };
       },
     };
   }

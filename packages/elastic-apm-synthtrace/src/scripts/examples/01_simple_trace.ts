@@ -7,19 +7,18 @@
  */
 
 import { apm, timerange } from '../../index';
-import { apmEventsToElasticsearchOutput } from '../../lib/apm/utils/apm_events_to_elasticsearch_output';
-import { getApmWriteTargets } from '../../lib/apm/utils/get_apm_write_targets';
+import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
+import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async ({ target, logLevel }) => {
-  const { client, logger } = getCommonServices({ target, logLevel });
-  const writeTargets = await getApmWriteTargets({ client });
+const scenario: Scenario = async (runOptions: RunOptions) => {
+  const { logger } = getCommonServices(runOptions);
+
+  const { numServices = 3 } = runOptions.scenarioOpts || {};
 
   return {
     generate: ({ from, to }) => {
-      const numServices = 3;
-
       const range = timerange(from, to);
 
       const transactionName = '240rpm/75% 1000ms';
@@ -28,79 +27,65 @@ const scenario: Scenario = async ({ target, logLevel }) => {
 
       const failedTimestamps = range.interval('1s').rate(1);
 
-      return new Array(numServices).fill(undefined).flatMap((_, index) => {
-        const events = logger.perf('generating_apm_events', () => {
-          const instance = apm
-            .service(`opbeans-go-${index}`, 'production', 'go')
-            .instance('instance');
-
-          const successfulTraceEvents = successfulTimestamps.flatMap((timestamp) =>
-            instance
-              .transaction(transactionName)
-              .timestamp(timestamp)
-              .duration(1000)
-              .success()
-              .children(
-                instance
-                  .span('GET apm-*/_search', 'db', 'elasticsearch')
-                  .duration(1000)
-                  .success()
-                  .destination('elasticsearch')
-                  .timestamp(timestamp),
-                instance
-                  .span('custom_operation', 'custom')
-                  .duration(100)
-                  .success()
-                  .timestamp(timestamp)
-              )
-              .serialize()
-          );
-
-          const failedTraceEvents = failedTimestamps.flatMap((timestamp) =>
-            instance
-              .transaction(transactionName)
-              .timestamp(timestamp)
-              .duration(1000)
-              .failure()
-              .errors(
-                instance
-                  .error('[ResponseError] index_not_found_exception')
-                  .timestamp(timestamp + 50)
-              )
-              .serialize()
-          );
-
-          const metricsets = range
-            .interval('30s')
-            .rate(1)
-            .flatMap((timestamp) =>
+      const instances = [...Array(numServices).keys()].map((index) =>
+        apm.service(`opbeans-go-${index}`, 'production', 'go').instance('instance')
+      );
+      const instanceSpans = (instance: Instance) => {
+        const successfulTraceEvents = successfulTimestamps.spans((timestamp) =>
+          instance
+            .transaction(transactionName)
+            .timestamp(timestamp)
+            .duration(1000)
+            .success()
+            .children(
               instance
-                .appMetrics({
-                  'system.memory.actual.free': 800,
-                  'system.memory.total': 1000,
-                  'system.cpu.total.norm.pct': 0.6,
-                  'system.process.cpu.total.norm.pct': 0.7,
-                })
+                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .duration(1000)
+                .success()
+                .destination('elasticsearch')
+                .timestamp(timestamp),
+              instance
+                .span('custom_operation', 'custom')
+                .duration(100)
+                .success()
                 .timestamp(timestamp)
-                .serialize()
-            );
-          return [...successfulTraceEvents, ...failedTraceEvents, ...metricsets];
-        });
-
-        return logger.perf('apm_events_to_es_output', () =>
-          apmEventsToElasticsearchOutput({
-            events: [
-              ...events,
-              ...logger.perf('get_transaction_metrics', () => apm.getTransactionMetrics(events)),
-              ...logger.perf('get_span_destination_metrics', () =>
-                apm.getSpanDestinationMetrics(events)
-              ),
-              ...logger.perf('get_breakdown_metrics', () => apm.getBreakdownMetrics(events)),
-            ],
-            writeTargets,
-          })
+            )
+            .serialize()
         );
-      });
+
+        const failedTraceEvents = failedTimestamps.spans((timestamp) =>
+          instance
+            .transaction(transactionName)
+            .timestamp(timestamp)
+            .duration(1000)
+            .failure()
+            .errors(
+              instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
+            )
+            .serialize()
+        );
+
+        const metricsets = range
+          .interval('30s')
+          .rate(1)
+          .spans((timestamp) =>
+            instance
+              .appMetrics({
+                'system.memory.actual.free': 800,
+                'system.memory.total': 1000,
+                'system.cpu.total.norm.pct': 0.6,
+                'system.process.cpu.total.norm.pct': 0.7,
+              })
+              .timestamp(timestamp)
+              .serialize()
+          );
+
+        return successfulTraceEvents.concat(failedTraceEvents, metricsets);
+      };
+
+      return instances
+        .map((instance) => logger.perf('generating_apm_events', () => instanceSpans(instance)))
+        .reduce((p, c) => p.concat(c));
     },
   };
 };

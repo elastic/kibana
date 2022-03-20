@@ -222,11 +222,10 @@ describe('saved_object', () => {
     test('should send correct options for counts of favorite timeline', async () => {
       expect(mockFindSavedObject.mock.calls[5][0]).toEqual({
         filter:
-          'not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
+          'not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.favorite.keySearch: dXNlcm5hbWU=',
         page: 1,
         perPage: 1,
-        search: ' dXNlcm5hbWU=',
-        searchFields: ['title', 'description', 'favorite.keySearch'],
+        searchFields: ['title', 'description'],
         type: 'siem-ui-timeline',
       });
     });

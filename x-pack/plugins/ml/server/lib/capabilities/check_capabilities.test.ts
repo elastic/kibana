@@ -26,17 +26,13 @@ const mlIsNotEnabled = async () => false;
 
 const mlClientNonUpgrade = {
   info: async () => ({
-    body: {
-      upgrade_mode: false,
-    },
+    upgrade_mode: false,
   }),
 } as unknown as MlClient;
 
 const mlClientUpgrade = {
   info: async () => ({
-    body: {
-      upgrade_mode: true,
-    },
+    upgrade_mode: true,
   }),
 } as unknown as MlClient;
 
@@ -51,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(32);
+      expect(count).toBe(36);
     });
   });
 
@@ -79,6 +75,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateAnnotation).toBe(true);
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
+      expect(capabilities.canGetTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -102,6 +99,9 @@ describe('check_capabilities', () => {
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
+      expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canDeleteTrainedModels).toBe(false);
+      expect(capabilities.canStartStopTrainedModels).toBe(false);
     });
 
     test('full capabilities', async () => {
@@ -126,6 +126,8 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(true);
       expect(capabilities.canDeleteAnnotation).toBe(true);
+      expect(capabilities.canUseMlAlerts).toBe(true);
+      expect(capabilities.canGetTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(true);
       expect(capabilities.canDeleteJob).toBe(true);
@@ -147,7 +149,11 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(true);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(true);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(true);
+      expect(capabilities.canCreateMlAlerts).toBe(true);
       expect(capabilities.canViewMlNodes).toBe(true);
+      expect(capabilities.canCreateTrainedModels).toBe(true);
+      expect(capabilities.canDeleteTrainedModels).toBe(true);
+      expect(capabilities.canStartStopTrainedModels).toBe(true);
     });
 
     test('upgrade in progress with full capabilities', async () => {
@@ -172,6 +178,8 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(false);
       expect(capabilities.canDeleteAnnotation).toBe(false);
+      expect(capabilities.canUseMlAlerts).toBe(false);
+      expect(capabilities.canGetTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -193,6 +201,11 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
+      expect(capabilities.canCreateMlAlerts).toBe(false);
+      expect(capabilities.canViewMlNodes).toBe(false);
+      expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canDeleteTrainedModels).toBe(false);
+      expect(capabilities.canStartStopTrainedModels).toBe(false);
     });
 
     test('upgrade in progress with partial capabilities', async () => {
@@ -217,6 +230,8 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(false);
       expect(capabilities.canDeleteAnnotation).toBe(false);
+      expect(capabilities.canUseMlAlerts).toBe(false);
+      expect(capabilities.canGetTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -238,6 +253,11 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
+      expect(capabilities.canCreateMlAlerts).toBe(false);
+      expect(capabilities.canViewMlNodes).toBe(false);
+      expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canDeleteTrainedModels).toBe(false);
+      expect(capabilities.canStartStopTrainedModels).toBe(false);
     });
 
     test('full capabilities, ml disabled in space', async () => {
@@ -262,6 +282,8 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetAnnotations).toBe(false);
       expect(capabilities.canCreateAnnotation).toBe(false);
       expect(capabilities.canDeleteAnnotation).toBe(false);
+      expect(capabilities.canUseMlAlerts).toBe(false);
+      expect(capabilities.canGetTrainedModels).toBe(false);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -283,6 +305,11 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
+      expect(capabilities.canCreateMlAlerts).toBe(false);
+      expect(capabilities.canViewMlNodes).toBe(false);
+      expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canDeleteTrainedModels).toBe(false);
+      expect(capabilities.canStartStopTrainedModels).toBe(false);
     });
   });
 
@@ -309,6 +336,8 @@ describe('check_capabilities', () => {
     expect(capabilities.canGetAnnotations).toBe(false);
     expect(capabilities.canCreateAnnotation).toBe(false);
     expect(capabilities.canDeleteAnnotation).toBe(false);
+    expect(capabilities.canUseMlAlerts).toBe(false);
+    expect(capabilities.canGetTrainedModels).toBe(false);
 
     expect(capabilities.canCreateJob).toBe(false);
     expect(capabilities.canDeleteJob).toBe(false);
@@ -330,5 +359,10 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
     expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
     expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
+    expect(capabilities.canCreateMlAlerts).toBe(false);
+    expect(capabilities.canViewMlNodes).toBe(false);
+    expect(capabilities.canCreateTrainedModels).toBe(false);
+    expect(capabilities.canDeleteTrainedModels).toBe(false);
+    expect(capabilities.canStartStopTrainedModels).toBe(false);
   });
 });

@@ -7,7 +7,7 @@
  */
 
 import { updateSearchSource } from './update_search_source';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 import { SavedSearch } from '../../../services/saved_searches';
 import { AppState } from '../services/discover_state';
 import type { SortOrder } from '../../../services/saved_searches';
@@ -50,6 +50,9 @@ export async function persistSavedSearch(
   }
   if (typeof state.hideChart !== 'undefined') {
     savedSearch.hideChart = state.hideChart;
+  }
+  if (typeof state.rowHeight !== 'undefined') {
+    savedSearch.rowHeight = state.rowHeight;
   }
 
   if (state.viewMode) {

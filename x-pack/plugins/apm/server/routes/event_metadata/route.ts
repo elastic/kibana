@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getEventMetadata } from './get_event_metadata';
 import { processorEventRt } from '../../../common/processor_event';
@@ -21,7 +20,9 @@ const eventMetadataRoute = createApmServerRoute({
       id: t.string,
     }),
   }),
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{ metadata: Partial<Record<string, unknown[]>> }> => {
     const setup = await setupRequest(resources);
 
     const {
@@ -40,5 +41,4 @@ const eventMetadataRoute = createApmServerRoute({
   },
 });
 
-export const eventMetadataRouteRepository =
-  createApmServerRouteRepository().add(eventMetadataRoute);
+export const eventMetadataRouteRepository = eventMetadataRoute;

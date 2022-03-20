@@ -9,15 +9,16 @@ import { EuiLink, EuiText, EuiPopover, EuiButtonEmpty, EuiSpacer } from '@elasti
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
-export function AdvancedOptions(props: {
-  options: Array<{
-    title: string;
-    dataTestSubj: string;
-    onClick: () => void;
-    showInPopover: boolean;
-    inlineElement: React.ReactElement | null;
-  }>;
-}) {
+interface AdvancedOption {
+  title: string;
+  dataTestSubj: string;
+  onClick: () => void;
+  showInPopover: boolean;
+  inlineElement: React.ReactElement | null;
+  helpPopup?: string | null;
+}
+
+export function AdvancedOptions(props: { options: AdvancedOption[] }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const popoverOptions = props.options.filter((option) => option.showInPopover);
   const inlineOptions = props.options.filter((option) => option.inlineElement);

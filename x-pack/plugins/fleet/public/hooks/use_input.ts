@@ -19,7 +19,7 @@ export function useInput(
   const [hasChanged, setHasChanged] = useState(false);
 
   const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const newValue = e.target.value;
       setValue(newValue);
       if (errors && validate && validate(newValue) === undefined) {
@@ -125,11 +125,22 @@ export function useComboInput(
 
   const isInvalid = errors !== undefined;
 
+  const validateCallback = useCallback(() => {
+    if (validate) {
+      const newErrors = validate(value);
+      setErrors(newErrors);
+
+      return newErrors === undefined;
+    }
+
+    return true;
+  }, [validate, value]);
+
   const onChange = useCallback(
     (newValues: string[]) => {
       setValue(newValues);
-      if (errors && validate && validate(newValues) === undefined) {
-        setErrors(undefined);
+      if (errors && validate) {
+        setErrors(validate(newValues));
       }
     },
     [validate, errors]
@@ -144,21 +155,16 @@ export function useComboInput(
       isInvalid,
       disabled,
     },
+    formRowProps: {
+      error: errors,
+      isInvalid,
+    },
     value,
     clear: () => {
       setValue([]);
     },
     setValue,
-    validate: () => {
-      if (validate) {
-        const newErrors = validate(value);
-        setErrors(newErrors);
-
-        return newErrors === undefined;
-      }
-
-      return true;
-    },
+    validate: validateCallback,
     hasChanged,
   };
 }

@@ -5,40 +5,10 @@
  * 2.0.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { HttpFetchQuery, HttpSetup } from 'src/core/public';
-import * as t from 'io-ts';
 import { FETCH_STATUS, AddInspectorRequest } from '../../../../observability/public';
-
-function isObject(value: unknown) {
-  const type = typeof value;
-  return value != null && (type === 'object' || type === 'function');
-}
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts
- */
-export const formatErrors = (errors: t.Errors): string[] => {
-  return errors.map((error) => {
-    if (error.message != null) {
-      return error.message;
-    } else {
-      const keyContext = error.context
-        .filter(
-          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
-        )
-        .map((entry) => entry.key)
-        .join('.');
-
-      const nameContext = error.context.find((entry) => entry.type?.name?.length > 0);
-      const suppliedValue =
-        keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
-      const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
-      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
-    }
-  });
-};
 
 class ApiService {
   private static instance: ApiService;
@@ -109,6 +79,8 @@ class ApiService {
       body: JSON.stringify(data),
     });
 
+    this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
+
     if (decodeType) {
       const decoded = decodeType.decode(response);
       if (isRight(decoded)) {
@@ -116,7 +88,7 @@ class ApiService {
       } else {
         // eslint-disable-next-line no-console
         console.warn(
-          `API ${apiUrl} is not returning expected response, ${PathReporter.report(decoded)}`
+          `API ${apiUrl} is not returning expected response, ${formatErrors(decoded.left)}`
         );
       }
     }
@@ -136,7 +108,7 @@ class ApiService {
       } else {
         // eslint-disable-next-line no-console
         console.warn(
-          `API ${apiUrl} is not returning expected response, ${PathReporter.report(decoded)}`
+          `API ${apiUrl} is not returning expected response, ${formatErrors(decoded.left)}`
         );
       }
     }

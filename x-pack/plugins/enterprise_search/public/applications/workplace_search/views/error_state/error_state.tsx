@@ -15,9 +15,7 @@ import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kiban
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
-export const ErrorState: React.FC<{ errorConnectingMessage?: string }> = ({
-  errorConnectingMessage,
-}) => {
+export const ErrorState: React.FC = () => {
   return (
     <>
       <SetPageChrome />
@@ -25,7 +23,7 @@ export const ErrorState: React.FC<{ errorConnectingMessage?: string }> = ({
 
       <KibanaPageTemplate isEmptyState>
         <ViewContentHeader title={WORKPLACE_SEARCH_PLUGIN.NAME} />
-        <ErrorStatePrompt errorConnectingMessage={errorConnectingMessage} />
+        <ErrorStatePrompt />
       </KibanaPageTemplate>
     </>
   );

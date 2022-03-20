@@ -39,7 +39,7 @@ export const registerGetRoute = ({
           name: id,
         });
 
-        const autoFollowPattern = result.body.patterns[0];
+        const autoFollowPattern = result.patterns[0];
 
         return response.ok({
           // @ts-expect-error Once #98266 is merged, test this again.

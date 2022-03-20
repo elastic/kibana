@@ -12,7 +12,7 @@ Create beautiful maps from your geographical data. With **Maps**, you can:
 
 * Build maps with multiple layers and indices.
 * Animate spatial temporal data.
-* Upload GeoJSON.
+* Upload GeoJSON files and shapefiles.
 * Embed your map in dashboards.
 * Symbolize features using data values.
 * Focus on only the data that’s important to you.
@@ -50,8 +50,8 @@ This animated map uses the time slider to show Portland buses over a period of 1
 image::maps/images/timeslider.gif[]
 
 [float]
-=== Upload GeoJSON
-Use **Maps** to drag and drop your GeoJSON points, lines, and polygons into Elasticsearch, and then use them as layers in your map.
+=== Upload GeoJSON files and shapefiles
+Use **Maps** to drag and drop your GeoJSON and shapefile data into Elasticsearch, and then use them as layers in your map.
 
 [float]
 === Embed your map in dashboards

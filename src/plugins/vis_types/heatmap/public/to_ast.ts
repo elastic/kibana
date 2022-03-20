@@ -20,6 +20,7 @@ const prepareLegend = (params: HeatmapVisParams) => {
     position: params.legendPosition,
     shouldTruncate: params.truncateLegend ?? true,
     maxLines: params.maxLegendLines ?? 1,
+    legendSize: params.legendSize,
   });
 
   return buildExpression([legend]);
@@ -40,6 +41,8 @@ const prepareGrid = (params: HeatmapVisParams) => {
   const gridConfig = buildExpressionFunction('heatmap_grid', {
     isCellLabelVisible: params.valueAxes?.[0].labels.show ?? false,
     isXAxisLabelVisible: true,
+    isYAxisTitleVisible: true,
+    isXAxisTitleVisible: true,
   });
 
   return buildExpression([gridConfig]);

@@ -11,8 +11,23 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AggregationsAggregate,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
+import { TransportResult } from '@elastic/elasticsearch';
+import { Agent, AgentPolicy } from '../../../../fleet/common';
 import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -22,15 +37,103 @@ import {
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
 } from './helpers';
-import {
+import type {
   TelemetryEvent,
   ESLicense,
   ESClusterInfo,
   GetEndpointListResponse,
   RuleSearchResult,
+  ExceptionListItem,
 } from './types';
 
-export class TelemetryReceiver {
+export interface ITelemetryReceiver {
+  start(
+    core?: CoreStart,
+    kibanaIndex?: string,
+    endpointContextService?: EndpointAppContextService,
+    exceptionListClient?: ExceptionListClient
+  ): Promise<void>;
+
+  getClusterInfo(): ESClusterInfo | undefined;
+
+  fetchFleetAgents(): Promise<
+    | {
+        agents: Agent[];
+        total: number;
+        page: number;
+        perPage: number;
+      }
+    | undefined
+  >;
+
+  fetchEndpointPolicyResponses(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
+  fetchEndpointMetrics(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
+  fetchEndpointMetadata(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
+  fetchDiagnosticAlerts(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<SearchResponse<TelemetryEvent, Record<string, AggregationsAggregate>>>;
+
+  fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
+
+  fetchTrustedApplications(): Promise<{
+    data: ExceptionListItem[] | undefined;
+    total: number;
+    page: number;
+    per_page: number;
+  }>;
+
+  fetchEndpointList(listId: string): Promise<GetEndpointListResponse>;
+
+  fetchDetectionRules(): Promise<
+    TransportResult<
+      SearchResponse<RuleSearchResult, Record<string, AggregationsAggregate>>,
+      unknown
+    >
+  >;
+
+  fetchDetectionExceptionList(
+    listId: string,
+    ruleVersion: number
+  ): Promise<{
+    data: ExceptionListItem[];
+    total: number;
+    page: number;
+    per_page: number;
+  }>;
+
+  fetchClusterInfo(): Promise<ESClusterInfo>;
+
+  fetchLicenseInfo(): Promise<ESLicense | undefined>;
+
+  copyLicenseFields(lic: ESLicense): {
+    issuer?: string | undefined;
+    issued_to?: string | undefined;
+    uid: string;
+    status: string;
+    type: string;
+  };
+}
+
+export class TelemetryReceiver implements ITelemetryReceiver {
   private readonly logger: Logger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
@@ -124,7 +227,7 @@ export class TelemetryReceiver {
       },
     };
 
-    return this.esClient.search(query);
+    return this.esClient.search(query, { meta: true });
   }
 
   public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
@@ -171,7 +274,54 @@ export class TelemetryReceiver {
       },
     };
 
-    return this.esClient.search(query);
+    return this.esClient.search(query, { meta: true });
+  }
+
+  public async fetchEndpointMetadata(executeFrom: string, executeTo: string) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve elastic endpoint metrics');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `.ds-metrics-endpoint.metadata-*`,
+      ignore_unavailable: false,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
+          },
+        },
+        aggs: {
+          endpoint_metadata: {
+            terms: {
+              field: 'agent.id',
+              size: this.max_records,
+            },
+            aggs: {
+              latest_metadata: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      '@timestamp': {
+                        order: 'desc' as const,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    return this.esClient.search(query, { meta: true });
   }
 
   public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
@@ -203,7 +353,7 @@ export class TelemetryReceiver {
       },
     };
 
-    return (await this.esClient.search<TelemetryEvent>(query)).body;
+    return this.esClient.search<TelemetryEvent>(query);
   }
 
   public async fetchPolicyConfigs(id: string) {
@@ -220,6 +370,9 @@ export class TelemetryReceiver {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
       throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
+
+    // Ensure list is created if it does not exist
+    await this.exceptionListClient.createTrustedAppsList();
 
     const results = await this.exceptionListClient.findExceptionListItem({
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -245,7 +398,7 @@ export class TelemetryReceiver {
     }
 
     // Ensure list is created if it does not exist
-    await this.exceptionListClient.createTrustedAppsList();
+    await this.exceptionListClient.createEndpointList();
 
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,
@@ -265,6 +418,10 @@ export class TelemetryReceiver {
     };
   }
 
+  /**
+   * Gets the elastic rules which are the rules that have immutable set to true and are of a particular rule type
+   * @returns The elastic rules
+   */
   public async fetchDetectionRules() {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
@@ -278,16 +435,39 @@ export class TelemetryReceiver {
       body: {
         query: {
           bool: {
-            filter: [
-              { term: { 'alert.alertTypeId': 'siem.signals' } },
-              { term: { 'alert.params.immutable': true } },
+            must: [
+              {
+                bool: {
+                  filter: {
+                    terms: {
+                      'alert.alertTypeId': [
+                        SIGNALS_ID,
+                        EQL_RULE_TYPE_ID,
+                        ML_RULE_TYPE_ID,
+                        QUERY_RULE_TYPE_ID,
+                        SAVED_QUERY_RULE_TYPE_ID,
+                        INDICATOR_RULE_TYPE_ID,
+                        THRESHOLD_RULE_TYPE_ID,
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                bool: {
+                  filter: {
+                    terms: {
+                      'alert.params.immutable': [true],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
       },
     };
-
-    return this.esClient.search<RuleSearchResult>(query);
+    return this.esClient.search<RuleSearchResult>(query, { meta: true });
   }
 
   public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {
@@ -316,13 +496,12 @@ export class TelemetryReceiver {
     };
   }
 
-  private async fetchClusterInfo(): Promise<ESClusterInfo> {
+  public async fetchClusterInfo(): Promise<ESClusterInfo> {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    const { body } = await this.esClient.info();
-    return body;
+    return this.esClient.info();
   }
 
   public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
@@ -331,17 +510,15 @@ export class TelemetryReceiver {
     }
 
     try {
-      const ret = (
-        await this.esClient.transport.request({
-          method: 'GET',
-          path: '/_license',
-          querystring: {
-            local: true,
-          },
-        })
-      ).body as Promise<{ license: ESLicense }>;
+      const ret = (await this.esClient.transport.request({
+        method: 'GET',
+        path: '/_license',
+        querystring: {
+          local: true,
+        },
+      })) as { license: ESLicense };
 
-      return (await ret).license;
+      return ret.license;
     } catch (err) {
       this.logger.debug(`failed retrieving license: ${err}`);
       return undefined;

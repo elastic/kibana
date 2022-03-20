@@ -16,23 +16,14 @@ export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
-export const KUBERNETES_RUN_INSTRUCTIONS =
-  'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
-export const STANDALONE_RUN_INSTRUCTIONS_LINUXMAC = 'sudo ./elastic-agent install';
-export const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = '.\\elastic-agent.exe install';
 
+export const FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID =
+  'elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395';
 /*
  Package rules:
-|               | unremovablePackages | defaultPackages | autoUpdatePackages |
-|---------------|:---------------------:|:---------------:|:------------------:|
-| Removable     |         ❌             |        ✔️        |          ✔️         |
-| Auto-installs |         ❌             |        ✔️        |          ❌         |
-| Auto-updates  |         ❌             |        ✔️        |          ✔️         |
-
-`endpoint` is a special package. It needs to autoupdate, it needs to _not_ be
-removable, but it doesn't install by default. Following the table, it needs to
-be in `unremovablePackages` and in `autoUpdatePackages`, but not in
-`defaultPackages`.
+|               | autoUpdatePackages |
+|---------------|:------------------:|
+| Auto-updates  |          ✔️         |
 
 
 We also define "auto upgrade policies" packages below. These are packages that are considered "stack-aligned"
@@ -41,15 +32,6 @@ editor UI's in the Kibana codebase will be included in this set of packages to a
 in their custom policy editor implementations.
 
 */
-
-export const unremovablePackages = [
-  FLEET_SYSTEM_PACKAGE,
-  FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_SERVER_PACKAGE,
-  FLEET_ENDPOINT_PACKAGE,
-];
-
-export const defaultPackages = unremovablePackages.filter((p) => p !== FLEET_ENDPOINT_PACKAGE);
 
 export const autoUpdatePackages = [
   FLEET_ENDPOINT_PACKAGE,
@@ -76,4 +58,5 @@ export const installationStatuses = {
   Installing: 'installing',
   InstallFailed: 'install_failed',
   NotInstalled: 'not_installed',
+  InstalledBundled: 'installed_bundled',
 } as const;

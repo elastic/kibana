@@ -112,7 +112,7 @@ or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, 
 . Click a pack name to view the status.
 +
 Details include the last time each query ran, how many results were returned, and the number of agents the query ran against.
-If there are errors, expand the row to view the details.
+If there are errors, expand the row to view the details, including an option to view more information in the Logs.
 +
 [role="screenshot"]
 image::images/scheduled-pack.png[Shows queries in the pack and details about each query, including the last time it ran, how many results were returned, the number of agents it ran against, and if there are errors]
@@ -121,11 +121,18 @@ image::images/scheduled-pack.png[Shows queries in the pack and details about eac
 
 [float]
 [[osquery-manage-query]]
-== Edit saved queries
+== Save queries
 
-Add or edit saved queries from the *Saved queries* tab.
+You can save queries in two ways:
 
-. Go to the saved queries, then click **Add saved query** or the edit icon.
+* After running a live query, click the *Save for later* link.
+* From the *Saved queries* tab, click the **Add saved query** button.
+
+Once you save a query, you can only edit it from the *Saved queries* tab.
+
+To add or edit saved queries from the *Saved queries* tab:
+
+. Go to *Saved queries*, and then click **Add saved query** or the edit icon.
 . Provide the following fields:
 
 * The unique identifier.
@@ -148,7 +155,7 @@ Add or edit saved queries from the *Saved queries* tab.
 
 * From the *Test query* panel, select agents or groups to test the query, then click *Submit* to run a live query. Result columns with the image:images/mapped-icon.png[mapping] icon are mapped. Hover over the icon to see the mapped ECS field.
 
-. Click **Save query**.
+. Click *Save* or *Update*. 
 
 [float]
 [[osquery-map-fields]]
@@ -175,11 +182,7 @@ and the mapped ECS fields. For example, if you update a query to map `osquery.na
 
 ** **Static value**: Enter a static value. When the query runs, the ECS field is set to the value entered. For example, static fields can be used to apply `tags` or your preferred `event.category` to the query results. 
 
-. Map more fields, as needed.
-
-** To add a new row for additional fields to map, click the plus icon.
-
-** To remove any mapped rows, click the trash icon.
+. Map more fields, as needed. To remove any mapped rows, click the delete icon.
 
 . Save your changes.
 
@@ -270,11 +273,17 @@ for an agent policy through Fleet.
 This integration supports x64 architecture on Windows, MacOS, and Linux platforms, 
 and ARM64 architecture on Linux.
 
-NOTE: The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
+[NOTE]
+=========================
+
+* The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
 and the https://docs.elastic.co/en/integrations/osquery[Osquery]
 integration collect logs from self-managed Osquery deployments.
 The *Osquery Manager* integration manages Osquery deployments
 and supports running and scheduling queries from {kib}.
+
+* *Osquery Manager* cannot be integrated with an Elastic Agent in standalone mode.
+=========================
 
 [float]
 === Customize Osquery sub-feature privileges
@@ -314,7 +323,7 @@ While this allows you to use advanced Osquery functionality like pack discovery 
 
 . Edit the *Osquery config* JSON field to apply your preferred Osquery configuration. Note the following:
 
-* The field may already have content if you have scheduled packs for this agent policy. To keep these packs scheduled, do not edit the `packs` section.
+* The field may already have content if you have scheduled packs for this agent policy. To keep these packs scheduled, do not remove the `packs` section.
 
 * Refer to the https://osquery.readthedocs.io/en/stable/[Osquery documentation] for configuration options. 
 
@@ -344,14 +353,12 @@ https://www.elastic.co/guide/en/fleet/master/upgrade-elastic-agent.html[upgrade 
 
 [float]
 === Debug issues
-If you encounter issues with *Osquery Manager*, find the relevant logs for the {elastic-agent}
-and Osquerybeat in the installed agent directory, then adjust the agent path for your setup. 
-
-The relevant logs look similar to the following example paths:
+If you encounter issues with *Osquery Manager*, find the relevant logs for {elastic-agent}
+and Osquerybeat in the agent directory. Refer to the {fleet-guide}/installation-layout.html[Fleet Installation layout] to find the log file location for your OS.
 
 ```ts
-`/data/elastic-agent-054e22/logs/elastic-agent-json.log-*`
-`/data/elastic-agent-054e22/logs/default/osquerybeat-json.log`
+../data/elastic-agent-*/logs/elastic-agent-json.log-*
+../data/elastic-agent-*/logs/default/osquerybeat-json.log
 ```
 
 To get more details in the logs, change the agent logging level to debug:

@@ -128,6 +128,7 @@ export async function getAgentsByKuery(
       from,
       size,
       track_total_hits: true,
+      rest_total_hits_as_int: true,
       ignore_unavailable: true,
       body: {
         ...body,
@@ -136,8 +137,8 @@ export async function getAgentsByKuery(
     });
   const res = await queryAgents((page - 1) * perPage, perPage);
 
-  let agents = res.body.hits.hits.map(searchHitToAgent);
-  let total = (res.body.hits.total as estypes.SearchTotalHits).value;
+  let agents = res.hits.hits.map(searchHitToAgent);
+  let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
@@ -146,7 +147,7 @@ export async function getAgentsByKuery(
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
     if (total < SO_SEARCH_LIMIT) {
       const response = await queryAgents(0, SO_SEARCH_LIMIT);
-      agents = response.body.hits.hits
+      agents = response.hits.hits
         .map(searchHitToAgent)
         .filter((agent) => isAgentUpgradeable(agent, appContextService.getKibanaVersion()));
       total = agents.length;
@@ -202,11 +203,13 @@ export async function countInactiveAgents(
     index: AGENTS_INDEX,
     size: 0,
     track_total_hits: true,
+    rest_total_hits_as_int: true,
+    filter_path: 'hits.total',
     ignore_unavailable: true,
     body,
   });
-  // @ts-expect-error value is number | TotalHits
-  return res.body.hits.total.value;
+
+  return (res.hits.total as number) || 0;
 }
 
 export async function getAgentById(esClient: ElasticsearchClient, agentId: string) {
@@ -217,11 +220,11 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
       id: agentId,
     });
 
-    if (agentHit.body.found === false) {
+    if (agentHit.found === false) {
       throw agentNotFoundError;
     }
 
-    return searchHitToAgent(agentHit.body);
+    return searchHitToAgent(agentHit);
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
       throw agentNotFoundError;
@@ -247,7 +250,7 @@ export async function getAgentDocuments(
     body: { docs: agentIds.map((_id) => ({ _id })) },
   });
 
-  return res.body.docs || [];
+  return res.docs || [];
 }
 
 export async function getAgentsById(
@@ -276,7 +279,7 @@ export async function getAgentByAccessAPIKeyId(
     q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
   });
 
-  const searchHit = res.body.hits.hits[0];
+  const searchHit = res.hits.hits[0];
   const agent = searchHit && searchHitToAgent(searchHit);
 
   if (!searchHit || !agent) {
@@ -334,7 +337,7 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item) => ({
+    items: res.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
       // @ts-expect-error it not assignable to ErrorCause

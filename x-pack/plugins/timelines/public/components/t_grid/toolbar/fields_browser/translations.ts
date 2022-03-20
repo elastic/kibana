@@ -21,21 +21,6 @@ export const CATEGORIES_COUNT = (totalCount: number) =>
     defaultMessage: '{totalCount} {totalCount, plural, =1 {category} other {categories}}',
   });
 
-export const CATEGORY_LINK = ({ category, totalCount }: { category: string; totalCount: number }) =>
-  i18n.translate('xpack.timelines.fieldBrowser.categoryLinkAriaLabel', {
-    values: { category, totalCount },
-    defaultMessage:
-      '{category} {totalCount} {totalCount, plural, =1 {field} other {fields}}. Click this button to select the {category} category.',
-  });
-
-export const CATEGORY_FIELDS_TABLE_CAPTION = (categoryId: string) =>
-  i18n.translate('xpack.timelines.fieldBrowser.categoryFieldsTableCaption', {
-    defaultMessage: 'category {categoryId} fields',
-    values: {
-      categoryId,
-    },
-  });
-
 export const CLOSE = i18n.translate('xpack.timelines.fieldBrowser.closeButton', {
   defaultMessage: 'Close',
 });
@@ -56,6 +41,10 @@ export const DESCRIPTION_FOR_FIELD = (field: string) =>
     defaultMessage: 'Description for field {field}:',
   });
 
+export const NAME = i18n.translate('xpack.timelines.fieldBrowser.fieldName', {
+  defaultMessage: 'Name',
+});
+
 export const FIELD = i18n.translate('xpack.timelines.fieldBrowser.fieldLabel', {
   defaultMessage: 'Field',
 });
@@ -64,10 +53,14 @@ export const FIELDS = i18n.translate('xpack.timelines.fieldBrowser.fieldsTitle',
   defaultMessage: 'Fields',
 });
 
+export const FIELDS_SHOWING = i18n.translate('xpack.timelines.fieldBrowser.fieldsCountShowing', {
+  defaultMessage: 'Showing',
+});
+
 export const FIELDS_COUNT = (totalCount: number) =>
   i18n.translate('xpack.timelines.fieldBrowser.fieldsCountTitle', {
     values: { totalCount },
-    defaultMessage: '{totalCount} {totalCount, plural, =1 {field} other {fields}}',
+    defaultMessage: '{totalCount, plural, =1 {field} other {fields}}',
   });
 
 export const FILTER_PLACEHOLDER = i18n.translate('xpack.timelines.fieldBrowser.filterPlaceholder', {
@@ -89,14 +82,6 @@ export const NO_FIELDS_MATCH_INPUT = (searchInput: string) =>
 export const RESET_FIELDS = i18n.translate('xpack.timelines.fieldBrowser.resetFieldsLink', {
   defaultMessage: 'Reset Fields',
 });
-
-export const VIEW_ALL_CATEGORY_FIELDS = (categoryId: string) =>
-  i18n.translate('xpack.timelines.fieldBrowser.viewCategoryTooltip', {
-    defaultMessage: 'View all {categoryId} fields',
-    values: {
-      categoryId,
-    },
-  });
 
 export const VIEW_COLUMN = (field: string) =>
   i18n.translate('xpack.timelines.fieldBrowser.viewColumnCheckboxAriaLabel', {

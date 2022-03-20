@@ -7,6 +7,9 @@
  */
 
 const { execSync } = require('child_process');
+const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
+  require('./groups.json').groups
+);
 
 const concurrency = 25;
 const defaultCount = concurrency * 2;
@@ -113,7 +116,7 @@ steps.push({
   label: 'Build Kibana Distribution and Plugins',
   agents: { queue: 'c2-8' },
   key: 'build',
-  if: "build.env('BUILD_ID_FOR_ARTIFACTS') == null || build.env('BUILD_ID_FOR_ARTIFACTS') == ''",
+  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
 for (const testSuite of testSuites) {
@@ -177,6 +180,26 @@ for (const testSuite of testSuites) {
         }_accessibility.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
         agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        depends_on: 'build',
+        parallelism: RUN_COUNT,
+        concurrency: concurrency,
+        concurrency_group: UUID,
+        concurrency_method: 'eager',
+      });
+      break;
+
+    case 'cypress':
+      const CYPRESS_SUITE = CI_GROUP;
+      const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));
+      if (!group) {
+        throw new Error(
+          `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`
+        );
+      }
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
+        label: group.name,
+        agents: { queue: 'ci-group-6' },
         depends_on: 'build',
         parallelism: RUN_COUNT,
         concurrency: concurrency,

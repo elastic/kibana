@@ -22,6 +22,7 @@ const mockComputedFields = (
       getComputedFields: () => ({
         runtimeFields,
       }),
+      getRuntimeMappings: () => runtimeFields,
     },
   ]);
 };

@@ -118,11 +118,11 @@ export interface ImportFailure {
   doc: ImportDoc;
 }
 
-export interface Doc {
+export interface ImportDocMessage {
   message: string;
 }
 
-export type ImportDoc = Doc | string | object;
+export type ImportDoc = ImportDocMessage | string | object;
 
 export interface Settings {
   pipeline?: string;

@@ -9,11 +9,14 @@
 import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { DataViewEditorStart } from '../../data_view_editor/public';
+import { DataViewsPublicPluginStart } from '../../data_views/public';
+import { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -24,6 +27,9 @@ export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
+  dataViews: DataViewsPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  spaces?: SpacesPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

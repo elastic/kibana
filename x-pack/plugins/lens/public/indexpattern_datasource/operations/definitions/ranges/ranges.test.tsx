@@ -159,7 +159,7 @@ describe('ranges', () => {
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
-          sourceField: 'Records',
+          sourceField: '___records___',
           operationType: 'count',
         },
       },
@@ -189,6 +189,9 @@ describe('ranges', () => {
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
           "arguments": Object {
+            "autoExtendBounds": Array [
+              false,
+            ],
             "enabled": Array [
               true,
             ],
@@ -249,6 +252,30 @@ describe('ranges', () => {
           function: 'aggHistogram',
           arguments: expect.objectContaining({
             maxBars: [10],
+          }),
+        })
+      );
+    });
+
+    it('should reflect show empty rows correctly', () => {
+      (layer.columns.col1 as RangeIndexPatternColumn).params.maxBars = 10;
+      (layer.columns.col1 as RangeIndexPatternColumn).params.includeEmptyRows = true;
+
+      const esAggsFn = rangeOperation.toEsAggsFn(
+        layer.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggHistogram',
+          arguments: expect.objectContaining({
+            autoExtendBounds: [true],
+            min_doc_count: [true],
           }),
         })
       );

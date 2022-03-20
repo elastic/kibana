@@ -10,9 +10,6 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from 'src/core/public';
-
-import { getNodeAllocationMigrationLink } from '../../../../../../../services/documentation';
-
 export interface Props {
   docLinks: DocLinksStart;
 }
@@ -28,7 +25,11 @@ export const nodeAllocationMigrationGuidance = ({ docLinks }: Props) => (
     defaultMessage="To allocate data to particular data nodes, {roleBasedGuidance} or configure custom node attributes in elasticsearch.yml."
     values={{
       roleBasedGuidance: (
-        <EuiLink href={getNodeAllocationMigrationLink(docLinks)} target="_blank" external={true}>
+        <EuiLink
+          href={docLinks.links.elasticsearch.migrateIndexAllocationFilters}
+          target="_blank"
+          external={true}
+        >
           {i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.defaultToDataNodesDescription.migrationGuidanceMessage',
             {

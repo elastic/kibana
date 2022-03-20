@@ -39,7 +39,7 @@ const getMathValue = (argValue, columns) => {
 // TODO: Garbage, we could make a much nicer math form that can handle way more.
 const DatacolumnArgInput = ({
   onValueChange,
-  columns,
+  resolved: { columns },
   argValue,
   renderError,
   argId,
@@ -123,7 +123,9 @@ const DatacolumnArgInput = ({
 };
 
 DatacolumnArgInput.propTypes = {
-  columns: PropTypes.array.isRequired,
+  resolved: PropTypes.shape({
+    columns: PropTypes.array.isRequired,
+  }).isRequired,
   onValueChange: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
   renderError: PropTypes.func.isRequired,

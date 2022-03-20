@@ -7,35 +7,32 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { first, get } from 'lodash';
 import moment from 'moment';
-import { first, get, last } from 'lodash';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertStates } from './types';
 import {
-  ActionGroupIdsOf,
   ActionGroup,
+  ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import {
-  AlertInstance as Alert,
-  AlertTypeState as RuleTypeState,
-} from '../../../../../alerting/server';
-import { SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraBackendLibs } from '../../infra_types';
-import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
+import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
+import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
+  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
-  buildInvalidQueryAlertReason,
 } from '../common/messages';
+import { createScopedLogger } from '../common/utils';
 import { evaluateCondition } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
@@ -65,9 +62,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params }) => {
+  >(async ({ services, params, alertId, executionId }) => {
+    const startTime = Date.now();
     const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+    const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
@@ -83,6 +82,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
+        logger.error(e.message);
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory('*', reason);
@@ -110,7 +110,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       )
       .catch(() => undefined);
 
-    const compositeSize = libs.configuration.inventory.compositeSize;
+    const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
     const results = await Promise.all(
       criteria.map((condition) =>
         evaluateCondition({
@@ -121,22 +121,20 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           esClient: services.scopedClusterClient.asCurrentUser,
           compositeSize,
           filterQuery,
+          logger,
         })
       )
     );
+    let scheduledActionsCount = 0;
     const inventoryItems = Object.keys(first(results)!);
     for (const group of inventoryItems) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = results.every((result) => {
-        // Grab the result of the most recent bucket
-        return last(result[group].shouldFire);
-      });
-      const shouldAlertWarn = results.every((result) => last(result[group].shouldWarn));
-
+      const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
+      const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = results.some((result) => last(result[group].isNoData));
-      const isError = results.some((result) => result[group].isError);
+      const isNoData = results.some((result) => result[group]?.isNoData);
+      const isError = results.some((result) => result[group]?.isError);
 
       const nextState = isError
         ? AlertStates.ERROR
@@ -195,6 +193,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             : FIRED_ACTIONS.id;
 
         const alert = alertFactory(`${group}`, reason);
+        scheduledActionsCount++;
         alert.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
@@ -215,7 +214,27 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
       }
     }
+    const stopTime = Date.now();
+    logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
   });
+
+const formatThreshold = (metric: SnapshotMetricType, value: number) => {
+  const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
+  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
+
+  const threshold = Array.isArray(value)
+    ? value.map((v: number) => {
+        if (metricFormatter.formatter === 'percent') {
+          v = Number(v) / 100;
+        }
+        if (metricFormatter.formatter === 'bits') {
+          v = Number(v) / 8;
+        }
+        return formatter(v);
+      })
+    : value;
+  return threshold;
+};
 
 const buildReasonWithVerboseMetricName = (
   group: string,
@@ -224,6 +243,10 @@ const buildReasonWithVerboseMetricName = (
   useWarningThreshold?: boolean
 ) => {
   if (!resultItem) return '';
+
+  const thresholdToFormat = useWarningThreshold
+    ? resultItem.warningThreshold!
+    : resultItem.threshold;
   const resultWithVerboseMetricName = {
     ...resultItem,
     group,
@@ -233,7 +256,7 @@ const buildReasonWithVerboseMetricName = (
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),
     currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
-    threshold: useWarningThreshold ? resultItem.warningThreshold! : resultItem.threshold,
+    threshold: formatThreshold(resultItem.metric, thresholdToFormat),
     comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);

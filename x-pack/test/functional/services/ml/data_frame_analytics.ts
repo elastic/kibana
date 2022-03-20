@@ -51,13 +51,15 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async startAnalyticsCreation() {
-      await retry.tryForTime(20 * 1000, async () => {
-        if (await testSubjects.exists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if (await testSubjects.exists('mlAnalyticsCreateFirstButton', { timeout: 1000 })) {
           await testSubjects.click('mlAnalyticsCreateFirstButton');
-        } else {
+        } else if (await testSubjects.exists('mlAnalyticsButtonCreate', { timeout: 1000 })) {
           await testSubjects.click('mlAnalyticsButtonCreate');
+        } else {
+          throw new Error('No Analytics create button found');
         }
-        await testSubjects.existOrFail('analyticsCreateSourceIndexModal');
+        await testSubjects.existOrFail('mlDFAPageSourceSelection', { timeout: 5000 });
       });
     },
 

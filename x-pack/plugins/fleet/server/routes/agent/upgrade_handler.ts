@@ -28,6 +28,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkVersionIsSame(version, kibanaVersion);
+    checkSourceUriAllowed(sourceUri);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -82,6 +83,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkVersionIsSame(version, kibanaVersion);
+    checkSourceUriAllowed(sourceUri);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -126,4 +128,12 @@ export const checkVersionIsSame = (version: string, kibanaVersion: string) => {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is different than the installed kibana version ${kibanaVersionNumber}`
     );
+};
+
+const checkSourceUriAllowed = (sourceUri?: string) => {
+  if (sourceUri && !appContextService.getConfig()?.developer?.allowAgentUpgradeSourceUri) {
+    throw new Error(
+      `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
+    );
+  }
 };

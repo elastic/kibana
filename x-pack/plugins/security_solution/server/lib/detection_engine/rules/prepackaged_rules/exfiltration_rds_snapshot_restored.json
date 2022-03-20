@@ -4,7 +4,7 @@
   ],
   "description": "Identifies when an attempt was made to restore an RDS Snapshot. Snapshots are sometimes shared by threat actors in order to exfiltrate bulk data. If the permissions were modified, verify if the snapshot was shared with an unauthorized or unexpected AWS account.",
   "false_positives": [
-    "Restoring snapshots may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Snapshot restoration from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Restoring snapshots may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Snapshot restoration by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "index": [
     "filebeat-*",
@@ -43,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

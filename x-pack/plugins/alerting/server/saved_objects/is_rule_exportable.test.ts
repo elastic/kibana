@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { TaskRunnerFactory } from '../task_runner';
 import { RuleTypeRegistry, ConstructorOptions } from '../rule_type_registry';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
@@ -28,6 +28,7 @@ beforeEach(() => {
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
+    minimumScheduleInterval: '1m',
   };
 });
 

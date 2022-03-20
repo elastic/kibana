@@ -19,7 +19,10 @@ import { makeRouterWithFleetAuthz } from './security';
 function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
   return (checkPrivileges: CheckPrivilegesPayload) => {
     const kibana = ((checkPrivileges?.kibana ?? []) as string[]).map((role: string) => {
-      return { authorized: kibanaRoles.includes(role) };
+      return {
+        privilege: role,
+        authorized: kibanaRoles.includes(role),
+      };
     });
 
     return Promise.resolve({
@@ -141,14 +144,6 @@ describe('FleetAuthzRouter', () => {
       path: '/api/fleet/test',
       fleetAuthz: { fleet: { setup: true } },
     };
-    it('allow users with superuser role', async () => {
-      expect(
-        await runTest({
-          security: { roles: ['superuser'] },
-          routeConfig,
-        })
-      ).toEqual('ok');
-    });
 
     it('allow users with fleet-setup role', async () => {
       mockCheckPrivileges.mockImplementation(
@@ -173,45 +168,11 @@ describe('FleetAuthzRouter', () => {
     });
   });
 
-  describe('with superuser privileges', () => {
-    const routeConfig = {
-      path: '/api/fleet/test',
-      fleetAuthz: { integrations: { uploadPackages: true } },
-    };
-    it('allow users with superuser role', async () => {
-      expect(
-        await runTest({
-          security: { roles: ['superuser'] },
-          routeConfig,
-        })
-      ).toEqual('ok');
-    });
-
-    it('do not allow users without superuser role', async () => {
-      mockCheckPrivileges.mockImplementation(getCheckPrivilegesMockedImplementation([]));
-      expect(
-        await runTest({
-          security: { checkPrivilegesDynamically: mockCheckPrivileges },
-          routeConfig,
-        })
-      ).toEqual('forbidden');
-    });
-  });
-
   describe('with fleet role', () => {
     const routeConfig = {
       path: '/api/fleet/test',
       fleetAuthz: { integrations: { readPackageInfo: true } },
     };
-
-    it('allow users with superuser role', async () => {
-      expect(
-        await runTest({
-          security: { roles: ['superuser'] },
-          routeConfig,
-        })
-      ).toEqual('ok');
-    });
 
     it('allow users with all required fleet authz role', async () => {
       mockCheckPrivileges.mockImplementation(

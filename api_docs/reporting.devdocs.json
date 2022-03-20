@@ -1,0 +1,611 @@
+{
+  "id": "reporting",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.ApplicationProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApplicationProps",
+        "description": [
+          "\nProperties for displaying a share menu with Reporting features."
+        ],
+        "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ApplicationProps.getJobParams",
+            "type": "Function",
+            "tags": [],
+            "label": "getJobParams",
+            "description": [
+              "\nA function that Reporting calls to get the sharing data from the application."
+            ],
+            "signature": [
+              "(forShareUrl?: boolean | undefined) => Omit<{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }, \"version\" | \"browserTimezone\">"
+            ],
+            "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ApplicationProps.getJobParams.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "forShareUrl",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/reporting/public/share_context_menu/reporting_panel_content/reporting_panel_content.tsx",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ApplicationProps.layoutOption",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layoutOption",
+            "description": [
+              "\nOption to control how the screenshot(s) is/are placed in the PDF"
+            ],
+            "signature": [
+              "\"canvas\" | \"print\" | undefined"
+            ],
+            "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ApplicationProps.objectId",
+            "type": "string",
+            "tags": [],
+            "label": "objectId",
+            "description": [
+              "\nSaved object ID"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ApplicationProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "\nA function to callback when the Reporting panel should be closed"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.ReportingPublicComponents",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReportingPublicComponents",
+        "description": [
+          "\nReact components used to display share menus with Reporting features in an application."
+        ],
+        "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingPublicComponents.ReportingPanelPDF",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "ReportingPanelPDF",
+            "description": [
+              "\nAn element to display a form to export the page as PDF"
+            ],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "reporting",
+                "scope": "public",
+                "docId": "kibReportingPluginApi",
+                "section": "def-public.ApplicationProps",
+                "text": "ApplicationProps"
+              },
+              ") => JSX.Element"
+            ],
+            "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+            "deprecated": true,
+            "references": [],
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingPublicComponents.ReportingPanelPDF.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "public",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-public.ApplicationProps",
+                    "text": "ApplicationProps"
+                  }
+                ],
+                "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingPublicComponents.ReportingPanelPDFV2",
+            "type": "Function",
+            "tags": [],
+            "label": "ReportingPanelPDFV2",
+            "description": [
+              "\nAn element to display a form to export the page as PDF"
+            ],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "reporting",
+                "scope": "public",
+                "docId": "kibReportingPluginApi",
+                "section": "def-public.ApplicationProps",
+                "text": "ApplicationProps"
+              },
+              ") => JSX.Element"
+            ],
+            "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingPublicComponents.ReportingPanelPDFV2.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "public",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-public.ApplicationProps",
+                    "text": "ApplicationProps"
+                  }
+                ],
+                "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingPublicComponents.ReportingPanelPNGV2",
+            "type": "Function",
+            "tags": [],
+            "label": "ReportingPanelPNGV2",
+            "description": [
+              "\nAn element to display a form to export the page as PNG"
+            ],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "reporting",
+                "scope": "public",
+                "docId": "kibReportingPluginApi",
+                "section": "def-public.ApplicationProps",
+                "text": "ApplicationProps"
+              },
+              ") => JSX.Element"
+            ],
+            "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingPublicComponents.ReportingPanelPNGV2.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "public",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-public.ApplicationProps",
+                    "text": "ApplicationProps"
+                  }
+                ],
+                "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "reporting",
+      "id": "def-public.ReportingStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ReportingStart",
+      "description": [
+        "\nStart contract for the Reporting plugin."
+      ],
+      "signature": [
+        {
+          "pluginId": "reporting",
+          "scope": "public",
+          "docId": "kibReportingPluginApi",
+          "section": "def-public.ReportingSetup",
+          "text": "ReportingSetup"
+        }
+      ],
+      "path": "x-pack/plugins/reporting/public/index.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "reporting",
+      "id": "def-server.ReportingStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ReportingStart",
+      "description": [
+        "\nPlugin Start Contract"
+      ],
+      "signature": [
+        {
+          "pluginId": "reporting",
+          "scope": "server",
+          "docId": "kibReportingPluginApi",
+          "section": "def-server.ReportingSetup",
+          "text": "ReportingSetup"
+        }
+      ],
+      "path": "x-pack/plugins/reporting/server/types.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "reporting",
+        "id": "def-common.BasePayload",
+        "type": "Interface",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "BasePayload",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "reporting",
+            "scope": "common",
+            "docId": "kibReportingPluginApi",
+            "section": "def-common.BasePayload",
+            "text": "BasePayload"
+          },
+          " extends { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/base.ts",
+        "deprecated": true,
+        "references": [],
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.BasePayload.headers",
+            "type": "string",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "path": "x-pack/plugins/reporting/common/types/base.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.BasePayload.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/base.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.BasePayload.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/base.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-common.BasePayloadV2",
+        "type": "Interface",
+        "tags": [],
+        "label": "BasePayloadV2",
+        "description": [
+          "\nReport job parameters, after they are processed in the request handler."
+        ],
+        "signature": [
+          {
+            "pluginId": "reporting",
+            "scope": "common",
+            "docId": "kibReportingPluginApi",
+            "section": "def-common.BasePayloadV2",
+            "text": "BasePayloadV2"
+          },
+          " extends ",
+          {
+            "pluginId": "reporting",
+            "scope": "common",
+            "docId": "kibReportingPluginApi",
+            "section": "def-common.BaseParamsV2",
+            "text": "BaseParamsV2"
+          }
+        ],
+        "path": "x-pack/plugins/reporting/common/types/base.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.BasePayloadV2.headers",
+            "type": "string",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "path": "x-pack/plugins/reporting/common/types/base.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.BasePayloadV2.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/base.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.BasePayloadV2.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/base.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-common.LocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "LocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "reporting",
+            "scope": "common",
+            "docId": "kibReportingPluginApi",
+            "section": "def-common.LocatorParams",
+            "text": "LocatorParams"
+          },
+          "<P>"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/url.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.LocatorParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/reporting/common/types/url.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.LocatorParams.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\nKibana version used to create the params"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/url.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-common.LocatorParams.params",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "\nData to recreate the user's state in the application"
+            ],
+            "signature": [
+              "P"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/url.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "reporting",
+        "id": "def-common.BaseParams",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "BaseParams",
+        "description": [],
+        "signature": [
+          "{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/base.ts",
+        "deprecated": true,
+        "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-common.BaseParamsV2",
+        "type": "Type",
+        "tags": [],
+        "label": "BaseParamsV2",
+        "description": [
+          "\nReport job parameters that an application must return from its\ngetSharingData function."
+        ],
+        "signature": [
+          "{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; } & { locatorParams: ",
+          {
+            "pluginId": "reporting",
+            "scope": "common",
+            "docId": "kibReportingPluginApi",
+            "section": "def-common.LocatorParams",
+            "text": "LocatorParams"
+          },
+          "<",
+          "SerializableRecord",
+          ">[]; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/base.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-common.JobAppParamsPDF",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "JobAppParamsPDF",
+        "description": [],
+        "signature": [
+          "{ title: string; layout: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; }; objectType: string; relativeUrls: string[]; isDeprecated?: boolean | undefined; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
+        "deprecated": true,
+        "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-common.JobAppParamsPDFV2",
+        "type": "Type",
+        "tags": [],
+        "label": "JobAppParamsPDFV2",
+        "description": [],
+        "signature": [
+          "{ title: string; layout: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; }; objectType: string; locatorParams: ",
+          {
+            "pluginId": "reporting",
+            "scope": "common",
+            "docId": "kibReportingPluginApi",
+            "section": "def-common.LocatorParams",
+            "text": "LocatorParams"
+          },
+          "<",
+          "SerializableRecord",
+          ">[]; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

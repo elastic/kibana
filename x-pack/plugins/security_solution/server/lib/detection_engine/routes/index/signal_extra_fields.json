@@ -168,6 +168,9 @@
                 "type": "float"
               }
             }
+          },
+          "timestamp_override": {
+            "type": "keyword"
           }
         }
       },

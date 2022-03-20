@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_CATEGORY,

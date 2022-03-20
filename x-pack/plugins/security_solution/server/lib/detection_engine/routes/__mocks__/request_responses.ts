@@ -23,9 +23,9 @@ import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
-  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
+  DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
 } from '../../../../../common/constants';
-import { RuleAlertType, HapiReadableStream, IRuleStatusSOAttributes } from '../../rules/types';
+import { RuleAlertType, HapiReadableStream } from '../../rules/types';
 import { requestMock } from './request';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
@@ -36,11 +36,18 @@ import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detec
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { GetCurrentStatusBulkResult } from '../../rule_execution_log/types';
+import {
+  getPerformBulkActionSchemaMock,
+  getPerformBulkActionEditSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import {
+  RuleExecutionEvent,
+  RuleExecutionStatus,
+  RuleExecutionSummary,
+} from '../../../../../common/detection_engine/schemas/common';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationAlertType } from '../../notifications/legacy_types';
+import { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -125,6 +132,13 @@ export const getBulkActionRequest = () =>
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
     body: getPerformBulkActionSchemaMock(),
+  });
+
+export const getBulkActionEditRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionEditSchemaMock(),
   });
 
 export const getDeleteBulkRequest = () =>
@@ -221,11 +235,13 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
-export const internalRuleStatusRequest = () =>
+export const getRuleExecutionEventsRequest = () =>
   requestMock.create({
-    method: 'post',
-    path: INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
-    body: { ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' },
+    method: 'get',
+    path: DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
+    params: {
+      ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    },
   });
 
 export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
@@ -463,73 +479,78 @@ export const getMockPrivilegesResult = () => ({
   application: {},
 });
 
-export const getEmptySavedObjectsResponse =
-  (): SavedObjectsFindResponse<IRuleStatusSOAttributes> => ({
-    page: 1,
-    per_page: 1,
-    total: 0,
-    saved_objects: [],
-  });
-
-export const getRuleExecutionStatusSucceeded = (): IRuleStatusSOAttributes => ({
-  statusDate: '2020-02-18T15:26:49.783Z',
-  status: RuleExecutionStatus.succeeded,
-  lastFailureAt: undefined,
-  lastSuccessAt: '2020-02-18T15:26:49.783Z',
-  lastFailureMessage: undefined,
-  lastSuccessMessage: 'succeeded',
-  lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-  gap: '500.32',
-  searchAfterTimeDurations: ['200.00'],
-  bulkCreateTimeDurations: ['800.43'],
+export const getEmptySavedObjectsResponse = (): SavedObjectsFindResponse => ({
+  page: 1,
+  per_page: 1,
+  total: 0,
+  saved_objects: [],
 });
 
-export const getRuleExecutionStatusFailed = (): IRuleStatusSOAttributes => ({
-  statusDate: '2020-02-18T15:15:58.806Z',
-  status: RuleExecutionStatus.failed,
-  lastFailureAt: '2020-02-18T15:15:58.806Z',
-  lastSuccessAt: '2020-02-13T20:31:59.855Z',
-  lastFailureMessage:
-    'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
-  lastSuccessMessage: 'succeeded',
-  lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-  gap: '500.32',
-  searchAfterTimeDurations: ['200.00'],
-  bulkCreateTimeDurations: ['800.43'],
-});
-
-export const getRuleExecutionStatuses = (): IRuleStatusSOAttributes[] => [
-  getRuleExecutionStatusSucceeded(),
-  getRuleExecutionStatusFailed(),
-];
-
-export const getFindBulkResultStatus = (): GetCurrentStatusBulkResult => ({
-  '04128c15-0d1b-4716-a4c5-46997ac7f3bd': {
-    statusDate: '2020-02-18T15:26:49.783Z',
+// TODO: https://github.com/elastic/kibana/pull/121644 clean up
+export const getRuleExecutionSummarySucceeded = (): RuleExecutionSummary => ({
+  last_execution: {
+    date: '2020-02-18T15:26:49.783Z',
     status: RuleExecutionStatus.succeeded,
-    lastFailureAt: undefined,
-    lastSuccessAt: '2020-02-18T15:26:49.783Z',
-    lastFailureMessage: undefined,
-    lastSuccessMessage: 'succeeded',
-    lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-    gap: '500.32',
-    searchAfterTimeDurations: ['200.00'],
-    bulkCreateTimeDurations: ['800.43'],
-  },
-  '1ea5a820-4da1-4e82-92a1-2b43a7bece08': {
-    statusDate: '2020-02-18T15:15:58.806Z',
-    status: RuleExecutionStatus.failed,
-    lastFailureAt: '2020-02-18T15:15:58.806Z',
-    lastSuccessAt: '2020-02-13T20:31:59.855Z',
-    lastFailureMessage:
-      'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
-    lastSuccessMessage: 'succeeded',
-    lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-    gap: '500.32',
-    searchAfterTimeDurations: ['200.00'],
-    bulkCreateTimeDurations: ['800.43'],
+    status_order: 0,
+    message: 'succeeded',
+    metrics: {
+      total_search_duration_ms: 200,
+      total_indexing_duration_ms: 800,
+      execution_gap_duration_s: 500,
+    },
   },
 });
+
+// TODO: https://github.com/elastic/kibana/pull/121644 clean up
+export const getRuleExecutionSummaryFailed = (): RuleExecutionSummary => ({
+  last_execution: {
+    date: '2020-02-18T15:15:58.806Z',
+    status: RuleExecutionStatus.failed,
+    status_order: 30,
+    message:
+      'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
+    metrics: {
+      total_search_duration_ms: 200,
+      total_indexing_duration_ms: 800,
+      execution_gap_duration_s: 500,
+    },
+  },
+});
+
+// TODO: https://github.com/elastic/kibana/pull/121644 clean up
+export const getRuleExecutionSummaries = (): RuleExecutionSummariesByRuleId => ({
+  '04128c15-0d1b-4716-a4c5-46997ac7f3bd': getRuleExecutionSummarySucceeded(),
+  '1ea5a820-4da1-4e82-92a1-2b43a7bece08': getRuleExecutionSummaryFailed(),
+});
+
+// TODO: https://github.com/elastic/kibana/pull/121644 clean up
+export const getLastFailures = (): RuleExecutionEvent[] => [
+  {
+    date: '2021-12-28T10:30:00.806Z',
+    status: RuleExecutionStatus.failed,
+    message: 'Rule failed',
+  },
+  {
+    date: '2021-12-28T10:25:00.806Z',
+    status: RuleExecutionStatus.failed,
+    message: 'Rule failed',
+  },
+  {
+    date: '2021-12-28T10:20:00.806Z',
+    status: RuleExecutionStatus.failed,
+    message: 'Rule failed',
+  },
+  {
+    date: '2021-12-28T10:15:00.806Z',
+    status: RuleExecutionStatus.failed,
+    message: 'Rule failed',
+  },
+  {
+    date: '2021-12-28T10:10:00.806Z',
+    status: RuleExecutionStatus.failed,
+    message: 'Rule failed',
+  },
+];
 
 export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({
   took: 1,

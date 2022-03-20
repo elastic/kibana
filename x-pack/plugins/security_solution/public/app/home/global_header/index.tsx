@@ -27,6 +27,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
+import { ConsolesPopoverHeaderSectionItem } from '../../../common/components/consoles_popover_header_section_item';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -40,6 +41,7 @@ export const GlobalHeader = React.memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const portalNode = useMemo(() => createPortalNode(), []);
     const {
+      theme,
       http: {
         basePath: { prepend },
       },
@@ -58,7 +60,7 @@ export const GlobalHeader = React.memo(
 
     useEffect(() => {
       setHeaderActionMenu((element) => {
-        const mount = toMountPoint(<OutPortal node={portalNode} />);
+        const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$: theme.theme$ });
         return mount(element);
       });
 
@@ -66,16 +68,20 @@ export const GlobalHeader = React.memo(
         portalNode.unmount();
         setHeaderActionMenu(undefined);
       };
-    }, [portalNode, setHeaderActionMenu]);
+    }, [portalNode, setHeaderActionMenu, theme.theme$]);
 
     return (
       <InPortal node={portalNode}>
         <EuiHeaderSection side="right">
+          {/* The consoles Popover may or may not be shown, depending on the user's authz */}
+          <ConsolesPopoverHeaderSectionItem />
+
           {isDetectionsPath(pathname) && (
             <EuiHeaderSectionItem>
               <MlPopover />
             </EuiHeaderSectionItem>
           )}
+
           <EuiHeaderSectionItem>
             <EuiHeaderLinks>
               <EuiHeaderLink

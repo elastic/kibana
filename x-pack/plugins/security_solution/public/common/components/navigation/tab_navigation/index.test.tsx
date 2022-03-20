@@ -51,13 +51,14 @@ const hostName = 'siem-window';
 
 describe('Table Navigation', () => {
   const mockHasMlUserPermissions = true;
+  const mockRiskyHostEnabled = true;
   const mockProps: TabNavigationProps & RouteSpyState = {
     pageName: 'hosts',
     pathName: '/hosts',
     detailName: undefined,
     search: '',
     tabName: HostsTableType.authentications,
-    navTabs: navTabsHostDetails(hostName, mockHasMlUserPermissions),
+    navTabs: navTabsHostDetails(hostName, mockHasMlUserPermissions, mockRiskyHostEnabled),
     [CONSTANTS.timerange]: {
       global: {
         [CONSTANTS.timerange]: {

@@ -7,9 +7,15 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiFlyout } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiFlyout,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import './_index.scss';
 
 import { Dictionary } from '../../../../common/types/common';
@@ -70,7 +76,7 @@ export function getInitialGroupsMap(selectedGroups: GroupObj[]): GroupsMap {
   return map;
 }
 
-interface JobSelectorProps {
+export interface JobSelectorProps {
   dateFormatTz: string;
   singleSelection: boolean;
   timeseriesOnly: boolean;
@@ -137,37 +143,49 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
 
   function renderJobSelectionBar() {
     return (
-      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            wrap
-            responsive={false}
-            gutterSize="xs"
-            alignItems="center"
-            data-test-subj="mlJobSelectionBadges"
-          >
-            <IdBadges
-              limit={BADGE_LIMIT}
-              maps={maps}
-              onLinkClick={() => setShowAllBarBadges(!showAllBarBadges)}
-              selectedIds={selectedIds}
-              showAllBarBadges={showAllBarBadges}
-            />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="pencil"
-            onClick={handleJobSelectionClick}
-            data-test-subj="mlButtonEditJobSelection"
-          >
-            {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
-              defaultMessage: 'Edit job selection',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {selectedIds.length > 0 ? (
+              <EuiFlexGroup
+                wrap
+                responsive={false}
+                gutterSize="xs"
+                alignItems="center"
+                data-test-subj="mlJobSelectionBadges"
+              >
+                <IdBadges
+                  limit={BADGE_LIMIT}
+                  maps={maps}
+                  onLinkClick={() => setShowAllBarBadges(!showAllBarBadges)}
+                  selectedIds={selectedIds}
+                  showAllBarBadges={showAllBarBadges}
+                />
+              </EuiFlexGroup>
+            ) : (
+              <span>
+                <FormattedMessage
+                  id="xpack.ml.jobSelector.noJobsSelectedLabel"
+                  defaultMessage="No jobs selected"
+                />
+              </span>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="pencil"
+              onClick={handleJobSelectionClick}
+              data-test-subj="mlButtonEditJobSelection"
+            >
+              {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
+                defaultMessage: 'Edit job selection',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="s" />
+      </>
     );
   }
 
@@ -197,8 +215,8 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   }
 
   return (
-    <div className="mlJobSelectorBar">
-      {selectedIds.length > 0 && renderJobSelectionBar()}
+    <div>
+      {renderJobSelectionBar()}
       {renderFlyout()}
     </div>
   );

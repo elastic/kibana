@@ -17,9 +17,14 @@ import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
+import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-jest.mock('../../../common/hooks/endpoint/use_isolate_privileges', () => ({
-  useIsolationPrivileges: jest.fn().mockReturnValue({ isAllowed: true }),
+jest.mock('../../../common/components/user_privileges');
+
+jest.mock('../user_info', () => ({
+  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -57,6 +62,8 @@ jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', 
   };
 });
 
+jest.mock('../../../common/components/user_privileges');
+
 describe('take action dropdown', () => {
   const defaultProps: TakeActionDropdownProps = {
     detailsData: mockAlertDetailsData as TimelineEventsDetailsItem[],
@@ -69,6 +76,7 @@ describe('take action dropdown', () => {
     onAddExceptionTypeClick: jest.fn(),
     onAddIsolationStatusClick: jest.fn(),
     refetch: jest.fn(),
+    refetchFlyoutData: jest.fn(),
     timelineId: TimelineId.active,
   };
 
@@ -80,6 +88,7 @@ describe('take action dropdown', () => {
         services: {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
+          cases: mockCasesContract(),
           application: {
             capabilities: { siem: { crud_alerts: true, read_alerts: true } },
           },
@@ -225,6 +234,28 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
         ).toBeEnabled();
+      });
+    });
+
+    test('should disable the "Add Endpoint event filter" button if no endpoint management privileges', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+      });
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('endpoint')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+        ).toBeDisabled();
       });
     });
 

@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter, DataView, ISearchSource } from 'src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
+import { DataView } from 'src/plugins/data_views/public';
+import { DataPublicPluginStart, ISearchSource } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from '../utils/sorting';
 import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';
 import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
 import { getEsQuerySort } from '../utils/get_es_query_sort';
-import { getServices } from '../../../kibana_services';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 
 export enum SurrDocType {
@@ -46,12 +47,12 @@ export async function fetchSurroundingDocs(
   sortDir: SortDirection,
   size: number,
   filters: Filter[],
+  data: DataPublicPluginStart,
   useNewFieldsApi?: boolean
 ): Promise<EsHitRecordList> {
   if (typeof anchor !== 'object' || anchor === null || !size) {
     return [];
   }
-  const { data } = getServices();
   const timeField = indexPattern.timeFieldName!;
   const searchSource = data.search.searchSource.createEmpty();
   updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));

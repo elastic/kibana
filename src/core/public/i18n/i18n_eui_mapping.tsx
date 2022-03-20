@@ -306,6 +306,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Select sorting method for {display}',
         values: { display },
       }),
+    'euiComboBox.listboxAriaLabel': i18n.translate('core.euiComboBox.listboxAriaLabel', {
+      defaultMessage: 'Choose from the following options',
+    }),
     'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
       'core.euiComboBoxOptionsList.allOptionsSelected',
       {
@@ -397,8 +400,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Row: {row}; Column: {col}',
         values: { row, col },
       }),
-    'euiDataGridCellButtons.expandButtonTitle': i18n.translate(
-      'core.euiDataGridCellButtons.expandButtonTitle',
+    'euiDataGridCellActions.expandButtonTitle': i18n.translate(
+      'core.euiDataGridCellActions.expandButtonTitle',
       {
         defaultMessage: 'Click or hit enter to interact with cell content',
       }
@@ -482,18 +485,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       {
         defaultMessage: 'Large-Small',
         description: 'Descending size label',
-      }
-    ),
-    'euiDataGridToolbar.fullScreenButton': i18n.translate(
-      'core.euiDataGridToolbar.fullScreenButton',
-      {
-        defaultMessage: 'Full screen',
-      }
-    ),
-    'euiDataGridToolbar.fullScreenButtonActive': i18n.translate(
-      'core.euiDataGridToolbar.fullScreenButtonActive',
-      {
-        defaultMessage: 'Exit full screen',
       }
     ),
     'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
@@ -586,6 +577,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label on a button that removes any entry in a form field',
       }
     ),
+    'euiFullscreenSelector.fullscreenButton': i18n.translate(
+      'core.euiFullscreenSelector.fullscreenButton',
+      {
+        defaultMessage: 'Enter fullscreen',
+      }
+    ),
+    'euiFullscreenSelector.fullscreenButtonActive': i18n.translate(
+      'core.euiFullscreenSelector.fullscreenButtonActive',
+      {
+        defaultMessage: 'Exit fullscreen',
+      }
+    ),
     'euiHeaderLinks.appNavigation': i18n.translate('core.euiHeaderLinks.appNavigation', {
       defaultMessage: 'App menu',
       description: 'ARIA label on a `nav` element',
@@ -598,12 +601,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiImage.closeImage': ({ alt }: EuiValues) =>
       i18n.translate('core.euiImage.closeImage', {
-        defaultMessage: 'Close full screen {alt} image',
+        defaultMessage: 'Close fullscreen {alt} image',
         values: { alt },
       }),
     'euiImage.openImage': ({ alt }: EuiValues) =>
       i18n.translate('core.euiImage.openImage', {
-        defaultMessage: 'Open full screen {alt} image',
+        defaultMessage: 'Open fullscreen {alt} image',
         values: { alt },
       }),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
@@ -954,13 +957,37 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ searchValue }}
       />
     ),
+    'euiSelectable.screenReaderInstructions': i18n.translate(
+      'core.euiSelectable.screenReaderInstructions',
+      {
+        defaultMessage:
+          'Use up and down arrows to move focus over options. Enter to select. Escape to collapse options.',
+      }
+    ),
+    'euiSelectable.searchResults': ({ resultsLength }: EuiValues) =>
+      i18n.translate('core.euiSelectable.searchResults', {
+        defaultMessage: '{resultsLength, plural, one {# result} other {# results}}',
+        values: { resultsLength },
+      }),
     'euiSelectable.placeholderName': i18n.translate('core.euiSelectable.placeholderName', {
       defaultMessage: 'Filter options',
     }),
+    'euiSelectableListItem.checkedOption': i18n.translate(
+      'core.euiSelectableListItem.checkedOption',
+      {
+        defaultMessage: 'Checked option.',
+      }
+    ),
+    'euiSelectableListItem.checkedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.checkedOptionInstructions',
+      {
+        defaultMessage: 'To uncheck this option, press enter.',
+      }
+    ),
     'euiSelectableListItem.includedOption': i18n.translate(
       'core.euiSelectableListItem.includedOption',
       {
-        defaultMessage: 'Included option.',
+        defaultMessage: 'Selected option.',
       }
     ),
     'euiSelectableListItem.includedOptionInstructions': i18n.translate(
@@ -978,7 +1005,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
       'core.euiSelectableListItem.excludedOptionInstructions',
       {
-        defaultMessage: 'To deselect this option, press enter.',
+        defaultMessage: 'To uncheck this option, press enter.',
+      }
+    ),
+    'euiSelectableListItem.unckeckedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.unckeckedOptionInstructions',
+      {
+        defaultMessage: 'To select this option, press enter.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
@@ -1088,6 +1121,28 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} is loading',
         values: { number },
       }),
+    'euiSuggest.stateSavedTooltip': i18n.translate('core.euiSuggest.stateSavedTooltip', {
+      defaultMessage: 'Saved.',
+    }),
+
+    'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
+      defaultMessage: 'Changes have not been saved.',
+    }),
+
+    'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {
+      defaultMessage: 'State: loading.',
+    }),
+
+    'euiSuggest.stateSaved': i18n.translate('core.euiSuggest.stateSaved', {
+      defaultMessage: 'State: saved.',
+    }),
+
+    'euiSuggest.stateUnsaved': i18n.translate('core.euiSuggest.stateUnsaved', {
+      defaultMessage: 'State: unsaved.',
+    }),
+    'euiSuggest.stateUnchanged': i18n.translate('core.euiSuggest.stateUnchanged', {
+      defaultMessage: 'State: unchanged.',
+    }),
     'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
       'core.euiSuperSelect.screenReaderAnnouncement',
       {
@@ -1141,6 +1196,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { innerText, description },
         description: 'Displayed in a cell in the header of the table to describe the field',
       }),
+    'euiTablePagination.allRows': i18n.translate('core.euiTablePagination.allRows', {
+      defaultMessage: 'Showing all rows',
+      description: 'Displayed in a button that toggles a table pagination menu',
+    }),
     'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
       defaultMessage: 'Rows per page',
       description: 'Displayed in a button that toggles a table pagination menu',
@@ -1151,6 +1210,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Displayed in a button that toggles the number of visible rows',
         values: { rowsPerPage },
       }),
+    'euiTablePagination.rowsPerPageOptionShowAllRows': i18n.translate(
+      'core.euiTablePagination.rowsPerPageOptionShowAllRows',
+      {
+        defaultMessage: 'Show all rows',
+        description: 'Displayed in a button that toggles the number of visible rows',
+      }
+    ),
     'euiTableSortMobile.sorting': i18n.translate('core.euiTableSortMobile.sorting', {
       defaultMessage: 'Sorting',
       description: 'Displayed in a button that toggles a table sorting menu',

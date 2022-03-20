@@ -29,7 +29,6 @@ import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
-import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
@@ -43,7 +42,7 @@ import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
-import { EndpointFleetServicesInterface } from '../../services/endpoint_fleet_services';
+import { EndpointFleetServicesInterface } from '../../services/fleet/endpoint_fleet_services_factory';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -115,10 +114,7 @@ export function getMetadataListRequestHandler(
 
     // If no unified Index present, then perform a search using the legacy approach
     if (!doesUnitedIndexExist || didUnitedIndexError) {
-      const endpointPolicies = await getAllEndpointPackagePolicies(
-        fleetServices.packagePolicy,
-        context.core.savedObjects.client
-      );
+      const endpointPolicies = await endpointMetadataService.getAllEndpointPackagePolicies();
 
       const legacyResponse = await legacyListMetadataQuery(
         context,
@@ -196,7 +192,7 @@ export function getMetadataTransformStatsHandler(
         allow_no_match: true,
       });
       return response.ok({
-        body: transformStats.body,
+        body: transformStats,
       });
     } catch (error) {
       return errorHandler(logger, response, error);
@@ -370,6 +366,6 @@ async function legacyListMetadataQuery(
   });
 
   const result = await esClient.search<HostMetadata>(queryParams);
-  const hostListQueryResult = queryResponseToHostListResult(result.body);
+  const hostListQueryResult = queryResponseToHostListResult(result);
   return mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext);
 }

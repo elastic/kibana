@@ -33,7 +33,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
-import { push } from '../../shared/Links/url_helpers';
+import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';

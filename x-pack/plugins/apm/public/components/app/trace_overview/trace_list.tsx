@@ -16,11 +16,11 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../utils/style';
-import { EmptyMessage } from '../../shared/EmptyMessage';
-import { ImpactBar } from '../../shared/ImpactBar';
-import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
+import { EmptyMessage } from '../../shared/empty_message';
+import { ImpactBar } from '../../shared/impact_bar';
+import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/service_link';
 import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
@@ -86,7 +86,7 @@ export function getTraceListColumns({
           content={
             <ServiceLink
               agentName={agentName}
-              query={{ ...query, transactionType }}
+              query={{ ...query, transactionType, serviceGroup: '' }}
               serviceName={serviceName}
             />
           }
@@ -169,7 +169,6 @@ export function TraceList({ items = [], isLoading, isFailure }: Props) {
       initialSortField="impact"
       initialSortDirection="desc"
       noItemsMessage={noItemsMessage}
-      initialPageSize={25}
     />
   );
 }

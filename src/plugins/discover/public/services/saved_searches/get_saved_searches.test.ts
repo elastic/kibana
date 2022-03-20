@@ -104,6 +104,7 @@ describe('getSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
+        "rowHeight": undefined,
         "searchSource": Object {
           "create": [MockFunction],
           "createChild": [MockFunction],
@@ -128,6 +129,7 @@ describe('getSavedSearch', () => {
           "setParent": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
+          "aliasPurpose": undefined,
           "aliasTargetId": undefined,
           "errorJSON": undefined,
           "outcome": "exactMatch",

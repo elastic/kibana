@@ -13,18 +13,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
-import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
-import { APMQueryParams } from '../../../shared/Links/url_helpers';
+import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
+import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -66,7 +69,7 @@ function ErrorGroupList({
   detailedStatistics,
   comparisonEnabled,
 }: Props) {
-  const { urlParams } = useLegacyUrlParams();
+  const { query } = useApmParams('/services/{serviceName}/errors');
 
   const columns = useMemo(() => {
     return [
@@ -115,12 +118,10 @@ function ErrorGroupList({
             <ErrorLink
               title={type}
               serviceName={serviceName}
-              query={
-                {
-                  ...urlParams,
-                  kuery: `error.exception.type:"${type}"`,
-                } as APMQueryParams
-              }
+              query={{
+                ...query,
+                kuery: `error.exception.type:"${type}"`,
+              }}
             >
               {type}
             </ErrorLink>
@@ -203,9 +204,12 @@ function ErrorGroupList({
             detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
           const previousPeriodTimeseries =
             detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
+          const { currentPeriodColor, previousPeriodColor } =
+            getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+
           return (
             <SparkPlot
-              color="euiColorVis7"
+              color={currentPeriodColor}
               series={currentPeriodTimeseries}
               valueLabel={i18n.translate(
                 'xpack.apm.serviceOveriew.errorsTableOccurrences',
@@ -219,12 +223,13 @@ function ErrorGroupList({
               comparisonSeries={
                 comparisonEnabled ? previousPeriodTimeseries : undefined
               }
+              comparisonSeriesColor={previousPeriodColor}
             />
           );
         },
       },
     ] as Array<ITableColumn<ErrorGroupItem>>;
-  }, [serviceName, urlParams, detailedStatistics, comparisonEnabled]);
+  }, [serviceName, query, detailedStatistics, comparisonEnabled]);
 
   return (
     <ManagedTable
@@ -233,7 +238,6 @@ function ErrorGroupList({
       })}
       items={mainStatistics}
       columns={columns}
-      initialPageSize={25}
       initialSortField="occurrences"
       initialSortDirection="desc"
       sortItems={false}

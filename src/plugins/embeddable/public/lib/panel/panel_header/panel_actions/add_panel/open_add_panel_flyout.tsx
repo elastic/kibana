@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { NotificationsStart, OverlayRef, OverlayStart } from 'src/core/public';
+import { NotificationsStart, OverlayRef, OverlayStart, ThemeServiceStart } from 'src/core/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
@@ -23,6 +23,7 @@ export function openAddPanelFlyout(options: {
   SavedObjectFinder: React.ComponentType<any>;
   showCreateNewMenu?: boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
+  theme: ThemeServiceStart;
 }): OverlayRef {
   const {
     embeddable,
@@ -33,6 +34,7 @@ export function openAddPanelFlyout(options: {
     SavedObjectFinder,
     showCreateNewMenu,
     reportUiCounter,
+    theme,
   } = options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
@@ -49,7 +51,8 @@ export function openAddPanelFlyout(options: {
         reportUiCounter={reportUiCounter}
         SavedObjectFinder={SavedObjectFinder}
         showCreateNewMenu={showCreateNewMenu}
-      />
+      />,
+      { theme$: theme.theme$ }
     ),
     {
       'data-test-subj': 'dashboardAddPanel',

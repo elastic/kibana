@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }) {
     before(async () => {
       await security.testUser.setRoles(
         ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
-        false
+        { skipBrowserRefresh: true }
       );
       await PageObjects.maps.loadSavedMap('join example');
       mapboxStyle = await PageObjects.maps.getMapboxStyle();

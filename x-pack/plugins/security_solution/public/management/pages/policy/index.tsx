@@ -7,18 +7,22 @@
 
 import React, { memo } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
-import { PolicyDetails } from './view';
+import { PolicyDetails, PolicyList } from './view';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
+  MANAGEMENT_ROUTING_POLICIES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
 } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { getPolicyDetailPath } from '../../common/routing';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export const PolicyContainer = memo(() => {
+  const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   return (
     <Switch>
       <Route
@@ -27,6 +31,7 @@ export const PolicyContainer = memo(() => {
           MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
         ]}
         exact
         component={PolicyDetails}
@@ -36,6 +41,9 @@ export const PolicyContainer = memo(() => {
         exact
         render={(props) => <Redirect to={getPolicyDetailPath(props.match.params.policyId)} />}
       />
+      {isPolicyListEnabled && (
+        <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} exact component={PolicyList} />
+      )}
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );

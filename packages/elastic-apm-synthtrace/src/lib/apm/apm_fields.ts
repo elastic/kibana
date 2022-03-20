@@ -31,9 +31,14 @@ export type ApmUserAgentFields = Partial<{
 export interface ApmException {
   message: string;
 }
+export interface Observer {
+  version: string;
+  version_major: number;
+}
 
 export type ApmFields = Fields &
   Partial<{
+    'timestamp.us'?: number;
     'agent.name': string;
     'agent.version': string;
     'container.id': string;
@@ -47,8 +52,7 @@ export type ApmFields = Fields &
     'host.name': string;
     'kubernetes.pod.uid': string;
     'metricset.name': string;
-    'observer.version': string;
-    'observer.version_major': number;
+    observer: Observer;
     'parent.id': string;
     'processor.event': string;
     'processor.name': string;
@@ -63,8 +67,12 @@ export type ApmFields = Fields &
     };
     'transaction.sampled': true;
     'service.name': string;
+    'service.version': string;
     'service.environment': string;
     'service.node.name': string;
+    'service.runtime.name': string;
+    'service.runtime.version': string;
+    'service.framework.name': string;
     'span.id': string;
     'span.name': string;
     'span.type': string;
@@ -77,5 +85,17 @@ export type ApmFields = Fields &
     'span.destination.service.response_time.count': number;
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
+    'cloud.provider': string;
+    'cloud.project.name': string;
+    'cloud.service.name': string;
+    'cloud.availability_zone': string;
+    'cloud.machine.type': string;
+    'cloud.region': string;
+    'host.os.platform': string;
+    'faas.id': string;
+    'faas.coldstart': boolean;
+    'faas.execution': string;
+    'faas.trigger.type': string;
+    'faas.trigger.request_id': string;
   }> &
   ApmApplicationMetricFields;

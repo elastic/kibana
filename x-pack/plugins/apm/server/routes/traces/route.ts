@@ -13,7 +13,6 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { getTransaction } from '../transactions/get_transaction';
 
 const tracesRoute = createApmServerRoute({
@@ -22,7 +21,20 @@ const tracesRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    items: Array<{
+      key: import('./get_top_traces_primary_stats').BucketKey;
+      serviceName: string;
+      transactionName: string;
+      averageResponseTime: number | null;
+      transactionsPerMinute: number;
+      transactionType: string;
+      impact: number;
+      agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
+    }>;
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { environment, kuery, start, end } = params.query;
@@ -53,7 +65,18 @@ const tracesByIdRoute = createApmServerRoute({
     query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    exceedsMax: boolean;
+    traceDocs: Array<
+      | import('./../../../typings/es_schemas/ui/transaction').Transaction
+      | import('./../../../typings/es_schemas/ui/span').Span
+    >;
+    errorDocs: Array<
+      import('./../../../typings/es_schemas/ui/apm_error').APMError
+    >;
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { traceId } = params.path;
@@ -71,7 +94,11 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
     }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    transaction: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+  }> => {
     const { params } = resources;
     const { traceId } = params.path;
     const setup = await setupRequest(resources);
@@ -87,7 +114,11 @@ const transactionByIdRoute = createApmServerRoute({
     }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    transaction: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+  }> => {
     const { params } = resources;
     const { transactionId } = params.path;
     const setup = await setupRequest(resources);
@@ -97,8 +128,9 @@ const transactionByIdRoute = createApmServerRoute({
   },
 });
 
-export const traceRouteRepository = createApmServerRouteRepository()
-  .add(tracesByIdRoute)
-  .add(tracesRoute)
-  .add(rootTransactionByTraceIdRoute)
-  .add(transactionByIdRoute);
+export const traceRouteRepository = {
+  ...tracesByIdRoute,
+  ...tracesRoute,
+  ...rootTransactionByTraceIdRoute,
+  ...transactionByIdRoute,
+};

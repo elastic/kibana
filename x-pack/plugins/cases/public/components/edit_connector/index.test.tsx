@@ -14,6 +14,8 @@ import { TestProviders } from '../../common/mock';
 import { connectorsMock } from '../../containers/configure/mock';
 import { basicCase, basicPush, caseUserActions } from '../../containers/mock';
 import { useKibana } from '../../common/lib/kibana';
+import { CaseConnector } from '../../containers/configure/types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -29,18 +31,20 @@ const caseServices = {
     hasDataToPush: true,
   },
 };
-const defaultProps: EditConnectorProps = {
-  caseData: basicCase,
-  caseServices,
-  connectorName: connectorsMock[0].name,
-  connectors: connectorsMock,
-  hasDataToPush: true,
-  isLoading: false,
-  isValidConnector: true,
-  onSubmit,
-  updateCase,
-  userActions: caseUserActions,
-  userCanCrud: true,
+const getDefaultProps = (): EditConnectorProps => {
+  return {
+    caseData: basicCase,
+    caseServices,
+    connectorName: connectorsMock[0].name,
+    connectors: connectorsMock,
+    hasDataToPush: true,
+    isLoading: false,
+    isValidConnector: true,
+    onSubmit,
+    updateCase,
+    userActions: caseUserActions,
+    userCanCrud: true,
+  };
 };
 
 describe('EditConnector ', () => {
@@ -53,6 +57,7 @@ describe('EditConnector ', () => {
   });
 
   it('Renders servicenow connector from case initially', async () => {
+    const defaultProps = getDefaultProps();
     const serviceNowProps = {
       ...defaultProps,
       caseData: {
@@ -71,6 +76,7 @@ describe('EditConnector ', () => {
   });
 
   it('Renders no connector, and then edit', async () => {
+    const defaultProps = getDefaultProps();
     const wrapper = mount(
       <TestProviders>
         <EditConnector {...defaultProps} />
@@ -92,6 +98,7 @@ describe('EditConnector ', () => {
   });
 
   it('Edit external service on submit', async () => {
+    const defaultProps = getDefaultProps();
     const wrapper = mount(
       <TestProviders>
         <EditConnector {...defaultProps} />
@@ -111,6 +118,7 @@ describe('EditConnector ', () => {
   });
 
   it('Revert to initial external service on error', async () => {
+    const defaultProps = getDefaultProps();
     onSubmit.mockImplementation((connector, onSuccess, onError) => {
       onError(new Error('An error has occurred'));
     });
@@ -155,11 +163,15 @@ describe('EditConnector ', () => {
   });
 
   it('Resets selector on cancel', async () => {
+    const defaultProps = getDefaultProps();
     const props = {
       ...defaultProps,
       caseData: {
         ...defaultProps.caseData,
-        connector: { ...defaultProps.caseData.connector, id: 'servicenow-1' },
+        connector: {
+          ...defaultProps.caseData.connector,
+          id: 'servicenow-1',
+        },
       },
     };
 
@@ -185,6 +197,7 @@ describe('EditConnector ', () => {
   });
 
   it('Renders loading spinner', async () => {
+    const defaultProps = getDefaultProps();
     const props = { ...defaultProps, isLoading: true };
     const wrapper = mount(
       <TestProviders>
@@ -197,6 +210,7 @@ describe('EditConnector ', () => {
   });
 
   it('does not allow the connector to be edited when the user does not have write permissions', async () => {
+    const defaultProps = getDefaultProps();
     const props = { ...defaultProps, userCanCrud: false };
     const wrapper = mount(
       <TestProviders>
@@ -211,6 +225,7 @@ describe('EditConnector ', () => {
   });
 
   it('displays the permissions error message when one is provided', async () => {
+    const defaultProps = getDefaultProps();
     const props = { ...defaultProps, permissionsError: 'error message' };
     const wrapper = mount(
       <TestProviders>
@@ -232,6 +247,7 @@ describe('EditConnector ', () => {
   });
 
   it('displays the callout message when none is selected', async () => {
+    const defaultProps = getDefaultProps();
     const props = { ...defaultProps, connectors: [] };
     const wrapper = mount(
       <TestProviders>
@@ -245,6 +261,79 @@ describe('EditConnector ', () => {
     wrapper.update();
     await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="push-callouts"]`).exists()).toEqual(true);
+    });
+  });
+
+  it('disables the save button until changes are done ', async () => {
+    const defaultProps = getDefaultProps();
+    const serviceNowProps = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: {
+          ...defaultProps.caseData.connector,
+          id: 'servicenow-1',
+          fields: {
+            urgency: null,
+            severity: null,
+            impact: null,
+            category: null,
+            subcategory: null,
+          },
+        } as CaseConnector,
+      },
+    };
+    const result = render(
+      <TestProviders>
+        <EditConnector {...serviceNowProps} />
+      </TestProviders>
+    );
+
+    // the save button should be disabled
+    userEvent.click(result.getByTestId('connector-edit-button'));
+    expect(result.getByTestId('edit-connectors-submit')).toBeDisabled();
+
+    // simulate changing the connector
+    userEvent.click(result.getByTestId('dropdown-connectors'));
+    userEvent.click(result.getAllByTestId('dropdown-connector-no-connector')[0]);
+    expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
+
+    // this strange assertion is required because of existing race conditions inside the EditConnector component
+    await waitFor(() => {
+      expect(true).toBeTruthy();
+    });
+  });
+
+  it('disables the save button when no connector is the default', async () => {
+    const defaultProps = getDefaultProps();
+    const noneConnector = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: {
+          id: 'none',
+          fields: null,
+        } as CaseConnector,
+      },
+    };
+    const result = render(
+      <TestProviders>
+        <EditConnector {...noneConnector} />
+      </TestProviders>
+    );
+
+    // the save button should be disabled
+    userEvent.click(result.getByTestId('connector-edit-button'));
+    expect(result.getByTestId('edit-connectors-submit')).toBeDisabled();
+
+    // simulate changing the connector
+    userEvent.click(result.getByTestId('dropdown-connectors'));
+    userEvent.click(result.getAllByTestId('dropdown-connector-resilient-2')[0]);
+    expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
+
+    // this strange assertion is required because of existing race conditions inside the EditConnector component
+    await waitFor(() => {
+      expect(true).toBeTruthy();
     });
   });
 });

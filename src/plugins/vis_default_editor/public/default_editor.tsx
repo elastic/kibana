@@ -13,8 +13,11 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
 import { EuiResizableContainer } from '@elastic/eui';
 
-import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { EditorRenderProps } from 'src/plugins/visualize/public';
+import {
+  Vis,
+  VisualizeEmbeddableContract,
+  EditorRenderProps,
+} from 'src/plugins/visualizations/public';
 import { KibanaContextProvider } from '../../kibana_react/public';
 import { Storage } from '../../kibana_utils/public';
 

@@ -7,16 +7,17 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
-import { Query, TimeRange } from '../../../../../../data/common/query';
+import { Query, TimeRange } from '../../../../../../data/public';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
-import { DataViewType } from '../../../../../../data_views/common';
+import { DataViewType } from '../../../../../../data_views/public';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
-  'indexPattern' | 'navigateTo' | 'savedSearch' | 'services' | 'searchSource'
+  'indexPattern' | 'navigateTo' | 'savedSearch' | 'searchSource'
 > & {
   onOpenInspector: () => void;
   query?: Query;
@@ -36,7 +37,6 @@ export const DiscoverTopNav = ({
   searchSource,
   navigateTo,
   savedSearch,
-  services,
   resetSavedSearch,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
@@ -44,6 +44,7 @@ export const DiscoverTopNav = ({
     () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
     [indexPattern]
   );
+  const services = useDiscoverServices();
   const { TopNavMenu } = services.navigation.ui;
 
   const onOpenSavedSearch = useCallback(

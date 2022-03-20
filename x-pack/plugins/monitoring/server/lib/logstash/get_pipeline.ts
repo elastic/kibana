@@ -7,7 +7,6 @@
 
 import boom from '@hapi/boom';
 import { get } from 'lodash';
-import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineStatsAggregation } from './get_pipeline_stats_aggregation';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
@@ -16,6 +15,7 @@ import {
   ElasticsearchSource,
   ElasticsearchSourceLogstashPipelineVertex,
 } from '../../../common/types/es';
+import { MonitoringConfig } from '../../config';
 
 export function _vertexStats(
   vertex: ElasticsearchSourceLogstashPipelineVertex,
@@ -76,6 +76,17 @@ export function _enrichStateWithStatsAggregation(
   statsAggregation: any,
   timeseriesIntervalInSeconds: number
 ) {
+  // we could have data in both legacy and metricbeat collection, we pick the bucket most filled
+  const bucketCount = (aggregationKey: string) =>
+    get(
+      statsAggregation.aggregations,
+      `${aggregationKey}.scoped.total_processor_duration_stats.count`
+    );
+
+  const pipelineBucket =
+    bucketCount('pipelines_mb') > bucketCount('pipelines')
+      ? statsAggregation.aggregations.pipelines_mb
+      : statsAggregation.aggregations.pipelines;
   const logstashState = stateDocument.logstash_state || stateDocument.logstash?.node?.state;
   const vertices = logstashState?.pipeline?.representation?.graph?.vertices ?? [];
 
@@ -85,14 +96,10 @@ export function _enrichStateWithStatsAggregation(
     vertex.stats = {};
   });
 
-  const totalDurationStats =
-    statsAggregation.aggregations.pipelines.scoped.total_processor_duration_stats;
+  const totalDurationStats = pipelineBucket.scoped.total_processor_duration_stats;
   const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
 
-  const verticesWithStatsBuckets =
-    statsAggregation.aggregations?.pipelines.scoped.vertices?.vertex_id.buckets ??
-    statsAggregation.aggregations?.pipelines_mb.scoped.vertices?.vertex_id.buckets ??
-    [];
+  const verticesWithStatsBuckets = pipelineBucket.scoped.vertices?.vertex_id.buckets ?? [];
   verticesWithStatsBuckets.forEach((vertexStatsBucket: any) => {
     // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
     const vertexId = vertexStatsBucket.key;
@@ -114,16 +121,13 @@ export function _enrichStateWithStatsAggregation(
 
 export async function getPipeline(
   req: LegacyRequest,
-  config: { get: (key: string) => string | undefined },
-  lsIndexPattern: string,
+  config: MonitoringConfig,
   clusterUuid: string,
   pipelineId: string,
   version: PipelineVersion
 ) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
-
   // Determine metrics' timeseries interval based on version's timespan
-  const minIntervalSeconds = Math.max(Number(config.get('monitoring.ui.min_interval_seconds')), 30);
+  const minIntervalSeconds = Math.max(config.ui.min_interval_seconds, 30);
   const timeseriesInterval = calculateTimeseriesInterval(
     Number(version.firstSeen),
     Number(version.lastSeen),
@@ -133,14 +137,12 @@ export async function getPipeline(
   const [stateDocument, statsAggregation] = await Promise.all([
     getPipelineStateDocument({
       req,
-      logstashIndexPattern: lsIndexPattern,
       clusterUuid,
       pipelineId,
       version,
     }),
     getPipelineStatsAggregation({
       req,
-      logstashIndexPattern: lsIndexPattern,
       timeseriesInterval,
       clusterUuid,
       pipelineId,

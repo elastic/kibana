@@ -86,7 +86,10 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     () =>
       showFlyout &&
       Legacy.shims.triggersActionsUi.getEditAlertFlyout({
-        initialAlert: alert,
+        initialRule: {
+          ...alert,
+          ruleTypeId: alert.alertTypeId,
+        },
         onClose: () => {
           setShowFlyout(false);
           showBottomBar();

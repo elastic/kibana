@@ -4,7 +4,7 @@
   ],
   "description": "Detects when multiple hosts are using the same agent ID. This could occur in the event of an agent being taken over and used to inject illegitimate documents into an instance as an attempt to spoof events in order to masquerade actual activity to evade detection.",
   "false_positives": [
-    "This is meant to run only on datasources using agents v7.14+ since versions prior to that will be missing the necessary field, resulting in false positives."
+    "This is meant to run only on datasources using Elastic Agent 7.14+ since versions prior to that will be missing the necessary field, resulting in false positives."
   ],
   "from": "now-9m",
   "index": [
@@ -55,5 +55,5 @@
   },
   "timestamp_override": "event.ingested",
   "type": "threshold",
-  "version": 1
+  "version": 2
 }

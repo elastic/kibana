@@ -17,7 +17,7 @@ import { defineGetApiKeysRoutes } from './get';
 interface TestOptions {
   isAdmin?: boolean;
   licenseCheckResult?: LicenseCheck;
-  apiResponse?: () => Promise<unknown>;
+  apiResponse?: () => unknown;
   asserts: { statusCode: number; result?: Record<string, any> };
 }
 
@@ -34,8 +34,9 @@ describe('Get API keys', () => {
       };
 
       if (apiResponse) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.getApiKey.mockImplementation(
-          (async () => ({ body: await apiResponse() })) as any
+        mockContext.core.elasticsearch.client.asCurrentUser.security.getApiKey.mockResponse(
+          // @ts-expect-error unknown type
+          apiResponse()
         );
       }
 
@@ -80,7 +81,7 @@ describe('Get API keys', () => {
 
   describe('success', () => {
     getApiKeysTest('returns API keys', {
-      apiResponse: async () => ({
+      apiResponse: () => ({
         api_keys: [
           {
             id: 'YCLV7m0BJ3xI4hhWB648',
@@ -111,7 +112,7 @@ describe('Get API keys', () => {
       },
     });
     getApiKeysTest('returns only valid API keys', {
-      apiResponse: async () => ({
+      apiResponse: () => ({
         api_keys: [
           {
             id: 'YCLV7m0BJ3xI4hhWB648',

@@ -11,14 +11,12 @@ import { allHosts } from './all';
 import { hostDetails } from './details';
 import { hostOverview } from './overview';
 
-import { riskScore } from './risk_score';
 import { firstOrLastSeenHost } from './last_first_seen';
 import { uncommonProcesses } from './uncommon_processes';
 import { authentications, authenticationsEntities } from './authentications';
 import { hostsKpiAuthentications, hostsKpiAuthenticationsEntities } from './kpi/authentications';
 import { hostsKpiHosts, hostsKpiHostsEntities } from './kpi/hosts';
 import { hostsKpiUniqueIps, hostsKpiUniqueIpsEntities } from './kpi/unique_ips';
-import { hostsKpiRiskyHosts } from './kpi/risky_hosts';
 
 jest.mock('./all');
 jest.mock('./details');
@@ -29,7 +27,6 @@ jest.mock('./authentications');
 jest.mock('./kpi/authentications');
 jest.mock('./kpi/hosts');
 jest.mock('./kpi/unique_ips');
-jest.mock('./risk_score');
 
 describe('hostsFactory', () => {
   test('should include correct apis', () => {
@@ -41,12 +38,10 @@ describe('hostsFactory', () => {
       [HostsQueries.uncommonProcesses]: uncommonProcesses,
       [HostsQueries.authentications]: authentications,
       [HostsQueries.authenticationsEntities]: authenticationsEntities,
-      [HostsQueries.hostsRiskScore]: riskScore,
       [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,
       [HostsKpiQueries.kpiAuthenticationsEntities]: hostsKpiAuthenticationsEntities,
       [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
       [HostsKpiQueries.kpiHostsEntities]: hostsKpiHostsEntities,
-      [HostsKpiQueries.kpiRiskyHosts]: hostsKpiRiskyHosts,
       [HostsKpiQueries.kpiUniqueIpsEntities]: hostsKpiUniqueIpsEntities,
       [HostsKpiQueries.kpiUniqueIps]: hostsKpiUniqueIps,
     };

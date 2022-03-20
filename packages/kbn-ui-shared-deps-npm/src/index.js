@@ -12,20 +12,26 @@
 
 const Path = require('path');
 
+// extracted const vars
+const distDir = Path.resolve(__dirname, '../shared_built_assets');
+const dllManifestPath = Path.resolve(distDir, 'kbn-ui-shared-deps-npm-manifest.json');
+const dllFilename = 'kbn-ui-shared-deps-npm.dll.js';
+const publicPathLoader = require.resolve('./public_path_loader');
+
 /**
  * Absolute path to the distributable directory
  */
-exports.distDir = Path.resolve(__dirname, '../shared_built_assets');
+exports.distDir = distDir;
 
 /**
  * Path to dll manifest of modules included in this bundle
  */
-exports.dllManifestPath = Path.resolve(exports.distDir, 'kbn-ui-shared-deps-npm-manifest.json');
+exports.dllManifestPath = dllManifestPath;
 
 /**
  * Filename of the main bundle file in the distributable directory
  */
-exports.dllFilename = 'kbn-ui-shared-deps-npm.dll.js';
+exports.dllFilename = dllFilename;
 
 /**
  * Filename of the light-theme css file in the distributable directory
@@ -54,4 +60,4 @@ exports.darkCssDistFilename = (themeVersion) => {
 /**
  * Webpack loader for configuring the public path lookup from `window.__kbnPublicPath__`.
  */
-exports.publicPathLoader = require.resolve('./public_path_loader');
+exports.publicPathLoader = publicPathLoader;

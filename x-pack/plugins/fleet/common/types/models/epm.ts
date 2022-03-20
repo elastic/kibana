@@ -43,9 +43,13 @@ export interface DefaultPackagesInstallationError {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
-export type InstallSource = 'registry' | 'upload';
+export type InstallSource = 'registry' | 'upload' | 'bundled';
 
-export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
+export type EpmPackageInstallStatus =
+  | 'installed'
+  | 'installing'
+  | 'install_failed'
+  | 'installed_bundled';
 
 export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
@@ -103,7 +107,13 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
-  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal'>;
+  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
+
+export interface BundledPackage {
+  name: string;
+  version: string;
+  buffer: Buffer;
+}
 
 export type RegistryPackage = PackageSpecManifest &
   Partial<RegistryOverridesToOptional> &
@@ -295,6 +305,7 @@ export enum RegistryDataStreamKeys {
 }
 
 export interface RegistryDataStream {
+  [key: string]: any;
   [RegistryDataStreamKeys.type]: string;
   [RegistryDataStreamKeys.ilm_policy]?: string;
   [RegistryDataStreamKeys.hidden]?: boolean;
@@ -313,6 +324,7 @@ export interface RegistryElasticsearch {
   privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
+  'ingest_pipeline.name'?: string;
 }
 
 export interface RegistryDataStreamPrivileges {
@@ -410,11 +422,20 @@ export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> = Installed<T> | Installing<T> | NotInstalled<T> | InstallFailed<T>;
+export type Installable<T> =
+  | InstalledRegistry<T>
+  | Installing<T>
+  | NotInstalled<T>
+  | InstallFailed<T>
+  | InstalledBundled<T>;
 
-export type Installed<T = {}> = T & {
+export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
+};
+
+export type InstalledBundled<T = {}> = T & {
+  status: InstallationStatus['InstalledBundled'];
 };
 
 export type Installing<T = {}> = T & {
@@ -462,6 +483,25 @@ export interface IndexTemplate {
   _meta: object;
 }
 
+export interface ESAssetMetadata {
+  package?: {
+    name: string;
+  };
+  managed_by: string;
+  managed: boolean;
+}
+export interface TemplateMapEntry {
+  _meta: ESAssetMetadata;
+  template:
+    | {
+        mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
+      }
+    | {
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+      };
+}
+
+export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;

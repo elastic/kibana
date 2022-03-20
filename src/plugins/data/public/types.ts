@@ -14,6 +14,7 @@ import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { DatatableUtilitiesService } from '../common';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
@@ -83,6 +84,12 @@ export interface DataPublicPluginStart {
    * {@link DataViewsContract}
    */
   dataViews: DataViewsContract;
+
+  /**
+   * Datatable type utility functions.
+   */
+  datatableUtilities: DatatableUtilitiesService;
+
   /**
    * index patterns service
    * {@link DataViewsContract}

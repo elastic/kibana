@@ -61,7 +61,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         element.classList.add('devAppWrapper');
 
         const [core] = await getStartServices();
-        const { application, chrome } = core;
+        const { application, chrome, executionContext } = core;
 
         this.docTitleService.setup(chrome.docTitle.change);
         this.breadcrumbService.setup(chrome.setBreadcrumbs);
@@ -69,6 +69,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         const appServices = {
           breadcrumbService: this.breadcrumbService,
           docTitleService: this.docTitleService,
+          executionContext,
         };
 
         const { renderApp } = await import('./application');

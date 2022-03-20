@@ -21,7 +21,7 @@ import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
 } from './dimension_panel';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { generateId } from '../../id_generator';
@@ -113,12 +113,12 @@ const expectedIndexPatterns = {
 };
 
 const bytesColumn: GenericIndexPatternColumn = {
-  label: 'Max of bytes',
+  label: 'Sum of bytes',
   dataType: 'number',
   isBucketed: false,
 
   // Private
-  operationType: 'max',
+  operationType: 'sum',
   sourceField: 'bytes',
   params: { format: { id: 'bytes' } },
 };
@@ -216,7 +216,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
           deserialize: jest.fn().mockReturnValue({
             convert: () => 'formatted',
           }),
-        } as unknown as DataPublicPluginStart['fieldFormats'],
+        },
+        search: {
+          aggs: {
+            calculateAutoTimeExpression: jest.fn(),
+          },
+        },
       } as unknown as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
@@ -350,7 +355,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
+    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-___records___');
 
     expect(
       options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
@@ -481,7 +486,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             dataType: 'number',
             isBucketed: false,
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         })}
       />
@@ -529,7 +534,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
-              operationType: 'max',
+              operationType: 'sum',
               sourceField: 'memory',
               params: { format: { id: 'bytes' } },
               // Other parts of this don't matter for this test
@@ -728,7 +733,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     act(() => {
       wrapper
         .find('input[data-test-subj="indexPattern-label-edit"]')
-        .simulate('change', { target: { value: 'Maximum of bytes' } });
+        .simulate('change', { target: { value: 'Sum of bytes' } });
     });
 
     expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
@@ -740,7 +745,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
-              label: 'Maximum of bytes',
+              label: 'Sum of bytes',
               customLabel: false,
               // Other parts of this don't matter for this test
             }),
@@ -991,7 +996,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       const newColumnState = setState.mock.calls[0][0](state).layers.first.columns.col2;
       expect(newColumnState.operationType).toEqual('count');
-      expect(newColumnState.sourceField).toEqual('Records');
+      expect(newColumnState.sourceField).toEqual('___records___');
     });
 
     it('should indicate document and field compatibility with selected document operation', () => {
@@ -1004,7 +1009,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               isBucketed: false,
               label: '',
               operationType: 'count',
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
           })}
           columnId="col2"
@@ -1090,7 +1095,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1320,7 +1325,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1337,7 +1342,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
@@ -1524,7 +1529,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1871,7 +1876,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: '',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         })}
         columnId={'col2'}

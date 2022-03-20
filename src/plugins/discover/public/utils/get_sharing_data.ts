@@ -8,12 +8,20 @@
 
 import type { Capabilities } from 'kibana/public';
 import type { IUiSettingsClient } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { Filter, ISearchSource, SerializedSearchSourceFields } from 'src/plugins/data/common';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
+import type {
+  DataPublicPluginStart,
+  ISearchSource,
+  SerializedSearchSourceFields,
+} from 'src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../common';
 import type { SavedSearch, SortOrder } from '../services/saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
-import { AppState } from '../application/main/services/discover_state';
+import { AppState, isEqualFilters } from '../application/main/services/discover_state';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -26,7 +34,7 @@ export async function getSharingData(
   const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
-  const existingFilter = searchSource.getField('filter');
+  let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
 
   searchSource.setField(
     'sort',
@@ -54,11 +62,20 @@ export async function getSharingData(
     }
   }
 
+  const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
+  const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
   return {
     getSearchSource: (absoluteTime?: boolean): SerializedSearchSourceFields => {
-      const timeFilter = absoluteTime
-        ? data.query.timefilter.timefilter.createFilter(index)
-        : data.query.timefilter.timefilter.createRelativeFilter(index);
+      const timeFilter = absoluteTime ? absoluteTimeFilter : relativeTimeFilter;
+
+      // remove timeFilter from existing filter
+      if (Array.isArray(existingFilter)) {
+        existingFilter = existingFilter.filter(
+          (current) => !isEqualFilters(current, absoluteTimeFilter)
+        );
+      } else if (isEqualFilters(existingFilter, absoluteTimeFilter)) {
+        existingFilter = undefined;
+      }
 
       if (existingFilter && timeFilter) {
         searchSource.setField(
@@ -72,6 +89,15 @@ export async function getSharingData(
         searchSource.setField('filter', filter);
       }
 
+      /*
+       * For downstream querying performance, the searchSource object must have fields set.
+       * Otherwise, the requests will ask for all fields, even if only a few are really needed.
+       * Discover does not set fields, since having all fields is needed for the UI.
+       */
+      const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+      if (useFieldsApi && columns.length) {
+        searchSource.setField('fields', columns);
+      }
       return searchSource.getSerializedFields(true);
     },
     columns,

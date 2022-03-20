@@ -5,99 +5,55 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import pLimit from 'p-limit';
-import Path from 'path';
-import { Worker } from 'worker_threads';
-import { getCommonServices } from './get_common_services';
 import { RunOptions } from './parse_run_cli_flags';
-import { WorkerData } from './upload_next_batch';
+import { getScenario } from './get_scenario';
+import { ApmSynthtraceEsClient } from '../../lib/apm';
+import { Logger } from '../../lib/utils/create_logger';
+import { StreamProcessor } from '../../lib/stream_processor';
 
-export async function startHistoricalDataUpload({
-  from,
-  to,
-  intervalInMs,
-  bucketSizeInMs,
-  workers,
-  clientWorkers,
-  batchSize,
-  logLevel,
-  target,
-  file,
-  writeTarget,
-}: RunOptions & { from: number; to: number }) {
-  let requestedUntil: number = from;
+export async function startHistoricalDataUpload(
+  esClient: ApmSynthtraceEsClient,
+  logger: Logger,
+  runOptions: RunOptions,
+  from: Date,
+  to: Date
+) {
+  const file = runOptions.file;
+  const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
-  const { logger } = getCommonServices({ target, logLevel });
+  const { generate, mapToIndex } = await scenario(runOptions);
 
-  function processNextBatch() {
-    const bucketFrom = requestedUntil;
-    const bucketTo = Math.min(to, bucketFrom + bucketSizeInMs);
+  // if we want to generate a maximum number of documents reverse generation to descend.
+  [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
 
-    if (bucketFrom === bucketTo) {
-      return;
-    }
+  logger.info(`Generating data from ${from} to ${to}`);
 
-    requestedUntil = bucketTo;
+  const events = logger.perf('generate_scenario', () => generate({ from, to }));
 
-    logger.info(
-      `Starting worker for ${new Date(bucketFrom).toISOString()} to ${new Date(
-        bucketTo
-      ).toISOString()}`
-    );
-
-    const workerData: WorkerData = {
-      bucketFrom,
-      bucketTo,
-      file,
-      logLevel,
-      batchSize,
-      bucketSizeInMs,
-      clientWorkers,
-      intervalInMs,
-      target,
-      workers,
-      writeTarget,
-    };
-
-    const worker = new Worker(Path.join(__dirname, './upload_next_batch.js'), {
-      workerData,
+  if (runOptions.dryRun) {
+    const maxDocs = runOptions.maxDocs;
+    const stream = new StreamProcessor({
+      processors: StreamProcessor.apmProcessors,
+      maxSourceEvents: maxDocs,
+      logger,
+    }).streamToDocument(StreamProcessor.toDocument, events);
+    logger.perf('enumerate_scenario', () => {
+      // @ts-ignore
+      // We just want to enumerate
+      let yielded = 0;
+      for (const _ of stream) {
+        yielded++;
+      }
     });
-
-    logger.perf('created_worker', () => {
-      return new Promise<void>((resolve, reject) => {
-        worker.on('online', () => {
-          resolve();
-        });
-      });
-    });
-
-    logger.perf('completed_worker', () => {
-      return new Promise<void>((resolve, reject) => {
-        worker.on('exit', () => {
-          resolve();
-        });
-      });
-    });
-
-    return new Promise<void>((resolve, reject) => {
-      worker.on('error', (err) => {
-        reject(err);
-      });
-
-      worker.on('exit', (code) => {
-        if (code !== 0) {
-          reject(new Error(`Worker stopped: exit code ${code}`));
-          return;
-        }
-        logger.debug('Worker completed');
-        resolve();
-      });
-    });
+    return;
   }
 
-  const numBatches = Math.ceil((to - from) / bucketSizeInMs);
-
-  const limiter = pLimit(workers);
-
-  return Promise.all(new Array(numBatches).fill(undefined).map((_) => limiter(processNextBatch)));
+  const clientWorkers = runOptions.clientWorkers;
+  await logger.perf('index_scenario', () =>
+    esClient.index(events, {
+      concurrency: clientWorkers,
+      maxDocs: runOptions.maxDocs,
+      mapToIndex,
+    })
+  );
 }

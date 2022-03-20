@@ -13,6 +13,8 @@ import { startHistoricalDataUpload } from './utils/start_historical_data_upload'
 import { startLiveDataUpload } from './utils/start_live_data_upload';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { getCommonServices } from './utils/get_common_services';
+import { ApmSynthtraceKibanaClient } from '../lib/apm/client/apm_synthtrace_kibana_client';
+import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
 
 function options(y: Argv) {
   return y
@@ -22,9 +24,23 @@ function options(y: Argv) {
       string: true,
     })
     .option('target', {
-      describe: 'Elasticsearch target, including username/password',
-      demandOption: true,
+      describe: 'Elasticsearch target',
       string: true,
+    })
+    .option('cloudId', {
+      describe:
+        'Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration',
+      string: true,
+    })
+    .option('username', {
+      describe: 'Basic authentication username',
+      string: true,
+      demandOption: true,
+    })
+    .option('password', {
+      describe: 'Basic authentication password',
+      string: true,
+      demandOption: true,
     })
     .option('from', {
       description: 'The start of the time window',
@@ -35,6 +51,20 @@ function options(y: Argv) {
     .option('live', {
       description: 'Generate and index data continuously',
       boolean: true,
+    })
+    .option('--dryRun', {
+      description: 'Enumerates the stream without sending events to Elasticsearch ',
+      boolean: true,
+    })
+    .option('maxDocs', {
+      description:
+        'The maximum number of documents we are allowed to generate, should be multiple of 10.000',
+      number: true,
+    })
+    .option('numShards', {
+      description:
+        'Updates the component templates to update the number of primary shards, requires cloudId to be provided',
+      number: true,
     })
     .option('clean', {
       describe: 'Clean APM indices before indexing new data',
@@ -69,7 +99,15 @@ function options(y: Argv) {
       describe: 'Target to index',
       string: true,
     })
-    .conflicts('to', 'live');
+    .option('scenarioOpts', {
+      describe: 'Options specific to the scenario',
+      coerce: (arg) => {
+        return arg as Record<string, any> | undefined;
+      },
+    })
+    .conflicts('to', 'live')
+    .conflicts('maxDocs', 'live')
+    .conflicts('target', 'cloudId');
 }
 
 export type RunCliFlags = ReturnType<typeof options>['argv'];
@@ -78,38 +116,57 @@ yargs(process.argv.slice(2))
   .command('*', 'Generate data and index into Elasticsearch', options, async (argv) => {
     const runOptions = parseRunCliFlags(argv);
 
-    const { logger } = getCommonServices(runOptions);
+    const { logger, client } = getCommonServices(runOptions);
 
-    const to = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
-    const from = argv.from
+    const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
+    const to = new Date(toMs);
+    const defaultTimeRange = !runOptions.maxDocs ? '15m' : '52w';
+    const fromMs = argv.from
       ? datemath.parse(String(argv.from))!.valueOf()
-      : to - intervalToMs('15m');
+      : toMs - intervalToMs(defaultTimeRange);
+    const from = new Date(fromMs);
 
     const live = argv.live;
+
+    const forceDataStreams = !!runOptions.cloudId;
+    const esClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
+    if (runOptions.dryRun) {
+      await startHistoricalDataUpload(esClient, logger, runOptions, from, to);
+      return;
+    }
+    if (runOptions.cloudId) {
+      const kibanaClient = new ApmSynthtraceKibanaClient(logger);
+      await kibanaClient.migrateCloudToManagedApm(
+        runOptions.cloudId,
+        runOptions.username,
+        runOptions.password
+      );
+    }
+
+    if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
+      await esClient.updateComponentTemplates(runOptions.numShards);
+    }
+
+    if (argv.clean) {
+      await esClient.clean();
+    }
 
     logger.info(
       `Starting data generation\n: ${JSON.stringify(
         {
           ...runOptions,
-          from: new Date(from).toISOString(),
-          to: new Date(to).toISOString(),
+          from: from.toISOString(),
+          to: to.toISOString(),
         },
         null,
         2
       )}`
     );
 
-    startHistoricalDataUpload({
-      ...runOptions,
-      from,
-      to,
-    });
+    await startHistoricalDataUpload(esClient, logger, runOptions, from, to);
 
     if (live) {
-      startLiveDataUpload({
-        ...runOptions,
-        start: to,
-      });
+      await startLiveDataUpload(esClient, logger, runOptions, to);
     }
   })
   .parse();

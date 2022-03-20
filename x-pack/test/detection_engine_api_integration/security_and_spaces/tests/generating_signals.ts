@@ -23,6 +23,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
@@ -673,23 +674,36 @@ export default ({ getService }: FtrProviderContext) => {
           const rule: EqlCreateSchema = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [any where true] [any where true]',
+            max_signals: 200,
           };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
           // For EQL rules, max_signals is the maximum number of detected sequences: each sequence has a building block
-          // alert for each event in the sequence, so max_signals=100 results in 200 building blocks in addition to
-          // 100 regular alerts
-          await waitForSignalsToBePresent(supertest, log, 300, [id]);
+          // alert for each event in the sequence, so max_signals=200 results in 400 building blocks in addition to
+          // 200 regular alerts
+          await waitForSignalsToBePresent(supertest, log, 600, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id], 1000);
-          expect(signalsOpen.hits.hits.length).eql(300);
+          expect(signalsOpen.hits.hits.length).eql(600);
           const shellSignals = signalsOpen.hits.hits.filter(
             (signal) => signal._source?.[ALERT_DEPTH] === 2
           );
           const buildingBlocks = signalsOpen.hits.hits.filter(
             (signal) => signal._source?.[ALERT_DEPTH] === 1
           );
-          expect(shellSignals.length).eql(100);
-          expect(buildingBlocks.length).eql(200);
+          expect(shellSignals.length).eql(200);
+          expect(buildingBlocks.length).eql(400);
+        });
+
+        it('generates signals when an index name contains special characters to encode', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['auditbeat-*', '<my-index-{now/d}*>']),
+            query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(1);
         });
       });
 
@@ -737,7 +751,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -864,7 +878,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -920,10 +934,6 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_THRESHOLD_RESULT]: {
               terms: [
                 {
-                  field: 'event.module',
-                  value: 'system',
-                },
-                {
                   field: 'host.id',
                   value: '2ab45fc1c41e4c84bbd02202a7e5761f',
                 },
@@ -931,9 +941,13 @@ export default ({ getService }: FtrProviderContext) => {
                   field: 'process.name',
                   value: 'sshd',
                 },
+                {
+                  field: 'event.module',
+                  value: 'system',
+                },
               ],
               count: 21,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T20:22:03.561Z',
             },
           });
         });
@@ -1158,7 +1172,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Signal deduplication', async () => {
+    describe('Signal deduplication', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
@@ -1191,7 +1205,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .query({ id: ruleResponse.id });
-        const initialStatusDate = new Date(statusResponse.body.status_date);
+
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        const ruleStatusDate = statusResponse.body?.execution_summary?.last_execution.date;
+        const initialStatusDate = new Date(ruleStatusDate);
 
         const initialSignal = signals.hits.hits[0];
 
@@ -1212,7 +1229,7 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           log,
           ruleResponse.id,
-          'succeeded',
+          RuleExecutionStatus.succeeded,
           initialStatusDate
         );
 

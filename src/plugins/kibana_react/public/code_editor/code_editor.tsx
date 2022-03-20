@@ -6,16 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
-import { htmlIdGenerator, EuiToolTip, keys } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiToolTip,
+  keys,
+  EuiButtonIcon,
+  EuiOverlayMask,
+  EuiI18n,
+  EuiFocusTrap,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import './register_languages';
-import './remeasure_fonts';
+import { remeasureFonts } from './remeasure_fonts';
 
 import {
   DARK_THEME,
@@ -114,6 +125,9 @@ export interface Props {
    * Accessible name for the editor. (Defaults to "Code editor")
    */
   'aria-label'?: string;
+
+  isCopyable?: boolean;
+  allowFullScreen?: boolean;
 }
 
 export const CodeEditor: React.FC<Props> = ({
@@ -136,6 +150,8 @@ export const CodeEditor: React.FC<Props> = ({
   'aria-label': ariaLabel = i18n.translate('kibana-react.kibanaCodeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
+  isCopyable = false,
+  allowFullScreen = false,
 }) => {
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -147,6 +163,11 @@ export const CodeEditor: React.FC<Props> = ({
       : ReactMonacoEditor;
   }, []);
 
+  const { FullScreenDisplay, FullScreenButton, isFullScreen, setIsFullScreen, onKeyDown } =
+    useFullScreen({
+      allowFullScreen,
+    });
+
   const isReadOnly = options?.readOnly ?? false;
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -157,11 +178,9 @@ export const CodeEditor: React.FC<Props> = ({
 
   const [isHintActive, setIsHintActive] = useState(true);
 
-  /* eslint-disable @typescript-eslint/naming-convention */
   const promptClasses = classNames('kibanaCodeEditor__keyboardHint', {
     'kibanaCodeEditor__keyboardHint--isInactive': !isHintActive,
   });
-  /* eslint-enable  @typescript-eslint/naming-convention */
 
   const _updateDimensions = useCallback(() => {
     _editor.current?.layout();
@@ -197,6 +216,7 @@ export const CodeEditor: React.FC<Props> = ({
           stopEditing();
           editorHint.current?.focus();
         }
+        setIsFullScreen(false);
       }
     },
     [stopEditing]
@@ -336,6 +356,8 @@ export const CodeEditor: React.FC<Props> = ({
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
 
+      remeasureFonts();
+
       _editor.current = editor;
 
       const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
@@ -394,42 +416,59 @@ export const CodeEditor: React.FC<Props> = ({
     };
   }, [placeholder, value]);
 
+  const { CopyButton } = useCopy({ isCopyable, value });
+
   return (
-    <div className="kibanaCodeEditor">
+    <div className="kibanaCodeEditor" onKeyDown={onKeyDown}>
       {renderPrompt()}
 
-      <MonacoEditor
-        theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
-        language={languageId}
-        value={value}
-        onChange={onChange}
-        width={width}
-        height={height}
-        editorWillMount={_editorWillMount}
-        editorDidMount={_editorDidMount}
-        options={{
-          renderLineHighlight: 'none',
-          scrollBeyondLastLine: false,
-          minimap: {
-            enabled: false,
-          },
-          scrollbar: {
-            useShadows: false,
-            // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
-            // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
-            // outer scrollbars.
-            alwaysConsumeMouseWheel: false,
-          },
-          wordBasedSuggestions: false,
-          wordWrap: 'on',
-          wrappingIndent: 'indent',
-          matchBrackets: 'never',
-          fontFamily: 'Roboto Mono',
-          fontSize: 12,
-          lineHeight: 21,
-          ...options,
-        }}
-      />
+      <FullScreenDisplay>
+        {allowFullScreen || isCopyable ? (
+          <div className="kibanaCodeEditor__controls">
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <CopyButton />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <FullScreenButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        ) : null}
+        <MonacoEditor
+          theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
+          language={languageId}
+          value={value}
+          onChange={onChange}
+          width={isFullScreen ? '100vw' : width}
+          height={isFullScreen ? '100vh' : height}
+          editorWillMount={_editorWillMount}
+          editorDidMount={_editorDidMount}
+          options={{
+            padding: allowFullScreen || isCopyable ? { top: 24 } : {},
+            renderLineHighlight: 'none',
+            scrollBeyondLastLine: false,
+            minimap: {
+              enabled: false,
+            },
+            scrollbar: {
+              useShadows: false,
+              // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
+              // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
+              // outer scrollbars.
+              alwaysConsumeMouseWheel: false,
+            },
+            wordBasedSuggestions: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            matchBrackets: 'never',
+            fontFamily: 'Roboto Mono',
+            fontSize: isFullScreen ? 16 : 12,
+            lineHeight: isFullScreen ? 24 : 21,
+            ...options,
+          }}
+        />
+      </FullScreenDisplay>
       <ReactResizeDetector
         handleWidth
         handleHeight
@@ -438,6 +477,101 @@ export const CodeEditor: React.FC<Props> = ({
       />
     </div>
   );
+};
+
+/**
+ * Fullscreen logic
+ */
+
+const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
+  };
+
+  const onKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === keys.ESCAPE) {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsFullScreen(false);
+    }
+  }, []);
+
+  const FullScreenButton: React.FC = () => {
+    if (!allowFullScreen) return null;
+    return (
+      <EuiI18n
+        tokens={['euiCodeBlock.fullscreenCollapse', 'euiCodeBlock.fullscreenExpand']}
+        defaults={['Collapse', 'Expand']}
+      >
+        {([fullscreenCollapse, fullscreenExpand]: string[]) => (
+          <EuiButtonIcon
+            className="euiCodeBlock__fullScreenButton"
+            onClick={toggleFullScreen}
+            iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
+            color="text"
+            aria-label={isFullScreen ? fullscreenCollapse : fullscreenExpand}
+            size="xs"
+          />
+        )}
+      </EuiI18n>
+    );
+  };
+
+  const FullScreenDisplay = useMemo(
+    () =>
+      ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
+        if (!isFullScreen) return <>{children}</>;
+
+        return (
+          <EuiOverlayMask>
+            <EuiFocusTrap clickOutsideDisables={true}>
+              <div className={'kibanaCodeEditor__isFullScreen'}>{children}</div>
+            </EuiFocusTrap>
+          </EuiOverlayMask>
+        );
+      },
+    [isFullScreen]
+  );
+
+  return {
+    FullScreenButton,
+    FullScreenDisplay,
+    onKeyDown,
+    isFullScreen,
+    setIsFullScreen,
+  };
+};
+
+const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) => {
+  const showCopyButton = isCopyable && value;
+
+  const CopyButton = () => {
+    if (!showCopyButton) return null;
+
+    return (
+      <div className="euiCodeBlock__copyButton">
+        <EuiI18n token="euiCodeBlock.copyButton" default="Copy">
+          {(copyButton: string) => (
+            <EuiCopy textToCopy={value}>
+              {(copy) => (
+                <EuiButtonIcon
+                  onClick={copy}
+                  iconType="copyClipboard"
+                  color="text"
+                  aria-label={copyButton}
+                  size="xs"
+                />
+              )}
+            </EuiCopy>
+          )}
+        </EuiI18n>
+      </div>
+    );
+  };
+
+  return { showCopyButton, CopyButton };
 };
 
 // React.lazy requires default export

@@ -7,19 +7,18 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { find, get, isEmpty } from 'lodash/fp';
+import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
-import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
-import { AddExceptionModalWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
+import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../../common/ecs';
-import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 
 interface EventDetailsFooterProps {
@@ -35,6 +34,7 @@ interface EventDetailsFooterProps {
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
+  refetchFlyoutData: () => Promise<void>;
 }
 
 interface AddExceptionModalWrapperData {
@@ -56,11 +56,13 @@ export const EventDetailsFooterComponent = React.memo(
     timelineId,
     globalQuery,
     timelineQuery,
+    refetchFlyoutData,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
-        find({ category: 'kibana', field: 'kibana.alert.rule.index' }, detailsData)?.values,
+        find({ category: 'kibana', field: 'kibana.alert.rule.parameters.index' }, detailsData)
+          ?.values,
       [detailsData]
     );
 
@@ -81,11 +83,6 @@ export const EventDetailsFooterComponent = React.memo(
       [detailsData]
     );
 
-    const eventIds = useMemo(
-      () => (isEmpty(expandedEvent?.eventId) ? null : [expandedEvent?.eventId]),
-      [expandedEvent?.eventId]
-    );
-
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
       newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
     };
@@ -99,12 +96,12 @@ export const EventDetailsFooterComponent = React.memo(
     }, [timelineId, globalQuery, timelineQuery]);
 
     const {
-      exceptionModalType,
+      exceptionFlyoutType,
       onAddExceptionTypeClick,
       onAddExceptionCancel,
       onAddExceptionConfirm,
       ruleIndices,
-    } = useExceptionModal({
+    } = useExceptionFlyout({
       ruleIndex,
       refetch: refetchAll,
       timelineId,
@@ -112,27 +109,22 @@ export const EventDetailsFooterComponent = React.memo(
     const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
       useEventFilterModal();
 
-    const { alertsEcsData } = useFetchEcsAlertsData({
-      alertIds: eventIds,
-      skip: expandedEvent?.eventId == null,
-    });
-
-    const ecsData = detailsEcsData ?? get(0, alertsEcsData);
     return (
       <>
-        <EuiFlyoutFooter>
+        <EuiFlyoutFooter data-test-subj="side-panel-flyout-footer">
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              {ecsData && (
+              {detailsEcsData && (
                 <TakeActionDropdown
                   detailsData={detailsData}
-                  ecsData={ecsData}
+                  ecsData={detailsEcsData}
                   handleOnEventClosed={handleOnEventClosed}
                   isHostIsolationPanelOpen={isHostIsolationPanelOpen}
                   loadingEventDetails={loadingEventDetails}
                   onAddEventFilterClick={onAddEventFilterClick}
                   onAddExceptionTypeClick={onAddExceptionTypeClick}
                   onAddIsolationStatusClick={onAddIsolationStatusClick}
+                  refetchFlyoutData={refetchFlyoutData}
                   refetch={refetchAll}
                   indexName={expandedEvent.indexName}
                   timelineId={timelineId}
@@ -144,19 +136,23 @@ export const EventDetailsFooterComponent = React.memo(
         {/* This is still wrong to do render flyout/modal inside of the flyout
         We need to completely refactor the EventDetails  component to be correct
       */}
-        {exceptionModalType != null &&
+        {exceptionFlyoutType != null &&
           addExceptionModalWrapperData.ruleId != null &&
           addExceptionModalWrapperData.eventId != null && (
-            <AddExceptionModalWrapper
+            <AddExceptionFlyoutWrapper
               {...addExceptionModalWrapperData}
               ruleIndices={ruleIndices}
-              exceptionListType={exceptionModalType}
+              exceptionListType={exceptionFlyoutType}
               onCancel={onAddExceptionCancel}
               onConfirm={onAddExceptionConfirm}
             />
           )}
-        {isAddEventFilterModalOpen && ecsData != null && (
-          <EventFiltersFlyout data={ecsData} onCancel={closeAddEventFilterModal} />
+        {isAddEventFilterModalOpen && detailsEcsData != null && (
+          <EventFiltersFlyout
+            data={detailsEcsData}
+            onCancel={closeAddEventFilterModal}
+            maskProps={{ style: 'z-index: 5000' }}
+          />
         )}
       </>
     );

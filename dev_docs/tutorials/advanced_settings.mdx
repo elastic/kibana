@@ -1,0 +1,288 @@
+---
+id: kibDevTutorialAdvancedSettings
+slug: /kibana-dev-docs/tutorials/advanced-settings
+title: How to register a new advanced setting
+summary: Learn how to add and use a new advanced setting
+date: 2022-02-07
+tags: ['kibana','onboarding', 'dev', 'architecture', 'tutorials']
+---
+
+_Note: Advanced settings, uiSettings, settings, and config are often used to describe the same concept. While we work toward unifying naming, there will be some inconsistencies until unification is complete._
+
+*Advanced Settings* control the behavior of Kibana. To configure the UI settings, open the main menu, then click *Stack Management > Advanced Settings*.  When settings are changed from their default, the new value is persisted as a key/value pair in the `config` saved object registered by `core`.
+
+There are several ways to configure an advanced setting:
+ - <DocLink id="kibDevTutorialAdvancedSettings" section="configuration-with-advanced-settings-ui" text="Through the Advanced Settings UI"/>
+ - <DocLink id="kibDevTutorialAdvancedSettings" section="configuration-with-ui-settings-overrides" text="Locked via `kibana.yml`'s `uiSettings.overrides`"/>
+ - <DocLink id="kibDevTutorialAdvancedSettings" section="client-side-usage" text="Through the client-side `uiSettings` service"/>
+ - <DocLink id="kibDevTutorialAdvancedSettings" section="server-side-usage" text="Through the server-side `uiSettings` service"/>
+
+`uiSettings` are registered synchronously during `core`'s setup lifecycle phase. This means that once you add a new advanced setting, you cannot change or remove it without <DocLink id="kibDevTutorialAdvancedSettings" section="registering-migrations" text="registering a migration in core"/>.
+
+### Configuration with Advanced Settings UI
+
+The `uiSettings` service is the programmatic interface to Kibana's Advanced Settings UI. Kibana plugins use the service to extend Kibana UI Settings Management with custom settings for a plugin.
+
+Configuration through the Advanced Settings UI is restricted to users authorised to access the Advanced Settings page. Users who don't have permissions to change these values default to using the csettings configuration defined for the space that they are in. The `config` saved object can be shared between spaces.
+
+### Configuration with UI settings overrides
+
+When a setting is configured as an override in `kibana.yml`, it overrides any other value store in the `config` saved object. The override applies to Kibana as a whole for all spaces and users, and the option is disabled on the Advanced Settings page. We refer to these as "global" overrides.
+
+Note: If an override is misconfigured, it fails config validation and prevents Kibana from starting up. Validation is, however, limited to value _type_ and not to _key_ (name). For example, when a plugin registers the `my_plugin_foo: 42` setting , then declares the following override, the config validation fails:
+
+```kibana.yml
+uiSettings.overrides:
+  my_plugin_foo: "42"
+```
+The following override results in a successful config validation:
+
+```kibana.yml
+uiSettings.overrides:
+  my_pluginFoo: 42
+```
+
+### Client side usage
+
+On the client, the `uiSettings` service is accessible directly from `core` and the client provides plugins access to the `config` entries stored in Elasticsearch.
+
+<DocCallOut>
+  Refer to [the client-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-public.iuisettingsclient.md)
+</DocCallOut>
+
+The following is a basic example for using the `uiSettings` service:
+
+**src/plugins/charts/public/plugin.ts**
+```ts
+import { Plugin, CoreSetup } from 'kibana/public';
+import { ExpressionsSetup } from '../../expressions/public';
+import { palette, systemPalette } from '../common';
+
+import { ThemeService, LegacyColorsService } from './services';
+import { PaletteService } from './services/palettes/service';
+import { ActiveCursor } from './services/active_cursor';
+
+export type Theme = Omit<ThemeService, 'init'>;
+export type Color = Omit<LegacyColorsService, 'init'>;
+
+interface SetupDependencies {
+  expressions: ExpressionsSetup;
+}
+
+/** @public */
+export interface ChartsPluginSetup {
+  legacyColors: Color;
+  theme: Theme;
+  palettes: ReturnType<PaletteService['setup']>;
+}
+
+/** @public */
+export type ChartsPluginStart = ChartsPluginSetup & {
+  activeCursor: ActiveCursor;
+};
+
+/** @public */
+export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart> {
+  private readonly themeService = new ThemeService();
+  private readonly legacyColorsService = new LegacyColorsService();
+  private readonly paletteService = new PaletteService();
+  private readonly activeCursor = new ActiveCursor();
+
+  private palettes: undefined | ReturnType<PaletteService['setup']>;
+
+  public setup(core: CoreSetup, dependencies: SetupDependencies): ChartsPluginSetup {
+    dependencies.expressions.registerFunction(palette);
+    dependencies.expressions.registerFunction(systemPalette);
+    this.themeService.init(core.uiSettings);
+    this.legacyColorsService.init(core.uiSettings);
+    this.palettes = this.paletteService.setup(this.legacyColorsService);
+
+    this.activeCursor.setup();
+
+    return {
+      legacyColors: this.legacyColorsService,
+      theme: this.themeService,
+      palettes: this.palettes,
+    };
+  }
+
+  public start(): ChartsPluginStart {
+    return {
+      legacyColors: this.legacyColorsService,
+      theme: this.themeService,
+      palettes: this.palettes!,
+      activeCursor: this.activeCursor,
+    };
+  }
+}
+
+```
+
+### Server side usage
+
+On the server side, `uiSettings` are accessible directly from `core`. The following example shows how to register a new setting with the minimum required schema parameter against which validations are performed on read and write.
+The example also shows how plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the Configure Kibana guide.
+
+<DocCallOut>
+  Refer to [the server-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)
+</DocCallOut>
+
+**src/plugins/charts/server/plugin.ts**
+
+```ts
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { CoreSetup, Plugin } from 'kibana/server';
+import { COLOR_MAPPING_SETTING, LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
+import { ExpressionsServerSetup } from '../../expressions/server';
+
+interface SetupDependencies {
+  expressions: ExpressionsServerSetup;
+}
+
+export class ChartsServerPlugin implements Plugin<object, object> {
+  public setup(core: CoreSetup, dependencies: SetupDependencies) {
+    dependencies.expressions.registerFunction(palette);
+    dependencies.expressions.registerFunction(systemPalette);
+    core.uiSettings.register({
+      [COLOR_MAPPING_SETTING]: {
+        name: i18n.translate('charts.advancedSettings.visualization.colorMappingTitle', {
+          defaultMessage: 'Color mapping',
+        }),
+        value: JSON.stringify({
+          Count: '#00A69B',
+        }),
+        type: 'json',
+        description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
+          defaultMessage:
+            'Maps values to specific colors in charts using the <strong>Compatibility</strong> palette.',
+        }),
+        deprecation: {
+          message: i18n.translate(
+            'charts.advancedSettings.visualization.colorMappingTextDeprecation',
+            {
+              defaultMessage:
+                'This setting is deprecated and will not be supported in a future version.',
+            }
+          ),
+          docLinksKey: 'visualizationSettings',
+        },
+        category: ['visualization'],
+        schema: schema.string(),
+      },
+    ...
+    });
+    
+    return {};
+  }
+  
+  public start() {
+    return {};
+  }
+
+  public stop() {}
+}  
+```
+For optimal Kibana performance, `uiSettings` are cached. Any changes that require a cache refresh should use the `requiresPageReload` parameter on registration. 
+
+For example, changing the time filter refresh interval triggers a prompt in the UI that the page needs to be refreshed to save the new value:
+
+**src/plugins/data/server/ui_settings.ts**
+
+```ts
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
+import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
+
+export function getUiSettings(
+  docLinks: DocLinksServiceSetup
+): Record<string, UiSettingsParams<unknown>> {
+  return {
+    ...
+    [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
+      name: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
+        defaultMessage: 'Time filter refresh interval',
+      }),
+      value: `{
+      "pause": false,
+      "value": 0
+      }`,
+        type: 'json',
+        description: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsText', {
+          defaultMessage: `The timefilter's default refresh interval. The "value" needs to be specified in milliseconds.`,
+        }),
+        requiresPageReload: true,
+        schema: schema.object({
+          pause: schema.boolean(),
+          value: schema.number(),
+        }),
+      },
+    ...
+  }
+}
+```
+
+### Registering Migrations
+To change or remove a `uiSetting`, you must migrate the whole `config` Saved Object. `uiSettings` migrations are declared directly in the service.
+
+For example, in 7.9.0, `siem` as renamed to `securitySolution`, and in 8.0.0, `theme:version` was removed:
+
+**src/core/server/ui_settings/saved_objects/migrations.ts**
+
+```ts
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'kibana/server';
+
+export const migrations = {
+  '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          key.startsWith('siem:')
+            ? {
+                ...acc,
+                [key.replace('siem', 'securitySolution')]: doc.attributes[key],
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
+  '7.12.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({...}),
+  '7.13.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({...}),
+    '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          [
+            // owner: Team:Geo [1]
+            'visualization:regionmap:showWarnings',
+            ...
+            // owner: Team:Core
+            ...
+            'theme:version',
+            // owner: Team:AppServices
+            ...
+          ].includes(key)
+            ? {
+                ...acc,
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
+  '8.1.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({...}),
+};
+```
+[1] Since all `uiSettings` migrations are added to the same migration function, while not required, grouping settings by team is good practice.

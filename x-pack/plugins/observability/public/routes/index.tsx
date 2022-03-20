@@ -15,6 +15,7 @@ import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
+import { RulesPage } from '../pages/rules';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -52,6 +53,7 @@ export const routes = {
         rangeTo: t.string,
         refreshPaused: jsonRt.pipe(t.boolean),
         refreshInterval: jsonRt.pipe(t.number),
+        alpha: jsonRt.pipe(t.boolean),
       }),
     },
     exact: true,
@@ -84,6 +86,13 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    exact: true,
+  },
+  '/rules': {
+    handler: () => {
+      return <RulesPage />;
+    },
+    params: {},
     exact: true,
   },
 };

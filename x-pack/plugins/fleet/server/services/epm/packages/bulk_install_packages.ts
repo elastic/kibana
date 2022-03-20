@@ -21,6 +21,7 @@ interface BulkInstallPackagesParams {
   esClient: ElasticsearchClient;
   force?: boolean;
   spaceId: string;
+  preferredSource?: 'registry' | 'bundled';
 }
 
 export async function bulkInstallPackages({
@@ -31,65 +32,79 @@ export async function bulkInstallPackages({
   force,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
-  const installSource = 'registry';
+
   const packagesResults = await Promise.allSettled(
-    packagesToInstall.map((pkg) => {
-      if (typeof pkg === 'string') return Registry.fetchFindLatestPackage(pkg);
-      return Promise.resolve(pkg);
+    packagesToInstall.map(async (pkg) => {
+      if (typeof pkg !== 'string') {
+        return Promise.resolve(pkg);
+      }
+
+      return Registry.fetchFindLatestPackageOrThrow(pkg);
     })
   );
 
-  logger.debug(`kicking off bulk install of ${packagesToInstall.join(', ')} from registry`);
+  logger.debug(
+    `kicking off bulk install of ${packagesToInstall
+      .map((pkg) => (typeof pkg === 'string' ? pkg : pkg.name))
+      .join(', ')}`
+  );
+
   const bulkInstallResults = await Promise.allSettled(
     packagesResults.map(async (result, index) => {
       const packageName = getNameFromPackagesToInstall(packagesToInstall, index);
-      if (result.status === 'fulfilled') {
-        const pkgKeyProps = result.value;
-        const installedPackageResult = await isPackageVersionOrLaterInstalled({
-          savedObjectsClient,
-          pkgName: pkgKeyProps.name,
-          pkgVersion: pkgKeyProps.version,
-        });
-        if (installedPackageResult) {
-          const {
-            name,
-            version,
-            installed_es: installedEs,
-            installed_kibana: installedKibana,
-          } = installedPackageResult.package;
-          return {
-            name,
-            version,
-            result: {
-              assets: [...installedEs, ...installedKibana],
-              status: 'already_installed',
-              installType: installedPackageResult.installType,
-            } as InstallResult,
-          };
-        }
-        const installResult = await installPackage({
-          savedObjectsClient,
-          esClient,
-          pkgkey: Registry.pkgToPkgKey(pkgKeyProps),
-          installSource,
-          spaceId,
-          force,
-        });
-        if (installResult.error) {
-          return {
-            name: packageName,
-            error: installResult.error,
-            installType: installResult.installType,
-          };
-        } else {
-          return {
-            name: packageName,
-            version: pkgKeyProps.version,
-            result: installResult,
-          };
-        }
+
+      if (result.status === 'rejected') {
+        return { name: packageName, error: result.reason };
       }
-      return { name: packageName, error: result.reason };
+
+      const pkgKeyProps = result.value;
+      const installedPackageResult = await isPackageVersionOrLaterInstalled({
+        savedObjectsClient,
+        pkgName: pkgKeyProps.name,
+        pkgVersion: pkgKeyProps.version,
+      });
+
+      if (installedPackageResult) {
+        const {
+          name,
+          version,
+          installed_es: installedEs,
+          installed_kibana: installedKibana,
+        } = installedPackageResult.package;
+        return {
+          name,
+          version,
+          result: {
+            assets: [...installedEs, ...installedKibana],
+            status: 'already_installed',
+            installType: installedPackageResult.installType,
+          } as InstallResult,
+        };
+      }
+
+      const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
+
+      const installResult = await installPackage({
+        savedObjectsClient,
+        esClient,
+        pkgkey,
+        installSource: 'registry',
+        spaceId,
+        force,
+      });
+
+      if (installResult.error) {
+        return {
+          name: packageName,
+          error: installResult.error,
+          installType: installResult.installType,
+        };
+      }
+      return {
+        name: packageName,
+        version: pkgKeyProps.version,
+        result: installResult,
+      };
     })
   );
 

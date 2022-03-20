@@ -8,6 +8,7 @@ import semver from 'semver';
 import {
   DESTINATION_IP,
   HOST_NAME,
+  PROCESS_NAME_COLUMN,
   PROCESS_NAME,
   REASON,
   RISK_SCORE,
@@ -23,7 +24,6 @@ import {
   ABOUT_RULE_DESCRIPTION,
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
-  getDetails,
   INDEX_PATTERNS_DETAILS,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
@@ -34,6 +34,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
+import { getDetails } from '../../../tasks/rule_details';
 import { waitForPageToBeLoaded } from '../../../tasks/common';
 import {
   waitForRulesTableToBeLoaded,
@@ -116,6 +117,7 @@ describe('After an upgrade, the custom query rule', () => {
     cy.get(REASON).should('have.text', expectedReason).type('{rightarrow}');
     cy.get(HOST_NAME).should('have.text', alert.hostName);
     cy.get(USER_NAME).should('have.text', alert.username);
+    cy.get(PROCESS_NAME_COLUMN).eq(0).scrollIntoView();
     cy.get(PROCESS_NAME).should('have.text', alert.processName);
     cy.get(SOURCE_IP).should('have.text', alert.sourceIp);
     cy.get(DESTINATION_IP).should('have.text', alert.destinationIp);

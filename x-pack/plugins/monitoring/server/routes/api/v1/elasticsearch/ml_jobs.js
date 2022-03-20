@@ -10,8 +10,6 @@ import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getMlJobs } from '../../../../lib/elasticsearch/get_ml_jobs';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
 export function mlJobRoute(server) {
@@ -33,20 +31,12 @@ export function mlJobRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
-        const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
-          req,
-          esIndexPattern,
-          clusterStats
-        );
-        const rows = await getMlJobs(req, esIndexPattern);
-
+        const clusterStats = await getClusterStats(req, clusterUuid);
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
+        const rows = await getMlJobs(req);
         return {
           clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),
           rows,

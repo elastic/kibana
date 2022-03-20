@@ -8,11 +8,11 @@
 import React from 'react';
 import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import type { LensMultiTable } from '../../common';
 import { layerTypes } from '../../common';
-import type { LayerArgs } from '../../common/expressions';
+import type { DataLayerArgs } from '../../common/expressions';
 import { getLegendAction } from './get_legend_action';
 import { LegendActionPopover } from '../shared_components';
 
@@ -27,7 +27,7 @@ const sampleLayer = {
   xScaleType: 'ordinal',
   yScaleType: 'linear',
   isHistogram: false,
-} as LayerArgs;
+} as DataLayerArgs;
 
 const tables = {
   first: {

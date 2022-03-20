@@ -30,13 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show field list', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.switchDataPanelIndexPattern('epoch-millis');
+      await PageObjects.lens.switchDataPanelIndexPattern('epoch-millis*');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       const fieldList = await PageObjects.lens.findAllFields();
       expect(fieldList).to.contain('@timestamp');
-      // not defined for document in time range, only out of time range
-      expect(fieldList).not.to.contain('agent.raw');
     });
 
     it('should able to configure a regular metric', async () => {

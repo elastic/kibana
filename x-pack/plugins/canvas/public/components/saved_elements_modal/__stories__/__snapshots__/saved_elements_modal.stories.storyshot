@@ -17,7 +17,6 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -38,7 +37,9 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -180,7 +181,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -201,7 +201,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -314,7 +316,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Edit element"
                       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__editButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -342,7 +343,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Delete element"
                       className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__deleteButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -423,7 +423,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Edit element"
                       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__editButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -451,7 +450,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Delete element"
                       className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__deleteButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -532,7 +530,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Edit element"
                       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__editButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -560,7 +557,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Delete element"
                       className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__deleteButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -629,7 +625,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -650,7 +645,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -698,6 +695,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                 <button
                   aria-label="Clear input"
                   className="euiFormControlLayoutClearButton"
+                  data-test-subj="clearSearchButton"
                   onClick={[Function]}
                   type="button"
                 >
@@ -778,7 +776,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       aria-label="Edit element"
                       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__editButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -806,7 +803,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       aria-label="Delete element"
                       className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__deleteButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}

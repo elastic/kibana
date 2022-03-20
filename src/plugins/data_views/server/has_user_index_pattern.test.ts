@@ -69,13 +69,11 @@ describe('hasUserIndexPattern', () => {
     });
 
     it('calls indices.resolveIndex for the index patterns', async () => {
-      esClient.indices.resolveIndex.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          indices: [],
-          data_streams: [],
-          aliases: [],
-        })
-      );
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [],
+        aliases: [],
+      });
       await hasUserIndexPattern({ esClient, soClient });
       expect(esClient.indices.resolveIndex).toHaveBeenCalledWith({
         name: 'logs-*,metrics-*',
@@ -83,91 +81,94 @@ describe('hasUserIndexPattern', () => {
     });
 
     it('returns false if no logs or metrics data_streams exist', async () => {
-      esClient.indices.resolveIndex.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          indices: [],
-          data_streams: [],
-          aliases: [],
-        })
-      );
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [],
+        aliases: [],
+      });
       expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
     });
 
     it('returns true if any index exists', async () => {
-      esClient.indices.resolveIndex.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          indices: [{ name: 'logs', attributes: [] }],
-          data_streams: [],
-          aliases: [],
-        })
-      );
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'logs', attributes: [] }],
+        data_streams: [],
+        aliases: [],
+      });
       expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(true);
     });
 
     it('returns false if only metrics-elastic_agent data stream exists', async () => {
-      esClient.indices.resolveIndex.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          indices: [],
-          data_streams: [
-            {
-              name: 'metrics-elastic_agent',
-              timestamp_field: '@timestamp',
-              backing_indices: ['.ds-metrics-elastic_agent'],
-            },
-          ],
-          aliases: [],
-        })
-      );
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'metrics-elastic_agent',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-metrics-elastic_agent'],
+          },
+        ],
+        aliases: [],
+      });
       expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
     });
 
     it('returns false if only logs-elastic_agent data stream exists', async () => {
-      esClient.indices.resolveIndex.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          indices: [],
-          data_streams: [
-            {
-              name: 'logs-elastic_agent',
-              timestamp_field: '@timestamp',
-              backing_indices: ['.ds-logs-elastic_agent'],
-            },
-          ],
-          aliases: [],
-        })
-      );
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'logs-elastic_agent',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-logs-elastic_agent'],
+          },
+        ],
+        aliases: [],
+      });
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
+    });
+
+    it('returns false if only logs-enterprise_search.api-default data stream exists', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'logs-enterprise_search.api-default',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-logs-enterprise_search.api-default-2022.03.07-000001'],
+          },
+        ],
+        aliases: [],
+      });
       expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
     });
 
     it('returns false if only metrics-endpoint.metadata_current_default index exists', async () => {
-      esClient.indices.resolveIndex.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          indices: [
-            {
-              name: 'metrics-endpoint.metadata_current_default',
-              attributes: ['open'],
-            },
-          ],
-          aliases: [],
-          data_streams: [],
-        })
-      );
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [
+          {
+            name: 'metrics-endpoint.metadata_current_default',
+            attributes: ['open'],
+          },
+        ],
+        aliases: [],
+        data_streams: [],
+      });
       expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
     });
 
     it('returns true if any other data stream exists', async () => {
-      esClient.indices.resolveIndex.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
-          indices: [],
-          data_streams: [
-            {
-              name: 'other',
-              timestamp_field: '@timestamp',
-              backing_indices: ['.ds-other'],
-            },
-          ],
-          aliases: [],
-        })
-      );
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'other',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-other'],
+          },
+        ],
+        aliases: [],
+      });
       expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(true);
     });
   });

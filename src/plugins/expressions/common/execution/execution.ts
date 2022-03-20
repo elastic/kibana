@@ -38,7 +38,7 @@ import {
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType, Datatable } from '../expression_types';
-import { ExpressionFunction } from '../expression_functions';
+import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
@@ -224,7 +224,7 @@ export class Execution<
         inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
-      ...execution.params.extraContext,
+      ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
 
@@ -300,7 +300,11 @@ export class Execution<
       ...(chainArr.map((link) =>
         switchMap((currentInput) => {
           const { function: fnName, arguments: fnArgs } = link;
-          const fn = getByAlias(this.state.get().functions, fnName);
+          const fn = getByAlias(
+            this.state.get().functions,
+            fnName,
+            this.execution.params.namespace
+          );
 
           if (!fn) {
             throw createError({
@@ -442,6 +446,16 @@ export class Execution<
     throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   }
 
+  validate<Type = unknown>(value: Type, argDef: ExpressionFunctionParameter<Type>): void {
+    if (argDef.strict && argDef.options?.length && !argDef.options.includes(value)) {
+      throw new Error(
+        `Value '${value}' is not among the allowed options for argument '${
+          argDef.name
+        }': '${argDef.options.join("', '")}'`
+      );
+    }
+  }
+
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
   resolveArgs<Fn extends ExpressionFunction>(
     fnDef: Fn,
@@ -498,7 +512,8 @@ export class Execution<
                   }
 
                   return this.cast(output, argDefs[argName].types);
-                })
+                }),
+                tap((value) => this.validate(value, argDefs[argName]))
               )
         )
       );

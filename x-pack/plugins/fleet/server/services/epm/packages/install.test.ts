@@ -20,6 +20,7 @@ import { licenseService } from '../../license';
 import { installPackage } from './install';
 import * as install from './_install_package';
 import * as obj from './index';
+import { getBundledPackages } from './bundled_packages';
 
 jest.mock('../../app_context', () => {
   return {
@@ -40,6 +41,7 @@ jest.mock('../../upgrade_sender');
 jest.mock('../../license');
 jest.mock('../../upgrade_sender');
 jest.mock('./cleanup');
+jest.mock('./bundled_packages');
 jest.mock('./_install_package', () => {
   return {
     _installPackage: jest.fn(() => Promise.resolve()),
@@ -52,13 +54,15 @@ jest.mock('../kibana/index_pattern/install', () => {
 });
 jest.mock('../archive', () => {
   return {
-    parseAndVerifyArchiveEntries: jest.fn(() =>
+    generatePackageInfoFromArchiveBuffer: jest.fn(() =>
       Promise.resolve({ packageInfo: { name: 'apache', version: '1.3.0' } })
     ),
     unpackBufferToCache: jest.fn(),
     setPackageInfo: jest.fn(),
   };
 });
+
+const mockGetBundledPackages = getBundledPackages as jest.MockedFunction<typeof getBundledPackages>;
 
 describe('install', () => {
   beforeEach(() => {
@@ -67,14 +71,26 @@ describe('install', () => {
       return { pkgName, pkgVersion };
     });
     jest
-      .spyOn(Registry, 'fetchFindLatestPackage')
+      .spyOn(Registry, 'pkgToPkgKey')
+      .mockImplementation((pkg: { name: string; version: string }) => {
+        return `${pkg.name}-${pkg.version}`;
+      });
+    jest
+      .spyOn(Registry, 'fetchFindLatestPackageOrThrow')
       .mockImplementation(() => Promise.resolve({ version: '1.3.0' } as any));
     jest
       .spyOn(Registry, 'getRegistryPackage')
       .mockImplementation(() => Promise.resolve({ packageInfo: { license: 'basic' } } as any));
+
+    mockGetBundledPackages.mockReset();
+    (install._installPackage as jest.Mock).mockClear();
   });
 
   describe('registry', () => {
+    beforeEach(() => {
+      mockGetBundledPackages.mockResolvedValue([]);
+    });
+
     it('should send telemetry on install failure, out of date', async () => {
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -187,13 +203,36 @@ describe('install', () => {
         status: 'failure',
       });
     });
+
+    it('should install from bundled package if one exists', async () => {
+      mockGetBundledPackages.mockResolvedValue([
+        {
+          name: 'test_package',
+          version: '1.0.0',
+          buffer: Buffer.from('test_package'),
+        },
+      ]);
+
+      await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'test_package-1.0.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(install._installPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ installSource: 'upload' })
+      );
+    });
   });
 
   describe('upload', () => {
-    it('should send telemetry on install failure', async () => {
+    it('should send telemetry on update', async () => {
       jest
         .spyOn(obj, 'getInstallationObject')
         .mockImplementationOnce(() => Promise.resolve({ attributes: { version: '1.2.0' } } as any));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',
@@ -206,13 +245,11 @@ describe('install', () => {
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: '1.2.0',
         dryRun: false,
-        errorMessage:
-          'Package upload only supports fresh installations. Package apache is already installed, please uninstall first.',
         eventType: 'package-install',
         installType: 'update',
         newVersion: '1.3.0',
         packageName: 'apache',
-        status: 'failure',
+        status: 'success',
       });
     });
 

@@ -7,11 +7,11 @@
 
 import { getColorAssignments } from './color_assignment';
 import type { FormatFactory, LensMultiTable } from '../../common';
-import type { LayerArgs } from '../../common/expressions';
+import type { DataLayerArgs } from '../../common/expressions';
 import { layerTypes } from '../../common';
 
 describe('color_assignment', () => {
-  const layers: LayerArgs[] = [
+  const layers: DataLayerArgs[] = [
     {
       yScaleType: 'linear',
       xScaleType: 'linear',

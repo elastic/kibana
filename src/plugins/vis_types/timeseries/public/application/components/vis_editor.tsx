@@ -12,6 +12,7 @@ import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
 import type { IUiSettingsClient } from 'kibana/public';
+import type { IndexPattern } from 'src/plugins/data/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -32,7 +33,7 @@ import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
-import type { EditorRenderProps } from '../../../../../visualize/public';
+import type { EditorRenderProps } from '../../../../../visualizations/public';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -46,6 +47,7 @@ export interface TimeseriesEditorProps {
   query: EditorRenderProps['query'];
   uiState: EditorRenderProps['uiState'];
   vis: Vis<TimeseriesVisParams>;
+  defaultIndexPattern?: IndexPattern;
 }
 
 interface TimeseriesEditorState {
@@ -216,6 +218,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
               visData$={this.visData$}
               onChange={this.handleChange}
               getConfig={this.getConfig}
+              defaultIndexPattern={this.props.defaultIndexPattern}
             />
           </div>
         </div>
@@ -236,6 +239,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
   componentWillUnmount() {
     this.updateVisState.cancel();
+    this.abortControllerFetchFields?.abort();
     this.props.eventEmitter.off('updateEditor', this.updateModel);
   }
 

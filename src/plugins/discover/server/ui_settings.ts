@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -28,9 +28,12 @@ import {
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
+  ROW_HEIGHT_OPTION,
 } from '../common';
 
-export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
+export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
+  docLinks: DocLinksServiceSetup
+) => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
@@ -161,7 +164,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
       defaultMessage: 'Document Explorer or classic view',
     }),
-    value: true,
+    value: false,
     description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
         'To use the new Document Explorer instead of the classic view, turn off this option. ' +
@@ -211,10 +214,19 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate(
       'discover.advancedSettings.discover.showFieldStatisticsDescription',
       {
-        defaultMessage: `Enable "Field statistics" table in Discover.`,
+        defaultMessage: `Enable the {fieldStatisticsDocs} to show details such as the minimum and maximum values of a numeric field or a map of a geo field. This functionality is in beta and is subject to change.`,
+        values: {
+          fieldStatisticsDocs:
+            `<a href=${docLinks.links.discover.fieldStatistics}
+            target="_blank" rel="noopener">` +
+            i18n.translate('discover.advancedSettings.discover.fieldStatisticsLinkText', {
+              defaultMessage: 'Field statistics view',
+            }) +
+            '</a>',
+        },
       }
     ),
-    value: false,
+    value: true,
     category: ['discover'],
     schema: schema.boolean(),
     metric: {
@@ -230,7 +242,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       defaultMessage: `Controls whether {multiFields} display in the expanded document view. In most cases, multi-fields are the same as the original field. This option is only available when \`searchFieldsFromSource\` is off.`,
       values: {
         multiFields:
-          `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html"
+          `<a href=${docLinks.links.elasticsearch.mappingMultifields}
             target="_blank" rel="noopener">` +
           i18n.translate('discover.advancedSettings.discover.multiFieldsLinkText', {
             defaultMessage: 'multi-fields',
@@ -242,15 +254,27 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     category: ['discover'],
     schema: schema.boolean(),
   },
+  [ROW_HEIGHT_OPTION]: {
+    name: i18n.translate('discover.advancedSettings.params.rowHeightTitle', {
+      defaultMessage: 'Row height in the Document Explorer',
+    }),
+    value: 3,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
+      defaultMessage:
+        'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
+    }),
+    schema: schema.number({ min: -1 }),
+  },
   [TRUNCATE_MAX_HEIGHT]: {
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum table cell height',
+      defaultMessage: 'Maximum cell height in the classic table',
     }),
     value: 115,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:
-        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
   },

@@ -14,15 +14,10 @@ import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import {
-  casesStatus,
-  useGetCasesMockState,
-  collectionCase,
-  connectorsMock,
-} from '../../containers/mock';
+import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses, CaseType } from '../../../common/api';
+import { CaseStatuses, CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -38,12 +33,18 @@ import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mo
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
+import { usePostComment } from '../../containers/use_post_comment';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useGetReporters } from '../../containers/use_get_reporters';
 
+jest.mock('../../containers/use_post_comment');
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -56,8 +57,11 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
+const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
+const usePostCommentMock = usePostComment as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -84,6 +88,7 @@ describe('AllCasesListGeneric', () => {
   const fetchCasesStatus = jest.fn();
   const onRowClick = jest.fn();
   const emptyTag = getEmptyTagValue().props.children;
+  usePostCommentMock.mockReturnValue({ status: { isLoading: false }, postComment: jest.fn() });
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -150,6 +155,14 @@ describe('AllCasesListGeneric', () => {
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
+    useGetTagsMock.mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
+    useGetReportersMock.mockReturnValue({
+      reporters: ['casetester'],
+      respReporters: [{ username: 'casetester' }],
+      isLoading: true,
+      isError: false,
+      fetchReporters: jest.fn(),
+    });
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     mockKibana();
@@ -207,7 +220,6 @@ describe('AllCasesListGeneric', () => {
             createdAt: null,
             createdBy: null,
             status: null,
-            subCases: null,
             tags: null,
             title: null,
             totalComment: null,
@@ -216,19 +228,24 @@ describe('AllCasesListGeneric', () => {
         ],
       },
     });
+
     const wrapper = mount(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
+
     const checkIt = (columnName: string, key: number) => {
       const column = wrapper.find('[data-test-subj="cases-table"] tbody .euiTableRowCell').at(key);
       expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
       expect(column.find('span').text()).toEqual(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
-      useCasesColumns(defaultColumnArgs)
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+      () => useCasesColumns(defaultColumnArgs),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
     );
 
     await waitFor(() => {
@@ -254,43 +271,6 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toBeFalsy();
     });
-  });
-
-  it.skip('should enable correct actions for sub cases', async () => {
-    useGetCasesMock.mockReturnValue({
-      ...defaultGetCases,
-      data: {
-        ...defaultGetCases.data,
-        cases: [
-          {
-            ...defaultGetCases.data.cases[0],
-            id: 'my-case-with-subcases',
-            createdAt: null,
-            createdBy: null,
-            status: null,
-            subCases: [
-              {
-                id: 'sub-case-id',
-              },
-            ],
-            tags: null,
-            title: null,
-            totalComment: null,
-            totalAlerts: null,
-            type: CaseType.collection,
-          },
-        ],
-      },
-    });
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toEqual(
-      false
-    );
   });
 
   it('should tableHeaderSortButton AllCasesList', async () => {
@@ -339,7 +319,7 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
-      selectedCases: [...useGetCasesMockState.data.cases, collectionCase],
+      selectedCases: [...useGetCasesMockState.data.cases, mockCase],
     });
 
     useDeleteCasesMock
@@ -372,11 +352,10 @@ describe('AllCasesListGeneric', () => {
       expect(handleToggleModal).toBeCalled();
 
       expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual([
-        ...useGetCasesMockState.data.cases.map(({ id, type, title }) => ({ id, type, title })),
+        ...useGetCasesMockState.data.cases.map(({ id, title }) => ({ id, title })),
         {
-          id: collectionCase.id,
-          title: collectionCase.title,
-          type: collectionCase.type,
+          id: mockCase.id,
+          title: mockCase.title,
         },
       ]);
     });
@@ -403,49 +382,6 @@ describe('AllCasesListGeneric', () => {
         false
       );
       expect(wrapper.find('[data-test-subj="cases-bulk-close-button"]').exists()).toEqual(false);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
-      ).toEqual(false);
-    });
-  });
-
-  it('Renders correct bulk actions for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
-    useGetCasesMock.mockReturnValue({
-      ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
-      selectedCases: [
-        ...useGetCasesMockState.data.cases,
-        {
-          ...useGetCasesMockState.data.cases[0],
-          type: CaseType.collection,
-        },
-      ],
-    });
-
-    useDeleteCasesMock
-      .mockReturnValueOnce({
-        ...defaultDeleteCases,
-        isDisplayConfirmDeleteModal: false,
-      })
-      .mockReturnValue({
-        ...defaultDeleteCases,
-        isDisplayConfirmDeleteModal: true,
-      });
-
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
-    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().props().disabled
-      ).toEqual(true);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().props().disabled
-      ).toEqual(true);
       expect(
         wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
       ).toEqual(false);
@@ -579,6 +515,46 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should call postComment when a case is selected in isSelectorView=true and has attachments', async () => {
+    const postCommentMockedValue = { status: { isLoading: false }, postComment: jest.fn() };
+    usePostCommentMock.mockReturnValueOnce(postCommentMockedValue);
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList
+          isSelectorView={true}
+          attachments={[
+            {
+              type: CommentType.alert,
+              alertId: 'alert-id-201',
+              owner: 'test',
+              index: 'index-id-1',
+              rule: {
+                id: 'rule-id-1',
+                name: 'Awesome myrule',
+              },
+            },
+          ]}
+        />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
+    await waitFor(() => {
+      expect(postCommentMockedValue.postComment).toHaveBeenCalledWith({
+        caseId: '1',
+        data: {
+          alertId: 'alert-id-201',
+          index: 'index-id-1',
+          owner: 'test',
+          rule: {
+            id: 'rule-id-1',
+            name: 'Awesome myrule',
+          },
+          type: 'alert',
+        },
+      });
+    });
+  });
+
   it('should call onRowClick with no cases and isSelectorView=true', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
@@ -637,12 +613,10 @@ describe('AllCasesListGeneric', () => {
         id: '1',
         owner: SECURITY_SOLUTION_OWNER,
         status: 'open',
-        subCaseIds: [],
         tags: ['coke', 'pepsi'],
         title: 'Another horrible breach!!',
         totalAlerts: 0,
         totalComment: 0,
-        type: CaseType.individual,
         updatedAt: '2020-02-20T15:02:57.995Z',
         updatedBy: {
           email: 'leslie.knope@elastic.co',
@@ -741,11 +715,15 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
-      useCasesColumns({
-        ...defaultColumnArgs,
-        isSelectorView: true,
-      })
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+      () =>
+        useCasesColumns({
+          ...defaultColumnArgs,
+          isSelectorView: true,
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
     );
 
     expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
@@ -792,8 +770,10 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const solutionHeader = wrapper.find({ children: 'Solution' });
-    expect(solutionHeader.exists()).toBeTruthy();
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeTruthy();
+    });
   });
 
   it('hides Solution column if there is a set owner', async () => {
@@ -805,8 +785,10 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const solutionHeader = wrapper.find({ children: 'Solution' });
-    expect(solutionHeader.exists()).toBeFalsy();
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeFalsy();
+    });
   });
 
   it('should deselect cases when refreshing', async () => {
@@ -821,7 +803,8 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const allCheckbox = await screen.findByTestId('checkboxSelectAll');
+    userEvent.click(allCheckbox);
     const checkboxes = await screen.findAllByRole('checkbox');
 
     for (const checkbox of checkboxes) {
@@ -833,7 +816,7 @@ describe('AllCasesListGeneric', () => {
       expect(checkbox).not.toBeChecked();
     }
 
-    waitForComponentToUpdate();
+    await waitForComponentToUpdate();
   });
 
   it('should deselect cases when changing filters', async () => {
@@ -842,26 +825,15 @@ describe('AllCasesListGeneric', () => {
       selectedCases: [],
     });
 
-    const { rerender } = render(
+    render(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
 
-    /** Something really weird is going on and we have to rerender
-     * to get the correct html output. Not sure why.
-     *
-     * If you run the test alone the rerender is not needed.
-     * If you run the test along with the above test
-     * then you need the rerender
-     */
-    rerender(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
+    const allCheckbox = await screen.findByTestId('checkboxSelectAll');
 
-    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    userEvent.click(allCheckbox);
     const checkboxes = await screen.findAllByRole('checkbox');
 
     for (const checkbox of checkboxes) {
@@ -875,6 +847,42 @@ describe('AllCasesListGeneric', () => {
       expect(checkbox).not.toBeChecked();
     }
 
-    waitForComponentToUpdate();
+    await waitForComponentToUpdate();
+  });
+
+  it('should hide the alerts column if the alert feature is disabled', async () => {
+    expect.assertions(1);
+
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: { enabled: false } }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await expect(findAllByTestId('case-table-column-alertsCount')).rejects.toThrow();
+  });
+
+  it('should show the alerts column if the alert feature is enabled', async () => {
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: { enabled: true } }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const alertCounts = await findAllByTestId('case-table-column-alertsCount');
+
+    expect(alertCounts.length).toBeGreaterThan(0);
+  });
+
+  it('should show the alerts column if the alert object is empty', async () => {
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: {} }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const alertCounts = await findAllByTestId('case-table-column-alertsCount');
+
+    expect(alertCounts.length).toBeGreaterThan(0);
   });
 });

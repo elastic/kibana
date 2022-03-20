@@ -71,6 +71,7 @@ describe('validateMonitor', () => {
           url: 'https://test-url.com',
         },
       ],
+      [ConfigKey.NAMESPACE]: 'testnamespace',
     };
     testMetaData = {
       is_tls_enabled: false,
@@ -281,14 +282,14 @@ describe('validateMonitor', () => {
       const testMonitor = {
         ...testTCPFields,
         ...({
-          [ConfigKey.TIMEOUT]: undefined,
+          [ConfigKey.NAME]: undefined,
         } as unknown as Partial<TCPFields>),
       } as MonitorFields;
 
       const result = validateMonitor(testMonitor);
 
       expect(result.details).toEqual(expect.stringContaining('Invalid value'));
-      expect(result.details).toEqual(expect.stringContaining(ConfigKey.TIMEOUT));
+      expect(result.details).toEqual(expect.stringContaining(ConfigKey.NAME));
       expect(result).toMatchObject({
         valid: false,
         reason: `Monitor is not a valid monitor of type ${DataStream.TCP}`,
@@ -425,6 +426,7 @@ function getJsonPayload() {
     '    "TLSv1.2"' +
     '  ],' +
     '  "name": "test-monitor-name",' +
+    '  "namespace": "testnamespace",' +
     '  "locations": [{' +
     '    "id": "eu-west-01",' +
     '    "label": "Europe West",' +

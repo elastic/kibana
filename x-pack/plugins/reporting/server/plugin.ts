@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { LevelLogger, ReportingStore } from './lib';
+import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -28,17 +28,15 @@ import { registerReportingUsageCollector } from './usage';
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
 {
-  private logger: LevelLogger;
+  private logger: Logger;
   private reportingCore?: ReportingCore;
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
-    this.logger = new LevelLogger(initContext.logger.get());
+    this.logger = initContext.logger.get();
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
-    const { http } = core;
-    const { features, licensing, security, spaces, taskManager } = plugins;
-
+    const { http, status } = core;
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
     // prevent throwing errors in route handlers about async deps not being initialized
@@ -52,26 +50,17 @@ export class ReportingPlugin
       }
     });
 
-    const router = http.createRouter<ReportingRequestHandlerContext>();
-    const basePath = http.basePath;
     reportingCore.pluginSetup({
-      features,
-      licensing,
-      basePath,
-      router,
-      security,
-      spaces,
-      taskManager,
       logger: this.logger,
-      status: core.status,
+      status,
+      basePath: http.basePath,
+      router: http.createRouter<ReportingRequestHandlerContext>(),
+      ...plugins,
     });
 
     registerUiSettings(core);
-    registerDeprecations({
-      core,
-      reportingCore,
-    });
-    registerReportingUsageCollector(reportingCore, plugins);
+    registerDeprecations({ core, reportingCore });
+    registerReportingUsageCollector(reportingCore, plugins.usageCollection);
     registerRoutes(reportingCore, this.logger);
 
     // async background setup
@@ -91,25 +80,26 @@ export class ReportingPlugin
   }
 
   public start(core: CoreStart, plugins: ReportingStartDeps) {
-    // use data plugin for csv formats
-    setFieldFormats(plugins.data.fieldFormats);
+    const { elasticsearch, savedObjects, uiSettings } = core;
+
+    // use fieldFormats plugin for csv formats
+    setFieldFormats(plugins.fieldFormats);
     const reportingCore = this.reportingCore!;
 
     // async background start
     (async () => {
       await reportingCore.pluginSetsUp();
 
-      const store = new ReportingStore(reportingCore, this.logger);
+      const logger = this.logger;
+      const store = new ReportingStore(reportingCore, logger);
 
       await reportingCore.pluginStart({
-        savedObjects: core.savedObjects,
-        uiSettings: core.uiSettings,
+        logger,
+        esClient: elasticsearch.client,
+        savedObjects,
+        uiSettings,
         store,
-        esClient: core.elasticsearch.client,
-        data: plugins.data,
-        taskManager: plugins.taskManager,
-        logger: this.logger,
-        screenshotting: plugins.screenshotting,
+        ...plugins,
       });
 
       // Note: this must be called after ReportingCore.pluginStart
@@ -122,5 +112,9 @@ export class ReportingPlugin
     });
 
     return reportingCore.getContract();
+  }
+
+  stop() {
+    this.reportingCore?.pluginStop();
   }
 }

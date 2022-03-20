@@ -10,8 +10,6 @@ import { handleError } from '../../../../lib/errors';
 import { getPipelineVersions } from '../../../../lib/logstash/get_pipeline_versions';
 import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { getPipelineVertex } from '../../../../lib/logstash/get_pipeline_vertex';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
-import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 function getPipelineVersion(versions, pipelineHash) {
   return pipelineHash ? versions.find(({ hash }) => hash === pipelineHash) : versions[0];
@@ -47,11 +45,9 @@ export function logstashPipelineRoute(server) {
       },
     },
     handler: async (req) => {
-      const config = server.config();
-      const ccs = req.payload.ccs;
+      const config = server.config;
       const clusterUuid = req.params.clusterUuid;
       const detailVertexId = req.payload.detailVertexId;
-      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       const pipelineId = req.params.pipelineId;
       // Optional params default to empty string, set to null to be more explicit.
@@ -62,8 +58,6 @@ export function logstashPipelineRoute(server) {
       try {
         versions = await getPipelineVersions({
           req,
-          config,
-          lsIndexPattern,
           clusterUuid,
           pipelineId,
         });
@@ -72,18 +66,11 @@ export function logstashPipelineRoute(server) {
       }
       const version = getPipelineVersion(versions, pipelineHash);
 
-      const promises = [getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, version)];
+      // noinspection ES6MissingAwait
+      const promises = [getPipeline(req, config, clusterUuid, pipelineId, version)];
       if (detailVertexId) {
         promises.push(
-          getPipelineVertex(
-            req,
-            config,
-            lsIndexPattern,
-            clusterUuid,
-            pipelineId,
-            version,
-            detailVertexId
-          )
+          getPipelineVertex(req, config, clusterUuid, pipelineId, version, detailVertexId)
         );
       }
 

@@ -13,7 +13,7 @@ import {
   getColorForAgentStatus,
   getLabelForAgentStatus,
 } from './services/agent_status';
-import type { ActionAgentStatus } from './types';
+import { ActionAgentStatus } from './types';
 
 export const ActionAgentsStatusBadges = memo<{
   agentStatus: { [k in ActionAgentStatus]: number };

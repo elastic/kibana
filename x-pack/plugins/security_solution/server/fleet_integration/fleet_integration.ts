@@ -25,6 +25,9 @@ import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
 import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
+import { FeatureUsageService } from '../endpoint/services/feature_usage/service';
+import { EndpointMetadataService } from '../endpoint/services/metadata';
+import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -105,7 +108,9 @@ export const getPackagePolicyCreateCallback = (
 
 export const getPackagePolicyUpdateCallback = (
   logger: Logger,
-  licenseService: LicenseService
+  licenseService: LicenseService,
+  featureUsageService: FeatureUsageService,
+  endpointMetadataService: EndpointMetadataService
 ): PutPackagePolicyUpdateCallback => {
   return async (
     newPackagePolicy: NewPackagePolicy
@@ -124,6 +129,8 @@ export const getPackagePolicyUpdateCallback = (
       licenseService,
       logger
     );
+
+    notifyProtectionFeatureUsage(newPackagePolicy, featureUsageService, endpointMetadataService);
 
     return newPackagePolicy;
   };

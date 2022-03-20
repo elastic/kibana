@@ -1,0 +1,14 @@
+{
+  "name": "third_party_vis_lens_example",
+  "version": "1.0.0",
+  "main": "target/examples/third_party_vis_lens_example",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "kbn": "node ../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../node_modules/.bin/tsc"
+  }
+}

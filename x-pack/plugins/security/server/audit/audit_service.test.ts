@@ -67,6 +67,10 @@ describe('#setup', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "asScoped": [Function],
+        "withoutRequest": Object {
+          "enabled": true,
+          "log": [Function],
+        },
       }
     `);
     audit.stop();
@@ -249,6 +253,82 @@ describe('#asScoped', () => {
     });
 
     await auditSetup.asScoped(request).log(undefined);
+    expect(logger.info).not.toHaveBeenCalled();
+    audit.stop();
+  });
+});
+
+describe('#withoutRequest', () => {
+  it('logs event without additional meta data', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+
+    await auditSetup.withoutRequest.log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
+      event: { action: 'ACTION' },
+    });
+    audit.stop();
+  });
+
+  it('does not log to audit logger if event matches ignore filter', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config: {
+        enabled: true,
+        appender: {
+          type: 'console',
+          layout: {
+            type: 'json',
+          },
+        },
+        ignore_filters: [{ actions: ['ACTION'] }],
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+
+    await auditSetup.withoutRequest.log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    expect(logger.info).not.toHaveBeenCalled();
+    audit.stop();
+  });
+
+  it('does not log to audit logger if no event was generated', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config: {
+        enabled: true,
+        appender: {
+          type: 'console',
+          layout: {
+            type: 'json',
+          },
+        },
+        ignore_filters: [{ actions: ['ACTION'] }],
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+
+    await auditSetup.withoutRequest.log(undefined);
     expect(logger.info).not.toHaveBeenCalled();
     audit.stop();
   });

@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { act, RenderResult, waitFor, within } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../common/api';
+import { CommentType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostComment } from '../../containers/use_post_comment';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -39,6 +39,8 @@ import { FormContext } from './form_context';
 import { CreateCaseFormFields, CreateCaseFormFieldsProps } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { Choice } from '../connectors/servicenow/types';
+import userEvent from '@testing-library/user-event';
 
 const sampleId = 'case-id';
 
@@ -81,7 +83,6 @@ const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
   withSteps: true,
-  hideConnectorServiceNowSir: false,
 };
 
 const defaultPostPushToService = {
@@ -110,11 +111,30 @@ const fillForm = (wrapper: ReactWrapper) => {
   });
 };
 
+const fillFormReactTestingLib = async (renderResult: RenderResult) => {
+  const titleInput = within(renderResult.getByTestId('caseTitle')).getByTestId('input');
+  userEvent.type(titleInput, sampleData.title);
+
+  const descriptionInput = renderResult.container.querySelector(
+    `[data-test-subj="caseDescription"] textarea`
+  );
+  if (descriptionInput) {
+    userEvent.type(descriptionInput, sampleData.description);
+  }
+  const caseTags = renderResult.getByTestId('caseTags');
+  for (let i = 0; i < sampleTags.length; i++) {
+    const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
+    userEvent.type(tagsInput, `${sampleTags[i]}{enter}`);
+  }
+};
+
 describe('Create case', () => {
   const fetchTags = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const postComment = jest.fn();
+  let onChoicesSuccess: (values: Choice[]) => void;
+  let mockedContext: AppMockRenderer;
 
   beforeAll(() => {
     postCase.mockResolvedValue({
@@ -130,7 +150,12 @@ describe('Create case', () => {
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
-    useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
+    useGetChoicesMock.mockImplementation(
+      ({ onSuccess }: { onSuccess: (values: Choice[]) => void }) => {
+        onChoicesSuccess = onSuccess;
+        return useGetChoicesResponse;
+      }
+    );
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       tags: sampleTags,
@@ -143,29 +168,23 @@ describe('Create case', () => {
   });
 
   beforeEach(() => {
+    mockedContext = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   describe('Step 1 - Case Fields', () => {
-    it('it renders', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
+    it('renders correctly', async () => {
+      const renderResult = mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
       );
-      await act(async () => {
-        wrapper.update();
-      });
-      expect(wrapper.find(`[data-test-subj="caseTitle"]`).first().exists()).toBeTruthy();
-      expect(wrapper.find(`[data-test-subj="caseDescription"]`).first().exists()).toBeTruthy();
-      expect(wrapper.find(`[data-test-subj="caseTags"]`).first().exists()).toBeTruthy();
-      expect(wrapper.find(`[data-test-subj="caseConnectors"]`).first().exists()).toBeTruthy();
-      expect(
-        wrapper.find(`[data-test-subj="case-creation-form-steps"]`).first().exists()
-      ).toBeTruthy();
+      expect(renderResult.getByTestId('caseTitle')).toBeTruthy();
+      expect(renderResult.getByTestId('caseDescription')).toBeTruthy();
+      expect(renderResult.getByTestId('caseTags')).toBeTruthy();
+      expect(renderResult.getByTestId('caseConnectors')).toBeTruthy();
+      expect(renderResult.getByTestId('case-creation-form-steps')).toBeTruthy();
     });
 
     it('should post case on submit click', async () => {
@@ -174,21 +193,21 @@ describe('Create case', () => {
         connectors: connectorsMock,
       });
 
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
+      const renderResult = mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
       );
 
-      fillForm(wrapper);
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
+      await fillFormReactTestingLib(renderResult);
+      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      await waitFor(() => {
+        expect(postCase).toBeCalledWith(sampleData);
+      });
     });
 
-    it('it does not submits the title when the length is longer than 64 characters', async () => {
+    it('does not submits the title when the length is longer than 64 characters', async () => {
       const longTitle =
         'This is a title that should not be saved as it is longer than 64 characters.';
 
@@ -249,7 +268,7 @@ describe('Create case', () => {
       });
 
       const wrapper = mount(
-        <TestProviders features={{ alerts: { sync: false } }}>
+        <TestProviders features={{ alerts: { sync: false, enabled: true } }}>
           <FormContext onSuccess={onFormSubmitSuccess}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
@@ -265,7 +284,7 @@ describe('Create case', () => {
       );
     });
 
-    it('it should select the default connector set in the configuration', async () => {
+    it('should select the default connector set in the configuration', async () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         connector: {
@@ -315,7 +334,7 @@ describe('Create case', () => {
       );
     });
 
-    it('it should default to none if the default connector does not exist in connectors', async () => {
+    it('should default to none if the default connector does not exist in connectors', async () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         connector: {
@@ -351,7 +370,7 @@ describe('Create case', () => {
   });
 
   describe('Step 2 - Connector Fields', () => {
-    it(`it should submit and push to Jira connector`, async () => {
+    it(`should submit and push to Jira connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
@@ -418,7 +437,7 @@ describe('Create case', () => {
       });
     });
 
-    it(`it should submit and push to resilient connector`, async () => {
+    it(`should submit and push to resilient connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
@@ -488,7 +507,7 @@ describe('Create case', () => {
       });
     });
 
-    it(`it should submit and push to servicenow itsm connector`, async () => {
+    it(`should submit and push to servicenow itsm connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
@@ -511,6 +530,11 @@ describe('Create case', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeTruthy();
+      });
+
+      // we need the choices response to conditionally show the subcategory select
+      act(() => {
+        onChoicesSuccess(useGetChoicesResponse.choices);
       });
 
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
@@ -578,7 +602,7 @@ describe('Create case', () => {
       });
     });
 
-    it(`it should submit and push to servicenow sir connector`, async () => {
+    it(`should submit and push to servicenow sir connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
@@ -601,6 +625,11 @@ describe('Create case', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find(`[data-test-subj="connector-fields-sn-sir"]`).exists()).toBeTruthy();
+      });
+
+      // we need the choices response to conditionally show the subcategory select
+      act(() => {
+        onChoicesSuccess(useGetChoicesResponse.choices);
       });
 
       wrapper
@@ -676,32 +705,28 @@ describe('Create case', () => {
     });
   });
 
-  it(`it should call afterCaseCreated`, async () => {
+  it(`should call afterCaseCreated`, async () => {
     useConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       connectors: connectorsMock,
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
-      </TestProviders>
+    const wrapper = mockedContext.render(
+      <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <SubmitCaseButton />
+      </FormContext>
     );
 
-    fillForm(wrapper);
-    expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
-
-    await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeTruthy();
+    await fillFormReactTestingLib(wrapper);
+    expect(wrapper.queryByTestId('connector-fields-jira')).toBeFalsy();
+    userEvent.click(wrapper.getByTestId('dropdown-connectors'));
+    await act(async () => {
+      userEvent.click(wrapper.getByTestId('dropdown-connector-jira-1'));
     });
+    expect(wrapper.getByTestId('connector-fields-jira')).toBeTruthy();
 
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    userEvent.click(wrapper.getByTestId('create-case-submit'));
     await waitFor(() => {
       expect(afterCaseCreated).toHaveBeenCalledWith(
         {
@@ -713,15 +738,75 @@ describe('Create case', () => {
     });
   });
 
-  it(`it should call callbacks in correct order`, async () => {
+  it('should call `postComment` with the attachments after the case is created', async () => {
     useConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       connectors: connectorsMock,
     });
+    const attachments = [
+      {
+        alertId: '1234',
+        index: '',
+        rule: {
+          id: '45321',
+          name: 'my rule',
+        },
+        owner: 'owner',
+        type: CommentType.alert as const,
+      },
+      {
+        alertId: '7896',
+        index: '',
+        rule: {
+          id: '445324',
+          name: 'my rule',
+        },
+        owner: 'second-owner',
+        type: CommentType.alert as const,
+      },
+    ];
+
+    const wrapper = mockedContext.render(
+      <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <SubmitCaseButton />
+      </FormContext>
+    );
+
+    await fillFormReactTestingLib(wrapper);
+
+    await act(async () => {
+      userEvent.click(wrapper.getByTestId('create-case-submit'));
+    });
+    expect(postComment).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments[0] });
+    expect(postComment).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments[1] });
+  });
+
+  it(`should call callbacks in correct order`, async () => {
+    useConnectorsMock.mockReturnValue({
+      ...sampleConnectorData,
+      connectors: connectorsMock,
+    });
+    const attachments = [
+      {
+        alertId: '1234',
+        index: '',
+        rule: {
+          id: '45321',
+          name: 'my rule',
+        },
+        owner: 'owner',
+        type: CommentType.alert as const,
+      },
+    ];
 
     const wrapper = mount(
       <TestProviders>
-        <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
+        <FormContext
+          onSuccess={onFormSubmitSuccess}
+          afterCaseCreated={afterCaseCreated}
+          attachments={attachments}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -741,26 +826,23 @@ describe('Create case', () => {
     wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() => {
       expect(postCase).toHaveBeenCalled();
+      expect(postComment).toHaveBeenCalled();
       expect(afterCaseCreated).toHaveBeenCalled();
       expect(pushCaseToExternalService).toHaveBeenCalled();
       expect(onFormSubmitSuccess).toHaveBeenCalled();
     });
 
     const postCaseOrder = postCase.mock.invocationCallOrder[0];
+    const postCommentOrder = postComment.mock.invocationCallOrder[0];
     const afterCaseOrder = afterCaseCreated.mock.invocationCallOrder[0];
     const pushCaseToExternalServiceOrder = pushCaseToExternalService.mock.invocationCallOrder[0];
     const onFormSubmitSuccessOrder = onFormSubmitSuccess.mock.invocationCallOrder[0];
 
     expect(
-      postCaseOrder < afterCaseOrder &&
-        postCaseOrder < pushCaseToExternalServiceOrder &&
-        postCaseOrder < onFormSubmitSuccessOrder
+      postCaseOrder < postCommentOrder &&
+        postCommentOrder < afterCaseOrder &&
+        afterCaseOrder < pushCaseToExternalServiceOrder &&
+        pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder
     ).toBe(true);
-
-    expect(
-      afterCaseOrder < pushCaseToExternalServiceOrder && afterCaseOrder < onFormSubmitSuccessOrder
-    ).toBe(true);
-
-    expect(pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder).toBe(true);
   });
 });

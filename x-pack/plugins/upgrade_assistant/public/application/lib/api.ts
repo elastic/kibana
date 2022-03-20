@@ -13,6 +13,7 @@ import {
   ClusterUpgradeState,
   ResponseError,
   SystemIndicesMigrationStatus,
+  ReindexStatusResponse,
 } from '../../../common/types';
 import {
   API_BASE_PATH,
@@ -209,7 +210,7 @@ export class ApiService {
   }
 
   public async getReindexStatus(indexName: string) {
-    return await this.sendRequest({
+    return await this.sendRequest<ReindexStatusResponse>({
       path: `${API_BASE_PATH}/reindex/${indexName}`,
       method: 'get',
     });
@@ -235,6 +236,37 @@ export class ApiService {
       details: string;
     }>({
       path: `${API_BASE_PATH}/status`,
+      method: 'get',
+    });
+  }
+
+  public async updateClusterSettings(settings: string[]) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/cluster_settings`,
+      method: 'post',
+      body: {
+        settings: JSON.stringify(settings),
+      },
+    });
+  }
+
+  public useLoadRemoteClusters() {
+    return this.useRequest<string[]>({
+      path: `${API_BASE_PATH}/remote_clusters`,
+      method: 'get',
+    });
+  }
+
+  public useLoadNodeDiskSpace() {
+    return this.useRequest<
+      Array<{
+        nodeId: string;
+        nodeName: string;
+        available: string;
+        lowDiskWatermarkSetting: string;
+      }>
+    >({
+      path: `${API_BASE_PATH}/node_disk_space`,
       method: 'get',
     });
   }

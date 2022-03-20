@@ -118,6 +118,15 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     });
   }
 
+  public navigateSync(locatorParams: P, navigationParams: LocatorNavigationParams = {}): void {
+    this.navigate(locatorParams, navigationParams).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.log(`Failed to navigate [locator = ${this.id}].`, locatorParams, navigationParams);
+      // eslint-disable-next-line no-console
+      console.error(error);
+    });
+  }
+
   public readonly useUrl = (
     params: P,
     getUrlParams?: LocatorGetUrlParams,

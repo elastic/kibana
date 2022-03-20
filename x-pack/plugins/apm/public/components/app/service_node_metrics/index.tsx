@@ -83,18 +83,19 @@ export function ServiceNodeMetrics() {
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
-          params: {
-            path: { serviceName, serviceNodeName },
-            query: {
-              kuery,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+          {
+            params: {
+              path: { serviceName, serviceNodeName },
+              query: {
+                kuery,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [kuery, serviceName, serviceNodeName, start, end]

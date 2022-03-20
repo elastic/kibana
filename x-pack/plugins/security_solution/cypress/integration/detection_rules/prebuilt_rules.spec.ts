@@ -13,30 +13,27 @@ import {
   RULES_EMPTY_PROMPT,
   RULE_SWITCH,
   SHOWING_RULES_TEXT,
-  RULES_MONIROTING_TABLE,
+  RULES_MONITORING_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 
-import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo100,
   deleteFirstRule,
   deleteSelectedRules,
   loadPrebuiltDetectionRules,
   reloadDeletedRules,
   selectNumberOfRules,
-  waitForRulesTableToBeLoaded,
   waitForPrebuiltDetectionRulesToBeLoaded,
   selectAllRules,
   confirmRulesDelete,
-  activateSelectedRules,
+  enableSelectedRules,
   waitForRuleToChangeStatus,
-  deactivateSelectedRules,
+  disableSelectedRules,
   changeRowsPerPageTo,
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
@@ -52,10 +49,7 @@ describe('Alerts rules, prebuilt rules', () => {
     const expectedNumberOfPages = Math.ceil(totalNumberOfPrebuiltRules / rowsPerPage);
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
@@ -74,121 +68,107 @@ describe('Actions with prebuilt rules', () => {
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
   });
 
-  it('Allows to activate/deactivate all rules at once', () => {
-    selectAllRules();
-    activateSelectedRules();
-    waitForRuleToChangeStatus();
-    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
+  context('Rules table', () => {
+    it('Allows to enable/disable all rules at once', () => {
+      selectAllRules();
+      enableSelectedRules();
+      waitForRuleToChangeStatus();
+      cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    selectAllRules();
-    deactivateSelectedRules();
-    waitForRuleToChangeStatus();
-    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
-  });
+      selectAllRules();
+      disableSelectedRules();
+      waitForRuleToChangeStatus();
+      cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
+    });
 
-  it('Allows to activate all rules on a page and deactivate single one at monitoring table', () => {
-    cy.get(RULES_MONIROTING_TABLE).click();
-    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-    activateSelectedRules();
-    waitForRuleToChangeStatus();
-    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
+    it('Allows to delete all rules at once', () => {
+      selectAllRules();
+      deleteSelectedRules();
+      confirmRulesDelete();
+      cy.get(RULES_EMPTY_PROMPT).should('be.visible');
+    });
 
-    selectNumberOfRules(1);
-    cy.get(RULE_SWITCH).first().click();
-    waitForRuleToChangeStatus();
-    cy.get(RULE_SWITCH).first().should('have.attr', 'aria-checked', 'false');
-  });
+    it('Does not allow to delete one rule when more than one is selected', () => {
+      const numberOfRulesToBeSelected = 2;
+      selectNumberOfRules(numberOfRulesToBeSelected);
 
-  it('Allows to delete all rules at once', () => {
-    selectAllRules();
-    deleteSelectedRules();
-    confirmRulesDelete();
-    cy.get(RULES_EMPTY_PROMPT).should('be.visible');
-  });
+      cy.get(COLLAPSED_ACTION_BTN).each((collapsedItemActionBtn) => {
+        cy.wrap(collapsedItemActionBtn).should('have.attr', 'disabled');
+      });
+    });
 
-  it('Does not allow to delete one rule when more than one is selected', () => {
-    changeRowsPerPageTo100();
+    it('Deletes and recovers one rule', () => {
+      const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 1;
+      const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
 
-    const numberOfRulesToBeSelected = 2;
-    selectNumberOfRules(numberOfRulesToBeSelected);
+      deleteFirstRule();
 
-    cy.get(COLLAPSED_ACTION_BTN).each((collapsedItemActionBtn) => {
-      cy.wrap(collapsedItemActionBtn).should('have.attr', 'disabled');
+      cy.get(ELASTIC_RULES_BTN).should(
+        'have.text',
+        `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
+      );
+      cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
+      cy.get(RELOAD_PREBUILT_RULES_BTN).should('have.text', 'Install 1 Elastic prebuilt rule ');
+
+      reloadDeletedRules();
+
+      cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
+
+      cy.get(ELASTIC_RULES_BTN).should(
+        'have.text',
+        `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
+      );
+    });
+
+    it('Deletes and recovers more than one rule', () => {
+      const numberOfRulesToBeSelected = 2;
+      const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 2;
+      const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
+
+      selectNumberOfRules(numberOfRulesToBeSelected);
+      deleteSelectedRules();
+
+      cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
+      cy.get(RELOAD_PREBUILT_RULES_BTN).should(
+        'have.text',
+        `Install ${numberOfRulesToBeSelected} Elastic prebuilt rules `
+      );
+      cy.get(ELASTIC_RULES_BTN).should(
+        'have.text',
+        `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
+      );
+
+      reloadDeletedRules();
+
+      cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
+
+      cy.get(ELASTIC_RULES_BTN).should(
+        'have.text',
+        `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
+      );
     });
   });
 
-  it('Deletes and recovers one rule', () => {
-    changeRowsPerPageTo100();
+  context('Rule monitoring table', () => {
+    it('Allows to enable/disable all rules at once', () => {
+      cy.get(RULES_MONITORING_TABLE).click();
 
-    const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 1;
-    const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
+      cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+      enableSelectedRules();
+      waitForRuleToChangeStatus();
+      cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    deleteFirstRule();
-    cy.reload();
-    changeRowsPerPageTo100();
-
-    cy.get(ELASTIC_RULES_BTN).should(
-      'have.text',
-      `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
-    );
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('have.text', 'Install 1 Elastic prebuilt rule ');
-
-    reloadDeletedRules();
-
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
-
-    cy.reload();
-    changeRowsPerPageTo100();
-
-    cy.get(ELASTIC_RULES_BTN).should(
-      'have.text',
-      `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
-    );
-  });
-
-  it('Deletes and recovers more than one rule', () => {
-    changeRowsPerPageTo100();
-
-    const numberOfRulesToBeSelected = 2;
-    const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 2;
-    const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
-
-    selectNumberOfRules(numberOfRulesToBeSelected);
-    deleteSelectedRules();
-    cy.reload();
-    changeRowsPerPageTo100();
-
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should(
-      'have.text',
-      `Install ${numberOfRulesToBeSelected} Elastic prebuilt rules `
-    );
-    cy.get(ELASTIC_RULES_BTN).should(
-      'have.text',
-      `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
-    );
-
-    reloadDeletedRules();
-
-    cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
-
-    cy.reload();
-    changeRowsPerPageTo100();
-
-    cy.get(ELASTIC_RULES_BTN).should(
-      'have.text',
-      `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
-    );
+      selectAllRules();
+      disableSelectedRules();
+      waitForRuleToChangeStatus();
+      cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
+    });
   });
 });

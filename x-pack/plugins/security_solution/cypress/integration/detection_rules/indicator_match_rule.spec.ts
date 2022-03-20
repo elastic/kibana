@@ -35,7 +35,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   INDEX_PATTERNS_DETAILS,
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
@@ -59,8 +58,6 @@ import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeli
 import {
   goToManageAlertsDetectionRules,
   investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
@@ -78,7 +75,7 @@ import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, reload } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineIndicatorMatchRuleAndContinue,
   fillIndexAndIndicatorIndexPattern,
@@ -112,10 +109,10 @@ import {
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { goBackToAllRulesTable } from '../../tasks/rule_details';
+import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
-const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -411,9 +408,7 @@ describe('indicator match', () => {
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
-      it('Creates and activates a new Indicator Match rule', () => {
-        waitForAlertsPanelToBeLoaded();
-        waitForAlertsIndexToBeCreated();
+      it('Creates and enables a new Indicator Match rule', () => {
         goToManageAlertsDetectionRules();
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();
@@ -421,7 +416,7 @@ describe('indicator match', () => {
         fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
         fillAboutRuleAndContinue(getNewThreatIndicatorRule());
         fillScheduleRuleAndContinue(getNewThreatIndicatorRule());
-        createAndActivateRule();
+        createAndEnableRule();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -511,7 +506,7 @@ describe('indicator match', () => {
         cy.get(ALERT_RISK_SCORE).first().should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      it.skip('Investigate alert in timeline', () => {
+      it('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
@@ -540,7 +535,8 @@ describe('indicator match', () => {
             getNewThreatIndicatorRule().indicatorMappingField
           }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
             getNewThreatIndicatorRule().atomic
-          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}`
+          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}provided` +
+            ` byfeed.nameAbuseCH malware${accessibilityText}`
         );
       });
     });

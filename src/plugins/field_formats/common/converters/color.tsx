@@ -35,7 +35,11 @@ export class ColorFormat extends FieldFormat {
     switch (this.param('fieldType')) {
       case 'string':
         return findLast(this.param('colors'), (colorParam: typeof DEFAULT_CONVERTER_COLOR) => {
-          return new RegExp(colorParam.regex).test(val as string);
+          try {
+            return new RegExp(colorParam.regex).test(val as string);
+          } catch (e) {
+            return false;
+          }
         });
 
       case 'number':

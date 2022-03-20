@@ -10,7 +10,7 @@ import { first, isEmpty, last, meanBy } from 'lodash';
 import moment from 'moment';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 import { asPercent } from '../../../../plugins/apm/common/utils/formatters';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -91,10 +91,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const transactionName = 'GET /api/product/list';
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoProdInstance
                   .transaction(transactionName)
                   .timestamp(timestamp)
@@ -102,10 +102,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .success()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_ERROR_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoProdInstance
                   .transaction(transactionName)
                   .duration(1000)

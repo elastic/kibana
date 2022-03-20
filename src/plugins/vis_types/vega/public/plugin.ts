@@ -18,18 +18,20 @@ import {
   setInjectedVars,
   setUISettings,
   setInjectedMetadata,
-  setMapServiceSettings,
   setDocLinks,
+  setMapsEms,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IServiceSettings, MapsEmsPluginSetup } from '../../../maps_ems/public';
+import type { MapsEmsPluginPublicStart } from '../../../maps_ems/public';
+import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
+
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
-import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settings';
+import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -46,12 +48,12 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
   data: DataPublicPluginSetup;
-  mapsEms: MapsEmsPluginSetup;
 }
 
 /** @internal */
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
+  mapsEms: MapsEmsPluginPublicStart;
 }
 
 /** @internal */
@@ -64,7 +66,7 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public setup(
     core: CoreSetup,
-    { inspector, data, expressions, visualizations, mapsEms }: VegaPluginSetupDependencies
+    { inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
@@ -73,16 +75,12 @@ export class VegaPlugin implements Plugin<void, void> {
 
     setUISettings(core.uiSettings);
 
-    setMapServiceSettings(
-      new MapServiceSettings(mapsEms.config, this.initializerContext.env.packageInfo.version)
-    );
-
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
       plugins: {
         data,
       },
-      getServiceSettings: mapsEms.getServiceSettings,
+      getServiceSettings: getServiceSettingsLazy,
     };
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
@@ -93,10 +91,11 @@ export class VegaPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(createVegaTypeDefinition());
   }
 
-  public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
+  public start(core: CoreStart, { data, mapsEms }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setData(data);
     setInjectedMetadata(core.injectedMetadata);
     setDocLinks(core.docLinks);
+    setMapsEms(mapsEms);
   }
 }

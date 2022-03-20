@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useMemo } from 'react';
 import { isString } from 'lodash/fp';
 import {
   AppError,
@@ -44,7 +44,11 @@ export const useAppToasts = (): UseAppToasts => {
     },
     [addError]
   );
-  return { api: toasts, addError: _addError, addSuccess, addWarning };
+
+  return useMemo(
+    () => ({ api: toasts, addError: _addError, addSuccess, addWarning }),
+    [_addError, addSuccess, addWarning, toasts]
+  );
 };
 
 /**

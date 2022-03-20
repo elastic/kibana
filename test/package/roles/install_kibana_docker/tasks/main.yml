@@ -7,8 +7,8 @@
 - name: load image
   become: yes
   docker_image:
-    name: kibana
-    load_path: "{{ kibana_docker.files[0].path }}"
+    name: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana/kibana:\\1') }}"
+    load_path: '{{ kibana_docker.files[0].path }}'
     timeout: 300
     source: load
     state: present
@@ -21,6 +21,6 @@
     network_mode: host
     env:
       SERVER_HOST: 0.0.0.0
-      ELASTICSEARCH_HOSTS: http://192.168.50.1:9200
-      ELASTICSEARCH_USERNAME: "{{ elasticsearch_username }}"
-      ELASTICSEARCH_PASSWORD: "{{ elasticsearch_password }}"
+      ELASTICSEARCH_HOSTS: http://192.168.56.1:9200
+      ELASTICSEARCH_USERNAME: '{{ elasticsearch_username }}'
+      ELASTICSEARCH_PASSWORD: '{{ elasticsearch_password }}'

@@ -9,7 +9,7 @@ import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { KibanaFeature } from '../../../../../../../../features/public';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';

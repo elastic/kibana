@@ -9,7 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '../../../../expressions/public';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
+import {
+  prepareLogTable,
+  Dimension,
+  validateAccessor,
+} from '../../../../visualizations/common/utils';
 import { HeatmapExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -17,7 +21,10 @@ import {
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
 
-const convertToVisDimension = (columns: DatatableColumn[], accessor: string) => {
+const convertToVisDimension = (
+  columns: DatatableColumn[],
+  accessor: string
+): ExpressionValueVisDimension | undefined => {
   const column = columns.find((c) => c.id === accessor);
   if (!column) return;
   return {
@@ -27,7 +34,7 @@ const convertToVisDimension = (columns: DatatableColumn[], accessor: string) => 
       params: { ...column.meta.params?.params },
     },
     type: 'vis_dimension',
-  } as ExpressionValueVisDimension;
+  };
 };
 
 const prepareHeatmapLogTable = (
@@ -70,12 +77,14 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('expressionHeatmap.function.legendConfig.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
+      default: `{${EXPRESSION_HEATMAP_LEGEND_NAME}}`,
     },
     gridConfig: {
       types: [EXPRESSION_HEATMAP_GRID_NAME],
       help: i18n.translate('expressionHeatmap.function.gridConfig.help', {
         defaultMessage: 'Configure the heatmap layout.',
       }),
+      default: `{${EXPRESSION_HEATMAP_GRID_NAME}}`,
     },
     showTooltip: {
       types: ['boolean'],
@@ -118,6 +127,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('expressionHeatmap.function.args.valueAccessorHelpText', {
         defaultMessage: 'The id of the value column or the corresponding dimension',
       }),
+      required: true,
     },
     // not supported yet, small multiples accessor
     splitRowAccessor: {
@@ -135,8 +145,21 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
         defaultMessage: 'The id of the split column or the corresponding dimension',
       }),
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('expressionHeatmap.functions.args.ariaLabelHelpText', {
+        defaultMessage: 'Specifies the aria label of the heat map',
+      }),
+      required: false,
+    },
   },
   fn(data, args, handlers) {
+    validateAccessor(args.xAccessor, data.columns);
+    validateAccessor(args.yAccessor, data.columns);
+    validateAccessor(args.valueAccessor, data.columns);
+    validateAccessor(args.splitRowAccessor, data.columns);
+    validateAccessor(args.splitColumnAccessor, data.columns);
+
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [];
       if (args.valueAccessor) {
@@ -197,7 +220,13 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       as: EXPRESSION_HEATMAP_NAME,
       value: {
         data,
-        args,
+        args: {
+          ...args,
+          ariaLabel:
+            args.ariaLabel ??
+            (handlers.variables?.embeddableTitle as string) ??
+            handlers.getExecutionContext?.()?.description,
+        },
       },
     };
   },

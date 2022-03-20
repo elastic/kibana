@@ -10,13 +10,13 @@ import React from 'react';
 import uuid from 'uuid';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
-import { getHostIsolationExceptionItems } from '../../../../../host_isolation_exceptions/service';
+import { getHostIsolationExceptionSummary } from '../../../../../host_isolation_exceptions/service';
 import { FleetIntegrationHostIsolationExceptionsCard } from './fleet_integration_host_isolation_exceptions_card';
 
 jest.mock('../../../../../host_isolation_exceptions/service');
 jest.mock('../../../../../../../common/components/user_privileges');
 
-const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+const getHostIsolationExceptionSummaryMock = getHostIsolationExceptionSummary as jest.Mock;
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
@@ -29,7 +29,7 @@ describe('Fleet host isolation exceptions card filters card', () => {
     );
   };
   afterEach(() => {
-    getHostIsolationExceptionItemsMock.mockReset();
+    getHostIsolationExceptionSummaryMock.mockReset();
   });
   describe('With canIsolateHost privileges', () => {
     beforeEach(() => {
@@ -41,23 +41,24 @@ describe('Fleet host isolation exceptions card filters card', () => {
     });
 
     it('should call the API and render the card correctly', async () => {
-      getHostIsolationExceptionItemsMock.mockResolvedValue({
+      getHostIsolationExceptionSummaryMock.mockResolvedValue({
+        linux: 5,
+        macos: 5,
         total: 5,
+        windows: 5,
       });
       const renderResult = renderComponent();
 
       await waitFor(() => {
-        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledWith({
-          http: mockedContext.coreStart.http,
-          filter: `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`,
-          page: 1,
-          perPage: 1,
-        });
+        expect(getHostIsolationExceptionSummaryMock).toHaveBeenCalledWith(
+          mockedContext.coreStart.http,
+          `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`
+        );
       });
 
       expect(
         renderResult.getByTestId('hostIsolationExceptions-fleet-integration-card')
-      ).toHaveTextContent('Host isolation exceptions applications5');
+      ).toHaveTextContent('Host isolation exceptions5');
     });
   });
 
@@ -71,13 +72,16 @@ describe('Fleet host isolation exceptions card filters card', () => {
     });
 
     it('should not render the card if there are no exceptions associated', async () => {
-      getHostIsolationExceptionItemsMock.mockResolvedValue({
+      getHostIsolationExceptionSummaryMock.mockResolvedValue({
+        linux: 0,
+        macos: 0,
         total: 0,
+        windows: 0,
       });
       const renderResult = renderComponent();
 
       await waitFor(() => {
-        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+        expect(getHostIsolationExceptionSummaryMock).toHaveBeenCalled();
       });
 
       expect(
@@ -86,13 +90,16 @@ describe('Fleet host isolation exceptions card filters card', () => {
     });
 
     it('should render the card if there are exceptions associated', async () => {
-      getHostIsolationExceptionItemsMock.mockResolvedValue({
+      getHostIsolationExceptionSummaryMock.mockResolvedValue({
+        linux: 1,
+        macos: 1,
         total: 1,
+        windows: 1,
       });
       const renderResult = renderComponent();
 
       await waitFor(() => {
-        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+        expect(getHostIsolationExceptionSummaryMock).toHaveBeenCalled();
       });
 
       expect(

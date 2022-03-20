@@ -13,8 +13,6 @@ import {
   mockDeleteLegacyUrlAliases,
 } from './update_objects_spaces.test.mock';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 import { loggerMock } from '../../../logging/logger.mock';
@@ -66,7 +64,7 @@ afterAll(() => {
 });
 
 describe('#updateObjectsSpaces', () => {
-  let client: DeeplyMockedKeys<ElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `updateObjectsSpaces` */
   function setup({ objects = [], spacesToAdd = [], spacesToRemove = [], options }: SetupParams) {
@@ -93,8 +91,29 @@ describe('#updateObjectsSpaces', () => {
 
   /** Mocks the saved objects client so it returns the expected results */
   function mockMgetResults(...results: Array<{ found: boolean }>) {
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+    client.mget.mockResponseOnce({
+      docs: results.map((x) =>
+        x.found
+          ? {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              _source: { namespaces: [EXISTING_SPACE] },
+              ...VERSION_PROPS,
+              found: true,
+            }
+          : {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              found: false,
+            }
+      ),
+    });
+  }
+
+  /** Mocks the saved objects client so as to test unsupported server responding with 404 */
+  function mockMgetResultsNotFound(...results: Array<{ found: boolean }>) {
+    client.mget.mockResponseOnce(
+      {
         docs: results.map((x) =>
           x.found
             ? {
@@ -110,33 +129,8 @@ describe('#updateObjectsSpaces', () => {
                 found: false,
               }
         ),
-      })
-    );
-  }
-  /** Mocks the saved objects client so as to test unsupported server responding with 404 */
-  function mockMgetResultsNotFound(...results: Array<{ found: boolean }>) {
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        {
-          docs: results.map((x) =>
-            x.found
-              ? {
-                  _id: 'doesnt-matter',
-                  _index: 'doesnt-matter',
-                  _source: { namespaces: [EXISTING_SPACE] },
-                  ...VERSION_PROPS,
-                  found: true,
-                }
-              : {
-                  _id: 'doesnt-matter',
-                  _index: 'doesnt-matter',
-                  found: false,
-                }
-          ),
-        },
-        { statusCode: 404 },
-        {}
-      )
+      },
+      { statusCode: 404, headers: {} }
     );
   }
 
@@ -155,13 +149,11 @@ describe('#updateObjectsSpaces', () => {
         mockGetBulkOperationError.mockReturnValueOnce(undefined);
       }
     });
-    client.bulk.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        items: results.map(() => ({})), // as long as the result does not contain an error field, it is treated as a success
-        errors: false,
-        took: 0,
-      })
-    );
+    client.bulk.mockResponseOnce({
+      items: results.map(() => ({})), // as long as the result does not contain an error field, it is treated as a success
+      errors: false,
+      took: 0,
+    });
   }
 
   /** Asserts that mget is called for the given objects */

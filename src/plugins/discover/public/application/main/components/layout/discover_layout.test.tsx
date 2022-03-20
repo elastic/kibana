@@ -8,19 +8,20 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
-import { DataView, IndexPatternAttributes } from '../../../../../../data/common';
+import type { DataView, DataViewAttributes } from '../../../../../../data_views/public';
 import { SavedObject } from '../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
+  AvailableFields$,
   DataCharts$,
   DataDocuments$,
   DataMain$,
@@ -32,37 +33,31 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
+import { LocalStorageMock } from 'src/plugins/discover/public/__mocks__/local_storage_mock';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { DiscoverServices } from '../../../../build_services';
 
-jest.mock('../../../../kibana_services', () => ({
-  ...jest.requireActual('../../../../kibana_services'),
-  getServices: () => ({
+setHeaderActionMenuMounter(jest.fn());
+
+function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
+  const searchSourceMock = createSearchSourceMock({});
+  const services = {
+    ...discoverServiceMock,
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
       getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
     },
-    uiSettings: {
-      get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
-    },
-  }),
-}));
-
-setHeaderActionMenuMounter(jest.fn());
-
-function getProps(indexPattern: DataView, wasSidebarClosed?: boolean): DiscoverLayoutProps {
-  const searchSourceMock = createSearchSourceMock({});
-  const services = discoverServiceMock;
+    storage: new LocalStorageMock({
+      [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
+    }) as unknown as Storage,
+  } as unknown as DiscoverServices;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  services.storage.get = (key: string) => {
-    if (key === SIDEBAR_CLOSED_KEY) {
-      return wasSidebarClosed;
-    }
   };
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
+  }) as unknown as Array<SavedObject<DataViewAttributes>>;
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -73,6 +68,11 @@ function getProps(indexPattern: DataView, wasSidebarClosed?: boolean): DiscoverL
     fetchStatus: FetchStatus.COMPLETE,
     result: esHits as ElasticSearchHit[],
   }) as DataDocuments$;
+
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -133,9 +133,10 @@ function getProps(indexPattern: DataView, wasSidebarClosed?: boolean): DiscoverL
     documents$,
     totalHits$,
     charts$,
+    availableFields$,
   };
 
-  return {
+  const props = {
     indexPattern,
     indexPatternList,
     inspectorAdapters: { requests: new RequestAdapter() },
@@ -147,45 +148,42 @@ function getProps(indexPattern: DataView, wasSidebarClosed?: boolean): DiscoverL
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-    services,
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
+
+  return mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverLayout {...(props as DiscoverLayoutProps)} />
+    </KibanaContextProvider>
+  );
 }
 
 describe('Discover component', () => {
   test('selected index pattern without time field displays no chart toggle', () => {
-    const component = mountWithIntl(<DiscoverLayout {...getProps(indexPatternMock)} />);
+    const component = mountComponent(indexPatternMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
 
   test('selected index pattern with time field displays chart toggle', () => {
-    const component = mountWithIntl(
-      <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
-    );
+    const component = mountComponent(indexPatternWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be opened if discover:sidebarClosed is false', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, false)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be closed if discover:sidebarClosed is true', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, true)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
     });
   });

@@ -20,6 +20,7 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
 export const deprecations = ({
   rename,
   renameFromRoot,
+  unused,
 }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
     // This order matters. The "blanket rename" needs to happen at the end
@@ -75,6 +76,9 @@ export const deprecations = ({
     rename('xpack_api_polling_frequency_millis', 'licensing.api_polling_frequency', {
       level: 'warning',
     }),
+
+    unused('cluster_alerts.allowedSpaces', { level: 'warning' }),
+    unused('monitoring.ui.metricbeat.index', { level: 'warning' }),
 
     // TODO: Add deprecations for "monitoring.ui.elasticsearch.username: elastic" and "monitoring.ui.elasticsearch.username: kibana".
     // TODO: Add deprecations for using "monitoring.ui.elasticsearch.ssl.certificate" without "monitoring.ui.elasticsearch.ssl.key", and

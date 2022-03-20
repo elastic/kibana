@@ -17,11 +17,12 @@ import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { MonitoringConfig } from '../../config';
 
 export function handleResponse(
   response: ElasticsearchResponse,
   apmUuid: string,
-  config: { get: (key: string) => string | undefined }
+  config: MonitoringConfig
 ) {
   if (!response.hits || response.hits.hits.length === 0) {
     return {};
@@ -68,7 +69,7 @@ export function handleResponse(
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
     bytesWritten: getDiffCalculation(Number(bytesWrittenLast), Number(bytesWrittenFirst)),
     config: {
-      container: config.get('monitoring.ui.container.apm.enabled'),
+      container: config.ui.container.apm.enabled,
     },
   };
 }
@@ -168,7 +169,7 @@ export async function getApmInfo(
     }),
   ]);
 
-  const formattedResponse = handleResponse(response, apmUuid, req.server.config());
+  const formattedResponse = handleResponse(response, apmUuid, req.server.config);
   return {
     ...formattedResponse,
     timeOfLastEvent,

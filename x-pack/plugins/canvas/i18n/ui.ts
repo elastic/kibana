@@ -244,6 +244,16 @@ export const ArgumentStrings = {
         defaultMessage: 'Custom',
       }),
   },
+  Color: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.colorTitle', {
+        defaultMessage: 'Color',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.colorLabel', {
+        defaultMessage: 'Color picker',
+      }),
+  },
   Percentage: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.percentageTitle', {
@@ -395,7 +405,7 @@ export const DataSourceStrings = {
       }),
     getIndexLabel: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.indexLabel', {
-        defaultMessage: 'Enter an index name or select an index pattern',
+        defaultMessage: 'Enter an index name or select a data view',
       }),
     getQueryTitle: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.queryTitle', {
@@ -589,6 +599,122 @@ export const ModelStrings = {
     getYaxisHelp: () =>
       i18n.translate('xpack.canvas.uis.models.pointSeries.args.yaxisLabel', {
         defaultMessage: 'Data along the vertical axis. Usually a number',
+      }),
+  },
+  HeatmapLegend: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.title', {
+        defaultMessage: "Configure the heatmap chart's legend",
+      }),
+    getIsVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.isVisibleTitle', {
+        defaultMessage: 'Show legend',
+      }),
+    getIsVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.isVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the legend is visible',
+      }),
+    getPositionDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionTitle', {
+        defaultMessage: 'Legend Position',
+      }),
+    getPositionHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionLabel', {
+        defaultMessage: 'Specifies the legend position.',
+      }),
+    getPositionTopOption: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionTopLabel', {
+        defaultMessage: 'Top',
+      }),
+    getPositionBottomOption: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionBottomLabel', {
+        defaultMessage: 'Bottom',
+      }),
+    getPositionLeftOption: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionLeftLabel', {
+        defaultMessage: 'Left',
+      }),
+    getPositionRightOption: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionRightLabel', {
+        defaultMessage: 'Right',
+      }),
+    getMaxLinesDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.maxLinesTitle', {
+        defaultMessage: 'Legend maximum lines',
+      }),
+    getMaxLinesHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.maxLinesLabel', {
+        defaultMessage: 'Specifies the number of lines per legend item.',
+      }),
+    getShouldTruncateDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.shouldTruncateTitle', {
+        defaultMessage: 'Truncate label',
+      }),
+    getShouldTruncateHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.shouldTruncateLabel', {
+        defaultMessage: 'Specifies whether or not the legend items should be truncated',
+      }),
+  },
+  HeatmapGrid: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.title', {
+        defaultMessage: 'Configure the heatmap layout',
+      }),
+    getStrokeWidthDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeWidthTitle', {
+        defaultMessage: 'Stroke width',
+      }),
+    getStrokeWidthHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeWidthLabel', {
+        defaultMessage: 'Specifies the grid stroke width',
+      }),
+    getStrokeColorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeColorTitle', {
+        defaultMessage: 'Stroke color',
+      }),
+    getStrokeColorHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeColorLabel', {
+        defaultMessage: 'Specifies the grid stroke color',
+      }),
+    getIsCellLabelVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isCellLabelVisibleTitle', {
+        defaultMessage: 'Show cell label',
+      }),
+    getIsCellLabelVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isCellLabelVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the cell label is visible',
+      }),
+    getIsYAxisLabelVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisLabelVisibleTile', {
+        defaultMessage: 'Show Y-axis labels',
+      }),
+    getIsYAxisLabelVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisLabelVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the Y-axis labels are visible',
+      }),
+    getIsYAxisTitleVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisTitleVisibleTile', {
+        defaultMessage: 'Show Y-axis title',
+      }),
+    getIsYAxisTitleVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisTitleVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the Y-axis title is visible',
+      }),
+    getIsXAxisLabelVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisLabelVisibleTile', {
+        defaultMessage: 'Show X-axis labels',
+      }),
+    getIsXAxisLabelVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisLabelVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the X-axis labels are visible',
+      }),
+    getIsXAxisTitleVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisTitleVisibleTile', {
+        defaultMessage: 'Show X-axis title',
+      }),
+    getIsXAxisTitleVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisTitleVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the X-axis title is visible',
       }),
   },
 };
@@ -1347,6 +1473,93 @@ export const ViewStrings = {
     getColorModeBackgroundOption: () =>
       i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.backgroundOption', {
         defaultMessage: 'Background',
+      }),
+  },
+  Heatmap: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmapTitle', {
+        defaultMessage: 'Heatmap Visualization',
+      }),
+    getXAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.xAccessorDisplayName', {
+        defaultMessage: 'X-axis',
+      }),
+    getXAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.xAccessorHelp', {
+        defaultMessage: 'The name of the x axis column or the corresponding dimension',
+      }),
+    getYAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.yAccessorDisplayName', {
+        defaultMessage: 'Y-axis',
+      }),
+    getYAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.yAccessorHelp', {
+        defaultMessage: 'The name of the y axis column or the corresponding dimension',
+      }),
+    getValueAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.valueAccessorDisplayName', {
+        defaultMessage: 'Value',
+      }),
+    getValueAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.valueAccessorHelp', {
+        defaultMessage: 'The name of the value column or the corresponding dimension',
+      }),
+    getLegendHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.legendHelp', {
+        defaultMessage: "Configure the heatmap chart's legend",
+      }),
+    getLegendDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.legendDisplayName', {
+        defaultMessage: 'Heatmap legend',
+      }),
+    getGridConfigHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.gridConfigHelp', {
+        defaultMessage: 'Configure the heatmap layout',
+      }),
+    getGridConfigDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.gridConfigDisplayName', {
+        defaultMessage: 'Heatmap layout configuration',
+      }),
+    getSplitRowAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.splitRowAccessorDisplayName', {
+        defaultMessage: 'Split row',
+      }),
+    getSplitRowAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.plitRowAccessorHelp', {
+        defaultMessage: 'The id of the split row or the corresponding dimension',
+      }),
+    getSplitColumnAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.splitColumnAccessorDisplayName', {
+        defaultMessage: 'Split column',
+      }),
+    getSplitColumnAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.splitColumnAccessorHelp', {
+        defaultMessage: 'The id of the split column or the corresponding dimension',
+      }),
+    getShowTooltipDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.showTooltipDisplayName', {
+        defaultMessage: 'Show tooltip',
+      }),
+    getShowTooltipHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.showTooltipHelp', {
+        defaultMessage: 'Show tooltip on hover',
+      }),
+    getHighlightInHoverDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.highlightInHoverDisplayName', {
+        defaultMessage: 'Hightlight on hover',
+      }),
+    getHighlightInHoverHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.highlightInHoverHelp', {
+        defaultMessage:
+          'When this is enabled, it highlights the ranges of the same color on legend hover',
+      }),
+    getLastRangeIsRightOpenDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.lastRangeIsRightOpenDisplayName', {
+        defaultMessage: 'Last range is right open',
+      }),
+    getLastRangeIsRightOpenHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.lastRangeIsRightOpenHelp', {
+        defaultMessage: 'If is set to true, the last range value will be right open',
       }),
   },
 };

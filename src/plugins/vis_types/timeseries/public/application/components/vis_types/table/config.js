@@ -221,7 +221,11 @@ export class TableSeriesConfig extends Component {
               fields={this.props.fields}
               indexPattern={this.props.panel.index_pattern}
               value={model.aggregate_by}
-              onChange={handleSelectChange('aggregate_by')}
+              onChange={(value) =>
+                this.props.onChange({
+                  aggregate_by: value?.[0],
+                })
+              }
               fullWidth
               restrict={[
                 KBN_FIELD_TYPES.NUMBER,

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, render } from 'enzyme';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from './page_template';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
@@ -104,7 +104,7 @@ describe('KibanaPageTemplate', () => {
   });
 
   test('render basic template', () => {
-    const component = shallow(
+    const component = render(
       <KibanaPageTemplate
         pageHeader={{
           iconType: 'test',
@@ -118,7 +118,7 @@ describe('KibanaPageTemplate', () => {
   });
 
   test('render solutionNav', () => {
-    const component = shallow(
+    const component = render(
       <KibanaPageTemplate
         pageHeader={{
           iconType: 'test',
@@ -134,9 +134,11 @@ describe('KibanaPageTemplate', () => {
       />
     );
     expect(component).toMatchSnapshot();
+    expect(component.find('div.kbnPageTemplate__pageSideBar').length).toBe(1);
   });
 
-  test('render noDataContent', () => {
+  // https://github.com/elastic/kibana/issues/127951
+  test.skip('render noDataContent', () => {
     const component = shallow(
       <KibanaPageTemplate
         pageHeader={{
@@ -167,8 +169,6 @@ describe('KibanaPageTemplate', () => {
         pageSideBarProps={{ className: 'customClass' }}
       />
     );
-    expect(component.prop('pageSideBarProps').className).toEqual(
-      'kbnPageTemplate__pageSideBar customClass'
-    );
+    expect(component.html().includes('kbnPageTemplate__pageSideBar customClass')).toBe(true);
   });
 });

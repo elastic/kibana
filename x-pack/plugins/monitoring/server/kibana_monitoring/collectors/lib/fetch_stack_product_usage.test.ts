@@ -18,22 +18,20 @@ describe('fetchStackProductUsage', () => {
 
   it('should use appropiate query parameters', async () => {
     const searchMock = jest.fn().mockImplementation(() => ({
-      body: {
-        aggregations: {
-          uuids: {
-            buckets: [
-              {
-                key: 'sadfsdf',
-                indices: {
-                  buckets: [
-                    {
-                      key: '.monitoring-kibana-8',
-                    },
-                  ],
-                },
+      aggregations: {
+        uuids: {
+          buckets: [
+            {
+              key: 'sadfsdf',
+              indices: {
+                buckets: [
+                  {
+                    key: '.monitoring-kibana-8',
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
       },
     }));
@@ -65,22 +63,20 @@ describe('fetchStackProductUsage', () => {
   it('should get the usage data', async () => {
     const callCluster = {
       search: jest.fn().mockImplementation(() => ({
-        body: {
-          aggregations: {
-            uuids: {
-              buckets: [
-                {
-                  key: 'sadfsdf',
-                  indices: {
-                    buckets: [
-                      {
-                        key: '.monitoring-kibana-8',
-                      },
-                    ],
-                  },
+        aggregations: {
+          uuids: {
+            buckets: [
+              {
+                key: 'sadfsdf',
+                indices: {
+                  buckets: [
+                    {
+                      key: '.monitoring-kibana-8',
+                    },
+                  ],
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       })),
@@ -105,25 +101,23 @@ describe('fetchStackProductUsage', () => {
   it('should handle both collection types', async () => {
     const callCluster = {
       search: jest.fn().mockImplementation(() => ({
-        body: {
-          aggregations: {
-            uuids: {
-              buckets: [
-                {
-                  key: 'sadfsdf',
-                  indices: {
-                    buckets: [
-                      {
-                        key: '.monitoring-kibana-8',
-                      },
-                      {
-                        key: '.monitoring-kibana-mb-8',
-                      },
-                    ],
-                  },
+        aggregations: {
+          uuids: {
+            buckets: [
+              {
+                key: 'sadfsdf',
+                indices: {
+                  buckets: [
+                    {
+                      key: '.monitoring-kibana-8',
+                    },
+                    {
+                      key: '.monitoring-kibana-mb-8',
+                    },
+                  ],
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       })),

@@ -6,29 +6,11 @@
  */
 
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../../../maps/common';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
+import { SEVERITY_COLOR_RAMP } from '../../../../common';
 import { AnomaliesTableData } from '../explorer_utils';
 
 const FEATURE = 'Feature';
 const POINT = 'Point';
-const SEVERITY_COLOR_RAMP = [
-  {
-    stop: ANOMALY_THRESHOLD.LOW,
-    color: SEVERITY_COLORS.WARNING,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.MINOR,
-    color: SEVERITY_COLORS.MINOR,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.MAJOR,
-    color: SEVERITY_COLORS.MAJOR,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.CRITICAL,
-    color: SEVERITY_COLORS.CRITICAL,
-  },
-];
 
 function getAnomalyFeatures(
   anomalies: AnomaliesTableData['anomalies'],

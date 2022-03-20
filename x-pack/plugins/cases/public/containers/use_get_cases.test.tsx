@@ -17,15 +17,18 @@ import {
   UseGetCases,
 } from './use_get_cases';
 import { UpdateKey } from './types';
-import { allCases, basicCase } from './mock';
+import { allCases, basicCase, caseWithAlerts, caseWithAlertsSyncOff } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useGetCases', () => {
   const abortCtrl = new AbortController();
+  const addSuccess = jest.fn();
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -112,6 +115,50 @@ describe('useGetCases', () => {
         updateCase.version,
         abortCtrl.signal
       );
+    });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: `Updated "${basicCase.title}"`,
+    });
+  });
+
+  it('shows a success toast notifying of synced alerts when sync is on', async () => {
+    await act(async () => {
+      const updateCase = {
+        updateKey: 'status' as UpdateKey,
+        updateValue: 'open',
+        caseId: caseWithAlerts.id,
+        refetchCasesStatus: jest.fn(),
+        version: '99999',
+      };
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitForNextUpdate();
+      result.current.dispatchUpdateCaseProperty(updateCase);
+    });
+    expect(addSuccess).toHaveBeenCalledWith({
+      text: 'Updated the statuses of attached alerts.',
+      title: 'Updated "Another horrible breach!!"',
+    });
+  });
+
+  it('shows a success toast without notifying of synced alerts when sync is off', async () => {
+    await act(async () => {
+      const updateCase = {
+        updateKey: 'status' as UpdateKey,
+        updateValue: 'open',
+        caseId: caseWithAlertsSyncOff.id,
+        refetchCasesStatus: jest.fn(),
+        version: '99999',
+      };
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+      await waitForNextUpdate();
+      result.current.dispatchUpdateCaseProperty(updateCase);
+    });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: 'Updated "Another horrible breach!!"',
     });
   });
 

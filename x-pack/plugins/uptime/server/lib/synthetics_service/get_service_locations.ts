@@ -8,14 +8,34 @@
 import axios from 'axios';
 import {
   ManifestLocation,
-  ServiceLocations,
+  ServiceLocation,
+  Locations,
   ServiceLocationsApiResponse,
 } from '../../../common/runtime_types';
+import { UptimeServerSetup } from '../adapters/framework';
 
-export async function getServiceLocations({ manifestUrl }: { manifestUrl: string }) {
-  const locations: ServiceLocations = [];
+export const getDevLocation = (devUrl: string): ServiceLocation => ({
+  id: 'localhost',
+  label: 'Local Synthetics Service',
+  geo: { lat: 0, lon: 0 },
+  url: devUrl,
+});
+
+export async function getServiceLocations(server: UptimeServerSetup) {
+  let locations: Locations = [];
+
+  if (process.env.NODE_ENV !== 'production' && server.config.service?.devUrl) {
+    locations = [getDevLocation(server.config.service.devUrl)];
+  }
+
+  if (!server.config.service?.manifestUrl) {
+    return { locations };
+  }
+
   try {
-    const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(manifestUrl);
+    const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(
+      server.config.service!.manifestUrl!
+    );
 
     Object.entries(data.locations).forEach(([locationId, location]) => {
       locations.push({
@@ -23,11 +43,13 @@ export async function getServiceLocations({ manifestUrl }: { manifestUrl: string
         label: location.geo.name,
         geo: location.geo.location,
         url: location.url,
+        isServiceManaged: true,
       });
     });
 
     return { locations } as ServiceLocationsApiResponse;
   } catch (e) {
+    server.logger.error(e);
     return {
       locations: [],
     } as ServiceLocationsApiResponse;

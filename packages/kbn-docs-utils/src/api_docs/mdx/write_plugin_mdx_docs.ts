@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import moment from 'moment';
 import fs from 'fs';
 import Path from 'path';
 import dedent from 'dedent';
@@ -80,11 +80,11 @@ slug: /kibana-dev-docs/api/${slug}
 title: "${doc.id}"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the ${doc.id} plugin
-date: 2020-11-16
+date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana', '${doc.id}']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import ${json} from './${fileName}.json';
+import ${json} from './${fileName}.devdocs.json';
 
 ${plugin.manifest.description ?? ''}
 
@@ -112,7 +112,10 @@ ${
     common: groupPluginApi(doc.common),
     server: groupPluginApi(doc.server),
   };
-  fs.writeFileSync(Path.resolve(folder, fileName + '.json'), JSON.stringify(scopedDoc, null, 2));
+  fs.writeFileSync(
+    Path.resolve(folder, fileName + '.devdocs.json'),
+    JSON.stringify(scopedDoc, null, 2)
+  );
 
   mdx += scopApiToMdx(scopedDoc.client, 'Client', json, 'client');
   mdx += scopApiToMdx(scopedDoc.server, 'Server', json, 'server');

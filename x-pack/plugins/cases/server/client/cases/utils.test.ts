@@ -17,7 +17,6 @@ import {
   userActions,
   commentAlert,
   commentAlertMultipleIds,
-  commentGeneratedAlert,
   isolateCommentActions,
   releaseCommentActions,
   isolateCommentActionsMultipleTargets,
@@ -641,11 +640,7 @@ describe('utils', () => {
         actionsClient: actionsMock,
         theCase: {
           ...theCase,
-          comments: [
-            { ...commentObj, id: 'comment-user-1' },
-            commentAlertMultipleIds,
-            commentGeneratedAlert,
-          ],
+          comments: [{ ...commentObj, id: 'comment-user-1' }, commentAlertMultipleIds],
         },
         userActions,
         connector,
@@ -661,7 +656,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Alerts attached to the case: 4',
+          comment: 'Elastic Alerts attached to the case: 2',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -674,7 +669,7 @@ describe('utils', () => {
           ...theCase,
           comments: [
             { ...commentObj, id: 'comment-user-1', pushed_at: '2019-11-25T21:55:00.177Z' },
-            { ...commentGeneratedAlert, pushed_at: '2019-11-25T21:55:00.177Z' },
+            { ...commentAlertMultipleIds, pushed_at: '2019-11-25T21:55:00.177Z' },
           ],
         },
         userActions,

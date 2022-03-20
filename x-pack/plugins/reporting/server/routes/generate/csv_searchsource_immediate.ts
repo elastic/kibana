@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest } from 'src/core/server';
-import { Writable } from 'stream';
-import { ReportingCore } from '../../';
+import type { KibanaRequest, Logger } from 'kibana/server';
+import type { ReportingCore } from '../../';
+import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
-import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
-import { LevelLogger as Logger } from '../../lib';
-import { TaskRunResult } from '../../lib/tasks';
+import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
+import { PassThroughStream } from '../../lib';
+import type { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
 
@@ -64,50 +64,52 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     authorizedUserPreRouting(
       reporting,
       async (user, context, req: CsvFromSavedObjectRequest, res) => {
-        const logger = parentLogger.clone(['csv_searchsource_immediate']);
+        const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE);
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
+        const stream = new PassThroughStream();
+        const eventLog = reporting.getEventLogger({
+          jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+          created_by: user && user.username,
+          payload: { browserTimezone: (req.params as BaseParams).browserTimezone },
+        });
+        const logError = (error: Error) => {
+          logger.error(error);
+          eventLog.logError(error);
+        };
 
         try {
-          let buffer = Buffer.from('');
-          const stream = new Writable({
-            write(chunk, encoding, callback) {
-              buffer = Buffer.concat([
-                buffer,
-                Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
-              ]);
-              callback();
-            },
-          });
+          eventLog.logExecutionStart();
+          const taskPromise = runTaskFn(null, req.body, context, stream, req)
+            .then((output) => {
+              logger.info(`Job output size: ${stream.bytesWritten} bytes.`);
 
-          const { content_type: jobOutputContentType }: TaskRunResult = await runTaskFn(
-            null,
-            req.body,
-            context,
-            stream,
-            req
-          );
-          stream.end();
-          const jobOutputContent = buffer.toString();
-          const jobOutputSize = buffer.byteLength;
+              if (!stream.bytesWritten) {
+                logger.warn('CSV Job Execution created empty content result');
+              }
 
-          logger.info(`Job output size: ${jobOutputSize} bytes.`);
+              eventLog.logExecutionComplete({
+                ...(output.metrics ?? {}),
+                byteSize: stream.bytesWritten,
+              });
+            })
+            .finally(() => stream.end());
 
-          // convert null to undefined so the value can be sent to h.response()
-          if (jobOutputContent === null) {
-            logger.warn('CSV Job Execution created empty content result');
-          }
+          await Promise.race([stream.firstBytePromise, taskPromise]);
+
+          taskPromise.catch(logError);
 
           return res.ok({
-            body: jobOutputContent || '',
+            body: stream,
             headers: {
-              'content-type': jobOutputContentType ? jobOutputContentType : [],
+              'content-type': 'text/csv;charset=utf-8',
               'accept-ranges': 'none',
             },
           });
-        } catch (err) {
-          logger.error(err);
-          return requestHandler.handleError(err);
+        } catch (error) {
+          logError(error);
+
+          return requestHandler.handleError(error);
         }
       }
     )

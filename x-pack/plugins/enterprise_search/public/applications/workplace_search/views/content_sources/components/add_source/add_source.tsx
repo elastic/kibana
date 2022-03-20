@@ -18,50 +18,35 @@ import {
   WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
 } from '../../../../components/layout';
-import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
-import { SourceDataItem } from '../../../../types';
-import { staticSourceData } from '../../source_data';
+import { NAV } from '../../../../constants';
+import { SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
+
+import { hasMultipleConnectorOptions } from '../../../../utils';
+
+import { SourcesLogic } from '../../sources_logic';
 
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
+import { ConfigurationChoice } from './configuration_choice';
 import { ConfigurationIntro } from './configuration_intro';
-import { ConfigureCustom } from './configure_custom';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
 import { Reauthenticate } from './reauthenticate';
 import { SaveConfig } from './save_config';
-import { SaveCustom } from './save_custom';
 
 import './add_source.scss';
 
 export const AddSource: React.FC<AddSourceProps> = (props) => {
-  const {
-    initializeAddSource,
-    setAddSourceStep,
-    saveSourceConfig,
-    createContentSource,
-    resetSourceState,
-  } = useActions(AddSourceLogic);
-  const {
-    addSourceCurrentStep,
-    sourceConfigData: {
-      name,
-      categories,
-      needsPermissions,
-      accountContextOnly,
-      privateSourcesEnabled,
-    },
-    dataLoading,
-    newCustomSource,
-  } = useValues(AddSourceLogic);
-
-  const { serviceType, configuration, features, objTypes, addPath } = staticSourceData[
-    props.sourceIndex
-  ] as SourceDataItem;
-
+  const { initializeAddSource, setAddSourceStep, saveSourceConfig, resetSourceState } =
+    useActions(AddSourceLogic);
+  const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(AddSourceLogic);
+  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
+    sourceConfigData;
+  const { serviceType, configuration, features, objTypes } = props.sourceData;
+  const addPath = getAddPath(serviceType);
   const { isOrganization } = useValues(AppLogic);
+  const { externalConfigured } = useValues(SourcesLogic);
 
   useEffect(() => {
     initializeAddSource(props);
@@ -72,6 +57,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
+  const goToChoice = () => setAddSourceStep(AddSourceSteps.ChoiceStep);
   const FORM_SOURCE_ADDED_SUCCESS_MESSAGE = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.contentSource.formSourceAddedSuccessMessage',
     {
@@ -85,9 +71,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(addPath, isOrganization)}/connect`);
   };
 
-  const saveCustomSuccess = () => setAddSourceStep(AddSourceSteps.SaveCustomStep);
-  const goToSaveCustom = () => createContentSource(CUSTOM_SERVICE_TYPE, saveCustomSuccess);
-
   const goToFormSourceCreated = () => {
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(SOURCES_PATH, isOrganization)}`);
     flashSuccessToast(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);
@@ -99,7 +82,16 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
-        <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
+        <ConfigurationIntro
+          name={name}
+          // TODO: Remove this once we can support multiple external connectors
+          advanceStep={
+            hasMultipleConnectorOptions(props.sourceData) && !externalConfigured
+              ? goToChoice
+              : goToSaveConfig
+          }
+          header={header}
+        />
       )}
       {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig
@@ -131,26 +123,14 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
           header={header}
         />
       )}
-      {addSourceCurrentStep === AddSourceSteps.ConfigureCustomStep && (
-        <ConfigureCustom
-          helpText={configuration.helpText}
-          advanceStep={goToSaveCustom}
-          header={header}
-        />
-      )}
       {addSourceCurrentStep === AddSourceSteps.ConfigureOauthStep && (
         <ConfigureOauth name={name} onFormCreated={goToFormSourceCreated} header={header} />
       )}
-      {addSourceCurrentStep === AddSourceSteps.SaveCustomStep && (
-        <SaveCustom
-          documentationUrl={configuration.documentationUrl}
-          newCustomSource={newCustomSource}
-          isOrganization={isOrganization}
-          header={header}
-        />
-      )}
       {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
         <Reauthenticate name={name} header={header} />
+      )}
+      {addSourceCurrentStep === AddSourceSteps.ChoiceStep && (
+        <ConfigurationChoice sourceData={props.sourceData} goToInternalStep={goToSaveConfig} />
       )}
     </Layout>
   );

@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { SavedObjectFinderUi } from '../../../../../../saved_objects/public';
-import { getServices } from '../../../../kibana_services';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 const SEARCH_OBJECT_TYPE = 'search';
 
@@ -35,7 +35,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
     core: { uiSettings, savedObjects },
     addBasePath,
     capabilities,
-  } = getServices();
+  } = useDiscoverServices();
 
   const hasSavedObjectPermission =
     capabilities.savedObjectsManagement?.edit || capabilities.savedObjectsManagement?.delete;

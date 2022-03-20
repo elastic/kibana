@@ -8,27 +8,36 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '../../../../observability/public';
+import { ScheduleUnit } from '../../../common/runtime_types';
 import { SyntheticsProviders } from '../../components/fleet_package/contexts';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { MonitorConfig } from '../../components/monitor_management/monitor_config/monitor_config';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
+import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
 export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
-  const { error, loading } = useLocations();
+  const { error, loading, locations } = useLocations();
+
+  useMonitorManagementBreadcrumbs({ isAddMonitor: true });
 
   return (
     <Loader
-      error={Boolean(error)}
+      error={Boolean(error) || (locations && locations.length === 0)}
       loading={loading}
       loadingTitle={LOADING_LABEL}
       errorTitle={ERROR_HEADING_LABEL}
       errorBody={ERROR_BODY_LABEL}
     >
-      <SyntheticsProviders>
-        <MonitorConfig />
+      <SyntheticsProviders
+        policyDefaultValues={{
+          isZipUrlSourceEnabled: false,
+          allowedScheduleUnits: [ScheduleUnit.MINUTES],
+        }}
+      >
+        <MonitorConfig isEdit={false} />
       </SyntheticsProviders>
     </Loader>
   );

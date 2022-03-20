@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import {
   LegendSettingsPopover,
   LegendSettingsPopoverProps,
@@ -38,6 +38,7 @@ describe('Legend Settings', () => {
       mode: 'auto',
       onDisplayChange: jest.fn(),
       onPositionChange: jest.fn(),
+      onLegendSizeChange: jest.fn(),
     };
   });
 

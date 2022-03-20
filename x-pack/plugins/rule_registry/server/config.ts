@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'src/core/server';
 
 export const config: PluginConfigDescriptor = {
-  deprecations: ({ deprecate, unused }) => [unused('unsafe.indexUpgrade.enabled')],
+  deprecations: ({ unused }) => [unused('unsafe.indexUpgrade.enabled', { level: 'warning' })],
   schema: schema.object({
     write: schema.object({
       disabledRegistrationContexts: schema.arrayOf(schema.string(), { defaultValue: [] }),

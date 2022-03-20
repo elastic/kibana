@@ -23,7 +23,8 @@ import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
-import { customElementType, workpadType, workpadTemplateType } from './saved_objects';
+import { customElementType, workpadTypeFactory, workpadTemplateType } from './saved_objects';
+import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
 import { initializeTemplates } from './templates';
 import { essqlSearchStrategyProvider } from './lib/essql_strategy';
 import { getUISettings } from './ui_settings';
@@ -51,16 +52,26 @@ export class CanvasPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
-    const expressionsFork = plugins.expressions.fork();
+    const expressionsFork = plugins.expressions.fork('canvas');
+    const expressionsSetup = expressionsFork.setup();
+    setupInterpreter(expressionsSetup, {
+      embeddablePersistableStateService: {
+        extract: plugins.embeddable.extract,
+        inject: plugins.embeddable.inject,
+        getAllMigrations: plugins.embeddable.getAllMigrations,
+      },
+    });
 
+    const deps: CanvasSavedObjectTypeMigrationsDeps = { expressions: expressionsSetup };
     coreSetup.uiSettings.register(getUISettings());
-    coreSetup.savedObjects.registerType(customElementType);
-    coreSetup.savedObjects.registerType(workpadType);
-    coreSetup.savedObjects.registerType(workpadTemplateType);
+    coreSetup.savedObjects.registerType(customElementType(deps));
+    coreSetup.savedObjects.registerType(workpadTypeFactory(deps));
+    coreSetup.savedObjects.registerType(workpadTemplateType(deps));
 
     plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
 
-    const contextProvider = createWorkpadRouteContext({ expressions: expressionsFork });
+    const expressionsStart = expressionsFork.start();
+    const contextProvider = createWorkpadRouteContext({ expressions: expressionsStart });
     coreSetup.http.registerRouteHandlerContext<CanvasRouteHandlerContext, 'canvas'>(
       'canvas',
       contextProvider
@@ -70,7 +81,7 @@ export class CanvasPlugin implements Plugin {
 
     initRoutes({
       router: canvasRouter,
-      expressions: expressionsFork,
+      expressions: expressionsSetup,
       bfetch: plugins.bfetch,
       logger: this.logger,
     });
@@ -83,13 +94,6 @@ export class CanvasPlugin implements Plugin {
     // we need the kibana index for the Canvas usage collector
     const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     registerCanvasUsageCollector(plugins.usageCollection, kibanaIndex);
-
-    setupInterpreter(expressionsFork, {
-      embeddablePersistableStateService: {
-        extract: plugins.embeddable.extract,
-        inject: plugins.embeddable.inject,
-      },
-    });
 
     coreSetup.getStartServices().then(([_, depsStart]) => {
       const strategy = essqlSearchStrategyProvider();

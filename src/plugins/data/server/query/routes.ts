@@ -123,6 +123,22 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
+  router.post(
+    {
+      path: `${SAVED_QUERY_PATH}/_all`,
+      validate: {},
+    },
+    async (context, request, response) => {
+      try {
+        const body = await context.savedQuery.getAll();
+        return response.ok({ body });
+      } catch (e) {
+        // TODO: Handle properly
+        return response.customError(e);
+      }
+    }
+  );
+
   router.delete(
     {
       path: `${SAVED_QUERY_PATH}/{id}`,

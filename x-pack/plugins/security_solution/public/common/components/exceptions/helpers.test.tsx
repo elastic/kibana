@@ -748,6 +748,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'some event code',
         },
+        'event.code': 'some event code',
       });
 
       expect(defaultItems[0].entries).toEqual([
@@ -850,6 +851,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'ransomware',
         },
+        'event.code': 'ransomware',
       });
 
       expect(defaultItems[0].entries).toEqual([
@@ -963,6 +965,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'memory_signature',
         },
+        'event.code': 'memory_signature',
       });
 
       expect(defaultItems[0].entries).toEqual([
@@ -1014,6 +1017,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'memory_signature',
         },
+        'event.code': 'memory_signature',
       });
 
       // should not contain name or executable
@@ -1074,6 +1078,7 @@ describe('Exception helpers', () => {
             },
           },
         },
+        'event.code': 'shellcode_thread',
       });
 
       expect(defaultItems[0].entries).toEqual([
@@ -1135,6 +1140,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'shellcode_thread',
         },
+        'event.code': 'shellcode_thread',
         Target: {
           process: {
             thread: {
@@ -1203,6 +1209,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'behavior',
         },
+        'event.code': 'behavior',
         file: {
           path: 'fake-file-path',
           name: 'fake-file-name',
@@ -1390,6 +1397,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'behavior',
         },
+        'event.code': 'behavior',
         file: {
           // path: 'fake-file-path', intentionally left commented
           name: 'fake-file-name',

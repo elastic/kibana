@@ -118,7 +118,7 @@ describe('Rollup Search Strategy', () => {
     });
 
     test('should return rollup data', async () => {
-      rollupResolvedData = Promise.resolve({ body: 'data' });
+      rollupResolvedData = Promise.resolve('data');
 
       const rollupData = await rollupSearchStrategy.getRollupData(requestContext, indexPattern);
 

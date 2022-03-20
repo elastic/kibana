@@ -12,6 +12,7 @@ import { LocationDescriptorObject } from 'history';
 import { HttpSetup } from 'kibana/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
 import {
   notificationServiceMock,
   docLinksServiceMock,
@@ -48,11 +49,7 @@ const appServices = {
   notifications: notificationServiceMock.createSetupContract(),
   history,
   uiSettings: uiSettingsServiceMock.createSetupContract(),
-  urlGenerators: {
-    getUrlGenerator: jest.fn().mockReturnValue({
-      createUrl: jest.fn(),
-    }),
-  },
+  url: sharePluginMock.createStartContract().url,
   fileUpload: {
     getMaxBytes: jest.fn().mockReturnValue(100),
     getMaxBytesFormatted: jest.fn().mockReturnValue('100'),

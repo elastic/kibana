@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -11,6 +12,11 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
+
+  const getPackagePolicyById = async (id: string) => {
+    const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
+    return body;
+  };
 
   const server = dockerServers.get('registry');
   // use function () {} and not () => {} here
@@ -136,6 +142,30 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
+    });
+
+    it('should trim whitespace from name on update', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: '  filetest-1  ',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        });
+
+      const { item: policy } = await getPackagePolicyById(packagePolicyId);
+
+      expect(policy.name).to.equal('filetest-1');
     });
 
     it('should work with valid values on hosted policies', async function () {

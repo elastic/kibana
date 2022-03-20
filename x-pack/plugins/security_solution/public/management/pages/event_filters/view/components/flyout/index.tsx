@@ -47,10 +47,13 @@ export interface EventFiltersFlyoutProps {
   id?: string;
   data?: Ecs;
   onCancel(): void;
+  maskProps?: {
+    style?: string;
+  };
 }
 
 export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
-  ({ onCancel, id, type = 'create', data }) => {
+  ({ onCancel, id, type = 'create', data, ...flyoutProps }) => {
     useEventFiltersNotification();
     const [enrichedData, setEnrichedData] = useState<Ecs | null>();
     const toasts = useToasts();
@@ -66,6 +69,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
 
     // load the list of policies>
     const policiesRequest = useGetEndpointSpecificPolicies({
+      perPage: 1000,
       onError: (error) => {
         toasts.addWarning(getLoadPoliciesError(error));
       },
@@ -190,7 +194,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           {id ? (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update"
-              defaultMessage="Update event filter"
+              defaultMessage="Save"
             />
           ) : data ? (
             <FormattedMessage
@@ -209,7 +213,12 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     );
 
     return (
-      <EuiFlyout size="l" onClose={handleOnCancel} data-test-subj="eventFiltersCreateEditFlyout">
+      <EuiFlyout
+        size="l"
+        onClose={handleOnCancel}
+        data-test-subj="eventFiltersCreateEditFlyout"
+        {...flyoutProps}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -257,7 +266,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
             <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
               <FormattedMessage
                 id="xpack.securitySolution.eventFilters.docsLink"
-                defaultMessage="Event Filters documentation."
+                defaultMessage="Event filters documentation."
               />
             </EuiLink>
           </EuiCallOut>

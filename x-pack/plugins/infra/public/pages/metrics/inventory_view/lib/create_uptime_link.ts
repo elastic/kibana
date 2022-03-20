@@ -8,7 +8,7 @@
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { getFieldByType } from '../../../../../common/inventory_models';
-import { LinkDescriptor } from '../../../../hooks/use_link_props';
+import { LinkDescriptor } from '../../../../../../observability/public';
 
 export const createUptimeLink = (
   options: InfraWaffleMapOptions,

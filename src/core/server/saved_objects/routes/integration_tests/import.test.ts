@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mockUuidv4 } from '../../import/lib/__mocks__';
+jest.mock('uuid');
+
 import supertest from 'supertest';
 import { registerImportRoute } from '../import';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
@@ -19,7 +20,6 @@ import { SavedObjectsErrorHelpers, SavedObjectsImporter } from '../..';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
 let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
@@ -46,8 +46,6 @@ describe(`POST ${URL}`, () => {
   };
 
   beforeEach(async () => {
-    mockUuidv4.mockReset();
-    mockUuidv4.mockImplementation(() => uuidv4());
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
@@ -231,7 +229,6 @@ describe(`POST ${URL}`, () => {
         {
           id: mockIndexPattern.id,
           type: mockIndexPattern.type,
-          title: mockIndexPattern.attributes.title,
           meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
           error: { type: 'conflict' },
         },
@@ -324,7 +321,6 @@ describe(`POST ${URL}`, () => {
         {
           id: 'my-vis',
           type: 'visualization',
-          title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           error: {
             type: 'missing_references',
@@ -388,7 +384,6 @@ describe(`POST ${URL}`, () => {
         {
           id: 'my-vis',
           type: 'visualization',
-          title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           error: {
             type: 'missing_references',
@@ -398,7 +393,6 @@ describe(`POST ${URL}`, () => {
         {
           id: 'my-vis',
           type: 'visualization',
-          title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           error: { type: 'conflict' },
         },
@@ -459,7 +453,6 @@ describe(`POST ${URL}`, () => {
         {
           id: 'my-vis',
           type: 'visualization',
-          title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           overwrite: true,
           error: {
@@ -487,7 +480,9 @@ describe(`POST ${URL}`, () => {
 
   describe('createNewCopies enabled', () => {
     it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
-      mockUuidv4
+      const mockUuid = jest.requireMock('uuid');
+      mockUuid.v4 = jest
+        .fn()
         .mockReturnValueOnce('foo') // a uuid.v4() is generated for the request.id
         .mockReturnValueOnce('foo') // another uuid.v4() is used for the request.uuid
         .mockReturnValueOnce('new-id-1')

@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import type { Filter } from '@kbn/es-query';
+import { APP_ID } from '../../../../common/constants';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
@@ -24,7 +25,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
-import { useKibana } from '../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18nCommon from '../../../common/translations';
@@ -98,7 +99,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     browserFields,
     indexPattern: indexPatterns,
-    loading: indexPatternsLoading,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
@@ -356,29 +356,34 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
-  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
+  const casesPermissions = useGetUserCasesPermissions();
+  const CasesContext = kibana.services.cases.ui.getCasesContext();
+
+  if (loading || isEmpty(selectedPatterns)) {
     return null;
   }
 
   return (
-    <StatefulEventsViewer
-      additionalFilters={additionalFiltersComponent}
-      currentFilter={filterGroup}
-      defaultCellActions={defaultCellActions}
-      defaultModel={alertsDefaultModel}
-      end={to}
-      entityType="events"
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
-      id={timelineId}
-      leadingControlColumns={leadingControlColumns}
-      onRuleChange={onRuleChange}
-      pageFilters={defaultFiltersMemo}
-      renderCellValue={RenderCellValue}
-      rowRenderers={defaultRowRenderers}
-      scopeId={SourcererScopeName.detections}
-      start={from}
-      utilityBar={utilityBarCallback}
-    />
+    <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
+      <StatefulEventsViewer
+        additionalFilters={additionalFiltersComponent}
+        currentFilter={filterGroup}
+        defaultCellActions={defaultCellActions}
+        defaultModel={alertsDefaultModel}
+        end={to}
+        entityType="events"
+        hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
+        id={timelineId}
+        leadingControlColumns={leadingControlColumns}
+        onRuleChange={onRuleChange}
+        pageFilters={defaultFiltersMemo}
+        renderCellValue={RenderCellValue}
+        rowRenderers={defaultRowRenderers}
+        scopeId={SourcererScopeName.detections}
+        start={from}
+        utilityBar={utilityBarCallback}
+      />
+    </CasesContext>
   );
 };
 

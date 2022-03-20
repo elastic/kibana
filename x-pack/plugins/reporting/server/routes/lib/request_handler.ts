@@ -7,12 +7,12 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
-import { ReportingCore } from '../..';
+import type { KibanaRequest, KibanaResponseFactory, Logger } from 'kibana/server';
+import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
-import { checkParamsVersion, cryptoFactory, LevelLogger } from '../../lib';
+import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
-import { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -30,7 +30,7 @@ export class RequestHandler {
     private context: ReportingRequestHandlerContext,
     private req: KibanaRequest,
     private res: KibanaResponseFactory,
-    private logger: LevelLogger
+    private logger: Logger
   ) {}
 
   private async encryptHeaders() {
@@ -53,7 +53,7 @@ export class RequestHandler {
     }
 
     const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger.clone([exportType.id])),
+      exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
       reporting.getStore(),
     ]);
 
@@ -98,6 +98,9 @@ export class RequestHandler {
     logger.info(
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
+
+    // 6. Log the action with event log
+    reporting.getEventLogger(report, task).logScheduleTask();
 
     return report;
   }

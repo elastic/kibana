@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
@@ -45,7 +45,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body.hasLegacyData).to.be(false);
         expect(response.body.items.length).to.be(0);
       });
     }
@@ -64,6 +63,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const transactionInterval = range.interval('1s');
       const metricInterval = range.interval('30s');
 
+      const errorInterval = range.interval('5s');
+
       const multipleEnvServiceProdInstance = apm
         .service('multiple-env-service', 'production', 'go')
         .instance('multiple-env-service-production');
@@ -75,6 +76,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const metricOnlyInstance = apm
         .service('metric-only-service', 'production', 'java')
         .instance('metric-only-production');
+
+      const errorOnlyInstance = apm
+        .service('error-only-service', 'production', 'java')
+        .instance('error-only-production');
 
       const config = {
         multiple: {
@@ -91,9 +96,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         return synthtrace.index([
-          ...transactionInterval
+          transactionInterval
             .rate(config.multiple.prod.rps)
-            .flatMap((timestamp) => [
+            .spans((timestamp) => [
               ...multipleEnvServiceProdInstance
                 .transaction('GET /api')
                 .timestamp(timestamp)
@@ -101,9 +106,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .success()
                 .serialize(),
             ]),
-          ...transactionInterval
+          transactionInterval
             .rate(config.multiple.dev.rps)
-            .flatMap((timestamp) => [
+            .spans((timestamp) => [
               ...multipleEnvServiceDevInstance
                 .transaction('GET /api')
                 .timestamp(timestamp)
@@ -111,9 +116,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .failure()
                 .serialize(),
             ]),
-          ...transactionInterval
+          transactionInterval
             .rate(config.multiple.prod.rps)
-            .flatMap((timestamp) => [
+            .spans((timestamp) => [
               ...multipleEnvServiceDevInstance
                 .transaction('non-request', 'rpc')
                 .timestamp(timestamp)
@@ -121,7 +126,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .success()
                 .serialize(),
             ]),
-          ...metricInterval.rate(1).flatMap((timestamp) => [
+          metricInterval.rate(1).spans((timestamp) => [
             ...metricOnlyInstance
               .appMetrics({
                 'system.memory.actual.free': 1,
@@ -132,6 +137,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .timestamp(timestamp)
               .serialize(),
           ]),
+          errorInterval
+            .rate(1)
+            .spans((timestamp) => [
+              ...errorOnlyInstance.error('Foo').timestamp(timestamp).serialize(),
+            ]),
         ]);
       });
 
@@ -185,6 +195,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const serviceNames = response.body.items.map((item) => item.serviceName);
 
           expect(serviceNames).to.contain('metric-only-service');
+
+          expect(serviceNames).to.contain('error-only-service');
         });
       });
 

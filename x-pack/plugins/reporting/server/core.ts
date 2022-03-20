@@ -8,44 +8,51 @@
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
-import type { ScreenshottingStart, ScreenshotResult } from '../../screenshotting/server';
-import {
+import type {
   BasePath,
   IClusterClient,
-  KibanaRequest,
+  Logger,
   PackageInfo,
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-  ServiceStatusLevels,
   StatusServiceSetup,
   UiSettingsServiceStart,
-} from '../../../../src/core/server';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
+} from 'src/core/server';
+import type { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
+import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { LicensingPluginStart } from '../../licensing/server';
+import type {
+  ScreenshottingStart,
+  PngScreenshotOptions as BasePngScreenshotOptions,
+  PngScreenshotResult,
+  PdfScreenshotResult,
+  UrlOrUrlWithContext,
+} from '../../screenshotting/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { SpacesPluginSetup } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
-import { ReportingConfig, ReportingSetup } from './';
+import type { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
-import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { ReportingStore } from './lib/store';
+import { checkLicense, getExportTypesRegistry } from './lib';
+import { reportingEventLoggerFactory } from './lib/event_logger/logger';
+import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import { ReportingPluginRouter, ScreenshotOptions } from './types';
+import type { ReportingPluginRouter, PngScreenshotOptions, PdfScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
-  licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  logger: LevelLogger;
+  logger: Logger;
   status: StatusServiceSetup;
 }
 
@@ -55,9 +62,12 @@ export interface ReportingInternalStart {
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
-  taskManager: TaskManagerStartContract;
-  logger: LevelLogger;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  logger: Logger;
   screenshotting: ScreenshottingStart;
+  security?: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -78,7 +88,9 @@ export class ReportingCore {
 
   public getContract: () => ReportingSetup;
 
-  constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
+  private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
+
+  constructor(private logger: Logger, context: PluginInitializerContext<ReportingConfigType>) {
     this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
@@ -123,6 +135,14 @@ export class ReportingCore {
     const { executeTask, monitorTask } = this;
     // enable this instance to generate reports and to monitor for pending reports
     await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+  }
+
+  public pluginStop() {
+    this.kibanaShuttingDown$.next();
+  }
+
+  public getKibanaShutdown$(): Rx.Observable<void> {
+    return this.kibanaShuttingDown$.pipe(take(1));
   }
 
   private async assertKibanaIsAvailable(): Promise<void> {
@@ -247,10 +267,12 @@ export class ReportingCore {
   }
 
   public async getLicenseInfo() {
-    const { licensing } = this.getPluginSetupDeps();
-    return await licensing.license$
+    const { license$ } = (await this.getPluginStartDeps()).licensing;
+    const registry = this.getExportTypesRegistry();
+
+    return await license$
       .pipe(
-        map((license) => checkLicense(this.getExportTypesRegistry(), license)),
+        map((license) => checkLicense(registry, license)),
         first()
       )
       .toPromise();
@@ -341,13 +363,16 @@ export class ReportingCore {
     return startDeps.esClient;
   }
 
-  public getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  public getScreenshots(
+    options: PngScreenshotOptions | PdfScreenshotOptions
+  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
         const config = this.getConfig();
         return screenshotting.getScreenshots({
           ...options,
-
           timeouts: {
             loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
             openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
@@ -364,8 +389,8 @@ export class ReportingCore {
             typeof url === 'string'
               ? url
               : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          ),
-        });
+          ) as UrlOrUrlWithContext[],
+        } as BasePngScreenshotOptions);
       })
     );
   }
@@ -380,5 +405,10 @@ export class ReportingCore {
 
   public countConcurrentReports(): number {
     return this.executing.size;
+  }
+
+  public getEventLogger(report: IReport, task?: { id: string }) {
+    const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
+    return new ReportingEventLogger(report, task);
   }
 }

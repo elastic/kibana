@@ -33,6 +33,7 @@ export const AllCases: React.FC = () => {
     </>
   );
 };
+AllCases.displayName = 'AllCases';
 
 // eslint-disable-next-line import/no-default-export
 export { AllCases as default };

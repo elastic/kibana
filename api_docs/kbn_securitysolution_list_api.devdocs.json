@@ -1,0 +1,1092 @@
+{
+  "id": "@kbn/securitysolution-list-api",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.addEndpointExceptionListWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "addEndpointExceptionListWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, signal, }: ",
+          "AddEndpointExceptionListProps",
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | {}>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.addEndpointExceptionListWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "AddEndpointExceptionListProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.addExceptionListItemWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "addExceptionListItemWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, listItem, signal, }: ",
+          "AddExceptionListItemProps",
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.addExceptionListItemWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  listItem,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "AddExceptionListItemProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.addExceptionListWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "addExceptionListWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, list, signal, }: ",
+          "AddExceptionListProps",
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.addExceptionListWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  list,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "AddExceptionListProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.createListIndexWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "createListIndexWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, signal, }: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ApiParams",
+            "text": "ApiParams"
+          },
+          ") => Promise<{ acknowledged: boolean; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.createListIndexWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-api",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListApiPluginApi",
+                "section": "def-common.ApiParams",
+                "text": "ApiParams"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.deleteExceptionListByIdWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteExceptionListByIdWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, id, namespaceType, signal, }: ",
+          "ApiCallByIdProps",
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.deleteExceptionListByIdWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  id,\n  namespaceType,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "ApiCallByIdProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.deleteExceptionListItemByIdWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteExceptionListItemByIdWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, id, namespaceType, signal, }: ",
+          "ApiCallByIdProps",
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.deleteExceptionListItemByIdWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  id,\n  namespaceType,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "ApiCallByIdProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.deleteListWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteListWithValidation",
+        "description": [],
+        "signature": [
+          "({ deleteReferences, http, id, ignoreReferences, signal, }: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.DeleteListParams",
+            "text": "DeleteListParams"
+          },
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.deleteListWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  deleteReferences,\n  http,\n  id,\n  ignoreReferences,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-api",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListApiPluginApi",
+                "section": "def-common.DeleteListParams",
+                "text": "DeleteListParams"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.exportExceptionList",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "exportExceptionList",
+        "description": [
+          "\nFetch an ExceptionList by providing a ExceptionList ID\n"
+        ],
+        "signature": [
+          "({ http, id, listId, namespaceType, signal, }: ",
+          "ExportExceptionListProps",
+          ") => Promise<Blob>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.exportExceptionList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  id,\n  listId,\n  namespaceType,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "ExportExceptionListProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.exportListWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "exportListWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, listId, signal, }: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ExportListParams",
+            "text": "ExportListParams"
+          },
+          ") => Promise<Blob>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.exportListWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  listId,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-api",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListApiPluginApi",
+                "section": "def-common.ExportListParams",
+                "text": "ExportListParams"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.fetchExceptionListByIdWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchExceptionListByIdWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, id, namespaceType, signal, }: ",
+          "ApiCallByIdProps",
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.fetchExceptionListByIdWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  id,\n  namespaceType,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "ApiCallByIdProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.fetchExceptionListItemByIdWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchExceptionListItemByIdWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, id, namespaceType, signal, }: ",
+          "ApiCallByIdProps",
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.fetchExceptionListItemByIdWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  id,\n  namespaceType,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "ApiCallByIdProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.fetchExceptionListsItemsByListIdsWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchExceptionListsItemsByListIdsWithValidation",
+        "description": [],
+        "signature": [
+          "({ filterOptions, http, listIds, namespaceTypes, pagination, signal, }: ",
+          "ApiCallByListIdProps",
+          ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.fetchExceptionListsItemsByListIdsWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filterOptions,\n  http,\n  listIds,\n  namespaceTypes,\n  pagination,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "ApiCallByListIdProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.fetchExceptionListsWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchExceptionListsWithValidation",
+        "description": [],
+        "signature": [
+          "({ filters, http, namespaceTypes, pagination, signal, }: ",
+          "ApiCallFetchExceptionListsProps",
+          ") => Promise<{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.fetchExceptionListsWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filters,\n  http,\n  namespaceTypes,\n  pagination,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "ApiCallFetchExceptionListsProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.findListsWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "findListsWithValidation",
+        "description": [],
+        "signature": [
+          "({ cursor, http, pageIndex, pageSize, signal, }: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.FindListsParams",
+            "text": "FindListsParams"
+          },
+          ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.findListsWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  cursor,\n  http,\n  pageIndex,\n  pageSize,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-api",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListApiPluginApi",
+                "section": "def-common.FindListsParams",
+                "text": "FindListsParams"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.importListWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "importListWithValidation",
+        "description": [],
+        "signature": [
+          "({ file, http, listId, type, signal, }: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ImportListParams",
+            "text": "ImportListParams"
+          },
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.importListWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  file,\n  http,\n  listId,\n  type,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-api",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListApiPluginApi",
+                "section": "def-common.ImportListParams",
+                "text": "ImportListParams"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.readListIndexWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "readListIndexWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, signal, }: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ApiParams",
+            "text": "ApiParams"
+          },
+          ") => Promise<{ list_index: boolean; list_item_index: boolean; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.readListIndexWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-api",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListApiPluginApi",
+                "section": "def-common.ApiParams",
+                "text": "ApiParams"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.readListPrivileges",
+        "type": "Function",
+        "tags": [],
+        "label": "readListPrivileges",
+        "description": [],
+        "signature": [
+          "({ http, signal }: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ApiParams",
+            "text": "ApiParams"
+          },
+          ") => Promise<unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.readListPrivileges.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ http, signal }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-api",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListApiPluginApi",
+                "section": "def-common.ApiParams",
+                "text": "ApiParams"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.toError",
+        "type": "Function",
+        "tags": [],
+        "label": "toError",
+        "description": [],
+        "signature": [
+          "(e: unknown) => Error"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/fp_utils/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.toError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "e",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/fp_utils/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.toPromise",
+        "type": "Function",
+        "tags": [],
+        "label": "toPromise",
+        "description": [],
+        "signature": [
+          "<E, A>(taskEither: ",
+          "TaskEither",
+          "<E, A>) => Promise<A>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/fp_utils/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.toPromise.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "taskEither",
+            "description": [],
+            "signature": [
+              "TaskEither",
+              "<E, A>"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/fp_utils/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.updateExceptionListItemWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "updateExceptionListItemWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, listItem, signal, }: ",
+          "UpdateExceptionListItemProps",
+          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.updateExceptionListItemWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  listItem,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "UpdateExceptionListItemProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.updateExceptionListWithValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "updateExceptionListWithValidation",
+        "description": [],
+        "signature": [
+          "({ http, list, signal, }: ",
+          "UpdateExceptionListProps",
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.updateExceptionListWithValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  list,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              "UpdateExceptionListProps"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.ApiParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiParams",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.ApiParams.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpStart"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.ApiParams.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.DeleteListParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteListParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.DeleteListParams",
+            "text": "DeleteListParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ApiParams",
+            "text": "ApiParams"
+          }
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.DeleteListParams.deleteReferences",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deleteReferences",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.DeleteListParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.DeleteListParams.ignoreReferences",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreReferences",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.ExportListParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExportListParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ExportListParams",
+            "text": "ExportListParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ApiParams",
+            "text": "ApiParams"
+          }
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.ExportListParams.listId",
+            "type": "string",
+            "tags": [],
+            "label": "listId",
+            "description": [],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.FindListsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindListsParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.FindListsParams",
+            "text": "FindListsParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ApiParams",
+            "text": "ApiParams"
+          }
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.FindListsParams.cursor",
+            "type": "string",
+            "tags": [],
+            "label": "cursor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.FindListsParams.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.FindListsParams.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.ImportListParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ImportListParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ImportListParams",
+            "text": "ImportListParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/securitysolution-list-api",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListApiPluginApi",
+            "section": "def-common.ApiParams",
+            "text": "ApiParams"
+          }
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.ImportListParams.file",
+            "type": "Object",
+            "tags": [],
+            "label": "file",
+            "description": [],
+            "signature": [
+              "File"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.ImportListParams.listId",
+            "type": "string",
+            "tags": [],
+            "label": "listId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.ImportListParams.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

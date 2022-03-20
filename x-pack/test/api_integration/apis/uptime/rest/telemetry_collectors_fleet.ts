@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         'up',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -150,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
       await client.indices.refresh();
     });
@@ -175,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
           dateEnd: 'now/d',
           autoRefreshEnabled: true,
           refreshTelemetryHistory: true,
+          refreshEsData: true,
         })
         .expect(200);
 

@@ -7,6 +7,10 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 interface ESAggResponse {
   key: string;
@@ -15,12 +19,17 @@ interface ESAggResponse {
 export async function fetchKibanaVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   size: number,
   filterQuery?: string
 ): Promise<AlertVersions[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'kibana',
+    dataset: 'stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: ['aggregations'],
     body: {
       size: 0,
@@ -32,11 +41,7 @@ export async function fetchKibanaVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'kibana_stats',
-              },
-            },
+            createDatasetFilter('kibana_stats', 'stats', 'kibana.stats'),
             {
               range: {
                 timestamp: {
@@ -99,7 +104,7 @@ export async function fetchKibanaVersions(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');
   const clusterList = get(response, 'aggregations.cluster.buckets', []) as ESAggResponse[];
   return clusterList.map((cluster) => {

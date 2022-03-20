@@ -7,12 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LAYER_WIZARD_CATEGORY } from '../../../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../../common/constants';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { getSecurityIndexPatterns } from './security_index_pattern_utils';
 import { SecurityLayerTemplate } from './security_layer_template';
 
 export const SecurityLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.SECURITY,
+  order: 20,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
   getIsDisabled: async () => {
     const indexPatterns = await getSecurityIndexPatterns();

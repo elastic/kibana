@@ -9,9 +9,9 @@
 import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { flattenHit } from '../../../../../../../data/common';
+import { useDiscoverServices } from '../../../../../utils/use_discover_services';
+import { flattenHit } from '../../../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
-import { getServices } from '../../../../../kibana_services';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 import { getFieldsToShow } from '../../../../../utils/get_fields_to_show';
@@ -27,7 +27,8 @@ export const DocViewerLegacyTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
+  const { fieldFormats, uiSettings } = useDiscoverServices();
+  const showMultiFields = useMemo(() => uiSettings.get(SHOW_MULTIFIELDS), [uiSettings]);
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
   const tableColumns = useMemo(() => {
@@ -89,7 +90,13 @@ export const DocViewerLegacyTable = ({
           scripted: Boolean(fieldMapping?.scripted),
         },
         value: {
-          formattedValue: formatFieldValue(flattened[field], hit, dataView, fieldMapping),
+          formattedValue: formatFieldValue(
+            flattened[field],
+            hit,
+            fieldFormats,
+            dataView,
+            fieldMapping
+          ),
           ignored,
         },
       };

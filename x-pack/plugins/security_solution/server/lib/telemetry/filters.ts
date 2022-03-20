@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TelemetryEvent } from './types';
+import type { TelemetryEvent } from './types';
 
 export interface AllowlistFields {
   [key: string]: boolean | AllowlistFields;
@@ -108,6 +108,7 @@ const allowlistBaseEventFields: AllowlistFields = {
 export const allowlistEventFields: AllowlistFields = {
   _id: true,
   '@timestamp': true,
+  signal_id: true,
   agent: true,
   Endpoint: true,
   /* eslint-disable @typescript-eslint/naming-convention */

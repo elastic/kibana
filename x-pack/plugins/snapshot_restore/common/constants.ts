@@ -35,23 +35,21 @@ export enum REPOSITORY_TYPES {
 }
 
 // Deliberately do not include `source` as a default repository since we treat it as a flag
-export const DEFAULT_REPOSITORY_TYPES: RepositoryType[] = [
+export const ON_PREM_REPOSITORY_TYPES: RepositoryType[] = [
   REPOSITORY_TYPES.fs,
   REPOSITORY_TYPES.url,
 ];
 
-export const PLUGIN_REPOSITORY_TYPES: RepositoryType[] = [
-  REPOSITORY_TYPES.s3,
-  REPOSITORY_TYPES.hdfs,
+export const MODULE_REPOSITORY_TYPES: RepositoryType[] = [
   REPOSITORY_TYPES.azure,
   REPOSITORY_TYPES.gcs,
+  REPOSITORY_TYPES.s3,
 ];
 
+export const PLUGIN_REPOSITORY_TYPES: RepositoryType[] = [REPOSITORY_TYPES.hdfs];
+
 export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
-  'repository-s3': REPOSITORY_TYPES.s3,
   'repository-hdfs': REPOSITORY_TYPES.hdfs,
-  'repository-azure': REPOSITORY_TYPES.azure,
-  'repository-gcs': REPOSITORY_TYPES.gcs,
 };
 
 export const APP_REQUIRED_CLUSTER_PRIVILEGES = [

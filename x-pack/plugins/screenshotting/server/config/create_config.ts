@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { cloneDeep, set, upperFirst } from 'lodash';
 import type { Logger } from 'src/core/server';
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
@@ -27,29 +26,15 @@ export async function createConfig(parentLogger: Logger, config: ConfigType) {
   const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
   const osName = [os.os, os.dist, os.release].filter(Boolean).map(upperFirst).join(' ');
 
-  logger.debug(
-    i18n.translate('xpack.screenshotting.serverConfig.osDetected', {
-      defaultMessage: `Running on OS: '{osName}'`,
-      values: { osName },
-    })
-  );
+  logger.debug(`Running on OS: '${osName}'`);
 
   if (disableSandbox === true) {
     logger.warn(
-      i18n.translate('xpack.screenshotting.serverConfig.autoSet.sandboxDisabled', {
-        defaultMessage: `Chromium sandbox provides an additional layer of protection, but is not supported for {osName} OS. Automatically setting '{configKey}: true'.`,
-        values: {
-          configKey: 'xpack.screenshotting.capture.browser.chromium.disableSandbox',
-          osName,
-        },
-      })
+      `Chromium sandbox provides an additional layer of protection, but is not supported for ${osName} OS. Automatically setting 'xpack.screenshotting.capture.browser.chromium.disableSandbox: true'.`
     );
   } else {
     logger.info(
-      i18n.translate('xpack.screenshotting.serverConfig.autoSet.sandboxEnabled', {
-        defaultMessage: `Chromium sandbox provides an additional layer of protection, and is supported for {osName} OS. Automatically enabling Chromium sandbox.`,
-        values: { osName },
-      })
+      `Chromium sandbox provides an additional layer of protection, and is supported for ${osName} OS. Automatically enabling Chromium sandbox.`
     );
   }
 

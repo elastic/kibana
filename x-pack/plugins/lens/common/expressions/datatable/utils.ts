@@ -13,9 +13,11 @@ function isValidNumber(value: unknown): boolean {
 }
 
 export function isNumericFieldForDatatable(currentData: Datatable | undefined, accessor: string) {
-  const isNumeric =
-    currentData?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
-      ?.meta.type === 'number';
+  const column = currentData?.columns.find(
+    (col) => col.id === accessor || getOriginalId(col.id) === accessor
+  );
+  // min and max aggs are reporting as number but are actually dates - work around this by checking for the date formatter until this is fixed at the source
+  const isNumeric = column?.meta.type === 'number' && column?.meta.params?.id !== 'date';
 
   return (
     isNumeric &&

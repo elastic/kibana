@@ -19,7 +19,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 export const useUpdateDataView = (
   onOpenAndReset: () => void
 ): ((missingPatterns: string[]) => Promise<boolean>) => {
-  const { uiSettings } = useKibana().services;
+  const { theme, uiSettings } = useKibana().services;
   const { addSuccess, addError } = useAppToasts();
   return useCallback(
     async (missingPatterns: string[]): Promise<boolean> => {
@@ -40,8 +40,8 @@ export const useUpdateDataView = (
       if (isUiSettingsSuccess) {
         addSuccess({
           color: 'success',
-          title: toMountPoint(i18n.SUCCESS_TOAST_TITLE),
-          text: toMountPoint(<RefreshButton />),
+          title: toMountPoint(i18n.SUCCESS_TOAST_TITLE, { theme$: theme.theme$ }),
+          text: toMountPoint(<RefreshButton />, { theme$: theme.theme$ }),
           iconType: undefined,
           toastLifeTimeMs: 600000,
         });
@@ -67,6 +67,6 @@ export const useUpdateDataView = (
       });
       return false;
     },
-    [addError, addSuccess, onOpenAndReset, uiSettings]
+    [addError, addSuccess, onOpenAndReset, theme.theme$, uiSettings]
   );
 };

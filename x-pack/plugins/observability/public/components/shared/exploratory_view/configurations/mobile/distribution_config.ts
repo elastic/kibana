@@ -17,6 +17,7 @@ import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
+  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -25,7 +26,7 @@ import {
 import { CPU_USAGE, SYSTEM_MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getMobileKPIDistributionConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: 'bar',
@@ -42,7 +43,7 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
     filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
-      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
+      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], dataView),
     ],
     labels: {
       ...FieldLabels,
@@ -55,16 +56,34 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
         label: RESPONSE_LATENCY,
         field: TRANSACTION_DURATION,
         id: TRANSACTION_DURATION,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: transaction`,
+          },
+        ],
       },
       {
         label: SYSTEM_MEMORY_USAGE,
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
       {
         label: CPU_USAGE,
         field: METRIC_SYSTEM_CPU_USAGE,
         id: METRIC_SYSTEM_CPU_USAGE,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
     ],
   };

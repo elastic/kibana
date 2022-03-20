@@ -1,0 +1,48 @@
+---
+id: kibDevTutorialCI
+slug: /kibana-dev-docs/tutorials/ci
+title: CI
+summary: CI
+date: 2022-02-03
+tags: ['kibana', 'onboarding', 'dev', 'ci']
+---
+
+## CI
+
+Kibana uses BuildKite to run a series of checks against each pull requests and tracked branch.  Results are posted in pull requests as comments and from the BuildKite UI
+
+### Comments
+
+Comments in pull requests can be used to trigger CI operations.
+
+#### `buildkite test this`
+
+Run test suites and checks.
+
+#### `@elasticmachine merge upstream`
+
+Merge in the most recent changes from upstream.
+
+#### `@elasticmachine run elasticsearch-ci/docs`
+
+Build documentation from the root `docs` folder.
+
+### Labels
+
+Labels can be added to a pull request to run conditional pipelines.
+
+#### `ci:deploy-cloud`
+
+Deploy a pull request to Elastic Cloud.  Deployment information will be available as an annotation at the top of a build.  Access credentials will be available in vault.
+
+#### `ci:build-all-platforms`
+
+Build Windows, macOS, and Linux archives.  Artifacts will be available on the "Artifacts" tab of the "Build Kibana Distribution and Plugins" step.
+
+#### `ci:build-os-packages`
+
+Build Docker images, and Debian and RPM packages.  Artifacts will be available on the "Artifacts" tab of the "Build Kibana Distribution and Plugins" step.
+
+#### `ci:all-cypress-suites`
+
+By default, Cypress test suites are only run when code changes are made in certain files, typically files with overlapping test coverage.  Adding this label will cause all Cypress tests to run.

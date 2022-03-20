@@ -31,7 +31,7 @@ function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id:
 }
 
 async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<any>({
+  const body = await esClient.search<any>({
     index,
     body: {
       query: {
@@ -67,7 +67,7 @@ describe('migration v2', () => {
         es: {
           license: 'basic',
           dataArchive: Path.join(__dirname, 'archives', '7.14.0_xpack_sample_saved_objects.zip'),
-          esArgs: ['http.max_content_length=1715275b'],
+          esArgs: ['http.max_content_length=1715329b'],
         },
       },
     }));
@@ -85,7 +85,7 @@ describe('migration v2', () => {
   });
 
   it('completes the migration even when a full batch would exceed ES http.max_content_length', async () => {
-    root = createRoot({ maxBatchSizeBytes: 1715275 });
+    root = createRoot({ maxBatchSizeBytes: 1715329 });
     esServer = await startES();
     await root.preboot();
     await root.setup();
@@ -95,7 +95,7 @@ describe('migration v2', () => {
     // wait a bit for the count to settle.
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    const esClient: ElasticsearchClient = esServer.es.getKibanaEsClient();
+    const esClient: ElasticsearchClient = esServer.es.getClient();
 
     // assert that the docs from the original index have been migrated rather than comparing a doc count after startup
     const originalDocs = await fetchDocuments(esClient, '.kibana_7.14.0_001');
@@ -109,7 +109,7 @@ describe('migration v2', () => {
     await root.preboot();
     await root.setup();
     await expect(root.start()).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715274 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.]`
+      `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715329 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.]`
     );
 
     await retryAsync(
@@ -122,7 +122,7 @@ describe('migration v2', () => {
         expect(
           records.find((rec) =>
             rec.message.startsWith(
-              `Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715274 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
+              `Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715329 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
             )
           )
         ).toBeDefined();
@@ -153,6 +153,7 @@ function createRoot(options: { maxBatchSizeBytes?: number }) {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],

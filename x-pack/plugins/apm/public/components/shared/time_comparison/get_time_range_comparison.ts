@@ -5,24 +5,21 @@
  * 2.0.
  */
 
+import { PartialTheme } from '@elastic/charts';
 import moment from 'moment';
-import { EuiTheme } from 'src/plugins/kibana_react/common';
 import {
   TimeRangeComparisonType,
   TimeRangeComparisonEnum,
 } from '../../../../common/runtime_types/comparison_type_rt';
-import { getDateDifference } from '../../../../common/utils/formatters';
 
-export function getComparisonChartTheme(theme: EuiTheme) {
+export function getComparisonChartTheme(): PartialTheme {
   return {
     areaSeriesStyle: {
       area: {
-        fill: theme.eui.euiColorLightShade,
         visible: true,
         opacity: 0.5,
       },
       line: {
-        stroke: theme.eui.euiColorMediumShade,
         strokeWidth: 1,
         visible: true,
       },
@@ -50,12 +47,8 @@ export function getTimeRangeComparison({
   if (!comparisonEnabled || !comparisonType || !start || !end) {
     return {};
   }
-
   const startMoment = moment(start);
   const endMoment = moment(end);
-
-  const startEpoch = startMoment.valueOf();
-  const endEpoch = endMoment.valueOf();
 
   let diff: number;
   let offset: string;
@@ -65,29 +58,21 @@ export function getTimeRangeComparison({
       diff = oneDayInMilliseconds;
       offset = '1d';
       break;
-
     case TimeRangeComparisonEnum.WeekBefore:
       diff = oneWeekInMilliseconds;
       offset = '1w';
       break;
-
     case TimeRangeComparisonEnum.PeriodBefore:
-      diff = getDateDifference({
-        start: startMoment,
-        end: endMoment,
-        unitOfTime: 'milliseconds',
-        precise: true,
-      });
+      diff = endMoment.diff(startMoment);
       offset = `${diff}ms`;
       break;
-
     default:
       throw new Error('Unknown comparisonType');
   }
 
   return {
-    comparisonStart: new Date(startEpoch - diff).toISOString(),
-    comparisonEnd: new Date(endEpoch - diff).toISOString(),
+    comparisonStart: startMoment.subtract(diff, 'ms').toISOString(),
+    comparisonEnd: endMoment.subtract(diff, 'ms').toISOString(),
     offset,
   };
 }

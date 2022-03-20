@@ -67,9 +67,7 @@ describe('saved query service', () => {
       });
       const result = await getAllSavedQueries();
       expect(http.post).toBeCalled();
-      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_find', {
-        body: '{"perPage":10000}',
-      });
+      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_all');
       expect(result).toEqual([{ attributes: savedQueryAttributes }]);
     });
   });

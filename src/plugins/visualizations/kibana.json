@@ -7,13 +7,17 @@
     "data",
     "expressions",
     "uiActions",
+    "urlForwarding",
+    "navigation",
     "embeddable",
     "inspector",
-    "savedObjects"
+    "savedObjects",
+    "screenshotMode",
+    "presentationUtil"
   ],
-  "optionalPlugins": ["usageCollection", "spaces", "savedObjectsTaggingOss"],
-  "requiredBundles": ["kibanaUtils", "discover", "kibanaReact"],
-  "extraPublicDirs": ["common/constants", "common/prepare_log_table", "common/expression_functions"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
+  "requiredBundles": ["kibanaUtils", "discover", "kibanaReact", "home"],
+  "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

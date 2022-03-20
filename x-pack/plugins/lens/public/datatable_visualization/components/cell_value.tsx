@@ -20,18 +20,19 @@ export const createGridCell = (
   columnConfig: ColumnConfig,
   DataContext: React.Context<DataContextType>,
   uiSettings: IUiSettingsClient,
-  fitRowToContent?: boolean
+  fitRowToContent?: boolean,
+  rowHeight?: number
 ) => {
   // Changing theme requires a full reload of the page, so we can cache here
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, minMaxByColumnId, getColorForValue } = useContext(DataContext);
-    const rowValue = table?.rows[rowIndex][columnId];
+    const rowValue = table?.rows[rowIndex]?.[columnId];
     const content = formatters[columnId]?.convert(rowValue, 'html');
     const currentAlignment = alignments && alignments[columnId];
     const alignmentClassName = `lnsTableCell--${currentAlignment}`;
     const className = classNames(alignmentClassName, {
-      lnsTableCell: !fitRowToContent,
+      lnsTableCell: !fitRowToContent && rowHeight === 1,
     });
 
     const { colorMode, palette } =

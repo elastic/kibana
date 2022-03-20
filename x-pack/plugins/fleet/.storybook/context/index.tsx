@@ -31,6 +31,7 @@ import { stubbedStartServices } from './stubs';
 import { getDocLinks } from './doc_links';
 import { getCloud } from './cloud';
 import { getShare } from './share';
+import { getExecutionContext } from './execution_context';
 
 // TODO: clintandrewhall - this is not ideal, or complete.  The root context of Fleet applications
 // requires full start contracts of its dependencies.  As a result, we have to mock all of those contracts
@@ -52,8 +53,12 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
     () => ({
       ...stubbedStartServices,
       application: getApplication(),
+      executionContext: getExecutionContext(),
       chrome: getChrome(),
-      cloud: getCloud({ isCloudEnabled }),
+      cloud: {
+        ...getCloud({ isCloudEnabled }),
+        CloudContextProvider: () => <></>,
+      },
       customIntegrations: {
         ContextProvider: getStorybookContextProvider(),
       },
@@ -116,6 +121,7 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   } as unknown as FleetConfigType;
 
   const extensions = {};
+  const theme$ = EMPTY;
   const kibanaVersion = '1.2.3';
   const setHeaderActionMenu = useCallback(() => {}, []);
 
@@ -129,6 +135,7 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
         startServices,
         extensions,
         setHeaderActionMenu,
+        theme$,
       }}
     >
       {storyChildren}

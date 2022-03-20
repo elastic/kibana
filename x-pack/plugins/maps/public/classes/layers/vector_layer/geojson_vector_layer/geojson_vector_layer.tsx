@@ -43,8 +43,6 @@ import { syncGeojsonSourceData } from './geojson_source_data';
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../../build_vector_request_meta';
 
-export const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
-
 export class GeoJsonVectorLayer extends AbstractVectorLayer {
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
@@ -63,12 +61,6 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     }
 
     return layerDescriptor;
-  }
-
-  supportsFeatureEditing(): boolean {
-    const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
-    const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
-    return data ? data.supportsFeatureEditing : false;
   }
 
   async getBounds(syncContext: DataRequestContext) {
@@ -255,7 +247,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       }
 
       const joinStates = await this._syncJoins(syncContext, style);
-      performInnerJoins(
+      await performInnerJoins(
         sourceResult,
         joinStates,
         syncContext.updateSourceData,
@@ -378,33 +370,6 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         }),
       ...syncContext,
     });
-  }
-
-  async _syncSupportsFeatureEditing({
-    syncContext,
-    source,
-  }: {
-    syncContext: DataRequestContext;
-    source: IVectorSource;
-  }) {
-    if (syncContext.dataFilters.isReadOnly) {
-      return;
-    }
-    const { startLoading, stopLoading, onLoadError } = syncContext;
-    const dataRequestId = SUPPORTS_FEATURE_EDITING_REQUEST_ID;
-    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
-    const prevDataRequest = this.getDataRequest(dataRequestId);
-    if (prevDataRequest) {
-      return;
-    }
-    try {
-      startLoading(dataRequestId, requestToken);
-      const supportsFeatureEditing = await source.supportsFeatureEditing();
-      stopLoading(dataRequestId, requestToken, { supportsFeatureEditing });
-    } catch (error) {
-      onLoadError(dataRequestId, requestToken, error.message);
-      throw error;
-    }
   }
 
   _getSourceFeatureCollection() {

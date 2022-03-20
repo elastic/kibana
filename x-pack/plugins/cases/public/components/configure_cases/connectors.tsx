@@ -131,5 +131,6 @@ const ConnectorsComponent: React.FC<Props> = ({
     </>
   );
 };
+ConnectorsComponent.displayName = 'Connectors';
 
 export const Connectors = React.memo(ConnectorsComponent);

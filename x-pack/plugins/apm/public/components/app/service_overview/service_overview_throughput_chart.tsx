@@ -18,17 +18,19 @@ import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_d
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
-import { useTheme } from '../../../hooks/use_theme';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 import {
   getComparisonChartTheme,
   getTimeRangeComparison,
 } from '../../shared/time_comparison/get_time_range_comparison';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../shared/charts/helper/get_timeseries_color';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -44,14 +46,8 @@ export function ServiceOverviewThroughputChart({
   kuery: string;
   transactionName?: string;
 }) {
-  const theme = useTheme();
-
   const {
-    urlParams: { comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
-
-  const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
   } = useApmParams('/services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
@@ -63,7 +59,8 @@ export function ServiceOverviewThroughputChart({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { transactionType, serviceName } = useApmServiceContext();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
+
+  const comparisonChartTheme = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -74,24 +71,26 @@ export function ServiceOverviewThroughputChart({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/throughput',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                comparisonStart,
+                comparisonEnd,
+                transactionName,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              comparisonStart,
-              comparisonEnd,
-              transactionName,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [
@@ -107,11 +106,15 @@ export function ServiceOverviewThroughputChart({
     ]
   );
 
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.THROUGHPUT
+  );
+
   const timeseries = [
     {
       data: data.currentPeriod,
       type: 'linemark',
-      color: theme.eui.euiColorVis0,
+      color: currentPeriodColor,
       title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
         defaultMessage: 'Throughput',
       }),
@@ -121,7 +124,7 @@ export function ServiceOverviewThroughputChart({
           {
             data: data.previousPeriod,
             type: 'area',
-            color: theme.eui.euiColorMediumShade,
+            color: previousPeriodColor,
             title: i18n.translate(
               'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
               { defaultMessage: 'Previous period' }

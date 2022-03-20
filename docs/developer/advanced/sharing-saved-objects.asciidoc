@@ -158,12 +158,13 @@ TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#use
 
 The
 https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
-interface] has three fields, summarized below:
+interface] has four fields, summarized below:
 
 * `saved_object` - The saved object that was found.
 * `outcome` - One of the following values: `'exactMatch' | 'aliasMatch' | 'conflict'`
 * `alias_target_id` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It means that a legacy URL alias with this ID points
   to an object with a _different_ ID.
+* `alias_purpose` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It describes why the legacy URL alis was created.
 
 The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
 custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `alias_target_id` fields need to be
@@ -236,12 +237,18 @@ if (spacesApi && resolveResult.outcome === 'aliasMatch') {
   // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
   const newObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'aliasMatch'
   const newPath = `/this/page/${newObjectId}${window.location.hash}`; // Use the *local* path within this app (do not include the "/app/appId" prefix)
-  await spacesApi.ui.redirectLegacyUrl(newPath, OBJECT_NOUN);
+  await spacesApi.ui.redirectLegacyUrl({
+    path: newPath,
+    aliasPurpose: resolveResult.alias_purpose, <1>
+    objectNoun: OBJECT_NOUN <2>
+  });
   return;
 }
 ```
-_Note that `OBJECT_NOUN` is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say
-"dashboard" or "index pattern" instead!_
+<1> The `aliasPurpose` field is required as of 8.2, because the API response now includes the reason the alias was created to inform the
+    client whether a toast should be shown or not.
+<2> The `objectNoun` field is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say
+    "dashboard" or "index pattern" instead!
 
 5. And finally, in your deep link page, add a function that will create a callout in the case of a `'conflict'` outcome:
 +
@@ -405,8 +412,8 @@ necessary. However, such handling of secondary objects is not considered critica
 ==== 4. What is a "legacy URL alias"?
 
 As depicted above, when an object is converted to become share-capable, if it exists in a non-Default space, its ID gets changed. To
-preserve its old ID, we also create a special object called a _legacy URL alias_ ("alias" for short); this alias retains the target object's
-old ID (_sourceId_), and it contains a pointer to the target object's new ID (_targetId_).
+preserve its old ID, we also create a special object called a <<legacy-url-aliases,_legacy URL alias_>> ("alias" for short); this alias
+retains the target object's old ID (_sourceId_), and it contains a pointer to the target object's new ID (_targetId_).
 
 Aliases are meant to be mostly invisible to end-users by design. There is no UI to manage them directly. Our vision is that aliases will be
 used as a stop-gap to help us through the 8.0 upgrade process, but we will nudge users away from relying on aliases so we can eventually
@@ -473,3 +480,7 @@ change any other data flows to use `resolve()`.
 External plugins (those not shipped with {kib}) can use this guide to convert any isolated objects to become share-capable or fully
 shareable! If you are an external plugin developer, the steps are the same, but you don't need to worry about getting anything done before a
 specific release. The only thing you need to know is that your plugin cannot convert your objects until the 8.0 release.
+
+==== 8. How will users be impacted?
+
+Refer to <<saved-object-ids,Saved Object IDs>> documentation for more details how users should expect to be impacted.

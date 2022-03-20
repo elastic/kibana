@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
+import type { Query, TimeRange } from '../../../../../../src/plugins/data/common';
 import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
 import type {
   ExpressionFunctionDefinition,

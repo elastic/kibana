@@ -48,6 +48,7 @@ describe('RenderCellValue', () => {
       isExpanded: false,
       linkValues,
       rowIndex,
+      colIndex: 0,
       setCellProps: jest.fn(),
       timelineId,
     };

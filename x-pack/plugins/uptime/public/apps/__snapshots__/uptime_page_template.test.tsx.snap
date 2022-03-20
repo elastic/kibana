@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UptimePageTemplateComponent styling applies the header centering on mobile 1`] = `
+.c0 .euiPageHeaderContent > .euiFlexGroup {
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c0 .euiPageHeaderContent > .euiFlexGroup > .euiFlexItem {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+<div
+  class="euiPage euiPage--grow euiPageTemplate c0"
+  style="min-height: 460px;"
+>
+  <div
+    class="euiPageBody euiPageBody--borderRadiusNone"
+  >
+    <div
+      class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--borderRadiusNone"
+      role="main"
+    >
+      <div
+        class="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+      >
+        <div
+          style="visibility: initial;"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`UptimePageTemplateComponent styling does not apply header centering on bigger resolutions 1`] = `
+.c0 .euiPageHeaderContent > .euiFlexGroup {
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+<div
+  class="euiPage euiPage--grow euiPageTemplate c0"
+  style="min-height: 460px;"
+>
+  <div
+    class="euiPageBody euiPageBody--borderRadiusNone"
+  >
+    <div
+      class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--borderRadiusNone"
+      role="main"
+    >
+      <div
+        class="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+      >
+        <div
+          style="visibility: initial;"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

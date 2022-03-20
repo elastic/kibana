@@ -27,7 +27,9 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+jest.mock('../../../pages/detection_engine/rules/all/rules_table/rules_table_context');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
+jest.mock('../../../containers/detection_engine/rules/use_find_rules_query');
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../components/user_info');
 

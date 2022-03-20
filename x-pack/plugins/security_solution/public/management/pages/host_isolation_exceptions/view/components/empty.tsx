@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
+import { ManagementEmptyStateWrapper } from '../../../../components/management_empty_state_wrapper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   ${() => css`
@@ -17,9 +17,12 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
   `}
 `;
 
-export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ onAdd }) => {
+export const HostIsolationExceptionsEmptyState = memo<{
+  onAdd: () => void;
+  backComponent?: React.ReactNode;
+}>(({ onAdd, backComponent }) => {
   return (
-    <ManagementEmptyStateWraper>
+    <ManagementEmptyStateWrapper>
       <EmptyPrompt
         data-test-subj="hostIsolationExceptionsEmpty"
         iconType="plusInCircle"
@@ -27,17 +30,17 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
           <h2>
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.listEmpty.title"
-              defaultMessage="Add your first Host isolation exception"
+              defaultMessage="Add your first host isolation exception"
             />
           </h2>
         }
         body={
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.listEmpty.message"
-            defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
+            defaultMessage="Add a host isolation exception to allow isolated hosts to communicate with specific IPs."
           />
         }
-        actions={
+        actions={[
           <EuiButton
             fill
             onClick={onAdd}
@@ -45,12 +48,14 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
           >
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.listEmpty.addButton"
-              defaultMessage="Add Host isolation exception"
+              defaultMessage="Add host isolation exception"
             />
-          </EuiButton>
-        }
+          </EuiButton>,
+
+          ...(backComponent ? [backComponent] : []),
+        ]}
       />
-    </ManagementEmptyStateWraper>
+    </ManagementEmptyStateWrapper>
   );
 });
 

@@ -9,8 +9,8 @@ import {
   FIELD_INPUT,
   OPERATOR_INPUT,
   CANCEL_BTN,
-  BUILDER_MODAL_BODY,
   EXCEPTION_ITEM_CONTAINER,
+  EXCEPTION_FLYOUT_TITLE,
 } from '../screens/exceptions';
 
 export const addExceptionEntryFieldValueOfItemX = (
@@ -23,19 +23,19 @@ export const addExceptionEntryFieldValueOfItemX = (
     .find(FIELD_INPUT)
     .eq(fieldIndex)
     .type(`${field}{enter}`);
-  cy.get(BUILDER_MODAL_BODY).click();
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
 export const addExceptionEntryFieldValue = (field: string, index = 0) => {
   cy.get(FIELD_INPUT).eq(index).type(`${field}{enter}`);
-  cy.get(BUILDER_MODAL_BODY).click();
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
-  cy.get(BUILDER_MODAL_BODY).click();
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
-export const closeExceptionBuilderModal = () => {
+export const closeExceptionBuilderFlyout = () => {
   cy.get(CANCEL_BTN).click();
 };

@@ -18,7 +18,7 @@ import {
   createPrepackagedRules,
   importRules,
   exportRules,
-  getRuleStatusById,
+  fetchRuleExecutionEvents,
   fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
@@ -131,11 +131,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: 'hello world',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: false,
           showElasticRules: false,
           tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -157,11 +159,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: false,
           tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -183,11 +187,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: false,
           showElasticRules: true,
           tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -209,11 +215,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: false,
           showElasticRules: false,
           tags: ['hello', 'world'],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -235,11 +243,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '',
-          sortField: 'updated_at',
-          sortOrder: 'desc',
           showCustomRules: false,
           showElasticRules: false,
           tags: ['hello', 'world'],
+        },
+        sortingOptions: {
+          field: 'updated_at',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -261,8 +271,6 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: 'ruleName',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: true,
           tags: ['('],
@@ -284,11 +292,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '"test"',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: true,
           tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -307,11 +317,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '"test"',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: true,
           tags: ['"test"'],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -330,11 +342,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: 'ruleName',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: true,
           tags: ['hello', 'world'],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -655,39 +669,29 @@ describe('Detections Rules API', () => {
     });
   });
 
-  describe('getRuleStatusById', () => {
-    const statusMock = {
-      myRule: {
-        current_status: {
-          alert_id: 'alertId',
-          status_date: 'mm/dd/yyyyTHH:MM:sssz',
-          status: 'succeeded',
-          last_failure_at: null,
-          last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-          last_failure_message: null,
-          last_success_message: 'it is a success',
-        },
-        failures: [],
-      },
-    };
+  describe('fetchRuleExecutionEvents', () => {
+    const responseMock = { events: [] };
 
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(statusMock);
+      fetchMock.mockResolvedValue(responseMock);
     });
 
-    test('check parameter url, query', async () => {
-      await getRuleStatusById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/internal/detection_engine/rules/_find_status', {
-        body: '{"ruleId":"mySuperRuleId"}',
-        method: 'POST',
-        signal: abortCtrl.signal,
-      });
+    test('calls API with correct parameters', async () => {
+      await fetchRuleExecutionEvents({ ruleId: '42', signal: abortCtrl.signal });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/rules/42/execution/events',
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
-    test('happy path', async () => {
-      const ruleResp = await getRuleStatusById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(ruleResp).toEqual(statusMock);
+    test('returns API response as is', async () => {
+      const response = await fetchRuleExecutionEvents({ ruleId: '42', signal: abortCtrl.signal });
+      expect(response).toEqual(responseMock);
     });
   });
 

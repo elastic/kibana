@@ -21,7 +21,8 @@ export interface CommonProps {
 }
 
 const StatefulCellComponent = ({
-  ariaRowindex,
+  rowIndex,
+  colIndex,
   data,
   header,
   eventId,
@@ -30,7 +31,8 @@ const StatefulCellComponent = ({
   tabType,
   timelineId,
 }: {
-  ariaRowindex: number;
+  rowIndex: number;
+  colIndex: number;
   data: TimelineNonEcsData[];
   header: ColumnHeaderOptions;
   eventId: string;
@@ -52,7 +54,8 @@ const StatefulCellComponent = ({
         isExpanded: false,
         isDetails: false,
         linkValues,
-        rowIndex: ariaRowindex - 1,
+        rowIndex,
+        colIndex,
         setCellProps,
         timelineId: tabType != null ? `${timelineId}-${tabType}` : timelineId,
       })}

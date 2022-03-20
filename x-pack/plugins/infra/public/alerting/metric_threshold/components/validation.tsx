@@ -6,21 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ValidationResult } from '../../../../../triggers_actions_ui/public';
 import {
-  MetricExpressionParams,
   Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
-import { QUERY_INVALID } from './expression';
+  FilterQuery,
+  MetricExpressionParams,
+  QUERY_INVALID,
+} from '../../../../common/alerting/metrics';
 
 export function validateMetricThreshold({
   criteria,
   filterQuery,
 }: {
   criteria: MetricExpressionParams[];
-  filterQuery?: string | symbol;
+  filterQuery?: FilterQuery;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {

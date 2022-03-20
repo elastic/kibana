@@ -9,3 +9,5 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
+    artifact_paths:
+      - "target/kibana-osquery/**/*"

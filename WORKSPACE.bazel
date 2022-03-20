@@ -10,15 +10,15 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Fetch Node.js rules
 http_archive(
   name = "build_bazel_rules_nodejs",
-  sha256 = "e79c08a488cc5ac40981987d862c7320cee8741122a2649e9b08e850b6f20442",
-  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.8.0/rules_nodejs-3.8.0.tar.gz"],
+  sha256 = "8a7c981217239085f78acc9898a1f7ba99af887c1996ceb3b4504655383a2c3c",
+  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.0.0/rules_nodejs-4.0.0.tar.gz"],
 )
 
 # Now that we have the rules let's import from them to complete the work
 load("@build_bazel_rules_nodejs//:index.bzl", "check_rules_nodejs_version", "node_repositories", "yarn_install")
 
 # Assure we have at least a given rules_nodejs version
-check_rules_nodejs_version(minimum_version_string = "3.8.0")
+check_rules_nodejs_version(minimum_version_string = "4.0.0")
 
 # Setup the Node.js toolchain for the architectures we want to support
 #
@@ -27,14 +27,14 @@ check_rules_nodejs_version(minimum_version_string = "3.8.0")
 # we can update that rule.
 node_repositories(
   node_repositories = {
-    "16.13.0-darwin_amd64": ("node-v16.13.0-darwin-x64.tar.gz", "node-v16.13.0-darwin-x64", "37e09a8cf2352f340d1204c6154058d81362fef4ec488b0197b2ce36b3f0367a"),
-    "16.13.0-darwin_arm64": ("node-v16.13.0-darwin-arm64.tar.gz", "node-v16.13.0-darwin-arm64", "46d83fc0bd971db5050ef1b15afc44a6665dee40bd6c1cbaec23e1b40fa49e6d"),
-    "16.13.0-linux_arm64": ("node-v16.13.0-linux-arm64.tar.xz", "node-v16.13.0-linux-arm64", "93a0d03f9f802353cb7052bc97a02cd9642b49fa985671cdc16c99936c86d7d2"),
-    "16.13.0-linux_s390x": ("node-v16.13.0-linux-s390x.tar.xz", "node-v16.13.0-linux-s390x", "49e972bf3e969d621157df4c8f2fa18ff748c167d5ebd0efc87e1b9f0c6541cc"),
-    "16.13.0-linux_amd64": ("node-v16.13.0-linux-x64.tar.xz", "node-v16.13.0-linux-x64", "a876ce787133149abd1696afa54b0b5bc5ce3d5ae359081d407ff776e39b7ba8"),
-    "16.13.0-windows_amd64": ("node-v16.13.0-win-x64.zip", "node-v16.13.0-win-x64", "5a39ec5d4786c2814a6c04488bebac6423c2aaa12832b24f0882456f2e4674e1"),
+    "16.13.2-darwin_amd64": ("node-v16.13.2-darwin-x64.tar.gz", "node-v16.13.2-darwin-x64", "900a952bb77533d349e738ff8a5179a4344802af694615f36320a888b49b07e6"),
+    "16.13.2-darwin_arm64": ("node-v16.13.2-darwin-arm64.tar.gz", "node-v16.13.2-darwin-arm64", "09d300008ad58792c12622a5eafdb14c931587bb88713df4df64cdf4ff2188d1"),
+    "16.13.2-linux_arm64": ("node-v16.13.2-linux-arm64.tar.xz", "node-v16.13.2-linux-arm64", "a3cf8e4e9fbea27573eee6da84720bf7227ddd22842b842d48049d6dfe55fb03"),
+    "16.13.2-linux_s390x": ("node-v16.13.2-linux-s390x.tar.xz", "node-v16.13.2-linux-s390x", "c4ba46fc19366f7377d28a60a98f741bfa38045d7924306244c51d1660afcc8d"),
+    "16.13.2-linux_amd64": ("node-v16.13.2-linux-x64.tar.xz", "node-v16.13.2-linux-x64", "7f5e9a42d6e86147867d35643c7b1680c27ccd45db85666fc52798ead5e74421"),
+    "16.13.2-windows_amd64": ("node-v16.13.2-win-x64.zip", "node-v16.13.2-win-x64", "107e3ece84b7fa1e80b3bdf03181d395246c7867e27b17b6d7e6fa9c7932b467"),
   },
-  node_version = "16.13.0",
+  node_version = "16.13.2",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],
@@ -64,4 +64,8 @@ yarn_install(
   symlink_node_modules = True,
   quiet = False,
   frozen_lockfile = False,
+  environment = {
+    "SASS_BINARY_SITE": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass",
+    "RE2_DOWNLOAD_MIRROR": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2",
+  }
 )

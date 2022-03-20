@@ -22,7 +22,8 @@ export async function getSearchStatus(
     const apiResponse: TransportResult<AsyncSearchStatusResponse> = await client.asyncSearch.status(
       {
         id: asyncId,
-      }
+      },
+      { meta: true }
     );
     const response = apiResponse.body;
     if ((response.is_partial && !response.is_running) || response.completion_status >= 400) {

@@ -45,6 +45,7 @@ export const PolicyFormLayout = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const {
     services: {
+      theme,
       application: { navigateToApp },
     },
   } = useKibana();
@@ -86,7 +87,8 @@ export const PolicyFormLayout = React.memo(() => {
                 defaultMessage="Integration {name} has been updated."
                 values={{ name: policyName }}
               />
-            </span>
+            </span>,
+            { theme$: theme.theme$ }
           ),
         });
 
@@ -103,7 +105,7 @@ export const PolicyFormLayout = React.memo(() => {
         });
       }
     }
-  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
+  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState, theme.theme$]);
 
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 

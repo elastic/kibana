@@ -47,7 +47,13 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           size="s"
         />
         <lazy
-          dockLinks={Object {}}
+          docLinks={
+            Object {
+              "legal": Object {
+                "privacyStatement": "https://some-host/some-url",
+              },
+            }
+          }
           enableSaving={true}
           handleChange={[Function]}
           loading={false}
@@ -64,7 +70,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                     values={
                       Object {
                         "privacyStatementLink": <EuiLink
-                          href="https://www.elastic.co/legal/privacy-statement"
+                          href="https://some-host/some-url"
                           target="_blank"
                         >
                           <FormattedMessage
@@ -139,7 +145,13 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 
 exports[`TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`] = `
 <TelemetryManagementSection
-  docLinks={Object {}}
+  docLinks={
+    Object {
+      "legal": Object {
+        "privacyStatement": "https://some-host/some-url",
+      },
+    }
+  }
   enableSaving={true}
   intl={
     Object {
@@ -258,6 +270,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "sendUsageTo": "staging",
       },
       "fetchExample": [Function],
+      "fetchLastReported": [Function],
       "fetchTelemetry": [Function],
       "getCanChangeOptInStatus": [Function],
       "getIsOptedIn": [Function],
@@ -279,6 +292,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         },
         "delete": [MockFunction],
         "externalUrl": Object {
+          "isInternalUrl": [MockFunction],
           "validateUrl": [MockFunction],
         },
         "fetch": [MockFunction],
@@ -308,6 +322,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "reportOptInStatusChange": false,
       "setOptIn": [Function],
       "setUserHasSeenNotice": [Function],
+      "updateLastReported": [Function],
       "updatedConfig": undefined,
     }
   }

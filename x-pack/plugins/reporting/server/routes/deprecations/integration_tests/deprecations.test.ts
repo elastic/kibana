@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
+import { licensingMock } from '../../../../../licensing/server/mocks';
 import { securityMock } from '../../../../../security/server/mocks';
 import { API_GET_ILM_POLICY_STATUS } from '../../../../common/constants';
 import {
   createMockConfigSchema,
-  createMockLevelLogger,
   createMockPluginSetup,
+  createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
 import { registerDeprecationsRoutes } from '../deprecations';
@@ -26,25 +27,18 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
 
-  const createReportingCore = ({
+  const mockConfig = createMockConfigSchema({
+    queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
+  });
+  const createReportingCore = async ({
     security,
   }: {
     security?: ReturnType<typeof securityMock.createSetup>;
   }) =>
     createMockReportingCore(
-      createMockConfigSchema({
-        queue: {
-          indexInterval: 'year',
-          timeout: 10000,
-          pollEnabled: true,
-        },
-        index: '.reporting',
-      }),
-      createMockPluginSetup({
-        security,
-        router: httpSetup.createRouter(''),
-        licensing: { license$: of({ isActive: true, isAvailable: true, type: 'gold' }) },
-      })
+      mockConfig,
+      createMockPluginSetup({ security, router: httpSetup.createRouter('') }),
+      await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
     );
 
   beforeEach(async () => {
@@ -60,7 +54,7 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
   it('correctly handles authz when security is unavailable', async () => {
     const core = await createReportingCore({});
 
-    registerDeprecationsRoutes(core, createMockLevelLogger());
+    registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
     await supertest(httpSetup.server.listener)
@@ -74,7 +68,7 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
     security.license.isEnabled.mockReturnValue(false);
     const core = await createReportingCore({ security });
 
-    registerDeprecationsRoutes(core, createMockLevelLogger());
+    registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
     await supertest(httpSetup.server.listener)

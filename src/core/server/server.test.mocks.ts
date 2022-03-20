@@ -116,3 +116,10 @@ export const mockDeprecationService = deprecationsServiceMock.create();
 jest.doMock('./deprecations/deprecations_service', () => ({
   DeprecationsService: jest.fn(() => mockDeprecationService),
 }));
+
+import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+
+export const mockDocLinksService = docLinksServiceMock.create();
+jest.doMock('./doc_links/doc_links_service', () => ({
+  DocLinksService: jest.fn(() => mockDocLinksService),
+}));

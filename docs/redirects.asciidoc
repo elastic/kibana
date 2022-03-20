@@ -381,67 +381,27 @@ This content has moved. Refer to <<data-views>>.
 
 This content has moved. Refer to <<managing-data-views>>.
 
-[role="exclude",id="index-patterns-api"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api>>.
-
-[role="exclude",id="index-patterns-api-create"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-create>>.
-
-[role="exclude",id="index-patterns-api-default-get"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-default-get>>.
-
-[role="exclude",id="index-patterns-api-default-set"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-default-set>>.
-
-[role="exclude",id="index-patterns-api-delete"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-delete>>.
-
-[role="exclude",id="index-patterns-api-get"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-get>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-create"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-create>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-delete"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-delete>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-get"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-get>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-update"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-update>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-upsert"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
-
-[role="exclude",id="index-patterns-api-update"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-update>>.
-
 [role="exclude",id="xpack-kibana-role-management"]
 == Kibana role management.
 
 This content has moved. Refer to <<kibana-role-management>>.
+
+[role="exclude",id="upgrade-migrations"]
+== Upgrade migrations
+
+This content has moved. Refer to <<saved-object-migrations>>.
+
+[role="exclude",id="upgrade-standard"]
+== Standard Upgrade
+
+This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
+
+[role="exclude",id="upgrade-assistant"]
+== Upgrade Assistant
+
+This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant].
+
+[role="exclude",id="brew"]
+== Install {kib} on macOS with Homebrew
+
+This page has been deleted. Refer to <<install>>.

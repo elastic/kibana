@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../src/plugins/data/common';
 import { getField } from '../../../../../common/elasticsearch_util';
 
 export interface ScriptField {
@@ -14,7 +14,7 @@ export interface ScriptField {
 }
 
 export function getDocValueAndSourceFields(
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   fieldNames: string[],
   dateFormat: string
 ): {

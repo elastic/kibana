@@ -8,38 +8,13 @@
 import { chunk } from 'lodash/fp';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../common/constants';
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { legacyMigrate } from './utils';
-
-/**
- * How many rules to update at a time is set to 50 from errors coming from
- * the slow environments such as cloud when the rule updates are > 100 we were
- * seeing timeout issues.
- *
- * Since there is not timeout options at the alerting API level right now, we are
- * at the mercy of the Elasticsearch server client/server default timeouts and what
- * we are doing could be considered a workaround to not being able to increase the timeouts.
- *
- * However, other bad effects and saturation of connections beyond 50 makes this a "noisy neighbor"
- * if we don't limit its number of connections as we increase the number of rules that can be
- * installed at a time.
- *
- * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
- * which in turn could create additional connections we want to avoid.
- *
- * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
- * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
- * reducing the 50 above to a lower number.
- *
- * See the original ticket here:
- * https://github.com/elastic/kibana/issues/94418
- */
-export const UPDATE_CHUNK_SIZE = 50;
 
 /**
  * Updates the prepackaged rules given a set of rules and output index.
@@ -47,7 +22,6 @@ export const UPDATE_CHUNK_SIZE = 50;
  * avoid being a "noisy neighbor".
  * @param rulesClient Alerting client
  * @param spaceId Current user spaceId
- * @param ruleStatusClient Rule execution log client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  */
@@ -55,18 +29,16 @@ export const updatePrepackagedRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   spaceId: string,
-  ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
   isRuleRegistryEnabled: boolean
 ): Promise<void> => {
-  const ruleChunks = chunk(UPDATE_CHUNK_SIZE, rules);
+  const ruleChunks = chunk(MAX_RULES_TO_UPDATE_IN_PARALLEL, rules);
   for (const ruleChunk of ruleChunks) {
     const rulePromises = createPromises(
       rulesClient,
       savedObjectsClient,
       spaceId,
-      ruleStatusClient,
       ruleChunk,
       outputIndex,
       isRuleRegistryEnabled
@@ -79,7 +51,6 @@ export const updatePrepackagedRules = async (
  * Creates promises of the rules and returns them.
  * @param rulesClient Alerting client
  * @param spaceId Current user spaceId
- * @param ruleStatusClient Rule execution log client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  * @returns Promise of what was updated.
@@ -88,7 +59,6 @@ export const createPromises = (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   spaceId: string,
-  ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
   isRuleRegistryEnabled: boolean
@@ -162,7 +132,6 @@ export const createPromises = (
     // or enable rules on the user when they were not expecting it if a rule updates
     return patchRules({
       rulesClient,
-      savedObjectsClient,
       author,
       buildingBlockType,
       description,
@@ -175,8 +144,6 @@ export const createPromises = (
       outputIndex,
       rule: migratedRule,
       savedId,
-      spaceId,
-      ruleStatusClient,
       meta,
       filters,
       index,

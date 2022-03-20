@@ -19,7 +19,7 @@ import {
   convertSavedDashboardPanelToPanelState,
 } from './embeddable/embeddable_saved_object_converters';
 import { SavedDashboardPanel } from './types';
-import { CONTROL_GROUP_TYPE } from '../../presentation_util/common/lib';
+import { CONTROL_GROUP_TYPE } from '../../controls/common';
 
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;

@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { Logger } from 'kibana/server';
-import { isoToEpochRt } from '@kbn/io-ts-utils/iso_to_epoch_rt';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
 import { getJSErrors } from './get_js_errors';
@@ -20,10 +20,9 @@ import { getVisitorBreakdown } from './get_visitor_breakdown';
 import { getWebCoreVitals } from './get_web_core_vitals';
 import { hasRumData } from './has_rum_data';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { rangeRt } from '../default_api_types';
-import { UxUIFilters } from '../../../typings/ui_filters';
 import { APMRouteHandlerResources } from '../typings';
+import { UxUIFilters } from '../../../common/ux_ui_filter';
 
 export type SetupUX = Setup & {
   uiFilters: UxUIFilters;
@@ -70,7 +69,14 @@ const rumClientMetricsRoute = createApmServerRoute({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    pageViews: { value: number };
+    totalPageLoadDuration: { value: number };
+    backEnd: { value: number };
+    frontEnd: { value: number };
+  }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -93,7 +99,16 @@ const rumPageLoadDistributionRoute = createApmServerRoute({
     query: t.intersection([uxQueryRt, percentileRangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    pageLoadDistribution: {
+      pageLoadDistribution: Array<{ x: number; y: number }>;
+      percentiles: Record<string, number | null> | undefined;
+      minDuration: number;
+      maxDuration: number;
+    } | null;
+  }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -123,7 +138,13 @@ const rumPageLoadDistBreakdownRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    pageLoadDistBreakdown:
+      | Array<{ name: string; data: Array<{ x: number; y: number }> }>
+      | undefined;
+  }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -150,7 +171,9 @@ const rumPageViewsTrendRoute = createApmServerRoute({
     query: t.intersection([uxQueryRt, t.partial({ breakdowns: t.string })]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{ topItems: string[]; items: Array<Record<string, number>> }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -173,7 +196,7 @@ const rumServicesRoute = createApmServerRoute({
     query: t.intersection([uiFiltersRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ rumServices: string[] }> => {
     const setup = await setupUXRequest(resources);
     const {
       query: { start, end },
@@ -189,7 +212,12 @@ const rumVisitorsBreakdownRoute = createApmServerRoute({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    os: Array<{ count: number; name: string }>;
+    browsers: Array<{ count: number; name: string }>;
+  }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -211,7 +239,19 @@ const rumWebCoreVitals = createApmServerRoute({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    coreVitalPages: number;
+    cls: number | null;
+    fid: number | null | undefined;
+    lcp: number | null | undefined;
+    tbt: number;
+    fcp: number | null | undefined;
+    lcpRanks: number[];
+    fidRanks: number[];
+    clsRanks: number[];
+  }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -234,7 +274,13 @@ const rumLongTaskMetrics = createApmServerRoute({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    noOfLongTasks: number;
+    sumOfLongTasks: number;
+    longestLongTask: number;
+  }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -257,7 +303,12 @@ const rumUrlSearch = createApmServerRoute({
     query: uxQueryRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    total: number;
+    items: Array<{ url: string; count: number; pld: number }>;
+  }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -285,7 +336,20 @@ const rumJSErrors = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    totalErrorPages: number;
+    totalErrors: number;
+    totalErrorGroups: number;
+    items:
+      | Array<{
+          count: number;
+          errorGroupId: string | number;
+          errorMessage: string;
+        }>
+      | undefined;
+  }> => {
     const setup = await setupUXRequest(resources);
 
     const {
@@ -313,7 +377,13 @@ const rumHasDataRoute = createApmServerRoute({
     }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    indices: string;
+    hasData: boolean;
+    serviceName: string | number | undefined;
+  }> => {
     const setup = await setupUXRequest(resources);
     const {
       query: { start, end },
@@ -337,6 +407,7 @@ function decodeUiFilters(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function setupUXRequest<TParams extends SetupUXRequestParams>(
   resources: APMRouteHandlerResources & { params: TParams }
 ) {
@@ -350,15 +421,16 @@ async function setupUXRequest<TParams extends SetupUXRequestParams>(
   };
 }
 
-export const rumRouteRepository = createApmServerRouteRepository()
-  .add(rumClientMetricsRoute)
-  .add(rumPageLoadDistributionRoute)
-  .add(rumPageLoadDistBreakdownRoute)
-  .add(rumPageViewsTrendRoute)
-  .add(rumServicesRoute)
-  .add(rumVisitorsBreakdownRoute)
-  .add(rumWebCoreVitals)
-  .add(rumLongTaskMetrics)
-  .add(rumUrlSearch)
-  .add(rumJSErrors)
-  .add(rumHasDataRoute);
+export const rumRouteRepository = {
+  ...rumClientMetricsRoute,
+  ...rumPageLoadDistributionRoute,
+  ...rumPageLoadDistBreakdownRoute,
+  ...rumPageViewsTrendRoute,
+  ...rumServicesRoute,
+  ...rumVisitorsBreakdownRoute,
+  ...rumWebCoreVitals,
+  ...rumLongTaskMetrics,
+  ...rumUrlSearch,
+  ...rumJSErrors,
+  ...rumHasDataRoute,
+};

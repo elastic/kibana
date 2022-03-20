@@ -73,6 +73,12 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
   return isMappable;
 }
 
+// Returns a boolean indicating whether the specified job is suitable for maps plugin.
+export function isJobWithGeoData(job: Job): boolean {
+  const { detectors } = job.analysis_config;
+  return detectors.some((detector) => detector.function === ML_JOB_AGGREGATION.LAT_LONG);
+}
+
 /**
  * Validates that composite definition only have sources that are only terms and date_histogram
  * if composite is defined.

@@ -7,8 +7,9 @@
 
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { BaseDataGenerator } from './base_data_generator';
-import { ConditionEntryField, EffectScope, NewTrustedApp, TrustedApp } from '../types';
+import { EffectScope, NewTrustedApp, TrustedApp } from '../types';
 
 const TRUSTED_APP_NAMES = [
   'Symantec Endpoint Security',

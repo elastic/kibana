@@ -9,7 +9,7 @@ import { KeyValueFilterList } from './';
 import {
   expectTextsInDocument,
   renderWithTheme,
-} from '../../../utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { fireEvent } from '@testing-library/react';
 
 describe('KeyValueFilterList', () => {

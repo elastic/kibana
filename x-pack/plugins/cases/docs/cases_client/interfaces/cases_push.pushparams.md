@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [cases/push](../modules/cases_push.md) / PushParams
+[Cases Client API Interface](../README.md) / [cases/push](../modules/cases_push.md) / PushParams
 
 # Interface: PushParams
 
@@ -10,25 +10,29 @@ Parameters for pushing a case to an external system
 
 ### Properties
 
-- [caseId](cases_push.pushparams.md#caseid)
-- [connectorId](cases_push.pushparams.md#connectorid)
+- [caseId](cases_push.PushParams.md#caseid)
+- [connectorId](cases_push.PushParams.md#connectorid)
 
 ## Properties
 
 ### caseId
 
-• **caseId**: *string*
+• **caseId**: `string`
 
 The ID of a case
 
-Defined in: [cases/push.ts:53](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/push.ts#L53)
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/push.ts:48](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/push.ts#L48)
 
 ___
 
 ### connectorId
 
-• **connectorId**: *string*
+• **connectorId**: `string`
 
 The ID of an external system to push to
 
-Defined in: [cases/push.ts:57](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/push.ts#L57)
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/push.ts:52](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/push.ts#L52)

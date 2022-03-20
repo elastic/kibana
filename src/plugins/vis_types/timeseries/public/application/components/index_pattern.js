@@ -69,6 +69,7 @@ export const IndexPattern = ({
   model: _model,
   allowLevelOfDetail,
   allowIndexSwitchingMode,
+  baseIndexPattern,
 }) => {
   const config = getUISettings();
   const timeFieldName = `${prefix}time_field`;
@@ -148,9 +149,11 @@ export const IndexPattern = ({
         indexPatternString: undefined,
       };
 
+      const indexPatternToFetch = index || baseIndexPattern;
+
       try {
-        fetchedIndexPattern = index
-          ? await fetchIndexPattern(index, indexPatterns, {
+        fetchedIndexPattern = indexPatternToFetch
+          ? await fetchIndexPattern(indexPatternToFetch, indexPatterns, {
               fetchKibanaIndexForStringIndexes: true,
             })
           : {
@@ -165,7 +168,7 @@ export const IndexPattern = ({
     }
 
     fetchIndex();
-  }, [index]);
+  }, [index, baseIndexPattern]);
 
   const toggleIndicatorDisplay = useCallback(
     () => onChange({ [HIDE_LAST_VALUE_INDICATOR]: !model.hide_last_value_indicator }),
@@ -256,7 +259,11 @@ export const IndexPattern = ({
             restrict={RESTRICT_FIELDS}
             value={model[timeFieldName]}
             disabled={disabled}
-            onChange={handleSelectChange(timeFieldName)}
+            onChange={(value) =>
+              onChange({
+                [timeFieldName]: value?.[0],
+              })
+            }
             indexPattern={model[indexPatternName]}
             fields={fields}
             placeholder={
@@ -386,6 +393,7 @@ IndexPattern.defaultProps = {
 };
 
 IndexPattern.propTypes = {
+  baseIndexPattern: PropTypes.oneOf([PropTypes.object, PropTypes.string]),
   model: PropTypes.object.isRequired,
   fields: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,

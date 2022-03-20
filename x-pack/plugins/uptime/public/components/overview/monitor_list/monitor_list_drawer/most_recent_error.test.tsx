@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowWithIntl, renderWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import moment from 'moment';
 import { BrowserRouter as Router } from 'react-router-dom';

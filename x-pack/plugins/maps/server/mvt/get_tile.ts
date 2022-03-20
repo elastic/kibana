@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { Logger } from 'src/core/server';
+import { CoreStart, Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Stream } from 'stream';
 import { isAbortError } from './util';
+import { makeExecutionContext } from '../../common/execution_context';
+import { Field, mergeFields } from './merge_fields';
 
 export async function getEsTile({
+  url,
+  core,
   logger,
   context,
   index,
@@ -22,6 +25,8 @@ export async function getEsTile({
   requestBody = {},
   abortController,
 }: {
+  url: string;
+  core: CoreStart;
   x: number;
   y: number;
   z: number;
@@ -34,29 +39,44 @@ export async function getEsTile({
 }): Promise<Stream | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    let fields = _.uniq(requestBody.docvalue_fields.concat(requestBody.stored_fields));
-    fields = fields.filter((f) => f !== geometryFieldName);
+
     const body = {
       grid_precision: 0, // no aggs
       exact_bounds: true,
       extent: 4096, // full resolution,
       query: requestBody.query,
-      fields,
+      fields: mergeFields(
+        [
+          requestBody.docvalue_fields as Field[] | undefined,
+          requestBody.stored_fields as Field[] | undefined,
+        ],
+        [geometryFieldName]
+      ),
       runtime_mappings: requestBody.runtime_mappings,
       track_total_hits: requestBody.size + 1,
     };
-    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request(
-      {
-        method: 'GET',
-        path,
-        body,
-      },
-      {
-        signal: abortController.signal,
-        headers: {
-          'Accept-Encoding': 'gzip',
-        },
-        asStream: true,
+
+    const tile = await core.executionContext.withContext(
+      makeExecutionContext({
+        description: 'mvt:get_tile',
+        url,
+      }),
+      async () => {
+        return await context.core.elasticsearch.client.asCurrentUser.transport.request(
+          {
+            method: 'GET',
+            path,
+            body,
+          },
+          {
+            signal: abortController.signal,
+            headers: {
+              'Accept-Encoding': 'gzip',
+            },
+            asStream: true,
+            meta: true,
+          }
+        );
       }
     );
 

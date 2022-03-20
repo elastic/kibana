@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { Logger } from 'kibana/server';
 import moment from 'moment';
-import { LevelLogger, ReportingStore } from '../';
+import { ReportingStore } from '../';
 import { ReportingCore } from '../../';
 import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../../task_manager/server';
 import { numberToDuration } from '../../../common/schema_utils';
@@ -38,7 +39,7 @@ import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskP
 export class MonitorReportsTask implements ReportingTask {
   public TYPE = REPORTING_MONITOR_TYPE;
 
-  private logger: LevelLogger;
+  private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
   private store?: ReportingStore;
   private timeout: moment.Duration;
@@ -46,9 +47,9 @@ export class MonitorReportsTask implements ReportingTask {
   constructor(
     private reporting: ReportingCore,
     private config: ReportingConfigType,
-    parentLogger: LevelLogger
+    parentLogger: Logger
   ) {
-    this.logger = parentLogger.clone([REPORTING_MONITOR_TYPE]);
+    this.logger = parentLogger.get(REPORTING_MONITOR_TYPE);
     this.timeout = numberToDuration(config.queue.timeout);
   }
 
@@ -91,31 +92,42 @@ export class MonitorReportsTask implements ReportingTask {
               return;
             }
 
-            const {
-              _id: jobId,
-              _source: { process_expiration: processExpiration, status },
-            } = recoveredJob;
+            const report = new SavedReport({ ...recoveredJob, ...recoveredJob._source });
+            const { _id: jobId, process_expiration: processExpiration, status } = report;
+            const eventLog = this.reporting.getEventLogger(report);
 
             if (![statuses.JOB_STATUS_PENDING, statuses.JOB_STATUS_PROCESSING].includes(status)) {
-              throw new Error(`Invalid job status in the monitoring search result: ${status}`); // only pending or processing jobs possibility need rescheduling
+              const invalidStatusError = new Error(
+                `Invalid job status in the monitoring search result: ${status}`
+              ); // only pending or processing jobs possibility need rescheduling
+              this.logger.error(invalidStatusError);
+              eventLog.logError(invalidStatusError);
+
+              // fatal: can not reschedule the job
+              throw invalidStatusError;
             }
 
             if (status === statuses.JOB_STATUS_PENDING) {
-              this.logger.info(
+              const migratingJobError = new Error(
                 `${jobId} was scheduled in a previous version and left in [${status}] status. Rescheduling...`
               );
+              this.logger.error(migratingJobError);
+              eventLog.logError(migratingJobError);
             }
 
             if (status === statuses.JOB_STATUS_PROCESSING) {
               const expirationTime = moment(processExpiration);
               const overdueValue = moment().valueOf() - expirationTime.valueOf();
-              this.logger.info(
+              const overdueExpirationError = new Error(
                 `${jobId} status is [${status}] and the expiration time was [${overdueValue}ms] ago. Rescheduling...`
               );
+              this.logger.error(overdueExpirationError);
+              eventLog.logError(overdueExpirationError);
             }
 
+            eventLog.logRetry();
+
             // clear process expiration and set status to pending
-            const report = new SavedReport({ ...recoveredJob, ...recoveredJob._source });
             await reportingStore.prepareReportForRetry(report); // if there is a version conflict response, this just throws and logs an error
 
             // clear process expiration and reschedule
@@ -145,13 +157,14 @@ export class MonitorReportsTask implements ReportingTask {
   }
 
   // reschedule the task with TM
-  private async rescheduleTask(task: ReportTaskParams, logger: LevelLogger) {
+  private async rescheduleTask(task: ReportTaskParams, logger: Logger) {
     if (!this.taskManagerStart) {
       throw new Error('Reporting task runner has not been initialized!');
     }
     logger.info(`Rescheduling task:${task.id} to retry.`);
 
     const newTask = await this.reporting.scheduleTask(task);
+
     return newTask;
   }
 

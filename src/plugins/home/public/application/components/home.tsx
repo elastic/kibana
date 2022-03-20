@@ -10,7 +10,6 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 import { KibanaPageTemplate, OverviewPageFooter } from '../../../../kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../services';
@@ -29,8 +28,7 @@ export interface HomeProps {
   solutions: FeatureCatalogueSolution[];
   localStorage: Storage;
   urlBasePath: string;
-  telemetry: TelemetryPluginStart;
-  hasUserIndexPattern: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
 }
 
 interface State {
@@ -89,7 +87,7 @@ export class Home extends Component<HomeProps, State> {
         }
       }, 10000);
 
-      const hasUserIndexPattern = await this.props.hasUserIndexPattern();
+      const hasUserIndexPattern = await this.props.hasUserDataView();
 
       this.endLoading({ isNewKibanaInstance: !hasUserIndexPattern });
     } catch (err) {
@@ -175,13 +173,7 @@ export class Home extends Component<HomeProps, State> {
   }
 
   private renderWelcome() {
-    return (
-      <Welcome
-        onSkip={() => this.skipWelcome()}
-        urlBasePath={this.props.urlBasePath}
-        telemetry={this.props.telemetry}
-      />
-    );
+    return <Welcome onSkip={() => this.skipWelcome()} urlBasePath={this.props.urlBasePath} />;
   }
 
   public render() {

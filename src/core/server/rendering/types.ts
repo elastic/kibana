@@ -89,7 +89,7 @@ export interface IRenderOptions {
 
   /**
    * Inject custom vars into the page metadata.
-   * @deprecated for legacy use only, remove with ui_render_mixin
+   * @deprecated for legacy use only. Can be removed when https://github.com/elastic/kibana/issues/127733 is done.
    * @internal
    */
   vars?: Record<string, any>;

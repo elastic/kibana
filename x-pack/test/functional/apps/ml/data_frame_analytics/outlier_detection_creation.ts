@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
     });
 
     const jobId = `ihp_1_${Date.now()}`;
@@ -117,8 +118,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('loads the data frame analytics page');
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
-
-          await ml.testExecution.logTestStep('loads the source selection modal');
 
           // Disable anti-aliasing to stabilize canvas image rendering assertions
           await ml.commonUI.disableAntiAliasing();

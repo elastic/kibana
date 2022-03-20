@@ -10,9 +10,10 @@ import uuid from 'uuid/v5';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
-import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT } from '../../common';
+import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
 import { OutputUnauthorizedError } from '../errors';
 
+import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
@@ -149,7 +150,7 @@ class OutputService {
       }
     }
 
-    if (data.hosts) {
+    if (data.type === outputType.Elasticsearch && data.hosts) {
       data.hosts = data.hosts.map(normalizeHostsForAgents);
     }
 
@@ -241,6 +242,12 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
+    await agentPolicyService.removeOutputFromAll(
+      soClient,
+      appContextService.getInternalUserESClient(),
+      id
+    );
+
     return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
@@ -260,7 +267,7 @@ class OutputService {
       );
     }
 
-    const updateData = { ...data };
+    const updateData = { type: originalOutput.type, ...data };
 
     // ensure only default output exists
     if (data.is_default) {
@@ -287,7 +294,7 @@ class OutputService {
       }
     }
 
-    if (updateData.hosts) {
+    if (updateData.type === outputType.Elasticsearch && updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
     const outputSO = await soClient.update<OutputSOAttributes>(

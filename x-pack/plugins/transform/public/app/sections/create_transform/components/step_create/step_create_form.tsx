@@ -26,10 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from '../../../../../../../../../src/plugins/discover/public';
+import { DISCOVER_APP_LOCATOR } from '../../../../../../../../../src/plugins/discover/public';
 
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
@@ -96,9 +93,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [discoverLink, setDiscoverLink] = useState<string>();
 
     const deps = useAppDependencies();
+    const { share } = deps;
     const indexPatterns = deps.data.indexPatterns;
     const toastNotifications = useToastNotifications();
-    const { getUrlGenerator } = deps.share.urlGenerators;
     const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
@@ -107,19 +104,14 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       onChange({ created, started, indexPatternId });
 
       const getDiscoverUrl = async (): Promise<void> => {
-        const state: DiscoverUrlGeneratorState = {
+        const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
+        if (!locator) return;
+
+        const discoverUrl = await locator.getUrl({
           indexPatternId,
-        };
+        });
 
-        let discoverUrlGenerator;
-        try {
-          discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-        } catch (error) {
-          // ignore error thrown when url generator is not available
-          return;
-        }
-
-        const discoverUrl = await discoverUrlGenerator.createUrl(state);
         if (!unmounted) {
           setDiscoverLink(discoverUrl);
         }

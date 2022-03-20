@@ -74,6 +74,7 @@ export function registerErrorCountAlertType({
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
+          apmActionVariables.reason,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
@@ -139,7 +140,13 @@ export function registerErrorCountAlertType({
           .filter((result) => result.errorCount >= ruleParams.threshold)
           .forEach((result) => {
             const { serviceName, environment, errorCount } = result;
-
+            const alertReason = formatErrorCountReason({
+              serviceName,
+              threshold: ruleParams.threshold,
+              measured: errorCount,
+              windowSize: ruleParams.windowSize,
+              windowUnit: ruleParams.windowUnit,
+            });
             services
               .alertWithLifecycle({
                 id: [AlertType.ErrorCount, serviceName, environment]
@@ -151,11 +158,7 @@ export function registerErrorCountAlertType({
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
-                  [ALERT_REASON]: formatErrorCountReason({
-                    serviceName,
-                    threshold: ruleParams.threshold,
-                    measured: errorCount,
-                  }),
+                  [ALERT_REASON]: alertReason,
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -164,6 +167,7 @@ export function registerErrorCountAlertType({
                 threshold: ruleParams.threshold,
                 triggerValue: errorCount,
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                reason: alertReason,
               });
           });
 

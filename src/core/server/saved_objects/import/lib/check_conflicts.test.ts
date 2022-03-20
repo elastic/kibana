@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { mockUuidv4 } from './__mocks__';
 import { savedObjectsClientMock } from '../../../mocks';
 import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
 import { SavedObjectsClientContract, SavedObject } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
 import { checkConflicts } from './check_conflicts';
+
+jest.mock('uuid', () => ({
+  v4: () => 'uuidv4',
+}));
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckConflictsParams = Parameters<typeof checkConflicts>[0];
@@ -71,11 +74,6 @@ describe('#checkConflicts', () => {
     return { ...partial, savedObjectsClient };
   };
 
-  beforeEach(() => {
-    mockUuidv4.mockReset();
-    mockUuidv4.mockReturnValueOnce(`new-object-id`);
-  });
-
   it('exits early if there are no objects to check', async () => {
     const namespace = 'foo-namespace';
     const params = setupParams({ objects: [], namespace });
@@ -85,7 +83,7 @@ describe('#checkConflicts', () => {
     expect(checkConflictsResult).toEqual({
       filteredObjects: [],
       errors: [],
-      importIdMap: new Map(),
+      importStateMap: new Map(),
       pendingOverwrites: new Set(),
     });
   });
@@ -110,18 +108,16 @@ describe('#checkConflicts', () => {
       errors: [
         {
           ...obj2Error,
-          title: obj2.attributes.title,
           meta: { title: obj2.attributes.title },
           error: { type: 'conflict' },
         },
         {
           ...obj4Error,
-          title: obj4.attributes.title,
           meta: { title: obj4.attributes.title },
           error: { ...obj4Error.error, type: 'unknown' },
         },
       ],
-      importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: `new-object-id` }]]),
+      importStateMap: new Map([[`${obj3.type}:${obj3.id}`, { destinationId: 'uuidv4' }]]),
       pendingOverwrites: new Set(),
     });
   });
@@ -138,7 +134,6 @@ describe('#checkConflicts', () => {
         errors: [
           {
             ...obj4Error,
-            title: obj4.attributes.title,
             meta: { title: obj4.attributes.title },
             error: { ...obj4Error.error, type: 'unknown' },
           },
@@ -176,25 +171,23 @@ describe('#checkConflicts', () => {
       errors: [
         {
           ...obj2Error,
-          title: obj2.attributes.title,
           meta: { title: obj2.attributes.title },
           error: { type: 'conflict', destinationId: 'some-object-id' },
         },
         {
           ...obj4Error,
-          title: obj4.attributes.title,
           meta: { title: obj4.attributes.title },
           error: { ...obj4Error.error, type: 'unknown' },
         },
       ],
-      importIdMap: new Map([
-        [`${obj3.type}:${obj3.id}`, { id: `new-object-id`, omitOriginId: true }],
+      importStateMap: new Map([
+        [`${obj3.type}:${obj3.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
       ]),
       pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),
     });
   });
 
-  it('adds `omitOriginId` field to `importIdMap` entries when createNewCopies=true', async () => {
+  it('adds `omitOriginId` field to `importStateMap` entries when createNewCopies=true', async () => {
     const namespace = 'foo-namespace';
     const params = setupParams({ objects, namespace, createNewCopies: true });
     socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
@@ -202,8 +195,8 @@ describe('#checkConflicts', () => {
     const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual(
       expect.objectContaining({
-        importIdMap: new Map([
-          [`${obj3.type}:${obj3.id}`, { id: `new-object-id`, omitOriginId: true }],
+        importStateMap: new Map([
+          [`${obj3.type}:${obj3.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
         ]),
       })
     );

@@ -23,6 +23,7 @@ import {
 } from '../../../common/constants';
 import { getHostIsolationExceptionsListPath } from '../../../common/routing';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../constants';
 import {
   getHostIsolationExceptionItems,
   getHostIsolationExceptionSummary,
@@ -85,8 +86,6 @@ export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   return canSeeMenu;
 }
 
-const SEARCHABLE_FIELDS: Readonly<string[]> = [`item_id`, `name`, `description`, `entries.value`];
-
 export function useFetchHostIsolationExceptionsList({
   filter,
   page,
@@ -120,7 +119,7 @@ export function useFetchHostIsolationExceptionsList({
         filter: kql,
       });
     },
-    { enabled }
+    { enabled, keepPreviousData: true }
   );
 }
 

@@ -21,8 +21,10 @@ import {
   fetchMonitorAlertRecords,
   NewAlertParams,
 } from '../api/alerts';
-import { ActionConnector as RawActionConnector } from '../../../../triggers_actions_ui/public';
-import { Alert } from '../../../../alerting/common';
+import type {
+  ActionConnector as RawActionConnector,
+  Rule,
+} from '../../../../triggers_actions_ui/public';
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
@@ -37,15 +39,14 @@ export type UptimeAlertTypeParams = Record<string, any>;
 
 export const createAlertAction = createAsyncAction<
   NewAlertParams,
-  Alert<UptimeAlertTypeParams> | null
+  Rule<UptimeAlertTypeParams> | null
 >('CREATE ALERT');
 export const getConnectorsAction = createAsyncAction<{}, ActionConnector[]>('GET CONNECTORS');
 export const getMonitorAlertsAction = createAsyncAction<{}, AlertsResult | null>('GET ALERTS');
 
-export const getAnomalyAlertAction = createAsyncAction<
-  MonitorIdParam,
-  Alert<UptimeAlertTypeParams>
->('GET EXISTING ALERTS');
+export const getAnomalyAlertAction = createAsyncAction<MonitorIdParam, Rule<UptimeAlertTypeParams>>(
+  'GET EXISTING ALERTS'
+);
 export const deleteAlertAction = createAsyncAction<{ alertId: string }, string | null>(
   'DELETE ALERTS'
 );
@@ -55,9 +56,9 @@ export const deleteAnomalyAlertAction = createAsyncAction<{ alertId: string }, a
 
 export interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
-  newAlert: AsyncInitState<Alert<UptimeAlertTypeParams>>;
+  newAlert: AsyncInitState<Rule<UptimeAlertTypeParams>>;
   alerts: AsyncInitState<AlertsResult>;
-  anomalyAlert: AsyncInitState<Alert<UptimeAlertTypeParams>>;
+  anomalyAlert: AsyncInitState<Rule<UptimeAlertTypeParams>>;
   alertDeletion: AsyncInitState<string>;
   anomalyAlertDeletion: AsyncInitState<boolean>;
 }
@@ -147,11 +148,11 @@ export function* fetchAlertsEffect() {
   );
   yield takeLatest(createAlertAction.get, function* (action: Action<NewAlertParams>): Generator {
     try {
-      const response = (yield call(createAlert, action.payload)) as Alert;
+      const response = (yield call(createAlert, action.payload)) as Rule<UptimeAlertTypeParams>;
       yield put(createAlertAction.success(response));
 
       kibanaService.core.notifications.toasts.addSuccess(
-        simpleAlertEnabled(action.payload.defaultActions, kibanaService.theme)
+        simpleAlertEnabled(action.payload.defaultActions, kibanaService.theme, response)
       );
       yield put(getMonitorAlertsAction.get());
     } catch (err) {

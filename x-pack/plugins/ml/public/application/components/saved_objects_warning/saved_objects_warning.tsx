@@ -8,13 +8,13 @@
 import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JobType } from '../../../../common/types/saved_objects';
+import type { JobType, TrainedModelType } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
 import { checkPermission } from '../../capabilities/check_capabilities';
 
 interface Props {
-  jobType?: JobType;
+  jobType?: JobType | TrainedModelType;
   onCloseFlyout?: () => void;
   forceRefresh?: boolean;
 }
@@ -55,14 +55,14 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
         mounted.current = false;
       };
     },
-    [forceRefresh, mounted]
+    [forceRefresh, mounted, checkStatus]
   );
 
   const onClose = useCallback(() => {
+    setShowSyncFlyout(false);
     if (forceRefresh === undefined) {
       checkStatus();
     }
-    setShowSyncFlyout(false);
     if (typeof onCloseFlyout === 'function') {
       onCloseFlyout();
     }
@@ -83,7 +83,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
         title={
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.title"
-            defaultMessage="ML job synchronization required"
+            defaultMessage="ML job and trained model synchronization required"
           />
         }
         color="warning"
@@ -93,7 +93,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
         <>
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.description"
-            defaultMessage="Some jobs are missing or have incomplete saved objects. "
+            defaultMessage="Some jobs or trained models are missing or have incomplete saved objects. "
           />
           {canCreateJob ? (
             <FormattedMessage
