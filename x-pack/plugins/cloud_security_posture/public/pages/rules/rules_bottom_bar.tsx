@@ -18,9 +18,8 @@ interface RulesBottomBarProps {
 export const RulesBottomBar = ({ onSave, onCancel, isLoading }: RulesBottomBarProps) => (
   <EuiBottomBar
     style={{
-      // the current is 999
-      // and we need it to render above the flyout
-      zIndex: 9999,
+      // same as .euiFlyout
+      zIndex: 1000,
     }}
     usePortal
     position="fixed"
