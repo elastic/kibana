@@ -502,8 +502,8 @@ const expectAssetsInstalled = ({
       installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
       package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
     };
+
     expect(sortedRes).eql({
-      installed_kibana_space_id: 'default',
       installed_kibana: [
         {
           id: 'sample_cloud_security_posture_rule_template',
@@ -546,6 +546,7 @@ const expectAssetsInstalled = ({
           type: 'visualization',
         },
       ],
+      installed_kibana_space_id: 'default',
       installed_es: [
         {
           id: 'logs-all_assets.test_logs@mappings',
@@ -604,38 +605,116 @@ const expectAssetsInstalled = ({
           type: 'ml_model',
         },
       ],
+      package_assets: [
+        {
+          id: '333a22a1-e639-5af5-ae62-907ffc83d603',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '256f3dad-6870-56c3-80a1-8dfa11e2d568',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '3fa0512f-bc01-5c2e-9df1-bc2f2a8259c8',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'ea334ad8-80c2-5acd-934b-2a377290bf97',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '96c6eb85-fe2e-56c6-84be-5fda976796db',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '2d73a161-fa69-52d0-aa09-1bdc691b95bb',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '0a00c2d2-ce63-5b9c-9aa0-0cf1938f7362',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '691f0505-18c5-57a6-9f40-06e8affbdf7a',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'b36e6dd0-58f7-5dd0-a286-8187e4019274',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'f839c76e-d194-555a-90a1-3265a45789e4',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '1d25cf2e-8d7f-5b38-a5d6-3f7b53eb6613',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '60d6d054-57e4-590f-a580-52bf3f5e7cca',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '318959c9-997b-5a14-b328-9fc7355b4b74',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '4c758d70-ecf1-56b3-b704-6d8374841b34',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'b265a5e0-c00b-5eda-ac44-2ddbd36d9ad0',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '53c94591-aa33-591d-8200-cd524c2a0561',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'b658d2d4-752e-54b8-afc2-4c76155c1466',
+          type: 'epm-packages-assets',
+        },
+      ],
       es_index_patterns: {
         test_logs: 'logs-all_assets.test_logs-*',
         test_metrics: 'metrics-all_assets.test_metrics-*',
       },
-      package_assets: [
-        { id: '333a22a1-e639-5af5-ae62-907ffc83d603', type: 'epm-packages-assets' },
-        { id: '256f3dad-6870-56c3-80a1-8dfa11e2d568', type: 'epm-packages-assets' },
-        { id: '3fa0512f-bc01-5c2e-9df1-bc2f2a8259c8', type: 'epm-packages-assets' },
-        { id: 'ea334ad8-80c2-5acd-934b-2a377290bf97', type: 'epm-packages-assets' },
-        { id: '96c6eb85-fe2e-56c6-84be-5fda976796db', type: 'epm-packages-assets' },
-        { id: '2d73a161-fa69-52d0-aa09-1bdc691b95bb', type: 'epm-packages-assets' },
-        { id: '0a00c2d2-ce63-5b9c-9aa0-0cf1938f7362', type: 'epm-packages-assets' },
-        { id: '691f0505-18c5-57a6-9f40-06e8affbdf7a', type: 'epm-packages-assets' },
-        { id: 'b36e6dd0-58f7-5dd0-a286-8187e4019274', type: 'epm-packages-assets' },
-        { id: 'f839c76e-d194-555a-90a1-3265a45789e4', type: 'epm-packages-assets' },
-        { id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2', type: 'epm-packages-assets' },
-        { id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71', type: 'epm-packages-assets' },
-        { id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b', type: 'epm-packages-assets' },
-        { id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad', type: 'epm-packages-assets' },
-        { id: '943d5767-41f5-57c3-ba02-48e0f6a837db', type: 'epm-packages-assets' },
-        { id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487', type: 'epm-packages-assets' },
-        { id: '60d6d054-57e4-590f-a580-52bf3f5e7cca', type: 'epm-packages-assets' },
-        { id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43', type: 'epm-packages-assets' },
-        { id: '318959c9-997b-5a14-b328-9fc7355b4b74', type: 'epm-packages-assets' },
-        { id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197', type: 'epm-packages-assets' },
-        { id: '4c758d70-ecf1-56b3-b704-6d8374841b34', type: 'epm-packages-assets' },
-        { id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58', type: 'epm-packages-assets' },
-        { id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2', type: 'epm-packages-assets' },
-        { id: 'b265a5e0-c00b-5eda-ac44-2ddbd36d9ad0', type: 'epm-packages-assets' },
-        { id: '53c94591-aa33-591d-8200-cd524c2a0561', type: 'epm-packages-assets' },
-        { id: 'b658d2d4-752e-54b8-afc2-4c76155c1466', type: 'epm-packages-assets' },
-      ],
       name: 'all_assets',
       version: '0.1.0',
       removable: true,

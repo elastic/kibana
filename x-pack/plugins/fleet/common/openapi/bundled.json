@@ -3586,7 +3586,7 @@
           "lens",
           "ml-module",
           "security-rule",
-        "cloud-security-posture-rule-template"
+          "cloud-security-posture-rule-template"
         ]
       },
       "elasticsearch_asset_type": {

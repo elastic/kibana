@@ -22,7 +22,7 @@ export const cspRuleTemplateAssetType: SavedObjectsType<CloudSecurityPostureRule
   hidden: false,
   management: {
     importableAndExportable: true,
-    visibleInManagement: false,
+    visibleInManagement: true,
   },
   namespaceType: 'agnostic',
   mappings: ruleTemplateAssetSavedObjectMappings,

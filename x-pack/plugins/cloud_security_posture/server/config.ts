@@ -8,10 +8,11 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from 'kibana/server';
 
-const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
+const shouldEnablePlugin = process.env.CI_GROUP ? true : false;
 
+const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: shouldEnablePlugin }),
+});
 type CloudSecurityPostureConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudSecurityPostureConfig> = {
