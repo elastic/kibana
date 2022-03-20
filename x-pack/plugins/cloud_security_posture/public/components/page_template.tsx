@@ -81,9 +81,9 @@ export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, .
 
   return (
     <KibanaPageTemplate
+      template={template}
       {...DEFAULT_PROPS}
       {...props}
-      template={template}
       noDataConfig={noDataConfig}
     >
       <EuiErrorBoundary>
