@@ -14,9 +14,9 @@ import { MountPoint } from '../../../../core/public';
 import { MountPointPortal } from '../../../kibana_react/public';
 import {
   StatefulSearchBarProps,
-  DataPublicPluginStart,
   SearchBarProps,
-} from '../../../data/public';
+  UnifiedSearchPublicPluginStart
+} from '../../../unified_search/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
@@ -29,7 +29,7 @@ export type TopNavMenuProps = StatefulSearchBarProps &
     showQueryInput?: boolean;
     showDatePicker?: boolean;
     showFilterBar?: boolean;
-    data?: DataPublicPluginStart;
+    unifiedSearch?: UnifiedSearchPublicPluginStart;
     className?: string;
     /**
      * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
@@ -102,8 +102,8 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
   function renderSearchBar(): ReactElement | null {
     // Validate presense of all required fields
-    if (!showSearchBar || !props.data) return null;
-    const { SearchBar } = props.data.ui;
+    if (!showSearchBar || !props.unifiedSearch) return null;
+    const { SearchBar } = props.unifiedSearch.ui;
     return <SearchBar {...searchBarProps} />;
   }
 

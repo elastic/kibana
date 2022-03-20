@@ -49,9 +49,10 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
   dateField: timeField,
   geoField,
   data,
+  unifiedSearch
 }) => {
   const { http } = useKibana<KibanaDeps>().services;
-  const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
+  const IndexPatternSelect = (unifiedSearch.ui && unifiedSearch.ui.IndexPatternSelect) || null;
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();

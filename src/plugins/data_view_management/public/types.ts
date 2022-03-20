@@ -15,6 +15,7 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../unified_search/public';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
 import { KibanaReactContextValue } from '../../kibana_react/public';
@@ -32,6 +33,7 @@ export interface IndexPatternManagmentContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   indexPatternManagementStart: IndexPatternManagementStart;

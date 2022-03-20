@@ -9,6 +9,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
 import { createInputControlVisFn } from './input_control_fn';
@@ -25,6 +26,7 @@ export interface InputControlSettings {
 export interface InputControlVisDependencies {
   core: InputControlVisCoreSetup;
   data: DataPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   getSettings: () => Promise<InputControlSettings>;
 }
 

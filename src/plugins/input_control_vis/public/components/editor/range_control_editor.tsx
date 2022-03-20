@@ -53,9 +53,9 @@ export class RangeControlEditor extends Component<
   }
 
   async getIndexPatternSelect() {
-    const [, { data }] = await this.props.deps.core.getStartServices();
+    const [, { unifiedSearch }] = await this.props.deps.core.getStartServices();
     this.setState({
-      IndexPatternSelect: data.ui.IndexPatternSelect,
+      IndexPatternSelect: unifiedSearch.ui.IndexPatternSelect,
     });
   }
 

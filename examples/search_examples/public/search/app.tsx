@@ -44,6 +44,7 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import type { DataViewField, DataView } from '../../../../src/plugins/data_views/public';
 import { IMyStrategyResponse } from '../../common/types';
 import { AbortError } from '../../../../src/plugins/kibana_utils/common';
@@ -53,6 +54,7 @@ interface SearchExamplesAppDeps {
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 function getNumeric(fields?: DataViewField[]) {
@@ -85,8 +87,9 @@ export const SearchExamplesApp = ({
   notifications,
   navigation,
   data,
+  unifiedSearch,
 }: SearchExamplesAppDeps) => {
-  const { IndexPatternSelect } = data.ui;
+  const { IndexPatternSelect } = unifiedSearch.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
   const [fibonacciN, setFibonacciN] = useState<number>(10);
   const [timeTook, setTimeTook] = useState<number | undefined>();
@@ -209,7 +212,7 @@ export const SearchExamplesApp = ({
             setResponse(res);
             const avgResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-                res.rawResponse.aggregations[1].value
+              res.rawResponse.aggregations[1].value
               : undefined;
             const isCool = (res as IMyStrategyResponse).cool;
             const executedAt = (res as IMyStrategyResponse).executed_at;
