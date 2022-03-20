@@ -30,6 +30,9 @@ export interface ExternalConnectorActions {
   saveExternalConnectorConfig(config: ExternalConnectorConfig): ExternalConnectorConfig;
   setExternalConnectorUrl(externalConnectorUrl: string): string;
   resetSourceState: () => true;
+  validateUrl: () => true;
+  setUrlValidation(valid: boolean): boolean;
+  setShowInsecureUrlCallout(showCallout: boolean): boolean;
 }
 
 export interface ExternalConnectorConfig {
@@ -43,7 +46,10 @@ export interface ExternalConnectorValues {
   dataLoading: boolean;
   externalConnectorApiKey: string;
   externalConnectorUrl: string;
+  urlValid: boolean;
   sourceConfigData: SourceConfigData | Pick<SourceConfigData, 'name' | 'categories'>;
+  insecureUrl: boolean;
+  showInsecureUrlCallout: boolean;
 }
 
 export const ExternalConnectorLogic = kea<
@@ -57,6 +63,9 @@ export const ExternalConnectorLogic = kea<
     saveExternalConnectorConfig: (config) => config,
     setExternalConnectorApiKey: (externalConnectorApiKey: string) => externalConnectorApiKey,
     setExternalConnectorUrl: (externalConnectorUrl: string) => externalConnectorUrl,
+    setUrlValidation: (valid: boolean) => valid,
+    setShowInsecureUrlCallout: (showCallout: boolean) => showCallout,
+    validateUrl: true,
   },
   reducers: {
     dataLoading: [
@@ -88,14 +97,27 @@ export const ExternalConnectorLogic = kea<
         setExternalConnectorApiKey: (_, apiKey) => apiKey,
       },
     ],
+    showInsecureUrlCallout: [
+      false,
+      {
+        fetchExternalSource: () => false,
+        setShowInsecureUrlCallout: (_, showCallout) => showCallout,
+      },
+    ],
     sourceConfigData: [
       { name: '', categories: [] },
       {
         fetchExternalSourceSuccess: (_, sourceConfigData) => sourceConfigData,
       },
     ],
+    urlValid: [
+      true,
+      {
+        setUrlValidation: (_, valid) => valid,
+      },
+    ],
   },
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values }) => ({
     [AddSourceLogic.actionTypes.setSourceConfigData]: (sourceConfigData) =>
       actions.fetchExternalSourceSuccess(sourceConfigData),
     fetchExternalSource: async () => {
@@ -108,36 +130,52 @@ export const ExternalConnectorLogic = kea<
         flashAPIErrors(e);
       }
     },
-    saveExternalConnectorConfig: async ({ url, apiKey }) => {
-      clearFlashMessages();
-      const route = '/internal/workplace_search/org/settings/connectors';
-      const http = HttpLogic.values.http.post;
-      const params = {
-        external_connector_url: url,
-        external_connector_api_key: apiKey,
-        service_type: 'external',
-      };
-      try {
-        await http<SourceConfigData>(route, {
-          body: JSON.stringify(params),
-        });
-
-        flashSuccessToast(
-          i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.externalConnectorCreated',
-            {
-              defaultMessage: 'Successfully created external connector.',
-            }
-          )
-        );
-        // TODO: Once we have multiple external connector types, use response data instead
-        actions.saveExternalConnectorConfigSuccess('external');
-        KibanaLogic.values.navigateToUrl(
-          getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
-        );
-      } catch (e) {
-        flashAPIErrors(e);
+    fetchExternalSourceSuccess: ({ configuredFields: { externalConnectorUrl } }) => {
+      if (externalConnectorUrl && !externalConnectorUrl.startsWith('https://')) {
+        actions.setShowInsecureUrlCallout(true);
+      } else {
+        actions.setShowInsecureUrlCallout(false);
       }
+    },
+    saveExternalConnectorConfig: async ({ url, apiKey }) => {
+      if (!isValidExternalUrl(url)) {
+        actions.setUrlValidation(false);
+      } else {
+        clearFlashMessages();
+        const route = '/internal/workplace_search/org/settings/connectors';
+        const http = HttpLogic.values.http.post;
+        const params = {
+          external_connector_url: url,
+          external_connector_api_key: apiKey,
+          service_type: 'external',
+        };
+        try {
+          await http<SourceConfigData>(route, {
+            body: JSON.stringify(params),
+          });
+
+          flashSuccessToast(
+            i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.externalConnectorCreated',
+              {
+                defaultMessage: 'Successfully created external connector.',
+              }
+            )
+          );
+          // TODO: Once we have multiple external connector types, use response data instead
+          actions.saveExternalConnectorConfigSuccess('external');
+          KibanaLogic.values.navigateToUrl(
+            getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
+          );
+        } catch (e) {
+          flashAPIErrors(e);
+        }
+      }
+    },
+    validateUrl: () => {
+      const url = values.externalConnectorUrl;
+      actions.setUrlValidation(isValidExternalUrl(url));
+      actions.setShowInsecureUrlCallout(!url.startsWith('https://'));
     },
   }),
   selectors: ({ selectors }) => ({
@@ -145,5 +183,12 @@ export const ExternalConnectorLogic = kea<
       () => [selectors.buttonLoading, selectors.dataLoading],
       (buttonLoading: boolean, dataLoading: boolean) => buttonLoading || dataLoading,
     ],
+    insecureUrl: [
+      () => [selectors.externalConnectorUrl],
+      (url: string) => !url.startsWith('https://'),
+    ],
   }),
 });
+
+export const isValidExternalUrl = (url: string): boolean =>
+  url.startsWith('https://') || url.startsWith('http://');
