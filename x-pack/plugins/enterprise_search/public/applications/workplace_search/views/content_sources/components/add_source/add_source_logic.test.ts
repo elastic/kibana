@@ -719,7 +719,8 @@ describe('AddSourceLogic', () => {
         AddSourceLogic.actions.getSourceConnectData('github', jest.fn());
 
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/workplace_search/account/sources/github/prepare'
+          '/internal/workplace_search/account/sources/github/prepare',
+          { query: { index_permissions: false } }
         );
       });
 
