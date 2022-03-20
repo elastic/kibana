@@ -89,7 +89,7 @@ export enum KibanaSavedObjectType {
   lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
-  cloudSecurityPostureRuleTemplate = 'cloud_security_posture_rule_template',
+  cloudSecurityPostureRuleTemplate = 'cloud-security-posture-rule-template',
   tag = 'tag',
 }
 
