@@ -46,7 +46,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   const pageProps: KibanaPageTemplateProps = useMemo(
     () => ({
       pageHeader: {
-        bottomBorder: false,
+        bottomBorder: false, // TODO: border still shows.
         pageTitle: 'Rules',
         description: integrationInfo.data && integrationInfo.data.package && (
           <PageDescription
