@@ -11,7 +11,7 @@ import { ThemeServiceSetup } from 'kibana/public';
 import { toMountPoint } from '../../../kibana_react/public';
 import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
-import { applyFiltersPopover } from '../ui/apply_filters';
+import { applyFiltersPopover } from '../apply_filters';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';

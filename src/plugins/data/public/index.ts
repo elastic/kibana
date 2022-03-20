@@ -19,8 +19,8 @@ export * from './deprecated';
  */
 
 export { getEsQueryConfig, FilterStateStore } from '../common';
-export { FilterLabel, FilterItem } from './ui';
 export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
+export { FilterLabel, FilterItem } from './filter_bar';
 
 /**
  * Exporters (CSV)
@@ -254,15 +254,6 @@ export const search = {
  * UI components
  */
 
-export type {
-  SearchBarProps,
-  StatefulSearchBarProps,
-  IndexPatternSelectProps,
-  QueryStringInputProps,
-} from './ui';
-
-export { QueryStringInput, SearchBar } from './ui';
-
 /**
  * Types to be shared externally
  * @public
@@ -276,6 +267,7 @@ export {
   getDefaultQuery,
   FilterManager,
   TimeHistory,
+  getQueryLog,
 } from './query';
 
 export type {
@@ -288,6 +280,8 @@ export type {
   QueryStateChange,
   QueryStart,
   AutoRefreshDoneFn,
+  PersistedLog,
+  QueryStringContract,
 } from './query';
 
 export type { AggsStart } from './search/aggs';
@@ -316,7 +310,6 @@ export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 

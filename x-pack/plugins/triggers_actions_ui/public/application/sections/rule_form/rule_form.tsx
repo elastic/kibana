@@ -121,6 +121,7 @@ export const RuleForm = ({
     kibanaFeatures,
     charts,
     data,
+    unifiedSearch,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -526,6 +527,7 @@ export const RuleForm = ({
               metadata={metadata}
               charts={charts}
               data={data}
+              unifiedSearch={unifiedSearch}
             />
           </Suspense>
         </EuiErrorBoundary>

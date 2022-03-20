@@ -41,6 +41,7 @@
     { "path": "../ml/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
-    { "path": "../timelines/tsconfig.json" }
+    { "path": "../timelines/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }
