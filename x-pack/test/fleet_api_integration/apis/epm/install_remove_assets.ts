@@ -506,7 +506,7 @@ const expectAssetsInstalled = ({
       installed_kibana_space_id: 'default',
       installed_kibana: [
         {
-          id: 'cloud-security-posture-rule-template',
+          id: 'sample_cloud_security_posture_rule_template',
           type: 'cloud_security_posture_rule_template',
         },
         {

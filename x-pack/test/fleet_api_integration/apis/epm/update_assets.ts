@@ -395,7 +395,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             id: 'sample_cloud_security_posture_rule_template',
-            type: 'cloud_security_posture_rule_template',
+            type: 'cloud-security-posture-rule-template',
           },
           {
             id: 'sample_ml_module',

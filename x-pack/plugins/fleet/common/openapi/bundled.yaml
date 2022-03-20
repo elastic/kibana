@@ -2238,7 +2238,7 @@ components:
         - lens
         - ml-module
         - security-rule
-        - cloud_security_posture-rule-template
+        - cloud-security-posture-rule-template
     elasticsearch_asset_type:
       title: Elasticsearch asset type
       type: string
