@@ -788,6 +788,7 @@ export interface Visualization<T = unknown> {
     type: LayerType;
     label: string;
     icon?: IconType;
+    noDatasource?: boolean;
     disabled?: boolean;
     toolTipContent?: string;
     initialDimensions?: Array<{

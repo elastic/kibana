@@ -99,6 +99,7 @@ export const getAnnotationsSupportedLayer = (
         })
       : undefined,
     initialDimensions,
+    noDatasource: true,
   };
 };
 

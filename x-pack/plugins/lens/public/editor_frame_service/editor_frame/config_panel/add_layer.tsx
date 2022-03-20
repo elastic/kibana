@@ -109,19 +109,21 @@ export function AddLayerButton({
             title: i18n.translate('xpack.lens.configPanel.selectLayerType', {
               defaultMessage: 'Select layer type',
             }),
-            items: supportedLayers.map(({ type, label, icon, disabled, toolTipContent }) => {
-              return {
-                toolTipContent,
-                disabled,
-                name: label,
-                icon: icon && <EuiIcon size="m" type={icon} />,
-                ['data-test-subj']: `lnsLayerAddButton-${type}`,
-                onClick: () => {
-                  onAddLayerClick(type, noDatasource);
-                  toggleLayersChoice(false);
-                },
-              };
-            }),
+            items: supportedLayers.map(
+              ({ type, label, icon, disabled, toolTipContent, noDatasource }) => {
+                return {
+                  toolTipContent,
+                  disabled,
+                  name: label,
+                  icon: icon && <EuiIcon size="m" type={icon} />,
+                  ['data-test-subj']: `lnsLayerAddButton-${type}`,
+                  onClick: () => {
+                    onAddLayerClick(type, noDatasource);
+                    toggleLayersChoice(false);
+                  },
+                };
+              }
+            ),
           },
         ]}
       />
