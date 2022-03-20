@@ -45,3 +45,9 @@ export function TruncateWithTooltip(props: Props) {
     </TooltipWrapper>
   );
 }
+
+export function TruncateWithoutTooltip(props: Props) {
+  const { text, content, ...rest } = props;
+
+  return <ContentWrapper>{content || text}</ContentWrapper>;
+}
