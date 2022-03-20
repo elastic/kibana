@@ -46,6 +46,13 @@ export const RULE_STATUS_UNKNOWN = i18n.translate(
   }
 );
 
+export const RULE_STATUS_WARNING = i18n.translate(
+  'xpack.observability.rules.rulesTable.ruleStatusWarning',
+  {
+    defaultMessage: 'warning',
+  }
+);
+
 export const LAST_RESPONSE_COLUMN_TITLE = i18n.translate(
   'xpack.observability.rules.rulesTable.columns.lastResponseTitle',
   {
@@ -130,6 +137,11 @@ export const RULES_PLURAL_TITLE = i18n.translate(
   {
     defaultMessage: 'rules',
   }
+);
+
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.observability.rules.searchPlaceholderTitle',
+  { defaultMessage: 'Search' }
 );
 
 export const confirmModalText = (

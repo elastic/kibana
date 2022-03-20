@@ -15,9 +15,14 @@ import { shallow } from 'enzyme';
 
 import { EuiSteps } from '@elastic/eui';
 
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
 import { staticSourceData } from '../../source_data';
 
 import { ExternalConnectorConfig } from './external_connector_config';
+import { ExternalConnectorFormFields } from './external_connector_form_fields';
 
 describe('ExternalConnectorConfig', () => {
   const goBack = jest.fn();
@@ -40,6 +45,7 @@ describe('ExternalConnectorConfig', () => {
     clientSecretValue: 'bar',
     baseUrlValue: 'http://foo.baz',
     hasPlatinumLicense: true,
+    isOrganization: true,
   };
 
   beforeEach(() => {
@@ -56,6 +62,21 @@ describe('ExternalConnectorConfig', () => {
     const wrapper = shallow(<ExternalConnectorConfig {...props} />);
 
     expect(wrapper.find(EuiSteps)).toHaveLength(1);
+    expect(wrapper.find(EuiSteps).dive().find(ExternalConnectorFormFields)).toHaveLength(1);
+  });
+
+  it('renders organizstion layout', () => {
+    const wrapper = shallow(<ExternalConnectorConfig {...props} />);
+
+    expect(wrapper.find(WorkplaceSearchPageTemplate)).toHaveLength(1);
+  });
+
+  it('should show correct layout for personal dashboard', () => {
+    setMockValues({ ...values, isOrganization: false });
+    const wrapper = shallow(<ExternalConnectorConfig {...props} />);
+
+    expect(wrapper.find(WorkplaceSearchPageTemplate)).toHaveLength(0);
+    expect(wrapper.find(PersonalDashboardLayout)).toHaveLength(1);
   });
 
   it('handles form submission', () => {
@@ -66,25 +87,5 @@ describe('ExternalConnectorConfig', () => {
 
     expect(preventDefault).toHaveBeenCalled();
     expect(saveExternalConnectorConfig).toHaveBeenCalled();
-  });
-
-  describe('external connector configuration', () => {
-    it('handles url change', () => {
-      const wrapper = shallow(<ExternalConnectorConfig {...props} />);
-      const steps = wrapper.find(EuiSteps);
-      const input = steps.dive().find('[name="external-connector-url"]');
-      input.simulate('change', { target: { value: 'url' } });
-
-      expect(setExternalConnectorUrl).toHaveBeenCalledWith('url');
-    });
-
-    it('handles Client secret change', () => {
-      const wrapper = shallow(<ExternalConnectorConfig {...props} />);
-      const steps = wrapper.find(EuiSteps);
-      const input = steps.dive().find('[name="external-connector-api-key"]');
-      input.simulate('change', { target: { value: 'api-key' } });
-
-      expect(setExternalConnectorApiKey).toHaveBeenCalledWith('api-key');
-    });
   });
 });

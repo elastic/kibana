@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import styled from 'styled-components';
 import {
   ExceptionListType,
@@ -37,7 +38,11 @@ import {
   FieldComponent,
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
-import { OperatingSystem, validateFilePathInput } from '@kbn/securitysolution-utils';
+import {
+  FILENAME_WILDCARD_WARNING,
+  OperatingSystem,
+  validateFilePathInput,
+} from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
@@ -268,6 +273,25 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
   };
 
+  // show this when wildcard filename with matches operator
+  const getWildcardWarning = (precedingWarning: string): React.ReactNode => {
+    return (
+      <p>
+        {precedingWarning}{' '}
+        <EuiIconTip
+          type="iInCircle"
+          content={
+            <FormattedMessage
+              id="xpack.lists.exceptions.builder.exceptionMatchesOperator.warningMessage.wildcardInFilepath"
+              defaultMessage="To make a more efficient event filter, use multiple conditions and make them as specific as possible when using wildcards in the path values. For instance, adding a process.name or file.name field."
+            />
+          }
+          size="m"
+        />
+      </p>
+    );
+  };
+
   const getFieldValueComboBox = (type: OperatorTypeEnum, isFirst: boolean): JSX.Element => {
     switch (type) {
       case OperatorTypeEnum.MATCH:
@@ -319,6 +343,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           [os] = osTypes as OperatingSystem[];
         }
         const warning = validateFilePathInput({ os, value: wildcardValue });
+        const actualWarning =
+          warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
+
         return (
           <AutocompleteFieldWildcardComponent
             autocompleteService={autocompleteService}
@@ -331,7 +358,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             onError={handleError}
             onChange={handleFieldWildcardValueChange}
             onWarning={handleWarning}
-            warning={warning}
+            warning={actualWarning}
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             rowLabel={isFirst ? i18n.VALUE : undefined}
             selectedField={entry.correspondingKeywordField ?? entry.field}
