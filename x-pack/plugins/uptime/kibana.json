@@ -22,7 +22,7 @@
   "server": true,
   "ui": true,
   "version": "8.0.0",
-  "requiredBundles": ["data", "fleet", "home", "kibanaReact", "kibanaUtils", "ml", "observability"],
+  "requiredBundles": ["unifiedSearch", "fleet", "home", "kibanaReact", "kibanaUtils", "ml", "observability"],
   "owner": {
     "name": "Uptime",
     "githubTeam": "uptime"

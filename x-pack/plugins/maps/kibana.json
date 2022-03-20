@@ -8,6 +8,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "maps"],
   "requiredPlugins": [
+    "unifiedSearch",
     "lens",
     "licensing",
     "features",

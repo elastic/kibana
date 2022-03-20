@@ -20,6 +20,7 @@
   "ui": true,
   "configPath": ["xpack", "infra"],
   "requiredBundles": [
+    "unifiedSearch",
     "observability",
     "licenseManagement",
     "kibanaUtils",

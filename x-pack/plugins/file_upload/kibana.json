@@ -6,6 +6,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "unifiedSearch",
     "usageCollection"
   ],
   "optionalPlugins": [

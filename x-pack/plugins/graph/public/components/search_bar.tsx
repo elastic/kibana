@@ -24,11 +24,11 @@ import {
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   IndexPattern,
-  QueryStringInput,
   IDataPluginServices,
   Query,
   esKuery,
 } from '../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../src/plugins/unified_search/public';
 import { TooltipWrapper } from './tooltip_wrapper';
 
 export interface SearchBarProps {
