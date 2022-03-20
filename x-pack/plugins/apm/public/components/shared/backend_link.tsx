@@ -13,10 +13,7 @@ import { useApmRouter } from '../../hooks/use_apm_router';
 import { truncate } from '../../utils/style';
 import { ApmRoutes } from '../routing/apm_route_config';
 import { SpanIcon } from './span_icon';
-import {
-  TruncateWithTooltip,
-  TruncateWithoutTooltip,
-} from './truncate_with_tooltip';
+import { TruncateWithoutTooltip } from './truncate_with_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`min-width: 0`;
 
