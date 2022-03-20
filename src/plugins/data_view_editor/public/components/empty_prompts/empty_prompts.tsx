@@ -84,7 +84,7 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
             onRefresh={loadSources}
             closeFlyout={onCancel}
             createAnyway={() => setGoToForm(true)}
-            canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
+            canSaveIndexPattern={!!application.capabilities.indexPatterns.save}
             navigateToApp={application.navigateToApp}
             addDataUrl={docLinks.links.indexPatterns.introduction}
           />
