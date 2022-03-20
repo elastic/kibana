@@ -5,29 +5,18 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { useQuery } from 'react-query';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiText, EuiTextColor, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiTextColor, EuiEmptyPrompt } from '@elastic/eui';
 import * as t from 'io-ts';
 import { CspPageTemplate } from '../../components/page_template';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { type PackagePolicy, packagePolicyRouteService } from '../../../../../plugins/fleet/common';
 import type { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 import { CspLoadingState } from '../../components/csp_loading_state';
 import { CspNavigationItem } from '../../common/navigation/types';
 import { extractErrorMessage } from '../../../common/utils/helpers';
-
-const useCspIntegrationInfo = ({ packagePolicyId }: PageUrlParams) => {
-  const { http } = useKibana().services;
-  return useQuery(
-    ['packagePolicy', { packagePolicyId }],
-    () => http.get<{ item: PackagePolicy }>(packagePolicyRouteService.getInfoPath(packagePolicyId)),
-    { select: (response) => response.item, enabled: !!packagePolicyId }
-  );
-};
+import { useCspIntegration } from './use_csp_integration';
 
 const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
   [allNavigationItems.benchmarks, { ...allNavigationItems.rules, name }].filter(
@@ -35,7 +24,7 @@ const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
   );
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
-  const integrationInfo = useCspIntegrationInfo(params);
+  const integrationInfo = useCspIntegration(params);
   const breadcrumbs = useMemo(
     // TODO: make benchmark breadcrumb navigable
     () => getRulesBreadcrumbs(integrationInfo.data?.name),
@@ -84,9 +73,7 @@ const extractErrorBodyMessage = (err: unknown) => {
 };
 
 const PageDescription = ({ text }: { text: string }) => (
-  <EuiText size="s">
-    <EuiTextColor color="subdued">{text}</EuiTextColor>
-  </EuiText>
+  <EuiTextColor color="subdued">{text}</EuiTextColor>
 );
 
 const RulesErrorPrompt = ({ error }: { error: string }) => (
