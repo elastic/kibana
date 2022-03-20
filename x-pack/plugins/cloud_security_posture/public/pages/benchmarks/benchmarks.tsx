@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPageHeaderProps, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiPageHeaderProps, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
@@ -41,7 +41,7 @@ export const Benchmarks = () => {
   return (
     <CspPageTemplate
       pageHeader={PAGE_HEADER}
-      status={query.status}
+      query={query}
       loadingRender={BenchmarksLoadingState}
       errorRender={BenchmarksErrorState}
     >

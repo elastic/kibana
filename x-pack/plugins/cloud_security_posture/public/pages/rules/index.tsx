@@ -26,7 +26,7 @@ export const Rules = () => {
   useCspBreadcrumbs(breadcrumbs);
 
   return (
-    <CspPageTemplate pageHeader={pageHeader} status={dataViewQuery.status}>
+    <CspPageTemplate pageHeader={pageHeader} query={dataViewQuery}>
       <RulesContainer />
     </CspPageTemplate>
   );

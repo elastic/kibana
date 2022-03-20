@@ -41,17 +41,26 @@ export const CSP_EVALUATION_BADGE_PASSED = i18n.translate(
 );
 
 export const PACKAGE_NOT_INSTALLED_TEXT = {
-  PAGE_TITLE: i18n.translate('xpack.csp.pageTemplate.noDataConfigTitle', {
-    defaultMessage: 'Understand your cloud security posture',
+  PAGE_TITLE: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.pageTitle', {
+    defaultMessage: 'Integration package not installed',
   }),
-  SOLUTION: i18n.translate('xpack.csp.pageTemplate.noDataConfig.solutionNameLabel', {
+  SOLUTION: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.solutionNameLabel', {
     defaultMessage: 'Cloud Security Posture',
   }),
-  BUTTON_TITLE: i18n.translate('xpack.csp.pageTemplate.noDataConfigButtonLabel', {
+  BUTTON_TITLE: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.ButtonLabel', {
     defaultMessage: 'Add a CIS integration',
   }),
-  DESCRIPTION: i18n.translate('xpack.csp.pageTemplate.noDataConfigDescription', {
+  DESCRIPTION: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.Description', {
     defaultMessage:
       'Use our CIS Kubernetes Benchmark integration to measure your Kubernetes cluster setup against the CIS recommendations.',
+  }),
+};
+
+export const DEFAULT_NO_DATA_TEXT = {
+  PAGE_TITLE: i18n.translate('xpack.csp.cspPageTemplate.defaultNoDataConfig.pageTitle', {
+    defaultMessage: 'No data found',
+  }),
+  SOLUTION: i18n.translate('xpack.csp.cspPageTemplate.defaultNoDataConfig.solutionNameLabel', {
+    defaultMessage: 'Cloud Security Posture',
   }),
 };
