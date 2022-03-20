@@ -24,8 +24,11 @@ export { SearchBar } from './search_bar';
 
 export { createIndexPatternSelect } from './index_pattern_select';
 
-export type { UnifiedSearchPublicPluginStart } from './types';
-export type { UnifiedSearchPluginSetup, UnifiedSearchPluginStart } from './types';
+export type {
+  UnifiedSearchPublicPluginStart,
+  UnifiedSearchPluginSetup,
+  UnifiedSearchPluginStart,
+} from './types';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
