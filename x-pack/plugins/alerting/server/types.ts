@@ -39,10 +39,11 @@ import {
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
+  AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
+import { RulesConfig } from './config';
 import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
-
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -126,6 +127,7 @@ export type ExecutorType<
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
 }
+
 export interface RuleType<
   Params extends AlertTypeParams = never,
   ExtractedParams extends AlertTypeParams = never,
@@ -170,6 +172,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  config?: RulesConfig;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,
@@ -199,6 +202,10 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   lastDuration?: number;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning: null | {
+    reason: AlertExecutionStatusWarningReasons;
     message: string;
   };
 }
@@ -246,7 +253,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string;
+  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
 }
 
 export type AlertInfoParams = Pick<
