@@ -120,7 +120,8 @@ export const EditIndexPattern = withRouter(
     const userEditPermission = dataViews.getCanSaveSync();
 
     const warning =
-      indexPattern.namespaces && indexPattern.namespaces.length > 1 ? (
+      (indexPattern.namespaces && indexPattern.namespaces.length > 1) ||
+      indexPattern.namespaces.includes('*') ? (
         <FormattedMessage
           id="indexPatternManagement.editDataView.deleteWarningWithNamespaces"
           defaultMessage="Delete the data view {dataViewName} from every space it is shared in. You can't undo this action."
