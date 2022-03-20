@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { FilterLabel, FilterItem, FilterBar } from './filter_bar';
+import { QuerySuggestion } from '../../../data/public';
+
+export type SuggestionOnClick = (suggestion: QuerySuggestion, index: number) => void;
+
+export type SuggestionOnMouseEnter = (suggestion: QuerySuggestion, index: number) => void;

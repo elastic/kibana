@@ -1,0 +1,7 @@
+{
+  "prefix": "unifiedSearch",
+  "paths": {
+    "unifiedSearch": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

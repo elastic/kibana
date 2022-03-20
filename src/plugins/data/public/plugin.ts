@@ -20,7 +20,6 @@ import type {
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
-import { createIndexPatternSelect } from './ui/index_pattern_select';
 import {
   setIndexPatterns,
   setNotifications,
@@ -29,7 +28,6 @@ import {
   setUiSettings,
   setTheme,
 } from './services';
-import { createSearchBar } from './ui/search_bar/create_search_bar';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
@@ -182,20 +180,7 @@ export class DataPublicPlugin
       nowProvider: this.nowProvider,
     };
 
-    const SearchBar = createSearchBar({
-      core,
-      data: dataServices,
-      storage: this.storage,
-      usageCollection: this.usageCollection,
-    });
-
-    return {
-      ...dataServices,
-      ui: {
-        IndexPatternSelect: createIndexPatternSelect(dataViews),
-        SearchBar,
-      },
-    };
+    return dataServices;
   }
 
   public stop() {

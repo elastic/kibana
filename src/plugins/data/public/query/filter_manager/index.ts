@@ -12,3 +12,4 @@ export { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 export { generateFilters } from './lib/generate_filters';
 export { getDisplayValueFromFilter } from './lib/get_display_value';
 export { getIndexPatternFromFilter } from './lib/get_index_pattern_from_filter';
+export { getFilter } from './test_helpers/get_stub_filter';

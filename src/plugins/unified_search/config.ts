@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { FilterLabel, FilterItem, FilterBar } from './filter_bar';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const configSchema = schema.object({});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;

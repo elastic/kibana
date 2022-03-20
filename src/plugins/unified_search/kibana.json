@@ -1,0 +1,17 @@
+{
+  "id": "unifiedSearch",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["dataViews", "data"],
+  "serviceFolders": [],
+  "optionalPlugins": [],
+  "extraPublicDirs": [],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+}

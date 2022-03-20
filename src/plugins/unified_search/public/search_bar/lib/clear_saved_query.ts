@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { FilterLabel, FilterItem, FilterBar } from './filter_bar';
+import { QueryStart } from '../../../../data/public';
+
+export const clearStateFromSavedQuery = (queryService: QueryStart) => {
+  queryService.filterManager.removeAll();
+  queryService.queryString.clearQuery();
+};
