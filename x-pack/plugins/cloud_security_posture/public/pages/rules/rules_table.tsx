@@ -16,7 +16,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
@@ -60,7 +59,6 @@ export const RulesTable = ({
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [1, 5, 10, 25],
-    showPerPageOptions: true,
   };
 
   const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
@@ -142,21 +140,7 @@ const getColumns = ({
     field: 'attributes.enabled',
     name: TEXT.ENABLED,
     render: (enabled, rule) => (
-      <EuiToolTip
-        content={
-          enabled ? (
-            <FormattedMessage
-              id="xpack.csp.rules.rulesTableHeader.deactivateRuleTooltip"
-              defaultMessage="Deactivate Rule"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.csp.rules.rulesTableHeader.activateRuleTooltip"
-              defaultMessage="Activate Rule"
-            />
-          )
-        }
-      >
+      <EuiToolTip content={enabled ? TEXT.DEACTIVATE : TEXT.ACTIVATE}>
         <EuiSwitch
           showLabel={false}
           label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
