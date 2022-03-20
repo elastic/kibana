@@ -37,36 +37,38 @@ type RuleTab = typeof tabs[number];
 
 const getOverviewCard = (rule: RuleSavedObject): EuiDescriptionListProps['listItems'] => [
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.frameworkSourcesLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.frameworkSourcesLabel', {
       defaultMessage: 'Framework Sources',
     }),
     description: '',
   },
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.sectionsLabel', { defaultMessage: 'Sections' }),
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.sectionsLabel', {
+      defaultMessage: 'Sections',
+    }),
     description: '',
   },
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.profileApplicabilityLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.profileApplicabilityLabel', {
       defaultMessage: 'Profile Applicability',
     }),
     description: '',
   },
 
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.profileApplicabilityLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.profileApplicabilityLabel', {
       defaultMessage: 'Profile Applicability',
     }),
     description: rule.attributes.description,
   },
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.auditLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.auditLabel', {
       defaultMessage: 'Audit',
     }),
     description: '',
   },
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.referencesLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.referencesLabel', {
       defaultMessage: 'References',
     }),
     description: '',
@@ -75,25 +77,25 @@ const getOverviewCard = (rule: RuleSavedObject): EuiDescriptionListProps['listIt
 
 const getRemediationCard = (rule: RuleSavedObject): EuiDescriptionListProps['listItems'] => [
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.remediationLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.remediationLabel', {
       defaultMessage: 'Remediation',
     }),
     description: rule.attributes.remediation,
   },
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.impactLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.impactLabel', {
       defaultMessage: 'Impact',
     }),
     description: rule.attributes.impact,
   },
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.defaultValueLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.defaultValueLabel', {
       defaultMessage: 'Default Value',
     }),
     description: rule.attributes.default_value,
   },
   {
-    title: i18n.translate('xpack.rules.ruleFlyout.rationaleLabel', {
+    title: i18n.translate('xpack.csp.rules.ruleFlyout.rationaleLabel', {
       defaultMessage: 'Rationale',
     }),
     description: rule.attributes.rationale,
