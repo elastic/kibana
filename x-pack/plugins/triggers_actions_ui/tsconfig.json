@@ -26,7 +26,6 @@
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
-    { "path": "../../../../src/plugins/unified_search/public" },
-    { "path": "../../../../../../../src/plugins/unified_search/public/mocks" }
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" },
   ]
 }
