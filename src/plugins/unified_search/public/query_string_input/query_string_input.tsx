@@ -490,7 +490,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 <EuiFlexItem grow={false}>
                   <EuiButton size="s" onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}>
                     <FormattedMessage
-                      id="data.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
+                      id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
                       defaultMessage="Don't show again"
                     />
                   </EuiButton>

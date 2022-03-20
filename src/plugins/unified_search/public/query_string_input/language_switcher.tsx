@@ -94,7 +94,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
     >
       <EuiPopoverTitle>
         <FormattedMessage
-          id="data.query.queryBar.syntaxOptionsTitle"
+          id="unifiedSearch.query.queryBar.syntaxOptionsTitle"
           defaultMessage="Syntax options"
         />
       </EuiPopoverTitle>
@@ -102,7 +102,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="data.query.queryBar.syntaxOptionsDescription"
+              id="unifiedSearch.query.queryBar.syntaxOptionsDescription"
               defaultMessage="The {docsLink} (KQL) offers a simplified query
               syntax and support for scripted fields. KQL also provides autocomplete.
               If you turn off KQL, {nonKqlModeHelpText}"

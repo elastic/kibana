@@ -317,14 +317,17 @@ export function SavedQueryManagementComponent({
                     flush="left"
                     onClick={onClearSavedQuery}
                     aria-label={i18n.translate(
-                      'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
+                      'unifiedSearch.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
                       { defaultMessage: 'Clear current saved query' }
                     )}
                     data-test-subj="saved-query-management-clear-button"
                   >
-                    {i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
-                      defaultMessage: 'Clear',
-                    })}
+                    {i18n.translate(
+                      'unifiedSearch.search.searchBar.savedQueryPopoverClearButtonText',
+                      {
+                        defaultMessage: 'Clear',
+                      }
+                    )}
                   </EuiButtonEmpty>
                 )}
               </EuiFlexItem>
