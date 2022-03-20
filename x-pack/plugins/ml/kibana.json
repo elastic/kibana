@@ -19,7 +19,8 @@
     "share",
     "taskManager",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "alerting",
@@ -45,6 +46,7 @@
     "kibanaUtils",
     "maps",
     "savedObjects",
+    "usageCollection",
     "usageCollection"
   ],
   "extraPublicDirs": [

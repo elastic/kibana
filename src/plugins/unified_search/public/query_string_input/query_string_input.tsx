@@ -10,6 +10,7 @@ import React, { PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import classNames from 'classnames';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButton,
@@ -26,8 +27,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
-import { Toast } from 'src/core/public';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { Toast } from '../../../../core/public';
 import { KibanaReactContextValue, toMountPoint } from '../../../kibana_react/public';
 
 import {
@@ -463,14 +463,14 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
 
       if (notifications && docLinks) {
         const toast = notifications.toasts.add({
-          title: i18n.translate('data.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
+          title: i18n.translate('unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
             defaultMessage: 'KQL nested query syntax',
           }),
           text: toMountPoint(
             <div>
               <p>
                 <FormattedMessage
-                  id="data.query.queryBar.KQLNestedQuerySyntaxInfoText"
+                  id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoText"
                   defaultMessage="It looks like you're querying on a nested field.
                   You can construct KQL syntax for nested queries in different ways, depending on the results you want.
                   Learn more in our {link}."
@@ -478,7 +478,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                     link: (
                       <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
                         <FormattedMessage
-                          id="data.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
+                          id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
                           defaultMessage="docs"
                         />
                       </EuiLink>
@@ -713,7 +713,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           <div
             {...ariaCombobox}
             style={{ position: 'relative', width: '100%' }}
-            aria-label={i18n.translate('data.query.queryBar.comboboxAriaLabel', {
+            aria-label={i18n.translate('unifiedSearch.query.queryBar.comboboxAriaLabel', {
               defaultMessage: 'Search and filter the {pageType} page',
               values: { pageType: this.services.appName },
             })}
@@ -725,7 +725,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
               <EuiTextArea
                 placeholder={
                   this.props.placeholder ||
-                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
+                  i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
                     defaultMessage: 'Search',
                   })
                 }
@@ -746,7 +746,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 inputRef={this.assignInputRef}
                 autoComplete="off"
                 spellCheck={false}
-                aria-label={i18n.translate('data.query.queryBar.searchInputAriaLabel', {
+                aria-label={i18n.translate('unifiedSearch.query.queryBar.searchInputAriaLabel', {
                   defaultMessage: 'Start typing to search and filter the {pageType} page',
                   values: { pageType: this.services.appName },
                 })}
@@ -777,7 +777,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                   <button
                     type="button"
                     className="euiFormControlLayoutClearButton"
-                    title={i18n.translate('data.query.queryBar.clearInputLabel', {
+                    title={i18n.translate('unifiedSearch.query.queryBar.clearInputLabel', {
                       defaultMessage: 'Clear input',
                     })}
                     onClick={() => {

@@ -22,6 +22,8 @@ export type { SearchBarProps, StatefulSearchBarProps } from './search_bar';
 export { QueryStringInput } from './query_string_input';
 export { SearchBar } from './search_bar';
 
+export { createIndexPatternSelect } from './index_pattern_select';
+
 export type { UnifiedSearchPublicPluginStart } from './types';
 export { UnifiedSearchPluginSetup, UnifiedSearchPluginStart } from './types';
 

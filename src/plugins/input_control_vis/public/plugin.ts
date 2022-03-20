@@ -26,7 +26,6 @@ export interface InputControlSettings {
 export interface InputControlVisDependencies {
   core: InputControlVisCoreSetup;
   data: DataPublicPluginSetup;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   getSettings: () => Promise<InputControlSettings>;
 }
 
@@ -42,6 +41,7 @@ export interface InputControlVisPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /** @internal */

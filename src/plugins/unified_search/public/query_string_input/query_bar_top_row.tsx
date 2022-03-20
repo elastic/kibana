@@ -37,7 +37,7 @@ import { UI_SETTINGS } from '../../../data/common';
 import { getQueryLog } from '../../../data/public';
 import type { PersistedLog } from '../../../data/public';
 import { NoDataPopover } from './no_data_popover';
-import { shallowEqual } from '../utils/shallow_equal';
+import { shallowEqual } from '../utils';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any

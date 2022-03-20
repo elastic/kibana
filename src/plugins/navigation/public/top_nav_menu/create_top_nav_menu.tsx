@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { I18nStart } from 'kibana/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../unified_search/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export function createTopNav(
-  data: DataPublicPluginStart,
+  unifiedSearch: UnifiedSearchPublicPluginStart,
   extraConfig: RegisteredTopNavMenuData[],
   i18n: I18nStart
 ) {
@@ -25,7 +25,7 @@ export function createTopNav(
 
     return (
       <i18n.Context>
-        <TopNavMenu {...props} data={data} config={config} />
+        <TopNavMenu {...props} unifiedSearch={unifiedSearch} config={config} />
       </i18n.Context>
     );
   };

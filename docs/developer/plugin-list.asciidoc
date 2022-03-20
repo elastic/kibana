@@ -283,6 +283,10 @@ In general this plugin provides:
 - Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 
+|{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
 |This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 

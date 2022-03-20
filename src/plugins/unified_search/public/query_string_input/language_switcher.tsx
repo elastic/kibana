@@ -43,20 +43,23 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   const kueryQuerySyntaxDocs = kibana.services.docLinks!.links.query.kueryQuerySyntax;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const luceneLabel = (
-    <FormattedMessage id="data.query.queryBar.luceneLanguageName" defaultMessage="Lucene" />
+    <FormattedMessage
+      id="unifiedSearch.query.queryBar.luceneLanguageName"
+      defaultMessage="Lucene"
+    />
   );
   const kqlLabel = (
-    <FormattedMessage id="data.query.queryBar.kqlLanguageName" defaultMessage="KQL" />
+    <FormattedMessage id="unifiedSearch.query.queryBar.kqlLanguageName" defaultMessage="KQL" />
   );
 
   const kqlFullName = (
     <FormattedMessage
-      id="data.query.queryBar.kqlFullLanguageName"
+      id="unifiedSearch.query.queryBar.kqlFullLanguageName"
       defaultMessage="Kibana Query Language"
     />
   );
 
-  const kqlModeTitle = i18n.translate('data.query.queryBar.languageSwitcher.toText', {
+  const kqlModeTitle = i18n.translate('unifiedSearch.query.queryBar.languageSwitcher.toText', {
     defaultMessage: 'Switch to Kibana Query Language for search',
   });
 
@@ -112,7 +115,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
                 nonKqlModeHelpText:
                   nonKqlModeHelpText ||
                   i18n.translate(
-                    'data.query.queryBar.syntaxOptionsDescription.nonKqlModeHelpText',
+                    'unifiedSearch.query.queryBar.syntaxOptionsDescription.nonKqlModeHelpText',
                     {
                       defaultMessage: 'Kibana uses Lucene.',
                     }
@@ -131,9 +134,15 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
               name="popswitch"
               label={
                 language === 'kuery' ? (
-                  <FormattedMessage id="data.query.queryBar.kqlOnLabel" defaultMessage="On" />
+                  <FormattedMessage
+                    id="unifiedSearch.query.queryBar.kqlOnLabel"
+                    defaultMessage="On"
+                  />
                 ) : (
-                  <FormattedMessage id="data.query.queryBar.kqlOffLabel" defaultMessage="Off" />
+                  <FormattedMessage
+                    id="unifiedSearch.query.queryBar.kqlOffLabel"
+                    defaultMessage="Off"
+                  />
                 )
               }
               checked={language === 'kuery'}

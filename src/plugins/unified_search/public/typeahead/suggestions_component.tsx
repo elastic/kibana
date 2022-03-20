@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
 import React, { PureComponent, ReactNode } from 'react';
+import { isEmpty } from 'lodash';
 import classNames from 'classnames';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
@@ -21,8 +21,7 @@ import {
   SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
 import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
-import { onRaf } from '../utils';
-import { shallowEqual } from '../utils/shallow_equal';
+import { onRaf, shallowEqual } from '../utils';
 
 interface SuggestionsComponentProps {
   index: number | null;

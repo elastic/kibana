@@ -6,7 +6,8 @@
   "ui": true,
   "requiredPlugins": [
     "data",
-    "usageCollection"
+    "usageCollection",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "security"

@@ -27,6 +27,7 @@ import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common
 
 import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
+import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -47,6 +48,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
   theme$: Observable<CoreTheme>;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

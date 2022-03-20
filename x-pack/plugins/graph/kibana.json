@@ -5,6 +5,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "unifiedSearch",
     "licensing",
     "data",
     "navigation",

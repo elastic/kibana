@@ -16,7 +16,7 @@ export interface IQueryPayload {
 export type PackSavedObject = SavedObject<{
   name: string;
   description: string | undefined;
-  queries: Array<Record<string, any>>;
+  queries: Array<Record<string, string>>;
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;

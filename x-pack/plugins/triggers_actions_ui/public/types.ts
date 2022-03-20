@@ -7,10 +7,11 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
-import { ComponentType } from 'react';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IconType } from '@elastic/eui';
+import type { ComponentType } from 'react';
+import type { ChartsPluginSetup } from 'src/plugins/charts/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { IconType } from '@elastic/eui';
+import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -273,6 +274,7 @@ export interface RuleTypeParamsExpressionProps<
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {

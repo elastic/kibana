@@ -17,7 +17,8 @@ import {
   SavedObjectsStart,
 } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
-import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../src/plugins/unified_search/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';

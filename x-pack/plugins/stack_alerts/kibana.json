@@ -13,7 +13,8 @@
     "triggersActionsUi",
     "kibanaReact",
     "savedObjects",
-    "data"
+    "data",
+    "unifiedSearch"
   ],
   "configPath": ["xpack", "stack_alerts"],
   "requiredBundles": ["esUiShared"],

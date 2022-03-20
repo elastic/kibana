@@ -12,7 +12,8 @@
     "savedObjects",
     "share",
     "triggersActionsUi",
-    "fieldFormats"
+    "fieldFormats",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "security",

@@ -7,3 +7,4 @@
  */
 
 export { onRaf } from './on_raf';
+export * from './shallow_equal';

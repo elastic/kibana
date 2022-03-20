@@ -24,7 +24,7 @@ const mockTimeHistory = {
   },
 };
 
-jest.mock('../../../data/public/ui/filter_bar/filter_bar', () => {
+jest.mock('../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
   };

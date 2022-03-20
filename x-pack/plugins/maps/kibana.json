@@ -24,7 +24,8 @@
     "mapsEms",
     "savedObjects",
     "share",
-    "presentationUtil"
+    "presentationUtil",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "customIntegrations",

@@ -66,14 +66,14 @@ export function SaveQueryForm({
   const [formErrors, setFormErrors] = useState<string[]>([]);
 
   const titleConflictErrorText = i18n.translate(
-    'data.search.searchBar.savedQueryForm.titleConflictText',
+    'unifiedSearch.search.searchBar.savedQueryForm.titleConflictText',
     {
       defaultMessage: 'Name conflicts with an existing saved query',
     }
   );
 
   const savedQueryDescriptionText = i18n.translate(
-    'data.search.searchBar.savedQueryDescriptionText',
+    'unifiedSearch.search.searchBar.savedQueryDescriptionText',
     {
       defaultMessage: 'Save query text and filters that you want to use again.',
     }
@@ -147,10 +147,10 @@ export function SaveQueryForm({
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('data.search.searchBar.savedQueryNameLabelText', {
+        label={i18n.translate('unifiedSearch.search.searchBar.savedQueryNameLabelText', {
           defaultMessage: 'Name',
         })}
-        helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
+        helpText={i18n.translate('unifiedSearch.search.searchBar.savedQueryNameHelpText', {
           defaultMessage:
             'Name is required, it cannot contain leading or trailing whitespace and must be unique.',
         })}
@@ -168,7 +168,7 @@ export function SaveQueryForm({
       </EuiFormRow>
 
       <EuiFormRow
-        label={i18n.translate('data.search.searchBar.savedQueryDescriptionLabelText', {
+        label={i18n.translate('unifiedSearch.search.searchBar.savedQueryDescriptionLabelText', {
           defaultMessage: 'Description',
         })}
       >
@@ -185,9 +185,12 @@ export function SaveQueryForm({
         <EuiFormRow>
           <EuiSwitch
             name="shouldIncludeFilters"
-            label={i18n.translate('data.search.searchBar.savedQueryIncludeFiltersLabelText', {
-              defaultMessage: 'Include filters',
-            })}
+            label={i18n.translate(
+              'unifiedSearch.search.searchBar.savedQueryIncludeFiltersLabelText',
+              {
+                defaultMessage: 'Include filters',
+              }
+            )}
             checked={shouldIncludeFilters}
             onChange={() => {
               setShouldIncludeFilters(!shouldIncludeFilters);
@@ -201,9 +204,12 @@ export function SaveQueryForm({
         <EuiFormRow>
           <EuiSwitch
             name="shouldIncludeTimefilter"
-            label={i18n.translate('data.search.searchBar.savedQueryIncludeTimeFilterLabelText', {
-              defaultMessage: 'Include time filter',
-            })}
+            label={i18n.translate(
+              'unifiedSearch.search.searchBar.savedQueryIncludeTimeFilterLabelText',
+              {
+                defaultMessage: 'Include time filter',
+              }
+            )}
             checked={shouldIncludeTimefilter}
             onChange={() => {
               setIncludeTimefilter(!shouldIncludeTimefilter);
@@ -219,7 +225,7 @@ export function SaveQueryForm({
     <EuiModal onClose={onClose} initialFocus="[name=title]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
+          {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormTitle', {
             defaultMessage: 'Save query',
           })}
         </EuiModalHeaderTitle>
@@ -229,7 +235,7 @@ export function SaveQueryForm({
 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
-          {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
+          {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormCancelButtonText', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
@@ -240,7 +246,7 @@ export function SaveQueryForm({
           data-test-subj="savedQueryFormSaveButton"
           disabled={hasErrors || !enabledSaveButton}
         >
-          {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
+          {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormSaveButtonText', {
             defaultMessage: 'Save',
           })}
         </EuiButton>

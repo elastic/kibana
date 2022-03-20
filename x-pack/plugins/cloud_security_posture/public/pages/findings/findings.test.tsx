@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
 import { Findings } from './findings';
 import { TestProvider } from '../../test/test_provider';
-import { type Start as DataPluginStart } from '../../../../../../src/plugins/data/public/mocks';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { UnifiedSearchPublicPluginStart } from '../../../../../../src/plugins/unified_search/public';

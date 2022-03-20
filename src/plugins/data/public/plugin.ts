@@ -37,7 +37,6 @@ import {
   createSelectRangeAction,
 } from './actions';
 import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
-import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
@@ -55,7 +54,6 @@ export class DataPublicPlugin
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
-  private usageCollection: UsageCollectionSetup | undefined;
   private readonly nowProvider: NowProviderInternalContract;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -80,7 +78,6 @@ export class DataPublicPlugin
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    this.usageCollection = usageCollection;
     setTheme(core.theme);
 
     const searchService = this.searchService.setup(core, {

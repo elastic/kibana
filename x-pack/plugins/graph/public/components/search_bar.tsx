@@ -24,12 +24,12 @@ import {
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   IndexPattern,
-  QueryStringInput,
   IDataPluginServices,
   Query,
   esKuery,
 } from '../../../../../src/plugins/data/public';
 import { TooltipWrapper } from './tooltip_wrapper';
+import { QueryStringInput } from '../../../../../src/plugins/unified_search/public';
 
 export interface SearchBarProps {
   isLoading: boolean;

@@ -15,7 +15,7 @@ import { MountPointPortal } from '../../../kibana_react/public';
 import {
   StatefulSearchBarProps,
   SearchBarProps,
-  UnifiedSearchPublicPluginStart
+  UnifiedSearchPublicPluginStart,
 } from '../../../unified_search/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
@@ -64,7 +64,7 @@ export type TopNavMenuProps = StatefulSearchBarProps &
 export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   const { config, badges, showSearchBar, ...searchBarProps } = props;
 
-  if ((!config || config.length === 0) && (!showSearchBar || !props.data)) {
+  if ((!config || config.length === 0) && (!showSearchBar || !props.unifiedSearch)) {
     return null;
   }
 

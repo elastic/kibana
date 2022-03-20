@@ -19,8 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import { IIndexPattern } from '../..';
-import { Filter } from '../../../common';
+import { Filter, IIndexPattern } from '../../../common';
 import { FilterLabel } from '../filter_bar';
 import { mapAndFlattenFilters, getDisplayValueFromFilter } from '../../query';
 

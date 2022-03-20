@@ -10,7 +10,7 @@ import React from 'react';
 
 const Fallback = () => <div />;
 
-export { FilterBar } from '../filter_bar/filter_bar'
+export { FilterBar } from '../filter_bar/filter_bar';
 
 const LazyFilterLabel = React.lazy(() => import('./filter_editor/lib/filter_label'));
 export const FilterLabel = (props: React.ComponentProps<typeof LazyFilterLabel>) => (

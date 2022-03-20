@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { IIndexPattern, Filter } from '../..';
+import { IIndexPattern, Filter } from '../../../common';
 
 type CancelFnType = () => void;
 type SubmitFnType = (filters: Filter[]) => void;

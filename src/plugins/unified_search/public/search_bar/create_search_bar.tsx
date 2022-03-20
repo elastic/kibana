@@ -8,16 +8,16 @@
 
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { CoreStart } from '../../../../core/public';
+import { IStorageWrapper } from '../../../kibana_utils/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
+import { QueryStart, SavedQuery, DataPublicPluginStart } from '../../../data/public';
+import { Filter, Query, TimeRange } from '../../../data/common';
 import { SearchBar } from './index';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
-import { QueryStart, SavedQuery, DataPublicPluginStart } from '../../../data/public';
-import { Filter, Query, TimeRange } from '../../../data/common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 

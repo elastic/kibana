@@ -32,17 +32,20 @@ export const SavedQueryListItem = ({
 
   const selectButtonAriaLabelText = isSelected
     ? i18n.translate(
-        'data.search.searchBar.savedQueryPopoverSavedQueryListItemSelectedButtonAriaLabel',
+        'unifiedSearch.search.searchBar.savedQueryPopoverSavedQueryListItemSelectedButtonAriaLabel',
         {
           defaultMessage:
             'Saved query button selected {savedQueryName}. Press to clear any changes.',
           values: { savedQueryName: savedQuery.attributes.title },
         }
       )
-    : i18n.translate('data.search.searchBar.savedQueryPopoverSavedQueryListItemButtonAriaLabel', {
-        defaultMessage: 'Saved query button {savedQueryName}',
-        values: { savedQueryName: savedQuery.attributes.title },
-      });
+    : i18n.translate(
+        'unifiedSearch.search.searchBar.savedQueryPopoverSavedQueryListItemButtonAriaLabel',
+        {
+          defaultMessage: 'Saved query button {savedQueryName}',
+          values: { savedQueryName: savedQuery.attributes.title },
+        }
+      );
 
   const selectButtonDataTestSubj = isSelected
     ? `load-saved-query-${savedQuery.attributes.title}-button saved-query-list-item-selected`
@@ -60,7 +63,7 @@ export const SavedQueryListItem = ({
           type="iInCircle"
           content={savedQuery.attributes.description}
           aria-label={i18n.translate(
-            'data.search.searchBar.savedQueryPopoverSavedQueryListItemDescriptionAriaLabel',
+            'unifiedSearch.search.searchBar.savedQueryPopoverSavedQueryListItemDescriptionAriaLabel',
             {
               defaultMessage: '{savedQueryName} description',
               values: { savedQueryName: savedQuery.attributes.title },
@@ -94,14 +97,14 @@ export const SavedQueryListItem = ({
                 iconType: 'trash',
                 iconSize: 's',
                 'aria-label': i18n.translate(
-                  'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
+                  'unifiedSearch.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
                   {
                     defaultMessage: 'Delete saved query {savedQueryName}',
                     values: { savedQueryName: savedQuery.attributes.title },
                   }
                 ),
                 title: i18n.translate(
-                  'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
+                  'unifiedSearch.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
                   {
                     defaultMessage: 'Delete saved query {savedQueryName}',
                     values: { savedQueryName: savedQuery.attributes.title },
@@ -115,20 +118,23 @@ export const SavedQueryListItem = ({
 
       {showDeletionConfirmationModal && (
         <EuiConfirmModal
-          title={i18n.translate('data.search.searchBar.savedQueryPopoverConfirmDeletionTitle', {
-            defaultMessage: 'Delete "{savedQueryName}"?',
-            values: {
-              savedQueryName: savedQuery.attributes.title,
-            },
-          })}
+          title={i18n.translate(
+            'unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
+            {
+              defaultMessage: 'Delete "{savedQueryName}"?',
+              values: {
+                savedQueryName: savedQuery.attributes.title,
+              },
+            }
+          )}
           confirmButtonText={i18n.translate(
-            'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
+            'unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
             {
               defaultMessage: 'Delete',
             }
           )}
           cancelButtonText={i18n.translate(
-            'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
+            'unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
             {
               defaultMessage: 'Cancel',
             }

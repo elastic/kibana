@@ -13,6 +13,7 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '../../../../../../../src/core/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
 import { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
@@ -37,6 +38,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
     data: dataPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     actionTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),

@@ -123,21 +123,21 @@ export function SavedQueryManagementComponent({
   );
 
   const savedQueryDescriptionText = i18n.translate(
-    'data.search.searchBar.savedQueryDescriptionText',
+    'unifiedSearch.search.searchBar.savedQueryDescriptionText',
     {
       defaultMessage: 'Save query text and filters that you want to use again.',
     }
   );
 
   const noSavedQueriesDescriptionText =
-    i18n.translate('data.search.searchBar.savedQueryNoSavedQueriesText', {
+    i18n.translate('unifiedSearch.search.searchBar.savedQueryNoSavedQueriesText', {
       defaultMessage: 'There are no saved queries.',
     }) +
     ' ' +
     savedQueryDescriptionText;
 
   const savedQueryPopoverTitleText = i18n.translate(
-    'data.search.searchBar.savedQueryPopoverTitleText',
+    'unifiedSearch.search.searchBar.savedQueryPopoverTitleText',
     {
       defaultMessage: 'Saved Queries',
     }
@@ -150,10 +150,10 @@ export function SavedQueryManagementComponent({
   const savedQueryPopoverButton = (
     <EuiButtonEmpty
       onClick={handleTogglePopover}
-      aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
+      aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverButtonText', {
         defaultMessage: 'See saved queries',
       })}
-      title={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
+      title={i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverButtonText', {
         defaultMessage: 'See saved queries',
       })}
       data-test-subj="saved-query-management-popover-button"
@@ -250,7 +250,7 @@ export function SavedQueryManagementComponent({
                       fill
                       onClick={handleSave}
                       aria-label={i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
+                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
                         {
                           defaultMessage: 'Save changes to {title}',
                           values: { title: loadedSavedQuery.attributes.title },
@@ -259,7 +259,7 @@ export function SavedQueryManagementComponent({
                       data-test-subj="saved-query-management-save-changes-button"
                     >
                       {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
+                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText',
                         {
                           defaultMessage: 'Save changes',
                         }
@@ -271,7 +271,7 @@ export function SavedQueryManagementComponent({
                       size="s"
                       onClick={handleSaveAsNew}
                       aria-label={i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
+                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
                         {
                           defaultMessage: 'Save as new saved query',
                         }
@@ -279,7 +279,7 @@ export function SavedQueryManagementComponent({
                       data-test-subj="saved-query-management-save-as-new-button"
                     >
                       {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
+                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
                         {
                           defaultMessage: 'Save as new',
                         }
@@ -295,14 +295,17 @@ export function SavedQueryManagementComponent({
                     fill
                     onClick={handleSave}
                     aria-label={i18n.translate(
-                      'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
+                      'unifiedSearch.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
                       { defaultMessage: 'Save a new saved query' }
                     )}
                     data-test-subj="saved-query-management-save-button"
                   >
-                    {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                      defaultMessage: 'Save current query',
-                    })}
+                    {i18n.translate(
+                      'unifiedSearch.search.searchBar.savedQueryPopoverSaveButtonText',
+                      {
+                        defaultMessage: 'Save current query',
+                      }
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
               )}

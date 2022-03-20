@@ -79,7 +79,7 @@ interface KibanaDeps {
 }
 
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<EsQueryAlertParams>
+  RuleTypeParamsExpressionProps<EsQueryAlertParams, 'unifiedSearch'>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
   const {
     index,

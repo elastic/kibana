@@ -87,7 +87,7 @@ type Props = Omit<
     },
     AlertContextMeta
   >,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
 export const defaultExpression = {
