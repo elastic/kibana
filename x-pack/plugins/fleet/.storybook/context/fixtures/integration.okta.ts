@@ -125,6 +125,7 @@ export const item: GetInfoResponse['item'] = {
       index_template: [],
       transform: [],
       ml_model: [],
+      osquery_pack_asset: [],
     },
   },
   policy_templates: [

@@ -67,6 +67,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -179,6 +180,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -271,6 +273,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -395,6 +398,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],

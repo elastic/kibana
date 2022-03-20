@@ -253,6 +253,7 @@ export const item: GetInfoResponse['item'] = {
       map: [],
       security_rule: [],
       tag: [],
+      osquery_pack_asset: [],
     },
     elasticsearch: {
       ingest_pipeline: [
