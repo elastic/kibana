@@ -8,6 +8,7 @@
 
 import type { IndexPatternsContract, ISearchStart } from 'src/plugins/data/public';
 import type { ChartsPluginStart } from 'src/plugins/charts/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { createGetterSetter } from '../../../../kibana_utils/public';
 
 export const [getIndexPatterns, setIndexPatterns] =
@@ -16,3 +17,6 @@ export const [getIndexPatterns, setIndexPatterns] =
 export const [getDataSearch, setDataSearch] = createGetterSetter<ISearchStart>('Search');
 
 export const [getCharts, setCharts] = createGetterSetter<ChartsPluginStart>('Charts');
+
+export const [getFieldFormats, setFieldFormats] =
+  createGetterSetter<FieldFormatsStart>('FieldFormats');

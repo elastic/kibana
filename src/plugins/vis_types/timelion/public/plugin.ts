@@ -24,9 +24,15 @@ import type {
 import type { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
 
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
-import { setIndexPatterns, setDataSearch, setCharts } from './helpers/plugin_services';
+import {
+  setIndexPatterns,
+  setDataSearch,
+  setCharts,
+  setFieldFormats,
+} from './helpers/plugin_services';
 
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 import { getTimelionVisRenderer } from './timelion_vis_renderer';
@@ -53,6 +59,7 @@ export interface TimelionVisSetupDependencies {
 export interface TimelionVisStartDependencies {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /** @public */
@@ -88,10 +95,11 @@ export class TimelionVisPlugin
     visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
   }
 
-  public start(core: CoreStart, { data, charts }: TimelionVisStartDependencies) {
+  public start(core: CoreStart, { data, charts, fieldFormats }: TimelionVisStartDependencies) {
     setIndexPatterns(data.indexPatterns);
     setDataSearch(data.search);
     setCharts(charts);
+    setFieldFormats(fieldFormats);
 
     return {
       getArgValueSuggestions,
