@@ -107,7 +107,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
       expect(JSON.parse(taskRecord.task.params)).to.eql({
         alertId: response.body.id,
         spaceId: 'default',
-        consumer: 'alerts',
+        consumer: 'alertsFixture',
       });
     });
   });
