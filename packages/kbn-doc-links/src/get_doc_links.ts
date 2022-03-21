@@ -603,5 +603,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     endpoints: {
       troubleshooting: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/ts-management.html#ts-endpoints`,
     },
+    legal: {
+      privacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
+    },
   });
 };

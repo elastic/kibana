@@ -31,6 +31,7 @@ import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alert
 import { SectionContainer } from '../../components/app/section';
 import { ObservabilityAppServices } from '../../application/types';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { paths } from '../../config';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -55,7 +56,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const indexNames = useAlertIndexNames();
   const { cases, docLinks, http } = useKibana<ObservabilityAppServices>().services;
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, config } = usePluginContext();
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, refreshInterval, refreshPaused } =
     useDatePickerContext();
@@ -97,6 +98,10 @@ export function OverviewPage({ routeParams }: Props) {
     docsLink: docLinks.links.observability.guide,
   });
 
+  const alertsLink = config.unsafe.alertingExperience.enabled
+    ? paths.observability.alerts
+    : paths.management.rules;
+
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
@@ -127,6 +132,12 @@ export function OverviewPage({ routeParams }: Props) {
                   defaultMessage: 'Alerts',
                 })}
                 hasError={false}
+                appLink={{
+                  href: alertsLink,
+                  label: i18n.translate('xpack.observability.overview.alerts.appLink', {
+                    defaultMessage: 'Show alerts',
+                  }),
+                }}
                 showExperimentalBadge={true}
               >
                 <CasesContext

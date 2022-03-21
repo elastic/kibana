@@ -782,7 +782,8 @@ export class DataRecognizer {
       })
     );
     if (applyToAllSpaces === true) {
-      const canCreateGlobalJobs = await this._jobSavedObjectService.canCreateGlobalJobs(
+      const canCreateGlobalJobs = await this._jobSavedObjectService.canCreateGlobalMlSavedObjects(
+        'anomaly-detector',
         this._request
       );
       if (canCreateGlobalJobs === true) {
