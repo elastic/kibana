@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import 'brace/theme/github';
@@ -51,13 +51,13 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   );
 
   return (
-    <Fragment>
+    <>
       {hasExpressionErrors && (
-        <Fragment>
+        <>
           <EuiSpacer />
           <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
           <EuiSpacer />
-        </Fragment>
+        </>
       )}
 
       {isSearchSource ? (
@@ -65,6 +65,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       ) : (
         <EsQueryExpression {...props} ruleParams={ruleParams} />
       )}
-    </Fragment>
+    </>
   );
 };

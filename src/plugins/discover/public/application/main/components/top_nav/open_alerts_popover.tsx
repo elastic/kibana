@@ -28,14 +28,11 @@ interface AlertsPopoverProps {
   searchSource: ISearchSource;
 }
 
-export function AlertsPopover(props: AlertsPopoverProps) {
-  const dataView = props.searchSource.getField('index')!;
-  const searchSource = props.searchSource;
+export function AlertsPopover({ searchSource, anchorElement, onClose }: AlertsPopoverProps) {
+  const dataView = searchSource.getField('index')!;
   const services = useDiscoverServices();
   const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
-
-  const onCloseAlertFlyout = useCallback(() => props.onClose(), [props]);
 
   /**
    * Provides the default parameters used to initialize the new rule
@@ -61,14 +58,14 @@ export function AlertsPopover(props: AlertsPopoverProps) {
     }
     return triggersActionsUi?.getAddAlertFlyout({
       consumer: 'discover',
-      onClose: onCloseAlertFlyout,
+      onClose,
       canChangeTrigger: false,
       ruleTypeId: ALERT_TYPE_ID,
       initialValues: {
         params: getParams(),
       },
     });
-  }, [getParams, onCloseAlertFlyout, triggersActionsUi, alertFlyoutVisible]);
+  }, [getParams, onClose, triggersActionsUi, alertFlyoutVisible]);
 
   const hasTimeFieldName = dataView.timeFieldName;
   let createSearchThresholdRuleLink = (
@@ -134,8 +131,8 @@ export function AlertsPopover(props: AlertsPopoverProps) {
       {SearchThresholdAlertFlyout}
       <EuiWrappingPopover
         ownFocus
-        button={props.anchorElement}
-        closePopover={props.onClose}
+        button={anchorElement}
+        closePopover={onClose}
         isOpen={!alertFlyoutVisible}
       >
         <EuiContextMenu initialPanelId="mainPanel" panels={panels} />
@@ -144,7 +141,7 @@ export function AlertsPopover(props: AlertsPopoverProps) {
   );
 }
 
-function onClose() {
+function closeAlertsPopover() {
   ReactDOM.unmountComponentAtNode(container);
   document.body.removeChild(container);
   isOpen = false;
@@ -162,7 +159,7 @@ export function openAlertsPopover({
   services: DiscoverServices;
 }) {
   if (isOpen) {
-    onClose();
+    closeAlertsPopover();
     return;
   }
 
@@ -173,7 +170,7 @@ export function openAlertsPopover({
     <I18nContext>
       <KibanaContextProvider services={services}>
         <AlertsPopover
-          onClose={onClose}
+          onClose={closeAlertsPopover}
           anchorElement={anchorElement}
           searchSource={searchSource}
         />

@@ -106,7 +106,7 @@ export const SearchSourceExpression = ({
   const filters = (usedSearchSource.getField('filter') as Filter[]).filter(
     ({ meta }) => !meta.disabled
   );
-  const indexPatterns = [dataView];
+  const dataViews = [dataView];
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -148,7 +148,7 @@ export const SearchSourceExpression = ({
           className="dscExpressionParam searchSourceAlertFilters"
           title={'sas'}
           description={'Filter'}
-          value={<ReadOnlyFilterItems filters={filters} indexPatterns={indexPatterns} />}
+          value={<ReadOnlyFilterItems filters={filters} indexPatterns={dataViews} />}
           display="columns"
         />
       )}
@@ -214,7 +214,6 @@ export const SearchSourceExpression = ({
           setParam('size', updatedValue);
         }}
       />
-
       <EuiSpacer size="s" />
     </Fragment>
   );

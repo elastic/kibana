@@ -23,6 +23,8 @@ interface ReadOnlyFilterItemsProps {
   indexPatterns: IIndexPattern[];
 }
 
+const noOp = () => {};
+
 export const ReadOnlyFilterItems = ({ filters, indexPatterns }: ReadOnlyFilterItemsProps) => {
   const { uiSettings } = useKibana().services;
 
@@ -34,8 +36,8 @@ export const ReadOnlyFilterItems = ({ filters, indexPatterns }: ReadOnlyFilterIt
           key={`${filter.meta.key}${filterValue}`}
           id={`${index}`}
           filter={filter}
-          onUpdate={() => {}}
-          onRemove={() => {}}
+          onUpdate={noOp}
+          onRemove={noOp}
           indexPatterns={indexPatterns}
           uiSettings={uiSettings!}
           readonly
