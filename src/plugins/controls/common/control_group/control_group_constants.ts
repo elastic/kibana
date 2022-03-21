@@ -16,7 +16,7 @@ export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => 
   panels: {},
   defaultControlWidth: DEFAULT_CONTROL_WIDTH,
   controlStyle: DEFAULT_CONTROL_STYLE,
-  chainingSytem: 'HIERARCHICAL',
+  chainingSystem: 'HIERARCHICAL',
   ignoreParentSettings: {
     ignoreFilters: false,
     ignoreQuery: false,

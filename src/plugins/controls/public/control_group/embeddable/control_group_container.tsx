@@ -140,7 +140,7 @@ export class ControlGroupContainer extends Container<
       { embeddableLoaded: {} },
       pluginServices.getServices().controls.getControlFactory,
       parent,
-      ControlGroupChainingSystems[initialInput.chainingSytem]?.getContainerSettings(initialInput)
+      ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)
     );
 
     this.recalculateFilters$ = new Subject();
@@ -289,9 +289,9 @@ export class ControlGroupContainer extends Container<
   }
 
   protected getInheritedInput(id: string): ControlInput {
-    const { filters, query, ignoreParentSettings, timeRange, chainingSytem } = this.getInput();
+    const { filters, query, ignoreParentSettings, timeRange, chainingSystem } = this.getInput();
 
-    const precedingFilters = ControlGroupChainingSystems[chainingSytem].getPrecedingFilters({
+    const precedingFilters = ControlGroupChainingSystems[chainingSystem].getPrecedingFilters({
       id,
       childOrder: this.childOrderCache,
       getChild: (getChildId: string) => this.getChild<ControlEmbeddable>(getChildId),

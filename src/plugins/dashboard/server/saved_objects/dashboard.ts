@@ -55,7 +55,7 @@ export const createDashboardSavedObjectType = ({
       controlGroupInput: {
         properties: {
           controlStyle: { type: 'keyword', index: false, doc_values: false },
-          chainingSytem: { type: 'keyword', index: false, doc_values: false },
+          chainingSystem: { type: 'keyword', index: false, doc_values: false },
           panelsJSON: { type: 'text', index: false },
           ignoreParentSettingsJSON: { type: 'text', index: false },
         },

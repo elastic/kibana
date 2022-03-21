@@ -133,7 +133,7 @@ export const ControlGroupEditor = ({
           <h2>{ControlGroupStrings.management.getFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="control-group-settings-flyout">
         <EuiForm>
           <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
             <EuiButtonGroup
@@ -271,10 +271,10 @@ export const ControlGroupEditor = ({
               <EuiSwitch
                 label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
                 showLabel={false}
-                checked={controlGroupEditorState.chainingSytem === 'HIERARCHICAL'}
+                checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
                 onChange={(e) =>
                   updateControlGroupEditorSetting({
-                    chainingSytem: e.target.checked ? 'HIERARCHICAL' : 'NONE',
+                    chainingSystem: e.target.checked ? 'HIERARCHICAL' : 'NONE',
                   })
                 }
               />

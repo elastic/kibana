@@ -14,10 +14,10 @@ export const getDefaultDashboardControlGroupInput = getDefaultControlGroupInput;
 
 export const controlGroupInputToRawAttributes = (
   controlGroupInput: Omit<ControlGroupInput, 'id'>
-): Omit<RawControlGroupAttributes, 'id'> => {
+): Omit<RawControlGroupAttributes, 'id' | 'type'> => {
   return {
     controlStyle: controlGroupInput.controlStyle,
-    chainingSytem: controlGroupInput.chainingSytem,
+    chainingSystem: controlGroupInput.chainingSystem,
     panelsJSON: JSON.stringify(controlGroupInput.panels),
     ignoreParentSettingsJSON: JSON.stringify(controlGroupInput.ignoreParentSettings),
   };
@@ -27,20 +27,23 @@ export const rawAttributesToControlGroupInput = (
   rawControlGroupAttributes: Omit<RawControlGroupAttributes, 'id'>
 ): Omit<ControlGroupInput, 'id'> | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
+  const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =
+    rawControlGroupAttributes;
+  const panels =
+    panelsJSON && typeof rawControlGroupAttributes?.panelsJSON === 'string'
+      ? JSON.parse(rawControlGroupAttributes?.panelsJSON)
+      : undefined;
+  const ignoreParentSettings =
+    ignoreParentSettingsJSON &&
+    typeof rawControlGroupAttributes?.ignoreParentSettingsJSON === 'string'
+      ? JSON.parse(rawControlGroupAttributes?.ignoreParentSettingsJSON)
+      : undefined;
   return {
     ...defaultControlGroupInput,
-    chainingSytem: rawControlGroupAttributes?.chainingSytem,
-    controlStyle: rawControlGroupAttributes?.controlStyle ?? defaultControlGroupInput.controlStyle,
-    ignoreParentSettings:
-      rawControlGroupAttributes?.ignoreParentSettingsJSON &&
-      typeof rawControlGroupAttributes?.ignoreParentSettingsJSON === 'string'
-        ? JSON.parse(rawControlGroupAttributes?.ignoreParentSettingsJSON)
-        : undefined,
-    panels:
-      rawControlGroupAttributes?.panelsJSON &&
-      typeof rawControlGroupAttributes?.panelsJSON === 'string'
-        ? JSON.parse(rawControlGroupAttributes?.panelsJSON)
-        : {},
+    ...(chainingSystem ? { chainingSystem } : {}),
+    ...(controlStyle ? { controlStyle } : {}),
+    ...(ignoreParentSettings ? { ignoreParentSettings } : {}),
+    ...(panels ? { panels } : {}),
   };
 };
 
@@ -49,7 +52,7 @@ export const rawAttributesToSerializable = (
 ): SerializableRecord => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
   return {
-    chainingSystem: rawControlGroupAttributes?.chainingSytem,
+    chainingSystem: rawControlGroupAttributes?.chainingSystem,
     controlStyle: rawControlGroupAttributes?.controlStyle ?? defaultControlGroupInput.controlStyle,
     parentIgnoreSettings:
       rawControlGroupAttributes?.ignoreParentSettingsJSON &&
@@ -66,10 +69,10 @@ export const rawAttributesToSerializable = (
 
 export const serializableToRawAttributes = (
   serializable: SerializableRecord
-): Omit<RawControlGroupAttributes, 'id'> => {
+): Omit<RawControlGroupAttributes, 'id' | 'type'> => {
   return {
     controlStyle: serializable.controlStyle as RawControlGroupAttributes['controlStyle'],
-    chainingSytem: serializable.chainingSystem as RawControlGroupAttributes['chainingSytem'],
+    chainingSystem: serializable.chainingSystem as RawControlGroupAttributes['chainingSystem'],
     ignoreParentSettingsJSON: JSON.stringify(serializable.ignoreParentSettings),
     panelsJSON: JSON.stringify(serializable.panels),
   };

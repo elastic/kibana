@@ -54,7 +54,7 @@ export const syncDashboardControlGroup = async ({
   const controlGroupDiff: DiffChecks = {
     panels: deepEqual,
     controlStyle: deepEqual,
-    chainingSytem: deepEqual,
+    chainingSystem: deepEqual,
     ignoreParentSettings: deepEqual,
   };
 
@@ -67,11 +67,11 @@ export const syncDashboardControlGroup = async ({
         )
       )
       .subscribe(() => {
-        const { panels, controlStyle, chainingSytem, ignoreParentSettings } =
+        const { panels, controlStyle, chainingSystem, ignoreParentSettings } =
           controlGroup.getInput();
         if (!isControlGroupInputEqual()) {
           dashboardContainer.updateInput({
-            controlGroupInput: { panels, controlStyle, chainingSytem, ignoreParentSettings },
+            controlGroupInput: { panels, controlStyle, chainingSystem, ignoreParentSettings },
           });
         }
       })
@@ -159,11 +159,11 @@ export const controlGroupInputIsEqual = (
   const defaultInput = getDefaultDashboardControlGroupInput();
   const inputA = {
     ...defaultInput,
-    ...pick(a, ['panels', 'chainingSytem', 'controlStyle', 'ignoreParentSettings']),
+    ...pick(a, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
   };
   const inputB = {
     ...defaultInput,
-    ...pick(b, ['panels', 'chainingSytem', 'controlStyle', 'ignoreParentSettings']),
+    ...pick(b, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
   };
   if (deepEqual(inputA, inputB)) return true;
   return false;
