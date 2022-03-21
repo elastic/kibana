@@ -20,7 +20,8 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
@@ -120,6 +121,33 @@ export function ProcessTreeNode({
   };
 
   const processDetails = process.getDetails();
+  const hasExec = process.hasExec();
+
+  const processIcon = useMemo(() => {
+    if (!process.parent) {
+      return 'unlink';
+    } else if (hasExec) {
+      return 'console';
+    } else {
+      return 'branch';
+    }
+  }, [hasExec, process.parent]);
+
+  const iconTooltip = useMemo(() => {
+    if (!process.parent) {
+      return i18n.translate('xpack.sessionView.processNode.tooltipOrphan', {
+        defaultMessage: 'Process missing parent (orphan)',
+      });
+    } else if (hasExec) {
+      return i18n.translate('xpack.sessionView.processNode.tooltipExec', {
+        defaultMessage: "Process exec'd",
+      });
+    } else {
+      return i18n.translate('xpack.sessionView.processNode.tooltipFork', {
+        defaultMessage: 'Process forked (no exec)',
+      });
+    }
+  }, [hasExec, process.parent]);
 
   if (!processDetails?.process) {
     return null;
@@ -144,11 +172,9 @@ export function ProcessTreeNode({
   const showUserEscalation = user.id !== parent.user.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'consoleApp' : 'compute';
-  const hasExec = process.hasExec();
   const iconTestSubj = hasExec
     ? 'sessionView:processTreeNodeExecIcon'
     : 'sessionView:processTreeNodeForkIcon';
-  const processIcon = hasExec ? 'console' : 'branch';
 
   return (
     <div>
@@ -178,7 +204,9 @@ export function ProcessTreeNode({
             </>
           ) : (
             <span>
-              <EuiIcon data-test-subj={iconTestSubj} type={processIcon} />
+              <EuiToolTip position="top" content={iconTooltip}>
+                <EuiIcon data-test-subj={iconTestSubj} type={processIcon} />
+              </EuiToolTip>{' '}
               <span ref={textRef}>
                 <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
                 <span css={styles.darkText}>{args[0]}</span>&nbsp;

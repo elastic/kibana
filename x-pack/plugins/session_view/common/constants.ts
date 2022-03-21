@@ -9,7 +9,6 @@ export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events_route
 export const ALERTS_ROUTE = '/internal/session_view/alerts_route';
 export const SESSION_ENTRY_LEADERS_ROUTE = '/internal/session_view/session_entry_leaders_route';
 export const PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-default';
-export const ALERTS_INDEX = '.siem-signals-default';
 export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
 
 // We fetch a large number of events per page to mitigate a few design caveats in session viewer
