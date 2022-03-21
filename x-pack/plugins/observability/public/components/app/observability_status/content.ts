@@ -31,7 +31,7 @@ export const getContent = (
       }),
       description: i18n.translate('xpack.observability.statusVisualization.logs.description', {
         defaultMessage:
-          'Fast, easy, and scalable, centralized log monitoring with out-of-the-box support for common data sources.',
+          'Fast, easy, and scalable centralized log monitoring with out-of-the-box support for common data sources.',
       }),
       addTitle: i18n.translate('xpack.observability.statusVisualization.logs.link', {
         defaultMessage: 'Add integrations',
