@@ -294,6 +294,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       actions: [
         {
@@ -403,6 +404,7 @@ describe('create()', () => {
           "error": null,
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
+          "warning": null,
         },
         "legacyId": null,
         "meta": Object {
@@ -426,6 +428,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
+        "snoozeEndTime": null,
         "tags": Array [
           "foo",
         ],
@@ -496,6 +499,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       actions: [
         {
@@ -555,6 +559,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       actions: [
         {
@@ -604,6 +609,7 @@ describe('create()', () => {
           "error": null,
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
+          "warning": null,
         },
         "legacyId": "123",
         "meta": Object {
@@ -627,6 +633,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
+        "snoozeEndTime": null,
         "tags": Array [
           "foo",
         ],
@@ -1030,10 +1037,12 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
+          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1156,6 +1165,11 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
+      config: {
+        execution: {
+          actions: { max: 1000 },
+        },
+      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1227,10 +1241,12 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
+          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1322,6 +1338,11 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
+      config: {
+        execution: {
+          actions: { max: 1000 },
+        },
+      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1393,10 +1414,12 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
+          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1505,6 +1528,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       notifyWhen: 'onActionGroupChange',
       actions: [
@@ -1561,12 +1585,14 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -1634,6 +1660,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       notifyWhen: 'onThrottleInterval',
       actions: [
@@ -1690,12 +1717,14 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onThrottleInterval',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -1763,6 +1792,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       notifyWhen: 'onActiveAlert',
       actions: [
@@ -1819,12 +1849,14 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -1901,6 +1933,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       actions: [
         {
@@ -1964,11 +1997,13 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         executionStatus: {
           status: 'pending',
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
+          warning: null,
         },
         monitoring: {
           execution: {
@@ -2062,6 +2097,11 @@ describe('create()', () => {
       isExportable: true,
       async executor() {},
       producer: 'alerts',
+      config: {
+        execution: {
+          actions: { max: 1000 },
+        },
+      },
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -2332,12 +2372,14 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -2432,12 +2474,14 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
         monitoring: getDefaultRuleMonitoring(),
       },
@@ -2516,6 +2560,11 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
+      },
+      config: {
+        execution: {
+          actions: { max: 1000 },
+        },
       },
     }));
 

@@ -18,6 +18,7 @@ import type {
   JobType,
   TrainedModelType,
   SavedObjectResult,
+  MlSavedObjectType,
 } from '../../common/types/saved_objects';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
@@ -46,9 +47,9 @@ export interface TrainedModelJob {
 
 type TrainedModelObjectFilter = { [k in keyof TrainedModelObject]?: string };
 
-export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
+export type MLSavedObjectService = ReturnType<typeof mlSavedObjectServiceFactory>;
 
-export function jobSavedObjectServiceFactory(
+export function mlSavedObjectServiceFactory(
   savedObjectsClient: SavedObjectsClientContract,
   internalSavedObjectsClient: SavedObjectsClientContract,
   spacesEnabled: boolean,
@@ -397,7 +398,7 @@ export function jobSavedObjectServiceFactory(
   }
 
   async function canCreateGlobalMlSavedObjects(
-    jobType: JobType | TrainedModelType,
+    mlSavedObjectType: MlSavedObjectType,
     request: KibanaRequest
   ) {
     if (authorization === undefined) {
@@ -407,7 +408,9 @@ export function jobSavedObjectServiceFactory(
     const { canCreateJobsGlobally, canCreateTrainedModelsGlobally } = await authorizationCheck(
       request
     );
-    return jobType === 'trained-model' ? canCreateTrainedModelsGlobally : canCreateJobsGlobally;
+    return mlSavedObjectType === 'trained-model'
+      ? canCreateTrainedModelsGlobally
+      : canCreateJobsGlobally;
   }
 
   async function getTrainedModelObject(

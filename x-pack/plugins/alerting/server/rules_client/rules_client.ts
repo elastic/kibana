@@ -84,6 +84,13 @@ import {
   getModifiedSearch,
   modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
+import {
+  formatExecutionLogResult,
+  getExecutionLogAggregation,
+  IExecutionLogResult,
+} from '../lib/get_execution_log_aggregation';
+import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { RuleMutedError } from '../lib/errors/rule_muted';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -144,6 +151,10 @@ export interface MuteOptions extends IndexType {
   alertInstanceId: string;
 }
 
+export interface SnoozeOptions extends IndexType {
+  snoozeEndTime: string | -1;
+}
+
 export interface FindOptions extends IndexType {
   perPage?: number;
   page?: number;
@@ -202,6 +213,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
+    | 'snoozeEndTime'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -226,6 +238,16 @@ export interface GetAlertSummaryParams {
   id: string;
   dateStart?: string;
   numberOfExecutions?: number;
+}
+
+export interface GetExecutionLogByIdParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -260,6 +282,7 @@ export class RulesClient {
   private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
     'monitoring',
     'mapped_params',
+    'snoozeEndTime',
   ];
 
   constructor({
@@ -372,6 +395,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
+      snoozeEndTime: null,
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -628,6 +652,70 @@ export class RulesClient {
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
+  }
+
+  public async getExecutionLogForRule({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetExecutionLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_EXECUTION_LOG,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_EXECUTION_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
+      'alert',
+      [id],
+      {
+        start: parsedDateStart.toISOString(),
+        end: parsedDateEnd.toISOString(),
+        filter,
+        aggs: getExecutionLogAggregation({
+          page,
+          perPage,
+          sort,
+        }),
+      },
+      rule.legacyId !== null ? [rule.legacyId] : undefined
+    );
+
+    return formatExecutionLogResult(results);
   }
 
   public async find<Params extends RuleTypeParams = never>({
@@ -1305,6 +1393,7 @@ export class RulesClient {
           lastDuration: 0,
           lastExecutionDate: new Date().toISOString(),
           error: null,
+          warning: null,
         },
       });
       try {
@@ -1476,6 +1565,85 @@ export class RulesClient {
     }
   }
 
+  public async snooze({
+    id,
+    snoozeEndTime,
+  }: {
+    id: string;
+    snoozeEndTime: string | -1;
+  }): Promise<void> {
+    if (typeof snoozeEndTime === 'string') {
+      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
+      if (snoozeDateValidationMsg) {
+        throw new RuleMutedError(snoozeDateValidationMsg);
+      }
+    }
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.snooze('${id}', ${snoozeEndTime})`,
+      async () => await this.snoozeWithOCC({ id, snoozeEndTime })
+    );
+  }
+
+  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: WriteOperations.Snooze,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.SNOOZE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.SNOOZE,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    // If snoozeEndTime is -1, instead mute all
+    const newAttrs =
+      snoozeEndTime === -1
+        ? { muteAll: true, snoozeEndTime: null }
+        : { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false };
+
+    const updateAttributes = this.updateMeta({
+      ...newAttrs,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    );
+  }
+
   public async muteAll({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
@@ -1525,6 +1693,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1587,6 +1756,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
