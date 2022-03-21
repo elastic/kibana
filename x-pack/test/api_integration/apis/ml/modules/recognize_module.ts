@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         moduleIds: [
           'security_auth',
           'security_network',
-          'security_windows_v3',
+          'security_windows_v3,',
         ],
       },
     },
