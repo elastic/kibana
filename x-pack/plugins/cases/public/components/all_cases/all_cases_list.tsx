@@ -99,7 +99,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
-    const { connectors } = useConnectors({ toastPermissionsErrors: false });
+    const { connectors } = useConnectors();
 
     const sorting = useMemo(
       () => ({
