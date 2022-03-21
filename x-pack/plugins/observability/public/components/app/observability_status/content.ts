@@ -124,7 +124,7 @@ export const getContent = (
       }),
       description: i18n.translate('xpack.observability.statusVisualization.alert.description', {
         defaultMessage:
-          'Detect complex conditions within Observability and trigger actions when those conditions are met.',
+          'Detect complex conditions in Observability and trigger actions when those conditions are met.',
       }),
       addTitle: i18n.translate('xpack.observability.statusVisualization.alert.link', {
         defaultMessage: 'Create rules',
