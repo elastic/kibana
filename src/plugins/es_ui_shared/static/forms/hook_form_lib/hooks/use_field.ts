@@ -85,7 +85,6 @@ export const useField = <T, FormType = FormData, I = T>(
   const isMounted = useRef<boolean>(false);
   const validateCounter = useRef(0);
   const changeCounter = useRef(0);
-  const hasBeenReset = useRef<boolean>(false);
   const inflightValidation = useRef<ValidationCancelablePromise | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   // Keep a ref of the last state (value and errors) notified to the consumer so they don't get
