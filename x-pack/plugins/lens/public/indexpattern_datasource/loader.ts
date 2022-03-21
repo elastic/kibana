@@ -7,7 +7,6 @@
 
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { DataView } from 'src/plugins/data_views/public';
 import type { HttpSetup, SavedObjectReference } from 'kibana/public';
 import type {
   DatasourceDataPanelProps,
@@ -26,11 +25,8 @@ import {
 import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
-import {
-  IndexPatternsContract,
-  IndexPattern as IndexPatternInstance,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../src/plugins/data/public';
+import type { DataViewsContract, DataView } from '../../../../../src/plugins/data_views/public';
+import { isNestedField } from '../../../../../src/plugins/data_views/common';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
@@ -38,15 +34,12 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
 type SetState = DatasourceDataPanelProps<IndexPatternPrivateState>['setState'];
-type IndexPatternsService = Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+type IndexPatternsService = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
 type ErrorHandler = (err: Error) => void;
 
 export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPattern {
   const newFields = dataView.fields
-    .filter(
-      (field) =>
-        !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
-    )
+    .filter((field) => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
     .map((field): IndexPatternField => {
       // Convert the getters on the index pattern service into plain JSON
       const base = {
@@ -135,8 +128,7 @@ export async function loadIndexPatterns({
   // ignore rejected indexpatterns here, they're already handled at the app level
   let indexPatterns = allIndexPatterns
     .filter(
-      (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
-        response.status === 'fulfilled'
+      (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
     )
     .map((response) => response.value);
 

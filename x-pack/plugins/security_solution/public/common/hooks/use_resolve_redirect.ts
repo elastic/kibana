@@ -59,7 +59,7 @@ export const useResolveRedirect = () => {
     }
 
     // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-    const newObjectId = resolveTimelineConfig?.alias_target_id ?? ''; // This is always defined if outcome === 'aliasMatch'
+    const newObjectId = resolveTimelineConfig.alias_target_id ?? ''; // This is always defined if outcome === 'aliasMatch'
     const newTimelineSearch = {
       ...timelineSearch,
       id: newObjectId,
@@ -67,7 +67,11 @@ export const useResolveRedirect = () => {
     const newTimelineRison = encodeRisonUrlState(newTimelineSearch);
     searchQuery.set(CONSTANTS.timeline, newTimelineRison);
     const newPath = `${pathname}?${searchQuery.toString()}`;
-    spaces.ui.redirectLegacyUrl(newPath, CONSTANTS.timeline);
+    spaces.ui.redirectLegacyUrl({
+      path: newPath,
+      aliasPurpose: resolveTimelineConfig.alias_purpose,
+      objectNoun: CONSTANTS.timeline,
+    });
     // Prevent the effect from being called again as the url change takes place in location rather than a true redirect
     updateHasRedirected(true);
   }, [
@@ -75,8 +79,7 @@ export const useResolveRedirect = () => {
     graphEventId,
     hasRedirected,
     pathname,
-    resolveTimelineConfig?.outcome,
-    resolveTimelineConfig?.alias_target_id,
+    resolveTimelineConfig,
     savedObjectId,
     search,
     show,

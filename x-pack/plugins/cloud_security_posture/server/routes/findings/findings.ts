@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
+import type { IRouter, Logger } from 'src/core/server';
 import { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -50,18 +52,48 @@ const getFindingsEsQuery = (
   };
 };
 
-const buildQueryRequest = (latestCycleIds?: string[]): QueryDslQueryContainer => {
-  let filterPart: QueryDslQueryContainer = { match_all: {} };
+const buildLatestCycleFilter = (
+  filter: QueryDslQueryContainer[],
+  latestCycleIds?: string[]
+): QueryDslQueryContainer[] => {
   if (!!latestCycleIds) {
-    const filter = latestCycleIds.map((latestCycleId) => ({
-      term: { 'run_id.keyword': latestCycleId },
-    }));
-    filterPart = { bool: { filter } };
+    filter.push({
+      terms: { 'cycle_id.keyword': latestCycleIds },
+    });
   }
+  return filter;
+};
 
-  return {
-    ...filterPart,
+const convertKqueryToElasticsearchQuery = (
+  kquery: string | undefined,
+  logger: Logger
+): QueryDslQueryContainer[] => {
+  let dslFilterQuery: QueryDslBoolQuery['filter'];
+  try {
+    dslFilterQuery = kquery ? toElasticsearchQuery(fromKueryExpression(kquery)) : [];
+    if (!Array.isArray(dslFilterQuery)) {
+      dslFilterQuery = [dslFilterQuery];
+    }
+  } catch (err) {
+    logger.warn(`Invalid kuery syntax for the filter (${kquery}) error: ${err.message}`);
+    throw err;
+  }
+  return dslFilterQuery;
+};
+
+const buildQueryRequest = (
+  kquery: string | undefined,
+  latestCycleIds: string[] | undefined,
+  logger: Logger
+): QueryDslQueryContainer => {
+  const kqueryFilter = convertKqueryToElasticsearchQuery(kquery, logger);
+  const filter = buildLatestCycleFilter(kqueryFilter, latestCycleIds);
+  const query = {
+    bool: {
+      filter,
+    },
   };
+  return query;
 };
 
 const buildOptionsRequest = (queryParams: FindingsQuerySchema): FindingsOptions => ({
@@ -87,15 +119,20 @@ export const defineFindingsIndexRoute = (router: IRouter, cspContext: CspAppCont
             ? await getLatestCycleIds(esClient, cspContext.logger)
             : undefined;
 
-        const query = buildQueryRequest(latestCycleIds);
+        if (request.query.latest_cycle === true && latestCycleIds === undefined) {
+          return response.ok({ body: [] });
+        }
+
+        const query = buildQueryRequest(request.query.kquery, latestCycleIds, cspContext.logger);
         const esQuery = getFindingsEsQuery(query, options);
 
-        const findings = await esClient.search(esQuery, { meta: true });
-        const hits = findings.body.hits.hits;
+        const findings = await esClient.search(esQuery);
+        const hits = findings.hits.hits;
 
         return response.ok({ body: hits });
       } catch (err) {
         const error = transformError(err);
+        cspContext.logger.error(`Failed to fetch Findings ${error.message}`);
         return response.customError({
           body: { message: error.message },
           statusCode: error.statusCode,
@@ -129,4 +166,8 @@ export const findingsInputSchema = rt.object({
    * The fields in the entity to return in the response
    */
   fields: rt.maybe(rt.string()),
+  /**
+   * kql query
+   */
+  kquery: rt.maybe(rt.string()),
 });
