@@ -75,6 +75,7 @@ export function registerErrorCountAlertType({
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
           apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
@@ -168,6 +169,7 @@ export function registerErrorCountAlertType({
                 triggerValue: errorCount,
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
                 reason: alertReason,
+                viewInAppUrl: 'viewInAppUrl',
               });
           });
 

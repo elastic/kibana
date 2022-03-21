@@ -84,6 +84,7 @@ export function registerTransactionErrorRateAlertType({
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
           apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
@@ -235,6 +236,7 @@ export function registerTransactionErrorRateAlertType({
               triggerValue: asDecimalOrInteger(errorRate),
               interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
               reason: reasonMessage,
+              viewInAppUrl: 'viewInAppUrl',
             });
         });
 

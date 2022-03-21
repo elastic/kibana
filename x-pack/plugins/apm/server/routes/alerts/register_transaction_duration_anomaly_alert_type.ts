@@ -86,6 +86,7 @@ export function registerTransactionDurationAnomalyAlertType({
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
         ],
       },
       producer: 'apm',
@@ -246,6 +247,7 @@ export function registerTransactionDurationAnomalyAlertType({
               threshold: selectedOption?.label,
               triggerValue: severityLevel,
               reason: reasonMessage,
+              viewInAppUrl: 'viewInAppUrl',
             });
         });
 

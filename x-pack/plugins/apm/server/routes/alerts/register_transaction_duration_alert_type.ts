@@ -87,6 +87,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.triggerValue,
         apmActionVariables.interval,
         apmActionVariables.reason,
+        apmActionVariables.viewInAppUrl,
       ],
     },
     producer: APM_SERVER_FEATURE_ID,
@@ -211,6 +212,7 @@ export function registerTransactionDurationAlertType({
             triggerValue: transactionDurationFormatted,
             interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
             reason: reasonMessage,
+            viewInAppUrl: 'viewInAppUrl',
           });
       }
 
