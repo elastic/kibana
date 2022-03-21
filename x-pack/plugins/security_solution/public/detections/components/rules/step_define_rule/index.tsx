@@ -514,6 +514,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             threatIndex,
             threatMapping: formThreatMapping,
             machineLearningJobId,
+            queryBar: formQuery ?? initialState.queryBar,
           })}
           query={formQuery}
           ruleType={ruleType}

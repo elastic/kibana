@@ -13,10 +13,10 @@ import { useMlKibana } from '../../contexts/kibana';
 import { HttpService } from '../http_service';
 
 import { basePath } from './index';
-import {
+import type {
   JobType,
-  TrainedModelType,
-  CanDeleteJobResponse,
+  MlSavedObjectType,
+  CanDeleteMLSpaceAwareItemsResponse,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
   SavedObjectResult,
@@ -45,10 +45,10 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
-  removeJobFromCurrentSpace(jobType: JobType, jobIds: string[]) {
-    const body = JSON.stringify({ jobType, jobIds });
+  removeItemFromCurrentSpace(mlSavedObjectType: MlSavedObjectType, ids: string[]) {
+    const body = JSON.stringify({ mlSavedObjectType, ids });
     return httpService.http<SavedObjectResult>({
-      path: `${basePath()}/saved_objects/remove_job_from_current_space`,
+      path: `${basePath()}/saved_objects/remove_item_from_current_space`,
       method: 'POST',
       body,
     });
@@ -67,18 +67,18 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       query: { simulate },
     });
   },
-  syncCheck(jobType?: JobType | TrainedModelType) {
-    const body = JSON.stringify({ jobType });
+  syncCheck(mlSavedObjectType?: MlSavedObjectType) {
+    const body = JSON.stringify({ mlSavedObjectType });
     return httpService.http<SyncCheckResponse>({
       path: `${basePath()}/saved_objects/sync_check`,
       method: 'POST',
       body,
     });
   },
-  canDeleteJob(jobType: JobType, jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
-    return httpService.http<CanDeleteJobResponse>({
-      path: `${basePath()}/saved_objects/can_delete_job/${jobType}`,
+  canDeleteMLSpaceAwareItems(mlSavedObjectType: MlSavedObjectType, ids: string[]) {
+    const body = JSON.stringify({ ids });
+    return httpService.http<CanDeleteMLSpaceAwareItemsResponse>({
+      path: `${basePath()}/saved_objects/can_delete_ml_space_aware_item/${mlSavedObjectType}`,
       method: 'POST',
       body,
     });
