@@ -52,7 +52,7 @@ describe('Summary artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useSummaryArtifact(instance, searchableFields, options, {
+        useSummaryArtifact(instance, options, searchableFields, {
           onSuccess: onSuccessMock,
           retry: false,
         }),
@@ -84,7 +84,7 @@ describe('Summary artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useSummaryArtifact(instance, searchableFields, options, {
+        useSummaryArtifact(instance, options, searchableFields, {
           onError: onErrorMock,
           retry: false,
         }),

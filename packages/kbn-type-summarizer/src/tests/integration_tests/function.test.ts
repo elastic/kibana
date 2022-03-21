@@ -81,3 +81,44 @@ it('prints the function declaration, including comments', async () => {
     "
   `);
 });
+
+it('uses the export name when it is different', async () => {
+  const output = await run(
+    `
+      export { foo as bar } from './foo';
+    `,
+    {
+      otherFiles: {
+        ['foo.ts']: `
+          export function foo() {
+            return 'foo'
+          }
+        `,
+      },
+    }
+  );
+
+  expect(output.code).toMatchInlineSnapshot(`
+    "export function bar(): string;
+    //# sourceMappingURL=index.d.ts.map"
+  `);
+  expect(output.map).toMatchInlineSnapshot(`
+    Object {
+      "file": "index.d.ts",
+      "mappings": "gBAAgB,G",
+      "names": Array [],
+      "sourceRoot": "../../../src",
+      "sources": Array [
+        "foo.ts",
+      ],
+      "version": 3,
+    }
+  `);
+  expect(output.logs).toMatchInlineSnapshot(`
+    "debug loaded sourcemaps for [
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts',
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
+    ]
+    "
+  `);
+});
