@@ -13,6 +13,7 @@ import { IsModified } from './form_is_modified';
 import { submitForm } from './form_utils';
 
 import { Basic as UseArrayBasic } from './use_array_basic';
+import { Complex as UseArrayComplex } from './use_array_complex';
 
 export const formStories = {
   Validation,
@@ -23,6 +24,7 @@ export const formStories = {
 
 export const useArrayStories = {
   UseArrayBasic,
+  UseArrayComplex,
 };
 
 export const helpers = {

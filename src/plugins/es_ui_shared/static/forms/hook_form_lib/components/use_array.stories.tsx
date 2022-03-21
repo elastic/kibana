@@ -16,7 +16,7 @@ import { UseArray } from './use_array';
 
 import { useArrayStories, helpers } from './storybook';
 
-const { UseArrayBasic } = useArrayStories;
+const { UseArrayBasic, UseArrayComplex } = useArrayStories;
 const { submitForm } = helpers;
 
 const defaultValue = {
@@ -49,4 +49,4 @@ export default {
   ],
 } as ComponentMeta<typeof UseArray>;
 
-export { UseArrayBasic };
+export { UseArrayBasic, UseArrayComplex };
