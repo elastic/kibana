@@ -364,38 +364,123 @@ can simply change it:
 
 image::images/sharing-saved-objects-step-6.png["Sharing Saved Objects registration (shareable)"]
 
-[TIP]
-====
-You can also mark your object as
-https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectstypemanagementdefinition.md[importable and exportable]:
-
-```json
-management: { isImportableAndExportable: true },
-```
-
-If you do this, then your objects will be visible in the <<managing-saved-objects,Saved Objects Management page>>, where users can assign
-them to multiple spaces.
-====
-
 [[sharing-saved-objects-step-7]]
 ==== Step 7
 
 > *Update saved object delete API usage to handle multiple spaces*
 
-WIP
+If an object is shared to multiple spaces, it cannot be deleted without using the
+https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsdeleteoptions.md[`force`
+delete option]. Consumers should always be aware when a saved object exists in multiple spaces, and they should warn users in that case.
 
-- Change usage of saved object delete API, and notify users of affected spaces and include the `force: true` option
+If your UI allows users to delete your objects, you can define a warning message like this:
+
+```tsx
+const { namespaces, id } = savedObject;
+const warningMessage =
+  namespaces.length > 1 || namespaces.includes('*') ? (
+    <FormattedMessage
+      id="myPlugin.deleteObjectWarning"
+      defaultMessage="When you delete this object, you remove it from every space it is shared in. You can't undo this action."
+    />
+  ) : null;
+```
+
+The <<data-views,Data Views page>> in <<management>> uses a
+https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx[similar
+approach] to show a warning in its delete confirmation modal:
+
+image::images/sharing-saved-objects-step-7.png["Sharing Saved Objects deletion warning"]
 
 [[sharing-saved-objects-step-8]]
 ==== Step 8
 
-> *Update your _client-side code_ to add reusable components*
+> *Allow users to view and change assigned spaces for your objects*
 
-WIP
+Users will need a way to view what spaces your objects are currently assigned to and share them to additional spaces. You can accomplish
+this in two ways, and many consumers will want to implement both:
 
-- Spaces list
-- Share to space flyout
-- Nothing else?
+1. Allow users to access your objects in the <<managing-saved-objects,Saved Objects Management page>> in <<management>>. You can do this by
+   ensuring that your objects are marked as
+   https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectstypemanagementdefinition.md[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
++
+```ts
+name: 'my-object-type',
+management: {
+  isImportableAndExportable: true,
+},
+...
+```
+If you do this, then your objects will be visible in the <<managing-saved-objects,Saved Objects Management page>>, where users can assign
+them to multiple spaces.
+2. (Highly recommended) Add reusable components to your application, making it "space-aware". The space-related components are exported by
+   the spaces plugin, and you can use them in your own application.
++
+First, make sure your page contents are wrapped in a
+https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/spaces_context/types.ts[spaces context provider]:
++
+```tsx
+const ContextWrapper = useMemo(
+  () =>
+    spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+  [spacesApi]
+);
+
+...
+
+return (
+  <ContextWrapper feature='my-feature-id'>
+    <!-- your page contents here -->
+  </ContextWrapper>
+);
+```
++
+Second, display a https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/space_list/types.ts[list of spaces] for an
+object, and third, show a
+https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts[flyout] for the user to
+edit the object's assigned spaces. You may want to follow the example of the
+https://github.com/elastic/kibana/blob/{main}/src/plugins/data_view_management/public/components/index_pattern_table/spaces_list.tsx[data
+view management page] and combine these into a single component so that the space list can be clicked to show the flyout:
++
+```tsx
+const [showFlyout, setShowFlyout] = useState(false);
+const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [spacesApi]);
+
+const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
+  savedObjectTarget: {
+    type: myObject.type,
+    namespaces: myObject.namespaces,
+    id: myObject.id,
+    icon: 'beaker', <1>
+    title: myObject.attributes.title, <2>
+    noun: OBJECT_NOUN, <3>
+  },
+  onUpdate: () => { /* callback when object is updated */ },
+  onClose: () => {
+    setShowFlyout(false);
+  },
+};
+
+return (
+  <>
+    <LazySpaceList
+      namespaces={spaceIds}
+      displayLimit={8}
+      behaviorContext="outside-space" <4>
+      listOnClick={() => setShowFlyout(true)}
+    />
+    {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
+  </>
+);
+```
+<1> The `icon` field is optional, it specifies an https://elastic.github.io/eui/#/display/icons[EUI icon] type that will be displayed in the
+    flyout header.
+<2> The `title` field is optional, it specifies a human-readable identifier for your object that will be displayed in the flyout header.
+<3> The `noun` field is optional, it just changes "object" in the flyout to whatever you specify -- you may want the flyout to say
+    "dashboard" or "index pattern" instead!
+<4> The `behaviorContext` field is optional, it controls how the space list is displayed. When using an `"outside-space"`` behavior context,
+    the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a `"within-space"`` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
 
 [[sharing-saved-objects-faq]]
 === Frequently asked questions (FAQ)
