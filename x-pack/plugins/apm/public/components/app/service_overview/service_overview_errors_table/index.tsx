@@ -243,7 +243,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               pageSize: PAGE_SIZE,
               totalItemCount: totalItems,
               pageSizeOptions: [PAGE_SIZE],
-              hidePerPageOptions: true,
+              showPerPageOptions: false,
             }}
             loading={status === FETCH_STATUS.LOADING}
             onChange={(newTableOptions: {

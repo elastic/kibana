@@ -155,21 +155,21 @@ describe('findings API', () => {
 
       mockEsClient.search.mockResolvedValueOnce(
         // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             group: {
               buckets: [
                 {
                   group_docs: {
                     hits: {
-                      hits: [{ fields: { 'run_id.keyword': ['randomId1'] } }],
+                      hits: [{ fields: { 'cycle_id.keyword': ['randomId1'] } }],
                     },
                   },
                 },
               ],
             },
           },
-        })
+        }
       );
 
       const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -183,7 +183,7 @@ describe('findings API', () => {
       expect(handlerArgs).toMatchObject({
         query: {
           bool: {
-            filter: [{ term: { 'run_id.keyword': 'randomId1' } }],
+            filter: [{ terms: { 'cycle_id.keyword': ['randomId1'] } }],
           },
         },
       });
@@ -346,6 +346,110 @@ describe('findings API', () => {
 
       expect(handlerArgs).toMatchObject({
         _source: ['field1', 'field2', 'field3'],
+      });
+    });
+
+    it('takes dslQuery and validate the conversion to esQuery filter', async () => {
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+      const router = httpServiceMock.createRouter();
+      const cspAppContextService = new CspAppService();
+      const cspContext: CspAppContext = {
+        logger,
+        service: cspAppContextService,
+      };
+
+      defineFindingsIndexRoute(router, cspContext);
+
+      const [_, handler] = router.get.mock.calls[0];
+      const mockContext = getMockCspContext(mockEsClient);
+      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: {
+          kquery: 'result.evaluation.keyword:failed',
+        },
+      });
+
+      const [context, req, res] = [mockContext, mockRequest, mockResponse];
+
+      await handler(context, req, res);
+      const handlerArgs = mockEsClient.search.mock.calls[0][0];
+
+      expect(handlerArgs).toMatchObject({
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ match: { 'result.evaluation.keyword': 'failed' } }],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('takes dslQuery and latest_cycle filter validate the conversion to esQuery filter', async () => {
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+      const router = httpServiceMock.createRouter();
+      const cspAppContextService = new CspAppService();
+      const cspContext: CspAppContext = {
+        logger,
+        service: cspAppContextService,
+      };
+
+      defineFindingsIndexRoute(router, cspContext);
+      const [_, handler] = router.get.mock.calls[0];
+
+      const mockContext = getMockCspContext(mockEsClient);
+      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: {
+          kquery: 'result.evaluation.keyword:failed',
+          latest_cycle: true,
+        },
+      });
+
+      mockEsClient.search.mockResolvedValueOnce(
+        // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+        {
+          aggregations: {
+            group: {
+              buckets: [
+                {
+                  group_docs: {
+                    hits: {
+                      hits: [{ fields: { 'cycle_id.keyword': ['randomId1'] } }],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        }
+      );
+
+      const [context, req, res] = [mockContext, mockRequest, mockResponse];
+
+      await handler(context, req, res);
+
+      const handlerArgs = mockEsClient.search.mock.calls[1][0];
+      // console.log(handlerArgs.query.bool);
+      expect(handlerArgs).toMatchObject({
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [{ match: { 'result.evaluation.keyword': 'failed' } }],
+                  minimum_should_match: 1,
+                },
+              },
+              { terms: { 'cycle_id.keyword': ['randomId1'] } },
+            ],
+          },
+        },
       });
     });
   });

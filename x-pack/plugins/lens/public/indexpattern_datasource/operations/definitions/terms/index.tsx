@@ -21,7 +21,7 @@ import {
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
-import { updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
+import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
@@ -353,11 +353,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       existingFields,
       operationSupportMatrix,
       updateLayer,
+      dimensionGroups,
+      groupId,
+      incompleteParams,
     } = props;
     const onFieldSelectChange = useCallback(
       (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
-        const secondaryFields = fields.length > 1 ? fields.slice(1) : undefined;
+        const [sourcefield, ...secondaryFields] = fields;
         const dataTypes = uniq(fields.map((field) => indexPattern.getFieldByName(field)?.type));
         const newDataType = (dataTypes.length === 1 ? dataTypes[0] : 'string') || column.dataType;
         const newParams = {
@@ -366,9 +369,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         if ('format' in newParams && newDataType !== 'number') {
           delete newParams.format;
         }
-        const mainField = indexPattern.getFieldByName(fields[0]);
+        const mainField = indexPattern.getFieldByName(sourcefield);
         if (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') {
           newParams.orderBy = { type: 'alphabetical' };
+        }
+        // in single field mode, allow the automatic switch of the function to
+        // the most appropriate one
+        if (fields.length === 1) {
+          const possibleOperations = operationSupportMatrix.operationByField[sourcefield];
+          const termsSupported = possibleOperations?.has('terms');
+          if (!termsSupported) {
+            const newFieldOp = possibleOperations?.values().next().value;
+            return updateLayer(
+              insertOrReplaceColumn({
+                layer,
+                columnId,
+                indexPattern,
+                op: newFieldOp,
+                field: mainField,
+                visualizationGroups: dimensionGroups,
+                targetGroup: groupId,
+                incompleteParams,
+              })
+            );
+          }
         }
         updateLayer({
           ...layer,
@@ -377,11 +401,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             [columnId]: {
               ...column,
               dataType: newDataType,
-              sourceField: fields[0],
+              sourceField: sourcefield,
               label: column.customLabel
                 ? column.label
                 : ofName(
-                    indexPattern.getFieldByName(fields[0])?.displayName,
+                    mainField?.displayName,
                     fields.length - 1,
                     newParams.orderBy.type === 'rare',
                     newParams.size
@@ -398,7 +422,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           } as Record<string, TermsIndexPatternColumn>,
         });
       },
-      [columnId, indexPattern, layer, updateLayer]
+      [
+        columnId,
+        dimensionGroups,
+        groupId,
+        incompleteParams,
+        indexPattern,
+        layer,
+        operationSupportMatrix.operationByField,
+        updateLayer,
+      ]
     );
     const currentColumn = layer.columns[columnId];
 
