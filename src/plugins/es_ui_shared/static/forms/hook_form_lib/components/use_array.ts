@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import uuid from 'uuid';
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { FormHook, FieldConfig } from '../types';
@@ -92,6 +93,9 @@ export const UseArray = ({
   // Create an internal hook field which behaves like any other form field except that it is not
   // outputed in the form data (when calling form.submit() or form.getFormData())
   // This allow us to run custom validations (passed to the props) on the Array items
+
+  const internalFieldPath = useMemo(() => `${path}__${uuid.v4()}`, [path]);
+
   const fieldConfigBase: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,
     initialValue: fieldDefaultValue,
@@ -103,7 +107,7 @@ export const UseArray = ({
     ? { validations, ...fieldConfigBase }
     : fieldConfigBase;
 
-  const field = useField(form, path, fieldConfig);
+  const field = useField(form, internalFieldPath, fieldConfig);
   const { setValue, value, isChangingValue, errors } = field;
 
   // Derived state from the field
