@@ -31,6 +31,7 @@ export interface DocLinks {
     readonly droppedTransactionSpans: string;
     readonly upgrading: string;
     readonly metaData: string;
+    readonly tailSamplingPolicies: string;
   };
   readonly canvas: {
     readonly guide: string;
