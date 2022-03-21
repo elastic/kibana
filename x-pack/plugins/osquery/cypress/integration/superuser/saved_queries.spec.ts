@@ -6,9 +6,10 @@
  */
 
 import { navigateTo } from '../../tasks/navigation';
+import { RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import {
   checkResults,
-  DEFAULT_QUERY,
+  BIG_QUERY,
   deleteAndConfirm,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -34,18 +35,18 @@ describe('Super User - Saved queries', () => {
     () => {
       cy.contains('New live query').click();
       selectAllAgents();
-      inputQuery(DEFAULT_QUERY);
+      inputQuery(BIG_QUERY);
       submitQuery();
       checkResults();
-      // enter full screen
-      cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
-      cy.contains(/Enter full screen$/).should('exist');
-      cy.contains('Exit full screen').should('not.exist');
-      cy.getBySel('dataGridFullScreenButton').click();
+      // enter fullscreen
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.contains(/Enter fullscreen$/).should('exist');
+      cy.contains('Exit fullscreen').should('not.exist');
+      cy.getBySel(RESULTS_TABLE_BUTTON).click();
 
-      cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
-      cy.contains(/Enter full screen$/).should('not.exist');
-      cy.contains('Exit full screen').should('exist');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.contains(/Enter Fullscreen$/).should('not.exist');
+      cy.contains('Exit fullscreen').should('exist');
 
       // hidden columns
       cy.react('EuiDataGridHeaderCellWrapper', { props: { id: 'osquery.cmdline' } }).click();
@@ -59,10 +60,10 @@ describe('Super User - Saved queries', () => {
       cy.getBySel('pagination-button-next').click().wait(500).click();
       cy.contains('2 columns hidden').should('exist');
 
-      cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
-      cy.contains(/Enter full screen$/).should('not.exist');
-      cy.contains('Exit full screen').should('exist');
-      cy.getBySel('dataGridFullScreenButton').click();
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.contains(/Enter fullscreen$/).should('not.exist');
+      cy.contains('Exit fullscreen').should('exist');
+      cy.getBySel(RESULTS_TABLE_BUTTON).click();
 
       // sorting
       cy.react('EuiDataGridHeaderCellWrapper', {
@@ -70,8 +71,8 @@ describe('Super User - Saved queries', () => {
       }).click();
       cy.contains(/Sort A-Z$/).click();
       cy.contains('2 columns hidden').should('exist');
-      cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
-      cy.contains(/Enter full screen$/).should('exist');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.contains(/Enter fullscreen$/).should('exist');
 
       // save new query
       cy.contains('Exit full screen').should('not.exist');
@@ -111,8 +112,8 @@ describe('Super User - Saved queries', () => {
         props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
       }).click();
       deleteAndConfirm('query');
-      cy.contains(SAVED_QUERY_ID);
-      cy.contains(/^No items found/);
+      cy.contains(SAVED_QUERY_ID).should('exist');
+      cy.contains(SAVED_QUERY_ID).should('not.exist');
     }
   );
 });
