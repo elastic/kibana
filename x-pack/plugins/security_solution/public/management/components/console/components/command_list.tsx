@@ -9,12 +9,16 @@ import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandDefinition } from '../types';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 export interface CommandListProps {
   commands: CommandDefinition[];
 }
 
 export const CommandList = memo<CommandListProps>(({ commands }) => {
+  const getTestId = useTestIdGenerator(useDataTestSubj());
+
   const footerMessage = useMemo(() => {
     return (
       <FormattedMessage
@@ -27,13 +31,18 @@ export const CommandList = memo<CommandListProps>(({ commands }) => {
       />
     );
   }, []);
+
   return (
     <>
-      <EuiFlexGroup wrap gutterSize="xs">
+      <EuiFlexGroup wrap gutterSize="xs" data-test-subj={getTestId('commandList')}>
         {commands.map(({ name, about }) => {
           return (
             <EuiFlexItem grow={2} style={{ flexBasis: '20%' }}>
-              <EuiDescriptionList compressed listItems={[{ title: name, description: about }]} />
+              <EuiDescriptionList
+                compressed
+                listItems={[{ title: name, description: about }]}
+                data-test-subj={getTestId('commandList-command')}
+              />
             </EuiFlexItem>
           );
         })}

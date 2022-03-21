@@ -16,6 +16,8 @@ import React, {
 } from 'react';
 import { pick } from 'lodash';
 import styled from 'styled-components';
+import { CommonProps } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const NOOP = () => undefined;
 
@@ -44,7 +46,7 @@ const KeyCaptureContainer = styled.span`
   }
 `;
 
-export interface KeyCaptureProps {
+export interface KeyCaptureProps extends Pick<CommonProps, 'data-test-subj'> {
   onCapture: (params: {
     value: string | undefined;
     eventDetails: Pick<
@@ -61,84 +63,88 @@ export interface KeyCaptureProps {
  * the console. It's sole purpose is to capture what the user types, which is then pass along to be
  * displayed in a more UX friendly way
  */
-export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateChange }) => {
-  const [, setLastInput] = useState('');
+export const KeyCapture = memo<KeyCaptureProps>(
+  ({ onCapture, focusRef, onStateChange, 'data-test-subj': dataTestSubj }) => {
+    const [, setLastInput] = useState('');
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const handleBlurAndFocus = useCallback<FormEventHandler>(
-    (ev) => {
-      if (!onStateChange) {
+    const handleBlurAndFocus = useCallback<FormEventHandler>(
+      (ev) => {
+        if (!onStateChange) {
+          return;
+        }
+
+        onStateChange(ev.type === 'focus');
+      },
+      [onStateChange]
+    );
+
+    const handleOnKeyUp = useCallback<KeyboardEventHandler<HTMLInputElement>>(
+      (ev) => {
+        ev.stopPropagation();
+
+        const eventDetails = pick(ev, [
+          'key',
+          'altKey',
+          'ctrlKey',
+          'keyCode',
+          'metaKey',
+          'repeat',
+          'shiftKey',
+        ]);
+
+        setLastInput((value) => {
+          onCapture({
+            value,
+            eventDetails,
+          });
+
+          return '';
+        });
+      },
+      [onCapture]
+    );
+
+    const handleOnInput = useCallback<FormEventHandler<HTMLInputElement>>((ev) => {
+      const newValue = ev.currentTarget.value;
+
+      setLastInput((prevState) => {
+        return `${prevState || ''}${newValue}`;
+      });
+    }, []);
+
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const setFocus = useCallback((force: boolean = false) => {
+      // If user selected text and `force` is not true, then don't focus (else they lose selection)
+      if (!force && (window.getSelection()?.toString() ?? '').length > 0) {
         return;
       }
 
-      onStateChange(ev.type === 'focus');
-    },
-    [onStateChange]
-  );
+      inputRef.current?.focus();
+    }, []);
 
-  const handleOnKeyUp = useCallback<KeyboardEventHandler<HTMLInputElement>>(
-    (ev) => {
-      ev.stopPropagation();
-
-      const eventDetails = pick(ev, [
-        'key',
-        'altKey',
-        'ctrlKey',
-        'keyCode',
-        'metaKey',
-        'repeat',
-        'shiftKey',
-      ]);
-
-      setLastInput((value) => {
-        onCapture({
-          value,
-          eventDetails,
-        });
-
-        return '';
-      });
-    },
-    [onCapture]
-  );
-
-  const handleOnInput = useCallback<FormEventHandler<HTMLInputElement>>((ev) => {
-    const newValue = ev.currentTarget.value;
-
-    setLastInput((prevState) => {
-      return `${prevState || ''}${newValue}`;
-    });
-  }, []);
-
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const setFocus = useCallback((force: boolean = false) => {
-    // If user selected text and `force` is not true, then don't focus (else they lose selection)
-    if (!force && (window.getSelection()?.toString() ?? '').length > 0) {
-      return;
+    if (focusRef) {
+      focusRef.current = setFocus;
     }
 
-    inputRef.current?.focus();
-  }, []);
-
-  if (focusRef) {
-    focusRef.current = setFocus;
+    // FIXME:PT probably need to add `aria-` type properties to the input?
+    return (
+      <KeyCaptureContainer data-test-subj={dataTestSubj}>
+        <input
+          className="invisible-input"
+          data-test-subj={getTestId('input')}
+          spellCheck="false"
+          value=""
+          onInput={handleOnInput}
+          onKeyUp={handleOnKeyUp}
+          onBlur={handleBlurAndFocus}
+          onFocus={handleBlurAndFocus}
+          onChange={NOOP} // this just silences Jest output warnings
+          ref={inputRef}
+        />
+      </KeyCaptureContainer>
+    );
   }
-
-  // FIXME:PT probably need to add `aria-` type properties to the input?
-  return (
-    <KeyCaptureContainer>
-      <input
-        className="invisible-input"
-        spellCheck="false"
-        value=""
-        onInput={handleOnInput}
-        onKeyUp={handleOnKeyUp}
-        onBlur={handleBlurAndFocus}
-        onFocus={handleBlurAndFocus}
-        onChange={NOOP} // this just silences Jest output warnings
-        ref={inputRef}
-      />
-    </KeyCaptureContainer>
-  );
-});
+);
 KeyCapture.displayName = 'KeyCapture';

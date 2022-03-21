@@ -130,6 +130,7 @@ export const CommandInput = memo<CommandInputProps>(
           onCapture={handleKeyCapture}
           focusRef={keyCaptureFocusRef}
           onStateChange={handleKeyCaptureOnStateChange}
+          data-test-subj={getTestId('keyCapture')}
         />
       </CommandInputContainer>
     );

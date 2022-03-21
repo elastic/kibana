@@ -9,6 +9,8 @@ import React, { memo, ReactNode, useEffect, useState } from 'react';
 import { EuiCallOut, EuiCallOutProps, EuiLoadingChart } from '@elastic/eui';
 import { UserCommandInput } from './user_command_input';
 import { CommandExecutionFailure } from './command_execution_failure';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 export interface HelpOutputProps extends Pick<EuiCallOutProps, 'title'> {
   input: string;
@@ -16,6 +18,7 @@ export interface HelpOutputProps extends Pick<EuiCallOutProps, 'title'> {
 }
 export const HelpOutput = memo<HelpOutputProps>(({ input, children, ...euiCalloutProps }) => {
   const [content, setContent] = useState<ReactNode>(<EuiLoadingChart size="l" mono />);
+  const getTestId = useTestIdGenerator(useDataTestSubj());
 
   useEffect(() => {
     if (children instanceof Promise) {
@@ -38,7 +41,13 @@ export const HelpOutput = memo<HelpOutputProps>(({ input, children, ...euiCallou
       <div>
         <UserCommandInput input={input} />
       </div>
-      <EuiCallOut {...euiCalloutProps} color="primary" size="s" iconType="help">
+      <EuiCallOut
+        {...euiCalloutProps}
+        color="primary"
+        size="s"
+        iconType="help"
+        data-test-subj={getTestId('helpOutput')}
+      >
         {content}
       </EuiCallOut>
     </div>

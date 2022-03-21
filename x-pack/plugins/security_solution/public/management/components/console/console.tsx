@@ -73,7 +73,11 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService, ...commonPr
 
   return (
     <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
-      <ConsoleStateProvider commandService={consoleService} scrollToBottom={scrollToBottom}>
+      <ConsoleStateProvider
+        commandService={consoleService}
+        scrollToBottom={scrollToBottom}
+        dataTestSubj={commonProps['data-test-subj']}
+      >
         <EuiPanel
           className="ui-panel"
           panelRef={consoleWindowRef}

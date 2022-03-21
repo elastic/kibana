@@ -17,10 +17,10 @@ type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
  * A Console wide data store for internal state management between inner components
  */
 export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
-  ({ commandService, scrollToBottom, children }) => {
+  ({ commandService, scrollToBottom, dataTestSubj, children }) => {
     const [state, dispatch] = useReducer(
       stateDataReducer,
-      { commandService, scrollToBottom },
+      { commandService, scrollToBottom, dataTestSubj },
       initiateState
     );
 

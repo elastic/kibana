@@ -21,6 +21,7 @@ export interface ConsoleDataState {
    * List of commands entered by the user and being shown in the UI
    */
   commandHistory: Array<ReturnType<HistoryItemComponent>>;
+  dataTestSubj?: string;
 }
 
 export type ConsoleDataAction =

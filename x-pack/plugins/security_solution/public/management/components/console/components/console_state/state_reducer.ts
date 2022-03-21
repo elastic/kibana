@@ -9,15 +9,20 @@ import { ConsoleDataState, ConsoleStoreReducer } from './types';
 import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
 import { ConsoleBuiltinCommandsService } from '../../service/builtin_command_service';
 
-export type InitialStateInterface = Pick<ConsoleDataState, 'commandService' | 'scrollToBottom'>;
+export type InitialStateInterface = Pick<
+  ConsoleDataState,
+  'commandService' | 'scrollToBottom' | 'dataTestSubj'
+>;
 
 export const initiateState = ({
   commandService,
   scrollToBottom,
+  dataTestSubj,
 }: InitialStateInterface): ConsoleDataState => {
   return {
     commandService,
     scrollToBottom,
+    dataTestSubj,
     commandHistory: [],
     builtinCommandService: new ConsoleBuiltinCommandsService(),
   };

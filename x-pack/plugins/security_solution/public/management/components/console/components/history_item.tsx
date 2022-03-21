@@ -7,12 +7,20 @@
 
 import React, { memo, PropsWithChildren } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 export type HistoryItemProps = PropsWithChildren<{}>;
 
 export const HistoryItem = memo<HistoryItemProps>(({ children }) => {
+  const getTestId = useTestIdGenerator(useDataTestSubj());
+
   return (
-    <EuiFlexItem grow={true} style={{ flexBasis: '100%' }}>
+    <EuiFlexItem
+      grow={true}
+      style={{ flexBasis: '100%' }}
+      data-test-subj={getTestId('historyItem')}
+    >
       {children}
     </EuiFlexItem>
   );
