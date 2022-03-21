@@ -27,7 +27,7 @@ import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
-import { ExternalConnectorLogic } from './external_connector_logic';
+import { ExternalConnectorLogic, isValidExternalUrl } from './external_connector_logic';
 
 export interface AddSourceProps {
   sourceData: SourceDataItem;
@@ -443,6 +443,15 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       } = values;
 
       const { externalConnectorUrl, externalConnectorApiKey } = ExternalConnectorLogic.values;
+      if (
+        serviceType === 'external' &&
+        externalConnectorUrl &&
+        !isValidExternalUrl(externalConnectorUrl)
+      ) {
+        ExternalConnectorLogic.actions.setUrlValidation(false);
+        actions.setButtonNotLoading();
+        return;
+      }
 
       const route = isUpdating
         ? `/internal/workplace_search/org/settings/connectors/${serviceType}`

@@ -8945,7 +8945,12 @@ const BootstrapCommand = {
 
     if (forceInstall) {
       await time('force install dependencies', async () => {
-        await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
+        await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline, {
+          env: {
+            SASS_BINARY_SITE: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
+            RE2_DOWNLOAD_MIRROR: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2'
+          }
+        });
       });
     } // build packages
 
