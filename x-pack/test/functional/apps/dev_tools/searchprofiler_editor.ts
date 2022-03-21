@@ -105,8 +105,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.click('profileButton');
 
-        const notification = await testSubjects.find('noShardsNotification');
-        expect(await notification.getVisibleText()).to.contain('Unable to profile');
+        await retry.waitFor('notification renders', async () => {
+          const notification = await testSubjects.find('noShardsNotification');
+          const notificationText = await notification.getVisibleText();
+          return notificationText.includes('Unable to profile');
+        });
       });
     });
   });
