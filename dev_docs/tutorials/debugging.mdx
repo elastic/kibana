@@ -84,19 +84,18 @@ Frontend (APM RUM):
 
 In some cases, it is beneficial to enable APM on a local development environment to get an initial undertanding of a feature's performance during manual or automatic tests.
 
- 1. Create a secondary deployment to collect APM data. 
- 2. Open Kibana, go to `Integrations` and enable the APM Server integration.
- 3. Configure CORS access ?
- 4. Copy the server URL and secret token
- 5. Create or open `config\kibana.dev.yml` on your local environment
- 6. Add the following settings: 
+ 1. Create a secondary monitoring deployment to collect APM data. The easiest option is to use [Elastic cloud](https://cloud.elastic.co/deployments) to create a new deployment.
+ 2. Open Kibana, go to `Integrations` and enable the Elastic APM integration.
+ 3. Scroll down and copy the server URL and secret token. You may also find them in your cloud console under APM & Fleet.
+ 4. Create or open `config\kibana.dev.yml` on your local development environment.
+ 5. Add the following settings: 
     ```
     elastic.apm.active: true
     elastic.apm.serverUrl: <serverUrl>
     elastic.apm.secretToken: <secretToken>
     ```
-7. Once you run kibana and start using it, two new services (kibana, kibana-frontend) should appear under the APM UI on the APM deployment.
-
+ 6. Once you run kibana and start using it, two new services (kibana, kibana-frontend) should appear under the APM UI on the APM deployment.
+  ![APM UI](./apm_ui.png)
 ### Enabling APM via environment variables
 
 It is possible to enable APM via environment variables as well.
