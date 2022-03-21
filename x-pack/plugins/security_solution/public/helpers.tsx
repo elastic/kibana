@@ -147,7 +147,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
 };
 
 export const getInspectResponse = <T extends FactoryQueryTypes>(
-  response: StrategyResponseType<T> | TimelineEqlResponse,
+  response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
   prevResponse: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],

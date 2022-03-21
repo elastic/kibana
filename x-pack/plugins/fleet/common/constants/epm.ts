@@ -16,10 +16,6 @@ export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
-export const KUBERNETES_RUN_INSTRUCTIONS =
-  'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
-export const STANDALONE_RUN_INSTRUCTIONS_LINUXMAC = 'sudo ./elastic-agent install';
-export const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = '.\\elastic-agent.exe install';
 
 export const FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID =
   'elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395';
