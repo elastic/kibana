@@ -29,6 +29,8 @@ import {
   validatePackagePolicy,
   validationHasErrors,
   SO_SEARCH_LIMIT,
+  FLEET_APM_PACKAGE,
+  outputType,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -63,6 +65,7 @@ import type { ExternalCallback } from '..';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
+import { getDataOutputForAgentPolicy } from './agent_policies';
 import { outputService } from './output';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
@@ -104,6 +107,15 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
+    const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
+
+    if (agentPolicy && packagePolicy.package?.name === FLEET_APM_PACKAGE) {
+      const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
+      if (dataOutput.type === outputType.Logstash) {
+        throw new IngestManagerError('You cannot add APM to a policy using a logstash output');
+      }
+    }
+
     // trailing whitespace causes issues creating API keys
     packagePolicy.name = packagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
@@ -155,7 +167,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
-        const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new IngestManagerError(
             `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
