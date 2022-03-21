@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { AddFromLibraryButton } from './add_from_library';
 import mdx from './add_from_library.mdx';
