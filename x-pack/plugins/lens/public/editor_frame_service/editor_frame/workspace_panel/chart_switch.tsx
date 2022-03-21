@@ -438,10 +438,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           isPreFiltered
           data-test-subj="lnsChartSwitchList"
           searchProps={{
-            incremental: true,
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
-            onSearch: (value) => setSearchTerm(value),
+            onChange: (value) => setSearchTerm(value),
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {

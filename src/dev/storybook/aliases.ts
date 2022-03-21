@@ -35,6 +35,6 @@ export const storybookAliases = {
   observability: 'x-pack/plugins/observability/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
-  shared_ux: 'src/plugins/shared_ux/.storybook',
+  shared_ux: 'packages/kbn-shared-ux-storybook/src/config',
   ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
 };

@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { deleteJobs } from '../utils';
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
-import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
+import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
@@ -165,8 +165,8 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   } else {
     return (
       <>
-        <DeleteJobCheckModal
-          jobIds={jobIds}
+        <DeleteSpaceAwareItemCheckModal
+          ids={jobIds}
           jobType="anomaly-detector"
           canDeleteCallback={() => {
             setCanDelete(true);

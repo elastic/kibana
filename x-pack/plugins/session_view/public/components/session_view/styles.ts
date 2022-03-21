@@ -19,7 +19,6 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
   const cached = useMemo(() => {
     const processTree: CSSObject = {
       height: `${height}px`,
-      paddingTop: euiTheme.size.s,
       position: 'relative',
     };
 
@@ -27,9 +26,20 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       height: `${height}px`,
     };
 
+    const searchBar: CSSObject = {
+      position: 'relative',
+      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+    };
+
+    const buttonsEyeDetail: CSSObject = {
+      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+    };
+
     return {
       processTree,
       detailPanel,
+      searchBar,
+      buttonsEyeDetail,
     };
   }, [height, euiTheme]);
 

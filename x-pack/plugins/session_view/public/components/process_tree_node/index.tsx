@@ -21,13 +21,14 @@ import React, {
   useMemo,
   RefObject,
 } from 'react';
-import { EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiIcon, formatDate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
 import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
-import { SessionLeaderButton, AlertButton, ChildrenProcessesButton } from './buttons';
+import { AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
+import { KIBANA_DATE_FORMAT } from '../../../common/constants';
 import { useStyles } from './styles';
 
 export interface ProcessDeps {
@@ -38,6 +39,8 @@ export interface ProcessDeps {
   jumpToEventID?: string;
   jumpToAlertID?: string;
   selectedProcessId?: string;
+  timeStampOn?: boolean;
+  verboseModeOn?: boolean;
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
 }
@@ -53,6 +56,8 @@ export function ProcessTreeNode({
   jumpToEventID,
   jumpToAlertID,
   selectedProcessId,
+  timeStampOn = true,
+  verboseModeOn = true,
   scrollerRef,
   onChangeJumpToEventVisibility,
 }: ProcessDeps) {
@@ -60,7 +65,6 @@ export function ProcessTreeNode({
 
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
-  const [showGroupLeadersOnly, setShowGroupLeadersOnly] = useState(isSessionLeader);
   const { searchMatched } = process;
 
   useEffect(() => {
@@ -111,10 +115,6 @@ export function ProcessTreeNode({
     }
   }, [searchMatched, styles.searchHighlight]);
 
-  const onShowGroupLeaderOnlyClick = useCallback(() => {
-    setShowGroupLeadersOnly(!showGroupLeadersOnly);
-  }, [showGroupLeadersOnly]);
-
   const onChildrenToggle = useCallback(() => {
     setChildrenExpanded(!childrenExpanded);
   }, [childrenExpanded]);
@@ -151,9 +151,10 @@ export function ProcessTreeNode({
     parent,
     working_directory: workingDirectory,
     exit_code: exitCode,
+    start,
   } = processDetails.process;
 
-  const children = process.getChildren(!showGroupLeadersOnly);
+  const children = process.getChildren(verboseModeOn);
   const childCount = process.getChildren(true).length;
   const shouldRenderChildren = childrenExpanded && children && children.length > 0;
   const childrenTreeDepth = depth + 1;
@@ -166,6 +167,8 @@ export function ProcessTreeNode({
     ? 'sessionView:processTreeNodeExecIcon'
     : 'sessionView:processTreeNodeForkIcon';
   const processIcon = hasExec ? 'console' : 'branch';
+
+  const timeStampsNormal = formatDate(start, KIBANA_DATE_FORMAT);
 
   return (
     <div>
@@ -187,12 +190,6 @@ export function ProcessTreeNode({
               <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name || args[0]}</b>{' '}
               <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
               <EuiIcon type="user" /> <b css={styles.darkText}>{user.name}</b>
-              <SessionLeaderButton
-                process={process}
-                childCount={childCount}
-                onClick={onShowGroupLeaderOnlyClick}
-                showGroupLeadersOnly={showGroupLeadersOnly}
-              />
             </>
           ) : (
             <span>
@@ -207,6 +204,15 @@ export function ProcessTreeNode({
                     [exit_code: {exitCode}]
                   </small>
                 )}
+                {timeStampOn && (
+                  <span
+                    data-test-subj="sessionView:processTreeNodeTimestamp"
+                    css={styles.timeStamp}
+                  >
+                    {timeStampsNormal}
+                  </span>
+                )}
+                ;
               </span>
             </span>
           )}
@@ -257,6 +263,8 @@ export function ProcessTreeNode({
                 jumpToEventID={jumpToEventID}
                 jumpToAlertID={jumpToAlertID}
                 selectedProcessId={selectedProcessId}
+                timeStampOn={timeStampOn}
+                verboseModeOn={verboseModeOn}
                 scrollerRef={scrollerRef}
                 onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
               />

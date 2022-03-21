@@ -612,6 +612,7 @@ export class SavedObjectsClient {
       saved_object: simpleSavedObject,
       outcome: resolveResponse.outcome,
       alias_target_id: resolveResponse.alias_target_id,
+      alias_purpose: resolveResponse.alias_purpose,
     };
   }
 
