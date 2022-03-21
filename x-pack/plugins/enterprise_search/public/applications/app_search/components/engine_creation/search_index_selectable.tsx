@@ -52,15 +52,15 @@ const healthColorsMap = {
 const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: string) => {
   return (
     <>
-      <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+      <EuiHighlight search={searchValue}>{option.label ?? ''}</EuiHighlight>
       <EuiSpacer size="xs" />
       <EuiTextColor color="subdued">
         <small>
           <span className="selectableSecondaryContentLabel">
-            <EuiIcon type="dot" color={healthColorsMap[option.health]} />
+            <EuiIcon type="dot" color={healthColorsMap[option.health] ?? ''} />
             &nbsp;{option.health ?? '-'}
           </span>
-          <span className="selectableSecondaryContentLabel">
+          <span className="selectableSecondaryContentLabel" data-test-subj="optionStatus">
             <b>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.status',
@@ -71,7 +71,7 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
             </b>
             &nbsp;{option.status ?? '-'}
           </span>
-          <span className="selectableSecondaryContentLabel">
+          <span className="selectableSecondaryContentLabel" data-test-subj="optionDocs">
             <b>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.docCount',
@@ -82,7 +82,7 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
             </b>
             &nbsp;{option.total?.docs?.count ?? '-'}
           </span>
-          <span className="selectableSecondaryContentLabel">
+          <span className="selectableSecondaryContentLabel" data-test-subj="optionStorage">
             <b>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.storage',
@@ -149,6 +149,7 @@ export const SearchIndexSelectable: React.FC = () => {
             { defaultMessage: 'No Elasticsearch indices available' }
           )}
           renderOption={renderIndexOption}
+          data-test-subj="SearchIndexSelectable"
         >
           {(list, search) => (
             <>
