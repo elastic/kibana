@@ -18,3 +18,4 @@ export type { ErrorThatHandlesItsOwnResponse, ElasticsearchError };
 export { getEsErrorMessage };
 export type { AlertTypeDisabledReason } from './alert_type_disabled';
 export { AlertTypeDisabledError } from './alert_type_disabled';
+export { RuleMutedError } from './rule_muted';

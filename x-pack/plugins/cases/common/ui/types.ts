@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsResolveResponse } from 'src/core/public';
 import {
   CaseAttributes,
   CaseConnector,
@@ -86,8 +87,9 @@ export interface Case extends BasicCase {
 
 export interface ResolvedCase {
   case: Case;
-  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export interface QueryParams {
