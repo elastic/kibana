@@ -92,8 +92,8 @@ export const useFormIsModified = ({
 
     const fieldsRemovedFromDOM: string[] = fieldsToDiscard
       ? Object.keys(__getFieldsRemoved())
-        .filter((path) => fieldsToDiscard[path] !== true)
-        .filter(fieldOnFormDefaultValue)
+          .filter((path) => fieldsToDiscard[path] !== true)
+          .filter(fieldOnFormDefaultValue)
       : Object.keys(__getFieldsRemoved()).filter(fieldOnFormDefaultValue);
 
     isModified = fieldsRemovedFromDOM.length > 0;
