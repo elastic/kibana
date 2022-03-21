@@ -31,6 +31,7 @@ import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';
 import type { ISearchOptions } from '../../../../../../../src/plugins/data/common';
 import { getFieldsStats } from '../search_strategy/requests/get_fields_stats';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 
 interface FieldStatsParams {
   metricConfigs: FieldRequestConfig[];
@@ -125,11 +126,19 @@ export function useFieldStatsSearchStrategy(
       ...fieldStatsParams.nonMetricConfigs,
     ].sort(itemsSorter);
 
-    const { pageIndex, pageSize } = dataVisualizerListState;
-    const sortedConfigs = preslicedSortedConfigs.slice(
-      pageIndex * pageSize,
-      (pageIndex + 1) * pageSize
+    const filteredItems = filterFields(
+      preslicedSortedConfigs,
+      dataVisualizerListState.visibleFieldNames,
+      dataVisualizerListState.visibleFieldTypes
     );
+
+    const { pageIndex, pageSize } = dataVisualizerListState;
+
+    const pageOfConfigs = filteredItems.filteredFields
+      ?.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+      .filter((d) => d.existsInDocs === true);
+
+    if (!pageOfConfigs) return;
 
     const filterCriteria = buildBaseFilterCriteria(
       searchStrategyParams.timeFieldName,
@@ -159,7 +168,7 @@ export function useFieldStatsSearchStrategy(
     };
 
     const batches = createBatchedRequests(
-      sortedConfigs.map((config, idx) => ({
+      pageOfConfigs.map((config, idx) => ({
         fieldName: config.fieldName,
         type: config.type,
         cardinality: config.cardinality,
@@ -221,7 +230,7 @@ export function useFieldStatsSearchStrategy(
 
             setFieldStats(statsMapTmp);
             setFetchState({
-              loaded: (statsMapTmp.size / sortedConfigs.length) * 100,
+              loaded: (statsMapTmp.size / pageOfConfigs.length) * 100,
               isRunning: true,
             });
 
@@ -262,7 +271,7 @@ export function useFieldStatsSearchStrategy(
           });
           setFieldStats(statsMap);
           setFetchState({
-            loaded: (statsMap.size / sortedConfigs.length) * 100,
+            loaded: (statsMap.size / pageOfConfigs.length) * 100,
             isRunning: true,
           });
         }
