@@ -108,6 +108,7 @@ interface PageSetupResults {
   elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   timeRange: string | null;
   error?: Error;
+  renderErrors?: string[];
 }
 
 const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
@@ -241,7 +242,6 @@ export class ScreenshotObservableHandler {
       withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotObservableResult> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
-
           const elements =
             data.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
@@ -251,12 +251,13 @@ export class ScreenshotObservableHandler {
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }
-          const { timeRange, error: setupError } = data;
+          const { timeRange, error: setupError, renderErrors } = data;
 
           return {
             timeRange,
             screenshots,
             error: setupError,
+            renderErrors,
             elementsPositionAndAttributes: elements,
           };
         })
