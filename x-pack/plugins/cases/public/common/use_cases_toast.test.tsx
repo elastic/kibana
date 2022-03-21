@@ -29,7 +29,7 @@ describe('Use cases toast hook', () => {
       successMock.mockClear();
     });
 
-    it('should create a success tost when invoked with a case', () => {
+    it('should create a success toast when invoked with a case', () => {
       const { result } = renderHook(
         () => {
           return useCasesToast();
@@ -40,7 +40,7 @@ describe('Use cases toast hook', () => {
       expect(successMock).toHaveBeenCalled();
     });
 
-    it('should create a success tost when invoked with a case and a custom title', () => {
+    it('should create a success toast when invoked with a case and a custom title', () => {
       const { result } = renderHook(
         () => {
           return useCasesToast();
@@ -54,7 +54,7 @@ describe('Use cases toast hook', () => {
       expect(el).toHaveTextContent('Custom title');
     });
 
-    it('should create a success tost when invoked with a case and a custom content', () => {
+    it('should create a success toast when invoked with a case and a custom content', () => {
       const { result } = renderHook(
         () => {
           return useCasesToast();
