@@ -31,6 +31,7 @@ import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
 
 export interface EditConnectorProps {
   caseData: Case;
@@ -46,7 +47,6 @@ export interface EditConnectorProps {
     onError: () => void,
     onSuccess: () => void
   ) => void;
-  permissionsError?: string;
   updateCase: (newCase: Case) => void;
   userActions: CaseUserActions[];
   userCanCrud?: boolean;
@@ -119,18 +119,20 @@ export const EditConnector = React.memo(
     isLoading,
     isValidConnector,
     onSubmit,
-    permissionsError,
     updateCase,
     userActions,
     userCanCrud = true,
   }: EditConnectorProps) => {
     const caseFields = caseData.connector.fields;
     const selectedConnector = caseData.connector.id;
+
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
       options: { stripEmptyFields: false },
       schema,
     });
+    const { actions } = useApplicationCapabilities();
+    const actionsReadCapabilities = actions.read;
 
     // by default save if disabled
     const [enableSave, setEnableSave] = useState(false);
@@ -303,7 +305,7 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup data-test-subj="edit-connectors" direction="column">
-          {!isLoading && !editConnector && pushCallouts && permissionsError == null && (
+          {!isLoading && !editConnector && pushCallouts && actionsReadCapabilities && (
             <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
           )}
           <DisappearingFlexItem $isHidden={!editConnector}>
@@ -330,9 +332,9 @@ export const EditConnector = React.memo(
             </Form>
           </DisappearingFlexItem>
           <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
-            {!editConnector && permissionsError && (
+            {!editConnector && !actionsReadCapabilities && (
               <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
-                <span>{permissionsError}</span>
+                <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
               </EuiText>
             )}
             <ConnectorFieldsForm
@@ -375,7 +377,7 @@ export const EditConnector = React.memo(
             !isLoading &&
             !editConnector &&
             userCanCrud &&
-            !permissionsError && (
+            actionsReadCapabilities && (
               <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
                 <span>{pushButton}</span>
               </EuiFlexItem>
