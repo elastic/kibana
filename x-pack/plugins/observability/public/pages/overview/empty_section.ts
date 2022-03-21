@@ -19,7 +19,7 @@ export const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
       icon: 'logoLogging',
       description: i18n.translate('xpack.observability.emptySection.apps.logs.description', {
         defaultMessage:
-          'Fast, easy, and scalable, centralized log monitoring with out-of-the-box support for common data sources.',
+          'Fast, easy, and scalable centralized log monitoring with out-of-the-box support for common data sources.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.logs.link', {
         defaultMessage: 'Install Filebeat',
