@@ -19,7 +19,13 @@ export const getEventCount = async ({
   tuple,
   timestampOverride,
 }: EventCountOptions): Promise<number> => {
-  const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
+  const filter = getQueryFilter({
+    query,
+    language: language ?? 'kuery',
+    filters,
+    index,
+    lists: exceptionItems,
+  });
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
     index,
     from: tuple.from.toISOString(),

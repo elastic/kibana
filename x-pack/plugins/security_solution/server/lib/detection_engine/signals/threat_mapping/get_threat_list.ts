@@ -31,13 +31,13 @@ export const getThreatList = async ({
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-  const queryFilter = getQueryFilter(
+  const queryFilter = getQueryFilter({
     query,
-    language ?? 'kuery',
-    threatFilters,
+    language: language ?? 'kuery',
+    filters: threatFilters,
     index,
-    exceptionItems
-  );
+    lists: exceptionItems,
+  });
 
   logger.debug(
     buildRuleMessage(
@@ -73,13 +73,13 @@ export const getThreatListCount = async ({
   index,
   exceptionItems,
 }: ThreatListCountOptions): Promise<number> => {
-  const queryFilter = getQueryFilter(
+  const queryFilter = getQueryFilter({
     query,
-    language ?? 'kuery',
-    threatFilters,
+    language: language ?? 'kuery',
+    filters: threatFilters,
     index,
-    exceptionItems
-  );
+    lists: exceptionItems,
+  });
   const response = await esClient.count({
     body: {
       query: queryFilter,

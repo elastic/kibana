@@ -10,7 +10,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
+import { BooleanFilter, buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import { Filter, EsQueryConfig, DataViewBase, buildEsQuery } from '@kbn/es-query';
 import {
   EqlSearchRequest,
@@ -19,15 +19,28 @@ import {
 
 import { ESBoolQuery } from '../typed_json';
 import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
+import { IRuleExecutionLogForExecutors } from '../../server/lib/detection_engine/rule_execution_log';
+import { RuleExecutionStatus } from './schemas/common';
 
-export const getQueryFilter = (
-  query: Query,
-  language: Language,
-  filters: unknown,
-  index: Index,
-  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  excludeExceptions: boolean = true
-): ESBoolQuery => {
+interface GetQueryFilterProps {
+  query: Query;
+  language: Language;
+  filters: unknown;
+  index: Index;
+  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  excludeExceptions?: boolean;
+  ruleExecutionLogger?: IRuleExecutionLogForExecutors;
+}
+
+export const getQueryFilter = ({
+  query,
+  language,
+  filters,
+  index,
+  lists,
+  excludeExceptions = true,
+  ruleExecutionLogger,
+}: GetQueryFilterProps): ESBoolQuery => {
   const indexPattern: DataViewBase = {
     fields: [],
     title: index.join(),
@@ -39,6 +52,16 @@ export const getQueryFilter = (
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: 'Zulu',
   };
+
+  const logger = async (filterLogs: BooleanFilter[] | Filter[]) => {
+    if (ruleExecutionLogger != null) {
+      await ruleExecutionLogger.logStatusChange({
+        newStatus: RuleExecutionStatus.running,
+        message: JSON.stringify(filterLogs),
+      });
+    }
+  };
+
   // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
   // allowing us to make 1024-item chunks of exception list items.
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
@@ -47,6 +70,7 @@ export const getQueryFilter = (
     lists,
     excludeExceptions,
     chunkSize: 1024,
+    logger,
   });
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], exceptionFilter);

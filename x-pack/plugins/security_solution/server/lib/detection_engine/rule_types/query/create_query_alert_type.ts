@@ -59,6 +59,7 @@ export const createQueryAlertType = (
           searchAfterSize,
           tuple,
           wrapHits,
+          ruleExecutionLogger,
         },
         services,
         state,
@@ -78,6 +79,7 @@ export const createQueryAlertType = (
         tuple,
         version,
         wrapHits,
+        ruleExecutionLogger,
       });
       return { ...result, state };
     },

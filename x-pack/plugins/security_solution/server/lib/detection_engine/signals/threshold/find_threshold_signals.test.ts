@@ -19,7 +19,13 @@ const buildRuleMessage = buildRuleMessageFactory({
   name: 'fake name',
 });
 
-const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
+const queryFilter = getQueryFilter({
+  query: '',
+  language: 'kuery',
+  filters: [],
+  index: ['*'],
+  lists: [],
+});
 const mockSingleSearchAfter = jest.fn();
 
 // Failing with rule registry enabled
