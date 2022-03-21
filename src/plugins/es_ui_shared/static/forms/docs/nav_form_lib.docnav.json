@@ -1,0 +1,53 @@
+{
+    "mission": "ES UI: Form lib",
+    "id": "formLib",
+    "landingPageId": "formLibWelcome",
+    "icon": "indexEdit",
+    "description": "Build complex forms the easy way",
+    "items": [
+      {
+        "label": "Getting started",
+        "items": [{ "id": "formLibWelcome" }]
+      },
+      {
+        "label": "Examples",
+        "items": [
+          { "id": "formLibExampleStyleFields" },
+          { "id": "formLibExampleValidation" },
+          { "id": "formLibExampleListeningToChanges" },
+          { "id": "formLibExampleFieldsComposition" },
+          { "id": "formLibExampleDynamicFields" },
+          { "id": "formLibExampleSerializersDeserializers" }
+        ]
+      },
+      {
+        "label": "Core",
+        "items": [
+          { "id": "formLibCoreFundamentals" },
+          { "id": "formLibCoreDefaultValue" },
+          { "id": "formLibCoreUseForm" },
+          { "id": "formLibCoreFormHook" },
+          { "id": "formLibCoreFormComponent" },
+          { "id": "formLibCoreUseField" },
+          { "id": "formLibCoreFieldHook" },
+          { "id": "formLibCoreUseMultiFields" },
+          { "id": "formLibCoreUseArray" }
+        ]
+      },
+      {
+        "label": "Hooks",
+        "items": [
+            { "id": "formLibCoreUseFormData" },
+            { "id": "formLibCoreUseFormIsModified" },
+            { "id": "formLibCoreUseBehaviorSubject" }
+        ]
+      },
+      {
+        "label": "Helpers",
+        "items": [
+          { "id": "formLibHelpersComponents" },
+          { "id": "formLibHelpersValidators" }
+        ]
+      }
+    ]
+  }

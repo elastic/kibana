@@ -38,7 +38,7 @@ export function BackendLink({
   query,
   subtype,
   type,
-  onClick,
+  onClick
 }: BackendLinkProps) {
   const { link } = useApmRouter();
 
@@ -48,7 +48,7 @@ export function BackendLink({
         query,
       })}
       onClick={onClick}
-    >
+    > 
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <SpanIcon type={type} subtype={subtype} />
