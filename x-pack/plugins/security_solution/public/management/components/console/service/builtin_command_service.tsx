@@ -73,15 +73,15 @@ export class ConsoleBuiltinCommandsService implements BuiltinCommandServiceInter
 
   async getHelpContent(
     parsedInput: ParsedCommandInput,
-    consoleService: CommandServiceInterface
+    commandService: CommandServiceInterface
   ): Promise<{ result: ReactNode }> {
     let helpOutput: ReactNode;
 
-    if (consoleService.getHelp) {
-      helpOutput = (await consoleService.getHelp()).result;
+    if (commandService.getHelp) {
+      helpOutput = (await commandService.getHelp()).result;
     } else {
       helpOutput = (
-        <CommandList commands={this.commandList.concat(consoleService.getCommandList())} />
+        <CommandList commands={this.commandList.concat(commandService.getCommandList())} />
       );
     }
 

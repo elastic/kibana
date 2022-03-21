@@ -46,18 +46,18 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
 
   const renderConsole: ConsoleTestSetup['renderConsole'] = ({
     prompt = '$$>',
-    consoleService = commandServiceMock,
+    commandService = commandServiceMock,
     'data-test-subj': dataTestSubj = 'test',
     ...others
   } = {}) => {
-    if (consoleService !== commandServiceMock) {
+    if (commandService !== commandServiceMock) {
       throw new Error('Must use CommandService provided by test setup');
     }
 
     return (renderResult = mockedContext.render(
       <Console
         prompt={prompt}
-        consoleService={consoleService}
+        commandService={commandService}
         data-test-subj={dataTestSubj}
         {...others}
       />

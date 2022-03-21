@@ -20,7 +20,7 @@ export const EndpointConsole = memo<EndpointConsoleProps>(({ endpoint }) => {
   }, [endpoint]);
 
   return (
-    <Console prompt={`endpoint-${endpoint.agent.version} >`} consoleService={consoleService} />
+    <Console prompt={`endpoint-${endpoint.agent.version} >`} commandService={consoleService} />
   );
 });
 

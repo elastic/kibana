@@ -18,7 +18,7 @@ export interface BuiltinCommandServiceInterface extends CommandServiceInterface 
 
   getHelpContent(
     parsedInput: ParsedCommandInput,
-    consoleService: CommandServiceInterface
+    commandService: CommandServiceInterface
   ): Promise<{ result: ReactNode }>;
 
   isBuiltin(name: string): boolean;

@@ -88,7 +88,7 @@ export const DevConsole = memo(() => {
 
   return isConsoleEnabled && showConsole ? (
     <div style={{ height: '400px' }}>
-      <Console prompt="$$>" consoleService={consoleService} data-test-subj="dev" />
+      <Console prompt="$$>" commandService={consoleService} data-test-subj="dev" />
     </div>
   ) : null;
 });

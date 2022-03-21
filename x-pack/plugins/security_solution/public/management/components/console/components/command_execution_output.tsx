@@ -30,7 +30,7 @@ export interface CommandExecutionOutputProps {
   command: Command;
 }
 export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ command }) => {
-  const consoleService = useCommandService();
+  const commandService = useCommandService();
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [output, setOutput] = useState<ReactNode | null>(null);
   const dispatch = useConsoleStateDispatch();
@@ -48,7 +48,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
       }, 15000);
 
       try {
-        const commandOutput = await consoleService.executeCommand(command);
+        const commandOutput = await commandService.executeCommand(command);
         setOutput(commandOutput.result);
 
         // FIXME: PT the console should scroll the bottom as well
@@ -60,7 +60,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
       setIsRunning(false);
       setShowRunInTheBackground(false);
     })();
-  }, [command, consoleService]);
+  }, [command, commandService]);
 
   useEffect(() => {
     if (!isRunning) {
