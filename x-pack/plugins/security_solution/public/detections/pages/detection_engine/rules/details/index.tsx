@@ -271,15 +271,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
         const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
-        spacesApi.ui.redirectLegacyUrl(
+        spacesApi.ui.redirectLegacyUrl({
           path,
-          i18nTranslate.translate(
+          aliasPurpose: rule.alias_purpose,
+          objectNoun: i18nTranslate.translate(
             'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
-            {
-              defaultMessage: 'rule',
-            }
-          )
-        );
+            { defaultMessage: 'rule' }
+          ),
+        });
       }
     }
   }, [rule, spacesApi]);

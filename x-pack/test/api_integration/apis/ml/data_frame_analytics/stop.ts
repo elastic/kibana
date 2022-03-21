@@ -40,11 +40,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('StopsDataFrameAnalyticsJob', () => {
       it('should stop analytics job for specified id when job exists', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).not.to.be(undefined);
         expect(body.stopped).to.be(true);
@@ -55,33 +55,33 @@ export default ({ getService }: FtrProviderContext) => {
         const id = `${jobId}_invalid`;
         const message = `No known job with id '${id}'`;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${id}/_stop`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(404, status, body);
 
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql(message);
       });
 
       it('should not allow to stop analytics job for unauthorized user', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
       });
 
       it('should not allow to stop analytics job for user with view only permission', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_stop`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
