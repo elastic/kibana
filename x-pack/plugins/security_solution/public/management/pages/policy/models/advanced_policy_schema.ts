@@ -879,7 +879,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
-        defaultMessage: 'Description needed. Default: kprobes',
+        defaultMessage:
+          'Allows users to control whether kprobes or ebpf are used to gather data. Possible options are kprobes, ebpf, or auto. Default: auto',
       }
     ),
   },

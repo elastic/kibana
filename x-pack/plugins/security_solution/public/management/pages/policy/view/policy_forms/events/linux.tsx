@@ -43,7 +43,7 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
     name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data',
       {
-        defaultMessage: 'Include session data in events',
+        defaultMessage: 'Include session data in process events',
       }
     ),
     protectionField: 'session_data',
