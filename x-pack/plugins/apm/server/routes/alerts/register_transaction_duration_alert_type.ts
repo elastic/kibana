@@ -13,6 +13,8 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { take } from 'rxjs/operators';
+import { join } from 'path';
+import { getAlertUrl } from '../../../common/utils/formatters/alertUrl';
 import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
@@ -64,6 +66,7 @@ export function registerTransactionDurationAlertType({
   ruleDataClient,
   config$,
   logger,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -189,6 +192,17 @@ export function registerTransactionDurationAlertType({
           windowSize: ruleParams.windowSize,
           windowUnit: ruleParams.windowUnit,
         });
+
+        const relativeViewInAppUrl = getAlertUrl(ruleParams.serviceName, [
+          getEnvironmentLabel(ruleParams.environment),
+        ]);
+
+        const viewInAppUrl = basePath.publicBaseUrl
+          ? new URL(
+              join(basePath.serverBasePath, relativeViewInAppUrl),
+              basePath.publicBaseUrl
+            ).toString()
+          : relativeViewInAppUrl;
         services
           .alertWithLifecycle({
             id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
@@ -212,7 +226,7 @@ export function registerTransactionDurationAlertType({
             triggerValue: transactionDurationFormatted,
             interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
             reason: reasonMessage,
-            viewInAppUrl: 'viewInAppUrl',
+            viewInAppUrl,
           });
       }
 
