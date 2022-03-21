@@ -114,7 +114,7 @@ export function EmptyStatusBox({
   addLink,
 }: ObservabilityStatusBoxProps) {
   return (
-    <EuiPanel color="warning" hasBorder={true} style={{ marginBottom: 20 }}>
+    <EuiPanel color="warning" hasBorder={true}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <div>
