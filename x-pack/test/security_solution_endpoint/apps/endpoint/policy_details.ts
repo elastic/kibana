@@ -323,11 +323,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show trusted apps card and link should go back to policy', async () => {
-        await testSubjects.existOrFail('fleetTrustedAppsCard');
-        await (await testSubjects.find('linkToTrustedApps')).click();
+        await testSubjects.existOrFail('trustedApps-fleet-integration-card');
+        await (await testSubjects.find('trustedApps-link-to-exceptions')).click();
         await testSubjects.existOrFail('policyDetailsPage');
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it('should show event filters card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('eventFilters-fleet-integration-card');
+        await (await testSubjects.find('eventFilters-link-to-exceptions')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it('should show blocklists card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('blocklists-fleet-integration-card');
+        const blocklistsCard = await testSubjects.find('blocklists-fleet-integration-card');
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(blocklistsCard);
+        await (await testSubjects.find('blocklists-link-to-exceptions')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it('should not show host isolation exceptions card because no entries', async () => {
+        await testSubjects.missingOrFail('hostIsolationExceptions-fleet-integration-card');
       });
     });
   });

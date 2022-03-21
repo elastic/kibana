@@ -12,7 +12,15 @@ export type {
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 export type { XYState } from './xy_visualization/types';
-export type { DataType, OperationMetadata, Visualization } from './types';
+export type {
+  DatasourcePublicAPI,
+  DataType,
+  OperationMetadata,
+  SuggestionRequest,
+  TableSuggestion,
+  Visualization,
+  VisualizationSuggestion,
+} from './types';
 export type {
   AxesSettingsConfig,
   XYLayerConfig,

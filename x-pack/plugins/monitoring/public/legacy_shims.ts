@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup, IUiSettingsClient, AppMountParameters } from 'kibana/public';
+import {
+  CoreStart,
+  HttpSetup,
+  IUiSettingsClient,
+  AppMountParameters,
+  NotificationsStart,
+  ApplicationStart,
+  DocLinksStart,
+  ChromeStart,
+  I18nStart,
+} from 'kibana/public';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
 import {
@@ -41,17 +51,17 @@ export interface KFetchKibanaOptions {
 }
 
 export interface IShims {
-  toastNotifications: CoreStart['notifications']['toasts'];
-  capabilities: CoreStart['application']['capabilities'];
+  toastNotifications: NotificationsStart['toasts'];
+  capabilities: ApplicationStart['capabilities'];
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
     set: (breadcrumbs: BreadcrumbItem[]) => void;
     update: (breadcrumbs?: BreadcrumbItem[]) => void;
   };
-  I18nContext: CoreStart['i18n']['Context'];
-  docLinks: CoreStart['docLinks'];
-  docTitle: CoreStart['chrome']['docTitle'];
+  I18nContext: I18nStart['Context'];
+  docLinks: DocLinksStart;
+  docTitle: ChromeStart['docTitle'];
   timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel>;

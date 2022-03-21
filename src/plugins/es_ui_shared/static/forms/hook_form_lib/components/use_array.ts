@@ -46,7 +46,7 @@ export interface FormArrayField {
  *   users: []
  * }
  *
- * and you want to be able to add user objects ({ name: 'john', lastName. 'snow' }) inside
+ * and you want to be able to add user objects (e.g. { name: 'john', lastName. 'snow' }) inside
  * the "users" array, you would use UseArray to render rows of user objects with 2 fields in each of them ("name" and "lastName")
  *
  * Look at the README.md for some examples.
@@ -75,27 +75,28 @@ export const UseArray = ({
 
   const fieldDefaultValue = useMemo<ArrayItem[]>(() => {
     const defaultValues = readDefaultValueOnForm
-      ? (getFieldDefaultValue(path) as any[])
+      ? getFieldDefaultValue<unknown[]>(path)
       : undefined;
 
-    const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
-      values.map((_, index) => ({
+    if (defaultValues) {
+      return defaultValues.map((_, index) => ({
         id: uniqueId.current++,
         path: `${path}[${index}]`,
         isNew: false,
       }));
+    }
 
-    return defaultValues
-      ? getInitialItemsFromValues(defaultValues)
-      : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
+    return new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
   }, [path, initialNumberOfItems, readDefaultValueOnForm, getFieldDefaultValue, getNewItemAtIndex]);
 
-  // Create a new hook field with the "isIncludedInOutput" set to false so we don't use its value to build the final form data.
-  // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.
+  // Create an internal hook field which behaves like any other form field except that it is not
+  // outputed in the form data (when calling form.submit() or form.getFormData())
+  // This allow us to run custom validations (passed to the props) on the Array items
   const fieldConfigBase: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,
+    initialValue: fieldDefaultValue,
     valueChangeDebounceTime: 0,
-    isIncludedInOutput: false,
+    isIncludedInOutput: false, // indicate to not include this field when returning the form data
   };
 
   const fieldConfig: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations

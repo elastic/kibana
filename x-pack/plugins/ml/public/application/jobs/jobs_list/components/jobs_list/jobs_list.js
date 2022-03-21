@@ -15,7 +15,7 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { JobSpacesList } from '../../../../components/job_spaces_list';
+import { MLSavedObjectsSpacesList } from '../../../../components/ml_saved_objects_spaces_list';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 import {
@@ -315,11 +315,11 @@ export class JobsList extends Component {
             defaultMessage: 'Spaces',
           }),
           render: (item) => (
-            <JobSpacesList
+            <MLSavedObjectsSpacesList
               spacesApi={spacesApi}
               spaceIds={item.spaceIds}
               id={item.id}
-              jobType="anomaly-detector"
+              mlSavedObjectType="anomaly-detector"
               refresh={this.props.refreshJobs}
             />
           ),
