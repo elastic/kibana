@@ -724,7 +724,7 @@ function addInitialValueIfAvailable({
     .find(({ type }) => type === layerType);
 
   if (
-    layerType !== 'annotations' &&
+    !layerInfo?.noDatasource &&
     layerInfo?.initialDimensions &&
     activeDatasource?.initializeDimension
   ) {
@@ -749,7 +749,7 @@ function addInitialValueIfAvailable({
       };
     }
   }
-  if (layerType === 'annotations' && layerInfo?.initialDimensions) {
+  if (layerInfo?.noDatasource && layerInfo?.initialDimensions) {
     const info = groupId
       ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
       : // pick the first available one if not passed
