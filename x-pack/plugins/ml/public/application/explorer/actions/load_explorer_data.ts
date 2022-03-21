@@ -28,7 +28,6 @@ import {
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
-import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
 import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
@@ -92,7 +91,6 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
  */
 const loadExplorerDataProvider = (
   mlResultsService: MlResultsService,
-  anomalyTimelineService: AnomalyTimelineService,
   anomalyExplorerChartsService: AnomalyExplorerChartsService,
   timefilter: TimefilterContract
 ) => {
@@ -206,28 +204,18 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
   const {
     services: {
       mlServices: { mlApiServices },
-      uiSettings,
     },
   } = useMlKibana();
 
   const loadExplorerData = useMemo(() => {
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
-    const anomalyTimelineService = new AnomalyTimelineService(
-      timefilter,
-      uiSettings,
-      mlResultsService
-    );
+
     const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
       timefilter,
       mlApiServices,
       mlResultsService
     );
-    return loadExplorerDataProvider(
-      mlResultsService,
-      anomalyTimelineService,
-      anomalyExplorerChartsService,
-      timefilter
-    );
+    return loadExplorerDataProvider(mlResultsService, anomalyExplorerChartsService, timefilter);
   }, []);
 
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);
