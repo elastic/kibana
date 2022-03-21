@@ -190,7 +190,7 @@ export const ALERT_TYPES_CONFIG: Record<
   },
   [AlertType.TransactionDurationAnomaly]: {
     name: i18n.translate('xpack.apm.transactionDurationAnomalyAlert.name', {
-      defaultMessage: 'Latency anomaly',
+      defaultMessage: 'Anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,

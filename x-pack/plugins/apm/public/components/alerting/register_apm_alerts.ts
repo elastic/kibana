@@ -151,7 +151,8 @@ export function registerApmAlerts(
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.description',
       {
-        defaultMessage: 'Alert when the latency of a service is abnormal.',
+        defaultMessage:
+          'Alert when either the latency, throughput, or failed transaction rate of a service is anomalous.',
       }
     ),
     format: ({ fields }) => ({
