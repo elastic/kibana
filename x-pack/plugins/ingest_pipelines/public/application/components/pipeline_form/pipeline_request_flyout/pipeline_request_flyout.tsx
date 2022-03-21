@@ -60,9 +60,8 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
       request={request}
       closeFlyout={closeFlyout}
       flyoutProps={{ maxWidth: 550 }}
-      navigateToUrl={services.navigateToUrl}
+      application={services.application}
       urlService={services.share.url}
-      canShowDevtools={!!services.capabilities?.dev_tools.show}
     />
   );
 };

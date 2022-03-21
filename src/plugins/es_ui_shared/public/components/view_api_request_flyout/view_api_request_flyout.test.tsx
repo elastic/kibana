@@ -14,6 +14,8 @@ import { compressToEncodedURIComponent } from 'lz-string';
 
 import { ViewApiRequestFlyout } from './view_api_request_flyout';
 import type { UrlService } from 'src/plugins/share/common/url_service';
+import { ApplicationStart } from 'src/core/public';
+import { applicationServiceMock } from 'src/core/public/mocks';
 
 const payload = {
   title: 'Test title',
@@ -22,7 +24,7 @@ const payload = {
   closeFlyout: jest.fn(),
 };
 
-const urlService = {
+const urlServiceMock = {
   locators: {
     get: jest.fn().mockReturnValue({
       useUrl: jest.fn().mockImplementation((value) => {
@@ -31,6 +33,15 @@ const urlService = {
     }),
   },
 } as any as UrlService;
+
+const applicationMock = {
+  ...applicationServiceMock.createStartContract(),
+  capabilities: {
+    dev_tools: {
+      show: true,
+    },
+  },
+} as any as ApplicationStart;
 
 describe('ViewApiRequestFlyout', () => {
   test('is rendered', () => {
@@ -50,12 +61,14 @@ describe('ViewApiRequestFlyout', () => {
     });
 
     test('doesnt have openInConsole when some optional props are not supplied', async () => {
-      const component = mountWithI18nProvider(
-        <ViewApiRequestFlyout {...payload} canShowDevtools />
-      );
+      const component = mountWithI18nProvider(<ViewApiRequestFlyout {...payload} />);
 
       const openInConsole = findTestSubject(component, 'apiRequestFlyoutOpenInConsoleButton');
       expect(openInConsole.length).toEqual(0);
+
+      // Flyout should *not* be wrapped with RedirectAppLinks
+      const redirectWrapper = findTestSubject(component, 'apiRequestFlyoutRedirectWrapper');
+      expect(redirectWrapper.length).toEqual(0);
     });
 
     test('has openInConsole when all optional props are supplied', async () => {
@@ -63,15 +76,18 @@ describe('ViewApiRequestFlyout', () => {
       const component = mountWithI18nProvider(
         <ViewApiRequestFlyout
           {...payload}
-          canShowDevtools
-          navigateToUrl={jest.fn()}
-          urlService={urlService}
+          application={applicationMock}
+          urlService={urlServiceMock}
         />
       );
 
       const openInConsole = findTestSubject(component, 'apiRequestFlyoutOpenInConsoleButton');
       expect(openInConsole.length).toEqual(1);
       expect(openInConsole.props().href).toEqual(`devToolsUrl_data:text/plain,${encodedRequest}`);
+
+      // Flyout should be wrapped with RedirectAppLinks
+      const redirectWrapper = findTestSubject(component, 'apiRequestFlyoutRedirectWrapper');
+      expect(redirectWrapper.length).toEqual(1);
     });
   });
 });

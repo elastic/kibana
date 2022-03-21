@@ -41,8 +41,7 @@ export interface AppServices {
   uiSettings: IUiSettingsClient;
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  capabilities: ApplicationStart['capabilities'];
+  application: ApplicationStart;
 }
 
 export interface CoreServices {

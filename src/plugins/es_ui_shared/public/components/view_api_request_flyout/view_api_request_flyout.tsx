@@ -5,14 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// We want to allow both right-clicking to open in a new tab and clicking through
-// the "Open in Console" link. We could use `RedirectAppLinks` at the top level
-// but that inserts a div which messes up the layout of the flyout. Adding the
-// `RedirectAppLinks` would also mean that we need to add another application
-// dependency to the component.
-/* eslint-disable @elastic/eui/href-or-on-click */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compressToEncodedURIComponent } from 'lz-string';
 
@@ -29,8 +23,9 @@ import {
   EuiCodeBlock,
   EuiCopy,
 } from '@elastic/eui';
-import { ApplicationStart } from 'src/core/public';
 import type { UrlService } from 'src/plugins/share/common/url_service';
+import { ApplicationStart, APP_WRAPPER_CLASS } from '../../../../../core/public';
+import { RedirectAppLinks } from '../../../../kibana_react/public';
 
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;
 interface ViewApiRequestFlyoutProps {
@@ -39,22 +34,21 @@ interface ViewApiRequestFlyoutProps {
   request: string;
   closeFlyout: () => void;
   flyoutProps?: FlyoutProps;
-  navigateToUrl?: ApplicationStart['navigateToUrl'];
+  application?: ApplicationStart;
   urlService?: UrlService;
-  canShowDevtools?: boolean;
 }
 
-export const ViewApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps> = ({
+export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps> = ({
   title,
   description,
   request,
   closeFlyout,
   flyoutProps,
-  navigateToUrl,
   urlService,
-  canShowDevtools,
+  application,
 }) => {
   const getUrlParams = undefined;
+  const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
   const devToolsDataUri = compressToEncodedURIComponent(request);
 
   // Generate a console preview link if we have a valid locator
@@ -64,11 +58,6 @@ export const ViewApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutP
     },
     getUrlParams,
     [request]
-  );
-
-  const consolePreviewClick = useCallback(
-    () => consolePreviewLink && navigateToUrl && navigateToUrl(consolePreviewLink),
-    [consolePreviewLink, navigateToUrl]
   );
 
   // Check if both the Dev Tools UI and the Console UI are enabled.
@@ -112,7 +101,6 @@ export const ViewApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutP
               flush="right"
               iconType="wrench"
               href={consolePreviewLink}
-              onClick={consolePreviewClick}
               data-test-subj="apiRequestFlyoutOpenInConsoleButton"
             >
               <FormattedMessage
@@ -140,4 +128,20 @@ export const ViewApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutP
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
+};
+
+export const ViewApiRequestFlyout = (props: ViewApiRequestFlyoutProps) => {
+  if (props.application) {
+    return (
+      <RedirectAppLinks
+        application={props.application}
+        className={APP_WRAPPER_CLASS}
+        data-test-subj="apiRequestFlyoutRedirectWrapper"
+      >
+        <ApiRequestFlyout {...props} />
+      </RedirectAppLinks>
+    );
+  }
+
+  return <ApiRequestFlyout {...props} />;
 };
