@@ -81,14 +81,16 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
-    docValueFields,
-    entityType,
-    indexName: expandedEvent.indexName ?? '',
-    eventId: expandedEvent.eventId ?? '',
-    runtimeMappings,
-    skip: !expandedEvent.eventId,
-  });
+  const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
+    {
+      docValueFields,
+      entityType,
+      indexName: expandedEvent.indexName ?? '',
+      eventId: expandedEvent.eventId ?? '',
+      runtimeMappings,
+      skip: !expandedEvent.eventId,
+    }
+  );
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
@@ -240,6 +242,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         detailsData={detailsData}
         detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
+        refetchFlyoutData={refetchFlyoutData}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         loadingEventDetails={loading}
@@ -277,6 +280,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
+        refetchFlyoutData={refetchFlyoutData}
         timelineId={timelineId}
       />
     </CasesContext>

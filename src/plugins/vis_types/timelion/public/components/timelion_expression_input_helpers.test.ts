@@ -9,11 +9,11 @@
 import { SUGGESTION_TYPE, suggest } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { setIndexPatterns } from '../helpers/plugin_services';
-import { IndexPatternsContract } from 'src/plugins/data/public';
+import { DataViewsContract } from 'src/plugins/data_views/public';
 import { ITimelionFunction } from '../../common/types';
 
 describe('Timelion expression suggestions', () => {
-  setIndexPatterns({} as IndexPatternsContract);
+  setIndexPatterns({} as DataViewsContract);
 
   const argValueSuggestions = getArgValueSuggestions();
 
