@@ -11,7 +11,7 @@ import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_t
 import { ProcessTreeAlert } from '../process_tree_alert';
 import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 
-interface ProcessTreeAlertsDeps {
+export interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
   jumpToAlertID?: string;
   isProcessSelected?: boolean;

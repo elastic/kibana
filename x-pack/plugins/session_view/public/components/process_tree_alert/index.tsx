@@ -11,7 +11,7 @@ import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_t
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
 
-interface ProcessTreeAlertDeps {
+export interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
   isInvestigated: boolean;
   isSelected: boolean;
@@ -71,6 +71,7 @@ export const ProcessTreeAlert = ({
         iconType="expand"
         aria-label="expand"
         css={styles.alertRowItem}
+        data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
         onClick={handleExpandClick}
       />
       <EuiIcon type="alert" css={styles.alertRowItem} />

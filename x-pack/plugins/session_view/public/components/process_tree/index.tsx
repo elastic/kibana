@@ -17,7 +17,7 @@ import { useStyles } from './styles';
 
 type FetchFunction = () => void;
 
-interface ProcessTreeDeps {
+export interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
 
