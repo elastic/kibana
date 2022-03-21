@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -14,7 +15,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const retry = getService('retry');
   const security = getService('security');
-  const esArchiver = getService('esArchiver');
+  const es = getService('es');
+  const log = getService('log');
 
   const editorTestSubjectSelector = 'searchProfilerEditor';
 
@@ -74,7 +76,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('No indices', () => {
       before(async () => {
-        await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+        // Delete any existing indices that were not properly cleaned up
+        try {
+          const indices = await es.indices.get({
+            index: '*',
+          });
+          const indexNames = Object.keys(indices);
+
+          if (indexNames.length > 0) {
+            await asyncForEach(indexNames, async (indexName) => {
+              await es.indices.delete({ index: indexName });
+            });
+          }
+        } catch (e) {
+          log.debug('[Setup error] Error deleting existing indices');
+          throw e;
+        }
       });
 
       it('returns error if profile is executed with no valid indices', async () => {
