@@ -78,6 +78,7 @@ describe('take action dropdown', () => {
     refetch: jest.fn(),
     refetchFlyoutData: jest.fn(),
     timelineId: TimelineId.active,
+    onOsqueryClick: jest.fn(),
   };
 
   beforeAll(() => {
