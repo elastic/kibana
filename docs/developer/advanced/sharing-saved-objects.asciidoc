@@ -438,9 +438,9 @@ return (
 Second, display a https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/space_list/types.ts[list of spaces] for an
 object, and third, show a
 https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts[flyout] for the user to
-edit the object's assigned spaces. You may want to follow the example of the
-https://github.com/elastic/kibana/blob/{main}/src/plugins/data_view_management/public/components/index_pattern_table/spaces_list.tsx[data
-view management page] and combine these into a single component so that the space list can be clicked to show the flyout:
+edit the object's assigned spaces. You may want to follow the example of the <<data-views,Data Views page>> and
+https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/index_pattern_table/spaces_list.tsx[combine
+these into a single component] so that the space list can be clicked to show the flyout:
 +
 ```tsx
 const [showFlyout, setShowFlyout] = useState(false);
