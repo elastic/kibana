@@ -45,7 +45,7 @@ export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
         <EuiTitle size="xs">
           <h2>
             <FormattedMessage
-              id="xpack.observability.status.dataAvailable"
+              id="xpack.observability.status.dataAvailableTitle"
               defaultMessage="Data available for"
             />
           </h2>

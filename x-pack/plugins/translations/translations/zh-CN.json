@@ -20986,7 +20986,6 @@
     "xpack.observability.seriesEditor.edit": "编辑序列",
     "xpack.observability.seriesEditor.hide": "隐藏序列",
     "xpack.observability.seriesEditor.sampleDocuments": "在新选项卡中查看样例文档",
-    "xpack.observability.status.addIntegrationLink": "添加",
     "xpack.observability.status.learnMoreButton": "了解详情",
     "xpack.observability.transactionRateLabel": "{value} tpm",
     "xpack.observability.urlFilter.wildcard": "使用通配符 *{wildcard}*",

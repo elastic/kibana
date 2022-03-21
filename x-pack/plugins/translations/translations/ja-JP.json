@@ -20958,7 +20958,6 @@
     "xpack.observability.seriesEditor.edit": "系列を編集",
     "xpack.observability.seriesEditor.hide": "系列を非表示",
     "xpack.observability.seriesEditor.sampleDocuments": "新しいタブでサンプルドキュメントを表示",
-    "xpack.observability.status.addIntegrationLink": "追加",
     "xpack.observability.status.learnMoreButton": "詳細",
     "xpack.observability.transactionRateLabel": "{value} tpm",
     "xpack.observability.urlFilter.wildcard": "ワイルドカード*{wildcard}*を使用",
