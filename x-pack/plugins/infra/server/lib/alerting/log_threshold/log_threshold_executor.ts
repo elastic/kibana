@@ -8,6 +8,8 @@
 import { join } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import type { IBasePath } from 'src/core/server';
+
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -22,6 +24,7 @@ import {
   AlertInstanceState as AlertState,
   AlertTypeState as RuleTypeState,
 } from '../../../../../alerting/server';
+
 import {
   RuleParams,
   ruleParamsRT,
@@ -98,7 +101,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async ({ services, params, startedAt }) => {
     const { alertWithLifecycle, savedObjectsClient, scopedClusterClient, getAlertStartedDate } =
       services;
-    const { sources, kibanaBaseUrl } = libs;
+    const { sources, basePath } = libs;
     let indexedStartedAt: string = startedAt.toISOString();
     const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold) => {
       indexedStartedAt = getAlertStartedDate(id) ?? indexedStartedAt;
@@ -111,7 +114,14 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         },
       });
     };
-    const viewInAppUrl = getViewInAppUrl(kibanaBaseUrl, indexedStartedAt);
+
+    const relativeViewInAppUrl = getAlertLink(new Date(indexedStartedAt).getTime());
+    const viewInAppUrl = basePath.publicBaseUrl
+      ? new URL(
+          join(basePath.serverBasePath, relativeViewInAppUrl),
+          basePath.publicBaseUrl
+        ).toString()
+      : relativeViewInAppUrl;
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
       sourceConfiguration.configuration,
@@ -486,14 +496,7 @@ export const updateAlert: AlertUpdater = (alert, state, actions) => {
   });
 };
 
-const getViewInAppUrl = (kibanaBaseUrl: string | undefined, indexedStartedAt: string) => {
-  // Need to extract the kibana base path if exists (server.basePath) to concatenate it correctly using the URL Api.
-  const kibanaBasePath = kibanaBaseUrl ? new URL(kibanaBaseUrl).pathname : '';
-  const relativeViewInAppUrl = getAlertLink(new Date(indexedStartedAt).getTime());
-  return kibanaBaseUrl
-    ? new URL(join(kibanaBasePath, relativeViewInAppUrl), kibanaBaseUrl).toString()
-    : relativeViewInAppUrl;
-};
+const getViewInAppUrl = (basePath: IBasePath, indexedStartedAt: string) => {};
 
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
