@@ -7,8 +7,9 @@
 import React, { createContext } from 'react';
 import { GlobalState } from '../../url_state';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
-import { TimeRange, RefreshInterval, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { TimeRange, RefreshInterval } from '../../../../../../src/plugins/data/public';
 import { Legacy } from '../../legacy_shims';
+import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
 
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
@@ -31,26 +32,6 @@ export const GlobalStateContext = createContext({} as State);
 const REFRESH_INTERVAL_OVERRIDE = {
   pause: false,
   value: 10000,
-};
-
-/**
- * Make sure we default to an active refresh interval if it's not conflicting
- * with user-defined values
- */
-const shouldOverrideRefreshInterval = (
-  uiSettings: MonitoringStartServices['uiSettings'],
-  timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter']
-): boolean => {
-  const isUserDefined =
-    timefilter.isRefreshIntervalTouched() ||
-    !uiSettings.isDefault(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS);
-  if (isUserDefined) {
-    return false;
-  }
-
-  const currentInterval = timefilter.getRefreshInterval();
-  const isPaused = currentInterval.pause || currentInterval.value === 0;
-  return isPaused;
 };
 
 export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
@@ -76,6 +57,7 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     state.setState(newState);
   };
 
+  // default to an active refresh interval if it's not conflicting with user-defined values
   if (shouldOverrideRefreshInterval(uiSettings, Legacy.shims.timefilter)) {
     localState.refreshInterval = REFRESH_INTERVAL_OVERRIDE;
     Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
