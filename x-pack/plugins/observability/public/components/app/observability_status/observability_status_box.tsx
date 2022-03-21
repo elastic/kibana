@@ -139,7 +139,7 @@ export function EmptyStatusBox({
 
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" size="s" href={addLink} target="_blank" fill>
+          <EuiButton color="primary" href={addLink} target="_blank" fill>
             {addTitle}
           </EuiButton>
         </EuiFlexItem>
