@@ -34,7 +34,10 @@ export const useCasesToast = () => {
   const toasts = useToasts();
 
   return {
-    showSuccessAttach: (theCase: Case) => {
+    showSuccessAttach: (
+      theCase: Case,
+      { title, content }: { title?: string; content?: string } = {}
+    ) => {
       const onViewCaseClick = () => {
         navigateToCaseView({
           detailName: theCase.id,
@@ -43,9 +46,10 @@ export const useCasesToast = () => {
       return toasts.addSuccess({
         color: 'success',
         iconType: 'check',
-        title: toMountPoint(<Title>{CASE_SUCCESS_TOAST(theCase.title)}</Title>),
+        title: toMountPoint(<Title>{title ? title : CASE_SUCCESS_TOAST(theCase.title)}</Title>),
         text: toMountPoint(
           <CaseToastSuccessContent
+            content={content}
             syncAlerts={theCase.settings.syncAlerts}
             onViewCaseClick={onViewCaseClick}
           />
@@ -57,17 +61,26 @@ export const useCasesToast = () => {
 export const CaseToastSuccessContent = ({
   syncAlerts,
   onViewCaseClick,
+  content,
 }: {
   syncAlerts: boolean;
   onViewCaseClick: () => void;
+  content?: string;
 }) => {
+  let toastContent: string | undefined;
+  if (content !== undefined) {
+    toastContent = content;
+  } else if (syncAlerts) {
+    toastContent = CASE_SUCCESS_SYNC_TEXT;
+  }
+
   return (
     <>
-      {syncAlerts && (
+      {toastContent !== undefined ? (
         <EuiTextStyled size="s" data-test-subj="toaster-content-sync-text">
-          {CASE_SUCCESS_SYNC_TEXT}
+          {toastContent}
         </EuiTextStyled>
-      )}
+      ) : null}
       <EuiButtonEmpty
         size="xs"
         flush="left"

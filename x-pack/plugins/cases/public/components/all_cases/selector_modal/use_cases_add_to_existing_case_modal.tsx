@@ -13,7 +13,12 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
-export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps) => {
+type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
+  toastTitle?: string;
+  toastContent?: string;
+};
+
+export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
     attachments: props.attachments,
     onClose: props.onClose,
@@ -24,6 +29,8 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
         return props.onRowClick(theCase);
       }
     },
+    toastTitle: props.toastTitle,
+    toastContent: props.toastContent,
   });
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
@@ -51,7 +58,10 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
             closeModal();
             createNewCaseFlyout.open();
           } else {
-            casesToasts.showSuccessAttach(theCase);
+            casesToasts.showSuccessAttach(theCase, {
+              title: props.toastTitle,
+              content: props.toastContent,
+            });
             if (props.onRowClick) {
               props.onRowClick(theCase);
             }
