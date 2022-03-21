@@ -12,7 +12,6 @@ import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subscription, concat } from 'rxjs';
-import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   distinctUntilChanged,
   debounceTime,
@@ -21,7 +20,7 @@ import {
   map,
   take,
 } from 'rxjs/operators';
-import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
+import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
   ControlGroupInput,
