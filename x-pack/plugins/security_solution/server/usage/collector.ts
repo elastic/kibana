@@ -18,6 +18,7 @@ export interface UsageData {
 
 export const registerCollector: RegisterCollector = ({
   core,
+  eventLogIndex,
   signalsIndex,
   ml,
   usageCollection,
@@ -28,6 +29,7 @@ export const registerCollector: RegisterCollector = ({
     return;
   }
 
+  // TODO: Add event collector log information to this usage collector
   const collector = usageCollection.makeUsageCollector<UsageData>({
     type: 'security_solution',
     schema: {
@@ -515,6 +517,7 @@ export const registerCollector: RegisterCollector = ({
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
       const detectionMetrics = await getDetectionsMetrics({
+        eventLogIndex,
         signalsIndex,
         esClient,
         savedObjectsClient,
