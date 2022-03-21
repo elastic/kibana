@@ -10,10 +10,21 @@ import { Validation } from './form_validation';
 import { DeSerializer } from './form_de_serializer';
 import { DefaultValue } from './form_default_value';
 import { IsModified } from './form_is_modified';
+import { submitForm } from './form_utils';
+
+import { Basic as UseArrayBasic } from './use_array_basic';
 
 export const formStories = {
   Validation,
   DeSerializer,
   DefaultValue,
   IsModified,
+};
+
+export const useArrayStories = {
+  UseArrayBasic,
+};
+
+export const helpers = {
+  submitForm,
 };

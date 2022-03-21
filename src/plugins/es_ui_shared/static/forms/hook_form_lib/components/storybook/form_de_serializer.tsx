@@ -84,7 +84,7 @@ export const DeSerializer = (args: Args) => {
   return <FormWithDeSerializer key={args.endPoint} {...args} />;
 };
 
-DeSerializer.storyName = 'Form (De)serializer';
+DeSerializer.storyName = '(De)serializer';
 
 DeSerializer.argTypes = {
   endPoint: {
