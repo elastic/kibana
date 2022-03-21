@@ -13,10 +13,11 @@ import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../../fle
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
+import { getEndpointListPath, getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
 import { getHostIsolationExceptionItems } from '../../host_isolation_exceptions/service';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
+import { APP_UI_ID } from '../../../../../common/constants';
 
 jest.mock('./policy_forms/components/policy_form_layout');
 jest.mock('../../../../common/components/user_privileges');
@@ -148,6 +149,30 @@ describe('Policy Details', () => {
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       backToListLink.simulate('click', { button: 0 });
       expect(history.location.pathname).toEqual(policyListPath);
+    });
+
+    it('should display and navigate to custom back button if non-default backLink state is present', async () => {
+      const customBackLinkState = {
+        backLink: {
+          navigateTo: [
+            APP_UI_ID,
+            {
+              path: getEndpointListPath({ name: 'endpointList' }),
+            },
+          ],
+          label: 'View all endpoints',
+          href: '/app/security/administration/endpoints',
+        },
+      };
+
+      history.push({ pathname: policyDetailsPathUrl, state: customBackLinkState });
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+
+      const backToListLink = policyView.find('BackToExternalAppButton');
+      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security/administration/endpoints`);
+      expect(backToListLink.text()).toBe('View all endpoints');
     });
 
     it('should display agent stats', async () => {
