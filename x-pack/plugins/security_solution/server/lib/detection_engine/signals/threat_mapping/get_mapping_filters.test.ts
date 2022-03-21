@@ -50,132 +50,92 @@ describe('getMappingFilters', () => {
   ];
 
   it('creates the expected filters', () => {
-    const { eventMappingFilters, indicatorMappingFilters } = getMappingFilters(sampleMapping);
+    const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(sampleMapping);
 
-    expect(eventMappingFilters).toEqual([
-      {
-        meta: {},
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: { field: 'source.ip' },
-                    },
-                    {
-                      exists: { field: 'host.name' },
-                    },
-                  ],
-                },
+    expect(eventMappingFilter).toEqual({
+      meta: {},
+      query: {
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [
+                  {
+                    exists: { field: 'source.ip' },
+                  },
+                  {
+                    exists: { field: 'host.name' },
+                  },
+                ],
               },
-            ],
-          },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    exists: { field: 'destination.ip' },
+                  },
+                  {
+                    exists: { field: 'destination.port' },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    exists: { field: 'source.port' },
+                  },
+                ],
+              },
+            },
+          ],
         },
       },
-      {
-        meta: {},
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: { field: 'destination.ip' },
-                    },
-                    {
-                      exists: { field: 'destination.port' },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-      {
-        meta: {},
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: { field: 'source.port' },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-    ]);
+    });
 
-    expect(indicatorMappingFilters).toEqual([
-      {
-        meta: {},
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: { field: 'threat.indicator.ip' },
-                    },
-                    {
-                      exists: { field: 'threat.host.name' },
-                    },
-                  ],
-                },
+    expect(indicatorMappingFilter).toEqual({
+      meta: {},
+      query: {
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [
+                  {
+                    exists: { field: 'threat.indicator.ip' },
+                  },
+                  {
+                    exists: { field: 'threat.host.name' },
+                  },
+                ],
               },
-            ],
-          },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    exists: { field: 'threat.indicator.ip' },
+                  },
+                  {
+                    exists: { field: 'threat.destination.port' },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    exists: { field: 'source.port' },
+                  },
+                ],
+              },
+            },
+          ],
         },
       },
-      {
-        meta: {},
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: { field: 'threat.indicator.ip' },
-                    },
-                    {
-                      exists: { field: 'threat.destination.port' },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-      {
-        meta: {},
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      exists: { field: 'source.port' },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-    ]);
+    });
   });
 });

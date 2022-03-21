@@ -8,7 +8,7 @@
 
 import { RollupSearchStrategy } from './rollup_search_strategy';
 
-import type { IndexPatternsService } from '../../../../../../data/common';
+import type { DataViewsService } from '../../../../../../data_views/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -156,7 +156,7 @@ describe('Rollup Search Strategy', () => {
     test('should return fields for wildcard', async () => {
       const fields = await rollupSearchStrategy.getFieldsForWildcard(
         { indexPatternString: 'indexPattern', indexPattern: undefined },
-        {} as IndexPatternsService,
+        {} as DataViewsService,
         (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher,
         {
           fieldsCapabilities,

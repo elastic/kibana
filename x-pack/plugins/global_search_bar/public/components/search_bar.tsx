@@ -35,17 +35,6 @@ import './search_bar.scss';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
-const setFieldValue = (field: HTMLInputElement, value: string) => {
-  const nativeInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-  const nativeInputValueSetter = nativeInputValue ? nativeInputValue.set : undefined;
-  if (nativeInputValueSetter) {
-    nativeInputValueSetter.call(field, value);
-  }
-  field.dispatchEvent(new Event('change'));
-};
-
-const clearField = (field: HTMLInputElement) => setFieldValue(field, '');
-
 const blurEvent = new FocusEvent('blur');
 
 const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
@@ -225,7 +214,6 @@ export const SearchBar: FC<SearchBarProps> = ({
       // if the type is a suggestion, we change the query on the input and trigger a new search
       // by setting the searchValue (only setting the field value does not trigger a search)
       if (type === '__suggestion__') {
-        setFieldValue(searchRef!, suggestion);
         setSearchValue(suggestion);
         return;
       }
@@ -253,12 +241,14 @@ export const SearchBar: FC<SearchBarProps> = ({
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
-        clearField(searchRef);
+        clearField();
         searchRef.dispatchEvent(blurEvent);
       }
     },
     [trackUiMetric, navigateToUrl, searchRef]
   );
+
+  const clearField = () => setSearchValue('');
 
   const emptyMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
@@ -276,6 +266,7 @@ export const SearchBar: FC<SearchBarProps> = ({
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
       searchProps={{
+        value: searchValue,
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,

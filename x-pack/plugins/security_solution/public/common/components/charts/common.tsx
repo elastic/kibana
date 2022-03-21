@@ -104,6 +104,7 @@ const theme: PartialTheme = {
 };
 export const useTheme = () => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const themeValue = useMemo(() => mergeWithDefaultTheme(theme, defaultTheme), []);

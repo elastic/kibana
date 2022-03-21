@@ -16,7 +16,7 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { DataViewsContract } from '../../../../../src/plugins/data_views/public';
 import { HttpFetchError } from '../../../../../src/core/public';
 import {
   IndexPatternPersistedState,
@@ -214,7 +214,7 @@ function mockIndexPatternsService() {
         },
       ];
     }),
-  } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
 }
 
 describe('loader', () => {
@@ -228,7 +228,7 @@ describe('loader', () => {
             Promise.reject('mockIndexPatternService.get should not have been called')
           ),
           getIdsWithTitle: jest.fn(),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache).toEqual(sampleIndexPatterns);
@@ -301,7 +301,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -357,7 +357,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -695,7 +695,7 @@ describe('loader', () => {
               },
             ];
           }),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
       }
       const savedState: IndexPatternPersistedState = {
         layers: {

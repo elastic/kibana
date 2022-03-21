@@ -21,7 +21,6 @@ import {
 } from '../../../../../alerting/server';
 import { TermAggregationBucket } from '../../types';
 import {
-  EqlSearchResponse,
   BaseHit,
   RuleAlertAction,
   SearchTypes,
@@ -187,8 +186,6 @@ export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type AlertSourceHit = estypes.SearchHit<RACAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
-
-export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
 export type RuleExecutorOptions = AlertExecutorOptions<
   RuleParams,

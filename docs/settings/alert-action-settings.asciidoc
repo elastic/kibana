@@ -126,7 +126,7 @@ into a single string.  This configuration can be used for environments where
 the files cannot be made available.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.xmatters`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
@@ -201,3 +201,6 @@ Specifies the minimum interval allowed for the all rules. This minimum is enforc
 `<count>[s,m,h,d]` 
 +
 For example, `20m`, `24h`, `7d`. Default: `1m`.
+
+`xpack.alerting.rules.execution.actions.max`
+Specifies the maximum number of actions that a rule can trigger each time detection checks run.

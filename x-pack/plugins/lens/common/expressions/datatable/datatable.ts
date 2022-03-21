@@ -29,6 +29,8 @@ export interface DatatableArgs {
   sortingDirection: SortingState['direction'];
   fitRowToContent?: boolean;
   rowHeightLines?: number;
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
 }
 
@@ -70,6 +72,14 @@ export const getDatatable = (
       help: '',
     },
     rowHeightLines: {
+      types: ['number'],
+      help: '',
+    },
+    headerRowHeight: {
+      types: ['string'],
+      help: '',
+    },
+    headerRowHeightLines: {
       types: ['number'],
       help: '',
     },

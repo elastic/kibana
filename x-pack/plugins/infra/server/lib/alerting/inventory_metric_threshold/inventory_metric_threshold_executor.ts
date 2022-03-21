@@ -32,6 +32,7 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
+import { createScopedLogger } from '../common/utils';
 import { evaluateCondition } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
@@ -61,9 +62,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params }) => {
+  >(async ({ services, params, alertId, executionId }) => {
+    const startTime = Date.now();
     const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+    const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
@@ -79,6 +82,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
+        logger.error(e.message);
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory('*', reason);
@@ -117,9 +121,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           esClient: services.scopedClusterClient.asCurrentUser,
           compositeSize,
           filterQuery,
+          logger,
         })
       )
     );
+    let scheduledActionsCount = 0;
     const inventoryItems = Object.keys(first(results)!);
     for (const group of inventoryItems) {
       // AND logic; all criteria must be across the threshold
@@ -187,6 +193,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             : FIRED_ACTIONS.id;
 
         const alert = alertFactory(`${group}`, reason);
+        scheduledActionsCount++;
         alert.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
@@ -207,6 +214,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
       }
     }
+    const stopTime = Date.now();
+    logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
   });
 
 const formatThreshold = (metric: SnapshotMetricType, value: number) => {

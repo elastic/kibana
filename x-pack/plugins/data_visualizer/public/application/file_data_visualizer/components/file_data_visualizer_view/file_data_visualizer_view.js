@@ -364,7 +364,7 @@ export class FileDataVisualizerView extends Component {
               fileName={fileName}
               fileContents={fileContents}
               data={data}
-              indexPatterns={this.props.indexPatterns}
+              dataViewsContract={this.props.dataViewsContract}
               showBottomBar={this.showBottomBar}
               hideBottomBar={this.hideBottomBar}
               savedObjectsClient={this.savedObjectsClient}

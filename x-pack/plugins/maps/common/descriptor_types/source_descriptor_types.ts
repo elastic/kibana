@@ -158,6 +158,7 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
 
 export type InlineFieldDescriptor = {
   name: string;
+  label?: string;
   type: 'string' | 'number';
 };
 

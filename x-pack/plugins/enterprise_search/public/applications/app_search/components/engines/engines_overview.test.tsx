@@ -156,19 +156,6 @@ describe('EnginesOverview', () => {
     });
   });
 
-  describe('when an account does not have a platinum license', () => {
-    it('renders a license call to action in place of the meta engines table', () => {
-      setMockValues({
-        ...valuesWithEngines,
-        hasPlatinumLicense: false,
-      });
-      const wrapper = shallow(<EnginesOverview />);
-
-      expect(wrapper.find('[data-test-subj="metaEnginesLicenseCTA"]')).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="appSearchMetaEngines"]')).toHaveLength(0);
-    });
-  });
-
   describe('pagination', () => {
     const getTablePagination = (wrapper: ShallowWrapper) =>
       wrapper.find(EnginesTable).prop('pagination');

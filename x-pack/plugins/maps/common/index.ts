@@ -22,6 +22,7 @@ export {
   MAX_ZOOM,
   MIN_ZOOM,
   VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
 } from './constants';
 
 export type { FieldFormatter } from './constants';
