@@ -161,7 +161,10 @@ export const IndexPatternTable = ({
             spaceIds={dataView.namespaces || []}
             id={dataView.id}
             title={dataView.title}
-            refresh={loadDataViews}
+            refresh={() => {
+              dataViews.clearCache(dataView.id);
+              loadDataViews();
+            }}
           />
         ) : (
           <></>

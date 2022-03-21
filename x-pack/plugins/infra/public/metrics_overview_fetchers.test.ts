@@ -19,7 +19,7 @@ function setup() {
     return Promise.resolve([
       core as CoreStart,
       deps as InfraClientStartDeps,
-      void 0 as InfraClientStartExports,
+      {} as InfraClientStartExports,
     ]) as Promise<[CoreStart, InfraClientStartDeps, InfraClientStartExports]>;
   });
   return { core, mockedGetStartServices };
