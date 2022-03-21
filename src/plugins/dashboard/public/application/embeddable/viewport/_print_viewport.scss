@@ -6,31 +6,85 @@ $a4PageHeight: 297mm;
 $a4PageWidth: 210mm;
 $a4PageMargin: 0;
 $a4PagePadding: 0;
+$a4PageFooterHeight: 10mm;
+
+$a4PageContentHeight: $a4PageHeight - $a4PageFooterHeight;
+$a4PageContentWidth: $a4PageWidth;
 
 @page {
   size: A4;
   orientation: portrait;
   margin: $a4PageMargin;
   padding: $a4PagePadding;
+  counter-increment: page;
+}
+
+@mixin globalScreenRules {
+  @media screen, projection {
+    .printFooter {
+      bottom: 0;
+    }
+
+    .printHeader {
+      display: none;
+    }
+
+  }
 }
 
 @mixin globalPrintRules {
-  html {
-    background-color: #FFF;
-  }
+  @media print {
 
-  a[href]:after {
-    content: ' [' attr(href) ']';
-  }
+    html {
+      background-color: #FFF;
+    }
 
-  figure {
-    break-inside: avoid;
-  }
+    a[href]:after {
+      content: ' [' attr(href) ']';
+    }
 
-  * {
-    -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
-    color-adjust: exact !important;                 /*Firefox*/
+    figure {
+      break-inside: avoid;
+    }
+
+    * {
+      -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
+      color-adjust: exact !important;                 /*Firefox*/
+    }
+
+    .printHeader {
+      position: fixed;
+      top: 0;
+    }
+
+    // .printHeader:after {
+
+    // }
+
+    .printFooter {
+      display: table-footer-group;
+      position: fixed;
+      bottom: 0;
+      padding: 0 2mm 2mm 2mm;
+      > img {
+        height: 8mm;
+      }
+    }
+
+    .printFooter:after {
+      position: fixed;
+      bottom: 2mm;
+      left: 50%;
+      transform: translateX(-50%);
+      counter-increment: page;
+      content: 'Page ' counter(page);
+    }
   }
+}
+
+@mixin globalRules {
+  @include globalScreenRules();
+  @include globalPrintRules();
 }
 
 /*
@@ -48,7 +102,7 @@ is being formed. This can result in parts of the vis being cut out.
   padding-left: $visPadding;
   padding-right: $visPadding;
 
-  &:nth-child(2n - 1) {
+  &:nth-child(#{$visualisationsPerPage}n - #{$visualisationsPerPage - 1}) {
     padding-top: $visPadding;
   }
 
@@ -58,6 +112,8 @@ is being formed. This can result in parts of the vis being cut out.
     padding-bottom: $visPadding;
   }
 }
+
+@include globalRules();
 
 @media screen, projection {
   .printViewport {
@@ -69,23 +125,22 @@ is being formed. This can result in parts of the vis being cut out.
       }
 
       margin: $euiSizeL auto;
-      height: calc(#{$a4PageHeight} / #{$visualisationsPerPage});
-      width: $a4PageWidth;
+      height: calc(#{$a4PageContentHeight} / #{$visualisationsPerPage});
+      width: $a4PageContentWidth;
       padding: $visPadding;
     }
   }
 }
 
 @media print {
-  @include globalPrintRules();
 
   .printViewport {
     &__vis {
 
       @include visualizationPadding();
 
-      height: calc(#{$a4PageHeight} / #{$visualisationsPerPage});
-      width: $a4PageWidth;
+      height: calc(#{$a4PageContentHeight} / #{$visualisationsPerPage});
+      width: $a4PageContentWidth;
 
       & .euiPanel {
         box-shadow: none !important;
