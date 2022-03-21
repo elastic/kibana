@@ -84,10 +84,11 @@ function ofName(
     });
   }
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
-    defaultMessage: 'Top {termsSize} values of {name}',
+    defaultMessage: 'Top {numberOfTermsLabel}{termsCount, plural, one {value} other {values}} of {name}',
     values: {
       name: name ?? missingFieldLabel,
-      termsSize: termsSize > 0 ? termsSize : '',
+      termsCount: termsSize,
+      numberOfTermsLabel: termsSize > 1 ? `${termsSize} ` : '',
     },
   });
 }
