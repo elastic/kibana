@@ -100,20 +100,12 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
       <UtilityBarText
         dataTestSubj="executionsShowing"
       />
-      <EuiToolTip
-        content="Enable to show additional metrics columns."
-        data-test-subj="show-metrics-columns-tooltip"
-        delay="regular"
-        display="block"
-        position="top"
-      >
-        <Styled(EuiSwitch)
-          checked={false}
-          compressed={true}
-          label="Show metrics columns"
-          onChange={[Function]}
-        />
-      </EuiToolTip>
+      <Styled(EuiSwitch)
+        checked={false}
+        compressed={true}
+        label="Show metrics columns"
+        onChange={[Function]}
+      />
     </UtilityBarSection>
   </UtilityBar>
   <EuiBasicTable
@@ -123,7 +115,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
           "field": "security_status",
           "name": <Memo(TableHeaderTooltipCell)
             title="Status"
-            tooltipContent="Overall status of execution"
+            tooltipContent="Overall status of execution."
           />,
           "render": [Function],
           "sortable": false,
@@ -134,7 +126,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
           "field": "timestamp",
           "name": <Memo(TableHeaderTooltipCell)
             title="Timestamp"
-            tooltipContent="Datetime rule execution initiated"
+            tooltipContent="Datetime rule execution initiated."
           />,
           "render": [Function],
           "sortable": true,
@@ -145,7 +137,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
           "field": "duration_ms",
           "name": <Memo(TableHeaderTooltipCell)
             title="Duration"
-            tooltipContent="The length of time it took for the rule to run (mm:ss:SSS)"
+            tooltipContent="The length of time it took for the rule to run (mm:ss:SSS)."
           />,
           "render": [Function],
           "sortable": true,
@@ -156,7 +148,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
           "field": "security_message",
           "name": <Memo(TableHeaderTooltipCell)
             title="Message"
-            tooltipContent="Relevant message from execution outcome"
+            tooltipContent="Relevant message from execution outcome."
           />,
           "render": [Function],
           "sortable": false,
@@ -167,7 +159,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
           "actions": Array [
             Object {
               "data-test-subj": "action-filter-by-execution-id",
-              "description": "Filter alerts by rule execution ID",
+              "description": "Filter alerts by rule execution ID.",
               "field": "",
               "icon": "filter",
               "isPrimary": true,
