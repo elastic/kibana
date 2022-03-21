@@ -17,7 +17,7 @@ import {
 import { createStubDataView } from '../../../../../../src/plugins/data_views/public/data_views/data_view.stub';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useCisKubernetesIntegraion } from '../../common/api/use_cis_kubernetes_integration';
+import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import type { DataView } from '../../../../../../src/plugins/data/common';
 
 jest.mock('../../common/api/use_kubebeat_data_view');
@@ -38,7 +38,7 @@ describe('<Findings />', () => {
     const data = dataPluginMock.createStartContract();
     const source = await data.search.searchSource.create();
 
-    (useCisKubernetesIntegraion as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
 
     (source.fetch$ as jest.Mock).mockReturnValue({
       toPromise: () => Promise.resolve({ rawResponse: { hits: { hits: [] } } }),

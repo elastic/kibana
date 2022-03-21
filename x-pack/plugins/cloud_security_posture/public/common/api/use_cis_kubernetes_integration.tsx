@@ -15,7 +15,7 @@ const CIS_KUBERNETES_INTEGRATION_VERSION = '0.0.1';
 /**
  * This hook will find our cis intergation and return it's PackageInfo
  * */
-export const useCisKubernetesIntegraion = () => {
+export const useCisKubernetesIntegration = () => {
   const { http } = useKibana().services;
 
   const integrationQuery = useQuery(['integrations'], () =>

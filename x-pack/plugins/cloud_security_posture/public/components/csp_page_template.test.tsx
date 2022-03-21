@@ -52,7 +52,7 @@ describe('getSideNavItems', () => {
 describe('<CspPageTemplate />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
+    // if package installations status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
   });
 

@@ -104,6 +104,8 @@ describe('<Rules />', () => {
 
     (useCspIntegration as jest.Mock).mockReturnValue(request);
 
+    console.log(Component);
+
     render(<Component />);
 
     expect(
