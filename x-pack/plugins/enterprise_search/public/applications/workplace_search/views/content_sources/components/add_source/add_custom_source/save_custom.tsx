@@ -104,6 +104,7 @@ export const SaveCustom: React.FC = () => {
               {serviceType !== 'custom' && githubRepository ? (
                 <>
                   <FormattedMessage
+                    data-test-subj="GithubRepositoryLink"
                     id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.repositoryInstructions"
                     defaultMessage="Set up your connector by cloning the {githubRepositoryLink}"
                     values={{
@@ -120,6 +121,7 @@ export const SaveCustom: React.FC = () => {
                   />
                   <EuiSpacer size="s" />
                   <FormattedMessage
+                    data-test-subj="PreconfiguredDocumentationLink"
                     id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.deploymentInstructions"
                     defaultMessage="Review the {documentationLink} and deploy the connector package to be self managed on the infrastructure of your choice."
                     values={{
@@ -137,6 +139,7 @@ export const SaveCustom: React.FC = () => {
                 </>
               ) : (
                 <FormattedMessage
+                  data-test-subj="GenericDocumentationLink"
                   id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentationHelpText"
                   defaultMessage="Review the {documentationLink} to learn how to build and deploy your own connector on the self managed infrastructure of your choice."
                   values={{
@@ -175,6 +178,7 @@ export const SaveCustom: React.FC = () => {
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiCallOut
+                data-test-subj="FeedbackCallout"
                 heading="h3"
                 size="s"
                 title={
