@@ -20,15 +20,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await PageObjects.lens.clickAddField();
-      await fieldEditor.setName('runtimefield');
-      await fieldEditor.enableValue();
-      await fieldEditor.typeScript("emit('abc')");
-      await fieldEditor.save();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.lens.searchField('runtime');
-      await PageObjects.lens.waitForField('runtimefield');
-      await PageObjects.lens.dragFieldToWorkspace('runtimefield');
+      await retry.try(async () => {
+        await PageObjects.lens.clickAddField();
+        await fieldEditor.setName('runtimefield');
+        await fieldEditor.enableValue();
+        await fieldEditor.typeScript("emit('abc')");
+        await fieldEditor.save();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.searchField('runtime');
+        await PageObjects.lens.waitForField('runtimefield');
+        await PageObjects.lens.dragFieldToWorkspace('runtimefield');
+      });
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
         'Top 5 values of runtimefield'

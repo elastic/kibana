@@ -22,6 +22,7 @@ import {
   MAP_READY,
   MAP_DESTROYED,
   SET_QUERY,
+  UPDATE_LAYER,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   SET_LAYER_STYLE_META,
@@ -53,6 +54,7 @@ import {
   getLayerIndex,
   removeTrackedLayerState,
   rollbackTrackedLayerState,
+  setLayer,
   trackCurrentLayerState,
   updateLayerInList,
   updateLayerSourceDescriptorProp,
@@ -270,6 +272,11 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
       return {
         ...state,
         layerList: [...state.layerList.filter(({ id }) => id !== action.id)],
+      };
+    case UPDATE_LAYER:
+      return {
+        ...state,
+        layerList: setLayer(state.layerList, action.layer),
       };
     case ADD_WAITING_FOR_MAP_READY_LAYER:
       return {

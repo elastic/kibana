@@ -60,7 +60,7 @@ export const RulesTable = ({
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [1, 5, 10, 25],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
