@@ -232,6 +232,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 message: getConsumerUnauthorizedErrorMessage('delete', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
+              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
               break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);

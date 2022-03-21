@@ -13,20 +13,24 @@ import { REPO_ROOT } from '@kbn/utils';
 import { asyncMapWithLimit } from '@kbn/std';
 
 import { BazelPackage } from './bazel_package';
+import { BAZEL_PACKAGE_DIRS } from './bazel_package_dirs';
 
 /**
  * Search the local Kibana repo for bazel packages and return an array of BazelPackage objects
  * representing each package found.
  */
 export async function discoverBazelPackages() {
-  const packageJsons = globby.sync('*/package.json', {
-    cwd: Path.resolve(REPO_ROOT, 'packages'),
-    absolute: true,
-  });
+  const packageJsons = globby.sync(
+    BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/package.json`),
+    {
+      cwd: REPO_ROOT,
+      absolute: true,
+    }
+  );
 
   return await asyncMapWithLimit(
     packageJsons.sort((a, b) => a.localeCompare(b)),
-    10,
-    (path) => BazelPackage.fromDir(Path.dirname(path))
+    100,
+    async (path) => await BazelPackage.fromDir(Path.dirname(path))
   );
 }

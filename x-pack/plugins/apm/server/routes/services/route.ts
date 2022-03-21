@@ -16,7 +16,6 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
 import { getServices } from './get_services';
 import { getServiceAgent } from './get_service_agent';
-import { getServiceAlerts } from './get_service_alerts';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
 import { getServiceInstancesMainStatistics } from './get_service_instances/main_statistics';
@@ -1115,46 +1114,6 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
-const serviceAlertsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/alerts',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      t.type({
-        transactionType: t.string,
-      }),
-    ]),
-  }),
-  options: {
-    tags: ['access:apm'],
-  },
-  handler: async ({
-    context,
-    params,
-    ruleDataClient,
-  }): Promise<{ alerts: Array<Partial<Record<string, unknown[]>>> }> => {
-    const {
-      query: { start, end, environment, transactionType },
-      path: { serviceName },
-    } = params;
-
-    return {
-      alerts: await getServiceAlerts({
-        ruleDataClient,
-        start,
-        end,
-        serviceName,
-        environment,
-        transactionType,
-      }),
-    };
-  },
-});
-
 const serviceInfrastructureRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
   params: t.type({
@@ -1315,7 +1274,6 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceProfilingTimelineRoute,
   ...serviceProfilingStatisticsRoute,
-  ...serviceAlertsRoute,
   ...serviceInfrastructureRoute,
   ...serviceAnomalyChartsRoute,
   ...sortedAndFilteredServicesRoute,

@@ -20,6 +20,8 @@ import {
   getHostIsolationExceptionsListPath,
   getTrustedAppsListPath,
   getPolicyDetailsArtifactsListPath,
+  getBlocklistsListPath,
+  getPolicyBlocklistsPath,
 } from '../../../../common/routing';
 import { useHttp } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
@@ -29,6 +31,7 @@ import {
   isOnPolicyEventFiltersView,
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
+  isOnBlocklistsView,
   policyDetails,
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
@@ -38,18 +41,22 @@ import { usePolicyDetailsSelector } from '../policy_hooks';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translations';
 import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations';
 import { POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS } from './host_isolation_exceptions_translations';
+import { POLICY_ARTIFACT_BLOCKLISTS_LABELS } from './blocklists_translations';
 import { TrustedAppsApiClient } from '../../../trusted_apps/service/trusted_apps_api_client';
 import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
+import { BlocklistsApiClient } from '../../../blocklist/services/blocklists_api_client';
 import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
+import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
 
 const enum PolicyTabKeys {
   SETTINGS = 'settings',
   TRUSTED_APPS = 'trustedApps',
   EVENT_FILTERS = 'eventFilters',
   HOST_ISOLATION_EXCEPTIONS = 'hostIsolationExceptions',
+  BLOCKLISTS = 'blocklists',
 }
 
 interface PolicyTab {
@@ -65,6 +72,7 @@ export const PolicyTabs = React.memo(() => {
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
   const isInEventFilters = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
+  const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const privileges = useUserPrivileges().endpointPrivileges;
@@ -104,6 +112,11 @@ export const PolicyTabs = React.memo(() => {
     [http]
   );
 
+  const getBlocklistsApiClientInstance = useCallback(
+    () => BlocklistsApiClient.getInstance(http),
+    [http]
+  );
+
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     const trustedAppsLabels = {
       ...POLICY_ARTIFACT_TRUSTED_APPS_LABELS,
@@ -133,6 +146,17 @@ export const PolicyTabs = React.memo(() => {
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
           defaultMessage="There {count, plural, one {is} other {are}} {count} host isolation {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const blocklistsLabels = {
+      ...POLICY_ARTIFACT_BLOCKLISTS_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.blocklists.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklists}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -214,11 +238,31 @@ export const PolicyTabs = React.memo(() => {
             ),
           }
         : undefined,
+      [PolicyTabKeys.BLOCKLISTS]: {
+        id: PolicyTabKeys.BLOCKLISTS,
+        name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.blocklists', {
+          defaultMessage: 'Blocklists',
+        }),
+        content: (
+          <>
+            <EuiSpacer />
+            <PolicyArtifactsLayout
+              policyItem={policyItem}
+              labels={blocklistsLabels}
+              getExceptionsListApiClient={getBlocklistsApiClientInstance}
+              searchableFields={BLOCKLISTS_SEARCHABLE_FIELDS}
+              getArtifactPath={getBlocklistsListPath}
+              getPolicyArtifactsPath={getPolicyBlocklistsPath}
+            />
+          </>
+        ),
+      },
     };
   }, [
     canSeeHostIsolationExceptions,
     getEventFiltersApiClientInstance,
     getHostIsolationExceptionsApiClientInstance,
+    getBlocklistsApiClientInstance,
     getTrustedAppsApiClientInstance,
     policyItem,
     privileges.canIsolateHost,
@@ -242,10 +286,19 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.EVENT_FILTERS];
     } else if (isInHostIsolationExceptionsTab) {
       selectedTab = tabs[PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS];
+    } else if (isInBlocklistsTab) {
+      selectedTab = tabs[PolicyTabKeys.BLOCKLISTS];
     }
 
     return selectedTab || defaultTab;
-  }, [tabs, isInSettingsTab, isInTrustedAppsTab, isInEventFilters, isInHostIsolationExceptionsTab]);
+  }, [
+    tabs,
+    isInSettingsTab,
+    isInTrustedAppsTab,
+    isInEventFilters,
+    isInHostIsolationExceptionsTab,
+    isInBlocklistsTab,
+  ]);
 
   const onTabClickHandler = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
@@ -262,6 +315,9 @@ export const PolicyTabs = React.memo(() => {
           break;
         case PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS:
           path = getPolicyHostIsolationExceptionsPath(policyId);
+          break;
+        case PolicyTabKeys.BLOCKLISTS:
+          path = getPolicyBlocklistsPath(policyId);
           break;
       }
       history.push(path);

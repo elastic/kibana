@@ -9,11 +9,11 @@ import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 export function MaybeViewTraceLink({
   transaction,
@@ -25,8 +25,8 @@ export function MaybeViewTraceLink({
   environment: Environment;
 }) {
   const {
-    urlParams: { latencyAggregationType, comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
+    query: { latencyAggregationType, comparisonEnabled, comparisonType },
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   const viewFullTraceButtonLabel = i18n.translate(
     'xpack.apm.transactionDetails.viewFullTraceButtonLabel',

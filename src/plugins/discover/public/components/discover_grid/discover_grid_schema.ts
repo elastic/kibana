@@ -7,7 +7,7 @@
  */
 
 import { kibanaJSON } from './constants';
-import { KBN_FIELD_TYPES } from '../../../../data/common';
+import { KBN_FIELD_TYPES } from '../../../../data/public';
 
 export function getSchemaByKbnType(kbnType: string | undefined) {
   // Default DataGrid schemas: boolean, numeric, datetime, json, currency, string

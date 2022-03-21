@@ -8,7 +8,7 @@
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import type { DataView, DataViewField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from 'src/plugins/data_views/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TableHeader } from './components/table_header/table_header';
 import { SHOW_MULTIFIELDS } from '../../../common';

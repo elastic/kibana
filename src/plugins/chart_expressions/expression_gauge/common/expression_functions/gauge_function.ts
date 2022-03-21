@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
-import { validateOptions } from '../../../../charts/common';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -21,26 +20,6 @@ import {
 import { isRoundShape } from '../utils';
 
 export const errors = {
-  invalidShapeError: () =>
-    i18n.translate('expressionGauge.functions.gauge.errors.invalidShapeError', {
-      defaultMessage: `Invalid shape is specified. Supported shapes: {shapes}`,
-      values: { shapes: Object.values(GaugeShapes).join(', ') },
-    }),
-  invalidColorModeError: () =>
-    i18n.translate('expressionGauge.functions.gauge.errors.invalidColorModeError', {
-      defaultMessage: `Invalid color mode is specified. Supported color modes: {colorModes}`,
-      values: { colorModes: Object.values(GaugeColorModes).join(', ') },
-    }),
-  invalidTicksPositionError: () =>
-    i18n.translate('expressionGauge.functions.gauge.errors.invalidTicksPositionError', {
-      defaultMessage: `Invalid ticks position is specified. Supported ticks positions: {ticksPositions}`,
-      values: { ticksPositions: Object.values(GaugeTicksPositions).join(', ') },
-    }),
-  invalidLabelMajorModeError: () =>
-    i18n.translate('expressionGauge.functions.gauge.errors.invalidLabelMajorModeError', {
-      defaultMessage: `Invalid label major mode is specified. Supported label major modes: {labelMajorModes}`,
-      values: { labelMajorModes: Object.values(GaugeLabelMajorModes).join(', ') },
-    }),
   centralMajorNotSupportedForShapeError: (shape: string) =>
     i18n.translate('expressionGauge.functions.gauge.errors.centralMajorNotSupportedForShapeError', {
       defaultMessage:
@@ -88,6 +67,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Type of gauge chart',
       }),
       required: true,
+      strict: true,
     },
     metric: {
       types: ['string', 'vis_dimension'],
@@ -120,6 +100,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.colorMode.help', {
         defaultMessage: 'If set to palette, the palette colors will be applied to the bands',
       }),
+      strict: true,
     },
     palette: {
       types: ['palette'],
@@ -134,6 +115,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.ticksPosition.help', {
         defaultMessage: 'Specifies the placement of ticks',
       }),
+      strict: true,
     },
     labelMajor: {
       types: ['string'],
@@ -148,6 +130,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies the mode of labelMajor',
       }),
       default: GaugeLabelMajorModes.AUTO,
+      strict: true,
     },
     labelMinor: {
       types: ['string'],
@@ -167,6 +150,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
         defaultMessage: 'Specifies the mode of centralMajor',
       }),
+      strict: true,
     },
     // used only in legacy gauge, consider it as @deprecated
     percentageMode: {
@@ -185,11 +169,6 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   },
 
   fn(data, args, handlers) {
-    validateOptions(args.shape, GaugeShapes, errors.invalidShapeError);
-    validateOptions(args.colorMode, GaugeColorModes, errors.invalidColorModeError);
-    validateOptions(args.ticksPosition, GaugeTicksPositions, errors.invalidTicksPositionError);
-    validateOptions(args.labelMajorMode, GaugeLabelMajorModes, errors.invalidLabelMajorModeError);
-
     validateAccessor(args.metric, data.columns);
     validateAccessor(args.min, data.columns);
     validateAccessor(args.max, data.columns);

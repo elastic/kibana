@@ -10,7 +10,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '../../../../../../data/common';
+import type { DataView } from '../../../../../../data_views/public';
 import { setHeaderActionMenuMounter, setUiActions } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';

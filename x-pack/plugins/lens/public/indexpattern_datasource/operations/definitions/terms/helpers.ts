@@ -18,6 +18,8 @@ import type { FieldStatsResponse } from '../../../../../common';
 import type { FrameDatasourceAPI } from '../../../../types';
 import type { FiltersIndexPatternColumn } from '../index';
 import type { TermsIndexPatternColumn } from './types';
+import { LastValueIndexPatternColumn } from '../last_value';
+
 import type { IndexPatternLayer, IndexPattern, IndexPatternField } from '../../../types';
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
 import { isColumnOfType } from '../helpers';
@@ -203,12 +205,20 @@ export function getDisallowedTermsMessage(
   };
 }
 
+function checkLastValue(column: GenericIndexPatternColumn) {
+  return (
+    column.operationType !== 'last_value' ||
+    (['number', 'date'].includes(column.dataType) &&
+      !(column as LastValueIndexPatternColumn).params.showArrayValues)
+  );
+}
+
 export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
   const column = layer.columns[columnId];
   return (
     column &&
     !column.isBucketed &&
-    column.operationType !== 'last_value' &&
+    checkLastValue(column) &&
     !('references' in column) &&
     !isReferenced(layer, columnId)
   );

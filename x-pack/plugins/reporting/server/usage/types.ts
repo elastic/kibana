@@ -19,12 +19,36 @@ interface DocCount {
   doc_count: number;
 }
 
-interface SizeStats {
+interface SizeBuckets {
   sizes?: { values: SizePercentiles };
 }
 
-export interface KeyCountBucket extends DocCount, SizeStats {
-  key: string;
+interface ObjectTypeBuckets {
+  objectTypes: AggregationBuckets;
+}
+
+interface LayoutTypeBuckets {
+  layoutTypes: AggregationBuckets;
+}
+
+/*
+ * NOTE: This list needs to be explicit in order for the telemetry schema check script to resolve the types.
+ * However, using `keyof JobTypes` is functionally the same thing
+ */
+type BaseJobTypes =
+  | 'csv_searchsource'
+  | 'csv_searchsource_immediate'
+  | 'PNG'
+  | 'PNGV2'
+  | 'printable_pdf'
+  | 'printable_pdf_v2';
+
+export interface KeyCountBucket
+  extends DocCount,
+    SizeBuckets,
+    ObjectTypeBuckets,
+    LayoutTypeBuckets {
+  key: BaseJobTypes;
   isDeprecated?: DocCount;
 }
 
@@ -44,14 +68,8 @@ export interface StatusByAppBucket extends DocCount {
   };
 }
 
-export interface AggregationResultBuckets extends DocCount, SizeStats {
+export interface AggregationResultBuckets extends DocCount, SizeBuckets {
   jobTypes?: AggregationBuckets;
-  layoutTypes: {
-    pdf?: AggregationBuckets;
-  } & DocCount;
-  objectTypes: {
-    pdf?: AggregationBuckets;
-  } & DocCount;
   statusTypes: AggregationBuckets;
   statusByApp: {
     buckets: StatusByAppBucket[];
@@ -73,28 +91,14 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  sizes?: SizePercentiles;
-  app?: {
+  sizes: SizePercentiles;
+  app: {
     search?: number;
     dashboard?: number;
     visualization?: number;
     'canvas workpad'?: number;
   };
-  layout?: {
-    print?: number;
-    preserve_layout?: number;
-    canvas?: number;
-  };
 }
-
-// FIXME: find a way to get this from exportTypesHandler or common/constants
-type BaseJobTypes =
-  | 'csv_searchsource'
-  | 'csv_searchsource_immediate'
-  | 'PNG'
-  | 'PNGV2'
-  | 'printable_pdf'
-  | 'printable_pdf_v2';
 
 export interface LayoutCounts {
   canvas: number;
@@ -106,7 +110,14 @@ export type AppCounts = {
   [A in 'canvas workpad' | 'dashboard' | 'visualization' | 'search']?: number;
 };
 
-export type JobTypes = { [K in BaseJobTypes]: AvailableTotal };
+export interface JobTypes {
+  csv_searchsource: AvailableTotal & { metrics: MetricsStatsCsv };
+  csv_searchsource_immediate: AvailableTotal & { metrics: MetricsStatsCsv };
+  PNG: AvailableTotal & { metrics: MetricsStatsPng };
+  PNGV2: AvailableTotal & { metrics: MetricsStatsPng };
+  printable_pdf: AvailableTotal & { layout: LayoutCounts; metrics: MetricsStatsPdf };
+  printable_pdf_v2: AvailableTotal & { layout: LayoutCounts; metrics: MetricsStatsPdf };
+}
 
 export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
 
@@ -126,6 +137,37 @@ export type RangeStats = JobTypes & {
   output_size?: SizePercentiles;
 };
 
+interface MetricsStatsCsv {
+  csv_rows: MetricsPercentiles;
+}
+
+interface MetricsStatsPng {
+  png_cpu: MetricsPercentiles;
+  png_memory: MetricsPercentiles;
+}
+
+interface MetricsStatsPdf {
+  pdf_cpu: MetricsPercentiles;
+  pdf_memory: MetricsPercentiles;
+  pdf_pages: MetricsPercentiles;
+}
+
+export interface MetricsPercentiles {
+  '50.0': number | null;
+  '75.0': number | null;
+  '95.0': number | null;
+  '99.0': number | null;
+}
+
+export interface MetricsStats {
+  csv_rows: MetricsPercentiles;
+  pdf_cpu: MetricsPercentiles;
+  pdf_memory: MetricsPercentiles;
+  pdf_pages: MetricsPercentiles;
+  png_cpu: MetricsPercentiles;
+  png_memory: MetricsPercentiles;
+}
+
 export type ReportingUsageType = RangeStats & {
   available: boolean;
   enabled: boolean;
@@ -133,14 +175,3 @@ export type ReportingUsageType = RangeStats & {
 };
 
 export type FeatureAvailabilityMap = Record<string, boolean>;
-
-export interface ReportingUsageSearchResponse {
-  aggregations: {
-    ranges: {
-      buckets: {
-        all: AggregationResultBuckets;
-        last7Days: AggregationResultBuckets;
-      };
-    };
-  };
-}

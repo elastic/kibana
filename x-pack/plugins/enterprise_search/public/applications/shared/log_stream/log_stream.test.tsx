@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EntSearchLogStream } from './';
 
+const fakeSourceId = 'fake-source-id';
+
 describe('EntSearchLogStream', () => {
   const mockDateNow = jest.spyOn(global.Date, 'now').mockReturnValue(160000000);
 
@@ -22,8 +24,8 @@ describe('EntSearchLogStream', () => {
       expect(wrapper.type()).toEqual(React.Suspense);
     });
 
-    it('renders with the enterprise search log source ID', () => {
-      expect(wrapper.prop('sourceId')).toEqual('ent-search-logs');
+    it('renders with the empty sourceId', () => {
+      expect(wrapper.prop('sourceId')).toBeUndefined();
     });
 
     it('renders with a default last-24-hours timestamp if no timestamp is passed', () => {
@@ -46,7 +48,9 @@ describe('EntSearchLogStream', () => {
     });
 
     it('allows passing a custom hoursAgo that modifies the default start timestamp', () => {
-      const wrapper = shallow(shallow(<EntSearchLogStream hoursAgo={1} />).prop('children'));
+      const wrapper = shallow(
+        shallow(<EntSearchLogStream sourceId={fakeSourceId} hoursAgo={1} />).prop('children')
+      );
 
       expect(wrapper.prop('startTimestamp')).toEqual(156400000);
       expect(wrapper.prop('endTimestamp')).toEqual(160000000);
@@ -56,6 +60,7 @@ describe('EntSearchLogStream', () => {
       const wrapper = shallow(
         shallow(
           <EntSearchLogStream
+            sourceId={fakeSourceId}
             height={500}
             highlight="some-log-id"
             columns={[

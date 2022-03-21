@@ -81,6 +81,12 @@ export function useDeleteOutput(onSuccess: () => void) {
           />,
           {
             buttonColor: 'danger',
+            confirmButtonText: i18n.translate(
+              'xpack.fleet.settings.deleteOutputs.confirmButtonLabel',
+              {
+                defaultMessage: 'Delete and deploy',
+              }
+            ),
           }
         );
 
