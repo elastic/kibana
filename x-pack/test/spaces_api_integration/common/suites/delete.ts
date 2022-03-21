@@ -54,37 +54,37 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     const buckets = response.aggregations?.count.buckets;
 
     // The test fixture contains six legacy URL aliases:
-    // (1) two for "space_1", (2) two for "space_2", and (3) two for "other_space", which is a non-existent space.
+    // (1) two for "default", (2) two for "space_2", and (3) two for "other_space", which is a non-existent space.
     // Each test deletes "space_2", so the agg buckets should reflect that aliases (1) and (3) still exist afterwards.
 
     // Space 2 deleted, all others should exist
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 7,
-        countByType: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            { key: 'visualization', doc_count: 3 },
-            { key: 'space', doc_count: 2 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
-            { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', doc_count: 1 },
-            // legacy-url-alias objects cannot exist for the default space
-          ],
-        },
-      },
-      {
-        doc_count: 7,
-        key: 'space_1',
+        doc_count: 9,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
             { key: 'visualization', doc_count: 3 },
             { key: 'legacy-url-alias', doc_count: 2 }, // aliases (1)
+            { key: 'space', doc_count: 2 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
             { key: 'dashboard', doc_count: 1 },
             { key: 'index-pattern', doc_count: 1 },
+          ],
+        },
+      },
+      {
+        doc_count: 5,
+        key: 'space_1',
+        countByType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            { key: 'visualization', doc_count: 3 },
+            { key: 'dashboard', doc_count: 1 },
+            { key: 'index-pattern', doc_count: 1 },
+            // no legacy url alias objects exist in space_1
           ],
         },
       },

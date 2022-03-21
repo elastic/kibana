@@ -68,6 +68,7 @@ describe('use_workspace_loader', () => {
           saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
           outcome: 'aliasMatch',
           alias_target_id: 'aliasTargetId',
+          alias_purpose: 'savedObjectConversion',
         }),
       },
     } as unknown as UseWorkspaceLoaderProps;
@@ -78,9 +79,10 @@ describe('use_workspace_loader', () => {
         props as RenderHookOptions<UseWorkspaceLoaderProps>
       );
     });
-    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '#/workspace/aliasTargetId?query={}',
-      'Graph'
-    );
+    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/workspace/aliasTargetId?query={}',
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'Graph',
+    });
   });
 });
