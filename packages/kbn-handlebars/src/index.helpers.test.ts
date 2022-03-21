@@ -10,7 +10,7 @@ import Handlebars, { HelperOptions } from '.';
 import { expectTemplate } from './__jest__/test_bench';
 
 beforeEach(() => {
-  global.handlebarsEnv = Handlebars.create();
+  global.kbnHandlebarsEnv = Handlebars.create();
 });
 
 describe('helpers', () => {
@@ -307,7 +307,7 @@ describe('helpers', () => {
     });
 
     it('the helper hash should augment the global hash', () => {
-      handlebarsEnv!.registerHelper('test_helper', function () {
+      kbnHandlebarsEnv!.registerHelper('test_helper', function () {
         return 'found it!';
       });
 
@@ -324,21 +324,21 @@ describe('helpers', () => {
 
   describe('registration', () => {
     it('unregisters', () => {
-      deleteAllKeys(handlebarsEnv!.helpers);
+      deleteAllKeys(kbnHandlebarsEnv!.helpers);
 
-      handlebarsEnv!.registerHelper('foo', function () {
+      kbnHandlebarsEnv!.registerHelper('foo', function () {
         return 'fail';
       });
-      expect(handlebarsEnv!.helpers.foo).toBeDefined();
-      handlebarsEnv!.unregisterHelper('foo');
-      expect(handlebarsEnv!.helpers.foo).toBeUndefined();
+      expect(kbnHandlebarsEnv!.helpers.foo).toBeDefined();
+      kbnHandlebarsEnv!.unregisterHelper('foo');
+      expect(kbnHandlebarsEnv!.helpers.foo).toBeUndefined();
     });
 
     it('allows multiple globals', () => {
-      const ifHelper = handlebarsEnv!.helpers.if;
-      deleteAllKeys(handlebarsEnv!.helpers);
+      const ifHelper = kbnHandlebarsEnv!.helpers.if;
+      deleteAllKeys(kbnHandlebarsEnv!.helpers);
 
-      handlebarsEnv!.registerHelper({
+      kbnHandlebarsEnv!.registerHelper({
         if: ifHelper,
         world() {
           return 'world!';
@@ -355,7 +355,7 @@ describe('helpers', () => {
 
     it('fails with multiple and args', () => {
       expect(() => {
-        handlebarsEnv!.registerHelper(
+        kbnHandlebarsEnv!.registerHelper(
           // @ts-expect-error TypeScript is complaining about the invalid input just as the thrown error
           {
             world() {

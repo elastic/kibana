@@ -9,10 +9,10 @@
 import Handlebars, { HelperDelegate, ExtendedCompileOptions, ExtendedRuntimeOptions } from '..';
 
 declare global {
-  var handlebarsEnv: typeof Handlebars | null; // eslint-disable-line no-var
+  var kbnHandlebarsEnv: typeof Handlebars | null; // eslint-disable-line no-var
 }
 
-global.handlebarsEnv = null;
+global.kbnHandlebarsEnv = null;
 
 export function expectTemplate(template: string) {
   return new HandlebarsTestBench(template);
@@ -117,5 +117,5 @@ class HandlebarsTestBench {
 }
 
 function getHandlebarsEnv() {
-  return handlebarsEnv || Handlebars.create();
+  return kbnHandlebarsEnv || Handlebars.create();
 }
