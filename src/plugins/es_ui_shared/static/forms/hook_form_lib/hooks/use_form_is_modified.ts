@@ -14,7 +14,11 @@ import { useFormData } from './use_form_data';
 
 interface Options {
   form?: FormHook<any>;
-  /** List of field paths to discard when checking if a field has been modified */
+  /**
+   * List of field paths to discard when checking if a field has been modified.
+   * Useful when we add internal fields (e.g. toggles) to the form that should not
+   * have an impact on the "isModified" state.
+   */
   discard?: string[];
 }
 
@@ -23,16 +27,16 @@ interface Options {
  * If a field is modified and then the value is changed back to the initial value
  * the form **won't be marked as modified**.
  * This is useful to detect if a form has changed and we need to display a confirm modal
- * to the user before he navigates away and loses his changes.
+ * to the user before they navigate away and lose their changes.
  *
  * @param options - Optional options object
  * @returns flag to indicate if the form has been modified
  */
 export const useFormIsModified = ({
   form: formFromOptions,
-  discard = [],
+  discard: fieldPathsToDiscard = [],
 }: Options = {}): boolean => {
-  // As hook calls can not be conditional we first try to access the form through context
+  // Hook calls can not be conditional we first try to access the form through context
   let form = useFormContext({ throwIfNotFound: false });
 
   if (formFromOptions) {
@@ -47,39 +51,41 @@ export const useFormIsModified = ({
 
   const { getFields, __getFieldsRemoved, __getFormDefaultValue } = form;
 
-  const discardToString = JSON.stringify(discard);
+  const discardArrayToString = JSON.stringify(fieldPathsToDiscard);
 
   // Create a map of the fields to discard to optimize look up
   const fieldsToDiscard = useMemo(() => {
-    if (discard.length === 0) {
+    if (fieldPathsToDiscard.length === 0) {
       return;
     }
 
-    return discard.reduce((acc, path) => ({ ...acc, [path]: {} }), {} as { [key: string]: {} });
+    return fieldPathsToDiscard.reduce(
+      (acc, path) => ({ ...acc, [path]: true }),
+      {} as { [key: string]: {} }
+    );
 
-    // discardToString === discard, we don't want to add it to the deps so we
-    // the coansumer does not need to memoize the array he provides.
-  }, [discardToString]); // eslint-disable-line react-hooks/exhaustive-deps
+    // discardArrayToString === discard, we don't want to add it to the dependencies so
+    // the consumer does not need to memoize the "discard" array they provide.
+  }, [discardArrayToString]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // We listen to all the form data change to trigger a re-render
   // and update our derived "isModified" state
   useFormData({ form });
 
-  let predicate: (arg: [string, FieldHook]) => boolean = () => true;
+  const isFieldIncluded = fieldsToDiscard
+    ? ([path]: [string, FieldHook]) => fieldsToDiscard[path] !== true
+    : () => true;
 
-  if (fieldsToDiscard) {
-    predicate = ([path]) => fieldsToDiscard[path] === undefined;
-  }
-
+  // 1. Check if any field has been modified
   let isModified = Object.entries(getFields())
-    .filter(predicate)
+    .filter(isFieldIncluded)
     .some(([_, field]) => field.isModified);
 
   if (isModified) {
     return isModified;
   }
 
-  // Check if any field has been removed.
+  // 2. Check if any field has been removed.
   // If somme field has been removed **and** they were originaly present on the
   // form "defaultValue" then the form has been modified.
   const formDefaultValue = __getFormDefaultValue();
@@ -87,7 +93,7 @@ export const useFormIsModified = ({
 
   const fieldsRemovedFromDOM: string[] = fieldsToDiscard
     ? Object.keys(__getFieldsRemoved())
-        .filter((path) => fieldsToDiscard[path] === undefined)
+        .filter((path) => fieldsToDiscard[path] !== true)
         .filter(fieldOnFormDefaultValue)
     : Object.keys(__getFieldsRemoved()).filter(fieldOnFormDefaultValue);
 
