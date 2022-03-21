@@ -8,6 +8,9 @@ PKG_REQUIRE_NAME = <%- json(pkg.name) %>
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
+  <%_ if (pkg.web) { _%>
+    "src/**/*.tsx",
+  <%_ } _%>
   ],
   exclude = [
     "**/*.test.*",
@@ -36,6 +39,9 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+<%_ if (pkg.web) { _%>
+  "@npm//react"
+<%_ } _%>
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -50,6 +56,9 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+<%_ if (pkg.web) { _%>
+  "@npm//@types/react"
+<%_ } _%>
 ]
 
 jsts_transpiler(

@@ -16,12 +16,8 @@ import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { SavedObjectAttributes, KibanaExecutionContext } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import {
-  IndexPattern,
-  TimeRange,
-  Query,
-  TimefilterContract,
-} from '../../../../plugins/data/public';
+import { TimeRange, Query, TimefilterContract } from '../../../../plugins/data/public';
+import type { DataView } from '../../../../plugins/data_views/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -51,7 +47,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean };
@@ -74,7 +70,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editPath: string;
   editApp: string;
   editUrl: string;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
   visTypeName: string;
 }
 

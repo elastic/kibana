@@ -123,15 +123,18 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   router.get(
     {
       path: '/api/ml/data_frame/analytics',
-      validate: false,
+      validate: {
+        query: analyticsQuerySchema,
+      },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
+        const { size } = request.query;
         const body = await mlClient.getDataFrameAnalytics({
-          size: 1000,
+          size: size ?? 1000,
         });
         return response.ok({
           body,

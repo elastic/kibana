@@ -201,3 +201,6 @@ Specifies the minimum interval allowed for the all rules. This minimum is enforc
 `<count>[s,m,h,d]` 
 +
 For example, `20m`, `24h`, `7d`. Default: `1m`.
+
+`xpack.alerting.rules.execution.actions.max`
+Specifies the maximum number of actions that a rule can trigger each time detection checks run.
