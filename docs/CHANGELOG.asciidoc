@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.1.1>>
 * <<release-notes-8.1.0>>
 //* <<release-notes-8.0.1>>
 //* <<release-notes-8.0.0>>
@@ -20,6 +21,55 @@ Review important information about the {kib} 8.x releases.
 //* <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.1.1]]
+== {kib} 8.1.1
+
+coming::[8.1.1]
+
+Review the following information about the {kib} 8.1.1 release.
+
+[float]
+[[breaking-changes-8.1.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.1.1, review the breaking changes, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+
+There are no breaking changes in {kib} 8.1.1.
+
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.1.1]]
+=== Enhancement
+Dashboard::
+Improves controls empty state {kibana-pull}125728[#125728]
+
+[float]
+[[fixes-v8.1.1]]
+=== Bug fixes
+Data ingest::
+The dot expander processor in the Ingest Pipelines UI now allows setting a wildcard (`*`) for the field parameter {kibana-pull}123522[#123522]
+
+Elastic Security::
+For the Elastic Security 8.1.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Enterprise Search::
+For the Elastic Enterprise Search 8.1.1 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
+
+Fleet::
+* Adds a new validation message {kibana-pull}127239[#127239]
+* Fixes empty assets on package install {kibana-pull}127070[#127070]
+* Hide enroll command when user creates a new agent policy in the Add agent flyout {kibana-pull}126431[#126431]
+* Makes input IDs unique in agent policy yaml {kibana-pull}127343[#127343]
+* Fixes links to Agent logs for APM, Endpoint, Synthetics, and OSQuery {kibana-pull}127480[#127480]
 
 [[release-notes-8.1.0]]
 == {kib} 8.1.0
@@ -32,8 +82,6 @@ Review the following information about the {kib} 8.1.0 release.
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.1.0, review the breaking changes, then mitigate the impact to your application.
-
-// tag::notable-breaking-changes[]
 
 [discrete]
 [[breaking-121435]]
@@ -58,8 +106,6 @@ The POST URLs that you generated in {kib} 6.2.0 no longer work. For more informa
 *Impact* +
 {kibana-ref-all}/8.1/automating-report-generation.html[Regenerate the POST URLs] that you use to automatatically generate PDF reports. 
 ====
-
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 
