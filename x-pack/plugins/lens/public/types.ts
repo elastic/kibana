@@ -861,16 +861,19 @@ export interface Visualization<T = unknown> {
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   /**
-   * TODO: used only for vis-only annotations
+   * Renders dimension trigger. Used only for noDatasource layers
    */
   renderDimensionTrigger?: (props: {
-    layerId: string;
     columnId: string;
-    state: T;
+    label: string;
     hideTooltip?: boolean;
     invalid?: boolean;
     invalidMessage?: string;
   }) => JSX.Element | null;
+  /**
+   * Creates map of columns ids and unique lables. Used only for noDatasource layers
+   */
+  getUniqueLabels?: (state: T) => Record<string, string>;
   /**
    * The frame will call this function on all visualizations at different times. The
    * main use cases where visualization suggestions are requested are:

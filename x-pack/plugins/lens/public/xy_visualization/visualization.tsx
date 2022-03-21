@@ -610,30 +610,30 @@ export const getXyVisualization = ({
       />
     ));
   },
+  getUniqueLabels(state) {
+    return getUniqueLabels(state.layers);
+  },
   renderDimensionTrigger({
     columnId,
-    layerId,
-    state,
+    label,
     hideTooltip,
     invalid,
     invalidMessage,
   }: {
     columnId: string;
-    layerId: string;
-    state: XYState;
+    label?: string;
     hideTooltip?: boolean;
     invalid?: boolean;
     invalidMessage?: string;
   }) {
-    const layer = state.layers.find((l) => l.layerId === layerId);
-    if (layer && isAnnotationsLayer(layer)) {
+    if (label) {
       return (
         <DimensionTrigger
           id={columnId}
           hideTooltip={hideTooltip}
           isInvalid={invalid}
           invalidMessage={invalidMessage}
-          label={getUniqueLabels(state.layers)?.[columnId] || defaultAnnotationLabel}
+          label={label || defaultAnnotationLabel}
         />
       );
     }

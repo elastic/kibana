@@ -124,7 +124,6 @@ export function LayerPanel(
     frame: props.framePublicAPI,
     dateRange,
   };
-  const columnLabelMap = layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
 
   const { groups, noDatasource } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
@@ -136,6 +135,12 @@ export function LayerPanel(
       activeVisualization,
     ]
   );
+
+  const columnLabelMap =
+    noDatasource && activeVisualization.getUniqueLabels
+      ? activeVisualization.getUniqueLabels(props.visualizationState)
+      : layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
+
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
 
@@ -516,8 +521,7 @@ export function LayerPanel(
                                   <>
                                     {activeVisualization?.renderDimensionTrigger?.({
                                       columnId,
-                                      layerId,
-                                      state: props.visualizationState,
+                                      label: columnLabelMap[columnId],
                                       hideTooltip,
                                       invalid: group.invalid,
                                       invalidMessage: group.invalidMessage,

@@ -20,6 +20,7 @@ import {
   DatasourceMock,
   mountWithProvider,
 } from '../../../mocks';
+import { getUniqueLabels } from '../../../xy_visualization/annotations/helpers';
 
 jest.mock('../../../id_generator');
 

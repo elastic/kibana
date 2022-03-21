@@ -8,7 +8,7 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../types';
-import type { State, XYSuggestion } from './types';
+import type { State, XYState, XYSuggestion } from './types';
 import type {
   SeriesType,
   XYDataLayerConfig,
@@ -2172,6 +2172,89 @@ describe('xy_visualization', () => {
           }
         />
       `);
+    });
+  });
+  describe('#getUniqueLabels', () => {
+    it('creates unique labels for single annotations layer with repeating labels', async () => {
+      const xyState = {
+        layers: [
+          {
+            layerId: 'layerId',
+            layerType: 'annotations',
+            annotations: [
+              {
+                label: 'Event',
+                id: '1',
+              },
+              {
+                label: 'Event',
+                id: '2',
+              },
+              {
+                label: 'Custom',
+                id: '3',
+              },
+            ],
+          },
+        ],
+      } as XYState;
+
+      expect(xyVisualization.getUniqueLabels!(xyState)).toEqual({
+        '1': 'Event',
+        '2': 'Event [1]',
+        '3': 'Custom',
+      });
+    });
+    it('creates unique labels for multiple annotations layers with repeating labels', async () => {
+      const xyState = {
+        layers: [
+          {
+            layerId: 'layer1',
+            layerType: 'annotations',
+            annotations: [
+              {
+                label: 'Event',
+                id: '1',
+              },
+              {
+                label: 'Event',
+                id: '2',
+              },
+              {
+                label: 'Custom',
+                id: '3',
+              },
+            ],
+          },
+          {
+            layerId: 'layer2',
+            layerType: 'annotations',
+            annotations: [
+              {
+                label: 'Event',
+                id: '4',
+              },
+              {
+                label: 'Event [1]',
+                id: '5',
+              },
+              {
+                label: 'Custom',
+                id: '6',
+              },
+            ],
+          },
+        ],
+      } as XYState;
+
+      expect(xyVisualization.getUniqueLabels!(xyState)).toEqual({
+        '1': 'Event',
+        '2': 'Event [1]',
+        '3': 'Custom',
+        '4': 'Event [2]',
+        '5': 'Event [1] [1]',
+        '6': 'Custom [1]',
+      });
     });
   });
 });
