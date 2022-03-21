@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 
+import queryString from 'query-string';
+
 import {
   EuiPageTemplate,
   EuiText,
@@ -22,7 +24,7 @@ import {
 import { ElasticsearchResources } from '../elasticsearch_resources';
 
 export const ElasticsearchGuide: React.FC = () => {
-  const options = [
+  const languages = [
     { value: 'java', text: 'Java' },
     { value: 'javascript', text: 'JavaScript' },
     { value: 'ruby', text: 'Ruby' },
@@ -34,12 +36,16 @@ export const ElasticsearchGuide: React.FC = () => {
     { value: 'rust', text: 'Rust' },
   ];
 
-  const [value, setValue] = useState(options[1].value);
+  const client = queryString.parse(window.location.search).client;
+  const languageExists = languages.some((language) => language.value === client);
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    languageExists ? (client as string) : 'java'
+  );
 
   const basicSelectId = useGeneratedHtmlId({ prefix: 'languageSelect' });
 
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setValue(e.target.value);
+    setSelectedLanguage(e.target.value);
   };
 
   return (
@@ -78,8 +84,8 @@ export const ElasticsearchGuide: React.FC = () => {
                     <EuiSelect
                       prepend="Select a client"
                       id={basicSelectId}
-                      options={options}
-                      value={value}
+                      options={languages}
+                      value={selectedLanguage}
                       onChange={(e) => onChange(e)}
                       aria-label="Use aria labels when no actual label is in use"
                     />
