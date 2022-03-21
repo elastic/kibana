@@ -24,7 +24,10 @@ export const HelpOutput = memo<HelpOutputProps>(({ input, children, ...euiCallou
     if (children instanceof Promise) {
       (async () => {
         try {
-          setContent((await children).result);
+          const response = await (children as Promise<{
+            result: ReactNode;
+          }>);
+          setContent(response.result);
         } catch (error) {
           setContent(<CommandExecutionFailure error={error} />);
         }
