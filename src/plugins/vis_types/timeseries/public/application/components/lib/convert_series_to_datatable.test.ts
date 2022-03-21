@@ -14,7 +14,6 @@ jest.mock('../../../services', () => {
   return {
     getDataStart: jest.fn(() => {
       return {
-        indexPatterns: jest.fn(),
         query: {
           timefilter: {
             timefilter: {
@@ -29,6 +28,7 @@ jest.mock('../../../services', () => {
         },
       };
     }),
+    getDataViewsStart: jest.fn(),
   };
 });
 

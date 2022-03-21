@@ -8,7 +8,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
-import { getDataStart } from '../../../../services';
+import { getDataViewsStart } from '../../../../services';
 
 import { SwitchModePopover } from './switch_mode_popover';
 
@@ -65,7 +65,7 @@ export const ComboBoxSelect = ({
 
   useEffect(() => {
     async function fetchIndexes() {
-      setAvailableIndexes(await getDataStart().indexPatterns.getIdsWithTitle());
+      setAvailableIndexes(await getDataViewsStart().getIdsWithTitle());
     }
 
     fetchIndexes();

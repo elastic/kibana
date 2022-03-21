@@ -13,7 +13,7 @@ import type { PanelData, Metric } from '../../../../common/types';
 import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
 import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
-import { getDataStart } from '../../../services';
+import { getDataStart, getDataViewsStart } from '../../../services';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import type { TSVBTables } from './types';
 
@@ -89,14 +89,14 @@ export const convertSeriesToDataTable = async (
   initialIndexPattern: DataView
 ) => {
   const tables: TSVBTables = {};
-  const { indexPatterns } = getDataStart();
+  const dataViews = getDataViewsStart();
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
     let usedIndexPattern = initialIndexPattern;
     // The user can overwrite the index pattern of a layer.
     // In that case, the index pattern should be fetched again.
     if (layer.override_index_pattern) {
-      const { indexPattern } = await fetchIndexPattern(layer.series_index_pattern, indexPatterns);
+      const { indexPattern } = await fetchIndexPattern(layer.series_index_pattern, dataViews);
       if (indexPattern) {
         usedIndexPattern = indexPattern;
       }
