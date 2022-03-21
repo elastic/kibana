@@ -17,6 +17,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usageFromCommandDefinition } from '../service/usage_from_command_definition';
 import { CommandDefinition } from '../types';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'command'>>(({ command }) => {
   const usageHelp = useMemo(() => {
@@ -50,44 +52,61 @@ export interface CommandUsageProps {
 }
 
 export const CommandUsage = memo<CommandUsageProps>(({ command }) => {
-  const hasArgs = Object.keys(command.args ?? []).length > 0;
+  const getTestId = useTestIdGenerator(useDataTestSubj());
+  const hasArgs = useMemo(() => Object.keys(command.args ?? []).length > 0, [command.args]);
+  const commandOptions = useMemo(() => {
+    // `command.args` only here to silence TS check
+    if (!hasArgs || !command.args) {
+      return [];
+    }
+
+    return Object.entries(command.args).map(([option, { about: description }]) => ({
+      title: `--${option}`,
+      description,
+    }));
+  }, [command.args, hasArgs]);
+  const additionalProps = useMemo(
+    () => ({
+      className: 'euiTruncateText',
+    }),
+    []
+  );
 
   return (
-    <EuiPanel color="transparent">
+    <EuiPanel color="transparent" data-test-subj={getTestId('commandUsage')}>
+      <EuiText>{command.about}</EuiText>
       <CommandInputUsage command={command} />
-      <EuiSpacer />
-      <p>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.securitySolution.console.commandUsage.optionsLabel"
-            defaultMessage="Options:"
-          />
-          {command.mustHaveArgs && command.args && hasArgs && (
-            <EuiText size="s" color="subdued">
+      {hasArgs && (
+        <>
+          <EuiSpacer />
+          <p>
+            <EuiText>
               <FormattedMessage
-                id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
-                defaultMessage="Note: at least one option must be used"
+                id="xpack.securitySolution.console.commandUsage.optionsLabel"
+                defaultMessage="Options:"
               />
+              {command.mustHaveArgs && command.args && hasArgs && (
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
+                    defaultMessage="Note: at least one option must be used"
+                  />
+                </EuiText>
+              )}
             </EuiText>
+          </p>
+          {command.args && (
+            <EuiDescriptionList
+              compressed
+              type="column"
+              className="descriptionList-20_80"
+              listItems={commandOptions}
+              descriptionProps={additionalProps}
+              titleProps={additionalProps}
+              data-test-subj={getTestId('commandUsage-options')}
+            />
           )}
-        </EuiText>
-      </p>
-      {command.args && (
-        <EuiDescriptionList
-          compressed
-          type="column"
-          className="descriptionList-20_80"
-          listItems={Object.entries(command.args).map(([option, { about: description }]) => ({
-            title: `--${option}`,
-            description,
-          }))}
-          descriptionProps={{
-            className: 'euiTruncateText',
-          }}
-          titleProps={{
-            className: 'euiTruncateText',
-          }}
-        />
+        </>
       )}
     </EuiPanel>
   );

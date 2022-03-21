@@ -84,8 +84,8 @@ export const Console = memo<ConsoleProps>(({ prompt, consoleService, ...commonPr
           data-test-subj={getTestId('mainPanel')}
         >
           <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={true} data-test-subj={getTestId('historyOutput')}>
-              <HistoryOutput />
+            <EuiFlexItem grow={true}>
+              <HistoryOutput data-test-subj={getTestId('historyOutput')} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <CommandInput

@@ -9,17 +9,21 @@ import React, { memo } from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserCommandInput } from './user_command_input';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface UnknownCommand {
   input: string;
 }
 export const UnknownCommand = memo<UnknownCommand>(({ input }) => {
+  const getTestId = useTestIdGenerator(useDataTestSubj());
+
   return (
     <>
       <div>
         <UserCommandInput input={input} />
       </div>
-      <EuiCallOut color="danger">
+      <EuiCallOut color="danger" data-test-subj={getTestId('unknownCommandError')}>
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.console.unknownCommand.title"

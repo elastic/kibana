@@ -16,6 +16,7 @@ import type { ConsoleProps } from './console';
 import type { Command, CommandServiceInterface } from './types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { CommandDefinition } from './types';
 
 export interface ConsoleTestSetup {
   renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
@@ -71,32 +72,67 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
 export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> => {
   return {
     getCommandList: jest.fn(() => {
-      return [
+      const commands: CommandDefinition[] = [
         {
           name: 'cmd1',
-          about: 'Runs cmd1',
+          about: 'a command with no options',
         },
         {
           name: 'cmd2',
           about: 'runs cmd 2',
           args: {
             file: {
+              about: 'Includes file in the run',
               required: true,
               allowMultiples: false,
-              about: 'Includes file in the run',
               validate: () => {
                 return true;
               },
             },
-            bad: {
+            ext: {
+              about: 'optional argument',
               required: false,
               allowMultiples: false,
+            },
+            bad: {
               about: 'will fail validation',
+              required: false,
+              allowMultiples: false,
               validate: () => 'This is a bad value',
             },
           },
         },
+        {
+          name: 'cmd3',
+          about: 'allows argument to be used multiple times',
+          args: {
+            foo: {
+              about: 'foo stuff',
+              required: true,
+              allowMultiples: true,
+            },
+          },
+        },
+        {
+          name: 'cmd4',
+          about: 'all options optinal, but at least one is required',
+          mustHaveArgs: true,
+          args: {
+            foo: {
+              about: 'foo stuff',
+              required: false,
+              allowMultiples: true,
+            },
+            bar: {
+              about: 'bar stuff',
+              required: false,
+              allowMultiples: true,
+            },
+          },
+        },
       ];
+
+      return commands;
     }),
 
     executeCommand: jest.fn(async (command: Command) => {

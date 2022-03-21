@@ -108,7 +108,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     }
 
     // Command supports no arguments
-    if (!commandDefinition.args) {
+    if (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0) {
       return updateStateWithNewCommandHistoryItem(
         state,
         <HistoryItem>
@@ -124,7 +124,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       );
     }
 
-    // unknown arguments?
+    // no unknown arguments allowed?
     if (parsedInput.unknownArgs && parsedInput.unknownArgs.length) {
       return updateStateWithNewCommandHistoryItem(
         state,
@@ -153,7 +153,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 {
                   defaultMessage: 'missing required argument: {argName}',
                   values: {
-                    argName: toCliArgumentOption(parsedInput.name),
+                    argName: toCliArgumentOption(requiredArg),
                   },
                 }
               )}
