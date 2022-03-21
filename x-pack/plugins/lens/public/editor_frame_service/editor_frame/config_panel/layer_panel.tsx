@@ -81,7 +81,6 @@ export function LayerPanel(
     updateDatasourceAsync,
     visualizationState,
   } = props;
-  const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
@@ -104,8 +103,10 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
+  const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
   const datasourceId = datasourcePublicAPI?.datasourceId;
   const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+  const layerDatasource = props.datasourceMap[datasourceId];
 
   const layerDatasourceDropProps = useMemo(
     () => ({
@@ -118,13 +119,12 @@ export function LayerPanel(
     [layerId, layerDatasourceState, datasourceId, updateDatasource]
   );
 
-  const layerDatasource = props.datasourceMap[datasourceId];
-
   const layerDatasourceConfigProps = {
     ...layerDatasourceDropProps,
     frame: props.framePublicAPI,
     dateRange,
   };
+  const columnLabelMap = layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
 
   const { groups, noDatasource } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
@@ -138,8 +138,6 @@ export function LayerPanel(
   );
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
-
-  const columnLabelMap = layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
 
   const { setDimension, removeDimension } = activeVisualization;
 
@@ -403,7 +401,6 @@ export function LayerPanel(
               : i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
                   defaultMessage: 'Requires field',
                 });
-
             const isOptional = !group.required && !group.suggestedValue;
             return (
               <EuiFormRow
@@ -447,7 +444,6 @@ export function LayerPanel(
                     <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
-
                         return (
                           <DraggableDimensionButton
                             registerNewButtonRef={registerNewButtonRef}

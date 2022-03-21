@@ -17,7 +17,6 @@ interface AddLayerButtonProps {
   visualizationState: unknown;
   onAddLayerClick: (layerType: LayerType, noDatasource?: boolean) => void;
   layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
-  noDatasource?: boolean;
 }
 
 export function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
@@ -29,7 +28,6 @@ export function AddLayerButton({
   visualizationState,
   onAddLayerClick,
   layersMeta,
-  noDatasource,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -65,7 +63,7 @@ export function AddLayerButton({
           })}
           fill
           color="text"
-          onClick={() => onAddLayerClick(supportedLayers[0].type, noDatasource)}
+          onClick={() => onAddLayerClick(supportedLayers[0].type, supportedLayers[0].noDatasource)}
           iconType="layers"
         >
           {i18n.translate('xpack.lens.configPanel.addLayerButton', {

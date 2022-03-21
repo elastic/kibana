@@ -51,11 +51,23 @@ const defaultContext = {
   registerDropTarget: jest.fn(),
 };
 
+const draggingField = {
+  field: { name: 'dragged' },
+  indexPatternId: 'a',
+  id: '1',
+  humanData: { label: 'Label' },
+  ghost: {
+    children: <button>Hello!</button>,
+    style: {},
+  },
+};
+
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
   let mockVisualization2: jest.Mocked<Visualization>;
 
   let mockDatasource: DatasourceMock;
+  mockDatasource = createMockDatasource('testDatasource');
   let frame: FramePublicAPI;
 
   function getDefaultProps() {
@@ -611,17 +623,6 @@ describe('LayerPanel', () => {
         nextLabel: '',
       });
 
-      const draggingField = {
-        field: { name: 'dragged' },
-        indexPatternId: 'a',
-        id: '1',
-        humanData: { label: 'Label' },
-        ghost: {
-          children: <button>Hello!</button>,
-          style: {},
-        },
-      };
-
       const { instance } = await mountWithProvider(
         <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
           <LayerPanel {...getDefaultProps()} />
@@ -665,17 +666,6 @@ describe('LayerPanel', () => {
       mockDatasource.getDropProps.mockImplementation(({ columnId }) =>
         columnId !== 'a' ? { dropTypes: ['field_replace'], nextLabel: '' } : undefined
       );
-
-      const draggingField = {
-        field: { name: 'dragged' },
-        indexPatternId: 'a',
-        id: '1',
-        humanData: { label: 'Label' },
-        ghost: {
-          children: <button>Hello!</button>,
-          style: {},
-        },
-      };
 
       const { instance } = await mountWithProvider(
         <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
@@ -983,6 +973,46 @@ describe('LayerPanel', () => {
         'newid',
         expect.objectContaining({ groupId: 'a' })
       );
+    });
+  });
+  describe('dimension trigger', () => {
+    it('should render datasource dimension trigger if there is layer datasource', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+      await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+      expect(mockDatasource.renderDimensionTrigger).toHaveBeenCalled();
+    });
+
+    it('should render visualization dimension trigger if there is no layer datasource', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        noDatasource: true,
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      mockVisualization.renderDimensionTrigger = jest.fn();
+
+      await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+      expect(mockDatasource.renderDimensionTrigger).not.toHaveBeenCalled();
+      expect(mockVisualization.renderDimensionTrigger).toHaveBeenCalled();
     });
   });
 });

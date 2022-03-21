@@ -85,6 +85,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
       hasReducedPadding={true}
       isHorizontal={true}
       label=""
+      rotationClass="lnsXyAnnotationIcon_rotate180"
     />
   }
   markerBody={
@@ -145,6 +146,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
       hasReducedPadding={true}
       isHorizontal={true}
       label=""
+      rotationClass="lnsXyAnnotationIcon_rotate180"
     />
   }
   markerBody={
