@@ -102,6 +102,15 @@
       margin-top: $euiSizeS * -1;
     }
   }
+
+  .kbnQueryBar-withDataViewPicker {
+    > :nth-child(2) {
+      // Change the order of the query bar and date picker so that the date picker is top and the query bar still aligns with filters
+      order: 1;
+      // EUI Flexbox adds too much margin between responded items, this just moves it up
+      margin-top: $euiSizeS * -1;
+    }
+  }
 }
 
 // IE specific fix for the datepicker to not collapse

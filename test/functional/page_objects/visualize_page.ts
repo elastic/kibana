@@ -39,6 +39,7 @@ export class VisualizePageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
   private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly visChart = this.ctx.getPageObject('visChart');
 
@@ -151,6 +152,10 @@ export class VisualizePageObject extends FtrService {
   public async clickVisType(type: string) {
     await this.testSubjects.click(`visType-${type}`);
     await this.header.waitUntilLoadingHasFinished();
+
+    if (type === 'lens') {
+      await this.unifiedSearch.closeTour();
+    }
   }
 
   public async clickAreaChart() {

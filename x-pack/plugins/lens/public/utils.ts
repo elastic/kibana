@@ -18,6 +18,7 @@ import type {
   LensBrushEvent,
   LensFilterEvent,
   Visualization,
+  StateSetter,
 } from './types';
 import { search } from '../../../../src/plugins/data/public';
 import type { DatasourceStates, VisualizationState } from './state_management';
@@ -62,6 +63,43 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
 export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Document) => {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
+
+export function handleIndexPatternChange({
+  activeDatasources,
+  datasourceStates,
+  indexPatternId,
+  setDatasourceState,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  datasourceStates: DatasourceStates;
+  indexPatternId: string;
+  setDatasourceState: StateSetter<unknown>;
+}): void {
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    datasource?.updateCurrentIndexPatternId?.({
+      state: datasourceStates[id].state,
+      indexPatternId,
+      setState: setDatasourceState,
+    });
+  });
+}
+
+export function refreshIndexPatternsList({
+  activeDatasources,
+  indexPatternId,
+  setDatasourceState,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  indexPatternId: string;
+  setDatasourceState: StateSetter<unknown>;
+}): void {
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    datasource?.refreshIndexPatternsList?.({
+      indexPatternId,
+      setState: setDatasourceState,
+    });
+  });
+}
 
 export function getIndexPatternsIds({
   activeDatasources,

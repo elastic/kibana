@@ -9,11 +9,11 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
+import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { SavedObject } from '../../../../../core/types';
 import type { DataViewAttributes } from '../../../../data_views/public';
 import { setHeaderActionMenuMounter } from '../../kibana_services';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
@@ -42,8 +42,7 @@ describe('DiscoverMainApp', () => {
       </Router>
     );
 
-    expect(findTestSubject(component, 'indexPattern-switch-link').text()).toBe(
-      indexPatternMock.title
-    );
+    expect(component.find(DiscoverTopNav).exists()).toBe(true);
+    expect(component.find(DiscoverTopNav).prop('indexPattern')).toEqual(indexPatternMock);
   });
 });
