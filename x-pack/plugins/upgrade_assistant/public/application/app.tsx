@@ -61,7 +61,7 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
           title={
             <FormattedMessage
               id="xpack.upgradeAssistant.app.deniedPrivilegeTitle"
-              defaultMessage="You require a Kibana admin role"
+              defaultMessage="Kibana admin role required"
             />
           }
           message={
