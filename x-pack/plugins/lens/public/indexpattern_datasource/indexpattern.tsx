@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { isEqual } from 'lodash';
+import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import type {
   DatasourceDimensionEditorProps,
@@ -118,6 +119,7 @@ export function getIndexPatternDatasource({
   core,
   storage,
   data,
+  dataViews,
   fieldFormats,
   charts,
   dataViewFieldEditor,
@@ -126,6 +128,7 @@ export function getIndexPatternDatasource({
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -139,7 +142,7 @@ export function getIndexPatternDatasource({
       }),
     });
 
-  const indexPatternsService = data.indexPatterns;
+  const indexPatternsService = dataViews;
 
   const handleChangeIndexPattern = (
     id: string,
@@ -261,6 +264,7 @@ export function getIndexPatternDatasource({
             <IndexPatternDataPanel
               changeIndexPattern={handleChangeIndexPattern}
               data={data}
+              dataViews={dataViews}
               fieldFormats={fieldFormats}
               charts={charts}
               indexPatternFieldEditor={dataViewFieldEditor}

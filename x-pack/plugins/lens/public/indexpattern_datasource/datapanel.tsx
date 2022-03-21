@@ -44,9 +44,11 @@ import { Loader } from '../loader';
 import { getEsQueryConfig } from '../../../../../src/plugins/data/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   changeIndexPattern: (
     id: string,
@@ -119,6 +121,7 @@ export function IndexPatternDataPanel({
   dragDropContext,
   core,
   data,
+  dataViews,
   fieldFormats,
   query,
   filters,
@@ -233,6 +236,7 @@ export function IndexPatternDataPanel({
           dragDropContext={dragDropContext}
           core={core}
           data={data}
+          dataViews={dataViews}
           fieldFormats={fieldFormats}
           charts={charts}
           indexPatternFieldEditor={indexPatternFieldEditor}
@@ -292,6 +296,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onUpdateIndexPattern,
   core,
   data,
+  dataViews,
   fieldFormats,
   indexPatternFieldEditor,
   existingFields,
@@ -301,6 +306,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   uiActions,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
@@ -365,6 +371,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       }),
     };
 
+    const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
+
     const fieldGroupDefinitions: FieldGroups = {
       SpecialFields: {
         fields: groupedFields.specialFields,
@@ -388,10 +396,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           : i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
               defaultMessage: 'Available fields',
             }),
-        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
-          defaultMessage:
-            'Available fields have data in the first 500 documents that match your filters. To view all fields, expand Empty fields. Some field types cannot be visualized in Lens, including full text and geographic fields.',
-        }),
+        helpText: isUsingSampling
+          ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
+              defaultMessage:
+                'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+              defaultMessage:
+                'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+            }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         // Show details on timeout but not failure
@@ -444,6 +457,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return fieldGroupDefinitions;
   }, [
     allFields,
+    core.uiSettings,
     fieldInfoUnavailable,
     filters.length,
     existenceFetchTimeout,
@@ -504,21 +518,21 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const refreshFieldList = useCallback(async () => {
     const newlyMappedIndexPattern = await loadIndexPatterns({
-      indexPatternsService: data.indexPatterns,
+      indexPatternsService: dataViews,
       cache: {},
       patterns: [currentIndexPattern.id],
     });
     onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
     // start a new session so all charts are refreshed
     data.search.session.start();
-  }, [data, currentIndexPattern, onUpdateIndexPattern]);
+  }, [data, dataViews, currentIndexPattern, onUpdateIndexPattern]);
 
   const editField = useMemo(
     () =>
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             trackUiEvent(`open_field_editor_${uiAction}`);
-            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+            const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
                 dataView: indexPatternInstance,
@@ -531,7 +545,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             });
           }
         : undefined,
-    [data, indexPatternFieldEditor, currentIndexPattern, editPermission, refreshFieldList]
+    [editPermission, dataViews, currentIndexPattern.id, indexPatternFieldEditor, refreshFieldList]
   );
 
   const removeField = useMemo(
@@ -539,7 +553,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       editPermission
         ? async (fieldName: string) => {
             trackUiEvent('open_field_delete_modal');
-            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+            const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
                 dataView: indexPatternInstance,
@@ -552,13 +566,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             });
           }
         : undefined,
-    [
-      currentIndexPattern.id,
-      data.indexPatterns,
-      editPermission,
-      indexPatternFieldEditor,
-      refreshFieldList,
-    ]
+    [currentIndexPattern.id, dataViews, editPermission, indexPatternFieldEditor, refreshFieldList]
   );
 
   const fieldProps = useMemo(

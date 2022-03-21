@@ -29,6 +29,7 @@ export type UrlStateType =
   | 'administration'
   | 'alerts'
   | 'cases'
+  | 'detection_response'
   | 'exceptions'
   | 'host'
   | 'users'

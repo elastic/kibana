@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { nodeBuilder } from '@kbn/es-query';
 import { Logger, CoreStart } from 'kibana/server';
 import { ActionsConfig } from '../config';
 import { ActionsPluginsStart } from '../plugin';
 import { ActionTypeRegistryContract } from '../types';
 import { cleanupTasks, CleanupTasksResult } from './cleanup_tasks';
 import { TaskInstance } from '../../../task_manager/server';
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 export interface FindAndCleanupTasksOpts {
   logger: Logger;

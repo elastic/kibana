@@ -19,7 +19,8 @@ import type { StateSetter } from '../types';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
+import { exporters } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   setState,
@@ -54,6 +55,7 @@ function getLensTopNavConfig(options: {
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
+  isSaveable: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -66,6 +68,7 @@ function getLensTopNavConfig(options: {
     savingToDashboardPermitted,
     tooltips,
     contextOriginatingApp,
+    isSaveable,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -179,7 +182,7 @@ function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
+      disableButton: !isSaveable,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
@@ -217,6 +220,7 @@ export const LensTopNavMenu = ({
     dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
+    dataViews,
   } = useKibana<LensAppServices>().services;
 
   const dispatch = useLensDispatch();
@@ -225,7 +229,7 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
 
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
   const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
   const closeFieldEditor = useRef<() => void | undefined>();
@@ -273,7 +277,7 @@ export const LensTopNavMenu = ({
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
+      getIndexPatternsObjects(indexPatternIds, dataViews).then(
         ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
           setRejectedIndexPatterns(rejectedIds);
@@ -286,7 +290,7 @@ export const LensTopNavMenu = ({
     rejectedIndexPatterns,
     datasourceMap,
     indexPatterns,
-    data.indexPatterns,
+    dataViews,
   ]);
 
   useEffect(() => {
@@ -373,6 +377,7 @@ export const LensTopNavMenu = ({
       showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
       savingToDashboardPermitted,
+      isSaveable,
       contextOriginatingApp,
       tooltips: {
         showExportWarning: () => {
@@ -426,7 +431,7 @@ export const LensTopNavMenu = ({
           }
         },
         saveAndReturn: () => {
-          if (savingToDashboardPermitted) {
+          if (isSaveable) {
             // disabling the validation on app leave because the document has been saved.
             onAppLeave((actions) => {
               return actions.default();

@@ -24,7 +24,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
-import { FilterManager, IndexPattern, Query } from '../../../../../src/plugins/data/public';
+import { FilterManager, Query } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '../../../../../src/plugins/data/common';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
@@ -142,7 +143,7 @@ describe('Lens App', () => {
 
   it('updates global filters with store state', async () => {
     const services = makeDefaultServicesForApp();
-    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const indexPattern = { id: 'index1' } as unknown as DataView;
     const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
     const pinnedFilter = buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
@@ -341,11 +342,9 @@ describe('Lens App', () => {
   describe('TopNavMenu#showDatePicker', () => {
     it('shows date picker if any used index pattern isTimeBased', async () => {
       const customServices = makeDefaultServicesForApp();
-      customServices.data.indexPatterns.get = jest
+      customServices.dataViews.get = jest
         .fn()
-        .mockImplementation((id) =>
-          Promise.resolve({ id, isTimeBased: () => true } as IndexPattern)
-        );
+        .mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true } as DataView));
       const { services } = await mountWith({ services: customServices });
       expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: true }),
@@ -354,11 +353,9 @@ describe('Lens App', () => {
     });
     it('shows date picker if active datasource isTimeBased', async () => {
       const customServices = makeDefaultServicesForApp();
-      customServices.data.indexPatterns.get = jest
+      customServices.dataViews.get = jest
         .fn()
-        .mockImplementation((id) =>
-          Promise.resolve({ id, isTimeBased: () => true } as IndexPattern)
-        );
+        .mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true } as DataView));
       const customProps = makeDefaultProps();
       customProps.datasourceMap.testDatasource.isTimeBased = () => true;
       const { services } = await mountWith({ props: customProps, services: customServices });
@@ -369,11 +366,9 @@ describe('Lens App', () => {
     });
     it('does not show date picker if index pattern nor active datasource is not time based', async () => {
       const customServices = makeDefaultServicesForApp();
-      customServices.data.indexPatterns.get = jest
+      customServices.dataViews.get = jest
         .fn()
-        .mockImplementation((id) =>
-          Promise.resolve({ id, isTimeBased: () => true } as IndexPattern)
-        );
+        .mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true } as DataView));
       const customProps = makeDefaultProps();
       customProps.datasourceMap.testDatasource.isTimeBased = () => false;
       const { services } = await mountWith({ props: customProps, services: customServices });
@@ -485,7 +480,7 @@ describe('Lens App', () => {
     });
     it('handles rejected index pattern', async () => {
       const customServices = makeDefaultServicesForApp();
-      customServices.data.indexPatterns.get = jest
+      customServices.dataViews.get = jest
         .fn()
         .mockImplementation((id) => Promise.reject({ reason: 'Could not locate that data view' }));
       const customProps = makeDefaultProps();
@@ -824,7 +819,7 @@ describe('Lens App', () => {
       });
 
       it('saves app filters and does not save pinned filters', async () => {
-        const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+        const indexPattern = { id: 'index1' } as unknown as DataView;
         const field = { name: 'myfield' } as unknown as FieldSpec;
         const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
         const unpinned = buildExistsFilter(field, indexPattern);
@@ -1034,7 +1029,7 @@ describe('Lens App', () => {
 
     it('updates the filters when the user changes them', async () => {
       const { instance, services, lensStore } = await mountWith({});
-      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const indexPattern = { id: 'index1' } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
@@ -1087,7 +1082,7 @@ describe('Lens App', () => {
           searchSessionId: `sessionId-3`,
         }),
       });
-      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const indexPattern = { id: 'index1' } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       act(() =>
         services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
@@ -1220,7 +1215,7 @@ describe('Lens App', () => {
           query: { query: 'new', language: 'lucene' },
         })
       );
-      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const indexPattern = { id: 'index1' } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = buildExistsFilter(field, indexPattern);
@@ -1277,7 +1272,7 @@ describe('Lens App', () => {
           query: { query: 'new', language: 'lucene' },
         })
       );
-      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const indexPattern = { id: 'index1' } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = buildExistsFilter(field, indexPattern);

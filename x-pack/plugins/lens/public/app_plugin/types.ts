@@ -21,6 +21,7 @@ import type {
   SavedObjectsStart,
 } from '../../../../../src/core/public';
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import type { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
 import type { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
@@ -123,6 +124,7 @@ export interface LensAppServices {
   overlays: OverlayStart;
   storage: IStorageWrapper;
   dashboard: DashboardStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
   inspector: LensInspector;

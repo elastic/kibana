@@ -8,13 +8,9 @@ import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
-import type {
-  IndexPattern,
-  IndexPatternsContract,
-  TimefilterContract,
-} from 'src/plugins/data/public';
-import type { IUiSettingsClient } from 'kibana/public';
-import type { SavedObjectReference } from 'kibana/public';
+import type { TimefilterContract } from 'src/plugins/data/public';
+import type { IUiSettingsClient, SavedObjectReference } from 'kibana/public';
+import type { DataView, DataViewsContract } from '../../../../src/plugins/data_views/public';
 import type { Document } from './persistence/saved_object_store';
 import type {
   Datasource,
@@ -127,11 +123,11 @@ export function getIndexPatternsIds({
 
 export async function getIndexPatternsObjects(
   ids: string[],
-  indexPatternsService: IndexPatternsContract
-): Promise<{ indexPatterns: IndexPattern[]; rejectedIds: string[] }> {
+  indexPatternsService: DataViewsContract
+): Promise<{ indexPatterns: DataView[]; rejectedIds: string[] }> {
   const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
   const fullfilled = responses.filter(
-    (response): response is PromiseFulfilledResult<IndexPattern> => response.status === 'fulfilled'
+    (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
   );
   const rejectedIds = responses
     .map((_response, i) => ids[i])

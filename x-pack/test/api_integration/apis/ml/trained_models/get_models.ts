@@ -18,6 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
     let testModelIds: string[] = [];
 
     before(async () => {
+      await ml.api.initSavedObjects();
       await ml.testResources.setKibanaTimeZoneToUTC();
       testModelIds = await ml.api.createTestTrainedModels('regression', 5, true);
       await ml.api.createModelAlias('dfa_regression_model_n_0', 'dfa_regression_model_alias');
@@ -32,6 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
         )
       );
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('returns all trained models with associated pipelines including aliases', async () => {

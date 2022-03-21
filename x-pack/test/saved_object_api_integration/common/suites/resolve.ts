@@ -55,7 +55,7 @@ export const TEST_CASES = Object.freeze({
     type: 'resolvetype',
     id: 'conflict',
     expectedNamespaces: EACH_SPACE,
-    expectedOutcome: 'conflict' as const, // only in space 1, where the alias exists
+    expectedOutcome: 'conflict' as const, // only in the default space and space 1, where the alias exists
     expectedId: 'conflict',
     expectedAliasTargetId: 'conflict-newid',
   }),
