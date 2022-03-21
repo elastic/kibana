@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { RuleNameProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 
