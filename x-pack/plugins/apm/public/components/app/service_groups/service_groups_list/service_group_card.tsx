@@ -19,6 +19,7 @@ import {
   SERVICE_GROUP_COLOR_DEFAULT,
 } from '../../../../../common/service_groups';
 import { ServiceGroupsTour } from '../service_groups_tour';
+import { useServiceGroupsTour } from '../use_service_groups_tour';
 
 interface Props {
   serviceGroup: ServiceGroup;
@@ -35,6 +36,8 @@ export function ServiceGroupsCard({
   href,
   withTour,
 }: Props) {
+  const { tourEnabled, dismissTour } = useServiceGroupsTour('serviceGroupCard');
+
   const cardProps: EuiCardProps = {
     style: { width: 286, height: 186 },
     icon: (
@@ -72,7 +75,12 @@ export function ServiceGroupsCard({
         )}
       </EuiFlexGroup>
     ),
-    onClick,
+    onClick: () => {
+      dismissTour();
+      if (onClick) {
+        onClick();
+      }
+    },
     href,
   };
 
@@ -80,7 +88,8 @@ export function ServiceGroupsCard({
     return (
       <EuiFlexItem key={serviceGroup.groupName}>
         <ServiceGroupsTour
-          type="serviceGroupCard"
+          tourEnabled={tourEnabled}
+          dismissTour={dismissTour}
           title={i18n.translate(
             'xpack.apm.serviceGroups.tour.serviceGroups.title',
             { defaultMessage: 'All services group' }

@@ -8,15 +8,18 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ServiceGroupsTour } from '../service_groups_tour';
+import { useServiceGroupsTour } from '../use_service_groups_tour';
 
 interface Props {
   onClick: () => void;
 }
 
 export function CreateButton({ onClick }: Props) {
+  const { tourEnabled, dismissTour } = useServiceGroupsTour('createGroup');
   return (
     <ServiceGroupsTour
-      type="createGroup"
+      tourEnabled={tourEnabled}
+      dismissTour={dismissTour}
       title={i18n.translate('xpack.apm.serviceGroups.tour.createGroups.title', {
         defaultMessage: 'Introducing service groups',
       })}
@@ -28,7 +31,13 @@ export function CreateButton({ onClick }: Props) {
         }
       )}
     >
-      <EuiButton iconType="plusInCircle" onClick={onClick}>
+      <EuiButton
+        iconType="plusInCircle"
+        onClick={() => {
+          dismissTour();
+          onClick();
+        }}
+      >
         {i18n.translate('xpack.apm.serviceGroups.createGroupLabel', {
           defaultMessage: 'Create group',
         })}

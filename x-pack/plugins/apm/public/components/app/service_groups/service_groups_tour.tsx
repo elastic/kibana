@@ -8,31 +8,24 @@
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 
-type Type = 'createGroup' | 'editGroup' | 'serviceGroupCard';
+export type TourType = 'createGroup' | 'editGroup' | 'serviceGroupCard';
 
 interface Props {
-  type: Type;
   title: string;
   content: string;
+  tourEnabled: boolean;
+  dismissTour: () => void;
   children: React.ReactElement;
 }
 
-const LocalStorageTourEnabled: Record<Type, boolean> = {
-  createGroup: true,
-  editGroup: true,
-  serviceGroupCard: true,
-};
-
-export function ServiceGroupsTour({ type, title, content, children }: Props) {
-  const [tourEnabled, setTourEnabled] = useLocalStorage(
-    'apm.serviceGroupsTour',
-    LocalStorageTourEnabled
-  );
-
-  const tourIsOpen = tourEnabled[type];
-
+export function ServiceGroupsTour({
+  tourEnabled,
+  dismissTour,
+  title,
+  content,
+  children,
+}: Props) {
   return (
     <EuiTourStep
       content={
@@ -48,7 +41,7 @@ export function ServiceGroupsTour({ type, title, content, children }: Props) {
           </EuiText>
         </>
       }
-      isStepOpen={tourIsOpen}
+      isStepOpen={tourEnabled}
       onFinish={() => {}}
       maxWidth={300}
       minWidth={300}
@@ -57,14 +50,10 @@ export function ServiceGroupsTour({ type, title, content, children }: Props) {
       title={title}
       anchorPosition="leftUp"
       footerAction={
-        <EuiButtonEmpty
-          color="text"
-          size="xs"
-          onClick={() => {
-            setTourEnabled({ ...tourEnabled, [type]: false });
-          }}
-        >
-          Dismiss
+        <EuiButtonEmpty color="text" size="xs" onClick={dismissTour}>
+          {i18n.translate('xpack.apm.serviceGroups.tour.dismiss', {
+            defaultMessage: 'Dismiss',
+          })}
         </EuiButtonEmpty>
       }
     >

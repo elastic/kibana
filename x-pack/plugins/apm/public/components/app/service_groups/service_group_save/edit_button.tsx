@@ -8,15 +8,18 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ServiceGroupsTour } from '../service_groups_tour';
+import { useServiceGroupsTour } from '../use_service_groups_tour';
 
 interface Props {
   onClick: () => void;
 }
 
 export function EditButton({ onClick }: Props) {
+  const { tourEnabled, dismissTour } = useServiceGroupsTour('editGroup');
   return (
     <ServiceGroupsTour
-      type="editGroup"
+      tourEnabled={tourEnabled}
+      dismissTour={dismissTour}
       title={i18n.translate('xpack.apm.serviceGroups.tour.editGroups.title', {
         defaultMessage: 'Edit this service group',
       })}
@@ -28,7 +31,13 @@ export function EditButton({ onClick }: Props) {
         }
       )}
     >
-      <EuiButton iconType="pencil" onClick={onClick}>
+      <EuiButton
+        iconType="pencil"
+        onClick={() => {
+          dismissTour();
+          onClick();
+        }}
+      >
         {i18n.translate('xpack.apm.serviceGroups.editGroupLabel', {
           defaultMessage: 'Edit group',
         })}
