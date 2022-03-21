@@ -40,7 +40,7 @@ export const OsqueryFlyout: React.FC<IProps> = ({ agentId, onClose }) => {
         <OsqueryEventDetailsHeader
           primaryText={<h2>{ACTION_OSQUERY}</h2>}
           handleClick={onClose}
-          data-test-subj={'flyout-header-osquery'}
+          data-test-subj="flyout-header-osquery"
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -49,7 +49,7 @@ export const OsqueryFlyout: React.FC<IProps> = ({ agentId, onClose }) => {
         </OsqueryActionWrapper>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <OsqueryEventDetailsFooter handleClick={onClose} data-test-subj={'flyout-footer-osquery'} />
+        <OsqueryEventDetailsFooter handleClick={onClose} data-test-subj="flyout-footer-osquery" />
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
