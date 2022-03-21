@@ -2655,7 +2655,6 @@
     "discover.advancedSettings.defaultColumnsText": "デフォルトでDiscoverアプリに表示される列。空の場合、ドキュメントの概要が表示されます。",
     "discover.advancedSettings.defaultColumnsTitle": "デフォルトの列",
     "discover.advancedSettings.disableDocumentExplorer": "ドキュメントエクスプローラーまたはクラシックビュー",
-    "discover.advancedSettings.disableDocumentExplorerDescription": "クラシックビューではなく、ドキュメントエクスプローラーを使用するには、このオプションをオフにします。ドキュメントエクスプローラーでは、データの並べ替え、列のサイズ変更、全画面表示といった優れた機能を使用できます。",
     "discover.advancedSettings.discover.fieldStatisticsLinkText": "フィールド統計情報ビュー",
     "discover.advancedSettings.discover.modifyColumnsOnSwitchText": "新しいデータビューで使用できない列を削除します。",
     "discover.advancedSettings.discover.modifyColumnsOnSwitchTitle": "データビューを変更するときに列を修正",

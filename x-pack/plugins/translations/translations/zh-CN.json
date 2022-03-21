@@ -2662,7 +2662,6 @@
     "discover.advancedSettings.defaultColumnsText": "Discover 应用中默认显示的列。如果为空，将显示文档摘要。",
     "discover.advancedSettings.defaultColumnsTitle": "默认列",
     "discover.advancedSettings.disableDocumentExplorer": "Document Explorer 或经典视图",
-    "discover.advancedSettings.disableDocumentExplorerDescription": "要使用新的 Document Explorer，而非经典视图，请关闭此选项。Document Explorer 提供了更合理的数据排序、可调整大小的列和全屏视图。",
     "discover.advancedSettings.discover.fieldStatisticsLinkText": "字段统计信息视图",
     "discover.advancedSettings.discover.modifyColumnsOnSwitchText": "移除新数据视图中不存在的列。",
     "discover.advancedSettings.discover.modifyColumnsOnSwitchTitle": "在更改数据视图时修改列",
