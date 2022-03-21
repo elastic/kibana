@@ -65,7 +65,7 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
   const canShowsearchProfiler =
     services.application?.capabilities?.dev_tools.show && searchProfilerHref !== undefined;
   const shouldShowsearchProfilerLink = !!(indexPattern && canShowsearchProfiler);
-  const handlesearchProfilerLinkClick = useCallback(
+  const handleSearchProfilerLinkClick = useCallback(
     () => searchProfilerHref && navigateToUrl && navigateToUrl(searchProfilerHref),
     [searchProfilerHref, navigateToUrl]
   );
@@ -80,45 +80,51 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
-        <div className="eui-textRight">
-          <EuiCopy textToCopy={json}>
-            {(copy) => (
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiCopy textToCopy={json}>
+              {(copy) => (
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  iconType="copyClipboard"
+                  onClick={copy}
+                  data-test-subj="inspectorRequestCopyClipboardButton"
+                >
+                  {copyToClipboardLabel}
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+          {shouldShowDevToolsLink && (
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
                 flush="right"
-                iconType="copyClipboard"
-                onClick={copy}
-                data-test-subj="inspectorRequestCopyClipboardButton"
+                iconType="wrench"
+                href={consoleHref}
+                onClick={handleDevToolsLinkClick}
+                data-test-subj="inspectorRequestOpenInConsoleButton"
               >
-                {copyToClipboardLabel}
+                {openInConsoleLabel}
               </EuiButtonEmpty>
-            )}
-          </EuiCopy>
-          {shouldShowDevToolsLink && (
-            <EuiButtonEmpty
-              size="xs"
-              flush="right"
-              iconType="wrench"
-              href={consoleHref}
-              onClick={handleDevToolsLinkClick}
-              data-test-subj="inspectorRequestOpenInConsoleButton"
-            >
-              {openInConsoleLabel}
-            </EuiButtonEmpty>
+            </EuiFlexItem>
           )}
           {shouldShowsearchProfilerLink && (
-            <EuiButtonEmpty
-              size="xs"
-              flush="right"
-              iconType="search"
-              href={searchProfilerHref}
-              onClick={handlesearchProfilerLinkClick}
-              data-test-subj="inspectorRequestOpenInSearchProfilerButton"
-            >
-              {openInSearchProfilerLabel}
-            </EuiButtonEmpty>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="right"
+                iconType="visBarHorizontal"
+                href={searchProfilerHref}
+                onClick={handleSearchProfilerLinkClick}
+                data-test-subj="inspectorRequestOpenInSearchProfilerButton"
+              >
+                {openInSearchProfilerLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           )}
-        </div>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <CodeEditor
