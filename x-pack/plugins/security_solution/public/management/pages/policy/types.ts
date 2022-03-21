@@ -90,8 +90,8 @@ export interface PolicyArtifactsState {
 }
 
 export interface PolicyDetailsArtifactsPageListLocationParams {
-  page_index: number;
-  page_size: number;
+  page: number;
+  pageSize: number;
   filter: string;
 }
 
