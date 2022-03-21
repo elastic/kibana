@@ -25,6 +25,10 @@ describe('Use cases toast hook', () => {
         addSuccess: successMock,
       };
     });
+    beforeEach(() => {
+      successMock.mockClear();
+    });
+
     it('should create a success tost when invoked with a case', () => {
       const { result } = renderHook(
         () => {
@@ -34,6 +38,34 @@ describe('Use cases toast hook', () => {
       );
       result.current.showSuccessAttach(mockCase);
       expect(successMock).toHaveBeenCalled();
+    });
+
+    it('should create a success tost when invoked with a case and a custom title', () => {
+      const { result } = renderHook(
+        () => {
+          return useCasesToast();
+        },
+        { wrapper: TestProviders }
+      );
+      result.current.showSuccessAttach(mockCase, { title: 'Custom title' });
+      const mockParams = successMock.mock.calls[0][0];
+      const el = document.createElement('div');
+      mockParams.title(el);
+      expect(el).toHaveTextContent('Custom title');
+    });
+
+    it('should create a success tost when invoked with a case and a custom content', () => {
+      const { result } = renderHook(
+        () => {
+          return useCasesToast();
+        },
+        { wrapper: TestProviders }
+      );
+      result.current.showSuccessAttach(mockCase, { content: 'Custom content' });
+      const mockParams = successMock.mock.calls[0][0];
+      const el = document.createElement('div');
+      mockParams.text(el);
+      expect(el).toHaveTextContent('Custom content');
     });
   });
   describe('Toast content', () => {
