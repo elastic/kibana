@@ -20,7 +20,6 @@ export function defineGetUserProfileRoute({
   router.get(
     {
       path: '/internal/security/user_profile',
-      options: { tags: ['access:accessUserProfile'] },
       validate: {
         query: schema.object({ data: schema.maybe(schema.string()) }),
       },
@@ -36,11 +35,7 @@ export function defineGetUserProfileRoute({
 
       const userProfileService = getUserProfileService();
       try {
-        const profile = await userProfileService.get(
-          request,
-          session.userProfileId,
-          request.query.data
-        );
+        const profile = await userProfileService.get(session.userProfileId, request.query.data);
         const body: AuthenticatedUserProfile = {
           ...profile,
           authentication_provider: session.provider,

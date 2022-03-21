@@ -19,7 +19,6 @@ export function defineUpdateUserProfileDataRoute({
   router.post(
     {
       path: '/internal/security/user_profile/_data',
-      options: { tags: ['access:updateUserProfile'] },
       validate: {
         body: schema.recordOf(schema.string(), schema.any()),
       },
@@ -35,7 +34,7 @@ export function defineUpdateUserProfileDataRoute({
 
       const userProfileService = getUserProfileService();
       try {
-        await userProfileService.update(request, session.userProfileId, request.body);
+        await userProfileService.update(session.userProfileId, request.body);
         return response.ok();
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

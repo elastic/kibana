@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { elasticsearchServiceMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import { securityMock } from '../mocks';
@@ -15,7 +15,6 @@ import { UserProfileService } from './user_profile_service';
 
 const logger = loggingSystemMock.createLogger();
 const userProfileService = new UserProfileService(logger);
-const requestMock = httpServerMock.createKibanaRequest();
 
 describe('UserProfileService', () => {
   let mockStartParams: {
@@ -41,9 +40,6 @@ describe('UserProfileService', () => {
     mockStartParams.clusterClient.asInternalUser.transport.request.mockResolvedValue({
       [userProfile.uid]: userProfile,
     });
-    mockStartParams.clusterClient.asScoped().asCurrentUser.transport.request.mockResolvedValue({
-      [userProfile.uid]: userProfile,
-    });
   });
 
   afterEach(() => {
@@ -64,7 +60,7 @@ describe('UserProfileService', () => {
   describe('#get', () => {
     it('should get user profile', async () => {
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.get(requestMock, 'UID')).resolves.toMatchInlineSnapshot(`
+      await expect(startContract.get('UID')).resolves.toMatchInlineSnapshot(`
           Object {
             "data": Object {
               "avatar": "fun.gif",
@@ -79,28 +75,24 @@ describe('UserProfileService', () => {
             },
           }
       `);
-      expect(
-        mockStartParams.clusterClient.asScoped().asCurrentUser.transport.request
-      ).toHaveBeenCalledWith({
+      expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '_security/profile/UID',
       });
     });
 
     it('should handle errors when get user profile fails', async () => {
-      mockStartParams.clusterClient
-        .asScoped()
-        .asCurrentUser.transport.request.mockRejectedValue(new Error('Fail'));
-      const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.get(requestMock, 'UID')).rejects.toMatchInlineSnapshot(
-        `[Error: Fail]`
+      mockStartParams.clusterClient.asInternalUser.transport.request.mockRejectedValue(
+        new Error('Fail')
       );
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(startContract.get('UID')).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
       expect(logger.error).toHaveBeenCalled();
     });
 
     it('should get user profile and application data scoped to Kibana', async () => {
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.get(requestMock, 'UID', '*')).resolves.toMatchInlineSnapshot(`
+      await expect(startContract.get('UID', '*')).resolves.toMatchInlineSnapshot(`
           Object {
             "data": Object {
               "avatar": "fun.gif",
@@ -115,9 +107,7 @@ describe('UserProfileService', () => {
             },
           }
       `);
-      expect(
-        mockStartParams.clusterClient.asScoped().asCurrentUser.transport.request
-      ).toHaveBeenCalledWith({
+      expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '_security/profile/UID?data=kibana.*',
       });
@@ -127,12 +117,10 @@ describe('UserProfileService', () => {
   describe('#update', () => {
     it('should update application data scoped to Kibana', async () => {
       const startContract = userProfileService.start(mockStartParams);
-      await startContract.update(requestMock, 'UID', {
+      await startContract.update('UID', {
         avatar: 'boring.png',
       });
-      expect(
-        mockStartParams.clusterClient.asScoped().asCurrentUser.transport.request
-      ).toHaveBeenCalledWith({
+      expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         body: {
           data: {
             kibana: {
@@ -146,12 +134,12 @@ describe('UserProfileService', () => {
     });
 
     it('should handle errors when update user profile fails', async () => {
-      mockStartParams.clusterClient
-        .asScoped()
-        .asCurrentUser.transport.request.mockRejectedValue(new Error('Fail'));
+      mockStartParams.clusterClient.asInternalUser.transport.request.mockRejectedValue(
+        new Error('Fail')
+      );
       const startContract = userProfileService.start(mockStartParams);
       await expect(
-        startContract.update(requestMock, 'UID', {
+        startContract.update('UID', {
           avatar: 'boring.png',
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
