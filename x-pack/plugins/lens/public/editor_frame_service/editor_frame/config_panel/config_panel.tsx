@@ -190,9 +190,9 @@ export function LayerPanels(
         visualization={activeVisualization}
         visualizationState={visualization.state}
         layersMeta={props.framePublicAPI}
-        onAddLayerClick={(layerType, noDatasource) => {
+        onAddLayerClick={(layerType) => {
           const layerId = generateId();
-          dispatchLens(addLayer({ layerId, layerType, noDatasource }));
+          dispatchLens(addLayer({ layerId, layerType }));
           trackUiEvent('layer_added');
           setNextFocusedLayerId(layerId);
         }}

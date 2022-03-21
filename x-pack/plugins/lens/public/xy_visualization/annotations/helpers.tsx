@@ -174,7 +174,6 @@ export const getAnnotationsConfiguration = ({
   );
 
   return {
-    noDatasource: true,
     groups: [
       {
         groupId: 'xAnnotations',

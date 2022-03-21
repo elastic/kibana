@@ -289,6 +289,7 @@ describe('xy_visualization', () => {
           .getSupportedLayers(exampleState(), frame)
           .find((a) => a.type === 'annotations');
         expect(supportedAnnotationLayer?.disabled).toBeFalsy();
+        expect(supportedAnnotationLayer?.noDatasource).toBeTruthy();
         expect(supportedAnnotationLayer?.initialDimensions).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ groupId: 'xAnnotations', columnId: expect.any(String) }),
@@ -1559,7 +1560,6 @@ describe('xy_visualization', () => {
           frame,
           layerId: 'annotations',
         });
-        expect(config.noDatasource).toBeTruthy();
         expect(config.groups[0].accessors).toEqual([
           { color: '#f04e98', columnId: 'an1', triggerIcon: 'color' },
         ]);

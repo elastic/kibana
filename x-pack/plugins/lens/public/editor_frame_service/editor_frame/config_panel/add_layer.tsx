@@ -15,7 +15,7 @@ import type { FramePublicAPI, Visualization } from '../../../types';
 interface AddLayerButtonProps {
   visualization: Visualization;
   visualizationState: unknown;
-  onAddLayerClick: (layerType: LayerType, noDatasource?: boolean) => void;
+  onAddLayerClick: (layerType: LayerType) => void;
   layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
 
@@ -63,7 +63,7 @@ export function AddLayerButton({
           })}
           fill
           color="text"
-          onClick={() => onAddLayerClick(supportedLayers[0].type, supportedLayers[0].noDatasource)}
+          onClick={() => onAddLayerClick(supportedLayers[0].type)}
           iconType="layers"
         >
           {i18n.translate('xpack.lens.configPanel.addLayerButton', {
@@ -107,21 +107,19 @@ export function AddLayerButton({
             title: i18n.translate('xpack.lens.configPanel.selectLayerType', {
               defaultMessage: 'Select layer type',
             }),
-            items: supportedLayers.map(
-              ({ type, label, icon, disabled, toolTipContent, noDatasource }) => {
-                return {
-                  toolTipContent,
-                  disabled,
-                  name: label,
-                  icon: icon && <EuiIcon size="m" type={icon} />,
-                  ['data-test-subj']: `lnsLayerAddButton-${type}`,
-                  onClick: () => {
-                    onAddLayerClick(type, noDatasource);
-                    toggleLayersChoice(false);
-                  },
-                };
-              }
-            ),
+            items: supportedLayers.map(({ type, label, icon, disabled, toolTipContent }) => {
+              return {
+                toolTipContent,
+                disabled,
+                name: label,
+                icon: icon && <EuiIcon size="m" type={icon} />,
+                ['data-test-subj']: `lnsLayerAddButton-${type}`,
+                onClick: () => {
+                  onAddLayerClick(type);
+                  toggleLayersChoice(false);
+                },
+              };
+            }),
           },
         ]}
       />

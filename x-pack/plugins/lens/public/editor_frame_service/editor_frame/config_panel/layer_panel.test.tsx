@@ -995,7 +995,6 @@ describe('LayerPanel', () => {
 
     it('should render visualization dimension trigger if there is no layer datasource', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
-        noDatasource: true,
         groups: [
           {
             groupLabel: 'A',
@@ -1008,9 +1007,18 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockVisualization.renderDimensionTrigger = jest.fn();
+      const props = getDefaultProps();
+      const propsWithVisOnlyLayer = {
+        ...props,
+        framePublicAPI: { ...props.framePublicAPI, datasourceLayers: {} },
+      };
 
-      await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+      mockVisualization.renderDimensionTrigger = jest.fn();
+      mockVisualization.getUniqueLabels = jest.fn(() => ({
+        x: 'A',
+      }));
+
+      await mountWithProvider(<LayerPanel {...propsWithVisOnlyLayer} />);
       expect(mockDatasource.renderDimensionTrigger).not.toHaveBeenCalled();
       expect(mockVisualization.renderDimensionTrigger).toHaveBeenCalled();
     });
