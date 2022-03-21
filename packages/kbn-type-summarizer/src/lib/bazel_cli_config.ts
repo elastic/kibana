@@ -17,6 +17,7 @@ const TYPE_SUMMARIZER_PACKAGES = [
   '@kbn/crypto',
   '@kbn/generate',
   '@kbn/mapbox-gl',
+  '@kbn/ace',
 ];
 
 type TypeSummarizerType = 'api-extractor' | 'type-summarizer';
