@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+/* eslint-disable import/no-extraneous-dependencies */
+
 import React from 'react';
 import { EuiCode } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
+import { act } from '@testing-library/react';
 import { Console } from './console';
 import type { ConsoleProps } from './console';
 import type { Command, CommandServiceInterface } from './types';
@@ -15,30 +19,52 @@ import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 
 export interface ConsoleTestSetup {
   renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
+
+  commandServiceMock: jest.Mocked<CommandServiceInterface>;
+
+  enterCommand(cmd: string): void;
 }
 
-export const getConsoleTestSetup = () => {
+export const getConsoleTestSetup = (): ConsoleTestSetup => {
   const mockedContext = createAppRootMockRenderer();
 
-  // let renderResult: ReturnType<AppContextTestRender['render']>;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
+
+  const commandServiceMock = getCommandServiceMock();
+
   const renderConsole: ConsoleTestSetup['renderConsole'] = ({
     prompt = '$$>',
-    consoleService = getCommandServiceMock(),
+    consoleService = commandServiceMock,
     'data-test-subj': dataTestSubj = 'test',
     ...others
   } = {}) => {
-    return mockedContext.render(
+    if (consoleService !== commandServiceMock) {
+      throw new Error('Must use CommandService provided by test setup');
+    }
+
+    return (renderResult = mockedContext.render(
       <Console
         prompt={prompt}
         consoleService={consoleService}
         data-test-subj={dataTestSubj}
         {...others}
       />
-    );
+    ));
+  };
+
+  const enterCommand: ConsoleTestSetup['enterCommand'] = (cmd) => {
+    const keyCaptureInput = renderResult.getByTestId('test-cmdInput-keyCapture-input');
+
+    act(() => {
+      userEvent.type(keyCaptureInput, cmd);
+      userEvent.keyboard('{enter}');
+    });
   };
 
   return {
     renderConsole,
+    commandServiceMock,
+    enterCommand,
   };
 };
 
@@ -79,7 +105,7 @@ export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> =>
       return {
         result: (
           <div data-test-subj="exec-output">
-            <div data-test-subj="exec-output.cmdName">{`${command.commandDefinition.name}`}</div>
+            <div data-test-subj="exec-output-cmdName">{`${command.commandDefinition.name}`}</div>
             <div data-test-subj="exec-output-userInput">{`command input: ${command.input}`}</div>
             <EuiCode data-test-subj="exec-output-argsJson">
               {JSON.stringify(command.args, null, 2)}
@@ -88,17 +114,5 @@ export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> =>
         ),
       };
     }),
-
-    // getHelp: jest.fn(async () => {
-    //   return {
-    //     result: <div data-test-subj="help-content">{'help here'}</div>,
-    //   };
-    // }),
-    //
-    // getCommandUsage: jest.fn(async () => {
-    //   return {
-    //     result: <div data-test-subj="cmd-useage">{'usage here'}</div>,
-    //   };
-    // }),
   };
 };
