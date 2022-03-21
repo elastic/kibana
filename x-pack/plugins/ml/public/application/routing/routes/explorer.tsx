@@ -227,11 +227,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity()
   );
 
-  const swimLaneBucketInterval = useObservable(
-    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneBucketInterval$(),
-    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneBucketInterval()
-  );
-
   const influencersFilterQuery = useObservable(
     anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
   );
@@ -244,7 +239,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           noInfluencersConfigured: explorerState.noInfluencersConfigured,
           selectedCells,
           selectedJobs: explorerState.selectedJobs,
-          swimlaneBucketInterval: swimLaneBucketInterval,
           tableInterval: tableInterval.val,
           tableSeverity: tableSeverity.val,
           viewBySwimlaneFieldName: viewByFieldName,

@@ -122,7 +122,6 @@ export class AnomalyTimelineStateService extends StateService {
     ])
       .pipe(takeUntil(this.unsubscribeAll$))
       .subscribe(([selectedJobs, containerWidth]) => {
-        if (!selectedJobs) return;
         this._swimLaneBucketInterval$.next(
           this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
         );
@@ -258,11 +257,7 @@ export class AnomalyTimelineStateService extends StateService {
               viewBySwimlaneFieldName
             );
 
-            const timerange = getSelectionTimeRange(
-              selectedCells,
-              swimLaneBucketInterval.asSeconds(),
-              this.timefilter.getBounds()
-            );
+            const timerange = getSelectionTimeRange(selectedCells, this.timefilter.getBounds());
 
             return from(
               this.anomalyTimelineService.loadViewByTopFieldValuesForSelectedTime(

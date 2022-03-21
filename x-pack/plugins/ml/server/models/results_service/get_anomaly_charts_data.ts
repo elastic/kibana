@@ -11,7 +11,16 @@ import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { MlClient } from '../../lib/ml_client';
 import { isPopulatedObject, isRuntimeMappings } from '../../../common';
-import { MetricData } from '../../../common/types/results';
+import type {
+  MetricData,
+  ModelPlotOutput,
+  RecordsForCriteria,
+  ScheduledEventsByBucket,
+  SeriesConfigWithMetadata,
+  ChartRecord,
+  ChartPoint,
+  SeriesConfig,
+} from '../../../common/types/results';
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -28,19 +37,16 @@ import {
 } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { isDefined } from '../../../common/types/guards';
-import { AnomalyRecordDoc, CombinedJob, Datafeed, JobId, RecordForInfluencer } from '../../shared';
+import { AnomalyRecordDoc, CombinedJob, Datafeed, RecordForInfluencer } from '../../shared';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
-import {
-  ModelPlotOutput,
-  RecordsForCriteria,
-  ScheduledEventsByBucket,
-} from '../../../public/application/services/results_service/result_service_rx';
+
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
-import { chartLimits, getChartType } from '../../../public/application/util/chart_utils';
-import { CHART_TYPE, ChartType } from '../../../public/application/explorer/explorer_constants';
+import { CHART_TYPE, ChartType } from '../../../common/constants/charts';
+import { getChartType, chartLimits } from '../../../common/util/chart_utils';
+import { MlJob } from '../../index';
 
 const CHART_MAX_POINTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -51,58 +57,9 @@ const CARDINALITY_PRECISION_THRESHOLD = 100;
 const USE_OVERALL_CHART_LIMITS = false;
 const ML_TIME_FIELD_NAME = 'timestamp';
 
-export interface ChartRecord extends RecordForInfluencer {
-  function: string;
-}
-
-interface ChartRange {
+export interface ChartRange {
   min: number;
   max: number;
-}
-
-interface SeriesConfig {
-  jobId: JobId;
-  detectorIndex: number;
-  metricFunction: ML_JOB_AGGREGATION.LAT_LONG | ES_AGGREGATION | null;
-  timeField: string;
-  interval: string;
-  datafeedConfig: Datafeed;
-  summaryCountFieldName?: string;
-  metricFieldName?: string;
-}
-
-interface InfoTooltip {
-  jobId: JobId;
-  aggregationInterval?: string;
-  chartFunction: string;
-  entityFields: EntityField[];
-}
-
-interface ChartPoint {
-  date: number;
-  anomalyScore?: number;
-  actual?: number[];
-  multiBucketImpact?: number;
-  typical?: number[];
-  value?: number | null;
-  entity?: string;
-  byFieldName?: string;
-  numberOfCauses?: number;
-  scheduledEvents?: any[];
-}
-
-export interface SeriesConfigWithMetadata extends SeriesConfig {
-  functionDescription?: string;
-  bucketSpanSeconds: number;
-  detectorLabel?: string;
-  fieldName: string;
-  entityFields: EntityField[];
-  infoTooltip?: InfoTooltip;
-  loading?: boolean;
-  chartData?: ChartPoint[] | null;
-  mapData?: Array<ChartRecord | undefined>;
-  plotEarliest?: number;
-  plotLatest?: number;
 }
 
 export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClusterClient) {
@@ -431,7 +388,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   function processRecordsForDisplay(
-    combinedJobRecords: Record<string, CombinedJob>,
+    combinedJobRecords: Record<string, MlJob>,
     anomalyRecords: RecordForInfluencer[]
   ): { records: ChartRecord[]; errors: Record<string, Set<string>> | undefined } {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).
@@ -455,8 +412,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       }
 
       let isChartable =
-        isSourceDataChartableForDetector(job, record.detector_index) ||
-        isMappableJob(job, record.detector_index);
+        isSourceDataChartableForDetector(job as CombinedJob, record.detector_index) ||
+        isMappableJob(job as CombinedJob, record.detector_index);
 
       if (isChartable === false) {
         if (isModelPlotChartableForDetector(job, record.detector_index)) {
@@ -621,7 +578,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     return { records: recordsForSeries, errors: errorMessages };
   }
 
-  function buildConfigFromDetector(job: CombinedJob, detectorIndex: number) {
+  function buildConfigFromDetector(job: MlJob, detectorIndex: number) {
     const analysisConfig = job.analysis_config;
     const detector = analysisConfig.detectors[detectorIndex];
 
@@ -693,7 +650,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     return config;
   }
 
-  function buildConfig(record: ChartRecord, job: CombinedJob): SeriesConfigWithMetadata {
+  function buildConfig(record: ChartRecord, job: MlJob): SeriesConfigWithMetadata {
     const detectorIndex = record.detector_index;
     const config: Omit<
       SeriesConfigWithMetadata,
@@ -877,7 +834,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   async function getAnomalyData(
-    combinedJobRecords: Record<string, CombinedJob>,
+    combinedJobRecords: Record<string, MlJob>,
     anomalyRecords: ChartRecord[],
     selectedEarliestMs: number,
     selectedLatestMs: number,
@@ -1122,6 +1079,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           plotLatest: chartRange.max,
           selectedEarliest: selectedEarliestMs,
           selectedLatest: selectedLatestMs,
+          // FIXME can we remove this?
           chartLimits: USE_OVERALL_CHART_LIMITS
             ? overallChartLimits
             : chartLimits(processedData[i]),
@@ -1130,6 +1088,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     if (mapData.length) {
       // push map data in if it's available
+      // @ts-ignore
       seriesToPlot.push(...mapData);
     }
 
@@ -1139,7 +1098,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   async function getMetricData(
     config: SeriesConfigWithMetadata,
     range: ChartRange,
-    job: CombinedJob
+    job: MlJob
   ): Promise<MetricData> {
     const { jobId, detectorIndex, entityFields, bucketSpanSeconds } = config;
 
@@ -1460,6 +1419,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       };
 
       if (metricFunction === 'percentiles') {
+        // @ts-ignore
         metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
       }
 
@@ -1486,9 +1446,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     const dataByTime = get(resp, ['aggregations', 'sample', 'byTime', 'buckets'], []);
+    // @ts-ignore
     const data = dataByTime.reduce((d, dataForTime) => {
       const date = +dataForTime.key;
       const entities = get(dataForTime, ['entities', 'buckets'], []);
+      // @ts-ignore
       entities.forEach((entity) => {
         let value = metricFunction === 'count' ? entity.doc_count : entity.metric.value;
 
@@ -1507,7 +1469,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         });
       });
       return d;
-    }, []);
+    }, [] as any[]);
 
     return data;
   }
@@ -1664,11 +1626,13 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           ],
         },
       },
+      // @ts-ignore check score request
       sort: [{ record_score: { order: 'desc' } }],
     };
 
     const resp = await mlClient.anomalySearch(searchRequest, jobIds);
 
+    // @ts-ignore
     if (resp.hits.total.value > 0) {
       each(resp.hits.hits, (hit: any) => {
         obj.records.push(hit._source);
@@ -1787,6 +1751,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       jobIds
     );
 
+    // @ts-ignore
     return response.hits.hits
       .map((hit) => {
         return hit._source;
@@ -1833,7 +1798,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const selectedJobs = (await mlClient.getJobs({ job_id: jobIds })).jobs;
 
-    const combinedJobRecords: Record<string, CombinedJob> = keyBy(selectedJobs, 'job_id');
+    const combinedJobRecords: Record<string, MlJob> = keyBy(selectedJobs, 'job_id');
 
     const chartData = await getAnomalyData(
       combinedJobRecords,

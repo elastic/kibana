@@ -16,6 +16,7 @@ import {
   ExplorerChartsData,
   getDefaultChartsData,
 } from './explorer_charts/explorer_charts_container_service';
+import { SeriesConfigWithMetadata } from '../services/anomaly_explorer_charts_service';
 
 const MAX_CHARTS_PER_ROW = 4;
 
@@ -44,7 +45,7 @@ export class AnomalyChartsStateService extends StateService {
         switchMap(([selectedJobs, influencerFilterQuery, containerWidth, selectedCells]) => {
           const jobIds = selectedJobs.map((v) => v.id);
 
-          if (!selectedCells) return of();
+          if (!selectedCells) return of([]) as Observable<SeriesConfigWithMetadata[]>;
 
           this._isChartsDataLoading$.next(true);
 

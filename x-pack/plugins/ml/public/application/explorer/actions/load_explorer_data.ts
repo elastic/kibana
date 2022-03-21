@@ -107,7 +107,6 @@ const loadExplorerDataProvider = (
       noInfluencersConfigured,
       selectedCells,
       selectedJobs,
-      swimlaneBucketInterval,
       tableInterval,
       tableSeverity,
       viewBySwimlaneFieldName,
@@ -118,30 +117,18 @@ const loadExplorerDataProvider = (
 
     const bounds = timefilter.getBounds() as Required<TimeRangeBounds>;
 
-    const timerange = getSelectionTimeRange(
-      selectedCells,
-      swimlaneBucketInterval.asSeconds(),
-      bounds
-    );
+    const timerange = getSelectionTimeRange(selectedCells, bounds);
 
     const dateFormatTz = getDateFormatTz();
-
-    const interval = swimlaneBucketInterval.asSeconds();
 
     // First get the data where we have all necessary args at hand using forkJoin:
     // annotationsData, anomalyChartRecords, influencers, overallState, tableData
     return forkJoin({
-      overallAnnotations: memoizedLoadOverallAnnotations(
-        lastRefresh,
-        selectedJobs,
-        interval,
-        bounds
-      ),
+      overallAnnotations: memoizedLoadOverallAnnotations(lastRefresh, selectedJobs, bounds),
       annotationsData: memoizedLoadAnnotationsTableData(
         lastRefresh,
         selectedCells,
         selectedJobs,
-        swimlaneBucketInterval.asSeconds(),
         bounds
       ),
       anomalyChartRecords: anomalyExplorerChartsService.loadDataForCharts$(
@@ -170,7 +157,6 @@ const loadExplorerDataProvider = (
         selectedCells,
         selectedJobs,
         dateFormatTz,
-        swimlaneBucketInterval.asSeconds(),
         bounds,
         viewBySwimlaneFieldName,
         tableInterval,

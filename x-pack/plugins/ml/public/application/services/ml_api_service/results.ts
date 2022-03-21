@@ -6,7 +6,6 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
-import { Observable } from 'rxjs';
 import {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
@@ -179,7 +178,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     maxResults: number,
     numberOfPoints: number,
     influencersFilterQuery?: InfluencersFilterQuery
-  ): Observable<SeriesConfigWithMetadata> {
+  ) {
     const body = JSON.stringify({
       jobIds,
       influencers,
@@ -191,7 +190,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       numberOfPoints,
       timeBounds,
     });
-    return httpService.http$<SeriesConfigWithMetadata>({
+    return httpService.http$<SeriesConfigWithMetadata[]>({
       path: `${basePath()}/results/anomaly_charts`,
       method: 'POST',
       body,

@@ -96,6 +96,7 @@ export interface SeriesConfigWithMetadata extends SeriesConfig {
   mapData?: Array<ChartRecord | undefined>;
   plotEarliest?: number;
   plotLatest?: number;
+  chartLimits?: { min: number; max: number };
 }
 
 export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {

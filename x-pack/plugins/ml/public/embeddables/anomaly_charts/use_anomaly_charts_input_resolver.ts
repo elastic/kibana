@@ -9,9 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, forkJoin, from, Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
-import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import {
   AppStateSelectedCells,
   getSelectionInfluencers,
@@ -40,11 +38,7 @@ export function useAnomalyChartsInputResolver(
   chartWidth: number,
   severity: number
 ): { chartsData: ExplorerChartsData; isLoading: boolean; error: Error | null | undefined } {
-  const [
-    { uiSettings },
-    { data: dataServices },
-    { anomalyDetectorService, anomalyExplorerService },
-  ] = services;
+  const [{}, { data: dataServices }, { anomalyDetectorService, anomalyExplorerService }] = services;
   const { timefilter } = dataServices.query.timefilter;
 
   const [chartsData, setChartsData] = useState<any>();
@@ -53,15 +47,6 @@ export function useAnomalyChartsInputResolver(
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
   const severity$ = useMemo(() => new Subject<number>(), []);
-
-  const timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-  }, []);
 
   useEffect(() => {
     const subscription = combineLatest([
@@ -108,9 +93,7 @@ export function useAnomalyChartsInputResolver(
 
           const jobIds = getSelectionJobIds(selections, explorerJobs);
 
-          const bucketInterval = timeBuckets.getInterval();
-
-          const timeRange = getSelectionTimeRange(selections, bucketInterval.asSeconds(), bounds);
+          const timeRange = getSelectionTimeRange(selections, bounds);
           return forkJoin({
             combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
             anomalyChartRecords: anomalyExplorerService.loadDataForCharts$(

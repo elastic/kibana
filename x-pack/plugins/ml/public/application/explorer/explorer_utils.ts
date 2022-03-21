@@ -255,7 +255,6 @@ export function getFieldsByJob() {
 
 export function getSelectionTimeRange(
   selectedCells: AppStateSelectedCells | undefined,
-  interval: number,
   bounds: TimeRangeBounds
 ): SelectionTimeRange {
   // Returns the time range of the cell(s) currently selected in the swimlane.
@@ -318,11 +317,10 @@ export function getSelectionJobIds(
 
 export function loadOverallAnnotations(
   selectedJobs: ExplorerJob[],
-  interval: number,
   bounds: TimeRangeBounds
 ): Promise<AnnotationsTable> {
   const jobIds = selectedJobs.map((d) => d.id);
-  const timeRange = getSelectionTimeRange(undefined, interval, bounds);
+  const timeRange = getSelectionTimeRange(undefined, bounds);
 
   return new Promise((resolve) => {
     ml.annotations
@@ -374,11 +372,10 @@ export function loadOverallAnnotations(
 export function loadAnnotationsTableData(
   selectedCells: AppStateSelectedCells | undefined,
   selectedJobs: ExplorerJob[],
-  interval: number,
   bounds: Required<TimeRangeBounds>
 ): Promise<AnnotationsTable> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
-  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
+  const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve) => {
     ml.annotations
@@ -434,7 +431,6 @@ export async function loadAnomaliesTableData(
   selectedCells: AppStateSelectedCells | undefined,
   selectedJobs: ExplorerJob[],
   dateFormatTz: any,
-  interval: number,
   bounds: Required<TimeRangeBounds>,
   fieldName: string,
   tableInterval: string,
@@ -443,7 +439,7 @@ export async function loadAnomaliesTableData(
 ): Promise<AnomaliesTableData> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
-  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
+  const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve, reject) => {
     ml.results
