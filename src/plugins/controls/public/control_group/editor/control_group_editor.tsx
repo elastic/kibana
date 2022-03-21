@@ -175,9 +175,10 @@ export const ControlGroupEditor = ({
               )}
             </>
           </EuiFormRow>
-          <EuiHorizontalRule />
+          <EuiHorizontalRule margin="m" />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
+              <EuiSpacer size="xs" />
               <EuiSwitch
                 label={ControlGroupStrings.management.querySync.getQuerySettingsTitle()}
                 showLabel={false}
@@ -193,10 +194,10 @@ export const ControlGroupEditor = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="xs">
+              <EuiTitle size="xxs">
                 <h3>{ControlGroupStrings.management.querySync.getQuerySettingsTitle()}</h3>
               </EuiTitle>
-              <EuiText>
+              <EuiText size="s">
                 <p>{ControlGroupStrings.management.querySync.getQuerySettingsSubtitle()}</p>
               </EuiText>
               <EuiSpacer size="s" />
@@ -206,35 +207,26 @@ export const ControlGroupEditor = ({
                 buttonContent={ControlGroupStrings.management.querySync.getAdvancedSettingsTitle()}
               >
                 <EuiSpacer size="s" />
-                <EuiFormRow
-                  label={ControlGroupStrings.management.querySync.getIgnoreTimerangeTitle()}
-                  display="columnCompressedSwitch"
-                >
+                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
                   <EuiSwitch
                     label={ControlGroupStrings.management.querySync.getIgnoreTimerangeTitle()}
-                    showLabel={false}
+                    compressed
                     checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreTimerange)}
                     onChange={(e) => updateIgnoreSetting({ ignoreTimerange: e.target.checked })}
                   />
                 </EuiFormRow>
-                <EuiFormRow
-                  label={ControlGroupStrings.management.querySync.getIgnoreQueryTitle()}
-                  display="columnCompressedSwitch"
-                >
+                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
                   <EuiSwitch
                     label={ControlGroupStrings.management.querySync.getIgnoreQueryTitle()}
-                    showLabel={false}
+                    compressed
                     checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreQuery)}
                     onChange={(e) => updateIgnoreSetting({ ignoreQuery: e.target.checked })}
                   />
                 </EuiFormRow>
-                <EuiFormRow
-                  label={ControlGroupStrings.management.querySync.getIgnoreFilterPillsTitle()}
-                  display="columnCompressedSwitch"
-                >
+                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
                   <EuiSwitch
                     label={ControlGroupStrings.management.querySync.getIgnoreFilterPillsTitle()}
-                    showLabel={false}
+                    compressed
                     checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreFilters)}
                     onChange={(e) => updateIgnoreSetting({ ignoreFilters: e.target.checked })}
                   />
@@ -242,9 +234,10 @@ export const ControlGroupEditor = ({
               </EuiAccordion>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiHorizontalRule />
+          <EuiHorizontalRule margin="m" />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
+              <EuiSpacer size="xs" />
               <EuiSwitch
                 label={ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
                 showLabel={false}
@@ -253,21 +246,22 @@ export const ControlGroupEditor = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="xs">
+              <EuiTitle size="xxs">
                 <h3>
                   {ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
                 </h3>
               </EuiTitle>
-              <EuiText>
+              <EuiText size="s">
                 <p>
                   {ControlGroupStrings.management.validateSelections.getValidateSelectionsSubTitle()}
                 </p>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiHorizontalRule />
+          <EuiHorizontalRule margin="m" />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
+              <EuiSpacer size="xs" />
               <EuiSwitch
                 label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
                 showLabel={false}
@@ -280,10 +274,10 @@ export const ControlGroupEditor = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="xs">
+              <EuiTitle size="xxs">
                 <h3>{ControlGroupStrings.management.controlChaining.getHierarchyTitle()}</h3>
               </EuiTitle>
-              <EuiText>
+              <EuiText size="s">
                 <p>{ControlGroupStrings.management.controlChaining.getHierarchySubTitle()}</p>
               </EuiText>
             </EuiFlexItem>
@@ -291,7 +285,8 @@ export const ControlGroupEditor = ({
           <EuiHorizontalRule />
           {controlCount > 0 && (
             <>
-              <EuiSpacer size="l" />
+              <EuiHorizontalRule margin="m" />
+              <EuiSpacer size="m" />
               <EuiButtonEmpty
                 onClick={onDeleteAll}
                 data-test-subj="delete-all-controls-button"
