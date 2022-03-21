@@ -24,17 +24,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink } from '../../../../../hooks';
+import { useLink } from '../../../hooks';
 
-import type { QuickStartCreateForm } from '../../../hooks';
+import type { QuickStartCreateForm } from '../hooks';
 
 export function getGettingStartedStep({
-  fleetServerHost,
-  onFleetServerHostChange,
   quickStartCreateForm,
 }: {
-  fleetServerHost: string;
-  onFleetServerHostChange: (value: string) => void;
   quickStartCreateForm: QuickStartCreateForm;
 }): EuiStepProps {
   return {
@@ -42,22 +38,16 @@ export function getGettingStartedStep({
       defaultMessage: 'Get started with Fleet Server',
     }),
     status: quickStartCreateForm.status === 'success' ? 'complete' : 'current',
-    children: (
-      <GettingStartedStepContent
-        fleetServerHost={fleetServerHost}
-        onFleetServerHostChange={onFleetServerHostChange}
-        quickStartCreateForm={quickStartCreateForm}
-      />
-    ),
+    children: <GettingStartedStepContent quickStartCreateForm={quickStartCreateForm} />,
   };
 }
 
 const GettingStartedStepContent: React.FunctionComponent<{
-  fleetServerHost: string;
-  onFleetServerHostChange: (value: string) => void;
   quickStartCreateForm: QuickStartCreateForm;
-}> = ({ fleetServerHost, onFleetServerHostChange, quickStartCreateForm }) => {
+}> = ({ quickStartCreateForm }) => {
   const { getHref } = useLink();
+
+  const { fleetServerHost, onFleetServerHostChange } = quickStartCreateForm;
 
   if (quickStartCreateForm.status === 'success') {
     return (
@@ -104,7 +94,7 @@ const GettingStartedStepContent: React.FunctionComponent<{
 
       <EuiSpacer size="m" />
 
-      <EuiForm onSubmit={() => quickStartCreateForm.submit(fleetServerHost)}>
+      <EuiForm onSubmit={quickStartCreateForm.submit}>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldText
@@ -135,7 +125,7 @@ const GettingStartedStepContent: React.FunctionComponent<{
 
         <EuiButton
           isLoading={quickStartCreateForm.status === 'loading'}
-          onClick={() => quickStartCreateForm.submit(fleetServerHost)}
+          onClick={quickStartCreateForm.submit}
           data-test-subj="generateFleetServerPolicyButton"
         >
           <FormattedMessage

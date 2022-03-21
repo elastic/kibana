@@ -13,9 +13,9 @@ import { useStartServices, sendGetPermissionsCheck } from '../../../hooks';
 
 import { FleetServerMissingPrivileges } from '../../agents/components/fleet_server_callouts';
 
-import { Loading } from '../../../components';
+import { FleetServerInstructions as OnPremInstructions, Loading } from '../../../components';
 
-import { CloudInstructions, OnPremInstructions } from './components';
+import { CloudInstructions } from './components';
 
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;

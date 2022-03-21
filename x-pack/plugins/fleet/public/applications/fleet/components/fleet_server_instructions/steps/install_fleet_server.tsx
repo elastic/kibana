@@ -12,39 +12,46 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PLATFORM_TYPE } from '../../../../../hooks';
-import { useDefaultOutput, useKibanaVersion } from '../../../../../hooks';
+import type { PLATFORM_TYPE } from '../../../hooks';
+import { useDefaultOutput, useKibanaVersion } from '../../../hooks';
 
-import type { QuickStartCreateForm } from '../../../hooks';
+import { PlatformSelector } from '../../../components';
 
-import { PlatformSelector } from '../../../../enrollment_instructions/manual/platform_selector';
-
-import { getInstallCommandForPlatform } from '../../../utils';
+import { getInstallCommandForPlatform } from '../utils';
 
 export function getInstallFleetServerStep({
   isFleetServerReady,
-  quickStartCreateForm,
+  disabled,
+  serviceToken,
+  fleetServerHost,
+  fleetServerPolicyId,
 }: {
   isFleetServerReady: boolean;
-  quickStartCreateForm: QuickStartCreateForm;
+  disabled: boolean;
+  serviceToken?: string;
+  fleetServerHost?: string;
+  fleetServerPolicyId?: string;
 }): EuiStepProps {
   return {
     title: i18n.translate('xpack.fleet.fleetServerFlyout.installFleetServerTitle', {
       defaultMessage: 'Install Fleet Server to a centralized host',
     }),
-    status:
-      quickStartCreateForm.status === 'success'
-        ? isFleetServerReady
-          ? 'complete'
-          : 'current'
-        : 'disabled',
-    children: <InstallFleetServerStepContent quickStartCreateForm={quickStartCreateForm} />,
+    status: disabled ? 'disabled' : isFleetServerReady ? 'complete' : 'incomplete',
+    children: !disabled && (
+      <InstallFleetServerStepContent
+        serviceToken={serviceToken}
+        fleetServerHost={fleetServerHost}
+        fleetServerPolicyId={fleetServerPolicyId}
+      />
+    ),
   };
 }
 
 const InstallFleetServerStepContent: React.FunctionComponent<{
-  quickStartCreateForm: QuickStartCreateForm;
-}> = ({ quickStartCreateForm }) => {
+  serviceToken?: string;
+  fleetServerHost?: string;
+  fleetServerPolicyId?: string;
+}> = ({ serviceToken, fleetServerHost, fleetServerPolicyId }) => {
   const kibanaVersion = useKibanaVersion();
   const { output } = useDefaultOutput();
 
@@ -53,9 +60,9 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
       acc[platform] = getInstallCommandForPlatform(
         platform,
         output?.hosts?.[0] ?? '',
-        quickStartCreateForm.serviceToken ?? '',
-        quickStartCreateForm.fleetServerPolicyId,
-        quickStartCreateForm.fleetServerHost,
+        serviceToken ?? '',
+        fleetServerPolicyId,
+        fleetServerHost,
         false,
         output?.ca_trusted_fingerprint,
         kibanaVersion
@@ -65,10 +72,6 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
     },
     {} as Record<PLATFORM_TYPE, string>
   );
-
-  if (quickStartCreateForm.status !== 'success') {
-    return null;
-  }
 
   return (
     <>

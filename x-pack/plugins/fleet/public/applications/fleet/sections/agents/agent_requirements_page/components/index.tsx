@@ -6,4 +6,3 @@
  */
 
 export { CloudInstructions } from './fleet_server_cloud_instructions';
-export * from './fleet_server_on_prem_instructions';

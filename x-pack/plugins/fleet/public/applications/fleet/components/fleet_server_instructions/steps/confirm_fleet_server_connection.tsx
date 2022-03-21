@@ -13,43 +13,31 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { QuickStartCreateForm } from '../../../hooks';
-
 export function getConfirmFleetServerConnectionStep({
-  quickStartCreateForm,
+  disabled,
   isFleetServerReady,
 }: {
-  quickStartCreateForm: QuickStartCreateForm;
+  disabled: boolean;
   isFleetServerReady: boolean;
 }): EuiStepProps {
   return {
-    title:
-      quickStartCreateForm.status === 'success' && isFleetServerReady
-        ? i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionSuccessTitle', {
-            defaultMessage: 'Fleet Server connected',
-          })
-        : i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionTitle', {
-            defaultMessage: 'Confirm connection',
-          }),
-    status:
-      quickStartCreateForm.status === 'success' && isFleetServerReady ? 'complete' : 'disabled',
-    children: (
-      <ConfirmFleetServerConnectionStepContent
-        quickStartCreateForm={quickStartCreateForm}
-        isFleetServerReady={isFleetServerReady}
-      />
+    title: isFleetServerReady
+      ? i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionSuccessTitle', {
+          defaultMessage: 'Fleet Server connected',
+        })
+      : i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionTitle', {
+          defaultMessage: 'Confirm connection',
+        }),
+    status: isFleetServerReady ? 'complete' : 'disabled',
+    children: !disabled && (
+      <ConfirmFleetServerConnectionStepContent isFleetServerReady={isFleetServerReady} />
     ),
   };
 }
 
 const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
-  quickStartCreateForm: QuickStartCreateForm;
   isFleetServerReady: boolean;
-}> = ({ quickStartCreateForm, isFleetServerReady }) => {
-  if (quickStartCreateForm.status !== 'success') {
-    return null;
-  }
-
+}> = ({ isFleetServerReady }) => {
   return isFleetServerReady ? (
     <>
       <EuiText>

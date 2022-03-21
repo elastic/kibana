@@ -31,12 +31,11 @@ import {
   useKibanaVersion,
 } from '../../hooks';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
+import { PlatformSelector } from '../../components';
 
 import type { PackagePolicy } from '../../../common';
 
 import { FLEET_KUBERNETES_PACKAGE } from '../../../common';
-
-import { PlatformSelector } from '../enrollment_instructions/manual/platform_selector';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import type { InstructionProps } from './types';

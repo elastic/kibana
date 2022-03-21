@@ -29,5 +29,5 @@ FleetServerFlyout.args = {
 
 export default {
   component: FleetServerFlyout,
-  title: 'Sections/Fleet/Agents/FleetServerFlyout',
+  title: 'Sections/Fleet/Agents/Fleet Server Instructions/In Flyout',
 };

@@ -10,7 +10,7 @@ import React from 'react';
 import { useKibanaVersion } from '../../../hooks';
 import type { EnrollmentAPIKey } from '../../../types';
 
-import { PlatformSelector } from './platform_selector';
+import { PlatformSelector } from '../../../components';
 
 interface Props {
   fleetServerHosts: string[];

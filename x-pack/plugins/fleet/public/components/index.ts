@@ -22,3 +22,4 @@ export { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 export { AddAgentHelpPopover } from './add_agent_help_popover';
 export * from './link_and_revision';
 export * from './agent_enrollment_flyout';
+export * from './platform_selector';

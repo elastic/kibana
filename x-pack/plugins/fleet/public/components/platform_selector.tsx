@@ -11,8 +11,8 @@ import { EuiText, EuiSpacer, EuiCodeBlock, EuiButtonGroup, EuiCallOut } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import type { PLATFORM_TYPE } from '../../../hooks';
-import { PLATFORM_OPTIONS, usePlatform } from '../../../hooks';
+import type { PLATFORM_TYPE } from '../hooks';
+import { PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 interface Props {
   linuxCommand: string;
