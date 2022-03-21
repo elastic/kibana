@@ -44,7 +44,7 @@ import {
 } from '../../../lib/execution_duration_utils';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 import { RuleAlertList } from './rule_alert_list';
-import { RuleEventLogList } from './rule_event_log_list';
+import { RuleEventLogListWithApi } from './rule_event_log_list';
 import { AlertListItem } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
@@ -62,20 +62,6 @@ type RuleProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
-
-const eventLogTabText = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText',
-  {
-    defaultMessage: 'Execution history',
-  }
-);
-
-const alertsTabText = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.rule.alertsTabText',
-  {
-    defaultMessage: 'Alerts',
-  }
-);
 
 export function RuleComponent({
   rule,
@@ -136,13 +122,17 @@ export function RuleComponent({
   const tabs = [
     {
       id: EVENT_LOG_LIST_TAB,
-      name: eventLogTabText,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText', {
+        defaultMessage: 'Execution history',
+      }),
       'data-test-subj': 'eventLogListTab',
-      content: <RuleEventLogList />,
+      content: <RuleEventLogListWithApi rule={rule} />,
     },
     {
       id: ALERT_LIST_TAB,
-      name: alertsTabText,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.alertsTabText', {
+        defaultMessage: 'Alerts',
+      }),
       'data-test-subj': 'ruleAlertListTab',
       content: renderRuleAlertList(),
     },
