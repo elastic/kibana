@@ -10449,7 +10449,6 @@
     "xpack.globalSearchBar.searchBar.noResultsImageAlt": "Illustration d'un trou noir",
     "xpack.globalSearchBar.searchBar.optionTagListAriaLabel": "Balises",
     "xpack.globalSearchBar.searchbar.overflowTagsAriaLabel": "{n} {n, plural, one {balise} other {balises}} de plus : {tags}",
-    "xpack.globalSearchBar.searchBar.placeholder": "Rechercher dans Elastic",
     "xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription": "Commande + /",
     "xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail": "{shortcutDescription} {commandDescription}",
     "xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription": "Raccourci",

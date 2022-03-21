@@ -12496,7 +12496,6 @@
     "xpack.globalSearchBar.searchBar.noResultsImageAlt": "黑洞的图示",
     "xpack.globalSearchBar.searchBar.optionTagListAriaLabel": "标签",
     "xpack.globalSearchBar.searchbar.overflowTagsAriaLabel": "另外 {n} 个{n, plural, other {标签}}：{tags}",
-    "xpack.globalSearchBar.searchBar.placeholder": "搜索 Elastic",
     "xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription": "Command + /",
     "xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail": "{shortcutDescription} {commandDescription}",
     "xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription": "快捷方式",
