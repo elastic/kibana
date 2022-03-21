@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+import { DataView, DataViewField } from 'src/plugins/data_views/public';
 import { PanelData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 import { convertSeriesToDataTable, addMetaToColumns } from './convert_series_to_datatable';
@@ -33,25 +33,25 @@ jest.mock('../../../services', () => {
 });
 
 describe('convert series to datatables', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: DataView;
 
   beforeEach(() => {
-    const fieldMap: Record<string, IndexPatternField> = {
-      test1: { name: 'test1', spec: { type: 'date', name: 'test1' } } as IndexPatternField,
+    const fieldMap: Record<string, DataViewField> = {
+      test1: { name: 'test1', spec: { type: 'date', name: 'test1' } } as DataViewField,
       test2: {
         name: 'test2',
         spec: { type: 'number', name: 'Average of test2' },
-      } as IndexPatternField,
-      test3: { name: 'test3', spec: { type: 'boolean', name: 'test3' } } as IndexPatternField,
+      } as DataViewField,
+      test3: { name: 'test3', spec: { type: 'boolean', name: 'test3' } } as DataViewField,
     };
 
-    const getFieldByName = (name: string): IndexPatternField | undefined => fieldMap[name];
+    const getFieldByName = (name: string): DataViewField | undefined => fieldMap[name];
     indexPattern = {
       id: 'index1',
       title: 'index1',
       timeFieldName: 'timestamp',
       getFieldByName,
-    } as IndexPattern;
+    } as DataView;
   });
 
   describe('addMetaColumns()', () => {

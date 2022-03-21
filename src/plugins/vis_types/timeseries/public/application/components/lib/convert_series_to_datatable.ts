@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
 import { Query } from 'src/plugins/data/common';
 import { TimeseriesVisParams } from '../../../types';
@@ -33,7 +33,7 @@ interface TSVBColumns {
 
 export const addMetaToColumns = (
   columns: TSVBColumns[],
-  indexPattern: IndexPattern
+  indexPattern: DataView
 ): DatatableColumn[] => {
   return columns.map((column) => {
     const field = indexPattern.getFieldByName(column.name);
@@ -86,7 +86,7 @@ const hasSeriesAgg = (metrics: Metric[]) => {
 export const convertSeriesToDataTable = async (
   model: TimeseriesVisParams,
   series: PanelData[],
-  initialIndexPattern: IndexPattern
+  initialIndexPattern: DataView
 ) => {
   const tables: TSVBTables = {};
   const { indexPatterns } = getDataStart();

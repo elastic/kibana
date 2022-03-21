@@ -14,10 +14,10 @@ import { SwitchModePopover } from './switch_mode_popover';
 
 import type { SelectIndexComponentProps } from './types';
 import type { IndexPatternValue } from '../../../../../common/types';
-import type { IndexPatternsService } from '../../../../../../../data/public';
+import type { DataViewsService } from '../../../../../../../data_views/public';
 
 /** @internal **/
-type IdsWithTitle = Awaited<ReturnType<IndexPatternsService['getIdsWithTitle']>>;
+type IdsWithTitle = Awaited<ReturnType<DataViewsService['getIdsWithTitle']>>;
 
 /** @internal **/
 type SelectedOptions = EuiComboBoxProps<string>['selectedOptions'];

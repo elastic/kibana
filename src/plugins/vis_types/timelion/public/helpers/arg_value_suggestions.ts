@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import { isNestedField } from 'src/plugins/data_views/common';
+import { isNestedField } from '../../../..//data_views/common';
 import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
 import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';

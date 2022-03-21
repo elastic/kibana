@@ -7,7 +7,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { DataViewsContract, IndexPattern } from 'src/plugins/data_views/public';
+import { DataViewsContract, DataView } from 'src/plugins/data_views/public';
 import { setDataStart } from './services';
 import type { TimeseriesVisParams } from './types';
 import type { Vis } from 'src/plugins/visualizations/public';
@@ -15,8 +15,8 @@ import { metricsVisDefinition } from './metrics_type';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 describe('metricsVisDefinition', () => {
   describe('getUsedIndexPattern', () => {
-    const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as IndexPattern;
-    const indexPattern2 = { id: '2', title: 'pattern2' } as unknown as IndexPattern;
+    const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as DataView;
+    const indexPattern2 = { id: '2', title: 'pattern2' } as unknown as DataView;
     let defaultParams: TimeseriesVisParams;
 
     beforeEach(async () => {
