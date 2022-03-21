@@ -64,6 +64,7 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 export function getServiceColumns({
   query,
   showTransactionTypeColumn,
+  comparisonDataLoading,
   comparisonData,
   breakpoints,
   showHealthStatusColumn,
@@ -71,6 +72,7 @@ export function getServiceColumns({
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
   showHealthStatusColumn: boolean;
+  comparisonDataLoading: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
@@ -162,6 +164,7 @@ export function getServiceColumns({
         );
         return (
           <ListMetric
+            seriesLoading={comparisonDataLoading}
             series={comparisonData?.currentPeriod[serviceName]?.latency}
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.latency
@@ -189,6 +192,7 @@ export function getServiceColumns({
 
         return (
           <ListMetric
+            seriesLoading={comparisonDataLoading}
             series={comparisonData?.currentPeriod[serviceName]?.throughput}
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.throughput
@@ -216,6 +220,7 @@ export function getServiceColumns({
         );
         return (
           <ListMetric
+            seriesLoading={comparisonDataLoading}
             series={
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }
@@ -236,6 +241,7 @@ export function getServiceColumns({
 
 interface Props {
   items: ServiceListItem[];
+  comparisonDataLoading: boolean;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
@@ -245,6 +251,7 @@ interface Props {
 export function ServiceList({
   items,
   noItemsMessage,
+  comparisonDataLoading,
   comparisonData,
   isLoading,
   isFailure,
@@ -270,6 +277,7 @@ export function ServiceList({
       getServiceColumns({
         query,
         showTransactionTypeColumn,
+        comparisonDataLoading,
         comparisonData,
         breakpoints,
         showHealthStatusColumn: displayHealthStatus,
@@ -277,6 +285,7 @@ export function ServiceList({
     [
       query,
       showTransactionTypeColumn,
+      comparisonDataLoading,
       comparisonData,
       breakpoints,
       displayHealthStatus,

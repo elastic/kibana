@@ -172,50 +172,52 @@ export function ServiceOverviewInstancesChartAndTable({
     direction
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
-  const { data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS } =
-    useFetcher(
-      (callApmApi) => {
-        if (
-          !start ||
-          !end ||
-          !transactionType ||
-          !latencyAggregationType ||
-          !currentPeriodItemsCount
-        ) {
-          return;
-        }
+  const {
+    data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
+    status: detailedStatsStatus,
+  } = useFetcher(
+    (callApmApi) => {
+      if (
+        !start ||
+        !end ||
+        !transactionType ||
+        !latencyAggregationType ||
+        !currentPeriodItemsCount
+      ) {
+        return;
+      }
 
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
-          {
-            params: {
-              path: {
-                serviceName,
-              },
-              query: {
-                environment,
-                kuery,
-                latencyAggregationType:
-                  latencyAggregationType as LatencyAggregationType,
-                start,
-                end,
-                numBuckets: 20,
-                transactionType,
-                serviceNodeIds: JSON.stringify(
-                  currentPeriodOrderedItems.map((item) => item.serviceNodeName)
-                ),
-                comparisonStart,
-                comparisonEnd,
-              },
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+        {
+          params: {
+            path: {
+              serviceName,
             },
-          }
-        );
-      },
-      // only fetches detailed statistics when requestId is invalidated by main statistics api call
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [requestId],
-      { preservePreviousData: false }
-    );
+            query: {
+              environment,
+              kuery,
+              latencyAggregationType:
+                latencyAggregationType as LatencyAggregationType,
+              start,
+              end,
+              numBuckets: 20,
+              transactionType,
+              serviceNodeIds: JSON.stringify(
+                currentPeriodOrderedItems.map((item) => item.serviceNodeName)
+              ),
+              comparisonStart,
+              comparisonEnd,
+            },
+          },
+        }
+      );
+    },
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId],
+    { preservePreviousData: false }
+  );
 
   return (
     <>
@@ -233,6 +235,7 @@ export function ServiceOverviewInstancesChartAndTable({
             mainStatsItems={currentPeriodOrderedItems}
             mainStatsStatus={mainStatsStatus}
             mainStatsItemCount={currentPeriodItemsCount}
+            detailedStatsLoading={detailedStatsStatus === FETCH_STATUS.LOADING}
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}

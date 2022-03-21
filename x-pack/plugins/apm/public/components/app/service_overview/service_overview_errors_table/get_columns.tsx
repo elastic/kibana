@@ -35,11 +35,13 @@ type ErrorGroupDetailedStatistics =
 
 export function getColumns({
   serviceName,
+  errorGroupDetailedStatisticsLoading,
   errorGroupDetailedStatistics,
   comparisonEnabled,
   query,
 }: {
   serviceName: string;
+  errorGroupDetailedStatisticsLoading: boolean;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query'];
@@ -129,6 +131,7 @@ export function getColumns({
         return (
           <SparkPlot
             color={currentPeriodColor}
+            seriesLoading={errorGroupDetailedStatisticsLoading}
             series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
