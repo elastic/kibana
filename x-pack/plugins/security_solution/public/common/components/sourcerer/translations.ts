@@ -18,10 +18,24 @@ export const CALL_OUT_DEPRECATED_TITLE = i18n.translate(
   }
 );
 
+export const CALL_OUT_DEPRECATED_TEMPLATE_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.callOutDeprecxatedTemplateTitle',
+  {
+    defaultMessage: 'This timeline template uses a legacy data view selector',
+  }
+);
+
 export const CALL_OUT_MISSING_PATTERNS_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutMissingPatternsTitle',
   {
     defaultMessage: 'This timeline is out of date with the Security Data View',
+  }
+);
+
+export const CALL_OUT_MISSING_PATTERNS_TEMPLATE_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.callOutMissingPatternsTemplateTitle',
+  {
+    defaultMessage: 'This timeline template is out of date with the Security Data View',
   }
 );
 
