@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-export const assetPath = path.resolve(__dirname, '..', '..', 'common', 'assets');
+export const assetPath = path.resolve(__dirname, 'assets');
 export const tableBorderWidth = 1;
 export const pageMarginTop = 40;
 export const pageMarginBottom = 80;

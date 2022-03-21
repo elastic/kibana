@@ -256,6 +256,20 @@ export class ApiService {
       method: 'get',
     });
   }
+
+  public useLoadNodeDiskSpace() {
+    return this.useRequest<
+      Array<{
+        nodeId: string;
+        nodeName: string;
+        available: string;
+        lowDiskWatermarkSetting: string;
+      }>
+    >({
+      path: `${API_BASE_PATH}/node_disk_space`,
+      method: 'get',
+    });
+  }
 }
 
 export const apiService = new ApiService();

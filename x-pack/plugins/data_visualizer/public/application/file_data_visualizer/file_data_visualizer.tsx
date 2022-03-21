@@ -44,7 +44,7 @@ export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileDataVisualizerView
-            indexPatterns={data.indexPatterns}
+            dataViewsContract={data.dataViews}
             savedObjectsClient={coreStart.savedObjects.client}
             http={coreStart.http}
             fileUpload={fileUpload}

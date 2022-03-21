@@ -8,10 +8,11 @@
 /* eslint-disable max-classes-per-file */
 
 import path from 'path';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { isUint8Array } from 'util/types';
-import { createMockLayout } from '../../../../../../screenshotting/server/layouts/mock';
-import { PdfWorkerOutOfMemoryError } from '../../../../../common/errors';
-import { PdfMaker } from '../';
+import { createMockLayout } from '../../../../layouts/mock';
+import { errors } from '../../../../../common';
+import { PdfMaker } from '../pdfmaker';
 
 const imageBase64 = Buffer.from(
   `iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAGFBMVEXy8vJpaWn7+/vY2Nj39/cAAACcnJzx8fFvt0oZAAAAi0lEQVR4nO3SSQoDIBBFwR7U3P/GQXKEIIJULXr9H3TMrHhX5Yysvj3jjM8+XRnVa9wec8QuHKv3h74Z+PNyGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/xu3Bxy026rXu4ljdUVW395xUFfGzLo946DK+QW+bgCTFcecSAAAAABJRU5ErkJggg==`,
@@ -21,10 +22,12 @@ const imageBase64 = Buffer.from(
 describe.skip('PdfMaker', () => {
   let layout: ReturnType<typeof createMockLayout>;
   let pdf: PdfMaker;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     layout = createMockLayout();
-    pdf = new PdfMaker(layout, undefined);
+    logger = loggingSystemMock.createLogger();
+    pdf = new PdfMaker(layout, undefined, logger);
   });
 
   describe('generate', () => {
@@ -53,14 +56,14 @@ describe.skip('PdfMaker', () => {
         protected workerMaxOldHeapSizeMb = 2;
         protected workerMaxYoungHeapSizeMb = 2;
         protected workerModulePath = path.resolve(__dirname, './memory_leak_worker.js');
-      })(layout, undefined);
-      await expect(leakyMaker.generate()).rejects.toBeInstanceOf(PdfWorkerOutOfMemoryError);
+      })(layout, undefined, logger);
+      await expect(leakyMaker.generate()).rejects.toBeInstanceOf(errors.PdfWorkerOutOfMemoryError);
     });
 
     it.skip('restarts the PDF worker if it crashes', async () => {
       const buggyMaker = new (class BuggyPdfMaker extends PdfMaker {
         protected workerModulePath = path.resolve(__dirname, './buggy_worker.js');
-      })(layout, undefined);
+      })(layout, undefined, logger);
 
       await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
       await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));

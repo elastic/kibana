@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from 'src/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import { MessageChannel, MessagePort, Worker } from 'worker_threads';
-import type { Layout } from '../../../../../screenshotting/server';
-import { PdfWorkerOutOfMemoryError } from '../../../../common/errors';
+import type { Layout } from '../../../layouts';
+import { errors } from '../../../../common';
 import {
   headingHeight,
   pageMarginBottom,
@@ -27,10 +28,8 @@ import type { GeneratePdfRequest, GeneratePdfResponse, WorkerData } from './work
 import './worker_dependencies';
 
 export class PdfMaker {
-  _layout: Layout;
-  private _logo: string | undefined;
-  private _title: string;
-  private _content: Content[];
+  private title: string;
+  private content: Content[];
 
   private worker?: Worker;
   private pageCount: number = 0;
@@ -63,18 +62,20 @@ export class PdfMaker {
    */
   protected workerMaxYoungHeapSizeMb: number | undefined = undefined;
 
-  constructor(layout: Layout, logo: string | undefined) {
-    this._layout = layout;
-    this._logo = logo;
-    this._title = '';
-    this._content = [];
+  constructor(
+    private readonly layout: Layout,
+    private readonly logo: string | undefined,
+    private readonly logger: Logger
+  ) {
+    this.title = '';
+    this.content = [];
   }
 
   _addContents(contents: Content[]) {
-    const groupCount = this._content.length;
+    const groupCount = this.content.length;
 
     // inject a page break for every 2 groups on the page
-    if (groupCount > 0 && groupCount % this._layout.groupCount === 0) {
+    if (groupCount > 0 && groupCount % this.layout.groupCount === 0) {
       contents = [
         {
           text: '',
@@ -82,7 +83,7 @@ export class PdfMaker {
         } as ContentText as Content,
       ].concat(contents);
     }
-    this._content.push(contents);
+    this.content.push(contents);
   }
 
   addBrandedImage(img: ContentImage, { title = '', description = '' }) {
@@ -122,7 +123,8 @@ export class PdfMaker {
     image: Buffer,
     opts: { title?: string; description?: string } = { title: '', description: '' }
   ) {
-    const size = this._layout.getPdfImageSize();
+    this.logger.debug(`Adding image to PDF. Image size: ${image.byteLength}`); // prettier-ignore
+    const size = this.layout.getPdfImageSize();
     const img = {
       image: `data:image/png;base64,${image.toString('base64')}`,
       alignment: 'center' as 'center',
@@ -130,7 +132,7 @@ export class PdfMaker {
       width: size.width,
     };
 
-    if (this._layout.useReportingBranding) {
+    if (this.layout.useReportingBranding) {
       return this.addBrandedImage(img, opts);
     }
 
@@ -138,17 +140,17 @@ export class PdfMaker {
   }
 
   setTitle(title: string) {
-    this._title = title;
+    this.title = title;
   }
 
   private getGeneratePdfRequestData(): GeneratePdfRequest['data'] {
     return {
       layout: {
-        hasFooter: this._layout.hasFooter,
-        hasHeader: this._layout.hasHeader,
-        orientation: this._layout.getPdfPageOrientation(),
-        useReportingBranding: this._layout.useReportingBranding,
-        pageSize: this._layout.getPdfPageSize({
+        hasHeader: this.layout.hasHeader,
+        hasFooter: this.layout.hasFooter,
+        orientation: this.layout.getPdfPageOrientation(),
+        useReportingBranding: this.layout.useReportingBranding,
+        pageSize: this.layout.getPdfPageSize({
           pageMarginTop,
           pageMarginBottom,
           pageMarginWidth,
@@ -157,9 +159,9 @@ export class PdfMaker {
           subheadingHeight,
         }),
       },
-      title: this._title,
-      logo: this._logo,
-      content: this._content as unknown as SerializableRecord[],
+      title: this.title,
+      logo: this.logo,
+      content: this.content as unknown as SerializableRecord[],
     };
   }
 
@@ -187,13 +189,15 @@ export class PdfMaker {
   public async generate(): Promise<Uint8Array> {
     if (this.worker) throw new Error('PDF generation already in progress!');
 
+    this.logger.info(`Compiling PDF using "${this.layout.id}" layout...`);
+
     try {
       return await new Promise<Uint8Array>((resolve, reject) => {
         const { port1: myPort, port2: theirPort } = new MessageChannel();
         this.worker = this.createWorker(theirPort);
         this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
           if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
-            reject(new PdfWorkerOutOfMemoryError(workerError.message));
+            reject(new errors.PdfWorkerOutOfMemoryError(workerError.message));
           } else {
             reject(workerError);
           }

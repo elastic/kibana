@@ -77,10 +77,13 @@ export function getTemplate(
             },
             {
               alignment: 'center',
-              text: i18n.translate('xpack.reporting.exportTypes.printablePdf.pagingDescription', {
-                defaultMessage: 'Page {currentPage} of {pageCount}',
-                values: { currentPage: currentPage.toString(), pageCount },
-              }),
+              text: i18n.translate(
+                'xpack.screenshotting.exportTypes.printablePdf.pagingDescription',
+                {
+                  defaultMessage: 'Page {currentPage} of {pageCount}',
+                  values: { currentPage: currentPage.toString(), pageCount },
+                }
+              ),
               style: {
                 color: '#aaa',
               },
@@ -90,9 +93,12 @@ export function getTemplate(
           [
             logo
               ? {
-                  text: i18n.translate('xpack.reporting.exportTypes.printablePdf.logoDescription', {
-                    defaultMessage: 'Powered by Elastic',
-                  }),
+                  text: i18n.translate(
+                    'xpack.screenshotting.exportTypes.printablePdf.logoDescription',
+                    {
+                      defaultMessage: 'Powered by Elastic',
+                    }
+                  ),
                   fontSize: 10,
                   style: {
                     color: '#aaa',

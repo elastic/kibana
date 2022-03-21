@@ -8,32 +8,30 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../src/plugins/data_views/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { dataVisualizerRefresh$, Refresh } from '../../services/timefilter_refresh_service';
 
-export interface DataVisualizerIndexPatternManagementProps {
+export interface DataVisualizerDataViewManagementProps {
   /**
    * Currently selected data view
    */
-  currentIndexPattern?: IndexPattern;
+  currentDataView?: DataView;
   /**
    * Read from the Fields API
    */
   useNewFieldsApi?: boolean;
 }
 
-export function DataVisualizerIndexPatternManagement(
-  props: DataVisualizerIndexPatternManagementProps
-) {
+export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewManagementProps) {
   const {
     services: { dataViewFieldEditor, application },
   } = useDataVisualizerKibana();
 
-  const { useNewFieldsApi, currentIndexPattern } = props;
-  const indexPatternFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
-  const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
-  const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
+  const { useNewFieldsApi, currentDataView } = props;
+  const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
+  const canEditDataViewField = !!dataViewFieldEditPermission && useNewFieldsApi;
+  const [isAddDataViewFieldPopoverOpen, setIsAddDataViewFieldPopoverOpen] = useState(false);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   useEffect(() => {
@@ -45,14 +43,14 @@ export function DataVisualizerIndexPatternManagement(
     };
   }, []);
 
-  if (dataViewFieldEditor === undefined || !currentIndexPattern || !canEditIndexPatternField) {
+  if (dataViewFieldEditor === undefined || !currentDataView || !canEditDataViewField) {
     return null;
   }
 
   const addField = () => {
     closeFieldEditor.current = dataViewFieldEditor.openEditor({
       ctx: {
-        dataView: currentIndexPattern,
+        dataView: currentDataView,
       },
       onSave: () => {
         const refresh: Refresh = {
@@ -66,17 +64,17 @@ export function DataVisualizerIndexPatternManagement(
   return (
     <EuiPopover
       panelPaddingSize="s"
-      isOpen={isAddIndexPatternFieldPopoverOpen}
+      isOpen={isAddDataViewFieldPopoverOpen}
       closePopover={() => {
-        setIsAddIndexPatternFieldPopoverOpen(false);
+        setIsAddDataViewFieldPopoverOpen(false);
       }}
       ownFocus
-      data-test-subj="dataVisualizerIndexPatternManagementPopover"
+      data-test-subj="dataVisualizerDataViewManagementPopover"
       button={
         <EuiButtonIcon
           color="text"
           iconType="boxesHorizontal"
-          data-test-subj="dataVisualizerIndexPatternManagementButton"
+          data-test-subj="dataVisualizerDataViewManagementButton"
           aria-label={i18n.translate(
             'xpack.dataVisualizer.index.dataViewManagement.actionsPopoverLabel',
             {
@@ -84,21 +82,21 @@ export function DataVisualizerIndexPatternManagement(
             }
           )}
           onClick={() => {
-            setIsAddIndexPatternFieldPopoverOpen(!isAddIndexPatternFieldPopoverOpen);
+            setIsAddDataViewFieldPopoverOpen(!isAddDataViewFieldPopoverOpen);
           }}
         />
       }
     >
       <EuiContextMenuPanel
-        data-test-subj="dataVisualizerIndexPatternManagementMenu"
+        data-test-subj="dataVisualizerDataViewManagementMenu"
         size="s"
         items={[
           <EuiContextMenuItem
             key="add"
             icon="indexOpen"
-            data-test-subj="dataVisualizerAddIndexPatternFieldAction"
+            data-test-subj="dataVisualizerAddDataViewFieldAction"
             onClick={() => {
-              setIsAddIndexPatternFieldPopoverOpen(false);
+              setIsAddDataViewFieldPopoverOpen(false);
               addField();
             }}
           >
@@ -109,11 +107,11 @@ export function DataVisualizerIndexPatternManagement(
           <EuiContextMenuItem
             key="manage"
             icon="indexSettings"
-            data-test-subj="dataVisualizerManageIndexPatternAction"
+            data-test-subj="dataVisualizerManageDataViewAction"
             onClick={() => {
-              setIsAddIndexPatternFieldPopoverOpen(false);
+              setIsAddDataViewFieldPopoverOpen(false);
               application.navigateToApp('management', {
-                path: `/kibana/indexPatterns/patterns/${props.currentIndexPattern?.id}`,
+                path: `/kibana/dataViews/dataView/${props.currentDataView?.id}`,
               });
             }}
           >

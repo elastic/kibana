@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { DataVisualizerIndexPatternManagement } from './index_pattern_management';
+export interface DisplayOptionsState {
+  timestamp: boolean;
+  verboseMode: boolean;
+}

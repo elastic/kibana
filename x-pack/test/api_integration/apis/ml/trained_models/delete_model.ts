@@ -25,43 +25,43 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('deletes trained model by id', async () => {
-      const { body: deleteResponseBody } = await supertest
+      const { body: deleteResponseBody, status: deleteResponseStatus } = await supertest
         .delete(`/api/ml/trained_models/dfa_regression_model_n_0`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, deleteResponseStatus, deleteResponseBody);
 
       expect(deleteResponseBody).to.eql({ acknowledged: true });
 
       // verify that model is actually deleted
-      await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/trained_models/dfa_regression_model_n_0`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(404, status, body);
     });
 
     it('returns 404 if requested trained model does not exist', async () => {
-      await supertest
+      const { body, status } = await supertest
         .delete(`/api/ml/trained_models/not_existing_model`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(404, status, body);
     });
 
     it('does not allow to delete trained model if the user does not have required permissions', async () => {
-      await supertest
+      const { body: deleteResponseBody, status: deleteResponseStatus } = await supertest
         .delete(`/api/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, deleteResponseStatus, deleteResponseBody);
 
       // verify that model has not been deleted
-      await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
     });
   });
 };
