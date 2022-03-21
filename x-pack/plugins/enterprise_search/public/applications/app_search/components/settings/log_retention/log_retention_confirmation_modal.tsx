@@ -146,7 +146,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
             logRetention &&
             logRetention?.[LogRetentionOptions.Audit].retentionPolicy?.minAgeDays &&
             i18n.translate(
-              'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.api.subheading',
+              'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.audit.subheading',
               {
                 defaultMessage: 'Your audit Logs are currently being stored for {minAgeDays} days.',
                 values: {
