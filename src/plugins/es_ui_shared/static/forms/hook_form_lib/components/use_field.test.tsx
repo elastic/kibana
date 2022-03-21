@@ -205,7 +205,7 @@ describe('<UseField />', () => {
 
   describe('validation', () => {
     let formHook: FormHook | null = null;
-    let fieldHook: FieldHook | null = null;
+    let fieldHook: FieldHook<string> | null = null;
 
     beforeEach(() => {
       formHook = null;
@@ -216,17 +216,22 @@ describe('<UseField />', () => {
       formHook = form;
     };
 
-    const onFieldHook = (field: FieldHook) => {
+    const onFieldHook = (field: FieldHook<string>) => {
       fieldHook = field;
     };
 
-    const getTestComp = (fieldConfig: FieldConfig) => {
+    const getTestComp = (fieldConfig?: FieldConfig<string>) => {
       const TestComp = () => {
-        const { form } = useForm<any>();
+        const { form } = useForm();
         const [isFieldActive, setIsFieldActive] = useState(true);
+        const [fieldPath, setFieldPath] = useState('name');
 
         const unmountField = () => {
           setIsFieldActive(false);
+        };
+
+        const changeFieldPath = () => {
+          setFieldPath('newPath');
         };
 
         useEffect(() => {
@@ -236,16 +241,12 @@ describe('<UseField />', () => {
         return (
           <Form form={form}>
             {isFieldActive && (
-              <UseField path="name" config={fieldConfig}>
+              <UseField<string> path={fieldPath} config={fieldConfig}>
                 {(field) => {
                   onFieldHook(field);
 
                   return (
-                    <input
-                      value={field.value as string}
-                      onChange={field.onChange}
-                      data-test-subj="myField"
-                    />
+                    <input value={field.value} onChange={field.onChange} data-test-subj="myField" />
                   );
                 }}
               </UseField>
@@ -253,20 +254,23 @@ describe('<UseField />', () => {
             <button onClick={unmountField} data-test-subj="unmountFieldBtn">
               Unmount field
             </button>
+            <button onClick={changeFieldPath} data-test-subj="changeFieldPathBtn">
+              Change field path
+            </button>
           </Form>
         );
       };
       return TestComp;
     };
 
-    const setup = (fieldConfig: FieldConfig) => {
+    const setup = (fieldConfig?: FieldConfig<string>) => {
       return registerTestBed(getTestComp(fieldConfig), {
         memoryRouter: { wrapComponent: false },
       })() as TestBed;
     };
 
     test('should update the form validity whenever the field value changes', async () => {
-      const fieldConfig: FieldConfig = {
+      const fieldConfig: FieldConfig<string> = {
         defaultValue: '', // empty string, which is not valid
         validations: [
           {
@@ -317,7 +321,7 @@ describe('<UseField />', () => {
     });
 
     test('should not update the state if the field has unmounted while validating', async () => {
-      const fieldConfig: FieldConfig = {
+      const fieldConfig: FieldConfig<string> = {
         validations: [
           {
             validator: () => {
@@ -367,6 +371,40 @@ describe('<UseField />', () => {
       expect(spyConsoleError.mock.calls.length).toBe(0);
 
       console.error = originalConsoleError; // eslint-disable-line no-console
+    });
+
+    test('should not validate the field if the "path" changes but the value has not changed', async () => {
+      // This happens with the UseArray. When we delete an item from the array the path for
+      // the remaining items are recalculated and thus changed for every <UseField path={...} /> inside
+      // the array. We should not re-run the validation when adding/removing array items.
+
+      const validator = jest.fn();
+      const fieldConfig: FieldConfig<string> = {
+        validations: [
+          {
+            validator,
+          },
+        ],
+      };
+
+      const {
+        find,
+        form: { setInputValue },
+      } = setup(fieldConfig);
+
+      await act(async () => {
+        setInputValue('myField', 'changedValue');
+      });
+
+      expect(validator).toHaveBeenCalledTimes(1);
+      validator.mockReset();
+
+      await act(async () => {
+        // Change the field path
+        find('changeFieldPathBtn').simulate('click');
+      });
+
+      expect(validator).not.toHaveBeenCalled();
     });
 
     describe('dynamic data', () => {
