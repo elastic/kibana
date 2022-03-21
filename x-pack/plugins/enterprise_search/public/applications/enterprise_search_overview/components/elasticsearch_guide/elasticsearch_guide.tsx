@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiPageTemplate,
@@ -14,83 +14,115 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSteps,
-  EuiCodeBlock,
+  EuiSelect,
   EuiLink,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { ElasticsearchResources } from '../elasticsearch_resources';
 
-const steps = [
-  {
-    title: 'Connect to Elasticsearch',
-    children: (
-      <>
-        <EuiText>
-          <p>
-            Elastic builds and maintains clients in several popular languages and our community has
-            contributed many more. They're easy to work with, feel natural to use, and, just like
-            Elasticsearch, don't limit what you might want to do with them.
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiLink href="#" external>
-          Learn more about Elasticsearch clients
-        </EuiLink>
-        <EuiCodeBlock language="bash">npm install</EuiCodeBlock>
-        <EuiLink href="#" external>
-          Learn more about the Elasticsearch JavaScript client
-        </EuiLink>
-      </>
-    ),
-  },
-  {
-    title: 'Build a search experience with Elasticsearch',
-    children: (
-      <>
-        <EuiText>
-          <p>
-            Ready to add an engaging, modern search experience to your application or website?
-            Search UI, Elastic’s JavaScript search framework for building world-class search
-            experiences, was made for the task.
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLink href="#" external>
-              Learn more about Search UI
-            </EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href="#" external>
-              Search UI on Github
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    ),
-  },
-];
+export const ElasticsearchGuide: React.FC = () => {
+  const options = [
+    { value: 'java', text: 'Java' },
+    { value: 'javascript', text: 'JavaScript' },
+    { value: 'ruby', text: 'Ruby' },
+    { value: 'go', text: 'Go' },
+    { value: 'dotnet', text: '.Net' },
+    { value: 'php', text: 'PHP' },
+    { value: 'perl', text: 'Perl' },
+    { value: 'python', text: 'Python' },
+    { value: 'rust', text: 'Rust' },
+  ];
 
-export const ElasticsearchGuide: React.FC = () => (
-  <EuiPageTemplate pageHeader={{ pageTitle: 'Elasticsearch' }}>
-    Content goes here
-    <EuiText>
-      <h2>Getting started with Elasticsearch</h2>
-      <p>
-        Whether you are building a search-powered application, or designing a large-scale search
-        implementation, Elasticsearch provides the low-level tools to create the most relevant and
-        performant search experience.{' '}
-      </p>
-    </EuiText>
-    <EuiSpacer />
-    <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={3}>
-        <EuiSteps headingElement="h2" steps={steps} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <ElasticsearchResources />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPageTemplate>
-);
+  const [value, setValue] = useState(options[1].value);
+
+  const basicSelectId = useGeneratedHtmlId({ prefix: 'languageSelect' });
+
+  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setValue(e.target.value);
+  };
+
+  return (
+    <EuiPageTemplate pageHeader={{ pageTitle: 'Elasticsearch' }}>
+      Content goes here
+      <EuiText>
+        <h2>Getting started with Elasticsearch</h2>
+        <p>
+          Whether you are building a search-powered application, or designing a large-scale search
+          implementation, Elasticsearch provides the low-level tools to create the most relevant and
+          performant search experience.
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup alignItems="flexStart">
+        <EuiFlexItem grow={3}>
+          <EuiSteps
+            headingElement="h2"
+            steps={[
+              {
+                title: 'Connect to Elasticsearch',
+                children: (
+                  <>
+                    <EuiText>
+                      <p>
+                        Elastic builds and maintains clients in several popular languages and our
+                        community has contributed many more. They're easy to work with, feel natural
+                        to use, and, just like Elasticsearch, don't limit what you might want to do
+                        with them.
+                      </p>
+                    </EuiText>
+                    <EuiSpacer />
+                    <EuiLink href="#" external>
+                      Learn more about Elasticsearch clients
+                    </EuiLink>
+                    <EuiSelect
+                      prepend="Select a client"
+                      id={basicSelectId}
+                      options={options}
+                      value={value}
+                      onChange={(e) => onChange(e)}
+                      aria-label="Use aria labels when no actual label is in use"
+                    />
+                    <EuiLink href="#" external>
+                      Learn more about the Elasticsearch JavaScript client
+                    </EuiLink>
+                  </>
+                ),
+              },
+              {
+                title: 'Build a search experience with Elasticsearch',
+                children: (
+                  <>
+                    <EuiText>
+                      <p>
+                        Ready to add an engaging, modern search experience to your application or
+                        website? Search UI, Elastic’s JavaScript search framework for building
+                        world-class search experiences, was made for the task.
+                      </p>
+                    </EuiText>
+                    <EuiSpacer />
+                    <EuiFlexGroup gutterSize="l" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiLink href="#" external>
+                          Learn more about Search UI
+                        </EuiLink>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiLink href="#" external>
+                          Search UI on Github
+                        </EuiLink>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                ),
+              },
+            ]}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <ElasticsearchResources />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageTemplate>
+  );
+};
