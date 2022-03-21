@@ -14,88 +14,60 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSteps,
-  EuiSubSteps,
   EuiCodeBlock,
-  EuiCode,
+  EuiLink,
 } from '@elastic/eui';
 
 import { ElasticsearchResources } from '../elasticsearch_resources';
 
 const steps = [
   {
-    title: 'Step 1 has intro plus code snippet',
+    title: 'Connect to Elasticsearch',
     children: (
       <>
         <EuiText>
-          <p>Run this code snippet to install things.</p>
+          <p>
+            Elastic builds and maintains clients in several popular languages and our community has
+            contributed many more. They're easy to work with, feel natural to use, and, just like
+            Elasticsearch, don't limit what you might want to do with them.
+          </p>
         </EuiText>
         <EuiSpacer />
+        <EuiLink href="#" external>
+          Learn more about Elasticsearch clients
+        </EuiLink>
         <EuiCodeBlock language="bash">npm install</EuiCodeBlock>
+        <EuiLink href="#" external>
+          Learn more about the Elasticsearch JavaScript client
+        </EuiLink>
       </>
     ),
   },
   {
-    title: 'Step 2 has sub steps',
+    title: 'Build a search experience with Elasticsearch',
     children: (
-      <EuiText>
-        <p>
-          In order to complete this step, do the following things <strong>in order</strong>.
-        </p>
-        <EuiSubSteps>
-          <ol>
-            <li>Do thing 1</li>
-            <li>Do thing 2</li>
-            <li>Do thing 3</li>
-          </ol>
-        </EuiSubSteps>
-        <p>Here are some bullet point reminders.</p>
-        <ul>
-          <li>Reminder 1</li>
-          <li>Reminder 2</li>
-          <li>Reminder 3</li>
-        </ul>
-      </EuiText>
-    ),
-  },
-  {
-    title: 'Step 3 has an intro and one line instruction',
-    children: (
-      <EuiText>
-        <p>
-          Now that you&apos;ve completed step 2, go find the <EuiCode>thing</EuiCode>.
-        </p>
-        <p>
-          Go to <strong>Overview &gt;&gt; Endpoints</strong> note <strong>Elasticsearch</strong> as{' '}
-          <EuiCode>&lt;thing&gt;</EuiCode>.
-        </p>
-      </EuiText>
-    ),
-  },
-  {
-    title: 'The last step has two options',
-    children: (
-      <EuiText size="s">
-        <h3>
-          <strong>Option 1:</strong> If you have this type of instance
-        </h3>
-        <EuiSubSteps>
-          <ol>
-            <li>Do thing 1</li>
-            <li>Do thing 2</li>
-            <li>Do thing 3</li>
-          </ol>
-        </EuiSubSteps>
-        <h3>
-          <strong>Option 2:</strong> If you have the other type of instance
-        </h3>
-        <EuiSubSteps>
-          <ol>
-            <li>Do thing 1</li>
-            <li>Do thing 2</li>
-            <li>Do thing 3</li>
-          </ol>
-        </EuiSubSteps>
-      </EuiText>
+      <>
+        <EuiText>
+          <p>
+            Ready to add an engaging, modern search experience to your application or website?
+            Search UI, Elastic’s JavaScript search framework for building world-class search
+            experiences, was made for the task.
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiFlexGroup gutterSize="l" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLink href="#" external>
+              Learn more about Search UI
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink href="#" external>
+              Search UI on Github
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     ),
   },
 ];
