@@ -148,7 +148,7 @@ export const ControlEditor = ({
               {isCreate ? getTypeButtons(getControlTypes()) : getTypeButtons([selectedType])}
             </EuiKeyPadMenu>
           </EuiFormRow>
-          {selectedType ? (
+          {selectedType && (
             <>
               {getControlTypeEditor(selectedType)}
               <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
@@ -190,7 +190,7 @@ export const ControlEditor = ({
                 </EuiButtonEmpty>
               )}
             </>
-          ) : null}
+          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

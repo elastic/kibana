@@ -26,7 +26,7 @@ export interface CreateControlButtonProps {
   closePopover?: () => void;
 }
 
-interface CreateControlPromise {
+interface CreateControlResult {
   type: string;
   controlInput: Omit<ControlInput, 'id'>;
 }
@@ -46,7 +46,7 @@ export const CreateControlButton = ({
   const createNewControl = async () => {
     const PresentationUtilProvider = pluginServices.getContextProvider();
 
-    const initialInputPromise = new Promise<CreateControlPromise>((resolve, reject) => {
+    const initialInputPromise = new Promise<CreateControlResult>((resolve, reject) => {
       let inputToReturn: Partial<ControlInput> = {};
 
       const onCancel = (ref: OverlayRef) => {
