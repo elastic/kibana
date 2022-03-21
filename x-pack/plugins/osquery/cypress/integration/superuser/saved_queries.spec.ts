@@ -37,14 +37,14 @@ describe('Super User - Saved queries', () => {
       inputQuery(DEFAULT_QUERY);
       submitQuery();
       checkResults();
-      // enter fullscreen
+      // enter full screen
       cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
-      cy.contains(/Full screen$/).should('exist');
+      cy.contains(/Enter full screen$/).should('exist');
       cy.contains('Exit full screen').should('not.exist');
       cy.getBySel('dataGridFullScreenButton').click();
 
       cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
-      cy.contains(/Full screen$/).should('not.exist');
+      cy.contains(/Enter full screen$/).should('not.exist');
       cy.contains('Exit full screen').should('exist');
 
       // hidden columns
@@ -60,7 +60,7 @@ describe('Super User - Saved queries', () => {
       cy.contains('2 columns hidden').should('exist');
 
       cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
-      cy.contains(/Full screen$/).should('not.exist');
+      cy.contains(/Enter full screen$/).should('not.exist');
       cy.contains('Exit full screen').should('exist');
       cy.getBySel('dataGridFullScreenButton').click();
 
@@ -71,7 +71,7 @@ describe('Super User - Saved queries', () => {
       cy.contains(/Sort A-Z$/).click();
       cy.contains('2 columns hidden').should('exist');
       cy.getBySel('dataGridFullScreenButton').trigger('mouseover');
-      cy.contains(/Full screen$/).should('exist');
+      cy.contains(/Enter full screen$/).should('exist');
 
       // save new query
       cy.contains('Exit full screen').should('not.exist');
