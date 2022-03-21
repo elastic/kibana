@@ -53,6 +53,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./mustache_templates'));
       loadTestFile(require.resolve('./health'));
       loadTestFile(require.resolve('./excluded'));
+      loadTestFile(require.resolve('./snooze'));
     });
   });
 }
