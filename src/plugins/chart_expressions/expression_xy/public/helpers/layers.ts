@@ -17,21 +17,21 @@ export function getFilteredLayers(layers: XYLayerConfigResult[], data: LensMulti
     }
 
     const { layerId, accessors, xAccessor, splitAccessor } = layer;
+    const table = data.tables[layerId];
 
-    const xColumnId = xAccessor && getAccessorByDimension(xAccessor, data.tables[layerId].columns);
+    const xColumnId = xAccessor && table && getAccessorByDimension(xAccessor, table.columns);
     const splitColumnId =
-      splitAccessor && getAccessorByDimension(splitAccessor, data.tables[layerId].columns);
+      splitAccessor && table && getAccessorByDimension(splitAccessor, table.columns);
 
     return !(
       !accessors.length ||
-      !data.tables[layerId] ||
-      data.tables[layerId].rows.length === 0 ||
-      (xColumnId &&
-        data.tables[layerId].rows.every((row) => typeof row[xColumnId] === 'undefined')) ||
+      !table ||
+      table.rows.length === 0 ||
+      (xColumnId && table.rows.every((row) => typeof row[xColumnId] === 'undefined')) ||
       // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
       (!xColumnId &&
         splitColumnId &&
-        data.tables[layerId].rows.every((row) => typeof row[splitColumnId] === 'undefined'))
+        table.rows.every((row) => typeof row[splitColumnId] === 'undefined'))
     );
   });
 }
