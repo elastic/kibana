@@ -38,11 +38,20 @@ export type {
 
 export type {
   DslQuery,
-  FunctionTypeBuildNode,
+  KqlAndFunctionNode,
+  KqlExistsFunctionNode,
+  KqlFunctionNode,
+  KqlIsFunctionNode,
+  KqlLiteralNode,
+  KqlNestedFunctionNode,
+  KqlNode,
+  KqlNotFunctionNode,
+  KqlOrFunctionNode,
+  KqlRangeFunctionNode,
+  KqlSuggestionNode,
+  KqlWildcardNode,
   KueryNode,
-  KueryParseOptions,
   KueryQueryOptions,
-  NodeTypes,
 } from './kuery';
 
 export {
@@ -101,6 +110,7 @@ export {
 export {
   KQLSyntaxError,
   fromKueryExpression,
+  functions,
   nodeBuilder,
   nodeTypes,
   toElasticsearchQuery,

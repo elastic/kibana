@@ -131,7 +131,7 @@ describe('modifyFilterKueryNode', () => {
 
   it('do NOT modify the resulting kuery node AST filter for alert params when they are not part of mapped params', () => {
     // Make sure it works for both camel and snake case params
-    const astFilter = fromKueryExpression(
+    const astFilter = fromKueryExpression<KqlAndFunctionNode>(
       'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.threat.tactic.name: Exfiltration'
     );
 

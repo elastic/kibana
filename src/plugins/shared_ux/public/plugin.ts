@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
-import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
-
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import {
   SharedUXPluginSetup,
@@ -35,9 +31,7 @@ export class SharedUXPlugin implements Plugin<SharedUXPluginSetup, SharedUXPlugi
     const services = servicesFactory({ coreStart, startPlugins });
 
     return {
-      ServicesContext: ({ children }) => (
-        <SharedUxServicesProvider {...services}>{children}</SharedUxServicesProvider>
-      ),
+      getContextServices: () => services,
     };
   }
 

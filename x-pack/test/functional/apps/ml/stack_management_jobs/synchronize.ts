@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.securityUI.loginAsMlPowerUser();
       await ml.testResources.cleanMLSavedObjects();
+      await ml.api.initSavedObjects();
     });
 
     after(async () => {

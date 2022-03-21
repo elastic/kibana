@@ -132,6 +132,11 @@ export const RULES_PLURAL_TITLE = i18n.translate(
   }
 );
 
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.observability.rules.searchPlaceholderTitle',
+  { defaultMessage: 'Search' }
+);
+
 export const confirmModalText = (
   numIdsToDelete: number,
   singleTitle: string,
