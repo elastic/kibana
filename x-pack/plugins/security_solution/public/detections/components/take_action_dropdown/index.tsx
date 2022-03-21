@@ -21,7 +21,9 @@ import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
+
 interface ActionsData {
   alertStatus: Status;
   eventId: string;
@@ -41,6 +43,7 @@ export interface TakeActionDropdownProps {
   onAddExceptionTypeClick: (type: ExceptionListType) => void;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   refetch: (() => void) | undefined;
+  refetchFlyoutData: () => Promise<void>;
   timelineId: string;
 }
 
@@ -56,9 +59,17 @@ export const TakeActionDropdown = React.memo(
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
     refetch,
+    refetchFlyoutData,
     timelineId,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+    const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
+      useUserPrivileges().endpointPrivileges;
+
+    const canCreateEndpointEventFilters = useMemo(
+      () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
+      [canAccessEndpointManagement, canAccessEndpointManagementLoading]
+    );
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -134,7 +145,7 @@ export const TakeActionDropdown = React.memo(
 
     const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
-      disabled: !isEndpointEvent,
+      disabled: !isEndpointEvent || !canCreateEndpointEventFilters,
     });
 
     const onMenuItemClick = useCallback(() => {
@@ -176,6 +187,7 @@ export const TakeActionDropdown = React.memo(
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
+      onSuccess: refetchFlyoutData,
       timelineId,
     });
 

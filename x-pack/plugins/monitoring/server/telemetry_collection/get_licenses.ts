@@ -8,17 +8,18 @@
 import { ElasticsearchClient } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESLicense } from '../../../telemetry_collection_xpack/server';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH, USAGE_FETCH_INTERVAL } from '../../common/constants';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.
  */
 export async function getLicenses(
   clusterUuids: string[],
-  callCluster: ElasticsearchClient, // TODO: To be changed to the new ES client when the plugin migrates
+  callCluster: ElasticsearchClient,
+  timestamp: number,
   maxBucketSize: number
 ): Promise<{ [clusterUuid: string]: ESLicense | undefined }> {
-  const response = await fetchLicenses(callCluster, clusterUuids, maxBucketSize);
+  const response = await fetchLicenses(callCluster, clusterUuids, timestamp, maxBucketSize);
   return handleLicenses(response);
 }
 
@@ -34,6 +35,7 @@ export async function getLicenses(
 export async function fetchLicenses(
   callCluster: ElasticsearchClient,
   clusterUuids: string[],
+  timestamp: number,
   maxBucketSize: number
 ) {
   const params: estypes.SearchRequest = {
@@ -51,6 +53,15 @@ export async function fetchLicenses(
              */
             { term: { type: 'cluster_stats' } },
             { terms: { cluster_uuid: clusterUuids } },
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: timestamp - USAGE_FETCH_INTERVAL,
+                  lte: timestamp,
+                },
+              },
+            },
           ],
         },
       },

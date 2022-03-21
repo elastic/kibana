@@ -51,7 +51,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
     pageSize: page.size,
     totalItemCount: certificates?.total ?? 0,
     pageSizeOptions: [10, 25, 50, 100],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   const columns = [

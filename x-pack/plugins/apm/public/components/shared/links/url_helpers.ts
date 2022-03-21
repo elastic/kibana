@@ -95,6 +95,7 @@ export interface APMQueryParams {
   podName?: string;
   agentName?: string;
   serviceVersion?: string;
+  serviceGroup?: string;
 }
 
 // forces every value of T[K] to be type: string

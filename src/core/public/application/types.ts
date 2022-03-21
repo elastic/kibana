@@ -411,6 +411,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * This string should not include the base path from HTTP.
    *
    * @deprecated Use {@link AppMountParameters.history} instead.
+   * @removeBy 8.8.0
    *
    * @example
    *
@@ -488,6 +489,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    *
    * @deprecated {@link ScopedHistory.block} should be used instead.
+   * @removeBy 8.8.0
    */
   onAppLeave: (handler: AppLeaveHandler) => void;
 
@@ -557,6 +559,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
  *
  * @public
  * @deprecated {@link AppMountParameters.onAppLeave} has been deprecated in favor of {@link ScopedHistory.block}
+ * @removeBy 8.8.0
  */
 export type AppLeaveHandler = (
   factory: AppLeaveActionFactory,

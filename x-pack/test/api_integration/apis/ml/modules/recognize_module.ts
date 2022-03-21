@@ -203,11 +203,11 @@ export default ({ getService }: FtrProviderContext) => {
   ];
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/modules/recognize/${indexPattern}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(rspCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }

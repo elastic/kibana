@@ -71,11 +71,13 @@ export function ObservabilityPageTemplate({
 
           const isSelected =
             entry.app === currentAppId &&
-            matchPath(currentPath, {
-              path: entry.path,
-              exact: !!entry.matchFullPath,
-              strict: !entry.ignoreTrailingSlash,
-            }) != null;
+            (entry.matchPath
+              ? entry.matchPath(currentPath)
+              : matchPath(currentPath, {
+                  path: entry.path,
+                  exact: !!entry.matchFullPath,
+                  strict: !entry.ignoreTrailingSlash,
+                }) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,

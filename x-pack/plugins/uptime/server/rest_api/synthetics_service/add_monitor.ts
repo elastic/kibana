@@ -54,10 +54,12 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       formatTelemetryEvent({ monitor: newMonitor, errors, kibanaVersion: server.kibanaVersion })
     );
 
-    if (errors) {
-      return errors;
+    if (errors && errors.length > 0) {
+      return response.ok({
+        body: { message: 'error pushing monitor to the service', attributes: { errors } },
+      });
     }
 
-    return newMonitor;
+    return response.ok({ body: newMonitor });
   },
 });

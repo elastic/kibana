@@ -20,6 +20,7 @@ import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
 import {
   previewRulesSchema,
   RulePreviewLogs,
@@ -34,7 +35,7 @@ import {
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
-import { Alert, createAbortableEsClientFactory } from '../../../../../../alerting/server';
+import { Alert } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
@@ -197,12 +198,11 @@ export const previewRulesRoute = async (
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
                 alertFactory,
-                search: createAbortableEsClientFactory({
-                  scopedClusterClient: context.core.elasticsearch.client,
-                  abortController,
-                }),
                 savedObjectsClient: context.core.savedObjects.client,
-                scopedClusterClient: context.core.elasticsearch.client,
+                scopedClusterClient: wrapScopedClusterClient({
+                  abortController,
+                  scopedClusterClient: context.core.elasticsearch.client,
+                }),
                 uiSettingsClient: context.core.uiSettings.client,
               },
               spaceId,

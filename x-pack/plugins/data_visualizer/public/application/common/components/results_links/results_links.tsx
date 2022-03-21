@@ -30,9 +30,9 @@ export interface ResultLink {
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];
   index: string;
-  indexPatternId: string;
+  dataViewId: string;
   timeFieldName?: string;
-  createIndexPattern: boolean;
+  createDataView: boolean;
   showFilebeatFlyout(): void;
   additionalLinks: ResultLink[];
 }
@@ -47,9 +47,9 @@ const RECHECK_DELAY_MS = 3000;
 export const ResultsLinks: FC<Props> = ({
   fieldStats,
   index,
-  indexPatternId,
+  dataViewId,
   timeFieldName,
-  createIndexPattern,
+  createDataView,
   showFilebeatFlyout,
   additionalLinks,
 }) => {
@@ -69,7 +69,7 @@ export const ResultsLinks: FC<Props> = ({
 
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
-  const [indexPatternManagementLink, setIndexPatternManagementLink] = useState('');
+  const [dataViewsManagementLink, setDataViewsManagementLink] = useState('');
   const [generatedLinks, setGeneratedLinks] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export const ResultsLinks: FC<Props> = ({
         return;
       }
       const discoverUrl = await discover.locator.getUrl({
-        indexPatternId,
+        indexPatternId: dataViewId,
         timeRange: globalState?.time ? globalState.time : undefined,
       });
       if (unmounted) return;
@@ -95,10 +95,10 @@ export const ResultsLinks: FC<Props> = ({
 
     Promise.all(
       additionalLinks.map(async ({ canDisplay, getUrl }) => {
-        if ((await canDisplay({ indexPatternId })) === false) {
+        if ((await canDisplay({ indexPatternId: dataViewId })) === false) {
           return null;
         }
-        return getUrl({ globalState, indexPatternId });
+        return getUrl({ globalState, indexPatternId: dataViewId });
       })
     ).then((urls) => {
       const linksById = urls.reduce((acc, url, i) => {
@@ -116,9 +116,9 @@ export const ResultsLinks: FC<Props> = ({
       );
 
       if (capabilities.indexPatterns.save === true) {
-        setIndexPatternManagementLink(
+        setDataViewsManagementLink(
           getUrlForApp('management', {
-            path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
+            path: `/kibana/dataViews${createDataView ? `/dataView/${dataViewId}` : ''}`,
           })
         );
       }
@@ -128,7 +128,7 @@ export const ResultsLinks: FC<Props> = ({
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPatternId, discover, JSON.stringify(globalState)]);
+  }, [dataViewId, discover, JSON.stringify(globalState)]);
 
   useEffect(() => {
     updateTimeValues();
@@ -183,7 +183,7 @@ export const ResultsLinks: FC<Props> = ({
 
   return (
     <EuiFlexGroup gutterSize="l">
-      {createIndexPattern && discoverLink && (
+      {createDataView && discoverLink && (
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
@@ -215,7 +215,7 @@ export const ResultsLinks: FC<Props> = ({
         </EuiFlexItem>
       )}
 
-      {indexPatternManagementLink && (
+      {dataViewsManagementLink && (
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
@@ -226,7 +226,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={indexPatternManagementLink}
+            href={dataViewsManagementLink}
           />
         </EuiFlexItem>
       )}

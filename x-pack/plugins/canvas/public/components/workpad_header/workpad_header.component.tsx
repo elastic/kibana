@@ -169,13 +169,13 @@ export const WorkpadHeader: FC<Props> = ({
               {{
                 primaryActionButton: <ElementMenu addElement={addElement} elements={elements} />,
                 quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-                addFromLibraryButton: (
+                extraButtons: [
                   <AddFromLibraryButton
                     onClick={showEmbedPanel}
                     data-test-subj="canvas-add-from-library-button"
-                  />
-                ),
-                extraButtons: [<EditorMenu addElement={addElement} />],
+                  />,
+                  <EditorMenu addElement={addElement} />,
+                ],
               }}
             </SolutionToolbar>
           </EuiFlexItem>

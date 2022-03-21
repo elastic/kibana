@@ -7,6 +7,10 @@
 
 import { NetworkKpiStrategyResponse } from '../../../../common/search_strategy';
 import { StatItems } from '../../../common/components/stat_items';
+import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
+import { kpiUniquePrivateIpsBarLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
+import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
+import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
 
 export const mockNarrowDateRange = jest.fn();
 
@@ -107,6 +111,7 @@ export const mockEnableChartsInitialData = {
       description: 'source',
       color: '#D36086',
       icon: 'visMapCoordinate',
+      lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
     },
     {
       key: 'uniqueDestinationPrivateIps',
@@ -115,11 +120,14 @@ export const mockEnableChartsInitialData = {
       description: 'destination',
       color: '#9170B8',
       icon: 'visMapCoordinate',
+      lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
     },
   ],
   description: 'Unique private IPs',
   enableAreaChart: true,
   enableBarChart: true,
+  areaChartLensAttributes: kpiUniquePrivateIpsAreaLensAttributes,
+  barChartLensAttributes: kpiUniquePrivateIpsBarLensAttributes,
   areaChart: [],
   barChart: [
     {
@@ -205,6 +213,7 @@ export const mockEnableChartsData = {
       description: 'source',
       color: '#D36086',
       icon: 'visMapCoordinate',
+      lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
     },
     {
       key: 'uniqueDestinationPrivateIps',
@@ -213,6 +222,7 @@ export const mockEnableChartsData = {
       description: 'destination',
       color: '#9170B8',
       icon: 'visMapCoordinate',
+      lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
     },
   ],
   from: '2019-06-15T06:00:00.000Z',
@@ -220,4 +230,6 @@ export const mockEnableChartsData = {
   statKey: 'UniqueIps',
   to: '2019-06-18T06:00:00.000Z',
   narrowDateRange: mockNarrowDateRange,
+  areaChartLensAttributes: kpiUniquePrivateIpsAreaLensAttributes,
+  barChartLensAttributes: kpiUniquePrivateIpsBarLensAttributes,
 };

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { OPTIONS_LIST_CONTROL, ControlWidth } from '../../../src/plugins/controls/common';
 
@@ -64,13 +65,57 @@ export class DashboardPageControls extends FtrService {
 
   public async openCreateControlFlyout(type: string) {
     this.log.debug(`Opening flyout for ${type} control`);
-    await this.testSubjects.click('controls-create-button');
-    if (await this.testSubjects.exists('control-type-picker')) {
-      await this.testSubjects.click(`create-${type}-control`);
-    }
+    await this.testSubjects.click('dashboard-controls-menu-button');
+    await this.testSubjects.click(`create-${type}-control`);
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
+  }
+
+  /* -----------------------------------------------------------
+     Control group editor flyout
+     ----------------------------------------------------------- */
+
+  public async openControlGroupSettingsFlyout() {
+    this.log.debug('Open controls group settings flyout');
+    await this.testSubjects.click('dashboard-controls-menu-button');
+    await this.testSubjects.click('controls-settings-button');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('control-group-settings-flyout');
+    });
+  }
+
+  public async deleteAllControls() {
+    this.log.debug('Delete all controls');
+    if ((await this.getControlsCount()) === 0) return;
+
+    await this.openControlGroupSettingsFlyout();
+    await this.testSubjects.click('delete-all-controls-button');
+    await this.testSubjects.click('confirmModalConfirmButton');
+    expect(await this.getControlsCount()).to.be(0);
+  }
+
+  public async adjustControlsLayout(layout: 'oneLine' | 'twoLine') {
+    this.log.debug(`Adjust controls layout to "${layout}"`);
+    await this.openControlGroupSettingsFlyout();
+    await this.testSubjects.existOrFail('control-group-layout-options');
+    await this.testSubjects.click(`control-editor-layout-${layout}`);
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async updateControlsSize(width: ControlWidth, applyToAll: boolean = false) {
+    this.log.debug(
+      `Update default control size to ${width}`,
+      applyToAll ? ' for all controls' : ''
+    );
+    await this.openControlGroupSettingsFlyout();
+    await this.testSubjects.existOrFail('control-group-default-size-options');
+    await this.testSubjects.click(`control-editor-width-${width}`);
+    if (applyToAll) {
+      const checkbox = await this.find.byXPath('//label[@for="editControls_setAllSizesCheckbox"]');
+      await checkbox.click();
+    }
+    await this.testSubjects.click('control-group-editor-save');
   }
 
   /* -----------------------------------------------------------

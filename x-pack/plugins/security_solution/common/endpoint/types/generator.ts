@@ -14,6 +14,7 @@ export interface EventOptions {
   timestamp?: number;
   entityID?: string;
   parentEntityID?: string;
+  sessionEntryLeader?: string;
   eventType?: string | string[];
   eventCategory?: string | string[];
   processName?: string;

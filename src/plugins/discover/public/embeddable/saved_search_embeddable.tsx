@@ -25,15 +25,8 @@ import {
   generateFilters,
 } from '../../../data/public';
 import { DiscoverServices } from '../build_services';
-import {
-  Filter,
-  DataView,
-  DataViewField,
-  ISearchSource,
-  Query,
-  TimeRange,
-  FilterStateStore,
-} from '../../../data/common';
+import { Filter, ISearchSource, Query, TimeRange, FilterStateStore } from '../../../data/public';
+import { DataView, DataViewField } from '../../../data_views/public';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
 import {

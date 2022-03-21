@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import _saved_queries from '../apps/discover/_saved_queries';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -369,10 +370,18 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickCreateNewDataView() {
-    await this.retry.try(async () => {
-      await this.testSubjects.click('dataview-create-new');
-      await this.find.byClassName('indexPatternEditor__form');
+    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
+      return await this.testSubjects.isDisplayed('dataview-create-new');
     });
+    await this.testSubjects.click('dataview-create-new');
+    await this.retry.waitForWithTimeout(
+      'index pattern editor form to be visible',
+      15000,
+      async () => {
+        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
+      }
+    );
+    await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
   public async hasNoResults() {

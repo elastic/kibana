@@ -56,7 +56,7 @@ describe('List artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useListArtifact(instance, searchableFields, options, {
+        useListArtifact(instance, options, searchableFields, {
           onSuccess: onSuccessMock,
           retry: false,
         }),
@@ -92,7 +92,7 @@ describe('List artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useListArtifact(instance, searchableFields, options, {
+        useListArtifact(instance, options, searchableFields, {
           onError: onErrorMock,
           retry: false,
         }),

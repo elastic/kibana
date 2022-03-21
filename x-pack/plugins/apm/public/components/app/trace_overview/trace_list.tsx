@@ -86,7 +86,7 @@ export function getTraceListColumns({
           content={
             <ServiceLink
               agentName={agentName}
-              query={{ ...query, transactionType }}
+              query={{ ...query, transactionType, serviceGroup: '' }}
               serviceName={serviceName}
             />
           }

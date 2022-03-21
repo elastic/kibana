@@ -14,6 +14,7 @@ import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount } from './get_event_count';
+import { getMappingFilters } from './get_mapping_filters';
 
 export const createThreatSignals = async ({
   alertId,
@@ -63,6 +64,10 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
+  const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
+  const allEventFilters = [...filters, eventMappingFilter];
+  const allThreatFilters = [...threatFilters, indicatorMappingFilter];
+
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
@@ -70,7 +75,7 @@ export const createThreatSignals = async ({
     tuple,
     query,
     language,
-    filters,
+    filters: allEventFilters,
   });
 
   logger.debug(`Total event count: ${eventCount}`);
@@ -83,7 +88,7 @@ export const createThreatSignals = async ({
   let threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
-    threatFilters,
+    threatFilters: allThreatFilters,
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
@@ -99,7 +104,7 @@ export const createThreatSignals = async ({
   let threatList = await getThreatList({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
-    threatFilters,
+    threatFilters: allThreatFilters,
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
@@ -115,7 +120,7 @@ export const createThreatSignals = async ({
     exceptionItems,
     logger,
     services,
-    threatFilters,
+    threatFilters: allThreatFilters,
     threatIndex,
     threatIndicatorPath,
     threatLanguage,
@@ -137,7 +142,7 @@ export const createThreatSignals = async ({
           currentThreatList: slicedChunk,
           eventsTelemetry,
           exceptionItems,
-          filters,
+          filters: allEventFilters,
           inputIndex,
           language,
           listClient,
@@ -180,7 +185,7 @@ export const createThreatSignals = async ({
       exceptionItems,
       query: threatQuery,
       language: threatLanguage,
-      threatFilters,
+      threatFilters: allThreatFilters,
       index: threatIndex,
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
       buildRuleMessage,

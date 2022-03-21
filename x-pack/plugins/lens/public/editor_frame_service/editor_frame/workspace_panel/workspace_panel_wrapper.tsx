@@ -136,7 +136,6 @@ export function WorkspacePanelWrapper({
               wrap={true}
               justifyContent="spaceBetween"
               className={classNames('lnsWorkspacePanelWrapper__toolbar', {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
               })}
             >

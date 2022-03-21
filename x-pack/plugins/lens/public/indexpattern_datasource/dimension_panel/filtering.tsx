@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
@@ -23,6 +23,7 @@ import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations
 import { validateQuery } from '../operations/definitions/filters';
 import { QueryInput } from '../query_input';
 import type { IndexPattern, IndexPatternLayer } from '../types';
+import { useDebouncedValue } from '../../shared_components';
 
 const filterByLabel = i18n.translate('xpack.lens.indexPattern.filterBy.label', {
   defaultMessage: 'Filter by',
@@ -65,23 +66,27 @@ export function Filtering({
   helpMessage: string | null;
 }) {
   const inputFilter = selectedColumn.filter;
-  const [queryInput, setQueryInput] = useState(inputFilter ?? defaultFilter);
+  const onChange = useCallback(
+    (query) => {
+      const { isValid } = validateQuery(query, indexPattern);
+      if (isValid && !isEqual(inputFilter, query)) {
+        updateLayer(setFilter(columnId, layer, query));
+      }
+    },
+    [columnId, indexPattern, inputFilter, layer, updateLayer]
+  );
+  const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
+    value: inputFilter ?? defaultFilter,
+    onChange,
+  });
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(isInitiallyOpen);
-
-  useEffect(() => {
-    const { isValid } = validateQuery(queryInput, indexPattern);
-
-    if (isValid && !isEqual(inputFilter, queryInput)) {
-      updateLayer(setFilter(columnId, layer, queryInput));
-    }
-  }, [columnId, layer, queryInput, indexPattern, updateLayer, inputFilter]);
 
   const onClosePopup: EuiPopoverProps['closePopover'] = useCallback(() => {
     setFilterPopoverOpen(false);
     if (inputFilter) {
       setQueryInput(inputFilter);
     }
-  }, [inputFilter]);
+  }, [inputFilter, setQueryInput]);
 
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
 

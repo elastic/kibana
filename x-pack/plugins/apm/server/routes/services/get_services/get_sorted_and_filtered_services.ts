@@ -11,6 +11,7 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { ServiceGroup } from '../../../../common/service_groups';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 
@@ -20,16 +21,18 @@ export async function getSortedAndFilteredServices({
   end,
   environment,
   logger,
+  serviceGroup,
 }: {
   setup: Setup;
   start: number;
   end: number;
   environment: Environment;
   logger: Logger;
+  serviceGroup: ServiceGroup | null;
 }) {
   const { apmEventClient } = setup;
 
-  async function getServicesFromTermsEnum() {
+  async function getServiceNamesFromTermsEnum() {
     if (environment !== ENVIRONMENT_ALL.value) {
       return [];
     }
@@ -54,27 +57,32 @@ export async function getSortedAndFilteredServices({
     return response.terms;
   }
 
-  const [servicesWithHealthStatuses, serviceNamesFromTermsEnum] =
-    await Promise.all([
-      getHealthStatuses({
-        setup,
-        start,
-        end,
-        environment,
-      }).catch((error) => {
-        logger.error(error);
-        return [];
-      }),
-      getServicesFromTermsEnum(),
-    ]);
+  const [servicesWithHealthStatuses, selectedServices] = await Promise.all([
+    getHealthStatuses({
+      setup,
+      start,
+      end,
+      environment,
+    }).catch((error) => {
+      logger.error(error);
+      return [];
+    }),
+    serviceGroup
+      ? getServiceNamesFromServiceGroup(serviceGroup)
+      : getServiceNamesFromTermsEnum(),
+  ]);
 
   const services = joinByKey(
     [
       ...servicesWithHealthStatuses,
-      ...serviceNamesFromTermsEnum.map((serviceName) => ({ serviceName })),
+      ...selectedServices.map((serviceName) => ({ serviceName })),
     ],
     'serviceName'
   );
 
   return services;
+}
+
+async function getServiceNamesFromServiceGroup(serviceGroup: ServiceGroup) {
+  return serviceGroup.serviceNames;
 }

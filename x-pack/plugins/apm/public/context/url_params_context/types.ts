@@ -16,8 +16,6 @@ export interface UrlParams {
   environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
-  exactStart?: string;
-  exactEnd?: string;
   refreshInterval?: number;
   refreshPaused?: boolean;
   sortDirection?: string;
