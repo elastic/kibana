@@ -133,7 +133,7 @@ export function EmptyStatusBox({
 
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiText size="xs">{description}</EuiText>
+          <EuiText size="s">{description}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
 
