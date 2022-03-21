@@ -124,6 +124,13 @@ export interface RuleAggregation {
       doc_count: number;
     }>;
   };
+  snoozed: {
+    buckets: Array<{
+      key: number;
+      key_as_string: string;
+      doc_count: number;
+    }>;
+  };
 }
 
 export interface ConstructorOptions {
@@ -190,6 +197,7 @@ export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
+  ruleSnoozedStatus?: { snoozed: number; not_snoozed: number };
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -870,6 +878,12 @@ export class RulesClient {
         muted: {
           terms: { field: 'alert.attributes.muteAll' },
         },
+        snoozed: {
+          date_range: {
+            field: 'alert.attributes.snoozeEndTime',
+            ranges: [{ from: 'now' }],
+          },
+        },
       },
     });
 
@@ -885,6 +899,7 @@ export class RulesClient {
           muted: 0,
           unmuted: 0,
         },
+        ruleSnoozedStatus: { snoozed: 0, not_snoozed: 0 },
       };
 
       for (const key of RuleExecutionStatusValues) {
@@ -924,6 +939,13 @@ export class RulesClient {
     ret.ruleMutedStatus = {
       muted: mutedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
       unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
+    };
+
+    const snoozedBuckets = resp.aggregations.snoozed.buckets;
+    const snoozed = snoozedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0;
+    ret.ruleSnoozedStatus = {
+      snoozed,
+      not_snoozed: resp.total - snoozed,
     };
 
     return ret;
