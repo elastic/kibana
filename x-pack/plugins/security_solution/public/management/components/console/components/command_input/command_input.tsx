@@ -85,7 +85,7 @@ export const CommandInput = memo<CommandInputProps>(
           let updatedState = prevState + value;
 
           switch (eventDetails.keyCode) {
-            // DELETE
+            // BACKSPACE
             // remove the last character from the text entered
             case 8:
               if (updatedState.length) {
@@ -119,7 +119,11 @@ export const CommandInput = memo<CommandInputProps>(
           <EuiFlexItem grow={false} data-test-subj={getTestId('prompt')}>
             <span className="eui-displayInlineBlock prompt">{prompt}</span>
           </EuiFlexItem>
-          <EuiFlexItem className="textEntered" grow={false}>
+          <EuiFlexItem
+            className="textEntered"
+            grow={false}
+            data-test-subj={getTestId('userTextInput')}
+          >
             {textEntered}
           </EuiFlexItem>
           <EuiFlexItem grow>

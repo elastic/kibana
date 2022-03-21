@@ -23,7 +23,18 @@ export interface ConsoleTestSetup {
 
   commandServiceMock: jest.Mocked<CommandServiceInterface>;
 
-  enterCommand(cmd: string): void;
+  enterCommand(
+    cmd: string,
+    options?: Partial<{
+      /** If true, the ENTER key will not be pressed */
+      inputOnly: boolean;
+      /**
+       * if true, then the keyboard keys will be used to send the command.
+       * Use this if wanting ot press keyboard keys other than letter/punctuation
+       */
+      useKeyboard: boolean;
+    }>
+  ): void;
 }
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
@@ -53,12 +64,23 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     ));
   };
 
-  const enterCommand: ConsoleTestSetup['enterCommand'] = (cmd) => {
+  const enterCommand: ConsoleTestSetup['enterCommand'] = (
+    cmd,
+    { inputOnly = false, useKeyboard = false } = {}
+  ) => {
     const keyCaptureInput = renderResult.getByTestId('test-cmdInput-keyCapture-input');
 
     act(() => {
-      userEvent.type(keyCaptureInput, cmd);
-      userEvent.keyboard('{enter}');
+      if (useKeyboard) {
+        userEvent.click(keyCaptureInput);
+        userEvent.keyboard(cmd);
+      } else {
+        userEvent.type(keyCaptureInput, cmd);
+      }
+
+      if (!inputOnly) {
+        userEvent.keyboard('{enter}');
+      }
     });
   };
 

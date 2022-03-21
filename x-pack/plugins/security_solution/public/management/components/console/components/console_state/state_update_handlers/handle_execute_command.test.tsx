@@ -22,7 +22,6 @@ describe('When a Console command is entered by the user', () => {
     const testSetup = getConsoleTestSetup();
 
     ({ commandServiceMock, enterCommand } = testSetup);
-
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
