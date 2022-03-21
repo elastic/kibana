@@ -14,14 +14,12 @@ export interface EndpointConsoleProps {
   endpoint: HostMetadata;
 }
 
-export const EndpointConsole = memo<EndpointConsoleProps>(({ endpoint }) => {
+export const EndpointConsole = memo<EndpointConsoleProps>((props) => {
   const consoleService = useMemo(() => {
-    return new EndpointConsoleCommandService(endpoint);
-  }, [endpoint]);
+    return new EndpointConsoleCommandService();
+  }, []);
 
-  return (
-    <Console prompt={`endpoint-${endpoint.agent.version} >`} commandService={consoleService} />
-  );
+  return <Console prompt={`endpoint> `} commandService={consoleService} />;
 });
 
 EndpointConsole.displayName = 'EndpointConsole';
