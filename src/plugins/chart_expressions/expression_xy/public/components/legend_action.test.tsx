@@ -11,26 +11,11 @@ import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ComponentType, ReactWrapper } from 'enzyme';
-import type { LensMultiTable } from '../../common';
+import type { DataLayerConfigResult, LensMultiTable } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import type { DataLayerArgs } from '../../common';
 import { getLegendAction } from './legend_action';
 import { LegendActionPopover } from './legend_action_popover';
 import { mockPaletteOutput } from '../../common/__mocks__';
-
-const sampleLayer = {
-  layerId: 'first',
-  layerType: LayerTypes.DATA,
-  seriesType: 'line',
-  xAccessor: 'c',
-  accessors: ['a', 'b'],
-  splitAccessor: 'splitAccessorId',
-  columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
-  xScaleType: 'ordinal',
-  yScaleType: 'linear',
-  isHistogram: false,
-  palette: mockPaletteOutput,
-} as DataLayerArgs;
 
 const tables = {
   first: {
@@ -168,11 +153,25 @@ const tables = {
   },
 } as LensMultiTable['tables'];
 
+const sampleLayer: DataLayerConfigResult = {
+  type: 'dataLayer',
+  layerType: LayerTypes.DATA,
+  seriesType: 'line',
+  xAccessor: 'c',
+  accessors: ['a', 'b'],
+  splitAccessor: 'splitAccessorId',
+  columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+  xScaleType: 'ordinal',
+  yScaleType: 'linear',
+  isHistogram: false,
+  palette: mockPaletteOutput,
+  table: tables.first,
+};
+
 describe('getLegendAction', function () {
   let wrapperProps: LegendActionProps;
   const Component: ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
-    tables,
     jest.fn(),
     jest.fn(),
     {}

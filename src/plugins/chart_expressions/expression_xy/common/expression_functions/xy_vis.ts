@@ -176,11 +176,13 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     },
   },
   fn(data, args, handlers) {
-    const layers = [args.dataLayer, args.referenceLineLayer].filter<XYLayerConfigResult>(
+    const { dataLayer, referenceLineLayer, ...restArgs } = args;
+    const layers = [dataLayer, referenceLineLayer].filter<XYLayerConfigResult>(
       (layer): layer is XYLayerConfigResult => layer !== undefined
     );
-    const tables = layers.reduce<Record<string, Datatable>>((t, { layerId }) => {
-      t[layerId] = data;
+
+    const tables = layers.reduce<Record<string, Datatable>>((t, layer, index) => {
+      t[index] = data;
       return t;
     }, {});
 
@@ -192,9 +194,8 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       type: 'render',
       as: XY_VIS_RENDERER,
       value: {
-        data,
         args: {
-          ...args,
+          ...restArgs,
           layers,
           ariaLabel:
             args.ariaLabel ??

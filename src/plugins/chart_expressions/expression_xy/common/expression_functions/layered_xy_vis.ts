@@ -174,8 +174,9 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     const layers = args.layers.filter<XYExtendedLayerConfigResult>(
       (layer): layer is XYExtendedLayerConfigResult => layer !== undefined
     );
-    const tables = layers.reduce<Record<string, Datatable>>((t, { layerId }) => {
-      t[layerId] = data;
+
+    const tables = layers.reduce<Record<string, Datatable>>((t, layer, index) => {
+      t[index] = data;
       return t;
     }, {});
 
@@ -187,7 +188,6 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       type: 'render',
       as: XY_VIS_RENDERER,
       value: {
-        data,
         args: {
           ...args,
           layers,

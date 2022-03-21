@@ -9,13 +9,13 @@
 import { DataLayerArgs } from '../types';
 import { dataLayerFunction } from '.';
 import { createMockExecutionContext } from '../../../../expressions/common/mocks';
-import { mockPaletteOutput } from '../__mocks__';
+import { mockPaletteOutput, sampleArgs } from '../__mocks__';
 import { LayerTypes } from '../constants';
 
 describe('dataLayerConfig', () => {
   test('produces the correct arguments', () => {
+    const { data } = sampleArgs();
     const args: DataLayerArgs = {
-      layerId: 'first',
       seriesType: 'line',
       xAccessor: 'c',
       accessors: ['a', 'b'],
@@ -26,8 +26,13 @@ describe('dataLayerConfig', () => {
       palette: mockPaletteOutput,
     };
 
-    const result = dataLayerFunction.fn(null, args, createMockExecutionContext());
+    const result = dataLayerFunction.fn(data, args, createMockExecutionContext());
 
-    expect(result).toEqual({ type: 'dataLayer', layerType: LayerTypes.DATA, ...args });
+    expect(result).toEqual({
+      type: 'dataLayer',
+      layerType: LayerTypes.DATA,
+      ...args,
+      table: data,
+    });
   });
 });

@@ -6,27 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { DataLayerConfigResult, LensMultiTable, XYLayerConfigResult } from '../../common';
+import { CommonXYLayerConfigResult, CommonXYDataLayerConfigResult } from '../../common';
 import { isDataLayer } from './visualization';
 
-export function getFilteredLayers(layers: XYLayerConfigResult[], data: LensMultiTable) {
-  return layers.filter<DataLayerConfigResult>((layer): layer is DataLayerConfigResult => {
-    if (!isDataLayer(layer)) {
-      return false;
+export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
+  return layers.filter<CommonXYDataLayerConfigResult>(
+    (layer): layer is CommonXYDataLayerConfigResult => {
+      if (!isDataLayer(layer)) {
+        return false;
+      }
+
+      const { accessors, xAccessor, splitAccessor, table } = layer;
+
+      return !(
+        !accessors.length ||
+        !table ||
+        table.rows.length === 0 ||
+        (xAccessor && table.rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+        // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+        (!xAccessor &&
+          splitAccessor &&
+          table.rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+      );
     }
-
-    const { layerId, accessors, xAccessor, splitAccessor } = layer;
-
-    return !(
-      !accessors.length ||
-      !data.tables[layerId] ||
-      data.tables[layerId].rows.length === 0 ||
-      (xAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-      (!xAccessor &&
-        splitAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
-    );
-  });
+  );
 }

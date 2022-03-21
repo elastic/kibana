@@ -14,7 +14,12 @@ import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '../../../../field_formats/common';
-import type { ReferenceLineLayerConfigResult, IconPosition, YAxisMode } from '../../common';
+import type {
+  CommonXYReferenceLineLayerConfigResult,
+  ReferenceLineLayerConfigResult,
+  IconPosition,
+  YAxisMode,
+} from '../../common';
 import type { LensMultiTable } from '../../common/types';
 import { hasIcon } from '../helpers';
 
@@ -56,7 +61,7 @@ export const computeChartMargins = (
 
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getReferenceLineRequiredPaddings = (
-  referenceLineLayers: ReferenceLineLayerConfigResult[],
+  referenceLineLayers: CommonXYReferenceLineLayerConfigResult[],
   axesMap: Record<'left' | 'right', unknown>
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
@@ -188,8 +193,7 @@ function getMarkerToShow(
 }
 
 export interface ReferenceLineAnnotationsProps {
-  layers: ReferenceLineLayerConfigResult[];
-  data: LensMultiTable;
+  layers: CommonXYReferenceLineLayerConfigResult[];
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
@@ -198,7 +202,6 @@ export interface ReferenceLineAnnotationsProps {
 
 export const ReferenceLineAnnotations = ({
   layers,
-  data,
   formatters,
   axesMap,
   isHorizontal,
@@ -206,15 +209,14 @@ export const ReferenceLineAnnotations = ({
 }: ReferenceLineAnnotationsProps) => {
   return (
     <>
-      {layers.flatMap((layer) => {
+      {layers.flatMap((layer, index) => {
         if (!layer.yConfig) {
           return [];
         }
-        const { columnToLabel, yConfig: yConfigs, layerId } = layer;
+        const { columnToLabel, yConfig: yConfigs, table } = layer;
         const columnToLabelMap: Record<string, string> = columnToLabel
           ? JSON.parse(columnToLabel)
           : {};
-        const table = data.tables[layerId];
 
         const row = table.rows[0];
 
@@ -288,8 +290,8 @@ export const ReferenceLineAnnotations = ({
           annotations.push(
             <LineAnnotation
               {...props}
-              id={`${layerId}-${yConfig.forAccessor}-line`}
-              key={`${layerId}-${yConfig.forAccessor}-line`}
+              id={`${index}-${yConfig.forAccessor}-line`}
+              key={`${index}-${yConfig.forAccessor}-line`}
               dataValues={table.rows.map(() => ({
                 dataValue: row[yConfig.forAccessor],
                 header: columnToLabelMap[yConfig.forAccessor],
@@ -319,8 +321,8 @@ export const ReferenceLineAnnotations = ({
             annotations.push(
               <RectAnnotation
                 {...props}
-                id={`${layerId}-${yConfig.forAccessor}-rect`}
-                key={`${layerId}-${yConfig.forAccessor}-rect`}
+                id={`${index}-${yConfig.forAccessor}-rect`}
+                key={`${index}-${yConfig.forAccessor}-rect`}
                 dataValues={table.rows.map(() => {
                   const nextValue = shouldCheckNextReferenceLine
                     ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]

@@ -20,7 +20,7 @@ import {
 
 export const extendedDataLayerFunction: ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
-  Datatable | null,
+  Datatable,
   ExtendedDataLayerArgs,
   ExtendedDataLayerConfigResult
 > = {
@@ -30,19 +30,13 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
   help: i18n.translate('expressionXY.dataLayer.help', {
     defaultMessage: `Configure a layer in the xy chart`,
   }),
-  inputTypes: ['null', 'datatable'],
+  inputTypes: ['datatable'],
   args: {
     hide: {
       types: ['boolean'],
       default: false,
       help: i18n.translate('expressionXY.dataLayer.hide.help', {
         defaultMessage: 'Show / hide axis',
-      }),
-    },
-    layerId: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.dataLayer.layerId.help', {
-        defaultMessage: 'Layer ID',
       }),
     },
     xAccessor: {
@@ -124,6 +118,7 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
       type: EXTENDED_DATA_LAYER,
       ...args,
       layerType: LayerTypes.DATA,
+      table: args.table ?? input,
     };
   },
 };

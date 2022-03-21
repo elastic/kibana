@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SeriesType, XYLayerConfigResult, YConfig } from '../../common';
+import type { CommonXYLayerConfigResult, SeriesType, YConfig } from '../../common';
 import { getDataLayers, isDataLayer } from './visualization';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -21,11 +21,11 @@ export function isStackedChart(seriesType: SeriesType) {
   return seriesType.includes('stacked');
 }
 
-export function isHorizontalChart(layers: XYLayerConfigResult[]) {
+export function isHorizontalChart(layers: CommonXYLayerConfigResult[]) {
   return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
 }
 
-export const getSeriesColor = (layer: XYLayerConfigResult, accessor: string) => {
+export const getSeriesColor = (layer: CommonXYLayerConfigResult, accessor: string) => {
   if (isDataLayer(layer) && layer.splitAccessor) {
     return null;
   }

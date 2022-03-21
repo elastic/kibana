@@ -10,7 +10,7 @@ import { uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
 import { Endzones } from '../../../../../plugins/charts/public';
-import type { LensMultiTable, DataLayerArgs } from '../../common';
+import type { CommonXYDataLayerConfigResult } from '../../common';
 import { search } from '../../../../../plugins/data/public';
 
 export interface XDomain {
@@ -19,11 +19,10 @@ export interface XDomain {
   minInterval?: number;
 }
 
-export const getAppliedTimeRange = (layers: DataLayerArgs[], data: LensMultiTable) => {
-  return Object.entries(data.tables)
-    .map(([tableId, table]) => {
-      const layer = layers.find((l) => l.layerId === tableId);
-      const xColumn = table.columns.find((col) => col.id === layer?.xAccessor);
+export const getAppliedTimeRange = (layers: CommonXYDataLayerConfigResult[]) => {
+  return layers
+    .map(({ xAccessor, table }) => {
+      const xColumn = table.columns.find((col) => col.id === xAccessor);
       const timeRange =
         xColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.timeRange;
       if (timeRange) {
@@ -37,13 +36,12 @@ export const getAppliedTimeRange = (layers: DataLayerArgs[], data: LensMultiTabl
 };
 
 export const getXDomain = (
-  layers: DataLayerArgs[],
-  data: LensMultiTable,
+  layers: CommonXYDataLayerConfigResult[],
   minInterval: number | undefined,
   isTimeViz: boolean,
   isHistogram: boolean
 ) => {
-  const appliedTimeRange = getAppliedTimeRange(layers, data)?.timeRange;
+  const appliedTimeRange = getAppliedTimeRange(layers)?.timeRange;
   const from = appliedTimeRange?.from;
   const to = appliedTimeRange?.to;
   const baseDomain = isTimeViz
@@ -59,8 +57,8 @@ export const getXDomain = (
   if (isHistogram && isFullyQualified(baseDomain)) {
     const xValues = uniq(
       layers
-        .flatMap((layer) =>
-          data.tables[layer.layerId].rows.map((row) => row[layer.xAccessor!].valueOf() as number)
+        .flatMap(({ table, xAccessor }) =>
+          table.rows.map((row) => row[xAccessor!].valueOf() as number)
         )
         .sort()
     );

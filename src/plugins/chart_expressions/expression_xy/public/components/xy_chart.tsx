@@ -42,8 +42,8 @@ import { RenderMode } from '../../../../expressions/common';
 import { FieldFormat } from '../../../../field_formats/common';
 import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
-import type { DataLayerConfigResult, SeriesType, XYChartProps } from '../../common';
-import { isHorizontalChart, getSeriesColor } from '../helpers';
+import type { SeriesType, XYChartProps } from '../../common';
+import { isHorizontalChart, getSeriesColor, Series } from '../helpers';
 import {
   ChartsPluginSetup,
   ChartsPluginStart,
@@ -71,7 +71,7 @@ import {
   ReferenceLineAnnotations,
 } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
-import { XYLayerConfigResult } from '../../common/types';
+import { CommonXYDataLayerConfigResult } from '../../common/types';
 
 import './xy_chart.scss';
 
@@ -131,7 +131,6 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 export const XYChartReportable = React.memo(XYChart);
 
 export function XYChart({
-  data,
   args,
   formatFactory,
   timeZone,
@@ -160,30 +159,31 @@ export function XYChart({
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
-  const filteredLayers = getFilteredLayers(layers, data);
-  const layersById = filteredLayers.reduce<Record<string, XYLayerConfigResult>>(
-    (hashMap, layer) => {
-      hashMap[layer.layerId] = layer;
+  const filteredLayers = getFilteredLayers(layers);
+  const layersById = filteredLayers.reduce<Record<string, CommonXYDataLayerConfigResult>>(
+    (hashMap, layer, index) => {
+      hashMap[index] = layer;
       return hashMap;
     },
     {}
   );
 
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-    datatables: Object.values(data.tables),
+    datatables: layers.map(({ table }) => table),
   });
 
   if (filteredLayers.length === 0) {
-    const dataLayers: DataLayerConfigResult[] = layers.filter(isDataLayer);
+    const dataLayers: CommonXYDataLayerConfigResult[] = layers.filter(isDataLayer);
     const icon: IconType =
       dataLayers.length > 0 ? getIconForSeriesType(dataLayers[0].seriesType) : 'bar';
     return <EmptyPlaceholder icon={icon} />;
   }
 
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
+  const xAxisColumn = filteredLayers[0].table.columns.find(
     ({ id }) => isDataLayer(filteredLayers[0]) && id === filteredLayers[0].xAccessor
   );
+
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
   const layersAlreadyFormatted: Record<string, boolean> = {};
 
@@ -199,12 +199,7 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(filteredLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(
-    filteredLayers,
-    shouldRotate,
-    data.tables,
-    formatFactory
-  );
+  const yAxesConfiguration = getAxesConfiguration(filteredLayers, shouldRotate, formatFactory);
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
   const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
@@ -236,7 +231,6 @@ export function XYChart({
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     filteredLayers,
-    data,
     minInterval,
     isTimeViz,
     isHistogramViz
@@ -247,17 +241,14 @@ export function XYChart({
     right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
   };
 
-  const getYAxesTitles = (
-    axisSeries: Array<{ layer: string; accessor: string }>,
-    groupId: string
-  ) => {
+  const getYAxesTitles = (axisSeries: Series[], groupId: string) => {
     const yTitle = groupId === 'right' ? args.yRightTitle : args.yTitle;
     return (
       yTitle ||
       axisSeries
         .map(
           (series) =>
-            data.tables[series.layer].columns.find((column) => column.id === series.accessor)?.name
+            layers[series.layer].table.columns.find((column) => column.id === series.accessor)?.name
         )
         .filter((name) => Boolean(name))[0]
     );
@@ -333,16 +324,14 @@ export function XYChart({
         // Remove this once the chart will support automatic annotation fit for other type of charts
         const { min: computedMin, max: computedMax } = computeOverallDataDomain(
           filteredLayers,
-          axis.series.map(({ accessor }) => accessor),
-          data.tables
+          axis.series.map(({ accessor }) => accessor)
         );
 
         if (computedMin != null && computedMax != null) {
           max = Math.max(computedMax, max || 0);
           min = Math.min(computedMin, min || 0);
         }
-        for (const { layerId, yConfig } of referenceLineLayers) {
-          const table = data.tables[layerId];
+        for (const { yConfig, table } of referenceLineLayers) {
           for (const { axisMode, forAccessor } of yConfig || []) {
             if (axis.groupId === axisMode) {
               for (const row of table.rows) {
@@ -373,7 +362,7 @@ export function XYChart({
   const valueLabelsStyling =
     shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
 
-  const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
+  const colorAssignments = getColorAssignments(filteredLayers, formatFactory);
 
   const clickHandler: ElementClickListener = ([[geometry, series]]) => {
     // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
@@ -387,7 +376,7 @@ export function XYChart({
       return;
     }
 
-    const table = data.tables[layer.layerId];
+    const { table } = layer;
 
     const xColumn = table.columns.find((col) => col.id === layer.xAccessor);
     const currentXFormatter =
@@ -452,7 +441,7 @@ export function XYChart({
       return;
     }
 
-    const table = data.tables[filteredLayers[0].layerId];
+    const { table } = filteredLayers[0];
 
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);
 
@@ -568,13 +557,7 @@ export function XYChart({
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={
           interactive
-            ? getLegendAction(
-                filteredLayers,
-                data.tables,
-                onClickValue,
-                formatFactory,
-                layersAlreadyFormatted
-              )
+            ? getLegendAction(filteredLayers, onClickValue, formatFactory, layersAlreadyFormatted)
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
@@ -639,7 +622,7 @@ export function XYChart({
             seriesType,
             accessors,
             xAccessor,
-            layerId,
+            table,
             columnToLabel,
             yScaleType,
             xScaleType,
@@ -649,8 +632,6 @@ export function XYChart({
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
-
-          const table = data.tables[layerId];
 
           const formatterPerColumn = new Map<DatatableColumn, FieldFormat>();
           for (const column of table.columns) {
@@ -727,7 +708,6 @@ export function XYChart({
           const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
           const splitHint = table.columns.find((col) => col.id === splitAccessor)?.meta?.params;
           const splitFormatter = formatFactory(splitHint);
-
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: isStacked ? [xAccessor as string] : [],
@@ -752,6 +732,7 @@ export function XYChart({
                   totalSeriesAtDepth: colorAssignment.totalSeriesCount,
                   rankAtDepth: colorAssignment.getRank(
                     layer,
+                    layerIndex,
                     String(seriesKeys[0]),
                     String(yAccessor)
                   ),
@@ -884,7 +865,6 @@ export function XYChart({
       {referenceLineLayers.length ? (
         <ReferenceLineAnnotations
           layers={referenceLineLayers}
-          data={data}
           formatters={{
             left: yAxesMap.left?.formatter,
             right: yAxesMap.right?.formatter,

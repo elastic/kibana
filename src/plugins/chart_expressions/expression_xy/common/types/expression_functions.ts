@@ -80,7 +80,6 @@ export interface YConfig {
 }
 
 export interface XYDataLayerConfig {
-  layerId: string;
   accessors: string[];
   seriesType: SeriesType;
   xAccessor?: string;
@@ -91,7 +90,6 @@ export interface XYDataLayerConfig {
 }
 
 export interface XYExtendedDataLayerConfig {
-  layerId: string;
   accessors: string[];
   seriesType: SeriesType;
   xAccessor?: string;
@@ -234,7 +232,7 @@ export interface XYProps {
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
-  layers: Array<XYExtendedLayerConfigResult | XYLayerConfigResult>;
+  layers: CommonXYLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -248,13 +246,11 @@ export interface XYProps {
 }
 
 export interface XYReferenceLineLayerConfig {
-  layerId: string;
   accessors: string[];
   yConfig?: YConfigResult[];
 }
 
 export interface XYExtendedReferenceLineLayerConfig {
-  layerId: string;
   accessors: string[];
   yConfig?: YConfigResult[];
 }
@@ -285,22 +281,25 @@ export interface LensMultiTable {
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
   type: typeof REFERENCE_LINE_LAYER;
   layerType: typeof LayerTypes.REFERENCELINE;
+  table: Datatable;
 };
 
 export type ExtendedReferenceLineLayerConfigResult = ExtendedReferenceLineLayerArgs & {
   type: typeof EXTENDED_REFERENCE_LINE_LAYER;
   layerType: typeof LayerTypes.REFERENCELINE;
+  table: Datatable;
 };
 
 export type DataLayerConfigResult = DataLayerArgs & {
   type: typeof DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
-  table?: Datatable;
+  table: Datatable;
 };
 
 export type ExtendedDataLayerConfigResult = ExtendedDataLayerArgs & {
   type: typeof EXTENDED_DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
+  table: Datatable;
 };
 
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
@@ -317,3 +316,9 @@ export type LegendConfigResult = LegendConfig & { type: typeof LEGEND_CONFIG };
 export type AxisExtentConfigResult = AxisExtentConfig & { type: typeof AXIS_EXTENT_CONFIG };
 export type GridlinesConfigResult = AxesSettingsConfig & { type: typeof GRID_LINES_CONFIG };
 export type TickLabelsConfigResult = AxesSettingsConfig & { type: typeof TICK_LABELS_CONFIG };
+
+export type CommonXYLayerConfigResult = XYLayerConfigResult | XYExtendedLayerConfigResult;
+export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedDataLayerConfigResult;
+export type CommonXYReferenceLineLayerConfigResult =
+  | ReferenceLineLayerConfigResult
+  | ExtendedReferenceLineLayerConfigResult;

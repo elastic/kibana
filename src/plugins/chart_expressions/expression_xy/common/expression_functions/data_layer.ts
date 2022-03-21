@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { DataLayerArgs, DataLayerConfigResult } from '../types';
 import {
   DATA_LAYER,
@@ -20,7 +20,7 @@ import {
 
 export const dataLayerFunction: ExpressionFunctionDefinition<
   typeof DATA_LAYER,
-  null,
+  Datatable,
   DataLayerArgs,
   DataLayerConfigResult
 > = {
@@ -30,19 +30,13 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
   help: i18n.translate('expressionXY.dataLayer.help', {
     defaultMessage: `Configure a layer in the xy chart`,
   }),
-  inputTypes: ['null'],
+  inputTypes: ['datatable'],
   args: {
     hide: {
       types: ['boolean'],
       default: false,
       help: i18n.translate('expressionXY.dataLayer.hide.help', {
         defaultMessage: 'Show / hide axis',
-      }),
-    },
-    layerId: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.dataLayer.layerId.help', {
-        defaultMessage: 'Layer ID',
       }),
     },
     xAccessor: {
@@ -113,11 +107,12 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       types: ['palette'],
     },
   },
-  fn(input, args) {
+  fn(table, args) {
     return {
       type: DATA_LAYER,
       ...args,
       layerType: LayerTypes.DATA,
+      table,
     };
   },
 };

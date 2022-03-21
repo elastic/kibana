@@ -59,8 +59,12 @@ export type {
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
   LabelsOrientationConfig,
+  CommonXYLayerConfigResult,
   XYReferenceLineLayerConfig,
+  XYExtendedLayerConfigResult,
   LabelsOrientationConfigResult,
+  CommonXYDataLayerConfigResult,
   ReferenceLineLayerConfigResult,
   AxisTitlesVisibilityConfigResult,
+  CommonXYReferenceLineLayerConfigResult,
 } from './types';

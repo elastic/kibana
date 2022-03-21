@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { LayerTypes, REFERENCE_LINE_LAYER, Y_CONFIG } from '../constants';
 import { ReferenceLineLayerArgs, ReferenceLineLayerConfigResult } from '../types';
 
 export const referenceLineLayerFunction: ExpressionFunctionDefinition<
   typeof REFERENCE_LINE_LAYER,
-  null,
+  Datatable,
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfigResult
 > = {
@@ -23,14 +23,8 @@ export const referenceLineLayerFunction: ExpressionFunctionDefinition<
   help: i18n.translate('expressionXY.referenceLineLayer.help', {
     defaultMessage: `Configure a reference line in the xy chart`,
   }),
-  inputTypes: ['null'],
+  inputTypes: ['datatable'],
   args: {
-    layerId: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.referenceLineLayer.layerId.help', {
-        defaultMessage: `Layer ID`,
-      }),
-    },
     accessors: {
       types: ['string'],
       help: i18n.translate('expressionXY.referenceLineLayer.accessors.help', {
@@ -52,11 +46,12 @@ export const referenceLineLayerFunction: ExpressionFunctionDefinition<
       }),
     },
   },
-  fn(input, args) {
+  fn(table, args) {
     return {
       type: REFERENCE_LINE_LAYER,
       ...args,
       layerType: LayerTypes.REFERENCELINE,
+      table,
     };
   },
 };

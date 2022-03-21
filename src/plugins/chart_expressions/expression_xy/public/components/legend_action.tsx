@@ -9,13 +9,12 @@
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import type { FilterEvent } from '../types';
-import type { LensMultiTable, DataLayerArgs } from '../../common';
+import type { CommonXYDataLayerConfigResult } from '../../common';
 import type { FormatFactory } from '../types';
 import { LegendActionPopover } from './legend_action_popover';
 
 export const getLegendAction = (
-  filteredLayers: DataLayerArgs[],
-  tables: LensMultiTable['tables'],
+  filteredLayers: CommonXYDataLayerConfigResult[],
   onFilter: (data: FilterEvent['data']) => void,
   formatFactory: FormatFactory,
   layersAlreadyFormatted: Record<string, boolean>
@@ -33,7 +32,7 @@ export const getLegendAction = (
     const splitLabel = series.seriesKeys[0] as string;
     const accessor = layer.splitAccessor;
 
-    const table = tables[layer.layerId];
+    const { table } = layer;
     const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
     const formatter = formatFactory(splitColumn && splitColumn.meta?.params);
 

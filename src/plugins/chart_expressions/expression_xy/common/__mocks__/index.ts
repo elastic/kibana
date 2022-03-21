@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/common';
 import { Datatable, DatatableRow } from 'src/plugins/expressions';
 import { LayerTypes } from '../constants';
-import { DataLayerConfigResult, LensMultiTable, XYArgs } from '../types';
+import { DataLayerConfigResult, XYProps } from '../types';
 
 export const mockPaletteOutput: PaletteOutput = {
   type: 'palette',
@@ -48,7 +48,6 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
 
 export const sampleLayer: DataLayerConfigResult = {
   type: 'dataLayer',
-  layerId: 'first',
   layerType: LayerTypes.DATA,
   seriesType: 'line',
   xAccessor: 'c',
@@ -59,9 +58,12 @@ export const sampleLayer: DataLayerConfigResult = {
   yScaleType: 'linear',
   isHistogram: false,
   palette: mockPaletteOutput,
+  table: createSampleDatatableWithRows([]),
 };
 
-export const createArgsWithLayers = (layers: DataLayerConfigResult[] = [sampleLayer]): XYArgs => ({
+export const createArgsWithLayers = (
+  layers: DataLayerConfigResult | DataLayerConfigResult[] = sampleLayer
+): XYProps => ({
   xTitle: '',
   yTitle: '',
   yRightTitle: '',
@@ -104,25 +106,17 @@ export const createArgsWithLayers = (layers: DataLayerConfigResult[] = [sampleLa
     mode: 'full',
     type: 'axisExtentConfig',
   },
-  layers,
+  layers: Array.isArray(layers) ? layers : [layers],
 });
 
 export function sampleArgs() {
-  const data: LensMultiTable = {
-    type: 'lens_multitable',
-    tables: {
-      first: createSampleDatatableWithRows([
-        { a: 1, b: 2, c: 'I', d: 'Foo' },
-        { a: 1, b: 5, c: 'J', d: 'Bar' },
-      ]),
-    },
-    dateRange: {
-      fromDate: new Date('2019-01-02T05:00:00.000Z'),
-      toDate: new Date('2019-01-03T05:00:00.000Z'),
-    },
+  const data = createSampleDatatableWithRows([
+    { a: 1, b: 2, c: 'I', d: 'Foo' },
+    { a: 1, b: 5, c: 'J', d: 'Bar' },
+  ]);
+
+  return {
+    data,
+    args: createArgsWithLayers({ ...sampleLayer, table: data }),
   };
-
-  const args: XYArgs = createArgsWithLayers();
-
-  return { data, args };
 }

@@ -9,7 +9,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataLayerConfigResult, LensMultiTable, XYArgs } from '../../common';
+import { Datatable } from '../../../../expressions/common';
+import { DataLayerConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import {
   AreaSeries,
@@ -45,6 +46,7 @@ import {
   sampleLayer,
 } from '../../common/__mocks__';
 import { XYChart, XYChartRenderProps } from './xy_chart';
+import { ExtendedDataLayerConfigResult, XYProps } from '../../common/types';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -54,45 +56,36 @@ describe('XYChart component', () => {
   let convertSpy: jest.Mock;
   let defaultProps: Omit<XYChartRenderProps, 'data' | 'args'>;
 
-  const dataWithoutFormats: LensMultiTable = {
-    type: 'lens_multitable',
-    tables: {
-      first: {
-        type: 'datatable',
-        columns: [
-          { id: 'a', name: 'a', meta: { type: 'number' } },
-          { id: 'b', name: 'b', meta: { type: 'number' } },
-          { id: 'c', name: 'c', meta: { type: 'string' } },
-          { id: 'd', name: 'd', meta: { type: 'string' } },
-        ],
-        rows: [
-          { a: 1, b: 2, c: 'I', d: 'Row 1' },
-          { a: 1, b: 5, c: 'J', d: 'Row 2' },
-        ],
-      },
-    },
-  };
-  const dataWithFormats: LensMultiTable = {
-    type: 'lens_multitable',
-    tables: {
-      first: {
-        type: 'datatable',
-        columns: [
-          { id: 'a', name: 'a', meta: { type: 'number' } },
-          { id: 'b', name: 'b', meta: { type: 'number' } },
-          { id: 'c', name: 'c', meta: { type: 'string' } },
-          { id: 'd', name: 'd', meta: { type: 'string', params: { id: 'custom' } } },
-        ],
-        rows: [
-          { a: 1, b: 2, c: 'I', d: 'Row 1' },
-          { a: 1, b: 5, c: 'J', d: 'Row 2' },
-        ],
-      },
-    },
+  const dataWithoutFormats: Datatable = {
+    type: 'datatable',
+    columns: [
+      { id: 'a', name: 'a', meta: { type: 'number' } },
+      { id: 'b', name: 'b', meta: { type: 'number' } },
+      { id: 'c', name: 'c', meta: { type: 'string' } },
+      { id: 'd', name: 'd', meta: { type: 'string' } },
+    ],
+    rows: [
+      { a: 1, b: 2, c: 'I', d: 'Row 1' },
+      { a: 1, b: 5, c: 'J', d: 'Row 2' },
+    ],
   };
 
-  const getRenderedComponent = (data: LensMultiTable, args: XYArgs) => {
-    return shallow(<XYChart {...defaultProps} data={data} args={args} />);
+  const dataWithFormats: Datatable = {
+    type: 'datatable',
+    columns: [
+      { id: 'a', name: 'a', meta: { type: 'number' } },
+      { id: 'b', name: 'b', meta: { type: 'number' } },
+      { id: 'c', name: 'c', meta: { type: 'string' } },
+      { id: 'd', name: 'd', meta: { type: 'string', params: { id: 'custom' } } },
+    ],
+    rows: [
+      { a: 1, b: 2, c: 'I', d: 'Row 1' },
+      { a: 1, b: 5, c: 'J', d: 'Row 2' },
+    ],
+  };
+
+  const getRenderedComponent = (args: XYProps) => {
+    return shallow(<XYChart {...defaultProps} args={args} />);
   };
 
   beforeEach(() => {
@@ -121,7 +114,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -129,6 +121,7 @@ describe('XYChart component', () => {
               ...args.layers[0],
               seriesType: 'line',
               type: 'dataLayer',
+              table: data,
             } as DataLayerConfigResult,
           ],
         }}
@@ -141,9 +134,10 @@ describe('XYChart component', () => {
   });
 
   describe('date range', () => {
+    const { data, args } = sampleArgs();
+
     const timeSampleLayer: DataLayerConfigResult = {
       type: 'dataLayer',
-      layerId: 'first',
       layerType: LayerTypes.DATA,
       seriesType: 'line',
       xAccessor: 'c',
@@ -154,49 +148,39 @@ describe('XYChart component', () => {
       yScaleType: 'linear',
       isHistogram: false,
       palette: mockPaletteOutput,
+      table: {
+        ...data,
+        columns: data.columns.map((c) =>
+          c.id !== 'c'
+            ? c
+            : {
+                ...c,
+                meta: {
+                  type: 'date',
+                  source: 'esaggs',
+                  sourceParams: {
+                    type: 'date_histogram',
+                    params: {},
+                    appliedTimeRange: {
+                      from: '2019-01-02T05:00:00.000Z',
+                      to: '2019-01-03T05:00:00.000Z',
+                    },
+                  },
+                },
+              }
+        ),
+      },
     };
+
     const multiLayerArgs = createArgsWithLayers([
       timeSampleLayer,
-      {
-        ...timeSampleLayer,
-        layerId: 'second',
-        seriesType: 'bar',
-        xScaleType: 'time',
-      },
+      { ...timeSampleLayer, seriesType: 'bar', xScaleType: 'time' },
     ]);
-    test('it uses the full date range', () => {
-      const { data, args } = sampleArgs();
 
+    test('it uses the full date range', () => {
       const component = shallow(
         <XYChart
           {...defaultProps}
-          data={{
-            ...data,
-            tables: {
-              first: {
-                ...data.tables.first,
-                columns: data.tables.first.columns.map((c) =>
-                  c.id !== 'c'
-                    ? c
-                    : {
-                        ...c,
-                        meta: {
-                          type: 'date',
-                          source: 'esaggs',
-                          sourceParams: {
-                            type: 'date_histogram',
-                            params: {},
-                            appliedTimeRange: {
-                              from: '2019-01-02T05:00:00.000Z',
-                              to: '2019-01-03T05:00:00.000Z',
-                            },
-                          },
-                        },
-                      }
-                ),
-              },
-            },
-          }}
           args={{
             ...args,
             layers: [
@@ -221,15 +205,21 @@ describe('XYChart component', () => {
     });
 
     test('it uses passed in minInterval', () => {
-      const data: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
-          second: createSampleDatatableWithRows([]),
-        },
-      };
+      const table1 = createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]);
+      const table2 = createSampleDatatableWithRows([]);
 
-      const component = shallow(<XYChart {...defaultProps} data={data} args={multiLayerArgs} />);
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...multiLayerArgs,
+            layers: [
+              { ...multiLayerArgs.layers[0], table: table1 },
+              { ...multiLayerArgs.layers[1], table: table2 },
+            ],
+          }}
+        />
+      );
 
       // real auto interval is 30mins = 1800000
       expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
@@ -244,7 +234,6 @@ describe('XYChart component', () => {
     describe('axis time', () => {
       const defaultTimeLayer: DataLayerConfigResult = {
         type: 'dataLayer',
-        layerId: 'first',
         layerType: LayerTypes.DATA,
         seriesType: 'line',
         xAccessor: 'c',
@@ -255,21 +244,28 @@ describe('XYChart component', () => {
         yScaleType: 'linear',
         isHistogram: true,
         palette: mockPaletteOutput,
+        table: data,
       };
-      test('it should disable the new time axis for a line time layer when isHistogram is set to false', () => {
-        const { data } = sampleArgs();
 
+      const newData = {
+        ...data,
+        dateRange: {
+          fromDate: new Date('2019-01-02T05:00:00.000Z'),
+          toDate: new Date('2019-01-03T05:00:00.000Z'),
+        },
+      };
+
+      test('it should disable the new time axis for a line time layer when isHistogram is set to false', () => {
         const instance = shallow(
           <XYChart
             {...defaultProps}
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
+            args={{
+              ...multiLayerArgs,
+              layers: multiLayerArgs.layers.map((layer) => ({
+                ...layer,
+                table: newData,
+              })),
             }}
-            args={multiLayerArgs}
           />
         );
 
@@ -278,20 +274,18 @@ describe('XYChart component', () => {
         expect(axisStyle).toBe(0);
       });
       test('it should enable the new time axis for a line time layer when isHistogram is set to true', () => {
-        const { data } = sampleArgs();
         const timeLayerArgs = createArgsWithLayers([defaultTimeLayer]);
 
         const instance = shallow(
           <XYChart
             {...defaultProps}
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
+            args={{
+              ...timeLayerArgs,
+              layers: timeLayerArgs.layers.map((layer) => ({
+                ...layer,
+                table: newData,
+              })),
             }}
-            args={timeLayerArgs}
           />
         );
 
@@ -300,7 +294,6 @@ describe('XYChart component', () => {
         expect(axisStyle).toBe(3);
       });
       test('it should disable the new time axis for a vertical bar with break down dimension', () => {
-        const { data } = sampleArgs();
         const timeLayer: DataLayerConfigResult = {
           ...defaultTimeLayer,
           seriesType: 'bar',
@@ -310,14 +303,13 @@ describe('XYChart component', () => {
         const instance = shallow(
           <XYChart
             {...defaultProps}
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
+            args={{
+              ...timeLayerArgs,
+              layers: timeLayerArgs.layers.map((layer) => ({
+                ...layer,
+                table: newData,
+              })),
             }}
-            args={timeLayerArgs}
           />
         );
 
@@ -327,7 +319,6 @@ describe('XYChart component', () => {
       });
 
       test('it should enable the new time axis for a stacked vertical bar with break down dimension', () => {
-        const { data } = sampleArgs();
         const timeLayer: DataLayerConfigResult = {
           ...defaultTimeLayer,
           seriesType: 'bar_stacked',
@@ -337,14 +328,13 @@ describe('XYChart component', () => {
         const instance = shallow(
           <XYChart
             {...defaultProps}
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
+            args={{
+              ...timeLayerArgs,
+              layers: timeLayerArgs.layers.map((layer) => ({
+                ...layer,
+                table: newData,
+              })),
             }}
-            args={timeLayerArgs}
           />
         );
 
@@ -354,45 +344,36 @@ describe('XYChart component', () => {
       });
     });
     describe('endzones', () => {
-      const { args } = sampleArgs();
       const table = createSampleDatatableWithRows([
         { a: 1, b: 2, c: new Date('2021-04-22').valueOf(), d: 'Foo' },
         { a: 1, b: 2, c: new Date('2021-04-23').valueOf(), d: 'Foo' },
         { a: 1, b: 2, c: new Date('2021-04-24').valueOf(), d: 'Foo' },
       ]);
-      const data: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          first: {
-            ...table,
-            columns: table.columns.map((c) =>
-              c.id !== 'c'
-                ? c
-                : {
-                    ...c,
-                    meta: {
-                      type: 'date',
-                      source: 'esaggs',
-                      sourceParams: {
-                        type: 'date_histogram',
-                        params: {},
-                        appliedTimeRange: {
-                          from: '2021-04-22T12:00:00.000Z',
-                          to: '2021-04-24T12:00:00.000Z',
-                        },
-                      },
+      const newData = {
+        ...table,
+        type: 'datatable',
+
+        columns: table.columns.map((c) =>
+          c.id !== 'c'
+            ? c
+            : {
+                ...c,
+                meta: {
+                  type: 'date',
+                  source: 'esaggs',
+                  sourceParams: {
+                    type: 'date_histogram',
+                    params: {},
+                    appliedTimeRange: {
+                      from: '2021-04-22T12:00:00.000Z',
+                      to: '2021-04-24T12:00:00.000Z',
                     },
-                  }
-            ),
-          },
-        },
-        dateRange: {
-          // first and last bucket are partial
-          fromDate: new Date('2021-04-22T12:00:00.000Z'),
-          toDate: new Date('2021-04-24T12:00:00.000Z'),
-        },
+                  },
+                },
+              }
+        ),
       };
-      const timeArgs: XYArgs = {
+      const timeArgs: XYProps = {
         ...args,
         layers: [
           {
@@ -402,18 +383,14 @@ describe('XYChart component', () => {
             xScaleType: 'time',
             isHistogram: true,
             splitAccessor: undefined,
+            table: newData,
           } as DataLayerConfigResult,
         ],
       };
 
       test('it extends interval if data is exceeding it', () => {
         const component = shallow(
-          <XYChart
-            {...defaultProps}
-            minInterval={24 * 60 * 60 * 1000}
-            data={data}
-            args={timeArgs}
-          />
+          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={timeArgs} />
         );
 
         expect(component.find(Settings).prop('xDomain')).toEqual({
@@ -425,14 +402,17 @@ describe('XYChart component', () => {
         });
       });
 
+      const defaultTimeArgs = {
+        ...timeArgs,
+        layers: timeArgs.layers.map((layer) => ({
+          ...layer,
+          table: data,
+        })),
+      };
+
       test('it renders endzone component bridging gap between domain and extended domain', () => {
         const component = shallow(
-          <XYChart
-            {...defaultProps}
-            minInterval={24 * 60 * 60 * 1000}
-            data={data}
-            args={timeArgs}
-          />
+          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={defaultTimeArgs} />
         );
 
         expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
@@ -447,12 +427,7 @@ describe('XYChart component', () => {
 
       test('should pass enabled histogram mode and min interval to endzones component', () => {
         const component = shallow(
-          <XYChart
-            {...defaultProps}
-            minInterval={24 * 60 * 60 * 1000}
-            data={data}
-            args={timeArgs}
-          />
+          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={defaultTimeArgs} />
         );
 
         expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
@@ -468,7 +443,6 @@ describe('XYChart component', () => {
           <XYChart
             {...defaultProps}
             minInterval={24 * 60 * 60 * 1000}
-            data={data}
             args={{
               ...args,
               layers: [
@@ -481,6 +455,7 @@ describe('XYChart component', () => {
                   yScaleType: 'linear',
                   isHistogram: true,
                   palette: { type: 'palette', name: 'default' },
+                  table: data,
                 },
               ],
             }}
@@ -500,8 +475,7 @@ describe('XYChart component', () => {
           <XYChart
             {...defaultProps}
             minInterval={24 * 60 * 60 * 1000}
-            data={data}
-            args={{ ...timeArgs, hideEndzones: true }}
+            args={{ ...defaultTimeArgs, hideEndzones: true }}
           />
         );
 
@@ -512,12 +486,11 @@ describe('XYChart component', () => {
 
   describe('y axis extents', () => {
     test('it passes custom y axis extents to elastic-charts axis spec', () => {
-      const { data, args } = sampleArgs();
+      const { args } = sampleArgs();
 
       const component = shallow(
         <XYChart
           {...defaultProps}
-          data={data}
           args={{
             ...args,
             yLeftExtent: {
@@ -537,12 +510,11 @@ describe('XYChart component', () => {
     });
 
     test('it passes fit to bounds y axis extents to elastic-charts axis spec', () => {
-      const { data, args } = sampleArgs();
+      const { args } = sampleArgs();
 
       const component = shallow(
         <XYChart
           {...defaultProps}
-          data={data}
           args={{
             ...args,
             yLeftExtent: {
@@ -565,7 +537,6 @@ describe('XYChart component', () => {
       const component = shallow(
         <XYChart
           {...defaultProps}
-          data={data}
           args={{
             ...args,
             yLeftExtent: {
@@ -582,6 +553,7 @@ describe('XYChart component', () => {
                 yScaleType: 'linear',
                 isHistogram: false,
                 palette: { type: 'palette', name: 'default' },
+                table: data,
               },
             ],
           }}
@@ -600,7 +572,6 @@ describe('XYChart component', () => {
       const component = shallow(
         <XYChart
           {...defaultProps}
-          data={data}
           args={{
             ...args,
             yLeftExtent: {
@@ -619,6 +590,7 @@ describe('XYChart component', () => {
                 yScaleType: 'linear',
                 isHistogram: false,
                 palette: { type: 'palette', name: 'default' },
+                table: data,
               },
             ],
           }}
@@ -632,9 +604,9 @@ describe('XYChart component', () => {
     });
 
     test('it does include referenceLine values when in full extent mode', () => {
-      const { data, args } = sampleArgsWithReferenceLine();
+      const { args } = sampleArgsWithReferenceLine();
 
-      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+      const component = shallow(<XYChart {...defaultProps} args={args} />);
       expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
         fit: false,
         min: 0,
@@ -643,12 +615,11 @@ describe('XYChart component', () => {
     });
 
     test('it should ignore referenceLine values when set to custom extents', () => {
-      const { data, args } = sampleArgsWithReferenceLine();
+      const { args } = sampleArgsWithReferenceLine();
 
       const component = shallow(
         <XYChart
           {...defaultProps}
-          data={data}
           args={{
             ...args,
             yLeftExtent: {
@@ -668,9 +639,9 @@ describe('XYChart component', () => {
     });
 
     test('it should work for negative values in referenceLines', () => {
-      const { data, args } = sampleArgsWithReferenceLine(-150);
+      const { args } = sampleArgsWithReferenceLine(-150);
 
-      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+      const component = shallow(<XYChart {...defaultProps} args={args} />);
       expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
         fit: false,
         min: -150,
@@ -685,13 +656,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2019-01-02T05:00:00.000Z'),
-            toDate: new Date('2019-01-03T05:00:00.000Z'),
-          },
-        }}
         args={{
           ...args,
           layers: [
@@ -704,6 +668,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: { type: 'palette', name: 'default' },
+              table: data,
             },
           ],
         }}
@@ -720,7 +685,6 @@ describe('XYChart component', () => {
       <XYChart
         {...defaultProps}
         minInterval={101}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -733,6 +697,7 @@ describe('XYChart component', () => {
               layerType: 'data',
               yScaleType: 'linear',
               palette: { type: 'palette', name: 'default' },
+              table: data,
             },
           ],
         }}
@@ -746,15 +711,15 @@ describe('XYChart component', () => {
   });
 
   test('disabled legend extra by default', () => {
-    const { data, args } = sampleArgs();
-    const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+    const { args } = sampleArgs();
+    const component = shallow(<XYChart {...defaultProps} args={args} />);
     expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
   });
 
   test('ignores legend extra for ordinal chart', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
     const component = shallow(
-      <XYChart {...defaultProps} data={data} args={{ ...args, valuesInLegend: true }} />
+      <XYChart {...defaultProps} args={{ ...args, valuesInLegend: true }} />
     );
     expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
   });
@@ -764,7 +729,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={dateHistogramData}
         args={{
           ...args,
           layers: [dateHistogramLayer],
@@ -780,7 +744,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -793,6 +756,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: { type: 'palette', name: 'default' },
+              table: data,
             },
           ],
         }}
@@ -809,7 +773,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -822,6 +785,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: { type: 'palette', name: 'default' },
+              table: data,
             },
           ],
         }}
@@ -838,7 +802,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -851,6 +814,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: { type: 'palette', name: 'default' },
+              table: data,
             },
           ],
         }}
@@ -865,11 +829,15 @@ describe('XYChart component', () => {
 
   test('it renders regular bar empty placeholder for no results', () => {
     const { data, args } = sampleArgs();
-
-    // send empty data to the chart
-    data.tables.first.rows = [];
-
-    const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: args.layers.map((layer) => ({ ...layer, table: { ...data, rows: [] } })),
+        }}
+      />
+    );
 
     expect(component.find(BarSeries)).toHaveLength(0);
     expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
@@ -881,7 +849,6 @@ describe('XYChart component', () => {
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={dateHistogramData}
         args={{
           ...args,
           layers: [dateHistogramLayer],
@@ -900,8 +867,41 @@ describe('XYChart component', () => {
   test('onBrushEnd returns correct context data for number histogram data', () => {
     const { args } = sampleArgs();
 
+    const numberHistogramData: Datatable = {
+      type: 'datatable',
+      rows: [
+        {
+          xAccessorId: 5,
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 7,
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 8,
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 10,
+          yAccessorId: 1,
+        },
+      ],
+      columns: [
+        {
+          id: 'xAccessorId',
+          name: 'bytes',
+          meta: { type: 'number' },
+        },
+        {
+          id: 'yAccessorId',
+          name: 'Count of records',
+          meta: { type: 'number' },
+        },
+      ],
+    };
+
     const numberLayer: DataLayerConfigResult = {
-      layerId: 'numberLayer',
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
       hide: false,
@@ -912,55 +912,12 @@ describe('XYChart component', () => {
       seriesType: 'bar_stacked',
       accessors: ['yAccessorId'],
       palette: mockPaletteOutput,
-    };
-
-    const numberHistogramData: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        numberLayer: {
-          type: 'datatable',
-          rows: [
-            {
-              xAccessorId: 5,
-              yAccessorId: 1,
-            },
-            {
-              xAccessorId: 7,
-              yAccessorId: 1,
-            },
-            {
-              xAccessorId: 8,
-              yAccessorId: 1,
-            },
-            {
-              xAccessorId: 10,
-              yAccessorId: 1,
-            },
-          ],
-          columns: [
-            {
-              id: 'xAccessorId',
-              name: 'bytes',
-              meta: { type: 'number' },
-            },
-            {
-              id: 'yAccessorId',
-              name: 'Count of records',
-              meta: { type: 'number' },
-            },
-          ],
-        },
-      },
-      dateRange: {
-        fromDate: new Date('2020-04-01T16:14:16.246Z'),
-        toDate: new Date('2020-04-01T17:15:41.263Z'),
-      },
+      table: numberHistogramData,
     };
 
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={numberHistogramData}
         args={{
           ...args,
           layers: [numberLayer],
@@ -972,17 +929,15 @@ describe('XYChart component', () => {
 
     expect(onSelectRange).toHaveBeenCalledWith({
       column: 0,
-      table: numberHistogramData.tables.numberLayer,
+      table: numberHistogramData,
       range: [5, 8],
     });
   });
 
   test('onBrushEnd is not set on non-interactive mode', () => {
-    const { args, data } = sampleArgs();
+    const { args } = sampleArgs();
 
-    const wrapper = mountWithIntl(
-      <XYChart {...defaultProps} data={data} args={args} interactive={false} />
-    );
+    const wrapper = mountWithIntl(<XYChart {...defaultProps} args={args} interactive={false} />);
 
     expect(wrapper.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
   });
@@ -993,7 +948,6 @@ describe('XYChart component', () => {
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={dateHistogramData}
         args={{
           ...args,
           layers: [dateHistogramLayer],
@@ -1018,12 +972,10 @@ describe('XYChart component', () => {
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
             {
-              layerId: 'first',
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               isHistogram: true,
@@ -1035,6 +987,7 @@ describe('XYChart component', () => {
               accessors: ['d'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1050,13 +1003,13 @@ describe('XYChart component', () => {
         {
           column: 1,
           row: 1,
-          table: data.tables.first,
+          table: data,
           value: 5,
         },
         {
           column: 1,
           row: 0,
-          table: data.tables.first,
+          table: data,
           value: 2,
         },
       ],
@@ -1084,7 +1037,6 @@ describe('XYChart component', () => {
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={dateHistogramData}
         args={{
           ...args,
           layers: [dateHistogramLayer],
@@ -1111,9 +1063,42 @@ describe('XYChart component', () => {
   test('onElementClick returns correct context data for numeric histogram', () => {
     const { args } = sampleArgs();
 
+    const numberHistogramData: Datatable = {
+      type: 'datatable',
+      rows: [
+        {
+          xAccessorId: 5,
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 7,
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 8,
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 10,
+          yAccessorId: 1,
+        },
+      ],
+      columns: [
+        {
+          id: 'xAccessorId',
+          name: 'bytes',
+          meta: { type: 'number' },
+        },
+        {
+          id: 'yAccessorId',
+          name: 'Count of records',
+          meta: { type: 'number' },
+        },
+      ],
+    };
+
     const numberLayer: DataLayerConfigResult = {
       type: 'dataLayer',
-      layerId: 'numberLayer',
       layerType: LayerTypes.DATA,
       hide: false,
       xAccessor: 'xAccessorId',
@@ -1123,50 +1108,9 @@ describe('XYChart component', () => {
       seriesType: 'bar_stacked',
       accessors: ['yAccessorId'],
       palette: mockPaletteOutput,
+      table: numberHistogramData,
     };
 
-    const numberHistogramData: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        numberLayer: {
-          type: 'datatable',
-          rows: [
-            {
-              xAccessorId: 5,
-              yAccessorId: 1,
-            },
-            {
-              xAccessorId: 7,
-              yAccessorId: 1,
-            },
-            {
-              xAccessorId: 8,
-              yAccessorId: 1,
-            },
-            {
-              xAccessorId: 10,
-              yAccessorId: 1,
-            },
-          ],
-          columns: [
-            {
-              id: 'xAccessorId',
-              name: 'bytes',
-              meta: { type: 'number' },
-            },
-            {
-              id: 'yAccessorId',
-              name: 'Count of records',
-              meta: { type: 'number' },
-            },
-          ],
-        },
-      },
-      dateRange: {
-        fromDate: new Date('2020-04-01T16:14:16.246Z'),
-        toDate: new Date('2020-04-01T17:15:41.263Z'),
-      },
-    };
     const geometry: GeometryValue = {
       x: 5,
       y: 1,
@@ -1185,7 +1129,6 @@ describe('XYChart component', () => {
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={numberHistogramData}
         args={{
           ...args,
           layers: [numberLayer],
@@ -1202,7 +1145,7 @@ describe('XYChart component', () => {
         {
           column: 0,
           row: 0,
-          table: numberHistogramData.tables.numberLayer,
+          table: numberHistogramData,
           value: 5,
         },
       ],
@@ -1227,12 +1170,10 @@ describe('XYChart component', () => {
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
             {
-              layerId: 'first',
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
@@ -1243,6 +1184,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1258,7 +1200,7 @@ describe('XYChart component', () => {
         {
           column: 3,
           row: 1,
-          table: data.tables.first,
+          table: data,
           value: 'Bar',
         },
       ],
@@ -1267,20 +1209,29 @@ describe('XYChart component', () => {
 
   test('sets up correct yScaleType equal to binary_linear for bytes formatting', () => {
     const { args, data } = sampleArgs();
-    data.tables.first.columns[0].meta = {
-      type: 'number',
-      params: { id: 'bytes', params: { pattern: '0,0.00b' } },
+
+    const [firstCol, ...rest] = data.columns;
+    const newData: Datatable = {
+      ...data,
+      columns: [
+        {
+          ...firstCol,
+          meta: {
+            type: 'number',
+            params: { id: 'bytes', params: { pattern: '0,0.00b' } },
+          },
+        },
+        ...rest,
+      ],
     };
 
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
             {
-              layerId: 'first',
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
@@ -1291,6 +1242,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: newData,
             },
           ],
         }}
@@ -1306,12 +1258,10 @@ describe('XYChart component', () => {
     const wrapper = mountWithIntl(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
             {
-              layerId: 'first',
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
@@ -1322,6 +1272,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1332,21 +1283,17 @@ describe('XYChart component', () => {
   });
 
   test('onElementClick is not triggering event on non-interactive mode', () => {
-    const { args, data } = sampleArgs();
+    const { args } = sampleArgs();
 
-    const wrapper = mountWithIntl(
-      <XYChart {...defaultProps} data={data} args={args} interactive={false} />
-    );
+    const wrapper = mountWithIntl(<XYChart {...defaultProps} args={args} interactive={false} />);
 
     expect(wrapper.find(Settings).first().prop('onElementClick')).toBeUndefined();
   });
 
   test('legendAction is not triggering event on non-interactive mode', () => {
-    const { args, data } = sampleArgs();
+    const { args } = sampleArgs();
 
-    const wrapper = mountWithIntl(
-      <XYChart {...defaultProps} data={data} args={args} interactive={false} />
-    );
+    const wrapper = mountWithIntl(<XYChart {...defaultProps} args={args} interactive={false} />);
 
     expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
   });
@@ -1356,7 +1303,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -1369,6 +1315,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1385,7 +1332,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -1398,6 +1344,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1414,7 +1361,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -1427,6 +1373,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1445,7 +1392,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -1460,6 +1406,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1471,10 +1418,8 @@ describe('XYChart component', () => {
   });
 
   test('it passes time zone to the series', () => {
-    const { data, args } = sampleArgs();
-    const component = shallow(
-      <XYChart {...defaultProps} data={data} args={args} timeZone="CEST" />
-    );
+    const { args } = sampleArgs();
+    const component = shallow(<XYChart {...defaultProps} args={args} timeZone="CEST" />);
     expect(component.find(LineSeries).at(0).prop('timeZone')).toEqual('CEST');
     expect(component.find(LineSeries).at(1).prop('timeZone')).toEqual('CEST');
   });
@@ -1491,10 +1436,11 @@ describe('XYChart component', () => {
       xScaleType: 'ordinal',
       yScaleType: 'linear',
       palette: mockPaletteOutput,
+      table: data,
     };
     delete firstLayer.splitAccessor;
     const component = shallow(
-      <XYChart {...defaultProps} data={data} args={{ ...args, layers: [firstLayer] }} />
+      <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer] }} />
     );
     expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
   });
@@ -1510,10 +1456,11 @@ describe('XYChart component', () => {
       xScaleType: 'ordinal',
       yScaleType: 'linear',
       palette: mockPaletteOutput,
+      table: data,
     };
     delete firstLayer.splitAccessor;
     const component = shallow(
-      <XYChart {...defaultProps} data={data} args={{ ...args, layers: [firstLayer] }} />
+      <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer] }} />
     );
     expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
     expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(false);
@@ -1530,6 +1477,7 @@ describe('XYChart component', () => {
       xScaleType: 'ordinal',
       yScaleType: 'linear',
       palette: mockPaletteOutput,
+      table: data,
     };
     delete firstLayer.splitAccessor;
     const secondLayer: DataLayerConfigResult = {
@@ -1541,14 +1489,11 @@ describe('XYChart component', () => {
       xScaleType: 'ordinal',
       yScaleType: 'linear',
       palette: mockPaletteOutput,
+      table: data,
     };
     delete secondLayer.splitAccessor;
     const component = shallow(
-      <XYChart
-        {...defaultProps}
-        data={data}
-        args={{ ...args, layers: [firstLayer, secondLayer] }}
-      />
+      <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer, secondLayer] }} />
     );
     expect(component.find(LineSeries).at(0).prop('enableHistogramMode')).toEqual(true);
     expect(component.find(LineSeries).at(1).prop('enableHistogramMode')).toEqual(true);
@@ -1559,7 +1504,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -1572,6 +1516,7 @@ describe('XYChart component', () => {
               xScaleType: 'ordinal',
               yScaleType: 'linear',
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1586,7 +1531,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -1599,6 +1543,7 @@ describe('XYChart component', () => {
               xScaleType: 'ordinal',
               yScaleType: 'linear',
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
         }}
@@ -1611,15 +1556,21 @@ describe('XYChart component', () => {
   describe('y axes', () => {
     test('single axis if possible', () => {
       const args = createArgsWithLayers();
-
-      const component = getRenderedComponent(dataWithoutFormats, args);
+      const newArgs = {
+        ...args,
+        layers: args.layers.map((layer) => ({
+          ...layer,
+          table: dataWithoutFormats,
+        })),
+      };
+      const component = getRenderedComponent(newArgs);
       const axes = component.find(Axis);
       expect(axes).toHaveLength(2);
     });
 
     test('multiple axes because of config', () => {
       const args = createArgsWithLayers();
-      const newArgs = {
+      const newArgs: XYProps = {
         ...args,
         layers: [
           {
@@ -1627,19 +1578,22 @@ describe('XYChart component', () => {
             accessors: ['a', 'b'],
             yConfig: [
               {
+                type: 'yConfig',
                 forAccessor: 'a',
                 axisMode: 'left',
               },
               {
+                type: 'yConfig',
                 forAccessor: 'b',
                 axisMode: 'right',
               },
             ],
+            table: dataWithoutFormats,
           },
         ],
-      } as XYArgs;
+      };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const axes = component.find(Axis);
       expect(axes).toHaveLength(3);
       expect(component.find(LineSeries).at(0).prop('groupId')).toEqual(axes.at(1).prop('groupId'));
@@ -1648,17 +1602,18 @@ describe('XYChart component', () => {
 
     test('multiple axes because of incompatible formatters', () => {
       const args = createArgsWithLayers();
-      const newArgs = {
+      const newArgs: XYProps = {
         ...args,
         layers: [
           {
             ...args.layers[0],
             accessors: ['c', 'd'],
+            table: dataWithFormats,
           },
         ],
-      } as XYArgs;
+      };
 
-      const component = getRenderedComponent(dataWithFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const axes = component.find(Axis);
       expect(axes).toHaveLength(3);
       expect(component.find(LineSeries).at(0).prop('groupId')).toEqual(axes.at(1).prop('groupId'));
@@ -1667,7 +1622,7 @@ describe('XYChart component', () => {
 
     test('single axis despite different formatters if enforced', () => {
       const args = createArgsWithLayers();
-      const newArgs = {
+      const newArgs: XYProps = {
         ...args,
         layers: [
           {
@@ -1675,19 +1630,22 @@ describe('XYChart component', () => {
             accessors: ['c', 'd'],
             yConfig: [
               {
+                type: 'yConfig',
                 forAccessor: 'c',
                 axisMode: 'left',
               },
               {
+                type: 'yConfig',
                 forAccessor: 'd',
                 axisMode: 'left',
               },
             ],
+            table: dataWithoutFormats,
           },
         ],
-      } as XYArgs;
+      };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const axes = component.find(Axis);
       expect(axes).toHaveLength(2);
     });
@@ -1696,39 +1654,44 @@ describe('XYChart component', () => {
   describe('y series coloring', () => {
     test('color is applied to chart for multiple series', () => {
       const args = createArgsWithLayers();
-      const newArgs = {
+      const newArgs: XYProps = {
         ...args,
         layers: [
           {
             ...args.layers[0],
-            splitAccessor: undefined,
             accessors: ['a', 'b'],
+            splitAccessor: undefined,
             yConfig: [
               {
+                type: 'yConfig',
                 forAccessor: 'a',
                 color: '#550000',
               },
               {
+                type: 'yConfig',
                 forAccessor: 'b',
                 color: '#FFFF00',
               },
             ],
-          },
+            table: dataWithoutFormats,
+          } as ExtendedDataLayerConfigResult,
           {
             ...args.layers[0],
-            splitAccessor: undefined,
             accessors: ['c'],
+            splitAccessor: undefined,
             yConfig: [
               {
+                type: 'yConfig',
                 forAccessor: 'c',
                 color: '#FEECDF',
               },
             ],
-          },
+            table: dataWithoutFormats,
+          } as ExtendedDataLayerConfigResult,
         ],
-      } as XYArgs;
+      };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       expect(
         (component.find(LineSeries).at(0).prop('color') as Function)!({
           yAccessor: 'a',
@@ -1750,7 +1713,7 @@ describe('XYChart component', () => {
     });
     test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
       const args = createArgsWithLayers();
-      const newArgs = {
+      const newArgs: XYProps = {
         ...args,
         layers: [
           {
@@ -1758,20 +1721,22 @@ describe('XYChart component', () => {
             accessors: ['a'],
             yConfig: [
               {
+                type: 'yConfig',
                 forAccessor: 'a',
                 color: '#550000',
               },
             ],
+            table: dataWithoutFormats,
           },
           {
             ...args.layers[0],
-            splitAccessor: undefined,
             accessors: ['c'],
+            table: dataWithoutFormats,
           },
         ],
-      } as XYArgs;
+      };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       expect(
         (component.find(LineSeries).at(0).prop('color') as Function)!({
           yAccessor: 'a',
@@ -1806,11 +1771,12 @@ describe('XYChart component', () => {
             accessors: ['a'],
             splitAccessor: undefined,
             columnToLabel: '',
+            table: dataWithoutFormats,
           },
         ],
       };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
       // In this case, the ID is used as the name. This shouldn't happen in practice
@@ -1828,11 +1794,12 @@ describe('XYChart component', () => {
             accessors: ['a'],
             splitAccessor: undefined,
             columnToLabel: '{"a":""}',
+            table: dataWithoutFormats,
           },
         ],
       };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
       // In this case, the ID is used as the name. This shouldn't happen in practice
@@ -1850,11 +1817,12 @@ describe('XYChart component', () => {
             accessors: ['a'],
             splitAccessor: undefined,
             columnToLabel: '{"a":"Column A"}',
+            table: dataWithoutFormats,
           },
         ],
       };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Column A');
@@ -1870,11 +1838,12 @@ describe('XYChart component', () => {
             accessors: ['a', 'b'],
             splitAccessor: undefined,
             columnToLabel: '{"a": "Label A"}',
+            table: dataWithoutFormats,
           },
         ],
       };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
       const nameFn2 = component.find(LineSeries).at(1).prop('name') as SeriesNameFn;
 
@@ -1895,11 +1864,12 @@ describe('XYChart component', () => {
             accessors: ['a'],
             splitAccessor: 'd',
             columnToLabel: '{"a": "Label A"}',
+            table: dataWithoutFormats,
           },
         ],
       };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual('split1');
@@ -1915,11 +1885,12 @@ describe('XYChart component', () => {
             accessors: ['a'],
             splitAccessor: 'd',
             columnToLabel: '{"a": "Label A"}',
+            table: dataWithFormats,
           },
         ],
       };
 
-      const component = getRenderedComponent(dataWithFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
       convertSpy.mockReturnValueOnce('formatted');
@@ -1937,11 +1908,12 @@ describe('XYChart component', () => {
             accessors: ['a', 'b'],
             splitAccessor: 'd',
             columnToLabel: '{"a": "Label A","b": "Label B"}',
+            table: dataWithoutFormats,
           },
         ],
       };
 
-      const component = getRenderedComponent(dataWithoutFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
       const nameFn2 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
 
@@ -1963,11 +1935,12 @@ describe('XYChart component', () => {
             accessors: ['a', 'b'],
             splitAccessor: 'd',
             columnToLabel: '{"a": "Label A","b": "Label B"}',
+            table: dataWithFormats,
           },
         ],
       };
 
-      const component = getRenderedComponent(dataWithFormats, newArgs);
+      const component = getRenderedComponent(newArgs);
       const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
       const nameFn2 = component.find(LineSeries).at(1).prop('name') as SeriesNameFn;
 
@@ -1982,12 +1955,11 @@ describe('XYChart component', () => {
   });
 
   test('it set the scale of the x axis according to the args prop', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -2004,12 +1976,11 @@ describe('XYChart component', () => {
   });
 
   test('it set the scale of the y axis according to the args prop', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={data}
         args={{
           ...args,
           layers: [
@@ -2027,20 +1998,19 @@ describe('XYChart component', () => {
   });
 
   test('it gets the formatter for the x axis', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
-    shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     expect(getFormatSpy).toHaveBeenCalledWith({ id: 'string' });
   });
 
   test('it gets the formatter for the y axis if there is only one accessor', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     shallow(
       <XYChart
         {...defaultProps}
-        data={{ ...data }}
         args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
       />
     );
@@ -2051,9 +2021,9 @@ describe('XYChart component', () => {
   });
 
   test('it should pass the formatter function to the axis', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
-    const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     const tickFormatter = instance.find(Axis).first().prop('tickFormat');
 
@@ -2067,7 +2037,7 @@ describe('XYChart component', () => {
   });
 
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.tickLabelsVisibilitySettings = {
       x: false,
@@ -2076,7 +2046,7 @@ describe('XYChart component', () => {
       type: 'tickLabelsConfig',
     };
 
-    const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     const axisStyle = instance.find(Axis).first().prop('style');
 
@@ -2088,7 +2058,7 @@ describe('XYChart component', () => {
   });
 
   test('it should set the tickLabel visibility on the y axis if the tick labels is hidden', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.tickLabelsVisibilitySettings = {
       x: true,
@@ -2097,7 +2067,7 @@ describe('XYChart component', () => {
       type: 'tickLabelsConfig',
     };
 
-    const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     const axisStyle = instance.find(Axis).at(1).prop('style');
 
@@ -2109,7 +2079,7 @@ describe('XYChart component', () => {
   });
 
   test('it should set the tickLabel visibility on the x axis if the tick labels is shown', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.tickLabelsVisibilitySettings = {
       x: true,
@@ -2118,7 +2088,7 @@ describe('XYChart component', () => {
       type: 'tickLabelsConfig',
     };
 
-    const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     const axisStyle = instance.find(Axis).first().prop('style');
 
@@ -2130,7 +2100,7 @@ describe('XYChart component', () => {
   });
 
   test('it should set the tickLabel orientation on the x axis', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.labelsOrientation = {
       x: -45,
@@ -2139,7 +2109,7 @@ describe('XYChart component', () => {
       type: 'labelsOrientationConfig',
     };
 
-    const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     const axisStyle = instance.find(Axis).first().prop('style');
 
@@ -2151,7 +2121,7 @@ describe('XYChart component', () => {
   });
 
   test('it should set the tickLabel visibility on the y axis if the tick labels is shown', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.tickLabelsVisibilitySettings = {
       x: false,
@@ -2160,7 +2130,7 @@ describe('XYChart component', () => {
       type: 'tickLabelsConfig',
     };
 
-    const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     const axisStyle = instance.find(Axis).at(1).prop('style');
 
@@ -2172,7 +2142,7 @@ describe('XYChart component', () => {
   });
 
   test('it should set the tickLabel orientation on the y axis', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.labelsOrientation = {
       x: -45,
@@ -2181,7 +2151,7 @@ describe('XYChart component', () => {
       type: 'labelsOrientationConfig',
     };
 
-    const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     const axisStyle = instance.find(Axis).at(1).prop('style');
 
@@ -2193,37 +2163,20 @@ describe('XYChart component', () => {
   });
 
   test('it should remove invalid rows', () => {
-    const data: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        first: {
-          type: 'datatable',
-          columns: [
-            { id: 'a', name: 'a', meta: { type: 'number' } },
-            { id: 'b', name: 'b', meta: { type: 'number' } },
-            { id: 'c', name: 'c', meta: { type: 'string' } },
-          ],
-          rows: [
-            { a: undefined, b: 2, c: 'I', d: 'Row 1' },
-            { a: 1, b: 5, c: 'J', d: 'Row 2' },
-          ],
-        },
-        second: {
-          type: 'datatable',
-          columns: [
-            { id: 'a', name: 'a', meta: { type: 'number' } },
-            { id: 'b', name: 'b', meta: { type: 'number' } },
-            { id: 'c', name: 'c', meta: { type: 'string' } },
-          ],
-          rows: [
-            { a: undefined, b: undefined, c: undefined },
-            { a: undefined, b: undefined, c: undefined },
-          ],
-        },
-      },
+    const data: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'a', name: 'a', meta: { type: 'number' } },
+        { id: 'b', name: 'b', meta: { type: 'number' } },
+        { id: 'c', name: 'c', meta: { type: 'string' } },
+      ],
+      rows: [
+        { a: undefined, b: 2, c: 'I', d: 'Row 1' },
+        { a: 1, b: 5, c: 'J', d: 'Row 2' },
+      ],
     };
 
-    const args: XYArgs = {
+    const args: XYProps = {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
@@ -2257,7 +2210,6 @@ describe('XYChart component', () => {
       },
       layers: [
         {
-          layerId: 'first',
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
@@ -2269,9 +2221,9 @@ describe('XYChart component', () => {
           yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
+          table: data,
         },
         {
-          layerId: 'second',
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
@@ -2283,39 +2235,34 @@ describe('XYChart component', () => {
           yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
+          table: data,
         },
       ],
     };
 
-    const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+    const component = shallow(<XYChart {...defaultProps} args={args} />);
 
     const series = component.find(LineSeries);
-
     // Only one series should be rendered, even though 2 are configured
     // This one series should only have one row, even though 2 are sent
     expect(series.prop('data')).toEqual([{ a: 1, b: 5, c: 'J', d: 'Row 2' }]);
   });
 
   test('it should not remove rows with falsy but non-undefined values', () => {
-    const data: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        first: {
-          type: 'datatable',
-          columns: [
-            { id: 'a', name: 'a', meta: { type: 'number' } },
-            { id: 'b', name: 'b', meta: { type: 'number' } },
-            { id: 'c', name: 'c', meta: { type: 'number' } },
-          ],
-          rows: [
-            { a: 0, b: 2, c: 5 },
-            { a: 1, b: 0, c: 7 },
-          ],
-        },
-      },
+    const data: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'a', name: 'a', meta: { type: 'number' } },
+        { id: 'b', name: 'b', meta: { type: 'number' } },
+        { id: 'c', name: 'c', meta: { type: 'number' } },
+      ],
+      rows: [
+        { a: 0, b: 2, c: 5 },
+        { a: 1, b: 0, c: 7 },
+      ],
     };
 
-    const args: XYArgs = {
+    const args: XYProps = {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
@@ -2349,7 +2296,6 @@ describe('XYChart component', () => {
       },
       layers: [
         {
-          layerId: 'first',
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
@@ -2361,11 +2307,12 @@ describe('XYChart component', () => {
           yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
+          table: data,
         },
       ],
     };
 
-    const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+    const component = shallow(<XYChart {...defaultProps} args={args} />);
 
     const series = component.find(LineSeries);
 
@@ -2376,22 +2323,17 @@ describe('XYChart component', () => {
   });
 
   test('it should show legend for split series, even with one row', () => {
-    const data: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        first: {
-          type: 'datatable',
-          columns: [
-            { id: 'a', name: 'a', meta: { type: 'number' } },
-            { id: 'b', name: 'b', meta: { type: 'number' } },
-            { id: 'c', name: 'c', meta: { type: 'string' } },
-          ],
-          rows: [{ a: 1, b: 5, c: 'J' }],
-        },
-      },
+    const data: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'a', name: 'a', meta: { type: 'number' } },
+        { id: 'b', name: 'b', meta: { type: 'number' } },
+        { id: 'c', name: 'c', meta: { type: 'string' } },
+      ],
+      rows: [{ a: 1, b: 5, c: 'J' }],
     };
 
-    const args: XYArgs = {
+    const args: XYProps = {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
@@ -2425,7 +2367,6 @@ describe('XYChart component', () => {
       },
       layers: [
         {
-          layerId: 'first',
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
@@ -2437,11 +2378,12 @@ describe('XYChart component', () => {
           yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
+          table: data,
         },
       ],
     };
 
-    const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
+    const component = shallow(<XYChart {...defaultProps} args={args} />);
 
     expect(component.find(Settings).prop('showLegend')).toEqual(true);
   });
@@ -2452,7 +2394,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={{ ...data }}
         args={{
           ...args,
           layers: [
@@ -2467,6 +2408,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
           legend: { ...args.legend, isVisible: true, showSingleSeries: true },
@@ -2483,7 +2425,6 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={{ ...data }}
         args={{
           ...args,
           layers: [
@@ -2498,6 +2439,7 @@ describe('XYChart component', () => {
               yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
+              table: data,
             },
           ],
           legend: { ...args.legend, isVisible: true, isInside: true },
@@ -2515,12 +2457,11 @@ describe('XYChart component', () => {
   });
 
   test('it not show legend if isVisible is set to false', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={{ ...data }}
         args={{
           ...args,
           legend: { ...args.legend, isVisible: false },
@@ -2532,12 +2473,11 @@ describe('XYChart component', () => {
   });
 
   test('it should show legend on right side', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     const component = shallow(
       <XYChart
         {...defaultProps}
-        data={{ ...data }}
         args={{
           ...args,
           legend: { ...args.legend, position: 'top' },
@@ -2549,17 +2489,7 @@ describe('XYChart component', () => {
   });
 
   test('it should apply the fitting function to all non-bar series', () => {
-    const data: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        first: createSampleDatatableWithRows([
-          { a: 1, b: 2, c: 'I', d: 'Foo' },
-          { a: 1, b: 5, c: 'J', d: 'Bar' },
-        ]),
-      },
-    };
-
-    const args: XYArgs = createArgsWithLayers([
+    const args: XYProps = createArgsWithLayers([
       { ...sampleLayer, accessors: ['a'] },
       { ...sampleLayer, seriesType: 'bar', accessors: ['a'] },
       { ...sampleLayer, seriesType: 'area', accessors: ['a'] },
@@ -2567,7 +2497,7 @@ describe('XYChart component', () => {
     ]);
 
     const component = shallow(
-      <XYChart {...defaultProps} data={{ ...data }} args={{ ...args, fittingFunction: 'Carry' }} />
+      <XYChart {...defaultProps} args={{ ...args, fittingFunction: 'Carry' }} />
     );
 
     expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.Carry });
@@ -2579,27 +2509,27 @@ describe('XYChart component', () => {
   });
 
   test('it should apply None fitting function if not specified', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.layers[0].accessors = ['a'];
 
-    const component = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
   });
 
   test('it should apply the xTitle if is specified', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.xTitle = 'My custom x-axis title';
 
-    const component = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     expect(component.find(Axis).at(0).prop('title')).toEqual('My custom x-axis title');
   });
 
   test('it should hide the X axis title if the corresponding switch is off', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.axisTitlesVisibilitySettings = {
       x: false,
@@ -2608,7 +2538,7 @@ describe('XYChart component', () => {
       type: 'axisTitlesVisibilityConfig',
     };
 
-    const component = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     const axisStyle = component.find(Axis).first().prop('style');
 
@@ -2620,7 +2550,7 @@ describe('XYChart component', () => {
   });
 
   test('it should show the X axis gridlines if the setting is on', () => {
-    const { data, args } = sampleArgs();
+    const { args } = sampleArgs();
 
     args.gridlinesVisibilitySettings = {
       x: true,
@@ -2629,7 +2559,7 @@ describe('XYChart component', () => {
       type: 'gridlinesConfig',
     };
 
-    const component = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
+    const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
     expect(component.find(Axis).at(0).prop('gridLine')).toMatchObject({
       visible: true,
@@ -2637,44 +2567,35 @@ describe('XYChart component', () => {
   });
 
   test('it should format the boolean values correctly', () => {
-    const data: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        first: {
-          type: 'datatable',
-          columns: [
-            {
-              id: 'a',
-              name: 'a',
-              meta: { type: 'number', params: { id: 'number', params: { pattern: '0,0.000' } } },
-            },
-            {
-              id: 'b',
-              name: 'b',
-              meta: { type: 'number', params: { id: 'number', params: { pattern: '000,0' } } },
-            },
-            {
-              id: 'c',
-              name: 'c',
-              meta: {
-                type: 'boolean',
-                params: { id: 'boolean' },
-              },
-            },
-          ],
-          rows: [
-            { a: 5, b: 2, c: 0 },
-            { a: 19, b: 5, c: 1 },
-          ],
+    const data: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'a',
+          name: 'a',
+          meta: { type: 'number', params: { id: 'number', params: { pattern: '0,0.000' } } },
         },
-      },
-      dateRange: {
-        fromDate: new Date('2019-01-02T05:00:00.000Z'),
-        toDate: new Date('2019-01-03T05:00:00.000Z'),
-      },
+        {
+          id: 'b',
+          name: 'b',
+          meta: { type: 'number', params: { id: 'number', params: { pattern: '000,0' } } },
+        },
+        {
+          id: 'c',
+          name: 'c',
+          meta: {
+            type: 'boolean',
+            params: { id: 'boolean' },
+          },
+        },
+      ],
+      rows: [
+        { a: 5, b: 2, c: 0 },
+        { a: 19, b: 5, c: 1 },
+      ],
     };
+
     const timeSampleLayer: DataLayerConfigResult = {
-      layerId: 'first',
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
       seriesType: 'line',
@@ -2684,19 +2605,16 @@ describe('XYChart component', () => {
       yScaleType: 'linear',
       isHistogram: false,
       palette: mockPaletteOutput,
+      table: data,
     };
+
     const args = createArgsWithLayers([timeSampleLayer]);
 
     const getCustomFormatSpy = jest.fn();
     getCustomFormatSpy.mockReturnValue({ convert: jest.fn((x) => Boolean(x)) });
 
     const component = shallow(
-      <XYChart
-        {...defaultProps}
-        formatFactory={getCustomFormatSpy}
-        data={{ ...data }}
-        args={{ ...args }}
-      />
+      <XYChart {...defaultProps} formatFactory={getCustomFormatSpy} args={{ ...args }} />
     );
 
     expect(component.find(LineSeries).at(1).prop('data')).toEqual([

@@ -8,10 +8,9 @@
 
 import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { Datatable } from '../../../../expressions';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
-import { DataLayerConfigResult, XYLayerConfigResult } from '../../common';
+import { CommonXYDataLayerConfigResult } from '../../common';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -21,40 +20,52 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(sortedLayer: DataLayerConfigResult, seriesKey: string, yAccessor: string): number;
+    getRank(
+      sortedLayer: CommonXYDataLayerConfigResult,
+      layerId: number,
+      seriesKey: string,
+      yAccessor: string
+    ): number;
   }
 >;
 
 export function getColorAssignments(
-  layers: XYLayerConfigResult[],
-  data: { tables: Record<string, Datatable> },
+  layers: CommonXYDataLayerConfigResult[],
   formatFactory: FormatFactory
 ): ColorAssignments {
-  const layersPerPalette: Record<string, DataLayerConfigResult[]> = {};
+  const layersPerPalette: Record<
+    string,
+    Array<{
+      index: number;
+      layer: CommonXYDataLayerConfigResult;
+    }>
+  > = {};
 
-  layers
-    .filter((layer): layer is DataLayerConfigResult => isDataLayer(layer))
-    .forEach((layer) => {
-      const palette = layer.palette?.name || 'default';
-      if (!layersPerPalette[palette]) {
-        layersPerPalette[palette] = [];
-      }
-      layersPerPalette[palette].push(layer);
-    });
+  layers.forEach((layer, index) => {
+    if (!isDataLayer(layer)) {
+      return;
+    }
+
+    const palette = layer.palette?.name || 'default';
+    if (!layersPerPalette[palette]) {
+      layersPerPalette[palette] = [];
+    }
+    layersPerPalette[palette].push({ layer, index });
+  });
 
   return mapValues(layersPerPalette, (paletteLayers) => {
-    const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
+    const seriesPerLayer = paletteLayers.map(({ layer }) => {
       if (!layer.splitAccessor) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
       const splitAccessor = layer.splitAccessor;
-      const column = data.tables[layer.layerId]?.columns.find(({ id }) => id === splitAccessor);
+      const column = layer.table.columns?.find(({ id }) => id === splitAccessor);
       const columnFormatter = column && formatFactory(column.meta.params);
       const splits =
-        !column || !data.tables[layer.layerId]
+        !column || !layer.table
           ? []
           : uniq(
-              data.tables[layer.layerId].rows.map((row) => {
+              layer.table.rows.map((row) => {
                 let value = row[splitAccessor];
                 if (value && !isPrimitive(value)) {
                   value = columnFormatter?.convert(value) ?? value;
@@ -72,8 +83,13 @@ export function getColorAssignments(
     );
     return {
       totalSeriesCount,
-      getRank(sortedLayer: DataLayerConfigResult, seriesKey: string, yAccessor: string) {
-        const layerIndex = paletteLayers.findIndex((l) => sortedLayer.layerId === l.layerId);
+      getRank(
+        sortedLayer: CommonXYDataLayerConfigResult,
+        layerId: number,
+        seriesKey: string,
+        yAccessor: string
+      ) {
+        const layerIndex = paletteLayers.findIndex(({ index }) => layerId === index);
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
         const splitRank = currentSeriesPerLayer.splits.indexOf(seriesKey);
         return (

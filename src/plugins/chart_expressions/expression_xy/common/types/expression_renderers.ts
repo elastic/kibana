@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '../../../../expressions';
 import { XY_VIS_RENDERER } from '../constants';
 import { XYProps } from './expression_functions';
 
 export interface XYChartProps {
-  data: Datatable;
   args: XYProps;
 }
 

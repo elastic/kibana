@@ -16,6 +16,11 @@ describe('xyVis', () => {
     const { data, args } = sampleArgs();
     const result = xyVisFunction.fn(data, args, createMockExecutionContext());
 
-    expect(result).toEqual({ type: 'render', as: XY_VIS, value: { data, args } });
+    const { layers, ...rest } = args;
+    expect(result).toEqual({
+      type: 'render',
+      as: XY_VIS,
+      value: { args: { ...rest, layers } },
+    });
   });
 });
