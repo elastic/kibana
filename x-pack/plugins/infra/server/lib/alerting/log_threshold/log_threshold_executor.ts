@@ -496,8 +496,6 @@ export const updateAlert: AlertUpdater = (alert, state, actions) => {
   });
 };
 
-const getViewInAppUrl = (basePath: IBasePath, indexedStartedAt: string) => {};
-
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string
