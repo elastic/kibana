@@ -20,7 +20,7 @@ import {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig } from '../utils';
-import type { IndexPattern } from '../../../../data/public';
+import type { DataView } from '../../../../data_views/public';
 import type { NavigateToLensContext } from '../../../../visualizations/public';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
@@ -151,7 +151,7 @@ const TopNav = ({
     hideLensBadge,
     hideTryInLensBadge,
   ]);
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
   );
   const showDatePicker = () => {
@@ -210,13 +210,13 @@ const TopNav = ({
 
   useEffect(() => {
     const asyncSetIndexPattern = async () => {
-      let indexes: IndexPattern[] | undefined;
+      let indexes: DataView[] | undefined;
 
       if (vis.type.getUsedIndexPattern) {
         indexes = await vis.type.getUsedIndexPattern(vis.params);
       }
       if (!indexes || !indexes.length) {
-        const defaultIndex = await services.data.indexPatterns.getDefault();
+        const defaultIndex = await services.dataViews.getDefault();
         if (defaultIndex) {
           indexes = [defaultIndex];
         }
@@ -229,7 +229,7 @@ const TopNav = ({
     if (!vis.data.indexPattern) {
       asyncSetIndexPattern();
     }
-  }, [vis.params, vis.type, services.data.indexPatterns, vis.data.indexPattern]);
+  }, [vis.params, vis.type, vis.data.indexPattern, services.dataViews]);
 
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
