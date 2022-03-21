@@ -18,13 +18,10 @@ import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
 import { schema, FormProps } from './schema';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { useKibana } from '../../common/lib/kibana';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
-jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/servicenow/use_get_choices');
@@ -34,7 +31,6 @@ const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const useGetIncidentTypesResponse = {
   isLoading: false,
@@ -58,6 +54,7 @@ const defaultProps = {
 };
 
 describe('Connector', () => {
+  let appMockRender: AppMockRenderer;
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
@@ -74,14 +71,9 @@ describe('Connector', () => {
     return <Form form={form}>{children}</Form>;
   };
 
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
-  beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
@@ -178,5 +170,20 @@ describe('Connector', () => {
         fields: { incidentTypes: ['19'], severityCode: '4' },
       });
     });
+  });
+
+  it('shows the actions permission message if the user does not have read access to actions', async () => {
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
+        <Connector {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
+    expect(result.getByTestId('create-case-connector-permissions-error-msg')).toBeInTheDocument();
+    expect(result.queryByTestId('caseConnectors')).toBe(null);
   });
 });
