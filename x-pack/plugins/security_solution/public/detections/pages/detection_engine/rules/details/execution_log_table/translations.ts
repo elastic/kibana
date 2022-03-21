@@ -23,7 +23,7 @@ export const RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED = (totalItems: number, max
     {
       values: { totalItems, maxItems },
       defaultMessage:
-        "More than {totalItems} rule executions match filters provided. Showing first {maxItems} by most recent '@timestamp'. Constrain filters further to view additional execution events",
+        "More than {totalItems} rule executions match filters provided. Showing first {maxItems} by most recent '@timestamp'. Constrain filters further to view additional execution events.",
     }
   );
 
@@ -41,13 +41,6 @@ export const RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH = i18n.translate(
   }
 );
 
-export const SHOW_METRIC_COLUMNS_SWITCH_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.showMetricColumnsSwitchTooltip',
-  {
-    defaultMessage: 'Enable to show additional metrics columns.',
-  }
-);
-
 export const COLUMN_STATUS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.statusColumn',
   {
@@ -58,7 +51,7 @@ export const COLUMN_STATUS = i18n.translate(
 export const COLUMN_STATUS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.statusColumnTooltip',
   {
-    defaultMessage: 'Overall status of execution',
+    defaultMessage: 'Overall status of execution.',
   }
 );
 
@@ -72,7 +65,7 @@ export const COLUMN_TIMESTAMP = i18n.translate(
 export const COLUMN_TIMESTAMP_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.timestampColumnTooltip',
   {
-    defaultMessage: 'Datetime rule execution initiated',
+    defaultMessage: 'Datetime rule execution initiated.',
   }
 );
 
@@ -86,7 +79,7 @@ export const COLUMN_DURATION = i18n.translate(
 export const COLUMN_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.durationColumnTooltip',
   {
-    defaultMessage: 'The length of time it took for the rule to run (mm:ss:SSS)',
+    defaultMessage: 'The length of time it took for the rule to run (mm:ss:SSS).',
   }
 );
 
@@ -100,7 +93,7 @@ export const COLUMN_MESSAGE = i18n.translate(
 export const COLUMN_MESSAGE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.messageColumnTooltip',
   {
-    defaultMessage: 'Relevant message from execution outcome',
+    defaultMessage: 'Relevant message from execution outcome.',
   }
 );
 
@@ -128,7 +121,7 @@ export const COLUMN_INDEX_DURATION = i18n.translate(
 export const COLUMN_INDEX_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.indexDurationColumnTooltip',
   {
-    defaultMessage: 'The length of time it took to index detected alerts (mm:ss:SSS)',
+    defaultMessage: 'The length of time it took to index detected alerts (mm:ss:SSS).',
   }
 );
 
@@ -142,7 +135,7 @@ export const COLUMN_SEARCH_DURATION = i18n.translate(
 export const COLUMN_SEARCH_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.searchDurationColumnTooltip',
   {
-    defaultMessage: 'The length of time it took to search for alerts (mm:ss:SSS)',
+    defaultMessage: 'The length of time it took to search for alerts (mm:ss:SSS).',
   }
 );
 
@@ -156,7 +149,7 @@ export const COLUMN_SCHEDULING_DELAY = i18n.translate(
 export const COLUMN_SCHEDULING_DELAY_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.schedulingDelayColumnTooltip',
   {
-    defaultMessage: 'The length of time from rule scheduled till rule executed (mm:ss:SSS)',
+    defaultMessage: 'The length of time from rule scheduled till rule executed (mm:ss:SSS).',
   }
 );
 
@@ -170,7 +163,7 @@ export const COLUMN_ACTIONS = i18n.translate(
 export const COLUMN_ACTIONS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionsColumnTooltip',
   {
-    defaultMessage: 'Filter alerts by rule execution ID',
+    defaultMessage: 'Filter alerts by rule execution ID.',
   }
 );
 

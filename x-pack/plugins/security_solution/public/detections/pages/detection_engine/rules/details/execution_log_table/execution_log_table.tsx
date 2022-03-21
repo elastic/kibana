@@ -20,7 +20,6 @@ import {
   OnRefreshChangeProps,
   EuiSpacer,
   EuiSwitch,
-  EuiToolTip,
   EuiBasicTable,
 } from '@elastic/eui';
 import { buildFilter, FILTERS } from '@kbn/es-query';
@@ -302,18 +301,12 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
               updatedAt: dataUpdatedAt,
             })}
           </UtilityBarText>
-          <EuiToolTip
-            display="block"
-            data-test-subj="show-metrics-columns-tooltip"
-            content={i18n.SHOW_METRIC_COLUMNS_SWITCH_TOOLTIP}
-          >
-            <UtilitySwitch
-              label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
-              checked={showMetricColumns}
-              compressed={true}
-              onChange={(e) => onShowMetricColumnsCallback(e.target.checked)}
-            />
-          </EuiToolTip>
+          <UtilitySwitch
+            label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
+            checked={showMetricColumns}
+            compressed={true}
+            onChange={(e) => onShowMetricColumnsCallback(e.target.checked)}
+          />
         </UtilityBarSection>
       </UtilityBar>
       <EuiBasicTable
