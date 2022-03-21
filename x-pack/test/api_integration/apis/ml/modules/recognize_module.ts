@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         moduleIds: [
           'security_auth',
           'security_network',
-          'security_windows',
+          'security_windows_v3',
         ],
       },
     },
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['auditbeat_process_hosts_ecs', 'security_linux'],
+        moduleIds: ['security_linux_v3'],
       },
     },
     {
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_auth', 'security_linux', 'security_network', 'security_windows'],
+        moduleIds: ['security_auth', 'security_linux_v3', 'security_network', 'security_windows_v3'],
       },
     },
     {
@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['metricbeat_system_ecs', 'security_linux'],
+        moduleIds: ['metricbeat_system_ecs', 'security_linux_v3'],
       },
     },
     {
@@ -167,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_linux'], // the metrics ui modules don't define a query and can't be recognized
+        moduleIds: ['security_linux_v3'], // the metrics ui modules don't define a query and can't be recognized
       },
     },
     {
