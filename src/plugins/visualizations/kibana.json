@@ -13,7 +13,8 @@
     "inspector",
     "savedObjects",
     "screenshotMode",
-    "presentationUtil"
+    "presentationUtil",
+    "dataViews"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaUtils", "discover", "kibanaReact", "home"],

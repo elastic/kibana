@@ -6,7 +6,6 @@
  */
 
 import fs from 'fs';
-import { when } from 'jest-when';
 import { SHAREABLE_RUNTIME_FILE } from '../../../shareable_runtime/constants';
 
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
@@ -33,8 +32,15 @@ describe('Download Canvas shareables runtime', () => {
 
   it(`returns 200 with canvas shareables runtime`, async () => {
     const content = 'Canvas shareable runtime';
-    const spy = jest.spyOn(fs, 'readFileSync').mockImplementation();
-    when(spy).calledWith(SHAREABLE_RUNTIME_FILE).mockReturnValue(content);
+
+    jest.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      switch (p) {
+        case SHAREABLE_RUNTIME_FILE:
+          return content;
+        default:
+          throw new Error(`unexpected argument to fs.readFileSync: ${p}`);
+      }
+    });
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
