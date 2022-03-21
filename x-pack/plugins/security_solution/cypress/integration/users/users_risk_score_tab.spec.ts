@@ -6,16 +6,15 @@
  */
 
 import { RISK_SCORE_TAB_CONTENT, RISK_SCORE_TAB } from '../../screens/users/user_risk_score';
-import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
 describe('Users risk tab', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPage(USERS_URL);
+    login();
+    visit(USERS_URL);
   });
 
   it(`renders users risk tab`, () => {

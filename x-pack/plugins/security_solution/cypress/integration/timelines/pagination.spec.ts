@@ -17,7 +17,7 @@ import {
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { populateTimeline } from '../../tasks/timeline';
 
@@ -28,7 +28,8 @@ describe('Pagination', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('timeline');
-    loginAndWaitForPage(HOSTS_URL);
+    login();
+    visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
   });

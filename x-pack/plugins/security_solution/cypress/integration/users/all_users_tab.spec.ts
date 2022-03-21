@@ -9,7 +9,7 @@ import { HEADER_SUBTITLE, USER_NAME_CELL } from '../../screens/users/all_users';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
@@ -17,7 +17,8 @@ describe('Users stats and tables', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('users');
-    loginAndWaitForPage(USERS_URL);
+    login();
+    visit(USERS_URL);
   });
   after(() => {
     esArchiverUnload('users');

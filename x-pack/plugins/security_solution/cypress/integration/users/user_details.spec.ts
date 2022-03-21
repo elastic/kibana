@@ -9,7 +9,7 @@ import { ALERT_FLYOUT } from '../../screens/alerts_details';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
@@ -21,9 +21,10 @@ import {
 import { USER_COLUMN } from '../../screens/alerts';
 
 describe('user details flyout', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    login();
+    visitWithoutDateRange(ALERTS_URL);
     createCustomRuleEnabled({ ...getNewRule(), customQuery: 'user.name:*' });
     refreshPage();
     waitForAlertsToPopulate();

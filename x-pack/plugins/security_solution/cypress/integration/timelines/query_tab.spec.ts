@@ -19,7 +19,7 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   addFilter,
   closeTimeline,
@@ -35,7 +35,8 @@ import { TIMELINES_URL } from '../../urls/navigation';
 describe('Timeline query tab', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    login();
+    visitWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
     createTimeline(getTimeline())

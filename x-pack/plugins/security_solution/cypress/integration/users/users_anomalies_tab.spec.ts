@@ -6,16 +6,15 @@
  */
 
 import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../screens/users/user_anomalies';
-import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
 describe('Users anomalies tab', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPage(USERS_URL);
+    login();
+    visit(USERS_URL);
   });
 
   it(`renders anomalies tab`, () => {

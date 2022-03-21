@@ -16,9 +16,9 @@ import {
 } from '../../screens/timeline';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteTimelines } from '../../tasks/common';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   addNotesToTimeline,
   closeTimeline,
@@ -34,9 +34,13 @@ const text = 'elastic';
 const link = 'https://www.elastic.co/';
 
 describe('Timeline notes tab', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    login();
+  });
+  beforeEach(() => {
+    deleteTimelines();
+    visitWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
     createTimeline(getTimelineNonValidQuery())
