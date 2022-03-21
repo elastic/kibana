@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { useCallback, useState } from 'react';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export function useSorting(onSortChange: (sort: estypes.SortCombinations[]) => void) {
+export function useSorting(
+  onSortChange: (sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => void
+) {
   const [sortingColumns, setSortingColumns] = useState([]);
   const onSort = useCallback(
     (_state) => {

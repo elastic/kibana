@@ -4,13 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { get } from 'lodash';
-import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RuleRegistrySearchRequestPagination } from '../../../../../../rule_registry/common';
+import {
+  RuleRegistrySearchRequest,
+  RuleRegistrySearchResponse,
+  RuleRegistrySearchRequestPagination,
+} from '../../../../../../rule_registry/common';
 import { AlertsTable } from '../alerts_table';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
+import { AlertsData } from '../../../../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
@@ -20,45 +32,103 @@ const consumers = [
   AlertConsumers.LOGS,
   AlertConsumers.UPTIME,
   AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.SIEM,
 ];
-const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
-  const [showCheckboxes] = useState(false);
 
-  const mockAlertData = [
-    {
-      'kibana.alert.rule.name': ['Test1'],
-      'kibana.alert.rule.category': ['Internal'],
-    },
-    {
-      'kibana.alert.rule.name': ['Test2'],
-      'kibana.alert.rule.category': ['Internal'],
-    },
-    {
-      'kibana.alert.rule.name': ['Test3'],
-      'kibana.alert.rule.category': ['Internal'],
-    },
-    {
-      'kibana.alert.rule.name': ['Test4'],
-      'kibana.alert.rule.category': ['Internal'],
-    },
-    {
-      'kibana.alert.rule.name': ['Test5'],
-      'kibana.alert.rule.category': ['Internal'],
-    },
-  ];
+const defaultPagination = {
+  pageSize: 10,
+  pageIndex: 0,
+};
+
+const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
+  const { data, notifications } = useKibana().services;
+  const [showCheckboxes] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [alertsCount, setAlertsCount] = useState(0);
+  const [alerts, setAlerts] = useState<AlertsData[]>([]);
+  const [sort, setSort] = useState<estypes.SortCombinations[]>([]);
+  const [pagination, setPagination] = useState(defaultPagination);
+
+  const onPageChange = (_pagination: RuleRegistrySearchRequestPagination) => {
+    setPagination(_pagination);
+  };
+  const onSortChange = (_sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
+    setSort(
+      _sort.map(({ id, direction }) => {
+        return {
+          [id]: {
+            order: direction,
+          },
+        };
+      })
+    );
+  };
+
+  const asyncSearch = useCallback(() => {
+    setIsLoading(true);
+    const abortController = new AbortController();
+    const request: RuleRegistrySearchRequest = {
+      featureIds: consumers,
+      sort,
+      pagination,
+    };
+    data.search
+      .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(request, {
+        strategy: 'ruleRegistryAlertsSearchStrategy',
+        abortSignal: abortController.signal,
+      })
+      .subscribe({
+        next: (res) => {
+          // eslint-disable-next-line no-console
+          console.log('response from search strategy', {
+            isPartial: res.isPartial,
+            isRunning: res.isRunning,
+            res,
+          });
+          const alertsResponse = res.rawResponse.hits.hits.map(
+            (hit) => hit.fields as unknown as AlertsData
+          ) as AlertsData[];
+          setAlerts(alertsResponse);
+          const total = !isNaN(res.rawResponse.hits.total as number)
+            ? (res.rawResponse.hits.total as number)
+            : (res.rawResponse.hits.total as estypes.SearchTotalHits).value ?? 0;
+          setAlertsCount(total);
+        },
+        error: (e) => {
+          if (e instanceof AbortError) {
+            notifications.toasts.addWarning({
+              title: e.message,
+            });
+          } else {
+            notifications.toasts.addDanger({
+              title: 'Failed to run search',
+              text: e.message,
+            });
+          }
+        },
+      });
+    setIsLoading(false);
+    setIsInitializing(false);
+  }, [data.search, notifications.toasts, sort, pagination]);
+
+  useEffect(() => {
+    asyncSearch();
+  }, [asyncSearch]);
 
   const useFetchAlertsData = () => {
     return {
-      activePage: 0,
-      alerts: mockAlertData,
-      isInitializing: false,
-      isLoading: false,
+      activePage: pagination.pageIndex,
+      alerts,
+      alertsCount,
+      isInitializing,
+      isLoading,
       getInspectQuery: () => ({ request: {}, response: {} }),
       onColumnsChange: (columns: EuiDataGridControlColumn[]) => {},
-      onPageChange: (pagination: RuleRegistrySearchRequestPagination) => {},
-      onSortChange: (sort: estypes.SortCombinations[]) => {},
-      refresh: () => {},
+      onPageChange,
+      onSortChange,
+      refresh: () => {
+        asyncSearch();
+      },
     };
   };
 
@@ -77,11 +147,14 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
     ],
     deletedEventIds: [],
     disabledCellActions: [],
-    pageSize: 2,
+    pageSize: defaultPagination.pageSize,
     pageSizeOptions: [2, 5, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: ({ columnId, rowIndex }: EuiDataGridCellValueElementProps) => {
-      return get(mockAlertData[rowIndex], columnId, 'N/A');
+    renderCellValue: (rcvProps: EuiDataGridCellValueElementProps) => {
+      const { columnId, visibleRowIndex } = rcvProps as EuiDataGridCellValueElementProps & {
+        visibleRowIndex: number;
+      };
+      return get(alerts[visibleRowIndex], columnId, 'N/A');
     },
     showCheckboxes,
     trailingControlColumns: [],
@@ -89,10 +162,14 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
   };
 
   return (
-    <>
+    <section>
       <h1>THIS IS AN INTERNAL TEST PAGE</h1>
-      <AlertsTable {...tableProps} />
-    </>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={true}>
+          <AlertsTable {...tableProps} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </section>
   );
 };
 

@@ -35,7 +35,7 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
   } = useKibana().services;
   const {
     activePage,
-    alerts,
+    alertsCount,
     // isInitializing,
     // isLoading,
     // getInspectQuery,
@@ -76,7 +76,7 @@ const AlertsTableComponent: React.FunctionComponent<AlertsTableProps> = (
         columns={props.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
-        rowCount={alerts.length}
+        rowCount={alertsCount}
         renderCellValue={props.renderCellValue}
         sorting={{ columns: sortingColumns, onSort }}
         pagination={{

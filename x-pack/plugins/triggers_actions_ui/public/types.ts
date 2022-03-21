@@ -9,7 +9,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
@@ -365,12 +364,13 @@ export type AlertsData = Record<string, any[]>;
 export interface FetchAlertData {
   activePage: number;
   alerts: AlertsData[];
+  alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
   onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  onSortChange: (sort: estypes.SortCombinations[]) => void;
+  onSortChange: (sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => void;
   refresh: () => void;
 }
 
