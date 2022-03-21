@@ -568,9 +568,8 @@ function getCancellableRuleType() {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    config: {
+    configFromOriginPlugin: {
       execution: {
-        actions: { max: 1000 },
         timeout: '3s',
       },
     },
