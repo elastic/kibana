@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ElasticDocsLink } from '../../shared/links/elastic_docs_link';
 
 export type TourType = 'createGroup' | 'editGroup' | 'serviceGroupCard';
 
@@ -34,11 +35,17 @@ export function ServiceGroupsTour({
             {content}
           </EuiText>
           <EuiSpacer />
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.apm.serviceGroups.tour.content.link', {
-              defaultMessage: 'Learn more in our documentation',
-            })}
-          </EuiText>
+          <ElasticDocsLink
+            section="/kibana"
+            path="/services.html"
+            target="blank"
+          >
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.apm.serviceGroups.tour.content.link', {
+                defaultMessage: 'Learn more in our documentation',
+              })}
+            </EuiText>
+          </ElasticDocsLink>
         </>
       }
       isStepOpen={tourEnabled}
