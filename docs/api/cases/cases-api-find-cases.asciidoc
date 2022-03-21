@@ -31,9 +31,10 @@ default space is used.
 (Optional, string) The default operator to use for the `simple_query_string`.
 Defaults to `OR`.
 
+////
 `fields`::
 (Optional, array of strings) The fields in the entity to return in the response.
-
+////
 `owner`::
 (Optional, string or array of strings) A filter to limit the retrieved cases to
 a specific set of applications. Valid values are: `cases`, `observability`,
