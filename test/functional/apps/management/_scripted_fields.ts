@@ -276,7 +276,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         // verify Lens opens a visualization
         expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-          'Top values of painString'
+          'Top 5 values of painString'
         );
       });
     });
