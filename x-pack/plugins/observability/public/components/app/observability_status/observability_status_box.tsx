@@ -97,7 +97,7 @@ export function CompletedStatusBox({
 
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiButton color="primary" size="s" href={goToAppLink}>
+          <EuiButton color="primary" href={goToAppLink}>
             {goToAppTitle}
           </EuiButton>
         </EuiFlexItem>
