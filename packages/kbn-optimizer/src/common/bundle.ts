@@ -12,7 +12,8 @@ import Fs from 'fs';
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
 import { omit } from './obj_helpers';
-import { includes, ascending, entriesToObject } from './array_helpers';
+import { includes } from './array_helpers';
+import type { Hashes } from './hashes';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
@@ -89,12 +90,10 @@ export class Bundle {
    * Calculate the cache key for this bundle based from current
    * mtime values.
    */
-  createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
+  createCacheKey(paths: string[], hashes: Hashes): unknown {
     return {
       spec: omit(this.toSpec(), ['pageLoadAssetSizeLimit']),
-      mtimes: entriesToObject(
-        files.map((p) => [p, mtimes.get(p)] as const).sort(ascending((e) => e[0]))
-      ),
+      checksums: Object.fromEntries(paths.map((p) => [p, hashes.getCached(p)] as const)),
     };
   }
 

@@ -19,22 +19,28 @@ import React, {
   MouseEvent,
   useCallback,
   useMemo,
+  RefObject,
 } from 'react';
 import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
-import { useStyles } from './styles';
+import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
 import { SessionLeaderButton, AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
-interface ProcessDeps {
+import { useStyles } from './styles';
+
+export interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
   depth?: number;
   onProcessSelected?: (process: Process) => void;
+  jumpToEventID?: string;
   jumpToAlertID?: string;
   selectedProcessId?: string;
+  scrollerRef: RefObject<HTMLDivElement>;
+  onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
 }
 
 /**
@@ -45,8 +51,11 @@ export function ProcessTreeNode({
   isSessionLeader = false,
   depth = 0,
   onProcessSelected,
+  jumpToEventID,
   jumpToAlertID,
   selectedProcessId,
+  scrollerRef,
+  onChangeJumpToEventVisibility,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -71,6 +80,14 @@ export function ProcessTreeNode({
   );
   const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert });
   const buttonStyles = useButtonStyles({});
+
+  const nodeRef = useVisible({
+    viewPortEl: scrollerRef.current,
+    visibleCallback: (isVisible, isAbove) => {
+      onChangeJumpToEventVisibility(isVisible, isAbove);
+    },
+    shouldAddListener: jumpToEventID === process.id,
+  });
 
   // Automatically expand alerts list when investigating an alert
   useEffect(() => {
@@ -183,6 +200,7 @@ export function ProcessTreeNode({
         key={id + searchMatched}
         css={styles.processNode}
         data-test-subj="sessionView:processTreeNode"
+        ref={nodeRef}
       >
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div
@@ -264,8 +282,11 @@ export function ProcessTreeNode({
                 process={child}
                 depth={childrenTreeDepth}
                 onProcessSelected={onProcessSelected}
+                jumpToEventID={jumpToEventID}
                 jumpToAlertID={jumpToAlertID}
                 selectedProcessId={selectedProcessId}
+                scrollerRef={scrollerRef}
+                onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
               />
             );
           })}

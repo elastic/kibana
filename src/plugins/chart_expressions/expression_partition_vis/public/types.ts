@@ -7,7 +7,10 @@
  */
 import type { ValueClickContext } from '../../../embeddable/public';
 import { ChartsPluginSetup } from '../../../charts/public';
-import { ExpressionsPublicPlugin, ExpressionsServiceStart } from '../../../expressions/public';
+import {
+  Plugin as ExpressionsPublicPlugin,
+  ExpressionsServiceStart,
+} from '../../../expressions/public';
 
 export type ExpressionPartitionVisPluginSetup = void;
 export type ExpressionPartitionVisPluginStart = void;

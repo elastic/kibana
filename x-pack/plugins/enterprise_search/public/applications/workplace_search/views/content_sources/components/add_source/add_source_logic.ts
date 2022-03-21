@@ -27,6 +27,8 @@ import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
+import { ExternalConnectorLogic } from './external_connector_logic';
+
 export interface AddSourceProps {
   sourceData: SourceDataItem;
   connect?: boolean;
@@ -110,8 +112,8 @@ export interface SourceConfigData {
     baseUrl?: string;
     clientId?: string;
     clientSecret?: string;
-    url?: string;
-    apiKey?: string;
+    externalConnectorUrl?: string;
+    externalConnectorApiKey?: string;
   };
   accountContextOnly?: boolean;
 }
@@ -440,6 +442,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         sourceConfigData,
       } = values;
 
+      const { externalConnectorUrl, externalConnectorApiKey } = ExternalConnectorLogic.values;
+
       const route = isUpdating
         ? `/internal/workplace_search/org/settings/connectors/${serviceType}`
         : '/internal/workplace_search/org/settings/connectors';
@@ -454,6 +458,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         private_key: sourceConfigData.configuredFields?.privateKey,
         public_key: sourceConfigData.configuredFields?.publicKey,
         consumer_key: sourceConfigData.configuredFields?.consumerKey,
+        external_connector_url: externalConnectorUrl || undefined,
+        external_connector_api_key: externalConnectorApiKey || undefined,
       };
 
       try {
@@ -570,9 +576,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 });
 
 const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
-  const { connect, configure, reAuthenticate } = props;
+  const {
+    connect,
+    configure,
+    reAuthenticate,
+    sourceData: { serviceType },
+  } = props;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
+  // TODO: Re-do this once we have more than one external connector type
+  // External connectors have already shown the intro step before the choice page, so we don't want to show it again
+  if (serviceType === 'external') return AddSourceSteps.SaveConfigStep;
   return AddSourceSteps.ConfigIntroStep;
 };

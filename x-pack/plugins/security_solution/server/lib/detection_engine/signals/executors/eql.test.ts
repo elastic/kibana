@@ -36,9 +36,9 @@ describe('eql_executor', () => {
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
     logger = loggingSystemMock.createLogger();
-    alertServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValue({
+    alertServices.scopedClusterClient.asCurrentUser.eql.search.mockResolvedValue({
       hits: {
-        total: { value: 10 },
+        total: { relation: 'eq', value: 10 },
         events: [],
       },
     });

@@ -28,7 +28,9 @@ export const enum OperatingSystem {
   WINDOWS = 'windows',
 }
 
-export type TrustedAppEntryTypes = 'match' | 'wildcard';
+export type EntryTypes = 'match' | 'wildcard' | 'match_any';
+export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
+
 /*
  * regex to match executable names
  * starts matching from the eol of the path
@@ -82,7 +84,7 @@ export const hasSimpleExecutableName = ({
   value,
 }: {
   os: OperatingSystem;
-  type: TrustedAppEntryTypes;
+  type: EntryTypes;
   value: string;
 }): boolean => {
   if (type === 'wildcard') {
@@ -99,7 +101,7 @@ export const isPathValid = ({
 }: {
   os: OperatingSystem;
   field: ConditionEntryField | 'file.path.text';
-  type: TrustedAppEntryTypes;
+  type: EntryTypes;
   value: string;
 }): boolean => {
   if (field === ConditionEntryField.PATH || field === 'file.path.text') {

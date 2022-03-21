@@ -20,7 +20,7 @@ import {
 } from '../__mocks__/use_context_app_fetch';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 import { createContextSearchSourceStub } from '../services/_stubs';
-import { DataView } from '../../../../../data_views/common';
+import { DataView } from '../../../../../data_views/public';
 import { themeServiceMock } from '../../../../../../core/public/mocks';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
 

@@ -23,8 +23,17 @@ interface SizeStats {
   sizes?: { values: SizePercentiles };
 }
 
+// FIXME: find a way to get this from exportTypesHandler or common/constants
+export type BaseJobTypes =
+  | 'csv_searchsource'
+  | 'csv_searchsource_immediate'
+  | 'PNG'
+  | 'PNGV2'
+  | 'printable_pdf'
+  | 'printable_pdf_v2';
+
 export interface KeyCountBucket extends DocCount, SizeStats {
-  key: string;
+  key: BaseJobTypes;
   isDeprecated?: DocCount;
 }
 
@@ -87,15 +96,6 @@ export interface AvailableTotal {
   };
 }
 
-// FIXME: find a way to get this from exportTypesHandler or common/constants
-type BaseJobTypes =
-  | 'csv_searchsource'
-  | 'csv_searchsource_immediate'
-  | 'PNG'
-  | 'PNGV2'
-  | 'printable_pdf'
-  | 'printable_pdf_v2';
-
 export interface LayoutCounts {
   canvas: number;
   print: number;
@@ -133,14 +133,3 @@ export type ReportingUsageType = RangeStats & {
 };
 
 export type FeatureAvailabilityMap = Record<string, boolean>;
-
-export interface ReportingUsageSearchResponse {
-  aggregations: {
-    ranges: {
-      buckets: {
-        all: AggregationResultBuckets;
-        last7Days: AggregationResultBuckets;
-      };
-    };
-  };
-}

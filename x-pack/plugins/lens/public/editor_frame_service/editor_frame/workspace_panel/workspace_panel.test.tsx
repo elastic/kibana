@@ -410,7 +410,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
     mockDatasource.toExpression.mockReturnValue('datasource');
-    mockDatasource.getLayers.mockReturnValue(['first']);
+    mockDatasource.getLayers.mockReturnValue(['table1']);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -430,12 +430,15 @@ describe('workspace_panel', () => {
 
     const onData = expressionRendererMock.mock.calls[0][0].onData$!;
 
-    const tableData = { table1: { columns: [], rows: [] } };
-    onData(undefined, { tables: { tables: tableData } });
+    const tablesData = {
+      table1: { columns: [], rows: [] },
+      table2: { columns: [], rows: [] },
+    };
+    onData(undefined, { tables: { tables: tablesData } });
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/onActiveDataChange',
-      payload: tableData,
+      payload: tablesData,
     });
   });
 

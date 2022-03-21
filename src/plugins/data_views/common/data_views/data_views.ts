@@ -11,7 +11,11 @@
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, FLEET_ASSETS_TO_IGNORE, SavedObjectsClientCommon } from '..';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  DEFAULT_ASSETS_TO_IGNORE,
+  SavedObjectsClientCommon,
+} from '..';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
@@ -731,8 +735,8 @@ export class DataViewsService {
       // otherwise fallback to any data view
       const userDataViews = patterns.filter(
         (pattern) =>
-          pattern.title !== FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
-          pattern.title !== FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
+          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
+          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
       );
 
       defaultId = userDataViews[0]?.id ?? patterns[0].id;

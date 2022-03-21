@@ -164,6 +164,7 @@ export const agentRouteService = {
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
+  getIncomingDataPath: () => AGENT_API_ROUTES.DATA_PATTERN,
   getCreateActionPath: (agentId: string) =>
     AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
 };

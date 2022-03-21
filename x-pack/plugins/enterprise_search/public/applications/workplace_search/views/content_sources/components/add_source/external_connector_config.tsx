@@ -31,6 +31,7 @@ import { NAV, REMOVE_BUTTON } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
 
 import { AddSourceHeader } from './add_source_header';
+import { ConfigDocsLinks } from './config_docs_links';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
 import { ExternalConnectorLogic } from './external_connector_logic';
 
@@ -40,7 +41,11 @@ interface SaveConfigProps {
   onDeleteConfig?: () => void;
 }
 
-export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onDeleteConfig }) => {
+export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
+  sourceData,
+  goBack,
+  onDeleteConfig,
+}) => {
   const serviceType = 'external';
   const {
     fetchExternalSource,
@@ -49,8 +54,13 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
     saveExternalConnectorConfig,
   } = useActions(ExternalConnectorLogic);
 
-  const { buttonLoading, externalConnectorUrl, externalConnectorApiKey, sourceConfigData } =
-    useValues(ExternalConnectorLogic);
+  const {
+    formDisabled,
+    buttonLoading,
+    externalConnectorUrl,
+    externalConnectorApiKey,
+    sourceConfigData,
+  } = useValues(ExternalConnectorLogic);
 
   useEffect(() => {
     fetchExternalSource();
@@ -62,10 +72,13 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
   };
 
   const { name, categories } = sourceConfigData;
+  const {
+    configuration: { documentationUrl, applicationLinkTitle, applicationPortalUrl },
+  } = sourceData;
   const { isOrganization } = useValues(AppLogic);
 
   const saveButton = (
-    <EuiButton color="primary" fill isLoading={buttonLoading} type="submit">
+    <EuiButton color="primary" fill isLoading={buttonLoading} disabled={formDisabled} type="submit">
       {OAUTH_SAVE_CONFIG_BUTTON}
     </EuiButton>
   );
@@ -92,13 +105,12 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
 
   const connectorForm = (
     <EuiFlexGroup justifyContent="flexStart" direction="column" responsive={false}>
-      {/* TODO: get a docs link in here for the external connector
       <ConfigDocsLinks
         name={name}
         documentationUrl={documentationUrl}
         applicationPortalUrl={applicationPortalUrl}
         applicationLinkTitle={applicationLinkTitle}
-      /> */}
+      />
       <EuiSpacer />
       <EuiForm>
         <EuiFormRow
@@ -111,6 +123,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
         >
           <EuiFieldText
             value={externalConnectorUrl}
+            disabled={formDisabled}
             required
             type="text"
             autoComplete="off"
@@ -128,6 +141,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({ goBack, onD
         >
           <EuiFieldText
             value={externalConnectorApiKey}
+            disabled={formDisabled}
             required
             type="text"
             autoComplete="off"

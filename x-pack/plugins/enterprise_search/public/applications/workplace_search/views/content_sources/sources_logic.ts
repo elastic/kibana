@@ -62,6 +62,7 @@ export interface ISourcesValues {
   permissionsModal: IPermissionsModalProps | null;
   dataLoading: boolean;
   serverStatuses: ServerStatuses | null;
+  externalConfigured: boolean;
 }
 
 interface ISourcesServerResponse {
@@ -148,6 +149,11 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     configuredSources: [
       () => [selectors.sourceData],
       (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => configured),
+    ],
+    externalConfigured: [
+      () => [selectors.configuredSources],
+      (configuredSources: SourceDataItem[]) =>
+        !!configuredSources.find((item) => item.serviceType === 'external'),
     ],
     sourceData: [
       () => [selectors.serviceTypes, selectors.contentSources],

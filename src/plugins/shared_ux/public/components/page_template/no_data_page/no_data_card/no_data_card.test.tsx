@@ -37,5 +37,29 @@ describe('NoDataCard', () => {
       );
       expect(component).toMatchSnapshot();
     });
+
+    test('isDisabled', () => {
+      const component = render(
+        <NoDataCard
+          isDisabled={true}
+          button="Button"
+          title="Card title"
+          description="Description"
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('extends EuiCardProps', () => {
+      const component = render(
+        <NoDataCard
+          button="Button"
+          title="Card title"
+          description="Description"
+          className="custom_class"
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
   });
 });

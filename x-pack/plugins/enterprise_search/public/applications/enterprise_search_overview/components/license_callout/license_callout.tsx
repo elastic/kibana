@@ -23,13 +23,13 @@ export const LicenseCallout: React.FC = () => {
   if (hasPlatinumLicense && !isTrial) return null;
 
   return (
-    <EuiPanel hasBorder color="transparent" paddingSize="l">
+    <EuiPanel color="primary" paddingSize="l">
       <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={7}>
-          <EuiText>
+          <EuiText size="s">
             <h3>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h3>
           </EuiText>
-          <EuiText size="s">{LICENSE_CALLOUT_BODY}</EuiText>
+          <EuiText size="xs">{LICENSE_CALLOUT_BODY}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={1} />
         <EuiFlexItem grow={false}>

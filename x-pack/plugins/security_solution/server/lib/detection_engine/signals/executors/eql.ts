@@ -24,10 +24,10 @@ import {
   BulkCreate,
   WrapHits,
   WrapSequences,
-  EqlSignalSearchResponse,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SimpleHit,
+  SignalSource,
 } from '../types';
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
@@ -110,16 +110,11 @@ export const eqlExecutor = async ({
     );
 
     const eqlSignalSearchStart = performance.now();
-    logger.debug(
-      `EQL query request path: ${request.path}, method: ${request.method}, body: ${JSON.stringify(
-        request.body
-      )}`
-    );
+    logger.debug(`EQL query request: ${JSON.stringify(request)}`);
 
-    // TODO: fix this later
-    const response = (await services.scopedClusterClient.asCurrentUser.transport.request(
+    const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
       request
-    )) as EqlSignalSearchResponse;
+    );
 
     const eqlSignalSearchEnd = performance.now();
     const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);

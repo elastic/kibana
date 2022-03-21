@@ -190,6 +190,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id
         );
 
+        expect(agentFullPolicy.inputs[0].id).to.eql(policyInfo.packagePolicy.id);
         expect(agentFullPolicy.inputs[0].policy.linux.advanced.agent.connection_delay).to.eql(
           'true'
         );

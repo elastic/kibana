@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockKibanaValues } from '../../../../../__mocks__/kea_logic';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  mockKibanaValues,
+} from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
+
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
@@ -14,6 +21,7 @@ jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
 
+import { AddSourceLogic } from './add_source_logic';
 import { ExternalConnectorLogic, ExternalConnectorValues } from './external_connector_logic';
 
 describe('ExternalConnectorLogic', () => {
@@ -24,6 +32,7 @@ describe('ExternalConnectorLogic', () => {
   const DEFAULT_VALUES: ExternalConnectorValues = {
     dataLoading: true,
     buttonLoading: false,
+    formDisabled: true,
     externalConnectorUrl: '',
     externalConnectorApiKey: '',
     sourceConfigData: {
@@ -53,7 +62,7 @@ describe('ExternalConnectorLogic', () => {
 
       it('saves the external url', () => {
         expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual(
-          sourceConfigData.configuredFields.url
+          sourceConfigData.configuredFields.externalConnectorUrl
         );
       });
 
@@ -64,14 +73,20 @@ describe('ExternalConnectorLogic', () => {
       it('sets undefined url to empty string', () => {
         ExternalConnectorLogic.actions.fetchExternalSourceSuccess({
           ...sourceConfigData,
-          configuredFields: { ...sourceConfigData.configuredFields, url: undefined },
+          configuredFields: {
+            ...sourceConfigData.configuredFields,
+            externalConnectorUrl: undefined,
+          },
         });
         expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual('');
       });
       it('sets undefined api key to empty string', () => {
         ExternalConnectorLogic.actions.fetchExternalSourceSuccess({
           ...sourceConfigData,
-          configuredFields: { ...sourceConfigData.configuredFields, apiKey: undefined },
+          configuredFields: {
+            ...sourceConfigData.configuredFields,
+            externalConnectorApiKey: undefined,
+          },
         });
         expect(ExternalConnectorLogic.values.externalConnectorApiKey).toEqual('');
       });
@@ -109,6 +124,16 @@ describe('ExternalConnectorLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('AddSourceLogic.actions.setSourceConfigData', () => {
+      it('dispatches success action', () => {
+        const fetchExternalSourceSuccess = jest.spyOn(
+          ExternalConnectorLogic.actions,
+          'fetchExternalSourceSuccess'
+        );
+        AddSourceLogic.actions.setSourceConfigData(sourceConfigData);
+        expect(fetchExternalSourceSuccess).toHaveBeenCalledWith(sourceConfigData);
+      });
+    });
     describe('fetchExternalSource', () => {
       it('retrieves config info on the "external" connector', () => {
         const promise = Promise.resolve();
@@ -127,17 +152,40 @@ describe('ExternalConnectorLogic', () => {
     });
 
     describe('saveExternalConnectorConfig', () => {
-      it('saves the external connector config', () => {
+      it('saves the external connector config', async () => {
+        const promise = Promise.resolve();
+        http.post.mockReturnValue(promise);
         const saveExternalConnectorConfigSuccess = jest.spyOn(
           ExternalConnectorLogic.actions,
           'saveExternalConnectorConfigSuccess'
         );
+        const { flashSuccessToast } = mockFlashMessageHelpers;
         ExternalConnectorLogic.actions.saveExternalConnectorConfig({
           url: 'url',
           apiKey: 'apiKey',
         });
+        const params = {
+          external_connector_url: 'url',
+          external_connector_api_key: 'apiKey',
+          service_type: 'external',
+        };
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/settings/connectors',
+          { body: JSON.stringify(params) }
+        );
+
+        await nextTick();
+
+        expect(flashSuccessToast).toHaveBeenCalled();
         expect(saveExternalConnectorConfigSuccess).toHaveBeenCalled();
         expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/external');
+      });
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        mount();
+        ExternalConnectorLogic.actions.saveExternalConnectorConfig({
+          url: 'url',
+          apiKey: 'apiKey',
+        });
       });
     });
   });

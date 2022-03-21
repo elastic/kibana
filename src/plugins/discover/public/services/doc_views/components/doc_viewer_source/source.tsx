@@ -16,7 +16,7 @@ import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { useEsDocSearch } from '../../../../utils/use_es_doc_search';
-import { DataView } from '../../../../../../data_views/common';
+import { DataView } from '../../../../../../data_views/public';
 import { ElasticRequestState } from '../../../../application/doc/types';
 
 interface SourceViewerProps {

@@ -14,7 +14,6 @@ import { AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
 import { useCurrentEuiTheme } from '../components/color_range_legend';
 
-export const X_AXIS_RIGHT_OVERFLOW = 50;
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
 const ANNOTATION_CONTAINER_HEIGHT = 12;
@@ -47,8 +46,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
 
       const dimensions = canvasRef.current.getBoundingClientRect();
 
-      const startingXPos = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
-      const endingXPos = dimensions.width - X_AXIS_RIGHT_OVERFLOW;
+      const startingXPos = Y_AXIS_LABEL_WIDTH;
+      const endingXPos = dimensions.width;
 
       const svg = chartElement
         .append('svg')
@@ -67,8 +66,9 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
             defaultMessage: 'Annotations',
           })
         )
-        .attr('x', Y_AXIS_LABEL_WIDTH + Y_AXIS_LABEL_PADDING)
-        .attr('y', ANNOTATION_CONTAINER_HEIGHT)
+        .attr('x', Y_AXIS_LABEL_WIDTH - Y_AXIS_LABEL_PADDING)
+        .attr('y', ANNOTATION_CONTAINER_HEIGHT / 2)
+        .attr('alignment-baseline', 'middle')
         .style('fill', euiTheme.euiTextSubduedColor)
         .style('font-size', euiTheme.euiFontSizeXS);
 

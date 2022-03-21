@@ -44,7 +44,6 @@ export const RedirectAppLinks: FunctionComponent<RedirectAppLinksProps> = ({
 }) => {
   const currentAppId = useObservable(currentAppId$, undefined);
   const containerRef = useRef<HTMLDivElement>(null);
-
   const clickHandler = useMemo(
     () =>
       containerRef.current && currentAppId

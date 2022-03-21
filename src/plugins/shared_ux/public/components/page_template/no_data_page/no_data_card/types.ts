@@ -15,7 +15,8 @@ export type NoDataCardProps = Partial<Omit<EuiCardProps, 'layout'>> & {
    */
   recommended?: boolean;
   /**
-   * Provide just a string for the button's label, or a whole component
+   * Provide just a string for the button's label, or a whole component;
+   * The button will be hidden completely if `isDisabled=true`
    */
   button?: string | ReactNode;
   /**
@@ -23,7 +24,15 @@ export type NoDataCardProps = Partial<Omit<EuiCardProps, 'layout'>> & {
    */
   onClick?: MouseEventHandler<HTMLElement>;
   /**
-   * Description for the card. If not provided, the default will be used.
+   * Description for the card;
+   * If not provided, the default will be used
    */
-  description?: string;
+  description?: string | ReactNode;
+};
+
+export type ElasticAgentCardProps = NoDataCardProps & {
+  /**
+   * Category to auto-select within Fleet
+   */
+  category?: string;
 };

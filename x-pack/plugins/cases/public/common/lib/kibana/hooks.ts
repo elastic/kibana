@@ -167,9 +167,16 @@ export const useNavigation = (appId: string) => {
 export const useApplicationCapabilities = (): { crud: boolean; read: boolean } => {
   const capabilities = useKibana().services.application.capabilities;
   const casesCapabilities = capabilities[FEATURE_ID];
-
   return {
     crud: !!casesCapabilities?.crud_cases,
     read: !!casesCapabilities?.read_cases,
+  };
+};
+export const useKibanaCapabilities = (): { visualize?: boolean; dashboard?: boolean } => {
+  const capabilities = useKibana().services?.application?.capabilities;
+
+  return {
+    visualize: !!capabilities?.visualize?.save,
+    dashboard: !!capabilities?.dashboard?.show && !!capabilities?.dashboard?.createNew,
   };
 };

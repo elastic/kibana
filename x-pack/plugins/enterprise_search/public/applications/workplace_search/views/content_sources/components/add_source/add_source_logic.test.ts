@@ -258,14 +258,15 @@ describe('AddSourceLogic', () => {
     });
 
     it('handles fallback states', () => {
-      const { publicKey, privateKey, consumerKey, apiKey } = sourceConfigData.configuredFields;
+      const { publicKey, privateKey, consumerKey, externalConnectorApiKey } =
+        sourceConfigData.configuredFields;
       const sourceConfigDataMock: SourceConfigData = {
         ...sourceConfigData,
         configuredFields: {
           publicKey,
           privateKey,
           consumerKey,
-          apiKey,
+          externalConnectorApiKey,
         },
       };
       AddSourceLogic.actions.setSourceConfigData(sourceConfigDataMock);
@@ -318,6 +319,18 @@ describe('AddSourceLogic', () => {
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReauthenticateStep);
+      });
+      it('sets SaveConfig as first step for external connectors', () => {
+        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+        const addSourceProps = {
+          sourceData: {
+            ...DEFAULT_SERVICE_TYPE,
+            serviceType: 'external',
+          },
+        };
+        AddSourceLogic.actions.initializeAddSource(addSourceProps);
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
       });
     });
 

@@ -7,13 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClientMock } from '../../../../../src/core/server/mocks';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import {
   Collector,
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from 'src/plugins/usage_collection/server/mocks';
-import { ReportingCore } from '../';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { FeaturesAvailability } from './';
@@ -44,16 +42,10 @@ const getMockFetchClients = (resp: any) => {
 const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
 
 describe('license checks', () => {
-  let mockCore: ReportingCore;
-  beforeAll(async () => {
-    mockCore = await createMockReportingCore(createMockConfigSchema());
-  });
-
   describe('with a basic license', () => {
     let usageStats: any;
     beforeAll(async () => {
       const collector = getReportingUsageCollector(
-        mockCore,
         usageCollectionSetup,
         getLicenseMock('basic'),
         exportTypesRegistry,
@@ -81,7 +73,6 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const collector = getReportingUsageCollector(
-        mockCore,
         usageCollectionSetup,
         getLicenseMock('none'),
         exportTypesRegistry,
@@ -109,7 +100,6 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const collector = getReportingUsageCollector(
-        mockCore,
         usageCollectionSetup,
         getLicenseMock('platinum'),
         exportTypesRegistry,
@@ -137,7 +127,6 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const collector = getReportingUsageCollector(
-        mockCore,
         usageCollectionSetup,
         getLicenseMock('basic'),
         exportTypesRegistry,
@@ -159,14 +148,8 @@ describe('license checks', () => {
 });
 
 describe('data modeling', () => {
-  let mockCore: ReportingCore;
-  let collectorFetchContext: CollectorFetchContext;
-  beforeAll(async () => {
-    mockCore = await createMockReportingCore(createMockConfigSchema());
-  });
   test('with usage data from the reporting/archived_reports es archive', async () => {
     const collector = getReportingUsageCollector(
-      mockCore,
       usageCollectionSetup,
       getLicenseMock(),
       exportTypesRegistry,
@@ -174,7 +157,7 @@ describe('data modeling', () => {
         return Promise.resolve(true);
       }
     );
-    collectorFetchContext = getMockFetchClients(
+    const collectorFetchContext = getMockFetchClients(
       getResponseMock({
         aggregations: {
           ranges: {
@@ -365,7 +348,6 @@ describe('data modeling', () => {
 
   test('usage data with meta.isDeprecated jobTypes', async () => {
     const collector = getReportingUsageCollector(
-      mockCore,
       usageCollectionSetup,
       getLicenseMock(),
       exportTypesRegistry,
@@ -373,7 +355,7 @@ describe('data modeling', () => {
         return Promise.resolve(true);
       }
     );
-    collectorFetchContext = getMockFetchClients(
+    const collectorFetchContext = getMockFetchClients(
       getResponseMock({
         aggregations: {
           ranges: {
@@ -497,7 +479,6 @@ describe('data modeling', () => {
 
   test('with sparse data', async () => {
     const collector = getReportingUsageCollector(
-      mockCore,
       usageCollectionSetup,
       getLicenseMock(),
       exportTypesRegistry,
@@ -505,7 +486,7 @@ describe('data modeling', () => {
         return Promise.resolve(true);
       }
     );
-    collectorFetchContext = getMockFetchClients(
+    const collectorFetchContext = getMockFetchClients(
       getResponseMock({
         aggregations: {
           ranges: {
@@ -595,7 +576,6 @@ describe('data modeling', () => {
 
   test('with empty data', async () => {
     const collector = getReportingUsageCollector(
-      mockCore,
       usageCollectionSetup,
       getLicenseMock(),
       exportTypesRegistry,
@@ -604,7 +584,7 @@ describe('data modeling', () => {
       }
     );
 
-    collectorFetchContext = getMockFetchClients(
+    const collectorFetchContext = getMockFetchClients(
       getResponseMock({
         aggregations: {
           ranges: {

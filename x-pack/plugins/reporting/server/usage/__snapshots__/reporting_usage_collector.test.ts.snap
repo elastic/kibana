@@ -1726,7 +1726,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": undefined,
+    "sizes": undefined,
     "total": 4,
   },
   "csv_searchsource_immediate": Object {
@@ -1794,7 +1794,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": undefined,
+      "sizes": undefined,
       "total": 4,
     },
     "csv_searchsource_immediate": Object {
@@ -2136,7 +2136,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": undefined,
+    "sizes": undefined,
     "total": 1,
   },
   "PNGV2": Object {
@@ -2171,7 +2171,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": undefined,
+    "sizes": undefined,
     "total": 1,
   },
   "csv_searchsource_immediate": Object {
@@ -2206,7 +2206,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": undefined,
+      "sizes": undefined,
       "total": 1,
     },
     "PNGV2": Object {
@@ -2240,7 +2240,7 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": undefined,
+      "sizes": undefined,
       "total": 1,
     },
     "csv_searchsource_immediate": Object {
@@ -2274,7 +2274,7 @@ Object {
         "preserve_layout": 2,
         "print": 0,
       },
-      "output_size": undefined,
+      "sizes": undefined,
       "total": 2,
     },
     "printable_pdf_v2": Object {
@@ -2325,7 +2325,7 @@ Object {
       "preserve_layout": 2,
       "print": 0,
     },
-    "output_size": undefined,
+    "sizes": undefined,
     "total": 2,
   },
   "printable_pdf_v2": Object {
@@ -2379,7 +2379,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": undefined,
+    "sizes": undefined,
     "total": 1,
   },
   "PNGV2": Object {
@@ -2414,7 +2414,7 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": undefined,
+    "sizes": undefined,
     "total": 1,
   },
   "csv_searchsource_immediate": Object {
@@ -2554,7 +2554,7 @@ Object {
       "preserve_layout": 5,
       "print": 1,
     },
-    "output_size": undefined,
+    "sizes": undefined,
     "total": 6,
   },
   "printable_pdf_v2": Object {

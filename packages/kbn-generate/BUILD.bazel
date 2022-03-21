@@ -30,6 +30,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-bazel-packages",
   "//packages/kbn-utils",
   "@npm//ejs",
+  "@npm//micromatch",
   "@npm//normalize-path",
 ]
 
@@ -37,7 +38,9 @@ TYPES_DEPS = [
   "//packages/kbn-dev-utils:npm_module_types",
   "//packages/kbn-bazel-packages:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "@npm//@types/micromatch",
   "@npm//ejs",
+  "@npm//micromatch",
   "@npm//normalize-path",
   "@npm//@types/ejs",
 ]

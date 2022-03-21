@@ -18,6 +18,10 @@ export type UserPermissionsServiceFactory = KibanaPluginServiceFactory<
 /**
  * A factory function for creating a Kibana-based implementation of `SharedUXPermissionsService`.
  */
-export const userPermissionsServiceFactory: UserPermissionsServiceFactory = ({ startPlugins }) => ({
+export const userPermissionsServiceFactory: UserPermissionsServiceFactory = ({
+  coreStart,
+  startPlugins,
+}) => ({
   canCreateNewDataView: startPlugins.dataViewEditor.userPermissions.editDataView(),
+  canAccessFleet: coreStart.application.capabilities.navLinks.integrations,
 });

@@ -304,15 +304,11 @@ export class AttachmentService {
             key: string;
             doc_count: number;
             reverse: {
+              alerts: {
+                value: number;
+              };
               comments: {
-                buckets: {
-                  alerts: {
-                    doc_count: number;
-                  };
-                  nonAlerts: {
-                    doc_count: number;
-                  };
-                };
+                doc_count: number;
               };
             };
           }>;
@@ -331,8 +327,8 @@ export class AttachmentService {
     return (
       res.aggregations?.references.caseIds.buckets.reduce((acc, idBucket) => {
         acc.set(idBucket.key, {
-          nonAlerts: idBucket.reverse.comments.buckets.nonAlerts.doc_count,
-          alerts: idBucket.reverse.comments.buckets.alerts.doc_count,
+          nonAlerts: idBucket.reverse.comments.doc_count,
+          alerts: idBucket.reverse.alerts.value,
         });
         return acc;
       }, new Map<string, CommentStats>()) ?? new Map()
@@ -357,23 +353,15 @@ export class AttachmentService {
               reverse: {
                 reverse_nested: {},
                 aggregations: {
+                  alerts: {
+                    cardinality: {
+                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+                    },
+                  },
                   comments: {
-                    filters: {
-                      filters: {
-                        alerts: {
-                          term: {
-                            [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.alert,
-                          },
-                        },
-                        nonAlerts: {
-                          bool: {
-                            must_not: {
-                              term: {
-                                [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.alert,
-                              },
-                            },
-                          },
-                        },
+                    filter: {
+                      term: {
+                        [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.user,
                       },
                     },
                   },

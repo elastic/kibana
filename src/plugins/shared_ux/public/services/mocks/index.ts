@@ -15,6 +15,8 @@ import { PluginServiceFactory } from '../types';
 import { platformServiceFactory } from './platform.mock';
 import { userPermissionsServiceFactory } from './permissions.mock';
 import { editorsServiceFactory } from './editors.mock';
+import { httpServiceFactory } from './http.mock';
+import { applicationServiceFactory } from './application.mock';
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUXServices`.
@@ -24,4 +26,6 @@ export const servicesFactory: PluginServiceFactory<SharedUXServices> = () => ({
   permissions: userPermissionsServiceFactory(),
   editors: editorsServiceFactory(),
   docLinks: docLinksServiceFactory(),
+  http: httpServiceFactory(),
+  application: applicationServiceFactory(),
 });

@@ -33,6 +33,11 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
+
+  /**
+   * Enables the Endpoint response actions console in various areas of the app
+   */
+  responseActionsConsoleEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

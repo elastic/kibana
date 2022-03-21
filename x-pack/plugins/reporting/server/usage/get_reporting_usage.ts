@@ -7,7 +7,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
-import type { ReportingConfig } from '../';
 import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import type { GetLicense } from './';
@@ -140,7 +139,6 @@ async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSe
 }
 
 export async function getReportingUsage(
-  config: ReportingConfig,
   getLicense: GetLicense,
   esClient: ElasticsearchClient,
   exportTypesRegistry: ExportTypesRegistry

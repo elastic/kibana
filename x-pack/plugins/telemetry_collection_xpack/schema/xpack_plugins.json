@@ -3413,6 +3413,279 @@
         }
       }
     },
+    "cases": {
+      "properties": {
+        "cases": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "syncAlertsOn": {
+                  "type": "long"
+                },
+                "syncAlertsOff": {
+                  "type": "long"
+                },
+                "totalUsers": {
+                  "type": "long"
+                },
+                "totalParticipants": {
+                  "type": "long"
+                },
+                "totalTags": {
+                  "type": "long"
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "totalWithConnectors": {
+                  "type": "long"
+                },
+                "latestDates": {
+                  "properties": {
+                    "createdAt": {
+                      "type": "keyword"
+                    },
+                    "updatedAt": {
+                      "type": "keyword"
+                    },
+                    "closedAt": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "userActions": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "comments": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "alerts": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "connectors": {
+          "properties": {
+            "all": {
+              "properties": {
+                "all": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "itsm": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "sir": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "jira": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "resilient": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "swimlane": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "maxAttachedToACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "pushes": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "configuration": {
+          "properties": {
+            "all": {
+              "properties": {
+                "closure": {
+                  "properties": {
+                    "manually": {
+                      "type": "long"
+                    },
+                    "automatic": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "cloud": {
       "properties": {
         "isCloudEnabled": {
@@ -3714,16 +3987,16 @@
                 "description": "Number of times the user opened the in-product formula help popover."
               }
             },
-            "toggle_fullscreen_formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user toggled fullscreen mode on formula."
-              }
-            },
             "toggle_autoapply": {
               "type": "long",
               "_meta": {
                 "description": "Number of times the user toggled auto-apply."
+              }
+            },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
               }
             },
             "indexpattern_field_info_click": {
@@ -3967,16 +4240,16 @@
                 "description": "Number of times the user opened the in-product formula help popover."
               }
             },
-            "toggle_fullscreen_formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user toggled fullscreen mode on formula."
-              }
-            },
             "toggle_autoapply": {
               "type": "long",
               "_meta": {
                 "description": "Number of times the user toggled auto-apply."
+              }
+            },
+            "toggle_fullscreen_formula": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled fullscreen mode on formula."
               }
             },
             "indexpattern_field_info_click": {

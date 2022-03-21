@@ -109,7 +109,7 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
+      "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
@@ -136,7 +136,7 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
+      "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
@@ -163,7 +163,7 @@ test('Model of jobTypes', () => {
         "preserve_layout": 3,
         "print": 0,
       },
-      "output_size": Object {
+      "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
@@ -205,7 +205,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": Object {
+      "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,

@@ -91,10 +91,10 @@ describe('ProductSelector', () => {
       expect(wrapper.find(ProductCard).prop('product').ID).toEqual('appSearch');
     });
 
-    it('renders empty prompt and no cards or license callout if the user does not have access', () => {
+    it('renders empty prompts and no cards or license callout if the user does not have access', () => {
       const wrapper = shallow(<ProductSelector {...props} />);
 
-      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(2);
       expect(wrapper.find(ProductCard)).toHaveLength(0);
       expect(wrapper.find(LicenseCallout)).toHaveLength(0);
     });

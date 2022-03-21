@@ -17,7 +17,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { UI_SETTINGS } from '../../../data/common';
+import { UI_SETTINGS } from '../../../data/public';
 import { TopNavMenu } from '../../../navigation/public';
 import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
 import { LocalStorageMock } from './local_storage_mock';

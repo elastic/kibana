@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField } from '../../../data/common';
+import { DataView, DataViewField } from '../../../data_views/public';
 import { getFieldsToShow } from './get_fields_to_show';
 
 describe('get fields to show', () => {

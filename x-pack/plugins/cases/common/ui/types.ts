@@ -19,10 +19,14 @@ import {
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
+type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
+
 export interface CasesContextFeatures {
-  alerts: { sync: boolean };
+  alerts: { sync?: boolean; enabled?: boolean };
   metrics: CaseMetricsFeature[];
 }
+
+export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 
 export type CasesFeatures = Partial<CasesContextFeatures>;
 

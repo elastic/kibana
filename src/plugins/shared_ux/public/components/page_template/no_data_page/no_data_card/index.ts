@@ -6,3 +6,4 @@
  * Side Public License, v 1.
  */
 export { NoDataCard } from './no_data_card';
+export { ElasticAgentCard } from './elastic_agent_card';

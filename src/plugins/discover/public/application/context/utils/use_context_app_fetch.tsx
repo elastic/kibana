@@ -11,7 +11,8 @@ import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import { MarkdownSimple, toMountPoint, wrapWithTheme } from '../../../../../kibana_react/public';
-import { DataView, SortDirection } from '../../../../../data/common';
+import type { DataView } from '../../../../../data_views/public';
+import { SortDirection } from '../../../../../data/public';
 import {
   ContextFetchState,
   FailureReason,

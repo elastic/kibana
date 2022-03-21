@@ -7,14 +7,13 @@
 
 import React from 'react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
-import { render } from '../../../../utils/test_helper';
+import { render, data as dataMock } from '../../../../utils/test_helper';
 import { APMSection } from './';
 import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
-import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { AppMountParameters } from 'kibana/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
@@ -36,11 +35,14 @@ describe('APMSection', () => {
         },
       },
     } as HasDataContextValue);
+
+    // @ts-expect-error `dataMock` is not properly propagating the mock types
+    dataMock.query.timefilter.timefilter.getTime.mockReturnValue({
+      from: '2020-10-08T06:00:00.000Z',
+      to: '2020-10-08T07:00:00.000Z',
+    });
+
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: {
-        uiSettings: { get: jest.fn() },
-        http: { basePath: { prepend: jest.fn() } },
-      } as unknown as CoreStart,
       appMountParameters: {} as AppMountParameters,
       config: {
         unsafe: {
@@ -51,20 +53,6 @@ describe('APMSection', () => {
         },
       },
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      plugins: {
-        data: {
-          query: {
-            timefilter: {
-              timefilter: {
-                getTime: jest.fn().mockImplementation(() => ({
-                  from: '2020-10-08T06:00:00.000Z',
-                  to: '2020-10-08T07:00:00.000Z',
-                })),
-              },
-            },
-          },
-        },
-      } as unknown as ObservabilityPublicPluginsStart,
       ObservabilityPageTemplate: KibanaPageTemplate,
     }));
   });

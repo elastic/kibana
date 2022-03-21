@@ -692,6 +692,18 @@ export default ({ getService }: FtrProviderContext) => {
           expect(shellSignals.length).eql(100);
           expect(buildingBlocks.length).eql(200);
         });
+
+        it('generates signals when an index name contains special characters to encode', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['auditbeat-*', '<my-index-{now/d}*>']),
+            query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(1);
+        });
       });
 
       describe('Threshold Rules', () => {

@@ -614,7 +614,7 @@ export default function ({ getService }: FtrProviderContext) {
         // include a schedule so that the task isn't deleted after completion
         schedule: { interval: `30m` },
         params: {
-          waitForEvent: 'releaseRunningTaskWithSingleConcurrency',
+          waitForEvent: 'releaseRunningTaskWithSingleConcurrencyFirst',
         },
       });
 
@@ -622,7 +622,7 @@ export default function ({ getService }: FtrProviderContext) {
       const secondWithSingleConcurrency = await scheduleTask({
         taskType: 'sampleTaskWithSingleConcurrency',
         params: {
-          waitForEvent: 'releaseRunningTaskWithSingleConcurrency',
+          waitForEvent: 'releaseRunningTaskWithSingleConcurrencySecond',
         },
       });
 
@@ -631,7 +631,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(1);
       });
-      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
+      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrencyFirst');
 
       // wait for second task to stall
       await retry.try(async () => {
@@ -649,7 +649,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // release the second task
-      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
+      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrencySecond');
     });
 
     it('should return a task run error result when running a task now fails', async () => {

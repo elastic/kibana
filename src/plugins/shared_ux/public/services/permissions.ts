@@ -8,4 +8,5 @@
 
 export interface SharedUXUserPermissionsService {
   canCreateNewDataView: boolean;
+  canAccessFleet: boolean;
 }

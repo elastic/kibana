@@ -19,9 +19,9 @@ export const LazyExitFullScreenButton = React.lazy(() =>
   }))
 );
 
-export const LazySolutionToolbarButton = React.lazy(() =>
-  import('./toolbar/index').then(({ SolutionToolbarButton }) => ({
-    default: SolutionToolbarButton,
+export const LazyToolbarButton = React.lazy(() =>
+  import('./toolbar/index').then(({ ToolbarButton }) => ({
+    default: ToolbarButton,
   }))
 );
 
@@ -35,11 +35,11 @@ export const RedirectAppLinks = React.lazy(() => import('./redirect_app_links'))
 export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
 
 /**
- * A `SolutionToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can
- * be used directly by consumers and will load the `LazySolutionToolbarButton` component lazily with
+ * A `ToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can
+ * be used directly by consumers and will load the `LazyToolbarButton` component lazily with
  * a predefined fallback and error boundary.
  */
-export const SolutionToolbarButton = withSuspense(LazySolutionToolbarButton);
+export const ToolbarButton = withSuspense(LazyToolbarButton);
 
 /**
  * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the
@@ -57,3 +57,18 @@ export const LazyNoDataViewsPage = React.lazy(() =>
  * a predefined fallback and error boundary.
  */
 export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);
+
+/**
+ * The Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const LazyIconButtonGroup = React.lazy(() =>
+  import('./toolbar/index').then(({ IconButtonGroup }) => ({
+    default: IconButtonGroup,
+  }))
+);
+
+/**
+ * The IconButtonGroup component that is wrapped by the `withSuspence` HOC.
+ */
+export const IconButtonGroup = withSuspense(LazyIconButtonGroup);

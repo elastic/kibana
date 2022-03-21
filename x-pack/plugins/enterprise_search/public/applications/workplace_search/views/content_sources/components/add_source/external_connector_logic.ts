@@ -20,7 +20,7 @@ import { AppLogic } from '../../../../app_logic';
 
 import { getAddPath, getSourcesPath } from '../../../../routes';
 
-import { SourceConfigData } from './add_source_logic';
+import { AddSourceLogic, SourceConfigData } from './add_source_logic';
 
 export interface ExternalConnectorActions {
   fetchExternalSource: () => true;
@@ -38,6 +38,7 @@ export interface ExternalConnectorConfig {
 }
 
 export interface ExternalConnectorValues {
+  formDisabled: boolean;
   buttonLoading: boolean;
   dataLoading: boolean;
   externalConnectorApiKey: string;
@@ -74,14 +75,16 @@ export const ExternalConnectorLogic = kea<
     externalConnectorUrl: [
       '',
       {
-        fetchExternalSourceSuccess: (_, { configuredFields: { url } }) => url || '',
+        fetchExternalSourceSuccess: (_, { configuredFields: { externalConnectorUrl } }) =>
+          externalConnectorUrl || '',
         setExternalConnectorUrl: (_, url) => url,
       },
     ],
     externalConnectorApiKey: [
       '',
       {
-        fetchExternalSourceSuccess: (_, { configuredFields: { apiKey } }) => apiKey || '',
+        fetchExternalSourceSuccess: (_, { configuredFields: { externalConnectorApiKey } }) =>
+          externalConnectorApiKey || '',
         setExternalConnectorApiKey: (_, apiKey) => apiKey,
       },
     ],
@@ -93,6 +96,8 @@ export const ExternalConnectorLogic = kea<
     ],
   },
   listeners: ({ actions }) => ({
+    [AddSourceLogic.actionTypes.setSourceConfigData]: (sourceConfigData) =>
+      actions.fetchExternalSourceSuccess(sourceConfigData),
     fetchExternalSource: async () => {
       const route = '/internal/workplace_search/org/settings/connectors/external';
 
@@ -103,36 +108,42 @@ export const ExternalConnectorLogic = kea<
         flashAPIErrors(e);
       }
     },
-    saveExternalConnectorConfig: async () => {
+    saveExternalConnectorConfig: async ({ url, apiKey }) => {
       clearFlashMessages();
-      // const route = '/internal/workplace_search/org/settings/connectors';
-      // const http = HttpLogic.values.http.post;
-      // const params = {
-      //   url,
-      //   api_key: apiKey,
-      //   service_type: 'external',
-      // };
+      const route = '/internal/workplace_search/org/settings/connectors';
+      const http = HttpLogic.values.http.post;
+      const params = {
+        external_connector_url: url,
+        external_connector_api_key: apiKey,
+        service_type: 'external',
+      };
       try {
-        // const response = await http<SourceConfigData>(route, {
-        //   body: JSON.stringify(params),
-        // });
+        await http<SourceConfigData>(route, {
+          body: JSON.stringify(params),
+        });
 
         flashSuccessToast(
           i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.externalConnectorCreated',
             {
-              defaultMessage: 'Successfully updated configuration.',
+              defaultMessage: 'Successfully created external connector.',
             }
           )
         );
-        // TODO: use response data instead
+        // TODO: Once we have multiple external connector types, use response data instead
         actions.saveExternalConnectorConfigSuccess('external');
         KibanaLogic.values.navigateToUrl(
           getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
         );
       } catch (e) {
-        // flashAPIErrors(e);
+        flashAPIErrors(e);
       }
     },
+  }),
+  selectors: ({ selectors }) => ({
+    formDisabled: [
+      () => [selectors.buttonLoading, selectors.dataLoading],
+      (buttonLoading: boolean, dataLoading: boolean) => buttonLoading || dataLoading,
+    ],
   }),
 });

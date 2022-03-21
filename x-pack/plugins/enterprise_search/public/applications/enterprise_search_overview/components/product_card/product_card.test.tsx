@@ -24,11 +24,10 @@ describe('ProductCard', () => {
   });
 
   it('renders an App Search card', () => {
-    const wrapper = shallow(<ProductCard product={APP_SEARCH_PLUGIN} image="as.jpg" />);
+    const wrapper = shallow(<ProductCard product={APP_SEARCH_PLUGIN} />);
     const card = wrapper.find(EuiCard).dive().shallow();
 
     expect(card.find('h2').text()).toEqual('Elastic App Search');
-    expect(card.find('.productCard__image').prop('src')).toEqual('as.jpg');
 
     const button = card.find(EuiButtonTo);
     expect(button.prop('to')).toEqual('/app/enterprise_search/app_search');
@@ -42,11 +41,10 @@ describe('ProductCard', () => {
   });
 
   it('renders a Workplace Search card', () => {
-    const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} image="ws.jpg" />);
+    const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} />);
     const card = wrapper.find(EuiCard).dive().shallow();
 
     expect(card.find('h2').text()).toEqual('Elastic Workplace Search');
-    expect(card.find('.productCard__image').prop('src')).toEqual('ws.jpg');
 
     const button = card.find(EuiButtonTo);
     expect(button.prop('to')).toEqual('/app/enterprise_search/workplace_search');
@@ -62,7 +60,7 @@ describe('ProductCard', () => {
   it('renders correct button text when host not present', () => {
     setMockValues({ config: { host: '' } });
 
-    const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} image="ws.jpg" />);
+    const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} />);
     const card = wrapper.find(EuiCard).dive().shallow();
     const button = card.find(EuiButtonTo);
 

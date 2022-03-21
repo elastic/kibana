@@ -15,7 +15,7 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { esHits } from '../../__mocks__/es_hits';
 import { EuiButton } from '@elastic/eui';
-import { DataViewField } from 'src/plugins/data/common';
+import { DataViewField } from 'src/plugins/data_views/public';
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {

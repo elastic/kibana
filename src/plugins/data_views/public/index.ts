@@ -16,13 +16,16 @@ export {
 export { onRedirectNoIndexPattern } from './data_views';
 
 export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
-export type { DataViewSpec } from '../common';
+export type { DataViewSpec, FieldSpec, DataViewAttributes } from '../common';
 export {
   IndexPatternField,
   DataViewField,
   DataViewType,
+  DataViewSavedObjectConflictError,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
 } from '../common';
 
 export type { IndexPatternsContract } from './data_views';

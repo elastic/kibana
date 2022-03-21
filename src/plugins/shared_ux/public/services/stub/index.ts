@@ -12,6 +12,8 @@ import { platformServiceFactory } from './platform';
 import { userPermissionsServiceFactory } from './permissions';
 import { editorsServiceFactory } from './editors';
 import { docLinksServiceFactory } from './doc_links';
+import { httpServiceFactory } from './http';
+import { applicationServiceFactory } from './application';
 
 /**
  * A factory function for creating a simple stubbed implemetation of `SharedUXServices`.
@@ -21,4 +23,6 @@ export const servicesFactory: PluginServiceFactory<SharedUXServices> = () => ({
   permissions: userPermissionsServiceFactory(),
   editors: editorsServiceFactory(),
   docLinks: docLinksServiceFactory(),
+  http: httpServiceFactory(),
+  application: applicationServiceFactory(),
 });

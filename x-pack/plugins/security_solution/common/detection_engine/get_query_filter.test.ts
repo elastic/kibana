@@ -1125,8 +1125,8 @@ describe('get_filter', () => {
         undefined
       );
       expect(request).toEqual({
-        method: 'POST',
-        path: `/testindex1,testindex2/_eql/search?allow_no_indices=true`,
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
         body: {
           size: 100,
           query: 'process where true',
@@ -1171,8 +1171,8 @@ describe('get_filter', () => {
         'event.other_category'
       );
       expect(request).toEqual({
-        method: 'POST',
-        path: `/testindex1,testindex2/_eql/search?allow_no_indices=true`,
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
         body: {
           event_category_field: 'event.other_category',
           size: 100,
@@ -1222,8 +1222,8 @@ describe('get_filter', () => {
         undefined
       );
       expect(request).toEqual({
-        method: 'POST',
-        path: `/testindex1,testindex2/_eql/search?allow_no_indices=true`,
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
         body: {
           size: 100,
           query: 'process where true',

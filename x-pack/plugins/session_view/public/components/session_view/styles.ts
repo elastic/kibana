@@ -24,6 +24,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     const processTree: CSSObject = {
       height: `${height}px`,
       paddingTop: euiTheme.size.s,
+      position: 'relative',
     };
 
     const detailPanel: CSSObject = {

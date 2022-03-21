@@ -92,7 +92,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('create_filters', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/126642
+  describe.skip('create_filters', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });

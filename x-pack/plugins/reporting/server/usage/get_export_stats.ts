@@ -29,16 +29,16 @@ function getAvailableTotalForFeature(
   const deprecated = jobTypeIsDeprecated(typeKey) ? jobType.total : jobType.deprecated || 0;
 
   // merge the additional stats for the jobType
-  const availableTotal = {
+  const availableTotal: AvailableTotal = {
     available: isAvailable(featureAvailability, typeKey),
     total: jobType.total,
     deprecated,
-    output_size: jobType.sizes,
+    sizes: jobType.sizes,
     app: { ...defaultTotalsForFeature.app, ...jobType.app },
     layout: { ...defaultTotalsForFeature.layout, ...jobType.layout },
   };
 
-  return availableTotal as AvailableTotal;
+  return availableTotal;
 }
 
 /*

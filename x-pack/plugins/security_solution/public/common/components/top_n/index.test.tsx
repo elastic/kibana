@@ -38,7 +38,9 @@ jest.mock('react-router-dom', () => {
 jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
-
+jest.mock('../visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
 const field = 'process.name';
 const value = 'nice';
 

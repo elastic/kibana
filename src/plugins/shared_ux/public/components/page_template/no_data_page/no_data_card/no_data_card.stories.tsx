@@ -18,11 +18,7 @@ export default {
 type Params = Pick<NoDataCardProps, 'recommended' | 'button' | 'description'>;
 
 export const PureComponent = (params: Params) => {
-  return (
-    <div style={{ width: '50%' }}>
-      <NoDataCard title={'Add data'} {...params} />
-    </div>
-  );
+  return <NoDataCard title={'Add data'} {...params} />;
 };
 
 PureComponent.argTypes = {

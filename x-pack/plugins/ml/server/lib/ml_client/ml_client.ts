@@ -636,6 +636,9 @@ export function getMlClient(
     async validateDetector(...p: Parameters<MlClient['validateDetector']>) {
       return mlClient.validateDetector(...p);
     },
+    async getMemoryStats(...p: Parameters<MlClient['getMemoryStats']>) {
+      return mlClient.getMemoryStats(...p);
+    },
 
     ...searchProvider(client, jobSavedObjectService),
   } as MlClient;

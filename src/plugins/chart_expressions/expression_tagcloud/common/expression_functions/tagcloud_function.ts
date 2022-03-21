@@ -94,12 +94,14 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         default: ScaleOptions.LINEAR,
         options: [ScaleOptions.LINEAR, ScaleOptions.LOG, ScaleOptions.SQUARE_ROOT],
         help: argHelp.scale,
+        strict: true,
       },
       orientation: {
         types: ['string'],
         default: Orientation.SINGLE,
         options: [Orientation.SINGLE, Orientation.RIGHT_ANGLED, Orientation.MULTIPLE],
         help: argHelp.orientation,
+        strict: true,
       },
       minFontSize: {
         types: ['number'],

@@ -211,7 +211,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
-  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
+  const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
     rule: maybeRule,
@@ -320,7 +320,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [hasIndexRead]);
 
-  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
+  const showUpdating = useMemo(
+    () => isLoadingIndexPattern || isAlertsLoading || loading,
+    [isLoadingIndexPattern, isAlertsLoading, loading]
+  );
 
   const title = useMemo(
     () => (

@@ -17,4 +17,5 @@ export type MockUserPermissionsServiceFactory =
  */
 export const userPermissionsServiceFactory: MockUserPermissionsServiceFactory = () => ({
   canCreateNewDataView: true,
+  canAccessFleet: true,
 });

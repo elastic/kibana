@@ -27,6 +27,8 @@ describe('SaveConfig', () => {
   const onDeleteConfig = jest.fn();
   const setClientIdValue = jest.fn();
   const setClientSecretValue = jest.fn();
+  const setExternalConnectorUrl = jest.fn();
+  const setExternalConnectorApiKey = jest.fn();
   const setBaseUrlValue = jest.fn();
 
   const credentialsSourceConfig = staticSourceData[0].configuration;
@@ -43,6 +45,11 @@ describe('SaveConfig', () => {
     header: <h1>Header</h1>,
   };
 
+  const publicProps = {
+    ...props,
+    configuration: publicKeySourceConfig,
+  };
+
   const values = {
     sourceConfigData,
     buttonLoading: false,
@@ -57,6 +64,8 @@ describe('SaveConfig', () => {
       setClientIdValue,
       setClientSecretValue,
       setBaseUrlValue,
+      setExternalConnectorUrl,
+      setExternalConnectorApiKey,
     });
     setMockValues({ ...values });
   });
@@ -75,6 +84,26 @@ describe('SaveConfig', () => {
 
     expect(preventDefault).toHaveBeenCalled();
     expect(advanceStep).toHaveBeenCalled();
+  });
+
+  describe('external connector', () => {
+    const externalConnectorConfigData = { ...sourceConfigData, serviceType: 'external' };
+    it('handles external url change', () => {
+      setMockValues({ sourceConfigData: externalConnectorConfigData });
+      const wrapper = shallow(<SaveConfig {...props} />);
+      const steps = wrapper.find(EuiSteps);
+      const input = steps.dive().find('[name="external-connector-url"]');
+      input.simulate('change', { target: { value: 'new-url' } });
+      expect(setExternalConnectorUrl).toHaveBeenCalledWith('new-url');
+    });
+    it('handles external api key change', () => {
+      setMockValues({ sourceConfigData: externalConnectorConfigData });
+      const wrapper = shallow(<SaveConfig {...publicProps} />);
+      const steps = wrapper.find(EuiSteps);
+      const input = steps.dive().find('[name="external-connector-api-key"]');
+      input.simulate('change', { target: { value: 'new-api-key' } });
+      expect(setExternalConnectorApiKey).toHaveBeenCalledWith('new-api-key');
+    });
   });
 
   describe('credentials item', () => {
@@ -98,11 +127,6 @@ describe('SaveConfig', () => {
   });
 
   describe('public key item', () => {
-    const publicProps = {
-      ...props,
-      configuration: publicKeySourceConfig,
-    };
-
     it('renders form controls', () => {
       const wrapper = shallow(<SaveConfig {...publicProps} />);
       const steps = wrapper.find(EuiSteps);

@@ -39,7 +39,6 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       marginLeft: size.base,
       paddingLeft: size.s,
       borderLeft: border.editable,
-      marginTop: size.s,
     };
 
     /**
@@ -67,12 +66,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       display: 'block',
       cursor: 'pointer',
       position: 'relative',
-      margin: `${size.s} 0px`,
-      '&:not(:first-of-type)': {
-        marginTop: size.s,
-      },
+      padding: `${size.xs} 0px`,
       '&:hover:before': {
         backgroundColor: hoverColor,
+        transform: `translateY(-${size.xs})`,
       },
       '&:before': {
         position: 'absolute',
@@ -83,6 +80,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
         borderLeft: `${size.xs} solid ${borderColor}`,
         backgroundColor: bgColor,
         width: `calc(100% + ${depth} * ${TREE_INDENT})`,
+        transform: `translateY(-${size.xs})`,
       },
     };
 
