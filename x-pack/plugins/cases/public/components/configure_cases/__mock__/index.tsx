@@ -10,7 +10,7 @@ import { ActionConnector } from '../../../containers/configure/types';
 import { UseConnectorsResponse } from '../../../containers/configure/use_connectors';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
 import { UseActionTypesResponse } from '../../../containers/configure/use_action_types';
-import { connectorsMock, actionTypesMock } from '../../../containers/configure/mock';
+import { connectorsMock, actionTypesMock } from '../../../common/mock/connectors';
 export { mappings } from '../../../containers/configure/mock';
 
 export const connectors: ActionConnector[] = connectorsMock;

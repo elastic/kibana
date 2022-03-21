@@ -294,6 +294,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       actions: [
         {
@@ -427,6 +428,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
+        "snoozeEndTime": null,
         "tags": Array [
           "foo",
         ],
@@ -497,6 +499,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       actions: [
         {
@@ -556,6 +559,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       actions: [
         {
@@ -629,6 +633,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
+        "snoozeEndTime": null,
         "tags": Array [
           "foo",
         ],
@@ -1037,6 +1042,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1240,6 +1246,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1412,6 +1419,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1520,6 +1528,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       notifyWhen: 'onActionGroupChange',
       actions: [
@@ -1576,6 +1585,7 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1650,6 +1660,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       notifyWhen: 'onThrottleInterval',
       actions: [
@@ -1706,6 +1717,7 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onThrottleInterval',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1780,6 +1792,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       notifyWhen: 'onActiveAlert',
       actions: [
@@ -1836,6 +1849,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1919,6 +1933,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeEndTime: null,
       mutedInstanceIds: [],
       actions: [
         {
@@ -1982,6 +1997,7 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         executionStatus: {
           status: 'pending',
@@ -2356,6 +2372,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -2457,6 +2474,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
+        snoozeEndTime: null,
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
