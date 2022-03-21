@@ -117,13 +117,6 @@ export function CasesAppCommonServiceProvider({ getService, getPageObject }: Ftr
       await testSubjects.click('confirmModalConfirmButton');
     },
 
-    async waitForCasesTableLoading(): Promise<void> {
-      const div = await find.allByCssSelector("[data-test-subj='cases-table-loading']", 200);
-      if (div.length > 0) {
-        return this.waitForCasesTableLoading();
-      }
-    },
-
     async deleteAllCasesFromListUi() {
       let rows: WebElementWrapper[];
       do {
@@ -131,7 +124,7 @@ export function CasesAppCommonServiceProvider({ getService, getPageObject }: Ftr
         if (rows.length > 0) {
           await this.deleteAllBulkListAction();
           await header.waitUntilLoadingHasFinished();
-          await this.waitForCasesTableLoading();
+          await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
         }
       } while (rows.length > 0);
     },
