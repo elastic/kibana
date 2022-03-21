@@ -68,6 +68,8 @@ Fleet::
 * Adds a new validation message {kibana-pull}127239[#127239]
 * Fixes empty assets on package install {kibana-pull}127070[#127070]
 * Hide enroll command when clicking on create agent policy {kibana-pull}126431[#126431]
+* Makes input IDs unique in agent policy yaml {kibana-pull}127343[#127343]
+* Fixes links to Agent logs for APM, Endpoint, Synthetics, and OSQuery {kibana-pull}127480[#127480]
 
 [[release-notes-8.1.0]]
 == {kib} 8.1.0
