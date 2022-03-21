@@ -270,7 +270,7 @@ export const PaginatedContent = memo(
               itemsPerPage={pagination.pageSize}
               itemsPerPageOptions={pagination.pageSizeOptions}
               pageCount={pageCount}
-              hidePerPageOptions={pagination.hidePerPageOptions}
+              showPerPageOptions={pagination.showPerPageOptions}
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={handlePageChange}
             />

@@ -10,9 +10,9 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { FieldName } from '../field_name';
-import { IndexPatternField } from '../../../../../data_views/common';
+import { DataViewField } from '../../../../../data_views/public';
 
-const field = new IndexPatternField({
+const field = new DataViewField({
   name: 'bytes',
   type: 'number',
   esTypes: ['long'],

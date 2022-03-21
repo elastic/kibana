@@ -34,6 +34,7 @@ const previouslyRegisteredTypes = [
   'cases-connector-mappings',
   'cases-sub-case',
   'cases-user-actions',
+  'cases-telemetry',
   'config',
   'connector_token',
   'core-usage-stats',

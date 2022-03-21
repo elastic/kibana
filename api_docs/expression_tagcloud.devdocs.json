@@ -80,6 +80,35 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.Orientation",
+        "type": "Object",
+        "tags": [],
+        "label": "Orientation",
+        "description": [],
+        "signature": [
+          "{ readonly SINGLE: \"single\"; readonly RIGHT_ANGLED: \"right angled\"; readonly MULTIPLE: \"multiple\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.ScaleOptions",
+        "type": "Object",
+        "tags": [],
+        "label": "ScaleOptions",
+        "description": [],
+        "signature": [
+          "{ readonly LINEAR: \"linear\"; readonly LOG: \"log\"; readonly SQUARE_ROOT: \"square root\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

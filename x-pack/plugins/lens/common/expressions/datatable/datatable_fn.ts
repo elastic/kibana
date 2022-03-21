@@ -15,6 +15,7 @@ import type {
   ExecutionContext,
 } from '../../../../../../src/plugins/expressions';
 import type { DatatableExpressionFunction } from './types';
+import { logDataTable } from '../expressions_utils';
 
 function isRange(meta: { params?: { id?: string } } | undefined) {
   return meta?.params?.id === 'range';
@@ -25,6 +26,10 @@ export const datatableFn =
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
   ): DatatableExpressionFunction['fn'] =>
   async (data, args, context) => {
+    if (context?.inspectorAdapters?.tables) {
+      logDataTable(context.inspectorAdapters.tables, data.tables);
+    }
+
     let untransposedData: LensMultiTable | undefined;
     // do the sorting at this level to propagate it also at CSV download
     const [firstTable] = Object.values(data.tables);

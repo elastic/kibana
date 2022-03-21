@@ -25,7 +25,7 @@ interface UrlPagination {
 
 type UrlPaginationParams = Partial<Pagination>;
 
-const paginationFromUrlParams = (urlParams: UrlPaginationParams): Pagination => {
+export const paginationFromUrlParams = (urlParams: UrlPaginationParams): Pagination => {
   const pagination: Pagination = {
     pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
     page: 1,
@@ -64,6 +64,7 @@ export const useUrlPagination = (): UrlPagination => {
   const location = useLocation();
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
+
   const urlPaginationParams = useMemo(() => {
     return paginationFromUrlParams(urlParams);
   }, [urlParams]);

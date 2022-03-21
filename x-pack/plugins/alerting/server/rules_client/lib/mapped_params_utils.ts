@@ -145,7 +145,16 @@ export const modifyFilterKueryNode = ({
       const firstAttribute = getFieldNameAttribute(fieldName, ['alert', 'attributes']);
       // Replace the ast.value for params to mapped_params
       if (firstAttribute === 'params') {
-        ast.value = getModifiedFilter(ast.value);
+        const attributeAfterParams = getFieldNameAttribute(fieldName, [
+          'alert',
+          'attributes',
+          'params',
+        ]);
+        if (
+          MAPPED_PARAMS_PROPERTIES.includes(attributeAfterParams as keyof MappedParamsProperties)
+        ) {
+          ast.value = getModifiedFilter(ast.value);
+        }
       }
     }
 
@@ -155,8 +164,16 @@ export const modifyFilterKueryNode = ({
 
       // Replace the ast.value for params value to the modified mapped_params value
       if (firstAttribute === 'params' && ast.value) {
-        const attribute = getFieldNameAttribute(localFieldName, ['alert', 'attributes', 'params']);
-        ast.value = getModifiedValue(attribute, ast.value);
+        const attributeAfterParams = getFieldNameAttribute(localFieldName, [
+          'alert',
+          'attributes',
+          'params',
+        ]);
+        if (
+          MAPPED_PARAMS_PROPERTIES.includes(attributeAfterParams as keyof MappedParamsProperties)
+        ) {
+          ast.value = getModifiedValue(attributeAfterParams, ast.value);
+        }
       }
     }
   };

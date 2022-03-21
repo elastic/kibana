@@ -7,6 +7,7 @@
 
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { FeaturesAvailability } from './';
+import { JobTypes } from './types';
 
 /*
  * Gets a handle to the Reporting export types registry and returns a few
@@ -18,8 +19,8 @@ export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) 
     /*
      * Allow usage collection to loop through each registered job type
      */
-    getJobTypes() {
-      return exportTypesRegistry.getAll().map(({ jobType }) => jobType);
+    getJobTypes(): Array<keyof JobTypes> {
+      return exportTypesRegistry.getAll().map(({ jobType }) => jobType as keyof JobTypes);
     },
 
     /*

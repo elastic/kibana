@@ -889,7 +889,7 @@
         "label": "KibanaPageTemplate",
         "description": [],
         "signature": [
-          "({ template, className, pageHeader, children, isEmptyState, restrictWidth, pageSideBar, pageSideBarProps, solutionNav, noDataConfig, ...rest }: React.PropsWithChildren<",
+          "({ template, className, children, solutionNav, noDataConfig, ...rest }: React.PropsWithChildren<",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -907,7 +907,7 @@
             "id": "def-public.KibanaPageTemplate.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  template,\n  className,\n  pageHeader,\n  children,\n  isEmptyState,\n  restrictWidth = true,\n  pageSideBar,\n  pageSideBarProps,\n  solutionNav,\n  noDataConfig,\n  ...rest\n}",
+            "label": "{\n  template,\n  className,\n  children,\n  solutionNav,\n  noDataConfig,\n  ...rest\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1703,6 +1703,69 @@
               ">"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.useExecutionContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useExecutionContext",
+        "description": [
+          "\nSet and clean up application level execution context"
+        ],
+        "signature": [
+          "(executionContext: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          },
+          ", context: ",
+          "KibanaExecutionContext",
+          ") => void"
+        ],
+        "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useExecutionContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              }
+            ],
+            "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useExecutionContext.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "KibanaExecutionContext"
+            ],
+            "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -3534,6 +3597,14 @@
             "section": "def-public.DocLinksStart",
             "text": "DocLinksStart"
           },
+          " | undefined; executionContext?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          },
           " | undefined; http?: ",
           {
             "pluginId": "core",
@@ -3692,7 +3763,7 @@
         "signature": [
           "950"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+        "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3916,7 +3987,7 @@
         "tags": [],
         "label": "NO_DATA_PAGE_TEMPLATE_PROPS",
         "description": [],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+        "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
         "deprecated": false,
         "children": [
           {
@@ -3926,7 +3997,7 @@
             "tags": [],
             "label": "restrictWidth",
             "description": [],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
             "deprecated": false
           },
           {
@@ -3939,7 +4010,7 @@
             "signature": [
               "\"centeredBody\""
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
             "deprecated": false
           },
           {
@@ -3949,7 +4020,7 @@
             "tags": [],
             "label": "pageContentProps",
             "description": [],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
             "deprecated": false,
             "children": [
               {
@@ -3962,7 +4033,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+                "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
                 "deprecated": false
               },
               {
@@ -3975,7 +4046,7 @@
                 "signature": [
                   "\"transparent\""
                 ],
-                "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+                "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
                 "deprecated": false
               }
             ]

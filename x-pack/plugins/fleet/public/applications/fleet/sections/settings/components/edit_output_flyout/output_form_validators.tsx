@@ -13,6 +13,9 @@ export function validateESHosts(value: string[]) {
   const urlIndexes: { [key: string]: number[] } = {};
   value.forEach((val, idx) => {
     try {
+      if (!val) {
+        throw new Error('Host URL required');
+      }
       const urlParsed = new URL(val);
       if (!['http:', 'https:'].includes(urlParsed.protocol)) {
         throw new Error('Invalid protocol');

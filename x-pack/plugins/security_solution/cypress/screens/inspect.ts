@@ -17,14 +17,6 @@ export interface InspectButtonMetadata {
 
 export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   {
-    id: '[data-test-subj="stat-hosts"]',
-    title: 'Hosts Stat',
-  },
-  {
-    id: '[data-test-subj="stat-uniqueIps"]',
-    title: 'Unique IPs Stat',
-  },
-  {
     id: '[data-test-subj="table-allHosts-loading-false"]',
     title: 'All Hosts Table',
     tabId: '[data-test-subj="navigation-allHosts"]',
@@ -48,26 +40,6 @@ export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
 ];
 
 export const INSPECT_NETWORK_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
-  {
-    id: '[data-test-subj="stat-networkEvents"]',
-    title: 'Network events Stat',
-  },
-  {
-    id: '[data-test-subj="stat-dnsQueries"]',
-    title: 'DNS queries Stat',
-  },
-  {
-    id: '[data-test-subj="stat-uniqueFlowId"]',
-    title: 'Unique flow IDs Stat',
-  },
-  {
-    id: '[data-test-subj="stat-tlsHandshakes"]',
-    title: 'TLS handshakes Stat',
-  },
-  {
-    id: '[data-test-subj="stat-UniqueIps"]',
-    title: 'Unique private IPs Stat',
-  },
   {
     id: '[data-test-subj="table-topNFlowSource-loading-false"]',
     title: 'Source IPs Table',

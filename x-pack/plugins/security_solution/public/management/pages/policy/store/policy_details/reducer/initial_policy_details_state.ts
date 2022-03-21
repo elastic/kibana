@@ -28,8 +28,8 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
   },
   artifacts: {
     location: {
-      page_index: MANAGEMENT_DEFAULT_PAGE,
-      page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+      page: MANAGEMENT_DEFAULT_PAGE,
+      pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
       show: undefined,
       filter: '',
     },

@@ -653,6 +653,38 @@ describe('Datatable Visualization', () => {
         }).rowHeightLines
       ).toEqual([2]);
     });
+
+    it('sets headerRowHeight && headerRowHeightLines correctly', () => {
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
+      ).toEqual([1]);
+
+      // should fallback to single in case it's not set
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
+      ).toEqual(['single']);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, headerRowHeight: 'single' })
+          .headerRowHeightLines
+      ).toEqual([1]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: 'custom',
+          headerRowHeightLines: 5,
+        }).headerRowHeightLines
+      ).toEqual([5]);
+
+      // should fallback to 2 for custom in case it's not set
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: 'custom',
+        }).headerRowHeightLines
+      ).toEqual([2]);
+    });
   });
 
   describe('#getErrorMessages', () => {
