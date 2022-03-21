@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ToolbarButton } from '../primary/primary';
+import { AddFromLibraryButton } from './add_from_library';
 import mdx from './add_from_library.mdx';
 
 export default {
@@ -21,5 +22,5 @@ export default {
 };
 
 export const Component = () => {
-  return <ToolbarButton label="Add from library" iconType="folderOpen" />;
+  return <AddFromLibraryButton />;
 };
