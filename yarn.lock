@@ -19526,10 +19526,10 @@ mapcap@^1.0.0:
   resolved "https://registry.yarnpkg.com/mapcap/-/mapcap-1.0.0.tgz#e8e29d04a160eaf8c92ec4bcbd2c5d07ed037e5a"
   integrity sha512-KcNlZSlFPx+r1jYZmxEbTVymG+dIctf10WmWkuhrhrblM+KMoF77HelwihL5cxYlORye79KoR4IlOOk99lUJ0g==
 
-maplibre-gl@2.1.8-pre.1:
-  version "2.1.8-pre.1"
-  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-2.1.8-pre.1.tgz#4b58aae4bb4dffd8805f5c7adb6f76ff1896dc93"
-  integrity sha512-8we/iEyvH90rAlFBpEw/Ncb4NIXe576srJWqmxPDDRHJ32AhidWsimmUzWLQrw1oQ1zD0XEPU9RC8NE4Q9Cqcg==
+maplibre-gl@2.1.8-pre.2:
+  version "2.1.8-pre.2"
+  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-2.1.8-pre.2.tgz#8de8c613f4103d89c2b1aa5ad7caaa84eb951771"
+  integrity sha512-3hQRKTAJ4LWZYMJkOd3W7n7brZU2RE9fyQapbg8+rWVjfcpfvcgriRksOzyAhzemqTDzvekxaW2wfLmrC4Rl3g==
   dependencies:
     "@mapbox/geojson-rewind" "^0.5.1"
     "@mapbox/jsonlint-lines-primitives" "^2.0.2"
