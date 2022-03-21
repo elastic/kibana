@@ -28,6 +28,7 @@ import { paramIsValid } from '../param_is_valid';
 
 const SINGLE_SELECTION = { asPlainText: true };
 
+type Warning = string | React.ReactNode;
 interface AutocompleteFieldWildcardProps {
   placeholder: string;
   selectedField: DataViewFieldBase | undefined;
@@ -43,7 +44,7 @@ interface AutocompleteFieldWildcardProps {
   onChange: (arg: string) => void;
   onError: (arg: boolean) => void;
   onWarning: (arg: boolean) => void;
-  warning?: string;
+  warning?: Warning;
 }
 
 export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildcardProps> = memo(
@@ -103,7 +104,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     );
 
     const handleWarning = useCallback(
-      (warn: string | undefined): void => {
+      (warn: Warning | undefined): void => {
         onWarning(warn !== undefined);
       },
       [onWarning]
@@ -194,9 +195,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       if (onError != null) {
         onError(false);
       }
-      if (onWarning != null) {
-        onWarning(false);
-      }
+      onWarning(false);
     }, [selectedField, onError, onWarning]);
 
     const defaultInput = useMemo((): JSX.Element => {

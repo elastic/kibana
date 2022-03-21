@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useState, useCallback, memo, useEffect, useRef } from 'react';
-import styled from 'styled-components';
 import {
   EuiForm,
   EuiFormRow,
@@ -20,6 +19,8 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import {
   OperatingSystem,
@@ -89,38 +90,12 @@ function getDropdownDisplay(field: ConditionEntryField): React.ReactNode {
   );
 }
 
-function getMarginForGridArea(gridArea: string): string {
-  switch (gridArea) {
-    case 'field':
-      return '0 4px 0 0';
-    case 'operator':
-      return '0 4px 0 4px';
-    case 'value':
-      return '0 0 0 4px';
-  }
-
-  return '0';
-}
-
 function isValid(itemValidation: ItemValidation): boolean {
   return !Object.values(itemValidation).some((error) => error.length);
 }
 
-const InputGroup = styled.div`
-  display: grid;
-  grid-template-columns: 25% 25% 50%;
-  grid-template-areas: 'field operator value';
-`;
-
-const InputItem = styled.div<{ gridArea: string }>`
-  grid-area: ${({ gridArea }) => gridArea};
-  align-self: center;
-  vertical-align: baseline;
-  margin: ${({ gridArea }) => getMarginForGridArea(gridArea)};
-`;
-
 export const BlockListForm = memo(
-  ({ item, policies, policiesIsLoading, onChange }: ArtifactFormComponentProps) => {
+  ({ item, policies, policiesIsLoading, onChange, mode }: ArtifactFormComponentProps) => {
     const [visited, setVisited] = useState<{ name: boolean; value: boolean }>({
       name: false,
       value: false,
@@ -238,13 +213,13 @@ export const BlockListForm = memo(
     }, []);
 
     const handleOnNameBlur = useCallback(() => {
-      setVisited((prevVisited) => ({ ...prevVisited, name: true }));
       validateValues(item);
+      setVisited((prevVisited) => ({ ...prevVisited, name: true }));
     }, [item, validateValues]);
 
-    const handleOnValueFocus = useCallback(() => {
-      setVisited((prevVisited) => ({ ...prevVisited, value: true }));
+    const handleOnValueBlur = useCallback(() => {
       validateValues(item);
+      setVisited((prevVisited) => ({ ...prevVisited, value: true }));
     }, [item, validateValues]);
 
     const handleOnNameChange = useCallback(
@@ -348,6 +323,7 @@ export const BlockListForm = memo(
 
         validateValues(nextItem);
 
+        setVisited((prevVisited) => ({ ...prevVisited, value: true }));
         onChange({
           isValid: isValid(errorsRef.current),
           item: nextItem,
@@ -380,9 +356,11 @@ export const BlockListForm = memo(
           <h3>{DETAILS_HEADER}</h3>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <EuiText size="s">
-          <p>{DETAILS_HEADER_DESCRIPTION}</p>
-        </EuiText>
+        {mode === 'create' && (
+          <EuiText size="s">
+            <p>{DETAILS_HEADER_DESCRIPTION}</p>
+          </EuiText>
+        )}
         <EuiSpacer size="m" />
 
         <EuiFormRow
@@ -432,14 +410,9 @@ export const BlockListForm = memo(
         </EuiFormRow>
         <EuiSpacer size="m" />
 
-        <EuiFormRow
-          isInvalid={visited.value && !!errorsRef.current.value?.length}
-          helpText={warningsRef.current.value}
-          error={errorsRef.current.value}
-          fullWidth
-        >
-          <InputGroup>
-            <InputItem gridArea="field">
+        <EuiFormRow fullWidth>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={1}>
               <EuiFormRow label={FIELD_LABEL} fullWidth>
                 <EuiSuperSelect
                   name="field"
@@ -449,25 +422,30 @@ export const BlockListForm = memo(
                   fullWidth
                 />
               </EuiFormRow>
-            </InputItem>
-            <InputItem gridArea="operator">
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
               <EuiFormRow label={OPERATOR_LABEL} fullWidth>
                 <EuiFieldText name="operator" value={isOneOfOperator.message} readOnly />
               </EuiFormRow>
-            </InputItem>
-            <InputItem gridArea="value">
-              <EuiFormRow label={VALUE_LABEL} fullWidth>
-                <EuiComboBox
-                  selectedOptions={selectedValues}
-                  onFocus={handleOnValueFocus}
-                  onChange={handleOnValueChange}
-                  onCreateOption={handleOnValueAdd}
-                  fullWidth
-                  noSuggestions
-                />
-              </EuiFormRow>
-            </InputItem>
-          </InputGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={2} />
+          </EuiFlexGroup>
+        </EuiFormRow>
+        <EuiFormRow
+          label={VALUE_LABEL}
+          isInvalid={visited.value && !!errorsRef.current.value?.length}
+          helpText={warningsRef.current.value}
+          error={errorsRef.current.value}
+          fullWidth
+        >
+          <EuiComboBox
+            selectedOptions={selectedValues}
+            onBlur={handleOnValueBlur}
+            onChange={handleOnValueChange}
+            onCreateOption={handleOnValueAdd}
+            fullWidth
+            noSuggestions
+          />
         </EuiFormRow>
 
         <>

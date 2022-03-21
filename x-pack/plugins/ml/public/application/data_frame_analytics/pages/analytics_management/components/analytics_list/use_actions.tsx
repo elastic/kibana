@@ -11,7 +11,7 @@ import { EuiTableActionsColumnType } from '@elastic/eui';
 
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
-import { DeleteJobCheckModal } from '../../../../../components/delete_job_check_modal';
+import { DeleteSpaceAwareItemCheckModal } from '../../../../../components/delete_space_aware_item_check_modal';
 import { useCloneAction } from '../action_clone';
 import { useDeleteAction, DeleteActionModal } from '../action_delete';
 import { isEditActionFlyoutVisible, useEditAction, EditActionFlyout } from '../action_edit';
@@ -58,7 +58,7 @@ export const useActions = (
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
         {deleteAction.isDeleteJobCheckModalVisible && deleteAction?.item?.config && (
-          <DeleteJobCheckModal
+          <DeleteSpaceAwareItemCheckModal
             onCloseCallback={deleteAction.closeDeleteJobCheckModal}
             canDeleteCallback={() => {
               // Item will always be set by the time we open the delete modal
@@ -67,7 +67,7 @@ export const useActions = (
             }}
             refreshJobsCallback={refresh}
             jobType={deleteAction.jobType}
-            jobIds={[deleteAction.item.config.id]}
+            ids={[deleteAction.item.config.id]}
           />
         )}
         {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}

@@ -23,7 +23,7 @@ export interface JoinState {
   propertiesMap?: PropertiesMap;
 }
 
-export function performInnerJoins(
+export async function performInnerJoins(
   sourceResult: SourceResult,
   joinStates: JoinState[],
   updateSourceData: DataRequestContext['updateSourceData'],
@@ -102,7 +102,11 @@ export function performInnerJoins(
     }
 
     const joinStatus = joinStatusesWithoutAnyMatches[0];
-    const leftFieldName = joinStatus.joinState.join.getLeftField().getName();
+    const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
+    const rightFieldName = await joinStatus.joinState.join
+      .getRightJoinSource()
+      .getTermField()
+      .getLabel();
     const reason =
       joinStatus.keys.length === 0
         ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
@@ -114,10 +118,7 @@ export function performInnerJoins(
             values: {
               leftFieldName,
               leftFieldValues: prettyPrintArray(joinStatus.keys),
-              rightFieldName: joinStatus.joinState.join
-                .getRightJoinSource()
-                .getTermField()
-                .getName(),
+              rightFieldName,
               rightFieldValues: prettyPrintArray(
                 Array.from(joinStatus.joinState.propertiesMap!.keys())
               ),
