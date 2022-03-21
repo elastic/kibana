@@ -13,6 +13,11 @@ export const ALERTS_INDEX = '.siem-signals-default';
 export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
 export const ALERT_UUID_PROPERTY = 'kibana.alert.uuid';
 export const KIBANA_DATE_FORMAT = 'MMM DD, YYYY @ hh:mm:ss.SSS';
+export const ALERT_STATUS = {
+  OPEN: 'open',
+  ACKNOWLEDGED: 'acknowledged',
+  CLOSED: 'closed',
+};
 
 // We fetch a large number of events per page to mitigate a few design caveats in session viewer
 // 1. Due to the hierarchical nature of the data (e.g we are rendering a time ordered pid tree) there are common scenarios where there
