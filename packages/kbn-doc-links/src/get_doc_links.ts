@@ -45,6 +45,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       droppedTransactionSpans: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-spans.html#data-model-dropped-spans`,
       upgrading: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade.html`,
       metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
+      tailSamplingPolicies: `${APM_DOCS}guide/${DOC_LINK_VERSION}/configure-tail-based-sampling.html`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,
@@ -65,6 +66,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
       fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
+      documentExplorer: `${KIBANA_DOCS}document-explorer.html`,
     },
     filebeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,

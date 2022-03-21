@@ -22,14 +22,12 @@ const dataViewsMap: Record<string, DataView> = {
 const getDataview = (id: string): DataView | undefined => dataViewsMap[id];
 jest.mock('../services', () => {
   return {
-    getDataStart: jest.fn(() => {
+    getDataViewsStart: jest.fn(() => {
       return {
-        dataViews: {
-          getDefault: jest.fn(() => {
-            return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
-          }),
-          get: getDataview,
-        },
+        getDefault: jest.fn(() => {
+          return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
+        }),
+        get: getDataview,
       };
     }),
   };

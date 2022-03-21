@@ -8,7 +8,7 @@
 import { tap } from 'rxjs/operators';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { IndexPatternsService } from '../../../../../../data/server';
+import { DataViewsService } from '../../../../../../data_views/common';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
@@ -90,7 +90,7 @@ export abstract class AbstractSearchStrategy {
 
   async getFieldsForWildcard(
     fetchedIndexPattern: FetchedIndexPattern,
-    indexPatternsService: IndexPatternsService,
+    indexPatternsService: DataViewsService,
     capabilities?: unknown,
     options?: Partial<{
       type: string;
