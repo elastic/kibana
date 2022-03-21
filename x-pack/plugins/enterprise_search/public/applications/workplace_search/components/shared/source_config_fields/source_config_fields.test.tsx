@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 import { ApiKey } from '../api_key';
 import { CredentialItem } from '../credential_item';
 
-import { SourceConfigFields } from './';
+import { SourceConfigFields } from './source_config_fields';
 
 describe('SourceConfigFields', () => {
   it('renders empty with no items', () => {
@@ -31,11 +31,14 @@ describe('SourceConfigFields', () => {
         publicKey="abc"
         consumerKey="def"
         baseUrl="ghi"
+        externalConnectorUrl="url"
+        externalConnectorApiKey="apiKey"
       />
     );
 
     expect(wrapper.find(ApiKey)).toHaveLength(0);
-    expect(wrapper.find(CredentialItem)).toHaveLength(3);
+    expect(wrapper.find(CredentialItem)).toHaveLength(4);
+    expect(wrapper.find('[data-test-subj="external-connector-url-input"]')).toHaveLength(1);
   });
 
   it('shows API keys', () => {
@@ -50,5 +53,23 @@ describe('SourceConfigFields', () => {
     );
 
     expect(wrapper.find(ApiKey)).toHaveLength(2);
+  });
+
+  it('handles select all button click', () => {
+    const wrapper = shallow(<SourceConfigFields externalConnectorUrl="url" />);
+    const simulatedEvent = {
+      button: 0,
+      target: { getAttribute: () => '_self' },
+      currentTarget: { select: jest.fn() },
+      preventDefault: jest.fn(),
+    };
+
+    const input = wrapper
+      .find('[data-test-subj="external-connector-url-input"]')
+      .dive()
+      .find('input');
+    input.simulate('click', simulatedEvent);
+
+    expect(simulatedEvent.currentTarget.select).toHaveBeenCalled();
   });
 });
