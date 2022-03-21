@@ -57,9 +57,6 @@ export const DocumentCreationButtons: React.FC<Props> = ({
       case 'api':
         openDocumentCreation('api');
         break;
-      case 'elasticsearchIndex':
-        openDocumentCreation('elasticsearchIndex');
-        break;
     }
   }, []);
 

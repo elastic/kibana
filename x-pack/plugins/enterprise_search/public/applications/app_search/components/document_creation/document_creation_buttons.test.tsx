@@ -34,7 +34,7 @@ describe('DocumentCreationButtons', () => {
   it('renders', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
-    expect(wrapper.find(EuiCard)).toHaveLength(3);
+    expect(wrapper.find(EuiCard)).toHaveLength(2);
     expect(wrapper.find(EuiCardTo)).toHaveLength(1);
   });
 
@@ -59,9 +59,6 @@ describe('DocumentCreationButtons', () => {
 
     wrapper.find(EuiCard).at(1).simulate('click');
     expect(actions.openDocumentCreation).toHaveBeenCalledWith('api');
-
-    wrapper.find(EuiCard).at(2).simulate('click');
-    expect(actions.openDocumentCreation).toHaveBeenCalledWith('elasticsearchIndex');
   });
 
   it('renders the crawler button with a link to the crawler page', () => {
@@ -84,13 +81,5 @@ describe('DocumentCreationButtons', () => {
 
     shallow(<DocumentCreationButtons />);
     expect(actions.openDocumentCreation).toHaveBeenCalledWith('api');
-  });
-
-  it('calls openDocumentCreation("elasticsearchIndex") if ?method=elasticsearchIndex', () => {
-    const search = '?method=elasticsearchIndex';
-    (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
-
-    shallow(<DocumentCreationButtons />);
-    expect(actions.openDocumentCreation).toHaveBeenCalledWith('elasticsearchIndex');
   });
 });
