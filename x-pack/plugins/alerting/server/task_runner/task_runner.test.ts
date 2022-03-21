@@ -14,6 +14,7 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  AlertExecutionStatusWarningReasons,
 } from '../types';
 import {
   ConcreteTaskInstance,
@@ -56,7 +57,7 @@ import {
   generateRunnerResult,
   RULE_ACTIONS,
   generateEnqueueFunctionInput,
-  SAVED_OBJECT_UPDATE_PARAMS,
+  generateSavedObjectParams,
   mockTaskInstance,
   GENERIC_ERROR_MESSAGE,
   generateAlertInstance,
@@ -67,6 +68,7 @@ import {
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
+import { translations } from '../constants/translations';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -244,7 +246,7 @@ describe('Task Runner', () => {
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-    ).toHaveBeenCalledWith(...SAVED_OBJECT_UPDATE_PARAMS);
+    ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
 
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
@@ -350,6 +352,7 @@ describe('Task Runner', () => {
           instanceId: '1',
           actionSubgroup: 'subDefault',
           savedObjects: [generateAlertSO('1'), generateActionSO('1')],
+          actionId: '1',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -929,6 +932,7 @@ describe('Task Runner', () => {
           action: EVENT_LOG_ACTIONS.executeAction,
           actionGroupId: 'default',
           instanceId: '1',
+          actionId: '1',
           savedObjects: [generateAlertSO('1'), generateActionSO('1')],
         })
       );
@@ -1057,9 +1061,10 @@ describe('Task Runner', () => {
         4,
         generateEventLog({
           action: EVENT_LOG_ACTIONS.executeAction,
-          savedObjects: [generateAlertSO('1'), generateActionSO('2')],
-          actionGroupId: 'recovered',
-          instanceId: '2',
+          savedObjects: [generateAlertSO('1'), generateActionSO('1')],
+          actionGroupId: 'default',
+          instanceId: '1',
+          actionId: '1',
         })
       );
 
@@ -1067,9 +1072,10 @@ describe('Task Runner', () => {
         5,
         generateEventLog({
           action: EVENT_LOG_ACTIONS.executeAction,
-          savedObjects: [generateAlertSO('1'), generateActionSO('1')],
-          actionGroupId: 'default',
-          instanceId: '1',
+          savedObjects: [generateAlertSO('1'), generateActionSO('2')],
+          actionGroupId: 'recovered',
+          instanceId: '2',
+          actionId: '2',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1157,8 +1163,8 @@ describe('Task Runner', () => {
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
       expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('1');
-      expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('2');
+      expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('2');
+      expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('1');
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
   );
@@ -2353,7 +2359,7 @@ describe('Task Runner', () => {
     );
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-    ).toHaveBeenCalledWith(...SAVED_OBJECT_UPDATE_PARAMS);
+    ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -2491,6 +2497,181 @@ describe('Task Runner', () => {
     }
     const runnerResult = await taskRunner.run();
     expect(runnerResult.monitoring?.execution.history.length).toBe(200);
+  });
+  test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
+    const ruleTypeWithConfig = {
+      ...ruleType,
+      config: {
+        execution: {
+          actions: { max: 3 },
+        },
+      },
+    };
+
+    const warning = {
+      reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      message: translations.taskRunner.warning.maxExecutableActions,
+    };
+
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+      }
+    );
+
+    rulesClient.get.mockResolvedValue({
+      ...mockedRuleTypeSavedObject,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: 'action',
+        },
+        {
+          group: 'default',
+          id: '2',
+          actionTypeId: 'action',
+        },
+        {
+          group: 'default',
+          id: '3',
+          actionTypeId: 'action',
+        },
+        {
+          group: 'default',
+          id: '4',
+          actionTypeId: 'action',
+        },
+        {
+          group: 'default',
+          id: '5',
+          actionTypeId: 'action',
+        },
+      ],
+    } as jest.ResolvedValue<unknown>);
+    ruleTypeRegistry.get.mockReturnValue(ruleTypeWithConfig);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+
+    const taskRunner = new TaskRunner(
+      ruleTypeWithConfig,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+
+    const runnerResult = await taskRunner.run();
+
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(
+      ruleTypeWithConfig.config.execution.actions.max
+    );
+
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(...generateSavedObjectParams({ status: 'warning', warning }));
+
+    expect(runnerResult).toEqual(
+      generateRunnerResult({
+        state: true,
+        history: [true],
+        alertInstances: {
+          '1': {
+            meta: {
+              lastScheduledActions: {
+                date: new Date(DATE_1970),
+                group: 'default',
+              },
+            },
+            state: {
+              duration: 0,
+              start: '1970-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      })
+    );
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(7);
+
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      1,
+      generateEventLog({
+        task: true,
+        action: EVENT_LOG_ACTIONS.executeStart,
+      })
+    );
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      2,
+      generateEventLog({
+        duration: 0,
+        start: DATE_1970,
+        action: EVENT_LOG_ACTIONS.newInstance,
+        actionGroupId: 'default',
+        instanceId: '1',
+      })
+    );
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      3,
+      generateEventLog({
+        duration: 0,
+        start: DATE_1970,
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        actionGroupId: 'default',
+        instanceId: '1',
+      })
+    );
+
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      4,
+      generateEventLog({
+        action: EVENT_LOG_ACTIONS.executeAction,
+        savedObjects: [generateAlertSO('1'), generateActionSO('1')],
+        actionGroupId: 'default',
+        instanceId: '1',
+        actionId: '1',
+      })
+    );
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      5,
+      generateEventLog({
+        action: EVENT_LOG_ACTIONS.executeAction,
+        savedObjects: [generateAlertSO('1'), generateActionSO('2')],
+        actionGroupId: 'default',
+        instanceId: '1',
+        actionId: '2',
+      })
+    );
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      6,
+      generateEventLog({
+        action: EVENT_LOG_ACTIONS.executeAction,
+        savedObjects: [generateAlertSO('1'), generateActionSO('3')],
+        actionGroupId: 'default',
+        instanceId: '1',
+        actionId: '3',
+      })
+    );
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+      7,
+      generateEventLog({
+        action: EVENT_LOG_ACTIONS.execute,
+        outcome: 'success',
+        status: 'warning',
+        numberOfTriggeredActions: ruleTypeWithConfig.config.execution.actions.max,
+        reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        task: true,
+      })
+    );
   });
 
   test('increments monitoring metrics after execution', async () => {
