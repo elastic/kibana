@@ -299,7 +299,6 @@ export class SyntheticsService {
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
-    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = [];
 
     if (!savedObjectsClient?.find) {
       return [] as SyntheticsMonitorWithId[];
@@ -311,24 +310,21 @@ export class SyntheticsService {
       perPage: 500,
     });
 
-    const start = Date.now();
+    const start = performance.now();
 
-    for (const monitor of encryptedMonitors) {
-      const decryptedMonitor =
-        await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = await Promise.all(
+      encryptedMonitors.map((monitor) =>
+        encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
           syntheticsMonitor.name,
-          monitor.id,
-          {
-            namespace: monitor.namespaces?.[0],
-          }
-        );
-      monitors.push(decryptedMonitor);
-    }
+          monitor.id
+        )
+      )
+    );
 
-    const end = Date.now();
+    const end = performance.now();
     const duration = end - start;
 
-    this.logger.info(`Decrypted ${monitors.length} monitors. Took ${duration} miliseconds`, {
+    this.logger.info(`Decrypted ${monitors.length} monitors. Took ${duration} milliseconds`, {
       event: {
         duration,
       },
