@@ -5,60 +5,50 @@
  * 2.0.
  */
 
-import { find } from 'lodash';
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { useAgentDetails } from '../../agents/use_agent_details';
-import { useAgentPolicy } from '../../agent_policies';
+import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { LiveQuery } from '../../live_queries';
 import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { KibanaThemeProvider } from '../../shared_imports';
+import { useIsOsqueryAvailable } from './use_is_osquery_available';
 
 interface OsqueryActionProps {
-  metadata?: {
-    info: {
-      agent: { id: string };
-    };
-  };
+  agentId?: string;
+  formType: 'steps' | 'simple';
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
+const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formType = 'simple' }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const agentId = metadata?.info?.agent?.id ?? undefined;
-  const {
-    data: agentData,
-    isFetched: agentFetched,
-    isLoading,
-  } = useAgentDetails({
-    agentId,
-    silent: true,
-    skip: !agentId,
-  });
-  const {
-    data: agentPolicyData,
-    isFetched: policyFetched,
-    isError: policyError,
-    isLoading: policyLoading,
-  } = useAgentPolicy({
-    policyId: agentData?.policy_id,
-    skip: !agentData,
-    silent: true,
-  });
 
-  const osqueryAvailable = useMemo(() => {
-    if (policyError) return false;
+  const emptyPrompt = useMemo(
+    () => (
+      <EuiEmptyPrompt
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is not available</h2>}
+        titleSize="xs"
+        body={
+          <p>
+            {i18n.translate('xpack.osquery.action.empty', {
+              defaultMessage:
+                'An Elastic Agent is not installed on this host. To run queries, install Elastic Agent on the host, and then add the Osquery Manager integration to the agent policy in Fleet.',
+            })}
+          </p>
+        }
+      />
+    ),
+    []
+  );
+  const { osqueryAvailable, agentFetched, isLoading, policyFetched, policyLoading, agentData } =
+    useIsOsqueryAvailable(agentId);
 
-    const osqueryPackageInstalled = find(agentPolicyData?.package_policies, [
-      'package.name',
-      OSQUERY_INTEGRATION_NAME,
-    ]);
-    return osqueryPackageInstalled?.enabled;
-  }, [agentPolicyData?.package_policies, policyError]);
+  if (!agentId || (agentFetched && !agentData)) {
+    return emptyPrompt;
+  }
 
   if (!(permissions.runSavedQueries || permissions.writeLiveQueries)) {
     return (
@@ -78,22 +68,6 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
 
   if (isLoading) {
     return <EuiLoadingContent lines={10} />;
-  }
-
-  if (!agentId || (agentFetched && !agentData)) {
-    return (
-      <EuiEmptyPrompt
-        icon={<OsqueryIcon />}
-        title={<h2>Osquery is not available</h2>}
-        titleSize="xs"
-        body={
-          <p>
-            An Elastic Agent is not installed on this host. To run queries, install Elastic Agent on
-            the host, and then add the Osquery Manager integration to the agent policy in Fleet.
-          </p>
-        }
-      />
-    );
   }
 
   if (!policyFetched && policyLoading) {
@@ -132,18 +106,18 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  return <LiveQuery formType="simple" agentId={agentId} />;
+  return <LiveQuery formType={formType} agentId={agentId} />;
 };
 
-export const OsqueryAction = React.memo(OsqueryActionComponent);
+const OsqueryAction = React.memo(OsqueryActionComponent);
 
 // @ts-expect-error update types
-const OsqueryActionWrapperComponent = ({ services, ...props }) => (
+const OsqueryActionWrapperComponent = ({ services, agentId, formType }) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryAction {...props} />
+          <OsqueryAction agentId={agentId} formType={formType} />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
