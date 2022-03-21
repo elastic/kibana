@@ -12473,7 +12473,6 @@
     "xpack.globalSearchBar.searchBar.noResultsImageAlt": "ブラックホールの図",
     "xpack.globalSearchBar.searchBar.optionTagListAriaLabel": "タグ",
     "xpack.globalSearchBar.searchbar.overflowTagsAriaLabel": "{n} その他の {n, plural, other  {個のタグ}}：{tags}",
-    "xpack.globalSearchBar.searchBar.placeholder": "Elastic を検索",
     "xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription": "コマンド+ /",
     "xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail": "{shortcutDescription} {commandDescription}",
     "xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription": "ショートカット",
