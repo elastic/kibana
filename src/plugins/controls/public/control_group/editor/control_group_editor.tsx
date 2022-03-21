@@ -135,13 +135,15 @@ export const ControlGroupEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-group-settings-flyout">
         <EuiForm>
-          <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
+          <EuiFormRow label={ControlGroupStrings.management.labelPosition.getLabelPositionTitle()}>
             <EuiButtonGroup
               color="primary"
               idSelected={controlGroupEditorState.controlStyle}
-              legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
+              legend={ControlGroupStrings.management.labelPosition.getLabelPositionLegend()}
+              data-test-subj="control-group-layout-options"
               options={CONTROL_LAYOUT_OPTIONS}
               onChange={(newControlStyle: string) => {
+                // The UI copy calls this setting labelPosition, but to avoid an unnecessary migration it will be left as controlStyle in the state.
                 updateControlGroupEditorSetting({ controlStyle: newControlStyle as ControlStyle });
               }}
             />

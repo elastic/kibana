@@ -78,10 +78,6 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
         defaultMessage: 'Default size',
       }),
-    getLayoutTitle: () =>
-      i18n.translate('controls.controlGroup.management.layoutTitle', {
-        defaultMessage: 'Layout',
-      }),
     getDeleteButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
@@ -116,18 +112,22 @@ export const ControlGroupStrings = {
           defaultMessage: 'Large',
         }),
     },
-    controlStyle: {
-      getDesignSwitchLegend: () =>
-        i18n.translate('controls.controlGroup.management.layout.designSwitchLegend', {
-          defaultMessage: 'Switch control designs',
+    labelPosition: {
+      getLabelPositionTitle: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.title', {
+          defaultMessage: 'Label position',
         }),
-      getSingleLineTitle: () =>
-        i18n.translate('controls.controlGroup.management.layout.singleLine', {
-          defaultMessage: 'Single line',
+      getLabelPositionLegend: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.designSwitchLegend', {
+          defaultMessage: 'Switch label position between inline and above',
         }),
-      getTwoLineTitle: () =>
-        i18n.translate('controls.controlGroup.management.layout.twoLine', {
-          defaultMessage: 'Double line',
+      getInlineTitle: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.inline', {
+          defaultMessage: 'Inline',
+        }),
+      getAboveTitle: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.above', {
+          defaultMessage: 'Above',
         }),
     },
     deleteControls: {

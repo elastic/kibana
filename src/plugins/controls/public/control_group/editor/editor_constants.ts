@@ -35,11 +35,11 @@ export const CONTROL_LAYOUT_OPTIONS = [
   {
     id: `oneLine`,
     'data-test-subj': 'control-editor-layout-oneLine',
-    label: ControlGroupStrings.management.controlStyle.getSingleLineTitle(),
+    label: ControlGroupStrings.management.labelPosition.getInlineTitle(),
   },
   {
     id: `twoLine`,
     'data-test-subj': 'control-editor-layout-twoLine',
-    label: ControlGroupStrings.management.controlStyle.getTwoLineTitle(),
+    label: ControlGroupStrings.management.labelPosition.getAboveTitle(),
   },
 ];
