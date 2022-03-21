@@ -385,7 +385,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Average of bytes'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-        'Top 5 values of ip'
+        'Top values of ip'
       );
     });
 
