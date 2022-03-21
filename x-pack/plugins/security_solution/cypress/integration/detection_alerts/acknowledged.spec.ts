@@ -57,33 +57,23 @@ describe('Acknowledging alerts', () => {
           selectNumberOfAlerts(numberOfAlertsToBeSelected);
           cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
-        
-  it.('Mark one alert as acknowledged when more than one open alerts are selected', () => {
-    cy.get(ALERTS_COUNT)
-      .invoke('text')
-      .then((alertNumberString) => {
-        const numberOfAlerts = alertNumberString.split(' ')[0];
-        const numberOfAlertsToBeMarkedAcknowledged = 1;
-        const numberOfAlertsToBeSelected = 3;
+          markAcknowledgedFirstAlert();
+          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
+          cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+          cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+            'have.text',
+            `${expectedNumberOfAlerts}`
+          );
 
-        cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
-        selectNumberOfAlerts(numberOfAlertsToBeSelected);
-        cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
+          goToAcknowledgedAlerts();
+          waitForAlerts();
 
-        markAcknowledgedFirstAlert();
-        const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
-        cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
-        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should('have.text', `${expectedNumberOfAlerts}`);
-
-        goToAcknowledgedAlerts();
-        waitForAlerts();
-
-        cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
-        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+          cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
+          cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
             'have.text',
             `${numberOfAlertsToBeMarkedAcknowledged}`
           );
-      });
+        });
     });
   });
 
