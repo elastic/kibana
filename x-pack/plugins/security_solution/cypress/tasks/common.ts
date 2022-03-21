@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from './es_archiver';
 import { RuleEcs } from '../../common/ecs/rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
@@ -69,7 +68,6 @@ export const cleanKibana = () => {
   deleteAlertsAndRules();
   deleteCases();
   deleteTimelines();
-  esArchiverResetKibana();
 };
 
 export const deleteAlertsAndRules = () => {
