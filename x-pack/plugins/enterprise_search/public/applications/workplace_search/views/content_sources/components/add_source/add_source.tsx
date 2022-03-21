@@ -23,6 +23,8 @@ import { SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
 
 import { hasMultipleConnectorOptions } from '../../../../utils';
 
+import { SourcesLogic } from '../../sources_logic';
+
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
@@ -44,6 +46,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const { serviceType, configuration, features, objTypes } = props.sourceData;
   const addPath = getAddPath(serviceType);
   const { isOrganization } = useValues(AppLogic);
+  const { externalConfigured } = useValues(SourcesLogic);
 
   useEffect(() => {
     initializeAddSource(props);
@@ -81,7 +84,12 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro
           name={name}
-          advanceStep={hasMultipleConnectorOptions(props.sourceData) ? goToChoice : goToSaveConfig}
+          // TODO: Remove this once we can support multiple external connectors
+          advanceStep={
+            hasMultipleConnectorOptions(props.sourceData) && !externalConfigured
+              ? goToChoice
+              : goToSaveConfig
+          }
           header={header}
         />
       )}

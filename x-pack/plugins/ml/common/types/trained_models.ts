@@ -205,6 +205,8 @@ export interface NodeDeploymentStatsResponse {
       total: number;
       jvm: number;
     };
+    /** Max amount of memory available for ML */
+    ml_max_in_bytes: number;
     /** Open anomaly detection jobs + hardcoded overhead */
     anomaly_detection: {
       /** Total size in bytes */
@@ -226,6 +228,6 @@ export interface NodeDeploymentStatsResponse {
 }
 
 export interface NodesOverviewResponse {
-  count: number;
+  _nodes: { total: number; failed: number; successful: number };
   nodes: NodeDeploymentStatsResponse[];
 }

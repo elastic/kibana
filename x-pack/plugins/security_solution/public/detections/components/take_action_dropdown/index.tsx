@@ -23,6 +23,7 @@ import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_c
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
+
 interface ActionsData {
   alertStatus: Status;
   eventId: string;
@@ -42,6 +43,7 @@ export interface TakeActionDropdownProps {
   onAddExceptionTypeClick: (type: ExceptionListType) => void;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   refetch: (() => void) | undefined;
+  refetchFlyoutData: () => Promise<void>;
   timelineId: string;
 }
 
@@ -57,6 +59,7 @@ export const TakeActionDropdown = React.memo(
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
     refetch,
+    refetchFlyoutData,
     timelineId,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
@@ -184,6 +187,7 @@ export const TakeActionDropdown = React.memo(
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
+      onSuccess: refetchFlyoutData,
       timelineId,
     });
 

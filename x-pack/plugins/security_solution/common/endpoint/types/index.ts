@@ -12,6 +12,7 @@ import { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
+export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
  * Supported React-Router state for the Policy Details page

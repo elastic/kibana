@@ -1938,9 +1938,9 @@
             "label": "controlGroupInput",
             "description": [],
             "signature": [
-              "{ controlStyle?: ",
-              "ControlStyle",
-              " | undefined; panelsJSON?: string | undefined; } | undefined"
+              "Omit<",
+              "RawControlGroupAttributes",
+              ", \"id\"> | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false
@@ -2420,6 +2420,73 @@
     "functions": [
       {
         "parentPluginId": "dashboard",
+        "id": "def-common.controlGroupInputToRawAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "controlGroupInputToRawAttributes",
+        "description": [],
+        "signature": [
+          "(controlGroupInput: Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\">) => Omit<",
+          "RawControlGroupAttributes",
+          ", \"id\">"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.controlGroupInputToRawAttributes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ", \"id\">"
+            ],
+            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.getDefaultDashboardControlGroupInput",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultDashboardControlGroupInput",
+        "description": [],
+        "signature": [
+          "() => { controlStyle: ",
+          "ControlStyle",
+          "; panels: {}; }"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-common.migratePanelsTo730",
         "type": "Function",
         "tags": [],
@@ -2588,6 +2655,120 @@
                 "deprecated": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.rawAttributesToControlGroupInput",
+        "type": "Function",
+        "tags": [],
+        "label": "rawAttributesToControlGroupInput",
+        "description": [],
+        "signature": [
+          "(rawControlGroupAttributes: Omit<",
+          "RawControlGroupAttributes",
+          ", \"id\">) => Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\"> | undefined"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.rawAttributesToControlGroupInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawControlGroupAttributes",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "RawControlGroupAttributes",
+              ", \"id\">"
+            ],
+            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.rawAttributesToSerializable",
+        "type": "Function",
+        "tags": [],
+        "label": "rawAttributesToSerializable",
+        "description": [],
+        "signature": [
+          "(rawControlGroupAttributes: Omit<",
+          "RawControlGroupAttributes",
+          ", \"id\">) => ",
+          "SerializableRecord"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.rawAttributesToSerializable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawControlGroupAttributes",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "RawControlGroupAttributes",
+              ", \"id\">"
+            ],
+            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.serializableToRawAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "serializableToRawAttributes",
+        "description": [],
+        "signature": [
+          "(controlGroupInput: ",
+          "SerializableRecord",
+          ") => Omit<",
+          "RawControlGroupAttributes",
+          ", \"id\">"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.serializableToRawAttributes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "SerializableRecord"
+            ],
+            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+            "deprecated": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

@@ -46,9 +46,9 @@ import { ActionsPanel } from '../actions_panel';
 import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
-import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
+import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { ResultLink } from '../../../common/components/results_links';
-import { IndexPatternField, IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import './_index.scss';
@@ -107,7 +107,7 @@ export const getDefaultDataVisualizerListState = (
 });
 
 export interface IndexDataVisualizerViewProps {
-  currentIndexPattern: IndexPattern;
+  currentDataView: DataView;
   currentSavedSearch: SavedSearchSavedObject | null;
   currentSessionId?: string;
   additionalLinks?: ResultLink[];
@@ -129,7 +129,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentIndexPattern, additionalLinks, currentSessionId } = dataVisualizerProps;
+  const { currentDataView, additionalLinks, currentSessionId } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -138,31 +138,31 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [dataVisualizerProps?.currentSavedSearch]);
 
   useEffect(() => {
-    if (!currentIndexPattern.isTimeBased()) {
+    if (!currentDataView.isTimeBased()) {
       toasts.addWarning({
         title: i18n.translate(
-          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle',
+          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationTitle',
           {
-            defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
-            values: { indexPatternTitle: currentIndexPattern.title },
+            defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
+            values: { dataViewTitle: currentDataView.title },
           }
         ),
         text: i18n.translate(
-          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationDescription',
+          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
           {
             defaultMessage: 'Anomaly detection only runs over time-based indices',
           }
         ),
       });
     }
-  }, [currentIndexPattern, toasts]);
+  }, [currentDataView, toasts]);
 
-  const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
+  const dataViewFields: DataViewField[] = currentDataView.fields;
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
     const indexedFieldTypes: JobFieldType[] = [];
-    indexPatternFields.forEach((field) => {
+    dataViewFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
         const dataVisualizerType: JobFieldType | undefined = kbnTypeToJobType(field);
         if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
@@ -171,7 +171,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       }
     });
     return indexedFieldTypes.sort();
-  }, [indexPatternFields]);
+  }, [dataViewFields]);
 
   const setSearchParams = useCallback(
     (searchParams: {
@@ -226,14 +226,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const input: DataVisualizerGridInput = useMemo(() => {
     return {
-      indexPattern: currentIndexPattern,
+      dataView: currentDataView,
       savedSearch: currentSavedSearch,
       sessionId: currentSessionId,
       visibleFieldNames,
       allowEditDataView: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndexPattern.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
+  }, [currentDataView.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
 
   const {
     configs,
@@ -257,12 +257,12 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       // to make sure new page doesn't have unrelated filters
       data.query.filterManager.removeAll();
     };
-  }, [currentIndexPattern.id, data.query.filterManager]);
+  }, [currentDataView.id, data.query.filterManager]);
 
   useEffect(() => {
     // Force refresh on index pattern change
     setLastRefresh(Date.now());
-  }, [currentIndexPattern.id, setLastRefresh]);
+  }, [currentDataView.id, setLastRefresh]);
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -282,13 +282,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
   const onAddFilter = useCallback(
-    (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
+    (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const newFilters = generateFilters(
         data.query.filterManager,
         field,
         values,
         operation,
-        String(currentIndexPattern.id)
+        String(currentDataView.id)
       );
       if (newFilters) {
         data.query.filterManager.addFilters(newFilters);
@@ -306,7 +306,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           language: searchQueryLanguage,
         },
         data.query.filterManager.getFilters() ?? [],
-        currentIndexPattern,
+        currentDataView,
         uiSettings
       );
 
@@ -318,7 +318,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       });
     },
     [
-      currentIndexPattern,
+      currentDataView,
       data.query.filterManager,
       searchQueryLanguage,
       searchString,
@@ -357,7 +357,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              indexPattern={currentIndexPattern}
+              dataView={currentDataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={onAddFilter}
             />
@@ -366,7 +366,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentIndexPattern, searchQueryLanguage, searchString, onAddFilter]
+    [currentDataView, searchQueryLanguage, searchString, onAddFilter]
   );
 
   // Some actions open up fly-out or popup
@@ -400,10 +400,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               <EuiPageContentHeaderSection>
                 <div className="dataViewTitleHeader">
                   <EuiTitle>
-                    <h1>{currentIndexPattern.title}</h1>
+                    <h1>{currentDataView.title}</h1>
                   </EuiTitle>
-                  <DataVisualizerIndexPatternManagement
-                    currentIndexPattern={currentIndexPattern}
+                  <DataVisualizerDataViewManagement
+                    currentDataView={currentDataView}
                     useNewFieldsApi={true}
                   />
                 </div>
@@ -415,10 +415,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 gutterSize="s"
                 data-test-subj="dataVisualizerTimeRangeSelectorSection"
               >
-                {currentIndexPattern.timeFieldName !== undefined && (
+                {currentDataView.timeFieldName !== undefined && (
                   <EuiFlexItem grow={false}>
                     <FullTimeRangeSelector
-                      indexPattern={currentIndexPattern}
+                      dataView={currentDataView}
                       query={undefined}
                       disabled={false}
                       timefilter={timefilter}
@@ -456,7 +456,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 )}
 
                 <SearchPanel
-                  indexPattern={currentIndexPattern}
+                  dataView={currentDataView}
                   searchString={searchString}
                   searchQuery={searchQuery}
                   searchQueryLanguage={searchQueryLanguage}
@@ -495,7 +495,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
               <ActionsPanel
-                indexPattern={currentIndexPattern}
+                dataView={currentDataView}
                 searchQueryLanguage={searchQueryLanguage}
                 searchString={searchString}
                 additionalLinks={additionalLinks ?? []}

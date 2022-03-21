@@ -22,6 +22,7 @@ interface Props {
   onChange: (newValue: string, submit?: boolean) => void;
   placeholder?: string;
   indexPattern?: string;
+  dataTestSubj?: string;
 }
 
 export const SearchBar: React.FunctionComponent<Props> = ({
@@ -30,6 +31,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   onChange,
   placeholder,
   indexPattern = INDEX_NAME,
+  dataTestSubj,
 }) => {
   const { data } = useStartServices();
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
@@ -101,6 +103,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       submitOnBlur
       isClearable
       autoSubmit
+      {...(dataTestSubj && { dataTestSubj })}
     />
   );
 };

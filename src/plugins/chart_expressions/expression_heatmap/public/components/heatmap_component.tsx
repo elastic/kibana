@@ -288,7 +288,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       return null;
     }
 
-    let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+    let chartData = table.rows.filter(
+      (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
+    );
     if (!chartData || !chartData.length) {
       return <EmptyPlaceholder icon={HeatmapIcon} />;
     }
