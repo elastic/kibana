@@ -17,6 +17,7 @@ export const KibanaServices = {
   getKibanaVersion: jest.fn(() => '8.0.0'),
   getConfig: jest.fn(() => null),
 };
+
 export const useKibana = jest.fn().mockReturnValue({
   services: createStartServicesMock(),
 });
@@ -46,6 +47,9 @@ export const useNavigation = jest.fn().mockReturnValue({
   navigateTo: jest.fn(),
 });
 
-export const useKibanaCapabilities = jest.fn().mockReturnValue({
-  visualize: true,
+export const useApplicationCapabilities = jest.fn().mockReturnValue({
+  actions: { crud: true, read: true },
+  generalCases: { crud: true, read: true },
+  visualize: { crud: true, read: true },
+  dashboard: { crud: true, read: true },
 });

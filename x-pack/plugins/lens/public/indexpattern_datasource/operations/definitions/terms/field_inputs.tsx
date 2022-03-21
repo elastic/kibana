@@ -76,9 +76,9 @@ export function FieldInputs({
   const onFieldSelectChange = useCallback(
     (choice, index = 0) => {
       const fields = [...localValues];
-      const newFieldName = indexPattern.getFieldByName(choice.field)?.displayName;
-      if (newFieldName != null) {
-        fields[index] = { id: generateId(), value: newFieldName };
+
+      if (indexPattern.getFieldByName(choice.field)) {
+        fields[index] = { id: generateId(), value: choice.field };
 
         // update the layer state
         handleInputChange(fields);

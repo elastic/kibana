@@ -44,6 +44,7 @@ import {
 
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
+import { registerListRoute } from './routes/enterprise_search/indices';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -155,6 +156,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
+    registerListRoute(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry

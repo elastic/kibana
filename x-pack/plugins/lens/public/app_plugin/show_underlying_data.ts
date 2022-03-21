@@ -43,10 +43,13 @@ function joinQueries(queries: Query[][] | undefined) {
 interface LayerMetaInfo {
   id: string;
   columns: string[];
-  filters: {
-    kuery: Query[][] | undefined;
-    lucene: Query[][] | undefined;
-  };
+  filters: Record<
+    'enabled' | 'disabled',
+    {
+      kuery: Query[][] | undefined;
+      lucene: Query[][] | undefined;
+    }
+  >;
 }
 
 export function getLayerMetaInfo(
@@ -137,8 +140,9 @@ export function combineQueryAndFilters(
       : { queryLanguage: 'kuery', filtersLanguage: 'lucene' };
 
   let newQuery = query;
-  if (meta.filters[queryLanguage]?.length) {
-    const filtersQuery = joinQueries(meta.filters[queryLanguage]);
+  const enabledFilters = meta.filters.enabled;
+  if (enabledFilters[queryLanguage]?.length) {
+    const filtersQuery = joinQueries(enabledFilters[queryLanguage]);
     newQuery = {
       language: queryLanguage,
       query: query?.query.trim()
@@ -149,17 +153,14 @@ export function combineQueryAndFilters(
 
   // make a copy as the original filters are readonly
   const newFilters = [...filters];
-  if (meta.filters[filtersLanguage]?.length) {
-    const queryExpression = joinQueries(meta.filters[filtersLanguage]);
+  const dataView = dataViews?.find(({ id }) => id === meta.id);
+  if (enabledFilters[filtersLanguage]?.length) {
+    const queryExpression = joinQueries(enabledFilters[filtersLanguage]);
     // Append the new filter based on the queryExpression to the existing ones
     newFilters.push(
       buildCustomFilter(
         meta.id!,
-        buildEsQuery(
-          dataViews?.find(({ id }) => id === meta.id),
-          { language: filtersLanguage, query: queryExpression },
-          []
-        ),
+        buildEsQuery(dataView, { language: filtersLanguage, query: queryExpression }, []),
         false,
         false,
         i18n.translate('xpack.lens.app.lensContext', {
@@ -169,6 +170,28 @@ export function combineQueryAndFilters(
         FilterStateStore.APP_STATE
       )
     );
+  }
+  // for each disabled filter create a new custom filter and disable it
+  // note that both languages go into the filter bar
+  const disabledFilters = meta.filters.disabled;
+  for (const language of ['lucene', 'kuery'] as const) {
+    const [disabledQueries] = disabledFilters[language] || [];
+    for (const disabledQuery of disabledQueries || []) {
+      let label = disabledQuery.query as string;
+      if (language === 'lucene') {
+        label += ` (${language})`;
+      }
+      newFilters.push(
+        buildCustomFilter(
+          meta.id!,
+          buildEsQuery(dataView, disabledQuery, []),
+          true,
+          false,
+          label,
+          FilterStateStore.APP_STATE
+        )
+      );
+    }
   }
   return { filters: newFilters, query: newQuery };
 }

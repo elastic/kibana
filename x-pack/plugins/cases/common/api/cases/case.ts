@@ -216,6 +216,7 @@ export const CaseResolveResponseRt = rt.intersection([
   }),
   rt.partial({
     alias_target_id: rt.string,
+    alias_purpose: rt.union([rt.literal('savedObjectConversion'), rt.literal('savedObjectImport')]),
   }),
 ]);
 

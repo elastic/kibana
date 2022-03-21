@@ -12,6 +12,7 @@ import {
   BrowserCouldNotLaunchError,
   BrowserUnexpectedlyClosedError,
   BrowserScreenshotError,
+  PdfWorkerOutOfMemoryError,
 } from '.';
 
 export function mapToReportingError(error: unknown): ReportingError {
@@ -25,6 +26,8 @@ export function mapToReportingError(error: unknown): ReportingError {
       return new BrowserScreenshotError((error as Error).message);
     case error instanceof errors.FailedToSpawnBrowserError:
       return new BrowserCouldNotLaunchError();
+    case error instanceof errors.PdfWorkerOutOfMemoryError:
+      return new PdfWorkerOutOfMemoryError();
   }
   return new UnknownError();
 }
