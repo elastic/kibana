@@ -7060,8 +7060,6 @@
     "xpack.apm.fleet_integration.settings.apm.urlLabel": "URL",
     "xpack.apm.fleet_integration.settings.apm.writeTimeoutLabel": "応答を書き込む最大時間",
     "xpack.apm.fleet_integration.settings.apmAgent.description": "{title}アプリケーションの計測を構成します。",
-    "xpack.apm.fleet_integration.settings.betaBadgeLabel": "ベータ",
-    "xpack.apm.fleet_integration.settings.betaBadgeTooltip": "このモジュールはGAではありません。不具合が発生したら報告してください。",
     "xpack.apm.fleet_integration.settings.disabledLabel": "無効",
     "xpack.apm.fleet_integration.settings.enabledLabel": "有効",
     "xpack.apm.fleet_integration.settings.optionalLabel": "オプション",
