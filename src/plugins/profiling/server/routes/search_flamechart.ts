@@ -11,7 +11,14 @@ import seedrandom from 'seedrandom';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
-import { Executable, FileID, StackFrame, StackFrameID, StackTrace, StackTraceID } from '../../common/profiling';
+import {
+  Executable,
+  FileID,
+  StackFrame,
+  StackFrameID,
+  StackTrace,
+  StackTraceID,
+} from '../../common/profiling';
 import { newProjectTimeQuery, ProjectTimeQuery } from './mappings';
 
 export interface DownsampledEventsIndex {
@@ -162,6 +169,7 @@ async function queryFlameGraph(
   // That is in the middle of our down-sampled indexes.
   const initialExp = 6;
   const downsampledIndex = index + '-5pow';
+  const testing = index === 'profiling-events2';
 
   const eventsIndex = await logExecutionLatency(
     logger,
@@ -251,11 +259,33 @@ async function queryFlameGraph(
     logger,
     'mget query for ' + stackTraceEvents.size + ' stacktraces',
     async () => {
-      return await client.mget({
-        index: 'profiling-stacktraces',
-        ids: [...stackTraceEvents.keys()],
-        _source_includes: ['FrameID', 'Type'],
-      });
+      if (testing) {
+        return await client.search(
+          {
+            index: 'profiling-stacktraces',
+            size: stackTraceEvents.size,
+            sort: '_doc',
+            query: {
+              ids: {
+                values: [...stackTraceEvents.keys()],
+              },
+            },
+            _source: false,
+            docvalue_fields: ['FrameID', 'Type'],
+          },
+          {
+            querystring: {
+              filter_path: 'hits.hits._id,hits.hits.fields.FrameID,hits.hits.fields.Type',
+            },
+          }
+        );
+      } else {
+        return await client.mget({
+          index: 'profiling-stacktraces',
+          ids: [...stackTraceEvents.keys()],
+          _source_includes: ['FrameID', 'Type'],
+        });
+      }
     }
   );
 
@@ -265,15 +295,29 @@ async function queryFlameGraph(
 
   // Create a lookup map StackTraceID -> StackTrace.
   const stackTraces = new Map<StackTraceID, StackTrace>();
-  for (const trace of resStackTraces.body.docs) {
-    if (trace.found) {
-      const frameIDs = trace._source.FrameID as string[];
+  if (testing) {
+    // console.log(JSON.stringify(resStackTraces, null, 2));
+
+    for (const trace of resStackTraces.body.hits.hits) {
+      const frameIDs = trace.fields.FrameID as string[];
       const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
       stackTraces.set(trace._id, {
         FileID: fileIDs,
         FrameID: frameIDs,
-        Type: trace._source.Type,
+        Type: trace.fields.Type,
       });
+    }
+  } else {
+    for (const trace of resStackTraces.body.docs) {
+      if (trace.found) {
+        const frameIDs = trace._source.FrameID as string[];
+        const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
+        stackTraces.set(trace._id, {
+          FileID: fileIDs,
+          FrameID: frameIDs,
+          Type: trace._source.Type,
+        });
+      }
     }
   }
   if (stackTraces.size < stackTraceEvents.size) {
