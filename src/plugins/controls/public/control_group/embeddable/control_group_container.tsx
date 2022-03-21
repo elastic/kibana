@@ -12,6 +12,7 @@ import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subscription, concat } from 'rxjs';
+import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   distinctUntilChanged,
   debounceTime,
@@ -134,7 +135,6 @@ export class ControlGroupContainer extends Container<
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
-              <EuiHorizontalRule margin="none" />,
               this.getEditControlGroupButton(closePopover),
             ]}
           />
