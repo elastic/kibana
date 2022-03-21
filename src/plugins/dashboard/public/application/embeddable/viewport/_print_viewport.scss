@@ -1,9 +1,70 @@
+$a4PageHeight: 297mm;
+$a4PageWidth: 210mm;
+$a4PageMargin: 0;
+
+$visualisationsPerPage: 2;
+
 .printViewport {
   &__vis {
-    height: 600px; // These values might need to be passed in as dimensions for the report. I.e., print should use layout dimensions.
-    width: 975px;
+    margin: 5mm auto;
+    height: calc(#{$a4PageHeight} / #{$visualisationsPerPage});
+    width: $a4PageWidth;
+  }
+}
 
-    // Some vertical space between vis, but center horizontally
-    margin: 10px auto;
+@page {
+  size: A4;
+  orientation: portrait;
+  padding: $a4PageMargin;
+}
+
+@mixin globalPrintRules {
+  html {
+    background-color: #FFF;
+  }
+
+  a[href]:after {
+    content: ' [' attr(href) ']';
+  }
+
+  figure {
+    break-inside: avoid;
+  }
+
+  code {
+    -webkit-print-color-adjust: exact;  /* Chrome/Safari/Edge/Opera */
+    color-adjust: exact;  /* Firefox */
+  }
+}
+
+/*
+General rules for print media
+*/
+@media print {
+  @include globalPrintRules();
+
+  .printViewport {
+    &__vis {
+      margin: 0 auto;
+      height: calc(#{$a4PageHeight} / #{$visualisationsPerPage});
+      width: $a4PageWidth;
+
+      & .euiPanel {
+        box-shadow: none !important;
+      }
+
+      & .embPanel__header button {
+        display: none;
+      }
+
+      &:nth-child(#{$visualisationsPerPage}n) {
+        page-break-after: always;
+        margin-top: 5mm;
+      }
+
+      & * {
+        overflow: hidden !important;
+      }
+    }
   }
 }
