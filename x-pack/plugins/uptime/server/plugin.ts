@@ -78,7 +78,7 @@ export class Plugin implements PluginType {
       router: core.http.createRouter(),
       cloud: plugins.cloud,
       kibanaVersion: this.initContext.env.packageInfo.version,
-      kibanaBaseUrl: core.http.basePath.publicBaseUrl,
+      basePath: core.http.basePath,
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
     } as UptimeServerSetup;

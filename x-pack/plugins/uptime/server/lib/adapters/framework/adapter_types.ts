@@ -6,7 +6,12 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { SavedObjectsClientContract, IScopedClusterClient, Logger } from 'src/core/server';
+import type {
+  SavedObjectsClientContract,
+  IScopedClusterClient,
+  Logger,
+  IBasePath,
+} from 'src/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 import { ObservabilityPluginSetup } from '../../../../../observability/server';
 import {
@@ -56,7 +61,7 @@ export interface UptimeServerSetup {
   logger: Logger;
   telemetry: TelemetryEventsSender;
   uptimeEsClient: UptimeESClient;
-  kibanaBaseUrl: string | undefined;
+  basePath: IBasePath;
 }
 
 export interface UptimeCorePluginsSetup {
