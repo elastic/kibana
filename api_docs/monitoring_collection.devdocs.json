@@ -1,0 +1,104 @@
+{
+  "id": "monitoringCollection",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "monitoringCollection",
+        "id": "def-server.MetricResult",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricResult",
+        "description": [],
+        "signature": [
+          "T & ",
+          "JsonObject"
+        ],
+        "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "monitoringCollection",
+        "id": "def-server.MonitoringCollectionConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "MonitoringCollectionConfig",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; }"
+        ],
+        "path": "x-pack/plugins/monitoring_collection/server/config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "monitoringCollection",
+      "id": "def-server.MonitoringCollectionSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "MonitoringCollectionSetup",
+      "description": [],
+      "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "monitoringCollection",
+          "id": "def-server.MonitoringCollectionSetup.registerMetric",
+          "type": "Function",
+          "tags": [],
+          "label": "registerMetric",
+          "description": [],
+          "signature": [
+            "<T>(metric: ",
+            "Metric",
+            "<T>) => void"
+          ],
+          "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "monitoringCollection",
+              "id": "def-server.MonitoringCollectionSetup.registerMetric.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "metric",
+              "description": [],
+              "signature": [
+                "Metric",
+                "<T>"
+              ],
+              "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -16,7 +17,10 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
-import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
+import {
+  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+} from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
@@ -51,20 +55,14 @@ const META_PROP_KEYS = ['metric_type', 'unit'];
  * @param indexPattern String with the index pattern
  */
 export function getTemplate({
-  type,
   templateIndexPattern,
-  fields,
-  mappings,
   pipelineName,
   packageName,
   composedOfTemplates,
   templatePriority,
   hidden,
 }: {
-  type: string;
   templateIndexPattern: string;
-  fields: Fields;
-  mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
@@ -72,10 +70,7 @@ export function getTemplate({
   hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
-    type,
     templateIndexPattern,
-    fields,
-    mappings,
     packageName,
     composedOfTemplates,
     templatePriority,
@@ -88,10 +83,13 @@ export function getTemplate({
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
 
-  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
-    // Add fleet global assets
-    template.composed_of = [...(template.composed_of || []), FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME];
-  }
+  template.composed_of = [
+    ...(template.composed_of || []),
+    FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+    ...(appContextService.getConfig()?.agentIdVerificationEnabled
+      ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
+      : []),
+  ];
 
   return template;
 }
@@ -321,6 +319,14 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
   return getRegistryDataStreamAssetBaseName(dataStream);
 }
 
+/**
+ * Given a data stream name, return the indexTemplate name
+ */
+function dataStreamNameToIndexTemplateName(dataStreamName: string): string {
+  const [type, dataset] = dataStreamName.split('-'); // ignore namespace at the end
+  return [type, dataset].join('-');
+}
+
 export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
   // undefined or explicitly set to false
   // See also https://github.com/elastic/package-spec/pull/102
@@ -387,45 +393,22 @@ const flattenFieldsToNameAndType = (
 };
 
 function getBaseTemplate(
-  type: string,
   templateIndexPattern: string,
-  fields: Fields,
-  mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
   templatePriority: number,
   hidden?: boolean
 ): IndexTemplate {
-  // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = getESAssetMetadata({ packageName });
 
   return {
     priority: templatePriority,
-    // To be completed with the correct index patterns
     index_patterns: [templateIndexPattern],
     template: {
       settings: {
         index: {},
       },
       mappings: {
-        // All the dynamic field mappings
-        dynamic_templates: [
-          // This makes sure all mappings are keywords by default
-          {
-            strings_as_keyword: {
-              mapping: {
-                ignore_above: 1024,
-                type: 'keyword',
-              },
-              match_mapping_type: 'string',
-            },
-          },
-        ],
-        // As we define fields ahead, we don't need any automatic field detection
-        // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
-        date_detection: false,
-        // All the properties we know from the fields.yml file
-        properties: mappings.properties,
         _meta,
       },
     },
@@ -490,70 +473,81 @@ const getDataStreams = async (
   }));
 };
 
+const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
+  try {
+    // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
+    return esClient.indices.rollover({
+      alias: dataStreamName,
+    });
+  } catch (error) {
+    throw new Error(`cannot rollover data stream [${dataStreamName}] due to error: ${error}`);
+  }
+};
+
 const updateAllDataStreams = async (
   indexNameWithTemplates: CurrentDataStream[],
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  const updatedataStreamPromises = indexNameWithTemplates.map(
-    ({ dataStreamName, indexTemplate }) => {
-      return updateExistingDataStream({ dataStreamName, esClient, logger, indexTemplate });
-    }
-  );
+  const updatedataStreamPromises = indexNameWithTemplates.map((templateEntry) => {
+    return updateExistingDataStream({
+      esClient,
+      logger,
+      dataStreamName: templateEntry.dataStreamName,
+    });
+  });
   await Promise.all(updatedataStreamPromises);
 };
 const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
   logger,
-  indexTemplate,
 }: {
   dataStreamName: string;
   esClient: ElasticsearchClient;
   logger: Logger;
-  indexTemplate: IndexTemplate;
 }) => {
-  const { settings, mappings } = indexTemplate.template;
-
-  // for now, remove from object so as not to update stream or data stream properties of the index until type and name
-  // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
-  // to skip updating and assume the value in the index mapping is correct
-  delete mappings.properties.stream;
-  delete mappings.properties.data_stream;
-  // try to update the mappings first
+  let settings: IndicesIndexSettings;
   try {
+    const simulateResult = await retryTransientEsErrors(() =>
+      esClient.indices.simulateTemplate({
+        name: dataStreamNameToIndexTemplateName(dataStreamName),
+      })
+    );
+
+    settings = simulateResult.template.settings;
+    const mappings = simulateResult.template.mappings;
+    // for now, remove from object so as not to update stream or data stream properties of the index until type and name
+    // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
+    // to skip updating and assume the value in the index mapping is correct
+    if (mappings && mappings.properties) {
+      delete mappings.properties.stream;
+      delete mappings.properties.data_stream;
+    }
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
           index: dataStreamName,
-          body: mappings,
+          body: mappings || {},
           write_index_only: true,
         }),
       { logger }
     );
     // if update fails, rollover data stream
   } catch (err) {
-    try {
-      // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-      const path = `/${dataStreamName}/_rollover`;
-      await esClient.transport.request({
-        method: 'POST',
-        path,
-      });
-    } catch (error) {
-      throw new Error(`cannot rollover data stream ${error}`);
-    }
+    await rolloverDataStream(dataStreamName, esClient);
+    return;
   }
   // update settings after mappings was successful to ensure
   // pointing to the new pipeline is safe
   // for now, only update the pipeline
-  if (!settings.index.default_pipeline) return;
+  if (!settings?.index?.default_pipeline) return;
   try {
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({
           index: dataStreamName,
-          body: { default_pipeline: settings.index.default_pipeline },
+          body: { default_pipeline: settings!.index!.default_pipeline },
         }),
       { logger }
     );

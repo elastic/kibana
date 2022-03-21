@@ -60,7 +60,6 @@ export class ProcessImpl implements Process {
     if (this.orphans.length) {
       children = [...children, ...this.orphans].sort(sortProcesses);
     }
-
     // When verboseMode is false, we filter out noise via a few techniques.
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {
@@ -68,8 +67,8 @@ export class ProcessImpl implements Process {
         const { group_leader: groupLeader, session_leader: sessionLeader } =
           child.getDetails().process;
 
-        // search matches will never be filtered out
-        if (child.searchMatched) {
+        // search matches or processes with alerts will never be filtered out
+        if (child.searchMatched || child.hasAlerts()) {
           return true;
         }
 

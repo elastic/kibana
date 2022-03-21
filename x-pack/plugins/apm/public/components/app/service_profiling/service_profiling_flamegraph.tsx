@@ -387,7 +387,7 @@ export function ServiceProfilingFlamegraph({
               }}
               pagination={{
                 pageSize: 20,
-                hidePerPageOptions: true,
+                showPerPageOptions: false,
               }}
               compressed
               columns={[

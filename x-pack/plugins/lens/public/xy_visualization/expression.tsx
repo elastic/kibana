@@ -262,7 +262,7 @@ export function XYChart({
   });
 
   if (filteredLayers.length === 0) {
-    const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
+    const icon: IconType = getIconForSeriesType(layers?.[0]?.seriesType || 'bar');
     return <EmptyPlaceholder icon={icon} />;
   }
 
@@ -613,6 +613,7 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+        legendSize={legend.legendSize}
         theme={{
           ...chartTheme,
           barSeriesStyle: {

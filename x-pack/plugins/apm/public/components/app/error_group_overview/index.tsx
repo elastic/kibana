@@ -68,7 +68,6 @@ export function ErrorGroupOverview() {
     comparisonType,
     comparisonEnabled,
   });
-
   const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,

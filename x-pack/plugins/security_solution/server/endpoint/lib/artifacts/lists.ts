@@ -188,7 +188,7 @@ function getMatcherFunction({
   os: ExceptionListItemSchema['os_types'][number];
 }): TranslatedEntryMatcher {
   return matchAny
-    ? field.endsWith('.caseless')
+    ? field.endsWith('.caseless') && os !== 'linux'
       ? 'exact_caseless_any'
       : 'exact_cased_any'
     : field.endsWith('.caseless')

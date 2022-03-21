@@ -31,7 +31,7 @@ import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { Storage } from '../../../../../../kibana_utils/public';
 import { usePager } from '../../../../utils/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
-import { flattenHit } from '../../../../../../data/common';
+import { flattenHit } from '../../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
 import { getFieldsToShow } from '../../../../utils/get_fields_to_show';

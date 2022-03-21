@@ -276,9 +276,20 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    // possibly undefined, but if undefined we want this test to fail
-    // @ts-expect-error TS2532
-    expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.users);
+    expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
+  });
+
+  // TODO: Sergi/detectionAndResponse remove when no longer experimental
+  it('should include detectionAndResponse when feature flag is on', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
+
+    expect(result?.current?.items?.[0].items?.[1].id).toEqual(
+      SecurityPageName.detectionAndResponse
+    );
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {

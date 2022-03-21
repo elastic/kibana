@@ -29,5 +29,14 @@ export const getDefaultsForActionParams = (
         pagerDutyDefaults.eventAction = EventActionOptions.RESOLVE;
       }
       return pagerDutyDefaults;
+    case '.xmatters':
+      const xmattersDefaults = {
+        alertActionGroupName: `{{${AlertProvidedActionVariables.alertActionGroupName}}}`,
+        signalId: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+        ruleName: `{{${AlertProvidedActionVariables.ruleName}}}`,
+        date: `{{${AlertProvidedActionVariables.date}}}`,
+        spaceId: `{{${AlertProvidedActionVariables.ruleSpaceId}}}`,
+      };
+      return xmattersDefaults;
   }
 };

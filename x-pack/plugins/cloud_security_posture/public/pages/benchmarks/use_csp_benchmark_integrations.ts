@@ -6,20 +6,30 @@
  */
 
 import { useQuery } from 'react-query';
-import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
-import { CspBenchmarkIntegration } from './types';
+import type { ListResult } from '../../../../fleet/common';
+import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
+import { useKibana } from '../../common/hooks/use_kibana';
+import type { Benchmark } from '../../../common/types';
 
 const QUERY_KEY = 'csp_benchmark_integrations';
 
-const FAKE_DATA: CspBenchmarkIntegration[] = [
-  createCspBenchmarkIntegrationFixture(),
-  createCspBenchmarkIntegrationFixture(),
-  createCspBenchmarkIntegrationFixture(),
-  createCspBenchmarkIntegrationFixture(),
-  createCspBenchmarkIntegrationFixture(),
-];
+interface Props {
+  name: string;
+  page: number;
+  perPage: number;
+}
 
-// TODO: Use data from BE
-export const useCspBenchmarkIntegrations = () => {
-  return useQuery(QUERY_KEY, () => Promise.resolve(FAKE_DATA));
+export const useCspBenchmarkIntegrations = ({ name, perPage, page }: Props) => {
+  const { http } = useKibana().services;
+  return useQuery([QUERY_KEY, { name, perPage, page }], () =>
+    http.get<ListResult<Benchmark>>(BENCHMARKS_ROUTE_PATH, {
+      query: {
+        benchmark_name: name,
+        per_page: perPage,
+        page,
+        sort_field: 'name',
+        sort_order: 'asc',
+      },
+    })
+  );
 };

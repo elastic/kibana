@@ -167,7 +167,7 @@ export const getColor = (
   rows: DatatableRow[],
   visParams: PartitionVisParams,
   palettes: PaletteRegistry | null,
-  byDataPalette: ReturnType<typeof byDataColorPaletteMap>,
+  byDataPalette: ReturnType<typeof byDataColorPaletteMap> | undefined,
   syncColors: boolean,
   isDarkMode: boolean,
   formatter: FieldFormatsStart,
@@ -216,9 +216,13 @@ export const getColor = (
     if (layerIndex < columns.length - 1) {
       return defaultColor;
     }
-    // only use the top level series layer for coloring
+    // for treemap use the top layer for coloring, for mosaic use the second layer
     if (seriesLayers.length > 1) {
-      seriesLayers.pop();
+      if (chartType === ChartTypes.MOSAIC) {
+        seriesLayers.shift();
+      } else {
+        seriesLayers.pop();
+      }
     }
   }
 

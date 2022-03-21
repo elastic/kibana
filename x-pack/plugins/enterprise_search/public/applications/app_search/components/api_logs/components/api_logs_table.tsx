@@ -98,7 +98,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
     ? {
         pagination: {
           ...convertMetaToPagination(meta),
-          hidePerPageOptions: true,
+          showPerPageOptions: false,
         },
         onChange: handlePageChange(onPaginate),
       }

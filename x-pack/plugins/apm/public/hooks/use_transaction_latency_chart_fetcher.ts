@@ -23,16 +23,11 @@ export function useTransactionLatencyChartsFetcher({
 }) {
   const { transactionType, serviceName } = useApmServiceContext();
   const {
-    urlParams: {
-      transactionName,
-      latencyAggregationType,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { transactionName, latencyAggregationType },
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonType, comparisonEnabled },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -43,7 +38,6 @@ export function useTransactionLatencyChartsFetcher({
     comparisonType,
     comparisonEnabled,
   });
-
   const { data, error, status } = useFetcher(
     (callApmApi) => {
       if (

@@ -1242,7 +1242,7 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; }"
+                  "<T>>; }"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
@@ -1696,22 +1696,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/check_for_duplicate_title.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/check_for_duplicate_title.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.d.ts"
           }
         ],
         "children": [

@@ -3,7 +3,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2022-02-28
+date: 2022-03-15
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
@@ -14,33 +14,33 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | Deprecated API | Referencing plugin(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibDataPluginApi" section="def-public.IndexPatternsService" text="IndexPatternsService"/> | dataViews, visTypeTimeseries, maps, data | - |
-| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternsContract" text="IndexPatternsContract"/> | dataViews, observability, lens, maps, graph, stackAlerts, transform, inputControlVis, visTypeTimelion, data | - |
-| <DocLink id="kibDataPluginApi" section="def-public.IndexPattern" text="IndexPattern"/> | dataViews, upgradeAssistant, dashboard, visualizations, discover, visTypeTimeseries, observability, dataVisualizer, transform, lens, maps, ux, savedObjects, dataViewEditor, graph, stackAlerts, uptime, inputControlVis, visDefaultEditor, visTypeVega, dataViewFieldEditor, data | - |
-| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternField" text="IndexPatternField"/> | dataViews, dataVisualizer, lens, maps, dataViewEditor, inputControlVis, visDefaultEditor, visTypeTimeseries, discover, data | - |
+| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternsContract" text="IndexPatternsContract"/> | dataViews, lens, maps, graph, stackAlerts, transform, visTypeTimelion, data | - |
+| <DocLink id="kibDataPluginApi" section="def-public.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, dataVisualizer, transform, ux, lens, savedObjects, dataViewEditor, visualizations, graph, stackAlerts, uptime, maps, visDefaultEditor, visTypeVega, data | - |
+| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternField" text="IndexPatternField"/> | dataViews, dataVisualizer, lens, dataViewEditor, maps, visDefaultEditor, visTypeTimeseries, discover, data | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IIndexPattern" text="IIndexPattern"/> | dataViews, monitoring, stackAlerts, transform | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IndexPatternAttributes" text="IndexPatternAttributes"/> | dataViews, transform, canvas, discover | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IIndexPattern" text="IIndexPattern"/> | dataViews, monitoring, stackAlerts, transform, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternAttributes" text="IndexPatternAttributes"/> | dataViews, transform, canvas, discover, data | - |
-| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternsContract" text="IndexPatternsContract"/> | dataViews, observability, lens, maps, graph, stackAlerts, transform, inputControlVis, visTypeTimelion, data | - |
+| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternsContract" text="IndexPatternsContract"/> | dataViews, lens, maps, graph, stackAlerts, transform, visTypeTimelion, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.INDEX_PATTERN_SAVED_OBJECT_TYPE" text="INDEX_PATTERN_SAVED_OBJECT_TYPE"/> | dataViews, visualizations, data | - |
-| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternField" text="IndexPatternField"/> | dataViews, dataVisualizer, lens, maps, dataViewEditor, inputControlVis, visDefaultEditor, visTypeTimeseries, discover, data | - |
+| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternField" text="IndexPatternField"/> | dataViews, dataVisualizer, lens, dataViewEditor, maps, visDefaultEditor, visTypeTimeseries, discover, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternsService" text="IndexPatternsService"/> | dataViews, visTypeTimeseries, maps, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataViewsService.ensureDefaultDataView" text="ensureDefaultDataView"/> | dataViews, visualizations, dashboard, lens | - |
-| <DocLink id="kibDataPluginApi" section="def-common.IndexPattern" text="IndexPattern"/> | dataViews, upgradeAssistant, dashboard, visualizations, discover, visTypeTimeseries, observability, dataVisualizer, transform, lens, maps, ux, savedObjects, dataViewEditor, graph, stackAlerts, uptime, inputControlVis, visDefaultEditor, visTypeVega, dataViewFieldEditor, data | - |
+| <DocLink id="kibDataPluginApi" section="def-common.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, dataVisualizer, transform, ux, lens, savedObjects, dataViewEditor, visualizations, graph, stackAlerts, uptime, maps, visDefaultEditor, visTypeVega, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement, dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement, dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-server.IndexPatternAttributes" text="IndexPatternAttributes"/> | dataViews, transform, canvas, discover | - |
-| <DocLink id="kibDataPluginApi" section="def-server.IndexPatternField" text="IndexPatternField"/> | dataViews, dataVisualizer, lens, maps, dataViewEditor, inputControlVis, visDefaultEditor, visTypeTimeseries, discover | - |
-| <DocLink id="kibDataPluginApi" section="def-server.IndexPattern" text="IndexPattern"/> | dataViews, upgradeAssistant, dashboard, visualizations, discover, visTypeTimeseries, observability, dataVisualizer, transform, lens, maps, ux, savedObjects, dataViewEditor, graph, stackAlerts, uptime, inputControlVis, visDefaultEditor, visTypeVega, dataViewFieldEditor | - |
+| <DocLink id="kibDataPluginApi" section="def-server.IndexPatternField" text="IndexPatternField"/> | dataViews, dataVisualizer, lens, dataViewEditor, maps, visDefaultEditor, visTypeTimeseries, discover | - |
+| <DocLink id="kibDataPluginApi" section="def-server.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, dataVisualizer, transform, ux, lens, savedObjects, dataViewEditor, visualizations, graph, stackAlerts, uptime, maps, visDefaultEditor, visTypeVega | - |
 | <DocLink id="kibDataPluginApi" section="def-server.IndexPatternsService" text="IndexPatternsService"/> | dataViews, visTypeTimeseries, maps | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement, dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement, dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | discover, visualizations, lens, maps, fileUpload, dataVisualizer, infra, graph, monitoring, securitySolution, stackAlerts, transform, uptime, inputControlVis, visTypeTimelion, visTypeTimeseries, visTypeVega, savedObjects | - |
-| <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | discover, dashboard, lens, stackAlerts, visTypeTable, visTypeTimeseries, visTypeXy, visTypeVislib, dataViewFieldEditor, expressionPartitionVis | - |
+| <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | discover, dashboard, lens, stackAlerts, visTypeTable, visTypeTimeseries, visTypeXy, visTypeVislib, expressionPartitionVis | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataPluginStart.fieldFormats" text="fieldFormats"/> | visTypeTimeseries | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-server.DataViewsServerPluginStart.indexPatternsServiceFactory" text="indexPatternsServiceFactory"/> | data, lens, visTypeTimeseries, infra, maps, visTypeTimelion | - |
@@ -53,14 +53,13 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObject" text="SavedObject"/> | savedObjectsTaggingOss, visualizations, dashboard, lens | - |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModal" text="SavedObjectSaveModal"/> | embeddable, presentationUtil, discover, dashboard, graph | - |
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.license$" text="license$"/> | spaces, security, actions, alerting, ml, remoteClusters, graph, indexLifecycleManagement, mapsEms, painlessLab, rollup, searchprofiler, snapshotRestore, transform, upgradeAssistant | - |
-| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectsStart.SavedObjectClass" text="SavedObjectClass"/> | dashboard | - |
+| <DocLink id="kibCorePluginApi" section="def-public.CoreSetup.injectedMetadata" text="injectedMetadata"/> | visTypeVega | - |
+| <DocLink id="kibCorePluginApi" section="def-public.CoreStart.injectedMetadata" text="injectedMetadata"/> | monitoring, visTypeVega | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.create" text="create"/> | discover | - |
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.create" text="create"/> | discover | - |
 | <DocLink id="kibUiActionsPluginApi" section="def-public.UiActionsService.executeTriggerActions" text="executeTriggerActions"/> | data, discover, embeddable | - |
 | <DocLink id="kibCorePluginApi" section="def-public.UiSettingsParams.metric" text="metric"/> | advancedSettings, discover | - |
 | <DocLink id="kibCorePluginApi" section="def-server.UiSettingsParams.metric" text="metric"/> | advancedSettings, discover | - |
-| <DocLink id="kibCorePluginApi" section="def-public.CoreSetup.injectedMetadata" text="injectedMetadata"/> | visTypeVega | - |
-| <DocLink id="kibCorePluginApi" section="def-public.CoreStart.injectedMetadata" text="injectedMetadata"/> | monitoring, visTypeVega | - |
 | <DocLink id="kibCorePluginApi" section="def-server.OpsMetrics.process" text="process"/> | monitoring, kibanaUsageCollection | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionFunctionDefinition.context" text="context"/> | canvas, visTypeXy | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionsServiceSetup.getFunction" text="getFunction"/> | canvas | - |
@@ -76,12 +75,14 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibLicensingPluginApi" section="def-server.PublicLicense.mode" text="mode"/> | apm, security, securitySolution | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | encryptedSavedObjects, actions, cloud, ml, dataEnhanced, logstash, securitySolution | - |
 | <DocLink id="kibCorePluginApi" section="def-public.AppLeaveHandler" text="AppLeaveHandler"/> | securitySolution | - |
+| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectsStart.SavedObjectClass" text="SavedObjectClass"/> | dashboard | - |
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
 | <DocLink id="kibHomePluginApi" section="def-public.HomePublicPluginSetup.environment" text="environment"/> | cloud, apm | - |
 | <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.license$" text="license$"/> | security, licenseManagement, ml, apm, crossClusterReplication, logstash, painlessLab, searchprofiler, watcher | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getScriptedFields" text="getScriptedFields"/> | dataViewManagement | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | actions, ml, enterpriseSearch, savedObjectsTagging | - |
+| <DocLink id="kibExpressionGaugePluginApi" section="def-common.GaugeState.percentageMode" text="percentageMode"/> | visTypeGauge | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.truncate" text="truncate"/> | visTypePie | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.last_level" text="last_level"/> | visTypePie | - |
 | <DocLink id="kibFeaturesPluginApi" section="def-public.FeatureKibanaPrivileges.disabled" text="disabled"/> | security, fleet | - |
@@ -90,7 +91,6 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibFeaturesPluginApi" section="def-server.FeatureKibanaPrivileges.disabled" text="disabled"/> | security, fleet | - |
 | <DocLink id="kibFeaturesPluginApi" section="def-server.FeatureElasticsearchPrivileges.requiredRoles" text="requiredRoles"/> | security | - |
 | <DocLink id="kibCorePluginApi" section="def-public.AppMountParameters.appBasePath" text="appBasePath"/> | management, fleet, security, kibanaOverview | - |
-| <DocLink id="kibCorePluginApi" section="def-server.AsyncPlugin" text="AsyncPlugin"/> | fleet | - |
 | <DocLink id="kibCorePluginApi" section="def-public.IHttpFetchError.req" text="req"/> | ml | - |
 | <DocLink id="kibCorePluginApi" section="def-public.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
 | <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
@@ -98,10 +98,10 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibCorePluginApi" section="def-server.ElasticsearchServiceSetup.legacy" text="legacy"/> | console | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.fetch" text="fetch"/> | discover, maps, inputControlVis | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.esFilters" text="esFilters"/> | discover, discoverEnhanced, maps | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-public.Filter" text="Filter"/> | dashboard, discoverEnhanced, urlDrilldown, inputControlVis, discover, maps | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-common.Filter" text="Filter"/> | dashboard, discoverEnhanced, urlDrilldown, inputControlVis, discover, maps | 8.1 |
+| <DocLink id="kibDataPluginApi" section="def-public.Filter" text="Filter"/> | dashboard, discoverEnhanced, urlDrilldown, discover, maps | 8.1 |
+| <DocLink id="kibDataPluginApi" section="def-common.Filter" text="Filter"/> | dashboard, discoverEnhanced, urlDrilldown, discover, maps | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | discover, maps, inputControlVis | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-server.Filter" text="Filter"/> | dashboard, discoverEnhanced, urlDrilldown, inputControlVis, discover, maps | 8.1 |
+| <DocLink id="kibDataPluginApi" section="def-server.Filter" text="Filter"/> | dashboard, discoverEnhanced, urlDrilldown, discover, maps | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.esKuery" text="esKuery"/> | apm, graph, stackAlerts | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.esQuery" text="esQuery"/> | stackAlerts | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.RangeFilter" text="RangeFilter"/> | discoverEnhanced | 8.1 |
@@ -123,23 +123,16 @@ Safe to remove.
 | ---------------|------------|
 | <DocLink id="kibDataPluginApi" section="def-public.AggConfig.toJSON" text="toJSON"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSourceFields.fieldsFromSource" text="fieldsFromSource"/> | data | 
-| <DocLink id="kibDataPluginApi" section="def-public.RangeFilterMeta" text="RangeFilterMeta"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-public.RangeFilterParams" text="RangeFilterParams"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-public.ExistsFilter" text="ExistsFilter"/> | data | 
-| <DocLink id="kibDataPluginApi" section="def-public.PhrasesFilter" text="PhrasesFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-public.PhraseFilter" text="PhraseFilter"/> | data | 
-| <DocLink id="kibDataPluginApi" section="def-public.CustomFilter" text="CustomFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-public.MatchAllFilter" text="MatchAllFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-public.EsQueryConfig" text="EsQueryConfig"/> | data | 
-| <DocLink id="kibDataPluginApi" section="def-public.isFilter" text="isFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-public.isFilters" text="isFilters"/> | data | 
-| <DocLink id="kibDataPluginApi" section="def-common.RangeFilterMeta" text="RangeFilterMeta"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.RangeFilterParams" text="RangeFilterParams"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.ExistsFilter" text="ExistsFilter"/> | data | 
-| <DocLink id="kibDataPluginApi" section="def-common.PhrasesFilter" text="PhrasesFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.PhraseFilter" text="PhraseFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.MatchAllFilter" text="MatchAllFilter"/> | data | 
-| <DocLink id="kibDataPluginApi" section="def-common.CustomFilter" text="CustomFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.FilterMeta" text="FilterMeta"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.EsQueryConfig" text="EsQueryConfig"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.COMPARE_ALL_OPTIONS" text="COMPARE_ALL_OPTIONS"/> | data | 
@@ -175,7 +168,6 @@ Safe to remove.
 | <DocLink id="kibDataPluginApi" section="def-common.buildExistsFilter" text="buildExistsFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.toggleFilterNegated" text="toggleFilterNegated"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.FILTERS" text="FILTERS"/> | data | 
-| <DocLink id="kibDataPluginApi" section="def-common.isFilter" text="isFilter"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.isFilterDisabled" text="isFilterDisabled"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.dedupFilters" text="dedupFilters"/> | data | 
 | <DocLink id="kibDataPluginApi" section="def-common.onlyDisabledFiltersChanged" text="onlyDisabledFiltersChanged"/> | data | 
@@ -202,10 +194,6 @@ Safe to remove.
 | <DocLink id="kibReportingPluginApi" section="def-common.BasePayload" text="BasePayload"/> | reporting | 
 | <DocLink id="kibReportingPluginApi" section="def-common.JobAppParamsPDF" text="JobAppParamsPDF"/> | reporting | 
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.interval" text="interval"/> | taskManager | 
-| <DocLink id="kibCorePluginApi" section="def-public.SavedObjectsImportFailure.title" text="title"/> | core | 
 | <DocLink id="kibCorePluginApi" section="def-public.IHttpFetchError.res" text="res"/> | core | 
-| <DocLink id="kibCorePluginApi" section="def-public.AsyncPlugin" text="AsyncPlugin"/> | core | 
-| <DocLink id="kibCorePluginApi" section="def-server.ElasticsearchServiceStart.legacy" text="legacy"/> | core | 
-| <DocLink id="kibCorePluginApi" section="def-server.HttpServiceSetup.auth" text="auth"/> | core | 
-| <DocLink id="kibCorePluginApi" section="def-server.PluginManifest.extraPublicDirs" text="extraPublicDirs"/> | core | 
-| <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsImportFailure.title" text="title"/> | core |
+| <DocLink id="kibCorePluginApi" section="def-server.AsyncPlugin" text="AsyncPlugin"/> | core | 
+| <DocLink id="kibCorePluginApi" section="def-server.PluginManifest.extraPublicDirs" text="extraPublicDirs"/> | core |

@@ -138,45 +138,36 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         .subscribe(this.runOptionsListQuery)
     );
 
-    // build filters when selectedOptions or invalidSelections change
-    this.subscriptions.add(
-      this.componentStateSubject$
-        .pipe(
-          debounceTime(100),
-          distinctUntilChanged((a, b) => isEqual(a.validSelections, b.validSelections)),
-          skip(1) // skip the first input update because initial filters will be built by initialize.
-        )
-        .subscribe(() => this.buildFilter())
-    );
-
     /**
-     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections.
+     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections, and publish filter
      **/
     this.subscriptions.add(
       this.getInput$()
         .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
-        .subscribe(({ selectedOptions: newSelectedOptions }) => {
+        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
             this.updateComponentState({
               validSelections: [],
               invalidSelections: [],
             });
-            return;
-          }
-          const { invalidSelections } = this.componentStateSubject$.getValue();
-          const newValidSelections: string[] = [];
-          const newInvalidSelections: string[] = [];
-          for (const selectedOption of newSelectedOptions) {
-            if (invalidSelections?.includes(selectedOption)) {
-              newInvalidSelections.push(selectedOption);
-              continue;
+          } else {
+            const { invalidSelections } = this.componentStateSubject$.getValue();
+            const newValidSelections: string[] = [];
+            const newInvalidSelections: string[] = [];
+            for (const selectedOption of newSelectedOptions) {
+              if (invalidSelections?.includes(selectedOption)) {
+                newInvalidSelections.push(selectedOption);
+                continue;
+              }
+              newValidSelections.push(selectedOption);
             }
-            newValidSelections.push(selectedOption);
+            this.updateComponentState({
+              validSelections: newValidSelections,
+              invalidSelections: newInvalidSelections,
+            });
           }
-          this.updateComponentState({
-            validSelections: newValidSelections,
-            invalidSelections: newInvalidSelections,
-          });
+          const newFilters = await this.buildFilter();
+          this.updateOutput({ filters: newFilters });
         })
     );
   };
@@ -216,8 +207,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   }
 
   private runOptionsListQuery = async () => {
-    this.updateComponentState({ loading: true });
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    this.updateComponentState({ loading: true });
+    this.updateOutput({ loading: true, dataViews: [dataView] });
     const { ignoreParentSettings, filters, query, selectedOptions, timeRange } = this.getInput();
 
     if (this.abortController) this.abortController.abort();
@@ -244,30 +236,32 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         totalCardinality,
         loading: false,
       });
-      return;
+    } else {
+      const valid: string[] = [];
+      const invalid: string[] = [];
+
+      for (const selectedOption of selectedOptions) {
+        if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+        else valid.push(selectedOption);
+      }
+      this.updateComponentState({
+        availableOptions: suggestions,
+        invalidSelections: invalid,
+        validSelections: valid,
+        totalCardinality,
+        loading: false,
+      });
     }
 
-    const valid: string[] = [];
-    const invalid: string[] = [];
-
-    for (const selectedOption of selectedOptions) {
-      if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
-      else valid.push(selectedOption);
-    }
-    this.updateComponentState({
-      availableOptions: suggestions,
-      invalidSelections: invalid,
-      validSelections: valid,
-      totalCardinality,
-      loading: false,
-    });
+    // publish filter
+    const newFilters = await this.buildFilter();
+    this.updateOutput({ loading: false, filters: newFilters });
   };
 
   private buildFilter = async () => {
     const { validSelections } = this.componentState;
     if (!validSelections || isEmpty(validSelections)) {
-      this.updateOutput({ filters: [] });
-      return;
+      return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
 
@@ -279,7 +273,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     newFilter.meta.key = field?.name;
-    this.updateOutput({ filters: [newFilter] });
+    return [newFilter];
   };
 
   reload = () => {

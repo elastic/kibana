@@ -22,6 +22,7 @@ import type {
 import { defineRoutes } from './routes';
 import { cspRuleAssetType } from './saved_objects/cis_1_4_1/csp_rule_type';
 import { initializeCspRules } from './saved_objects/cis_1_4_1/initialize_rules';
+import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
 
 export interface CspAppContext {
   logger: Logger;
@@ -68,7 +69,7 @@ export class CspPlugin
     });
 
     initializeCspRules(core.savedObjects.createInternalRepository());
-
+    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     return {};
   }
   public stop() {}

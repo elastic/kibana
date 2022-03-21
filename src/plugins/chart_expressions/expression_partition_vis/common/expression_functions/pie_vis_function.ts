@@ -9,7 +9,6 @@
 import { Position } from '@elastic/charts';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
-import { validateOptions } from '../../../../charts/common';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -55,12 +54,18 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: strings.getLegendDisplayArgHelp(),
       options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
       default: LegendDisplay.HIDE,
+      strict: true,
     },
     legendPosition: {
       types: ['string'],
       default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      strict: true,
+    },
+    legendSize: {
+      types: ['number'],
+      help: strings.getLegendSizeArgHelp(),
     },
     nestedLegend: {
       types: ['boolean'],
@@ -132,9 +137,6 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     if (args.splitRow) {
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
-
-    validateOptions(args.legendDisplay, LegendDisplay, errors.invalidLegendDisplayError);
-    validateOptions(args.legendPosition, Position, errors.invalidLegendPositionError);
 
     const visConfig: PartitionVisParams = {
       ...args,

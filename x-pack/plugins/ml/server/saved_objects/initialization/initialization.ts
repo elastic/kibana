@@ -8,7 +8,7 @@
 import { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from 'kibana/server';
 import { savedObjectClientsFactory } from '../util';
 import { syncSavedObjectsFactory } from '../sync';
-import { jobSavedObjectServiceFactory, JobObject } from '../service';
+import { mlSavedObjectServiceFactory, JobObject } from '../service';
 import { mlLog } from '../../lib/log';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { createJobSpaceOverrides } from './space_overrides';
@@ -47,7 +47,7 @@ export function jobSavedObjectsInitializationFactory(
         return;
       }
 
-      const jobSavedObjectService = jobSavedObjectServiceFactory(
+      const mlSavedObjectService = mlSavedObjectServiceFactory(
         savedObjectsClient,
         savedObjectsClient,
         spacesEnabled,
@@ -60,7 +60,7 @@ export function jobSavedObjectsInitializationFactory(
       // create space overrides for specific jobs
       const jobSpaceOverrides = await createJobSpaceOverrides(client);
       // initialize jobs
-      const { initSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
+      const { initSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
       const { jobs, trainedModels } = await initSavedObjects(false, jobSpaceOverrides);
       mlLog.info(`${jobs.length + trainedModels.length} ML saved objects initialized`);
     } catch (error) {

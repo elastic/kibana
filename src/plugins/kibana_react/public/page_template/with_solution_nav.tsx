@@ -39,7 +39,6 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
     const sideBarClasses = classNames(
       'kbnPageTemplate__pageSideBar',
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'kbnPageTemplate__pageSideBar--shrink':
           isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
       },
