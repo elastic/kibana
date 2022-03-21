@@ -162,7 +162,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     moveHelperToHooks(this.container, 'blockHelperMissing', keepHelperInHelpers);
 
     if (!this.ast) {
-      this.ast = Handlebars.parse(this.template); // TODO: can we get away with using parseWithoutProcessing instead?
+      this.ast = Handlebars.parse(this.template);
     }
 
     this.accept(this.ast);
