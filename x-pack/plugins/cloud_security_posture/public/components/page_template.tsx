@@ -46,7 +46,11 @@ export const getSideNavItems = (
 const DEFAULT_PROPS: KibanaPageTemplateProps = {
   solutionNav: {
     name: CLOUD_SECURITY_POSTURE,
-    items: getSideNavItems(allNavigationItems),
+    items: getSideNavItems({
+      dashboard: allNavigationItems.dashboard,
+      findings: allNavigationItems.findings,
+      benchmark: allNavigationItems.benchmarks,
+    }),
   },
   restrictWidth: false,
 };
