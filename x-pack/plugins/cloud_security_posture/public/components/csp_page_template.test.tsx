@@ -18,7 +18,7 @@ import { UseQueryResult } from 'react-query';
 
 const chance = new Chance();
 
-// Synchronized to the error message in the formatted message in `page_template.tsx`
+// Synchronized to the error message in the formatted message in `csp_page_template.tsx`
 const ERROR_LOADING_DATA_DEFAULT_MESSAGE = "We couldn't fetch your cloud security posture data";
 const packageNotInstalledUniqueTexts = [
   PACKAGE_NOT_INSTALLED_TEXT.PAGE_TITLE,

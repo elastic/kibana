@@ -21,7 +21,7 @@ import { LOADING, PACKAGE_NOT_INSTALLED_TEXT, DEFAULT_NO_DATA_TEXT } from './tra
 import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
 
-interface CspError {
+interface QueryError {
   body: {
     error: string;
     message: string;
@@ -87,7 +87,7 @@ const getPackageNotInstalledConfig = (
 
 const DefaultLoading = () => <CspLoadingState>{LOADING}</CspLoadingState>;
 
-const DefaultError = (error: CspError) => (
+const DefaultError = (error: QueryError) => (
   <EuiEmptyPrompt
     color="danger"
     iconType="alert"
@@ -119,7 +119,7 @@ const DefaultError = (error: CspError) => (
 export const CspPageTemplate: React.FC<
   KibanaPageTemplateProps & {
     loadingRender?: () => JSX.Element;
-    errorRender?: (error: CspError) => JSX.Element;
+    errorRender?: (error: QueryError) => JSX.Element;
     query?: UseQueryResult;
   }
 > = ({
@@ -149,7 +149,7 @@ export const CspPageTemplate: React.FC<
   const render = () => {
     // TODO: pass query to render functions
     if (query?.isLoading) return loadingRender();
-    if (query?.isError) return errorRender(query.error as CspError);
+    if (query?.isError) return errorRender(query.error as QueryError);
     if (query?.isSuccess) return children;
 
     return children;

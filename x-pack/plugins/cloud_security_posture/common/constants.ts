@@ -24,8 +24,8 @@ export const RULE_FAILED = `failed`;
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
-  showBenchmarks: true,
+  showBenchmarks: false,
   showTrendLineMock: false,
-  showManageRulesMock: true,
+  showManageRulesMock: false,
   showRisksMock: false,
 } as const;
