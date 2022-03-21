@@ -33,7 +33,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'lnsDatatable_rows > lns-dimensionTrigger'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_rows')).to.eql(
-          'Top values of clientip'
+          'Top 3 values of clientip'
         );
 
         await PageObjects.lens.dragFieldToDimensionTrigger(
