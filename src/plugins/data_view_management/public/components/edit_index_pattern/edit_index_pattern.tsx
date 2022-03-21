@@ -112,7 +112,7 @@ export const EditIndexPattern = withRouter(
       }
 
       const warning =
-        indexPattern.namespaces.length > 1 ? (
+        indexPattern.namespaces.length > 1 || indexPattern.namespaces.includes('*') ? (
           <FormattedMessage
             id="indexPatternManagement.editDataView.deleteWarning"
             defaultMessage="When you delete {dataViewName}, you remove it from every space it is shared in. You can't undo this action."

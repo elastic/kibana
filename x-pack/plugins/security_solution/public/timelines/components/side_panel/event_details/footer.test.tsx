@@ -101,6 +101,7 @@ const defaultProps = {
   onAddIsolationStatusClick: jest.fn(),
   expandedEvent: { eventId: ecsData._id, indexName: '' },
   detailsData: mockAlertDetailsDataWithIsObject,
+  refetchFlyoutData: jest.fn(),
 };
 
 describe('event details footer component', () => {

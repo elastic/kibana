@@ -46,6 +46,8 @@ interface SiemSearchBarProps {
   pollForSignalIndex?: () => void;
   timelineId?: string;
   dataTestSubj?: string;
+  hideFilterBar?: boolean;
+  hideQueryInput?: boolean;
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
@@ -53,6 +55,8 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     end,
     filterQuery,
     fromStr,
+    hideFilterBar = false,
+    hideQueryInput = false,
     id,
     indexPattern,
     isLoading = false,
@@ -293,10 +297,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           onSaved={onSaved}
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
-          showFilterBar={true}
+          showFilterBar={!hideFilterBar}
           showDatePicker={true}
           showQueryBar={true}
-          showQueryInput={true}
+          showQueryInput={!hideQueryInput}
           showSaveQuery={true}
           dataTestSubj={dataTestSubj}
         />
