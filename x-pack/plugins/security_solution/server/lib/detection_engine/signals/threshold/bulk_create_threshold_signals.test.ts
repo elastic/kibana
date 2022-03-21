@@ -60,12 +60,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       'test',
       startedAt,
       from,
-      undefined,
-      loggingSystemMock.createLogger(),
       threshold,
-      '1234',
-      undefined,
-      sampleThresholdSignalHistory()
+      '1234'
     );
     const _id = calculateThresholdSignalUuid(
       '1234',
@@ -158,12 +154,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       'test',
       startedAt,
       from,
-      undefined,
-      loggingSystemMock.createLogger(),
       threshold,
-      '1234',
-      undefined,
-      sampleThresholdSignalHistory()
+      '1234'
     );
     expect(transformedResults).toEqual({
       took: 10,
@@ -226,12 +218,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       'test',
       startedAt,
       from,
-      undefined,
-      loggingSystemMock.createLogger(),
       threshold,
-      '1234',
-      undefined,
-      sampleThresholdSignalHistory()
+      '1234'
     );
     const _id = calculateThresholdSignalUuid('1234', startedAt, [], '');
     expect(transformedResults).toEqual({

@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash';
 
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import agent from 'elastic-apm-node';
 
 import { createPersistenceRuleTypeWrapper } from '../../../../../rule_registry/server';
@@ -19,11 +18,7 @@ import {
   getRuleRangeTuples,
   hasReadIndexPrivileges,
   hasTimestampFields,
-  isEqlParams,
-  isQueryParams,
-  isSavedQueryParams,
-  isThreatParams,
-  isThresholdParams,
+  isMachineLearningParams,
 } from '../signals/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { CreateSecurityRuleTypeWrapper } from './types';
@@ -132,22 +127,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ...params,
             name,
             id: alertId,
-          } as unknown as NotificationRuleTypeParams;
+          };
 
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
           try {
-            // Typescript 4.1.3 can't figure out that `!isMachineLearningParams(params)` also excludes the only rule type
-            // of rule params that doesn't include `params.index`, but Typescript 4.3.5 does compute the stricter type correctly.
-            // When we update Typescript to >= 4.3.5, we can replace this logic with `!isMachineLearningParams(params)` again.
-            if (
-              isEqlParams(params) ||
-              isThresholdParams(params) ||
-              isQueryParams(params) ||
-              isSavedQueryParams(params) ||
-              isThreatParams(params)
-            ) {
+            if (!isMachineLearningParams(params)) {
               const index = params.index;
               const hasTimestampOverride = !!timestampOverride;
 
@@ -169,7 +155,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     {
                       index,
                       fields: hasTimestampOverride
-                        ? ['@timestamp', timestampOverride as string]
+                        ? ['@timestamp', timestampOverride]
                         : ['@timestamp'],
                       include_unmapped: true,
                     },
@@ -177,9 +163,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   )
                 );
                 wroteWarningStatus = await hasTimestampFields({
-                  timestampField: hasTimestampOverride
-                    ? (timestampOverride as string)
-                    : '@timestamp',
+                  timestampField: hasTimestampOverride ? timestampOverride : '@timestamp',
                   timestampFieldCapsResponse: timestampFieldCaps,
                   inputIndices,
                   ruleExecutionLogger,
@@ -201,8 +185,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const { tuples, remainingGap } = getRuleRangeTuples({
             logger,
             previousStartedAt,
-            from: from as string,
-            to: to as string,
+            from,
+            to,
             interval,
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             buildRuleMessage,
@@ -235,7 +219,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const exceptionItems = await getExceptions({
               client: exceptionsClient,
-              lists: (params.exceptionsList as ListArray) ?? [],
+              lists: params.exceptionsList,
             });
 
             const bulkCreate = bulkCreateFactory(
