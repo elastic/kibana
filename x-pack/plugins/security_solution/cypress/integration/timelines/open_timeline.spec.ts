@@ -76,19 +76,19 @@ describe('Open timeline', () => {
     });
 
     it('should display timeline info - description', () => {
-      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', getTimeline().description);
+      cy.get(TIMELINES_DESCRIPTION).last().should('have.text', getTimeline().description);
     });
 
     it('should display timeline info - pinned event count', () => {
-      cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
+      cy.get(TIMELINES_PINNED_EVENT_COUNT).last().should('have.text', '1');
     });
 
     it('should display timeline info - notes count', () => {
-      cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
+      cy.get(TIMELINES_NOTES_COUNT).last().should('have.text', '1');
     });
 
     it('should display timeline info - favorite timeline', () => {
-      cy.get(TIMELINES_FAVORITE).first().should('exist');
+      cy.get(TIMELINES_FAVORITE).last().should('exist');
     });
 
     it('should display timeline content - title', () => {
