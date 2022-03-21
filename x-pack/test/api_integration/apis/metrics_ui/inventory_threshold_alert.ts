@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { Logger, LogMeta } from 'kibana/server';
+import sinon from 'sinon';
 import {
   Comparator,
   InventoryMetricConditions,
@@ -22,6 +24,21 @@ import { DATES } from './constants';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const log = getService('log');
+
+  const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
+    meta ? log.debug(msg, meta) : log.debug(msg);
+
+  const logger = {
+    trace: fakeLogger,
+    debug: fakeLogger,
+    info: fakeLogger,
+    warn: fakeLogger,
+    error: fakeLogger,
+    fatal: fakeLogger,
+    log: sinon.stub(),
+    get: sinon.stub(),
+  } as Logger;
 
   const baseCondition: InventoryMetricConditions = {
     metric: 'cpu',
@@ -77,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
     logQueryFields: void 0,
     compositeSize: 10000,
     startTime: DATES['8.0.0'].hosts_only.max,
+    logger,
   };
 
   describe('Inventory Threshold Rule Executor', () => {

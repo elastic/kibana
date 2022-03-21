@@ -231,6 +231,7 @@ export const config: {
         sniffInterval: Type<false | Duration>;
         sniffOnConnectionFault: Type<boolean>;
         hosts: Type<string | string[]>;
+        maxSockets: Type<number>;
         compression: Type<boolean>;
         username: Type<string | undefined>;
         password: Type<string | undefined>;
@@ -889,7 +890,7 @@ export { EcsEventType }
 export type ElasticsearchClient = Omit<Client, 'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'>;
 
 // @public
-export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
+export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'maxSockets' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
@@ -907,6 +908,7 @@ export class ElasticsearchConfig {
     readonly healthCheckDelay: Duration;
     readonly hosts: string[];
     readonly ignoreVersionMismatch: boolean;
+    readonly maxSockets: number;
     readonly password?: string;
     readonly pingTimeout: Duration;
     readonly requestHeadersWhitelist: string[];
@@ -2739,6 +2741,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
+    alias_purpose?: 'savedObjectConversion' | 'savedObjectImport';
     alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
@@ -2749,7 +2752,7 @@ export class SavedObjectsSerializer {
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
     generateRawId(namespace: string | undefined, type: string, id: string): string;
-    generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string;
+    generateRawLegacyUrlAliasId(namespace: string | undefined, type: string, id: string): string;
     isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): boolean;
     rawToSavedObject<T = unknown>(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): SavedObjectSanitizedDoc<T>;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
@@ -3158,8 +3161,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:375:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:483:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:376:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:378:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:485:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

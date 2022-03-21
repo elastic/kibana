@@ -49,7 +49,7 @@ interface Props {
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
   compact?: boolean;
-  hidePerPageOptions?: boolean;
+  showPerPageOptions?: boolean;
 }
 
 export function DependenciesTable(props: Props) {
@@ -62,7 +62,7 @@ export function DependenciesTable(props: Props) {
     nameColumnTitle,
     status,
     compact = true,
-    hidePerPageOptions = false,
+    showPerPageOptions = true,
   } = props;
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
@@ -236,7 +236,7 @@ export function DependenciesTable(props: Props) {
             initialSortField="impactValue"
             initialSortDirection="desc"
             pagination={true}
-            hidePerPageOptions={hidePerPageOptions}
+            showPerPageOptions={showPerPageOptions}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

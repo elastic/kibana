@@ -66,15 +66,15 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: StopTransformsRequestSchema = [
           { id: transformId, state: TRANSFORM_STATE.STARTED },
         ];
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body[transformId].success).to.eql(true);
@@ -87,15 +87,15 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: StopTransformsRequestSchema = [
           { id: transformId, state: TRANSFORM_STATE.STARTED },
         ];
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body[transformId].success).to.eql(false);
@@ -111,15 +111,15 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: StopTransformsRequestSchema = [
           { id: 'invalid_transform_id', state: TRANSFORM_STATE.STARTED },
         ];
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body.invalid_transform_id.success).to.eql(false);
@@ -148,15 +148,15 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should stop multiple transforms by transformIds', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(isStopTransformsResponseSchema(body)).to.eql(true);
 
@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should stop multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
@@ -180,8 +180,8 @@ export default ({ getService }: FtrProviderContext) => {
             { id: reqBody[0].id, state: reqBody[0].state },
             { id: invalidTransformId, state: TRANSFORM_STATE.STOPPED },
             { id: reqBody[1].id, state: reqBody[1].state },
-          ])
-          .expect(200);
+          ]);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(isStopTransformsResponseSchema(body)).to.eql(true);
 

@@ -9,7 +9,7 @@ import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/compar
 import { getTimeRangeComparison } from './get_time_range_comparison';
 import { getDateRange } from '../../../context/url_params_context/helpers';
 import { getComparisonOptions } from './get_comparison_options';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 function getExpectedTimesAndComparisons({
   rangeFrom,
@@ -49,6 +49,7 @@ describe('Comparison test suite', () => {
   let dateNowSpy: jest.SpyInstance;
 
   beforeAll(() => {
+    moment.tz.setDefault('Europe/London');
     const mockDateNow = '2022-01-14T18:30:15.500Z';
     dateNowSpy = jest
       .spyOn(Date, 'now')
@@ -56,6 +57,7 @@ describe('Comparison test suite', () => {
   });
 
   afterAll(() => {
+    moment.tz.setDefault('');
     dateNowSpy.mockRestore();
   });
 

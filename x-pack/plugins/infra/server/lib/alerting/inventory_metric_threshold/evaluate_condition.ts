@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { mapValues } from 'lodash';
 import moment from 'moment';
+import { Logger } from '@kbn/logging';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
@@ -34,6 +35,7 @@ export const evaluateCondition = async ({
   filterQuery,
   lookbackSize,
   startTime,
+  logger,
 }: {
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
@@ -44,6 +46,7 @@ export const evaluateCondition = async ({
   filterQuery?: string;
   lookbackSize?: number;
   startTime?: number;
+  logger: Logger;
 }): Promise<Record<string, ConditionResult>> => {
   const { metric, customMetric } = condition;
 
@@ -69,6 +72,7 @@ export const evaluateCondition = async ({
     logQueryFields,
     compositeSize,
     condition,
+    logger,
     filterQuery,
     customMetric
   );

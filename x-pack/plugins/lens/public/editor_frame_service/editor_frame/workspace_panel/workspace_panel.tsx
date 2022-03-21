@@ -504,6 +504,7 @@ export const VisualizationWrapper = ({
           onActiveDataChange(
             Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
               (acc, [key, value], index, tables) => ({
+                ...acc,
                 [tables.length === 1 ? defaultLayerId : key]: value,
               }),
               {}
