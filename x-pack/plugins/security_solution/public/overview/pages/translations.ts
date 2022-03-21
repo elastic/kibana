@@ -53,3 +53,18 @@ export const VIEW_ALERTS = i18n.translate('xpack.securitySolution.overview.viewA
 export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewEventsButtonLabel', {
   defaultMessage: 'View events',
 });
+
+export const DETECTION_RESPONSE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.pageTitle',
+  {
+    defaultMessage: 'Detection & Response - SOC',
+  }
+);
+
+export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
+  defaultMessage: 'Updating...',
+});
+
+export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
+  defaultMessage: 'Updated',
+});
