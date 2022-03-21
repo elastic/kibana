@@ -477,8 +477,8 @@ return (
 <2> The `title` field is optional, it specifies a human-readable identifier for your object that will be displayed in the flyout header.
 <3> The `noun` field is optional, it just changes "object" in the flyout to whatever you specify -- you may want the flyout to say
     "dashboard" or "index pattern" instead!
-<4> The `behaviorContext` field is optional, it controls how the space list is displayed. When using an `"outside-space"`` behavior context,
-    the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a `"within-space"`` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
+<4> The `behaviorContext` field is optional, it controls how the space list is displayed. When using an `"outside-space"` behavior context,
+    the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a `"within-space"` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
 
 [[sharing-saved-objects-faq]]
 === Frequently asked questions (FAQ)
