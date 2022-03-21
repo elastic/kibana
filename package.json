@@ -438,7 +438,7 @@
     "@babel/register": "^7.16.0",
     "@babel/traverse": "^7.16.3",
     "@babel/types": "^7.16.0",
-    "@bazel/ibazel": "^0.15.10",
+    "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "^3.8.0",
     "@cypress/snapshot": "^2.1.7",
     "@cypress/webpack-preprocessor": "^5.6.0",

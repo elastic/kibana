@@ -1002,12 +1002,12 @@ export default ({ getService }: FtrProviderContext) => {
     rqBody: object,
     rspCode: number
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/api/ml/modules/setup/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(rqBody)
-      .expect(rspCode);
+      .send(rqBody);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }

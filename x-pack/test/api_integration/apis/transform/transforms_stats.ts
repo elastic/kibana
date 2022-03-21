@@ -73,29 +73,29 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return a list of transforms statistics for super-user', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get('/api/transform/transforms/_stats')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+        .send();
+      transform.api.assertResponseStatusCode(200, status, body);
 
       assertTransformsStatsResponseBody(body);
     });
 
     it('should return a list of transforms statistics view-only user', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/transform/transforms/_stats`)
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+        .send();
+      transform.api.assertResponseStatusCode(200, status, body);
 
       assertTransformsStatsResponseBody(body);
     });

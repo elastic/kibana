@@ -100,12 +100,12 @@ export default ({ getService }: FtrProviderContext) => {
     it(`should validate a job with documents`, async () => {
       const job = getBaseJobConfig();
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job })
-        .expect(200);
+        .send({ job });
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.valid).to.eql(true, `valid should be true, but got ${body.valid}`);
       expect(body.documentsFound).to.eql(
@@ -118,12 +118,12 @@ export default ({ getService }: FtrProviderContext) => {
       const job = getBaseJobConfig();
       job.analysis_config.detectors[0].field_name = 'no_such_field';
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job })
-        .expect(200);
+        .send({ job });
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.valid).to.eql(false, `valid should be false, but got ${body.valid}`);
       expect(body.documentsFound).to.eql(
@@ -136,12 +136,12 @@ export default ({ getService }: FtrProviderContext) => {
       const job = getBaseJobConfig();
       job.datafeed_config.indices = ['farequote_empty'];
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job })
-        .expect(200);
+        .send({ job });
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.valid).to.eql(true, `valid should be true, but got ${body.valid}`);
       expect(body.documentsFound).to.eql(
@@ -153,23 +153,23 @@ export default ({ getService }: FtrProviderContext) => {
     it(`should fail for viewer user`, async () => {
       const job = getBaseJobConfig();
 
-      await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/datafeed_preview')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job })
-        .expect(403);
+        .send({ job });
+      ml.api.assertResponseStatusCode(403, status, body);
     });
 
     it(`should fail for unauthorized user`, async () => {
       const job = getBaseJobConfig();
 
-      await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/datafeed_preview')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send({ job })
-        .expect(403);
+        .send({ job });
+      ml.api.assertResponseStatusCode(403, status, body);
     });
   });
 };
