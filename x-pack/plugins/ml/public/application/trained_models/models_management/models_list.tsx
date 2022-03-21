@@ -51,7 +51,7 @@ import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
-import { JobSpacesList } from '../../components/job_spaces_list';
+import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test';
 
@@ -605,11 +605,11 @@ export const ModelsList: FC<Props> = ({
       render: (id: string) => {
         const spaces = modelSpaces[id];
         return (
-          <JobSpacesList
+          <MLSavedObjectsSpacesList
             spacesApi={spacesApi}
             spaceIds={spaces ?? []}
             id={id}
-            jobType="trained-model"
+            mlSavedObjectType="trained-model"
             refresh={fetchModelsData}
           />
         );
@@ -732,7 +732,7 @@ export const ModelsList: FC<Props> = ({
       {isManagementTable ? null : (
         <>
           <SavedObjectsWarning
-            jobType="trained-model"
+            mlSavedObjectType="trained-model"
             onCloseFlyout={fetchModelsData}
             forceRefresh={isLoading}
           />
