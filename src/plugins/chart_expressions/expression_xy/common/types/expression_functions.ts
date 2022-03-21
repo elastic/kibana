@@ -174,6 +174,7 @@ export interface XYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  interval?: number;
 }
 
 export interface XYReferenceLineLayerConfig {

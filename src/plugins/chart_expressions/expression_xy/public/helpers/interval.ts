@@ -11,7 +11,7 @@ import { XYChartProps } from '../../common';
 import { getFilteredLayers } from './layers';
 import { isDataLayer } from './visualization';
 
-export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
+export function calculateMinInterval({ args: { layers, interval }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time');
@@ -20,6 +20,9 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   );
 
   if (!xColumn) return;
+  if (interval) {
+    return interval;
+  }
   if (!isTimeViz) {
     const histogramInterval = search.aggs.getNumberHistogramIntervalByDatatableColumn(xColumn);
     if (typeof histogramInterval === 'number') {
