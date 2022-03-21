@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
@@ -20,9 +19,8 @@ import {
   getColorAssignments,
 } from '../color_assignment';
 import { getSortedAccessors } from '../to_expression';
-import { updateLayer } from '.';
 import { TooltipWrapper } from '../../shared_components';
-import { isDataLayer, isReferenceLayer } from '../visualization_helpers';
+import { isReferenceLayer } from '../visualization_helpers';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -39,7 +37,6 @@ const tooltipContent = {
 
 export const ColorPicker = ({
   state,
-  setState,
   layerId,
   accessor,
   frame,
@@ -47,11 +44,15 @@ export const ColorPicker = ({
   paletteService,
   label,
   disableHelpTooltip,
+  disabled,
+  setConfig,
 }: VisualizationDimensionEditorProps<State> & {
   formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
   label?: string;
   disableHelpTooltip?: boolean;
+  disabled?: boolean;
+  setConfig: (config: { color?: string }) => void;
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -63,8 +64,10 @@ export const ColorPicker = ({
       return defaultReferenceLineColor;
     }
 
-    const datasource = frame.datasourceLayers[layer.layerId];
-    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+    const sortedAccessors: string[] = getSortedAccessors(
+      frame.datasourceLayers[layer.layerId],
+      layer
+    );
 
     const colorAssignments = getColorAssignments(
       state.layers,
@@ -86,35 +89,13 @@ export const ColorPicker = ({
 
   const [color, setColor] = useState(currentColor);
 
-  const disabled = Boolean(isDataLayer(layer) && layer.splitAccessor);
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
     if (output.isValid || text === '') {
-      updateColorInState(text, output);
+      const newColor = text === '' ? undefined : output.hex;
+      setConfig({ color: newColor });
     }
   };
-
-  const updateColorInState: EuiColorPickerProps['onChange'] = useMemo(
-    () =>
-      debounce((text, output) => {
-        const newYConfigs = [...(layer.yConfig || [])];
-        const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
-        if (existingIndex !== -1) {
-          if (text === '') {
-            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: undefined };
-          } else {
-            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: output.hex };
-          }
-        } else {
-          newYConfigs.push({
-            forAccessor: accessor,
-            color: output.hex,
-          });
-        }
-        setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
-      }, 256),
-    [state, setState, layer, accessor, index]
-  );
 
   const inputLabel =
     label ??

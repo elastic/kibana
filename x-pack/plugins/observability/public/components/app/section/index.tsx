@@ -15,8 +15,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../../application/types';
 import { ErrorPanel } from './error_panel';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { ExperimentalBadge } from '../../shared/experimental_badge';
 
 interface AppLink {
@@ -39,7 +40,7 @@ export function SectionContainer({
   hasError,
   showExperimentalBadge = false,
 }: Props) {
-  const { core } = usePluginContext();
+  const { http } = useKibana<ObservabilityAppServices>().services;
   return (
     <EuiPanel hasShadow={true} color="subdued">
       <EuiAccordion
@@ -69,7 +70,7 @@ export function SectionContainer({
               iconType={'sortRight'}
               size="xs"
               color="text"
-              href={core.http.basePath.prepend(appLink.href)}
+              href={http.basePath.prepend(appLink.href)}
             >
               {appLink.label}
             </EuiButtonEmpty>

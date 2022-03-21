@@ -12,9 +12,8 @@ import cpy from 'cpy';
 import del from 'del';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
-import { getMtimes } from '../optimizer/get_mtimes';
 import { OptimizerConfig } from '../optimizer/optimizer_config';
-import { allValuesFrom, Bundle } from '../common';
+import { allValuesFrom, Bundle, Hashes } from '../common';
 import { getBundleCacheEvent$ } from '../optimizer/bundle_cache';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
@@ -50,19 +49,19 @@ it('emits "bundle cached" event when everything is updated', async () => {
   const [bundle] = config.bundles;
 
   const optimizerCacheKey = 'optimizerCacheKey';
-  const files = [
+  const referencedPaths = [
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await getMtimes(files);
-  const cacheKey = bundle.createCacheKey(files, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
     optimizerCacheKey,
-    files,
-    moduleCount: files.length,
+    referencedPaths,
+    moduleCount: referencedPaths.length,
     bundleRefExportIds: [],
   });
 
@@ -89,19 +88,19 @@ it('emits "bundle not cached" event when cacheKey is up to date but caching is d
   const [bundle] = config.bundles;
 
   const optimizerCacheKey = 'optimizerCacheKey';
-  const files = [
+  const referencedPaths = [
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await getMtimes(files);
-  const cacheKey = bundle.createCacheKey(files, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
     optimizerCacheKey,
-    files,
-    moduleCount: files.length,
+    referencedPaths,
+    moduleCount: referencedPaths.length,
     bundleRefExportIds: [],
   });
 
@@ -128,19 +127,19 @@ it('emits "bundle not cached" event when optimizerCacheKey is missing', async ()
   const [bundle] = config.bundles;
 
   const optimizerCacheKey = 'optimizerCacheKey';
-  const files = [
+  const referencedPaths = [
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await getMtimes(files);
-  const cacheKey = bundle.createCacheKey(files, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
     optimizerCacheKey: undefined,
-    files,
-    moduleCount: files.length,
+    referencedPaths,
+    moduleCount: referencedPaths.length,
     bundleRefExportIds: [],
   });
 
@@ -167,19 +166,19 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
   const [bundle] = config.bundles;
 
   const optimizerCacheKey = 'optimizerCacheKey';
-  const files = [
+  const referencedPaths = [
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await getMtimes(files);
-  const cacheKey = bundle.createCacheKey(files, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
     optimizerCacheKey: 'old',
-    files,
-    moduleCount: files.length,
+    referencedPaths,
+    moduleCount: referencedPaths.length,
     bundleRefExportIds: [],
   });
 
@@ -211,19 +210,19 @@ it('emits "bundle not cached" event when bundleRefExportIds is outdated, include
   const [bundle] = config.bundles;
 
   const optimizerCacheKey = 'optimizerCacheKey';
-  const files = [
+  const referencedPaths = [
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
   ];
-  const mtimes = await getMtimes(files);
-  const cacheKey = bundle.createCacheKey(files, mtimes);
+  const hashes = await Hashes.ofFiles(referencedPaths);
+  const cacheKey = bundle.createCacheKey(referencedPaths, hashes);
 
   bundle.cache.set({
     cacheKey,
     optimizerCacheKey,
-    files,
-    moduleCount: files.length,
+    referencedPaths,
+    moduleCount: referencedPaths.length,
     bundleRefExportIds: ['plugin/bar/public'],
   });
 
@@ -256,7 +255,7 @@ it('emits "bundle not cached" event when cacheKey is missing', async () => {
   const [bundle] = config.bundles;
 
   const optimizerCacheKey = 'optimizerCacheKey';
-  const files = [
+  const referencedPaths = [
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
@@ -265,8 +264,8 @@ it('emits "bundle not cached" event when cacheKey is missing', async () => {
   bundle.cache.set({
     cacheKey: undefined,
     optimizerCacheKey,
-    files,
-    moduleCount: files.length,
+    referencedPaths,
+    moduleCount: referencedPaths.length,
     bundleRefExportIds: [],
   });
 
@@ -293,7 +292,7 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
   const [bundle] = config.bundles;
 
   const optimizerCacheKey = 'optimizerCacheKey';
-  const files = [
+  const referencedPaths = [
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
     Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
@@ -302,8 +301,8 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
   bundle.cache.set({
     cacheKey: 'old',
     optimizerCacheKey,
-    files,
-    moduleCount: files.length,
+    referencedPaths,
+    moduleCount: referencedPaths.length,
     bundleRefExportIds: [],
   });
 

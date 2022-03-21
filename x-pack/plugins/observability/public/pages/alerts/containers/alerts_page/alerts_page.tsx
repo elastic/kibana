@@ -70,17 +70,20 @@ const ALERT_STATUS_REGEX = new RegExp(
 );
 
 function AlertsPage() {
-  const { core, plugins, ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate, config } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
-  const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
   const {
+    cases,
+    dataViews,
+    docLinks,
     http,
     notifications: { toasts },
-  } = core;
+  } = useKibana<ObservabilityAppServices>().services;
+
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -139,8 +142,8 @@ function AlertsPage() {
   }, []);
 
   const manageRulesHref = config.unsafe.rules.enabled
-    ? prepend('/app/observability/rules')
-    : prepend('/app/management/insightsAndAlerting/triggersActions/rules');
+    ? http.basePath.prepend('/app/observability/rules')
+    : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
@@ -151,7 +154,7 @@ function AlertsPage() {
       {
         id: 'dynamic-observability-alerts-table-index-pattern',
         title: indexNames.join(','),
-        fields: await plugins.dataViews.getFieldsForWildcard({
+        fields: await dataViews.getFieldsForWildcard({
           pattern: indexNames.join(','),
           allowNoIndex: true,
         }),
@@ -214,8 +217,7 @@ function AlertsPage() {
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
-  const kibana = useKibana<ObservabilityAppServices>();
-  const CasesContext = kibana.services.cases.ui.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (!hasAnyData && !isAllRequestsComplete) {
@@ -224,8 +226,8 @@ function AlertsPage() {
 
   const noDataConfig = getNoDataConfig({
     hasData,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
   return (

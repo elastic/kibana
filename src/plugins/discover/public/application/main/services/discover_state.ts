@@ -315,7 +315,7 @@ export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newS
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
+export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {

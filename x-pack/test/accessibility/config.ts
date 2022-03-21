@@ -41,6 +41,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
       require.resolve('./apps/license_management'),
+      require.resolve('./apps/tags'),
+      require.resolve('./apps/search_sessions'),
     ],
 
     pageObjects,
