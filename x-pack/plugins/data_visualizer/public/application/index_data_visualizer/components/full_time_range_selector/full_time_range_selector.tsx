@@ -63,7 +63,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
   const setRange = useCallback(
     async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
       try {
-        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData);
+        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData, toasts);
         if (typeof callback === 'function') {
           callback(fullTimeRange);
         }
