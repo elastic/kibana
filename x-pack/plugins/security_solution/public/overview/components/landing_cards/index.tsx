@@ -17,16 +17,16 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import endpointSvg from '../../images/endpoint.svg';
-import siemSvg from '../../images/siem.svg';
+import endpointPng from '../../images/endpoint.png';
+import siemPng from '../../images/siem.png';
 import videoSvg from '../../images/video.svg';
 import { ADD_DATA_PATH } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 
 const imgUrls = {
-  siem: siemSvg,
+  siem: siemPng,
   video: videoSvg,
-  endpoint: endpointSvg,
+  endpoint: endpointPng,
 };
 
 const StyledEuiCard = styled(EuiCard)`
@@ -54,6 +54,13 @@ const StyledEuiImage = styled(EuiImage)`
   img {
     display: block;
     margin: 0 auto;
+  }
+`;
+
+const StyledImgEuiCard = styled(EuiCard)`
+  img {
+    margin-top: 20px;
+    max-width: 400px;
   }
 `;
 
@@ -94,7 +101,8 @@ export const LandingCards = memo(() => {
       <StyledEuiFlexItem>
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem>
-            <EuiCard
+            <StyledImgEuiCard
+              hasBorder
               description={i18n.SIEM_CARD_DESCRIPTION}
               image={imgUrls.siem}
               textAlign="center"
@@ -102,7 +110,8 @@ export const LandingCards = memo(() => {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiCard
+            <StyledImgEuiCard
+              hasBorder
               description={i18n.ENDPOINT_DESCRIPTION}
               image={imgUrls.endpoint}
               textAlign="center"

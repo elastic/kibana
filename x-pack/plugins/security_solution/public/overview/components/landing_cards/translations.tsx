@@ -30,7 +30,7 @@ export const SIEM_DESCRIPTION = i18n.translate(
 export const SIEM_CTA = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.siem.cta',
   {
-    defaultMessage: 'Get started',
+    defaultMessage: 'Add security integrations',
   }
 );
 export const ENDPOINT_TITLE = i18n.translate(
