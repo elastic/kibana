@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiButton,
   EuiCard,
@@ -20,6 +20,8 @@ import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint.svg';
 import siemSvg from '../../images/siem.svg';
 import videoSvg from '../../images/video.svg';
+import { ADD_DATA_PATH } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 const imgUrls = {
   siem: siemSvg,
@@ -61,57 +63,65 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
   margin: -12px !important;
 `;
 
-export const LandingCards = memo(() => (
-  <EuiFlexGroup direction="column" gutterSize="l">
-    <EuiFlexItem>
-      <EuiFlexGroup gutterSize="l">
-        <EuiFlexItem>
-          <StyledEuiPageHeader pageTitle={i18n.SIEM_HEADER} iconType="logoSecurity" />
-          <StyledEuiCard
-            display="plain"
-            description={i18n.SIEM_DESCRIPTION}
-            textAlign="left"
-            title={i18n.SIEM_TITLE}
-            footer={<EuiButton href="#">{i18n.SIEM_CTA}</EuiButton>}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLink href="https://www.elastic.co/security" external={false} target="_blank">
-            <StyledEuiImage alt={i18n.SIEM_HEADER} size="xl" margin="l" src={imgUrls.video} />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <StyledEuiFlexItem>
-      <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem>
-          <EuiCard
-            description={i18n.SIEM_CARD_DESCRIPTION}
-            image={imgUrls.siem}
-            textAlign="center"
-            title={i18n.SIEM_CARD_TITLE}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            description={i18n.ENDPOINT_DESCRIPTION}
-            image={imgUrls.endpoint}
-            textAlign="center"
-            title={i18n.ENDPOINT_TITLE}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </StyledEuiFlexItem>
-    <EuiFlexItem>
-      <StyledEuiCardTop
-        display="plain"
-        description={i18n.UNIFY_DESCRIPTION}
-        paddingSize="l"
-        textAlign="center"
-        title={i18n.UNIFY_TITLE}
-        footer={<EuiButton href="#">{i18n.SIEM_CTA}</EuiButton>}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
+export const LandingCards = memo(() => {
+  const {
+    http: {
+      basePath: { prepend },
+    },
+  } = useKibana().services;
+  const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
+  return (
+    <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="l">
+          <EuiFlexItem>
+            <StyledEuiPageHeader pageTitle={i18n.SIEM_HEADER} iconType="logoSecurity" />
+            <StyledEuiCard
+              display="plain"
+              description={i18n.SIEM_DESCRIPTION}
+              textAlign="left"
+              title={i18n.SIEM_TITLE}
+              footer={<EuiButton href={href}>{i18n.SIEM_CTA}</EuiButton>}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLink href="https://www.elastic.co/security" external={false} target="_blank">
+              <StyledEuiImage alt={i18n.SIEM_HEADER} size="xl" margin="l" src={imgUrls.video} />
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <StyledEuiFlexItem>
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem>
+            <EuiCard
+              description={i18n.SIEM_CARD_DESCRIPTION}
+              image={imgUrls.siem}
+              textAlign="center"
+              title={i18n.SIEM_CARD_TITLE}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              description={i18n.ENDPOINT_DESCRIPTION}
+              image={imgUrls.endpoint}
+              textAlign="center"
+              title={i18n.ENDPOINT_TITLE}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </StyledEuiFlexItem>
+      <EuiFlexItem>
+        <StyledEuiCardTop
+          display="plain"
+          description={i18n.UNIFY_DESCRIPTION}
+          paddingSize="l"
+          textAlign="center"
+          title={i18n.UNIFY_TITLE}
+          footer={<EuiButton href={href}>{i18n.SIEM_CTA}</EuiButton>}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 LandingCards.displayName = 'LandingCards';

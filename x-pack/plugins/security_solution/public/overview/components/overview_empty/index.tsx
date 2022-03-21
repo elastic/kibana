@@ -11,8 +11,6 @@ import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { getAppLandingUrl } from '../../../common/components/link_to/redirect_to_overview';
 
 const OverviewEmptyComponent: React.FC = () => {
-  console.log('redirect yo');
-
   const { navigateToApp } = useKibana().services.application;
 
   navigateToApp(APP_UI_ID, {
