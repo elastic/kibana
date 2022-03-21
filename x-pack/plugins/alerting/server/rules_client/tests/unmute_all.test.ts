@@ -82,6 +82,7 @@ describe('unmuteAll()', () => {
       {
         muteAll: false,
         mutedInstanceIds: [],
+        snoozeEndTime: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
