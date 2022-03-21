@@ -36,7 +36,8 @@ describe('Marking alerts as acknowledged', () => {
     waitForAlertsToPopulate(500);
   });
 
-  it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+  // See https://github.com/elastic/kibana/pull/125960#issuecomment-1072675903
+  it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .then((alertNumberString) => {
