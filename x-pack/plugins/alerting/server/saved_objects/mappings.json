@@ -163,6 +163,16 @@
                 "type": "keyword"
               }
             }
+          },
+          "warning": {
+            "properties": {
+              "reason": {
+                "type": "keyword"
+              },
+              "message": {
+                "type": "keyword"
+              }
+            }
           }
         }
       },
