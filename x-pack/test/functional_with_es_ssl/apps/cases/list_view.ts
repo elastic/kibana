@@ -61,7 +61,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await input.type(caseTitle);
       await input.pressKeys(browser.keys.ENTER);
 
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(20000, async () => {
         await casesApp.common.validateCasesTableHasNthRows(1);
       });
     });
