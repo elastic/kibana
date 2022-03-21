@@ -10,7 +10,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 
-import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
+import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
 import { mapFormFields, unflattenObject, Subject, Subscription } from '../lib';
 
 const DEFAULT_OPTIONS = {
@@ -35,22 +35,25 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     defaultValue,
   } = formConfig ?? {};
 
+  // Strip out any "undefined" value and run the deserializer
   const initDefaultValue = useCallback(
-    (_defaultValue?: Partial<T>): { [key: string]: any } => {
+    (_defaultValue?: Partial<T>): I | undefined => {
       if (_defaultValue === undefined || Object.keys(_defaultValue).length === 0) {
-        return {};
+        return undefined;
       }
 
       const filtered = Object.entries(_defaultValue as object)
         .filter(({ 1: value }) => value !== undefined)
         .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as T);
 
-      return deserializer ? deserializer(filtered) : filtered;
+      return deserializer ? deserializer(filtered) : (filtered as unknown as I);
     },
     [deserializer]
   );
 
-  const defaultValueMemoized = useMemo<{ [key: string]: any }>(() => {
+  // We create this stable reference to be able to initialize our "defaultValueDeserialized" ref below
+  // as we can't initialize useRef by calling a function (e.g. useRef(initDefaultValue()))
+  const defaultValueMemoized = useMemo<I | undefined>(() => {
     return initDefaultValue(defaultValue);
   }, [defaultValue, initDefaultValue]);
 
@@ -68,15 +71,33 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [errorMessages, setErrorMessages] = useState<{ [fieldName: string]: string }>({});
 
+  /**
+   * Map of all the fields currently in the form
+   */
   const fieldsRefs = useRef<FieldsMap>({});
+  /**
+   * Keep a track of the fields that have been removed from the form.
+   * This will allow us to know if the form has been modified
+   * (this ref is then accessed in the "useFormIsModified()" hook)
+   */
   const fieldsRemovedRefs = useRef<FieldsMap>({});
+  /**
+   * A list of all subscribers to form data and validity changes that
+   * called "form.subscribe()"
+   */
   const formUpdateSubscribers = useRef<Subscription[]>([]);
   const isMounted = useRef<boolean>(false);
+  /**
+   * Keep a reference to the form defaultValue once it has been deserialized.
+   * This allows us to reset the form and put back the initial value of each fields
+   */
   const defaultValueDeserialized = useRef(defaultValueMemoized);
 
   /**
    * We have both a state and a ref for the error messages so the consumer can, in the same callback,
    * validate the form **and** have the errors returned immediately.
+   * Note: As an alternative we could return the errors when calling the "validate()" method but that creates
+   * a breaking change in the API which would require to update many forms.
    *
    * ```
    * const myHandler = useCallback(async () => {
@@ -87,16 +108,22 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
    */
   const errorMessagesRef = useRef<{ [fieldName: string]: string }>({});
 
-  // formData$ is an observable we can subscribe to in order to receive live
-  // update of the raw form data. As an observable it does not trigger any React
-  // render().
-  // The "useFormData()" hook is the one in charge of reading this observable
-  // and updating its own state that will trigger the necessary re-renders in the UI.
+  /**
+   * formData$ is an observable that gets updated every time a field value changes.
+   * It is the "useFormData()" hook that subscribes to this observable and updates
+   * its internal "formData" state that in turn triggers the necessary re-renders in the consumer component.
+   */
   const formData$ = useRef<Subject<FormData> | null>(null);
 
   // ----------------------------------
   // -- HELPERS
   // ----------------------------------
+  /**
+   * We can't initialize a React ref by calling a function (in this case
+   * useRef(new Subject())) the function is called on every render and would
+   * create a new "Subject" instance.
+   * We use this handler to access the ref and initialize it on first access.
+   */
   const getFormData$ = useCallback((): Subject<FormData> => {
     if (formData$.current === null) {
       formData$.current = new Subject<FormData>({});
@@ -124,7 +151,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       }
 
       if (errorMessage === null) {
-        // We strip out previous error message
+        // The field at this path is now valid, we strip out any previous error message
         const { [path]: discard, ...next } = prev;
         errorMessagesRef.current = next;
         return next;
@@ -175,7 +202,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const updateDefaultValueAt: FormHook<T, I>['__updateDefaultValueAt'] = useCallback(
     (path, value) => {
-      set(defaultValueDeserialized.current, path, value);
+      if (defaultValueDeserialized.current === undefined) {
+        defaultValueDeserialized.current = {} as I;
+      }
+      set(defaultValueDeserialized.current!, path, value);
     },
     []
   );
@@ -200,81 +230,25 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     });
   }, [fieldsToArray]);
 
-  const validateFields: FormHook<T, I>['validateFields'] = useCallback(
-    async (fieldNames, onlyBlocking = false) => {
-      const fieldsToValidate = fieldNames
-        .map((name) => fieldsRefs.current[name])
-        .filter((field) => field !== undefined);
-
-      const formData = getFormData$().value;
-      const validationResult = await Promise.all(
-        fieldsToValidate.map((field) => field.validate({ formData, onlyBlocking }))
-      );
-
-      if (isMounted.current === false) {
-        return { areFieldsValid: true, isFormValid: true };
-      }
-
-      const areFieldsValid = validationResult.every((res) => res.isValid);
-
-      const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
-        acc[field.path] = validationResult[i].isValid;
-        return acc;
-      }, {} as { [key: string]: boolean });
-
-      // At this stage we have an updated field validation state inside the "validationResultByPath" object.
-      // The fields we have in our "fieldsRefs.current" have not been updated yet with the new validation state
-      // (isValid, isValidated...) as this will happen _after_, when the "useEffect" triggers and calls "addField()".
-      // This means that we have **stale state value** in our fieldsRefs.
-      // To know the current form validity, we will then merge the "validationResult" _with_ the fieldsRefs object state,
-      // the "validationResult" taking presedence over the fieldsRefs values.
-      const formFieldsValidity = fieldsToArray().map((field) => {
-        const hasUpdatedValidity = validationResultByPath[field.path] !== undefined;
-        const _isValid = validationResultByPath[field.path] ?? field.isValid;
-        const _isValidated = hasUpdatedValidity ? true : field.isValidated;
-        const _isValidating = hasUpdatedValidity ? false : field.isValidating;
-        return {
-          isValid: _isValid,
-          isValidated: _isValidated,
-          isValidating: _isValidating,
-        };
-      });
-
-      const areAllFieldsValidated = formFieldsValidity.every((field) => field.isValidated);
-      const areSomeFieldValidating = formFieldsValidity.some((field) => field.isValidating);
-
-      // If *not* all the fiels have been validated, the validity of the form is unknown, thus still "undefined"
-      const isFormValid =
-        areAllFieldsValidated && areSomeFieldValidating === false
-          ? formFieldsValidity.every((field) => field.isValid)
-          : undefined;
-
-      setIsValid(isFormValid);
-
-      return { areFieldsValid, isFormValid };
-    },
-    [getFormData$, fieldsToArray]
-  );
-
   // ----------------------------------
   // -- Internal API
   // ----------------------------------
   const addField: FormHook<T, I>['__addField'] = useCallback(
     (field) => {
-      const fieldExists = fieldsRefs.current[field.path] !== undefined;
+      const fieldPreviouslyAdded = fieldsRefs.current[field.path] !== undefined;
       fieldsRefs.current[field.path] = field;
       delete fieldsRemovedRefs.current[field.path];
 
       updateFormDataAt(field.path, field.value);
       updateFieldErrorMessage(field.path, field.getErrorsMessages());
 
-      if (!fieldExists && !field.isValidated) {
+      if (!fieldPreviouslyAdded && !field.isValidated) {
         setIsValid(undefined);
 
-        // When we submit the form (and set "isSubmitted" to "true"), we validate **all fields**.
-        // If a field is added and it is not validated it means that we have swapped fields and added new ones:
-        // --> we have basically have a new form in front of us.
-        // For that reason we make sure that the "isSubmitted" state is false.
+        // When we submit() the form we set the "isSubmitted" state to "true" and all fields are marked as "isValidated: true".
+        // If a **new** field is added and and its "isValidated" is "false" it means that we have swapped fields and added new ones:
+        // --> we have a new form in front of us with different set of fields. We need to reset the "isSubmitted" state.
+        // (e.g. In the mappings editor when the user switches the field "type" it brings a whole new set of settings)
         setIsSubmitted(false);
       }
     },
@@ -284,18 +258,16 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const removeField: FormHook<T, I>['__removeField'] = useCallback(
     (_fieldNames) => {
       const fieldNames = Array.isArray(_fieldNames) ? _fieldNames : [_fieldNames];
-      const currentFormData = { ...getFormData$().value };
+      const updatedFormData = { ...getFormData$().value };
 
       fieldNames.forEach((name) => {
-        // Keep a track of the fields that have been removed from the form
-        // This will allow us to know if the form has been modified
         fieldsRemovedRefs.current[name] = fieldsRefs.current[name];
         updateFieldErrorMessage(name, null);
         delete fieldsRefs.current[name];
-        delete currentFormData[name];
+        delete updatedFormData[name];
       });
 
-      updateFormData$(currentFormData);
+      updateFormData$(updatedFormData);
 
       /**
        * After removing a field, the form validity might have changed
@@ -306,7 +278,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
           const isFormValid = fieldsToArray().every(isFieldValid);
           return isFormValid;
         }
-        // If the form validity is "true" or "undefined", it does not change after removing a field
+        // If the form validity is "true" or "undefined", it remains the same after removing a field
         return prev;
       });
     },
@@ -320,7 +292,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const readFieldConfigFromSchema: FormHook<T, I>['__readFieldConfigFromSchema'] = useCallback(
     (fieldName) => {
-      const config = (get(schema ?? {}, fieldName) as FieldConfig) || {};
+      const config = get(schema ?? {}, fieldName);
 
       return config;
     },
@@ -335,6 +307,61 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   // ----------------------------------
   // -- Public API
   // ----------------------------------
+  const validateFields: FormHook<T, I>['validateFields'] = useCallback(
+    async (fieldNames, onlyBlocking = false) => {
+      const fieldsToValidate = fieldNames
+        .map((name) => fieldsRefs.current[name])
+        .filter((field) => field !== undefined);
+
+      const formData = getFormData$().value;
+      const validationResult = await Promise.all(
+        fieldsToValidate.map((field) => field.validate({ formData, onlyBlocking }))
+      );
+
+      if (isMounted.current === false) {
+        // If the form has unmounted while validating, the result is not pertinent
+        // anymore. Let's satisfy TS and exit.
+        return { areFieldsValid: true, isFormValid: true };
+      }
+
+      const areFieldsValid = validationResult.every((res) => res.isValid);
+
+      const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
+        acc[field.path] = validationResult[i].isValid;
+        return acc;
+      }, {} as { [fieldPath: string]: boolean });
+
+      // At this stage we have an updated field validation state inside the "validationResultByPath" object.
+      // The fields object in "fieldsRefs.current" have not been updated yet with their new validation state
+      // (isValid, isValidated...) as this occurs later, when the "useEffect" kicks in and calls "addField()" on the form.
+      // This means that we have **stale state value** in our fieldsRefs map.
+      // To know the current form validity, we will then merge the "validationResult" with the fieldsRefs object state.
+      const formFieldsValidity = fieldsToArray().map((field) => {
+        const hasUpdatedValidity = validationResultByPath[field.path] !== undefined;
+
+        return {
+          isValid: validationResultByPath[field.path] ?? field.isValid,
+          isValidated: hasUpdatedValidity ? true : field.isValidated,
+          isValidating: hasUpdatedValidity ? false : field.isValidating,
+        };
+      });
+
+      const areAllFieldsValidated = formFieldsValidity.every((field) => field.isValidated);
+      const areSomeFieldValidating = formFieldsValidity.some((field) => field.isValidating);
+
+      // If *not* all the fields have been validated, the validity of the form is unknown, thus still "undefined"
+      const isFormValid =
+        areAllFieldsValidated && areSomeFieldValidating === false
+          ? formFieldsValidity.every((field) => field.isValid)
+          : undefined;
+
+      setIsValid(isFormValid);
+
+      return { areFieldsValid, isFormValid };
+    },
+    [getFormData$, fieldsToArray]
+  );
+
   const getFormData: FormHook<T, I>['getFormData'] = useCallback(() => {
     const fieldsToOutput = getFieldsForOutput(fieldsRefs.current, {
       stripEmptyFields: formOptions.stripEmptyFields,
@@ -367,6 +394,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     }
 
     const fieldsArray = fieldsToArray();
+    // We only need to validate the fields that haven't been validated yet. Those
+    // are pristine fields (dirty fields are always validated when their value changed)
     const fieldsToValidate = fieldsArray.filter((field) => !field.isValidated);
 
     let isFormValid: boolean | undefined;
@@ -375,7 +404,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       isFormValid = fieldsArray.every(isFieldValid);
     } else {
       const fieldPathsToValidate = fieldsToValidate.map((field) => field.path);
-      ({ isFormValid } = await validateFields(fieldPathsToValidate, true));
+      const validateOnlyBlockingValidation = true;
+      ({ isFormValid } = await validateFields(
+        fieldPathsToValidate,
+        validateOnlyBlockingValidation
+      ));
     }
 
     setIsValid(isFormValid);
@@ -383,17 +416,15 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   }, [fieldsToArray, validateFields, waitForFieldsToFinishValidating]);
 
   const setFieldValue: FormHook<T, I>['setFieldValue'] = useCallback((fieldName, value) => {
-    if (fieldsRefs.current[fieldName] === undefined) {
-      return;
+    if (fieldsRefs.current[fieldName]) {
+      fieldsRefs.current[fieldName].setValue(value);
     }
-    fieldsRefs.current[fieldName].setValue(value);
   }, []);
 
   const setFieldErrors: FormHook<T, I>['setFieldErrors'] = useCallback((fieldName, errors) => {
-    if (fieldsRefs.current[fieldName] === undefined) {
-      return;
+    if (fieldsRefs.current[fieldName]) {
+      fieldsRefs.current[fieldName].setErrors(errors);
     }
-    fieldsRefs.current[fieldName].setErrors(errors);
   }, []);
 
   const getFields: FormHook<T, I>['getFields'] = useCallback(() => {
@@ -402,7 +433,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   }, []);
 
   const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
-    (fieldName) => get(defaultValueDeserialized.current, fieldName),
+    (fieldName) => get(defaultValueDeserialized.current ?? {}, fieldName),
     []
   );
 
@@ -465,8 +496,9 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       }
 
       Object.entries(fieldsRefs.current).forEach(([path, field]) => {
-        // By resetting the form, some field might be unmounted. In order
-        // to avoid a race condition, we check that the field still exists.
+        // By resetting the form and changing field values, some fields might be unmounted
+        // (e.g. a toggle might be set back to "false" and some fields removed from the UI as a consequence).
+        // We make sure that the field still exists before resetting it.
         const isFieldMounted = fieldsRefs.current[path] !== undefined;
         if (isFieldMounted) {
           const fieldDefaultValue = getFieldDefaultValue(path);
@@ -539,6 +571,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     validateFields,
     validate,
   ]);
+
+  // ----------------------------------
+  // -- EFFECTS
+  // ----------------------------------
 
   useEffect(() => {
     if (!isMounted.current) {

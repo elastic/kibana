@@ -12,11 +12,11 @@ import type { SharedUxDocLinksService } from '../doc_links';
 /**
  * A factory function for creating a stubbed implementation of `SharedUxDocLinksService`.
  */
-export type DockLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>;
+export type DocLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>;
 
 /**
  * A factory function for creating a stubbed implementation of `SharedUxDocLinksService`.
  */
-export const docLinksServiceFactory: DockLinksServiceFactory = () => ({
+export const docLinksServiceFactory: DocLinksServiceFactory = () => ({
   dataViewsDocLink: 'docs',
 });

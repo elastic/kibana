@@ -8,7 +8,7 @@
 import { getExportTypesRegistry } from '../lib';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
-import { FeatureAvailabilityMap } from './types';
+import { FeatureAvailabilityMap, MetricsStats } from './types';
 
 let featureMap: FeatureAvailabilityMap;
 const sizesAggResponse = {
@@ -76,18 +76,27 @@ test('Model of job status and status-by-pdf-app', () => {
 test('Model of jobTypes', () => {
   const result = getExportStats(
     {
-      PNG: { available: true, total: 3, sizes: sizesAggResponse },
+      PNG: {
+        available: true,
+        total: 3,
+        sizes: sizesAggResponse,
+        app: { dashboard: 0, visualization: 3, 'canvas workpad': 0 },
+        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+      },
       printable_pdf: {
         available: true,
         total: 3,
         sizes: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
-        layout: { preserve_layout: 3, print: 0 },
+        layout: { preserve_layout: 3, print: 0, canvas: 0 },
+        metrics: { pdf_cpu: {}, pdf_memory: {}, pdf_pages: {} } as MetricsStats,
       },
       csv_searchsource: {
         available: true,
         total: 3,
+        app: { search: 3 },
         sizes: sizesAggResponse,
+        metrics: { csv_rows: {} } as MetricsStats,
       },
     },
     featureMap,
@@ -100,14 +109,14 @@ test('Model of jobTypes', () => {
         "canvas workpad": 0,
         "dashboard": 0,
         "search": 0,
-        "visualization": 0,
+        "visualization": 3,
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {},
+        "png_memory": Object {},
       },
       "sizes": Object {
         "1.0": 5093470,
@@ -126,15 +135,14 @@ test('Model of jobTypes', () => {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
+        "search": 3,
         "visualization": 0,
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {},
       },
       "sizes": Object {
         "1.0": 5093470,
@@ -163,6 +171,11 @@ test('Model of jobTypes', () => {
         "preserve_layout": 3,
         "print": 0,
       },
+      "metrics": Object {
+        "pdf_cpu": Object {},
+        "pdf_memory": Object {},
+        "pdf_pages": Object {},
+      },
       "sizes": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -185,6 +198,8 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         total: 15,
         deprecated: 5,
         sizes: sizesAggResponse,
+        app: { dashboard: 0, visualization: 0, 'canvas workpad': 0 },
+        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
       },
     },
     featureMap,
@@ -200,10 +215,10 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       },
       "available": true,
       "deprecated": 5,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {},
+        "png_memory": Object {},
       },
       "sizes": Object {
         "1.0": 5093470,
@@ -215,6 +230,121 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         "99.0": 11935594,
       },
       "total": 15,
+    }
+  `);
+});
+
+test('Incorporate metric stats', () => {
+  const result = getExportStats(
+    {
+      PNGV2: {
+        available: true,
+        total: 3,
+        sizes: sizesAggResponse,
+        app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
+        metrics: {
+          png_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
+          png_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
+        },
+      },
+      printable_pdf_v2: {
+        available: true,
+        total: 3,
+        sizes: sizesAggResponse,
+        metrics: {
+          pdf_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
+          pdf_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
+          pdf_pages: { '50.0': 4, '75.0': 4, '95.0': 4, '99.0': 4 },
+        },
+        app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
+        layout: { preserve_layout: 3, print: 0, canvas: 0 },
+      },
+    },
+    featureMap,
+    exportTypesHandler
+  );
+  expect(result.PNGV2).toMatchInlineSnapshot(`
+    Object {
+      "app": Object {
+        "canvas workpad": 3,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": false,
+      "deprecated": 0,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": 0.01,
+          "75.0": 0.01,
+          "95.0": 0.01,
+          "99.0": 0.01,
+        },
+        "png_memory": Object {
+          "50.0": 3485,
+          "75.0": 3496,
+          "95.0": 3678,
+          "99.0": 3782,
+        },
+      },
+      "sizes": Object {
+        "1.0": 5093470,
+        "25.0": 5093470,
+        "5.0": 5093470,
+        "50.0": 8514532,
+        "75.0": 11935594,
+        "95.0": 11935594,
+        "99.0": 11935594,
+      },
+      "total": 3,
+    }
+  `);
+  expect(result.printable_pdf_v2).toMatchInlineSnapshot(`
+    Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 3,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": false,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 3,
+        "print": 0,
+      },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": 0.01,
+          "75.0": 0.01,
+          "95.0": 0.01,
+          "99.0": 0.01,
+        },
+        "pdf_memory": Object {
+          "50.0": 3485,
+          "75.0": 3496,
+          "95.0": 3678,
+          "99.0": 3782,
+        },
+        "pdf_pages": Object {
+          "50.0": 4,
+          "75.0": 4,
+          "95.0": 4,
+          "99.0": 4,
+        },
+      },
+      "sizes": Object {
+        "1.0": 5093470,
+        "25.0": 5093470,
+        "5.0": 5093470,
+        "50.0": 8514532,
+        "75.0": 11935594,
+        "95.0": 11935594,
+        "99.0": 11935594,
+      },
+      "total": 3,
     }
   `);
 });

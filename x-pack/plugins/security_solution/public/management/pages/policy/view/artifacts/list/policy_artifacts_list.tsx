@@ -15,6 +15,7 @@ import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components
 import { useUrlParams } from '../../../../../components/hooks/use_url_params';
 import { useUrlPagination } from '../../../../../components/hooks/use_url_pagination';
 import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
+import { useOldUrlSearchPaginationReplace } from '../../../../../components/hooks/use_old_url_search_pagination_replace';
 import {
   ArtifactCardGrid,
   ArtifactCardGridProps,
@@ -58,6 +59,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     onDeleteActionCallback,
     externalPrivileges = true,
   }) => {
+    useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });

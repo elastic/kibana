@@ -142,6 +142,10 @@ const registerHttpRequestMockHelpers = (
   const setLoadRemoteClustersResponse = (response?: object, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/remote_clusters`, response, error);
 
+  const setLoadNodeDiskSpaceResponse = (response?: object, error?: ResponseError) => {
+    mockResponse('GET', `${API_BASE_PATH}/node_disk_space`, response, error);
+  };
+
   const setClusterSettingsResponse = (response?: object, error?: ResponseError) => {
     mockResponse('POST', `${API_BASE_PATH}/cluster_settings`, response, error);
   };
@@ -164,6 +168,7 @@ const registerHttpRequestMockHelpers = (
     setLoadMlUpgradeModeResponse,
     setGetUpgradeStatusResponse,
     setLoadRemoteClustersResponse,
+    setLoadNodeDiskSpaceResponse,
     setClusterSettingsResponse,
   };
 };
