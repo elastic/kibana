@@ -39,6 +39,7 @@
     "common/constants"
   ],
   "requiredBundles": [
+    "unifiedSearch",
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",

@@ -47,6 +47,7 @@ import type {
   ConnectorEditFlyoutProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
+import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -83,6 +84,7 @@ interface PluginsStart {
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export class Plugin
@@ -163,6 +165,7 @@ export class Plugin
           charts: pluginsStart.charts,
           alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,
+          unifiedSearch: pluginsStart.unifiedSearch,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
           theme$: params.theme$,
