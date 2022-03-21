@@ -400,6 +400,7 @@ export function getIndexPatternDatasource({
               });
             }}
             {...props}
+            data={data}
           />
         </KibanaThemeProvider>,
         domElement

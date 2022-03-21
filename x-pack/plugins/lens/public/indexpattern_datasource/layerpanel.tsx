@@ -5,23 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { DatasourceLayerPanelProps } from '../types';
-import { IndexPatternPrivateState } from './types';
+import { IndexPatternPrivateState, IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
 
 export interface IndexPatternLayerPanelProps
   extends DatasourceLayerPanelProps<IndexPatternPrivateState> {
   state: IndexPatternPrivateState;
   onChangeIndexPattern: (newId: string) => void;
+  data: DataPublicPluginStart;
 }
 
-export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatternLayerPanelProps) {
+export function LayerPanel({
+  state,
+  layerId,
+  onChangeIndexPattern,
+  data,
+}: IndexPatternLayerPanelProps) {
   const layer = state.layers[layerId];
+  const [dataViewsList, setDataViewsList] = useState<IndexPatternRef[]>([]);
 
   const indexPattern = state.indexPatterns[layer.indexPatternId];
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      setDataViewsList(dataViewsRefs);
+    };
+    fetchDataViews();
+  }, [data, indexPattern]);
 
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
@@ -39,7 +54,7 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
           fontWeight: 'normal',
         }}
         indexPatternId={layer.indexPatternId}
-        indexPatternRefs={state.indexPatternRefs}
+        indexPatternRefs={dataViewsList}
         isMissingCurrent={!indexPattern}
         onChangeIndexPattern={onChangeIndexPattern}
       />

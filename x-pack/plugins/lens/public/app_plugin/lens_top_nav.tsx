@@ -638,27 +638,25 @@ export const LensTopNavMenu = ({
   );
 
   const createNewDataView = useCallback(() => {
-    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
-    if (!indexPatternFieldEditPermission) {
+    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView;
+    if (!dataViewEditPermission) {
       return;
     }
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (dataView) => {
         if (dataView.id) {
-          if (dataView.id) {
-            handleIndexPatternChange({
-              activeDatasources: Object.keys(datasourceStates).reduce(
-                (acc, datasourceId) => ({
-                  ...acc,
-                  [datasourceId]: datasourceMap[datasourceId],
-                }),
-                {}
-              ),
-              datasourceStates,
-              indexPatternId: dataView.id,
-              setDatasourceState,
-            });
-          }
+          handleIndexPatternChange({
+            activeDatasources: Object.keys(datasourceStates).reduce(
+              (acc, datasourceId) => ({
+                ...acc,
+                [datasourceId]: datasourceMap[datasourceId],
+              }),
+              {}
+            ),
+            datasourceStates,
+            indexPatternId: dataView.id,
+            setDatasourceState,
+          });
         }
       },
     });
@@ -669,7 +667,6 @@ export const LensTopNavMenu = ({
       label: currentIndexPattern?.title || '',
       'data-test-subj': 'lns-dataView-switch-link',
       title: currentIndexPattern?.title || '',
-      fullWidth: true,
     },
     currentDataViewId: currentIndexPattern?.id,
     onAddField: addField,

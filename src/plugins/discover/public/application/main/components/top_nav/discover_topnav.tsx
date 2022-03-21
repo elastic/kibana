@@ -174,7 +174,6 @@ export const DiscoverTopNav = ({
       label: indexPattern?.title || '',
       'data-test-subj': 'discover-dataView-switch-link',
       title: indexPattern?.title || '',
-      fullWidth: true,
     },
     currentDataViewId: indexPattern?.id,
     onAddField: addField,
