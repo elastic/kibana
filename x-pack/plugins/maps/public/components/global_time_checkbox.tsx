@@ -29,7 +29,7 @@ export function GlobalTimeCheckbox({
     ? i18n.translate('xpack.maps.filterEditor.isGlobalTimeNotApplied', {
         defaultMessage: 'Global time is not applied to the layer while editing features',
       })
-    : i18n.translate('xpack.maps.filterEditor.applyGlobalFilterHelp', {
+    : i18n.translate('xpack.maps.filterEditor.applyGlobalTimeHelp', {
         defaultMessage: 'When enabled, results narrowed by global time',
       });
 
