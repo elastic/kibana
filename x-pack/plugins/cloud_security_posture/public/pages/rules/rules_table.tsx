@@ -134,7 +134,7 @@ const getColumns = ({
   },
   {
     field: 'updatedAt',
-    name: TEXT.UPDATED_AT,
+    name: TEXT.LAST_MODIFIED,
     width: '15%',
     render: (timestamp) => moment(timestamp).fromNow(),
   },
