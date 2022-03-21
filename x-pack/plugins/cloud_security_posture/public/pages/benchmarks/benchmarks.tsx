@@ -22,7 +22,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
-import { CspPageTemplate } from '../../components/page_template';
+import { CspPageTemplate } from '../../components/csp_page_template';
 import { BenchmarksTable } from './benchmarks_table';
 import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS } from './translations';
 import {
@@ -120,8 +120,6 @@ const PAGE_HEADER: EuiPageHeaderProps = {
   pageTitle: BENCHMARK_INTEGRATIONS,
   rightSideItems: [<AddCisIntegrationButton />],
 };
-
-const BenchmarksLoadingState = () => <CspLoadingState>{LOADING_BENCHMARKS}</CspLoadingState>;
 
 export const Benchmarks = () => {
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
