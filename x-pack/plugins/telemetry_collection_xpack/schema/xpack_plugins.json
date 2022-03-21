@@ -4149,7 +4149,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4216,7 +4216,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4283,7 +4283,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4350,7 +4350,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4417,7 +4417,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4484,7 +4484,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4551,7 +4551,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5260,7 +5260,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5327,7 +5327,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5394,7 +5394,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5461,7 +5461,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5528,7 +5528,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5595,7 +5595,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5662,7 +5662,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
