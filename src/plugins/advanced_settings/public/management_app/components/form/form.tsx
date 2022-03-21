@@ -44,7 +44,7 @@ interface FormProps {
   save: (changes: SettingsChanges) => Promise<boolean[]>;
   showNoResultsMessage: boolean;
   enableSaving: boolean;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   theme: ThemeServiceStart['theme$'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
@@ -264,7 +264,7 @@ export class Form extends PureComponent<FormProps> {
                   unsavedChanges={this.state.unsavedChanges[setting.name]}
                   clearChange={this.clearChange}
                   enableSaving={this.props.enableSaving}
-                  dockLinks={this.props.dockLinks}
+                  docLinks={this.props.docLinks}
                   toasts={this.props.toasts}
                 />
               );
