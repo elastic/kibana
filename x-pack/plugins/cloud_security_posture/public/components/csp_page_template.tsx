@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { QueryStatus, UseQueryResult } from 'react-query';
+import type { UseQueryResult } from 'react-query';
 import { NavLink } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiErrorBoundary, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -101,12 +101,16 @@ const DefaultError = (error: CspError) => (
             />
           </h2>
         </EuiTitle>
-        <EuiTitle size="xs">
-          <h5>{`${error.body.error} (${error.body.statusCode})`}</h5>
-        </EuiTitle>
-        <EuiTitle size="xs">
-          <h5>{error.body.message}</h5>
-        </EuiTitle>
+        {error.body?.error && error.body?.statusCode && (
+          <EuiTitle size="xs">
+            <h5>{`${error.body.error} (${error.body.statusCode})`}</h5>
+          </EuiTitle>
+        )}
+        {error.body?.message && (
+          <EuiTitle size="xs">
+            <h5>{error.body.message}</h5>
+          </EuiTitle>
+        )}
       </>
     }
   />
@@ -114,7 +118,6 @@ const DefaultError = (error: CspError) => (
 
 export const CspPageTemplate: React.FC<
   KibanaPageTemplateProps & {
-    status?: QueryStatus;
     loadingRender?: () => JSX.Element;
     errorRender?: (error: CspError) => JSX.Element;
     query?: UseQueryResult;
@@ -122,7 +125,6 @@ export const CspPageTemplate: React.FC<
 > = ({
   query,
   children,
-  status,
   loadingRender = DefaultLoading,
   errorRender = DefaultError,
   ...kibanaPageTemplateProps

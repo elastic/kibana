@@ -52,7 +52,7 @@ describe('getSideNavItems', () => {
 describe('<CspPageTemplate />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    // if package installations status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
+    // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
   });
 
@@ -85,7 +85,7 @@ describe('<CspPageTemplate />', () => {
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
-    packageNotInstalledUniqueTexts.forEach((text: string) =>
+    packageNotInstalledUniqueTexts.forEach((text) =>
       expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
   });
@@ -98,7 +98,7 @@ describe('<CspPageTemplate />', () => {
     const children = chance.sentence();
     renderCspPageTemplate({ children });
 
-    Object.values(PACKAGE_NOT_INSTALLED_TEXT).forEach((text: string) =>
+    Object.values(PACKAGE_NOT_INSTALLED_TEXT).forEach((text) =>
       expect(screen.queryByText(text)).toBeInTheDocument()
     );
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -106,7 +106,7 @@ describe('<CspPageTemplate />', () => {
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
   });
 
-  it('renders loading text when query is loading', () => {
+  it('renders default loading text when query isLoading', () => {
     const query = createReactQueryResponse({
       status: 'loading',
     }) as unknown as UseQueryResult;
@@ -117,19 +117,23 @@ describe('<CspPageTemplate />', () => {
     expect(screen.queryByText(LOADING)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
-    packageNotInstalledUniqueTexts.forEach((text: string) =>
+    packageNotInstalledUniqueTexts.forEach((text) =>
       expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
   });
 
-  it('renders error text when query is error', () => {
+  it('renders default error texts when query isError', () => {
+    const error = chance.sentence();
+    const message = chance.sentence();
+    const statusCode = chance.integer();
+
     const query = createReactQueryResponse({
       status: 'error',
       error: {
         body: {
-          error: chance.sentence(),
-          message: chance.sentence(),
-          statusCode: chance.integer(),
+          error,
+          message,
+          statusCode,
         },
       },
     }) as unknown as UseQueryResult;
@@ -137,24 +141,28 @@ describe('<CspPageTemplate />', () => {
     const children = chance.sentence();
     renderCspPageTemplate({ children, query });
 
-    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).toBeInTheDocument();
+    [ERROR_LOADING_DATA_DEFAULT_MESSAGE, error, message, statusCode].forEach((text) =>
+      expect(screen.queryByText(text, { exact: false })).toBeInTheDocument()
+    );
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
-    packageNotInstalledUniqueTexts.forEach((text: string) =>
+    packageNotInstalledUniqueTexts.forEach((text) =>
       expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
   });
 
   it('prefers custom error render', () => {
+    const error = chance.sentence();
     const message = chance.sentence();
+    const statusCode = chance.integer();
 
     const query = createReactQueryResponse({
       status: 'error',
       error: {
         body: {
-          error: chance.sentence(),
+          error,
           message,
-          statusCode: chance.integer(),
+          statusCode,
         },
       },
     }) as unknown as UseQueryResult;
@@ -163,14 +171,16 @@ describe('<CspPageTemplate />', () => {
     renderCspPageTemplate({
       children,
       query,
-      errorRender: (error) => <div>{error.body.message}</div>,
+      errorRender: (err) => <div>{err.body?.message}</div>,
     });
 
     expect(screen.queryByText(message)).toBeInTheDocument();
-    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
+    [ERROR_LOADING_DATA_DEFAULT_MESSAGE, error, statusCode].forEach((text) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
-    packageNotInstalledUniqueTexts.forEach((text: string) =>
+    packageNotInstalledUniqueTexts.forEach((text) =>
       expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
   });
@@ -193,7 +203,7 @@ describe('<CspPageTemplate />', () => {
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
-    packageNotInstalledUniqueTexts.forEach((text: string) =>
+    packageNotInstalledUniqueTexts.forEach((text) =>
       expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
   });
@@ -211,7 +221,7 @@ describe('<CspPageTemplate />', () => {
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
-    packageNotInstalledUniqueTexts.forEach((text: string) =>
+    packageNotInstalledUniqueTexts.forEach((text) =>
       expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
   });
@@ -238,7 +248,7 @@ describe('<CspPageTemplate />', () => {
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
-    packageNotInstalledUniqueTexts.forEach((text: string) =>
+    packageNotInstalledUniqueTexts.forEach((text) =>
       expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
   });

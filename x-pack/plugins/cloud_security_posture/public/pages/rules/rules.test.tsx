@@ -66,6 +66,7 @@ describe('<Rules />', () => {
     const Component = getTestComponent({ packagePolicyId: '1', policyId: '2' });
     const request = {
       status: 'error',
+      isError: true,
       data: null,
       error: new Error('some error message'),
     };
@@ -81,13 +82,14 @@ describe('<Rules />', () => {
     const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
     const request = {
       status: 'loading',
+      isLoading: true,
     };
 
     (useCspIntegration as jest.Mock).mockReturnValue(request);
 
     render(<Component />);
 
-    expect(screen.getByTestId(cspLoadingStateTestId)).toBeInTheDocument();
+    expect(screen.queryByTestId(cspLoadingStateTestId)).toBeInTheDocument();
   });
 
   it('displays success state when result request is resolved', async () => {
@@ -103,8 +105,6 @@ describe('<Rules />', () => {
     };
 
     (useCspIntegration as jest.Mock).mockReturnValue(request);
-
-    console.log(Component);
 
     render(<Component />);
 
