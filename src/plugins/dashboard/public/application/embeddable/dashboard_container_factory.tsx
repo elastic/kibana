@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
 
-import { identity, isNil, pickBy } from 'lodash';
+import { identity, pickBy } from 'lodash';
 import { DashboardContainerInput } from '../..';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';

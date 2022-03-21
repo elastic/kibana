@@ -14,7 +14,7 @@ export const getDefaultDashboardControlGroupInput = getDefaultControlGroupInput;
 
 export const controlGroupInputToRawAttributes = (
   controlGroupInput: Omit<ControlGroupInput, 'id'>
-): Omit<RawControlGroupAttributes, 'id' | 'type'> => {
+): RawControlGroupAttributes => {
   return {
     controlStyle: controlGroupInput.controlStyle,
     chainingSystem: controlGroupInput.chainingSystem,
@@ -24,7 +24,7 @@ export const controlGroupInputToRawAttributes = (
 };
 
 export const rawAttributesToControlGroupInput = (
-  rawControlGroupAttributes: Omit<RawControlGroupAttributes, 'id'>
+  rawControlGroupAttributes: RawControlGroupAttributes
 ): Omit<ControlGroupInput, 'id'> | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
   const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =

@@ -99,10 +99,10 @@ export type SavedDashboardPanel730ToLatest = Pick<
 // Once that is all available from common, we should be able to move the dashboard_container type to our common as well
 
 // dashboard only persists part of the Control Group Input
-export type DashboardContainerControlGroupInput = EmbeddableStateWithType &
-  Pick<ControlGroupInput, 'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings'> & {
-    id: string;
-  };
+export type DashboardContainerControlGroupInput = Pick<
+  ControlGroupInput,
+  'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings'
+>;
 
 export type RawControlGroupAttributes = Omit<
   DashboardContainerControlGroupInput,
@@ -110,7 +110,6 @@ export type RawControlGroupAttributes = Omit<
 > & {
   ignoreParentSettingsJSON: string;
   panelsJSON: string;
-  id: string;
 };
 
 export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
