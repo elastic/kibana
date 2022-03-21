@@ -324,7 +324,7 @@ export class SyntheticsService {
     const end = performance.now();
     const duration = end - start;
 
-    this.logger.info(`Decrypted ${monitors.length} monitors. Took ${duration} milliseconds`, {
+    this.logger.debug(`Decrypted ${monitors.length} monitors. Took ${duration} milliseconds`, {
       event: {
         duration,
       },
