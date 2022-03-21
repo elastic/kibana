@@ -126,11 +126,11 @@ export const CspPageTemplate: React.FC<
   errorRender = DefaultError,
   ...kibanaPageTemplateProps
 }) => {
-  const cisKubernetes = useCisKubernetesIntegraion();
+  const cisKubernetesPackageInfo = useCisKubernetesIntegraion();
 
   const getNoDataConfig = (): KibanaPageTemplateProps['noDataConfig'] => {
     // TODO: add 'installed_failed' configurations
-    if (cisKubernetes?.status === 'not_installed') return PACKAGE_NOT_INSTALLED_CONFIG;
+    if (cisKubernetesPackageInfo?.status === 'not_installed') return PACKAGE_NOT_INSTALLED_CONFIG;
     if (query && !query.isLoading && !query.isError && !query.data)
       return kibanaPageTemplateProps.noDataConfig || DEFAULT_NO_DATA_CONFIG;
   };

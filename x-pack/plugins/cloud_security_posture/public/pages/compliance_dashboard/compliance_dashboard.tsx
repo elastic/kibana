@@ -32,21 +32,15 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
   },
 });
 
-const Test = () => <div>{'hi'}</div>;
-
 export const ComplianceDashboard = () => {
   const getDashboarDataQuery = useComplianceDashboardDataApi();
   useCspBreadcrumbs([allNavigationItems.dashboard]);
-
-  console.log(getDashboarDataQuery);
 
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       query={getDashboarDataQuery}
       noDataConfig={getNoDataConfig(getDashboarDataQuery.refetch)}
-      errorRender={(error) => <div>{`custom error render: ${error.body.message}`}</div>}
-      loadingRender={() => <div>{'custom loader render'}</div>}
     >
       {getDashboarDataQuery.data && (
         <>

@@ -13,7 +13,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ComplianceDashboardData } from '../../../common/types';
+import type { CloudPostureStats } from '../../../common/types';
 import { CSP_KUBEBEAT_INDEX_PATTERN, STATS_ROUTE_PATH } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { getResourcesTypes } from './get_resources_types';
@@ -95,15 +95,13 @@ export const defineGetComplianceDashboardRoute = (
           },
         };
 
-        throw new Error('demo error message');
-
         const [stats, resourcesTypes, clusters] = await Promise.all([
           getStats(esClient, query),
           getResourcesTypes(esClient, query),
           getClusters(esClient, query),
         ]);
 
-        const body: ComplianceDashboardData = {
+        const body: CloudPostureStats = {
           stats,
           resourcesTypes,
           clusters,
