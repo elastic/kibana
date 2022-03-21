@@ -1595,7 +1595,7 @@ export class RulesClient {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
-        operation: WriteOperations.MuteAll,
+        operation: WriteOperations.Snooze,
         entity: AlertingAuthorizationEntity.Rule,
       });
 
@@ -1693,6 +1693,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1755,6 +1756,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
