@@ -746,32 +746,54 @@ describe('<UseField />', () => {
   });
 
   describe('change handlers', () => {
+    const onChange = jest.fn();
     const onError = jest.fn();
 
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
-    const getTestComp = (fieldConfig: FieldConfig) => {
+    const getTestComp = (fieldConfig?: FieldConfig) => {
       const TestComp = () => {
         const { form } = useForm<any>();
 
         return (
           <Form form={form}>
-            <UseField path="name" config={fieldConfig} data-test-subj="myField" onError={onError} />
+            <UseField
+              path="name"
+              config={fieldConfig}
+              data-test-subj="myField"
+              onChange={onChange}
+              onError={onError}
+            />
           </Form>
         );
       };
       return TestComp;
     };
 
-    const setup = (fieldConfig: FieldConfig) => {
+    const setup = (fieldConfig?: FieldConfig) => {
       return registerTestBed(getTestComp(fieldConfig), {
         memoryRouter: { wrapComponent: false },
       })() as TestBed;
     };
 
-    it('calls onError when validation state changes', async () => {
+    test('calls onChange() prop when value state changes', async () => {
+      const {
+        form: { setInputValue },
+      } = setup();
+
+      expect(onChange).toBeCalledTimes(0);
+
+      await act(async () => {
+        setInputValue('myField', 'foo');
+      });
+
+      expect(onChange).toBeCalledTimes(1);
+      expect(onChange).toBeCalledWith('foo');
+    });
+
+    test('calls onError() prop when validation state changes', async () => {
       const {
         form: { setInputValue },
       } = setup({
