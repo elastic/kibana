@@ -873,4 +873,14 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.kernel.capture_mode',
+    first_supported_version: '8.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
+      {
+        defaultMessage: 'Description needed. Default: true',
+      }
+    ),
+  },
 ];
