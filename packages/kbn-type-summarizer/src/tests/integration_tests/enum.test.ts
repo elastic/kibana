@@ -8,60 +8,64 @@
 
 import { run } from '../integration_helpers';
 
-it('prints the whole interface, including comments', async () => {
+it('prints the whole enum, including comments', async () => {
   const result = await run(`
     /**
-     * This is an interface
+     * This is an enum
      */
-    export interface Foo<Bar> {
+    export enum Foo {
       /**
-       * method
+       * some comment
        */
-      name(): string
-
+      x,
       /**
-       * hello
+       * some other comment
        */
-      close(): Promise<void>
+      y,
+      /**
+       * some final comment
+       */
+      z = 1,
     }
   `);
 
   expect(result.code).toMatchInlineSnapshot(`
     "/**
-     * This is an interface
+     * This is an enum
      */
-    export interface Foo<Bar> {
+    export declare enum Foo {
         /**
-         * method
+         * some comment
          */
-        name(): string;
+        x = 0,
         /**
-         * hello
+         * some other comment
          */
-        close(): Promise<void>;
+        y = 1,
+        /**
+         * some final comment
+         */
+        z = 1
     }
     //# sourceMappingURL=index.d.ts.map"
   `);
   expect(result.map).toMatchInlineSnapshot(`
     Object {
       "file": "index.d.ts",
-      "mappings": ";;;iBAGiB,G",
+      "mappings": "",
       "names": Array [],
       "sourceRoot": "../../../src",
-      "sources": Array [
-        "index.ts",
-      ],
+      "sources": Array [],
       "version": 3,
     }
   `);
   expect(result.logs).toMatchInlineSnapshot(`
     "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
-    debug Ignoring 5 global declarations for \\"Promise\\"
     "
   `);
 });
 
-it(`handles export-type'd interfaces`, async () => {
+it(`handles export-type'd enums`, async () => {
   const result = await run(
     `
       export type { Foo } from './foo'
@@ -69,8 +73,10 @@ it(`handles export-type'd interfaces`, async () => {
     {
       otherFiles: {
         ['foo.ts']: `
-          export interface Foo {
-            name: string
+          export enum Foo {
+            x = 1,
+            y = 2,
+            z = 3,
           }
         `,
       },
@@ -78,20 +84,20 @@ it(`handles export-type'd interfaces`, async () => {
   );
 
   expect(result.code).toMatchInlineSnapshot(`
-    "export interface Foo {
-        name: string;
+    "export declare enum Foo {
+        x = 1,
+        y = 2,
+        z = 3
     }
     //# sourceMappingURL=index.d.ts.map"
   `);
   expect(result.map).toMatchInlineSnapshot(`
     Object {
       "file": "index.d.ts",
-      "mappings": "iBAAiB,G",
+      "mappings": "",
       "names": Array [],
       "sourceRoot": "../../../src",
-      "sources": Array [
-        "foo.ts",
-      ],
+      "sources": Array [],
       "version": 3,
     }
   `);
