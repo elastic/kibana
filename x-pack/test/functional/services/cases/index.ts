@@ -5,5 +5,13 @@
  * 2.0.
  */
 
-export { CasesAppAPIServiceProvider } from './api';
-export { CasesAppServiceProvider } from './browser';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { CasesAppAPIServiceProvider } from './api';
+import { CasesAppCommonServiceProvider } from './common';
+
+export function CasesAppServiceProvider(context: FtrProviderContext) {
+  return {
+    api: CasesAppAPIServiceProvider(context),
+    common: CasesAppCommonServiceProvider(context),
+  };
+}

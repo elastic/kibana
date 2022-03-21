@@ -14,20 +14,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     const common = getPageObject('common');
     const find = getService('find');
     const casesApp = getService('casesApp');
-    const casesAppApi = getService('casesAppApi');
 
     before(async () => {
       await common.navigateToApp('casesStackManagement');
     });
 
     after(async () => {
-      casesAppApi.deleteAllCases();
+      casesApp.api.deleteAllCases();
     });
 
     describe('creating a case', () => {
       it('creates a case from the stack managament page', async () => {
         const caseTitle = 'test-' + uuid.v4();
-        await casesApp.createCaseFromCreateCasePage(caseTitle);
+        await casesApp.common.createCaseFromCreateCasePage(caseTitle);
         const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
         expect(await title.getVisibleText()).equal(caseTitle);
       });

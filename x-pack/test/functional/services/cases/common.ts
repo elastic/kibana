@@ -10,7 +10,7 @@ import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrap
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function CasesAppServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+export function CasesAppCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');

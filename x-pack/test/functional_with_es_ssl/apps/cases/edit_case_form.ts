@@ -15,7 +15,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const casesApp = getService('casesApp');
-  const casesAppApi = getService('casesAppApi');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
@@ -23,21 +22,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     // create the case to test on
     before(async () => {
       await common.navigateToApp('casesStackManagement');
-      await casesAppApi.createNthRandomCases(1);
+      await casesApp.api.createNthRandomCases(1);
     });
 
     after(async () => {
-      casesAppApi.deleteAllCases();
+      casesApp.api.deleteAllCases();
     });
 
     beforeEach(async () => {
       await common.navigateToApp('casesStackManagement');
-      await casesApp.goToFirstListedCase();
+      await casesApp.common.goToFirstListedCase();
       await header.waitUntilLoadingHasFinished();
     });
 
     it('edits a case title from the case view page', async () => {
-      const newTitle = 'test-' + uuid.v4();
+      const newTitle = `test-${uuid.v4()}`;
 
       await testSubjects.click('editable-title-edit-icon');
       await testSubjects.setValue('editable-title-input-field', newTitle);
@@ -78,7 +77,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('changes a case status to in-progress via dropdown menu', async () => {
-      await casesApp.markCaseInProgressViaDropdown();
+      await casesApp.common.markCaseInProgressViaDropdown();
       // validate user action
       await find.byCssSelector(
         '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-in-progress"]'
@@ -86,7 +85,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('changes a case status to closed via dropdown-menu', async () => {
-      await casesApp.markCaseClosedViaDropdown();
+      await casesApp.common.markCaseClosedViaDropdown();
 
       // validate user action
       await find.byCssSelector(
@@ -95,7 +94,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it("reopens a case from the 'reopen case' button", async () => {
-      await casesApp.markCaseClosedViaDropdown();
+      await casesApp.common.markCaseClosedViaDropdown();
       await header.waitUntilLoadingHasFinished();
       await testSubjects.click('case-view-status-action-button');
       await header.waitUntilLoadingHasFinished();
@@ -111,7 +110,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it("marks in progress a case from the 'mark in progress' button", async () => {
-      await casesApp.markCaseOpenViaDropdown();
+      await casesApp.common.markCaseOpenViaDropdown();
       await header.waitUntilLoadingHasFinished();
       await testSubjects.click('case-view-status-action-button');
       await header.waitUntilLoadingHasFinished();
@@ -127,7 +126,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it("closes a case from the 'close case' button", async () => {
-      await casesApp.markCaseInProgressViaDropdown();
+      await casesApp.common.markCaseInProgressViaDropdown();
       await header.waitUntilLoadingHasFinished();
       await testSubjects.click('case-view-status-action-button');
       await header.waitUntilLoadingHasFinished();

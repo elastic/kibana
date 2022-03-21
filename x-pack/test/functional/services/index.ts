@@ -69,7 +69,7 @@ import {
 import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
 import { CompareImagesProvider } from './compare_images';
-import { CasesAppAPIServiceProvider, CasesAppServiceProvider } from './cases';
+import { CasesAppServiceProvider } from './cases';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -130,5 +130,4 @@ export const services = {
   observability: ObservabilityProvider,
   compareImages: CompareImagesProvider,
   casesApp: CasesAppServiceProvider,
-  casesAppApi: CasesAppAPIServiceProvider,
 };

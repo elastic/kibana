@@ -13,20 +13,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const casesApp = getService('casesApp');
-  const casesAppApi = getService('casesAppApi');
   const retry = getService('retry');
   const browser = getService('browser');
 
   describe('cases list', () => {
     before(async () => {
       await common.navigateToApp('casesStackManagement');
-      await casesAppApi.deleteAllCases();
+      await casesApp.api.deleteAllCases();
     });
 
     after(async () => {
-      casesAppApi.deleteAllCases();
+      casesApp.api.deleteAllCases();
     });
 
     beforeEach(async () => {
@@ -39,13 +37,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('lists cases correctly', async () => {
       const NUMBER_CASES = 2;
-      await casesAppApi.createNthRandomCases(NUMBER_CASES);
+      await casesApp.api.createNthRandomCases(NUMBER_CASES);
       await common.navigateToApp('casesStackManagement');
-      await casesApp.validateCasesTableHasNthRows(NUMBER_CASES);
+      await casesApp.common.validateCasesTableHasNthRows(NUMBER_CASES);
     });
 
     it('deletes a case correctly from the list', async () => {
-      await casesAppApi.createNthRandomCases(1);
+      await casesApp.api.createNthRandomCases(1);
       await common.navigateToApp('casesStackManagement');
       await testSubjects.click('action-delete');
       await testSubjects.click('confirmModalConfirmButton');
@@ -53,10 +51,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('filters cases from the list with partial match', async () => {
-      await casesAppApi.createNthRandomCases(5);
+      await casesApp.api.createNthRandomCases(5);
       const id = uuid.v4();
       const caseTitle = 'test-' + id;
-      await casesAppApi.createCaseWithData({ title: caseTitle });
+      await casesApp.api.createCaseWithData({ title: caseTitle });
       await common.navigateToApp('casesStackManagement');
 
       // search
@@ -65,13 +63,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await input.pressKeys(browser.keys.ENTER);
 
       await retry.tryForTime(5000, async () => {
-        await casesApp.validateCasesTableHasNthRows(1);
+        await casesApp.common.validateCasesTableHasNthRows(1);
       });
     });
 
     it('paginates cases correctly', async () => {
-      await casesAppApi.deleteAllCases();
-      await casesAppApi.createNthRandomCases(8);
+      await casesApp.api.deleteAllCases();
+      await casesApp.api.createNthRandomCases(8);
       await common.navigateToApp('casesStackManagement');
       await testSubjects.click('tablePaginationPopoverButton');
       await testSubjects.click('tablePagination-5-rows');
@@ -82,38 +80,38 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('bulk delete cases from the list', async () => {
       // deletes them from the API
-      await casesAppApi.deleteAllCases();
-      await casesAppApi.createNthRandomCases(8);
+      await casesApp.api.deleteAllCases();
+      await casesApp.api.createNthRandomCases(8);
       await common.navigateToApp('casesStackManagement');
       // deletes them from the UI
-      await casesApp.deleteAllCasesFromListUi();
-      await casesApp.validateCasesTableHasNthRows(0);
+      await casesApp.common.deleteAllCasesFromListUi();
+      await casesApp.common.validateCasesTableHasNthRows(0);
     });
 
     describe('changes status from the list', () => {
       before(async () => {
         await common.navigateToApp('casesStackManagement');
-        await casesAppApi.deleteAllCases();
-        await casesAppApi.createNthRandomCases(1);
+        await casesApp.api.deleteAllCases();
+        await casesApp.api.createNthRandomCases(1);
         await common.navigateToApp('casesStackManagement');
       });
 
       it('to in progress', async () => {
-        await casesApp.openCaseSetStatusDropdown();
+        await casesApp.common.openCaseSetStatusDropdown();
         await testSubjects.click('case-view-status-dropdown-in-progress');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('status-badge-in-progress');
       });
 
       it('to closed', async () => {
-        await casesApp.openCaseSetStatusDropdown();
+        await casesApp.common.openCaseSetStatusDropdown();
         await testSubjects.click('case-view-status-dropdown-closed');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('status-badge-closed');
       });
 
       it('to open', async () => {
-        await casesApp.openCaseSetStatusDropdown();
+        await casesApp.common.openCaseSetStatusDropdown();
         await testSubjects.click('case-view-status-dropdown-open');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('status-badge-open');
