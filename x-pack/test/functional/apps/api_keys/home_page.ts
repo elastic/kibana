@@ -20,11 +20,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   async function clearAllApiKeys() {
     const existingKeys = await es.security.queryApiKeys();
     if (existingKeys.count > 0) {
-      await (
-        await es.security.queryApiKeys()
-      ).api_keys.map(async (key) => {
-        await es.security.invalidateApiKey({ ids: [key.id] });
-      });
+      Promise.all(
+        await (
+          await existingKeys.queryApiKeys()
+        ).api_keys.map(async (key) => {
+          await es.security.invalidateApiKey({ ids: [key.id] });
+        })
+      );
     } else {
       log.debug('No API keys to delete.');
     }
@@ -54,8 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('creates API key', function () {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin']);
-        await security.testUser.setRoles(['test_api_keys']);
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
         await pageObjects.common.navigateToApp('apiKeys');
 
         // Delete any API keys created outside of these tests
@@ -114,8 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('deletes API key(s)', function () {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin']);
-        await security.testUser.setRoles(['test_api_keys']);
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
         await pageObjects.common.navigateToApp('apiKeys');
       });
 
