@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCheckbox, EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
+import { EuiCheckbox, EuiSpacer, EuiText, htmlIdGenerator, EuiSwitch } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { PolicyOperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
@@ -32,6 +32,7 @@ export type EventFormSelection<T extends OperatingSystem> = { [K in ProtectionFi
 export interface EventFormOption<T extends OperatingSystem> {
   name: string;
   protectionField: ProtectionField<T>;
+  displayAsSwitch?: boolean;
 }
 
 export interface EventsFormProps<T extends OperatingSystem> {
@@ -71,16 +72,33 @@ export const EventsForm = <T extends OperatingSystem>({
       })}
     </ConfigFormHeading>
     <EuiSpacer size="s" />
-    {options.map(({ name, protectionField }) => (
-      <EuiCheckbox
-        key={String(protectionField)}
-        id={htmlIdGenerator()()}
-        label={name}
-        data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
-        checked={selection[protectionField]}
-        onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-      />
-    ))}
+    {options.map(({ name, protectionField, displayAsSwitch = false }) => {
+      if (displayAsSwitch) {
+        return (
+          <>
+            <EuiSpacer size="s" />
+            <EuiSwitch
+              key={String(protectionField)}
+              id={htmlIdGenerator()()}
+              label={name}
+              data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
+              checked={selection[protectionField]}
+              onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+            />
+          </>
+        );
+      }
+      return (
+        <EuiCheckbox
+          key={String(protectionField)}
+          id={htmlIdGenerator()()}
+          label={name}
+          data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
+          checked={selection[protectionField]}
+          onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+        />
+      );
+    })}
   </ConfigForm>
 );
 

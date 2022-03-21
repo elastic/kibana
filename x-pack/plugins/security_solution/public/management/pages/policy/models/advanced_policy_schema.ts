@@ -879,7 +879,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
-        defaultMessage: 'Description needed. Default: true',
+        defaultMessage: 'Description needed. Default: kprobes',
       }
     ),
   },
