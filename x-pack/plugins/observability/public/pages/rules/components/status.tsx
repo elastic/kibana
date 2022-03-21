@@ -27,15 +27,4 @@ export function Status({ type, disabled, onClick }: StatusProps) {
       {statusMap[type].label}
     </EuiBadge>
   );
-  /* <EuiBadge
-      color={statusMap[type].color}
-      iconType={!disabled ? 'arrowDown' : {}}
-      iconSide="right"
-      onClick={onClick}
-      iconOnClick={!disabled ? onClick : noop}
-      onClickAriaLabel="Change status"
-    >
-      {statusMap[type].label}
-  </EuiBadge> 
-  };*/
 }
