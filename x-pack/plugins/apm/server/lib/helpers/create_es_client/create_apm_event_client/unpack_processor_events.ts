@@ -36,7 +36,6 @@ export function unpackProcessorEvents(
     body: { query: { bool: { filter: ESFilter[] } } };
   } = defaultsDeep(cloneDeep(params), {
     body: {
-      size: 0,
       query: {
         bool: {
           filter: [],
