@@ -94,11 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: [
-          'security_auth',
-          'security_network',
-          'security_windows_v3,',
-        ],
+        moduleIds: ['security_auth', 'security_network', 'security_windows_v3,'],
       },
     },
     {
