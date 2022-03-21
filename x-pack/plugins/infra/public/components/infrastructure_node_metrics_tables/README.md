@@ -15,10 +15,10 @@ All tables get their data from the Metrics Explorer API by making use of the
 `useInfrastructureNodeMetrics` hook. The key input to the hook is the `MetricsMap` which defines
 which metrics should be requested (by field and type of aggregation). By passing a `MetricsMap` to 
 the helper `metricsToApiOptions` we get back the options we need to pass to 
-`useInfrastructureNodeMetrics`.
+`useInfrastructureNodeMetrics`. `metricsToApiOptions` also returns a mapping object that is used to 
+translate the field name to the format the API returns (e.g. `metric_0`).
 The `MetricsMap` type is mostly to ensure that the object key and the `field` value match to avoid
-mistakes. `metricsToApiOptions` also returns a mapping object that is used to translate the field
-name to the format the API returns (e.g. `metric_0`).
+mistakes when re-ordering the metrics being used.
 
 `useInfrastructureNodeMetrics` also expects a timerange and a filter (in ES DSL) and a function
 to transform the Metrics Explorer response to something more suitable for the table component to
