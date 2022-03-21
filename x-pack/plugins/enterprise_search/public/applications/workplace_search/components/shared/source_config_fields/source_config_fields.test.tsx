@@ -31,7 +31,7 @@ describe('SourceConfigFields', () => {
         publicKey="abc"
         consumerKey="def"
         baseUrl="ghi"
-        externalConnectorUrl="url"
+        externalConnectorUrl="https://url.com"
         externalConnectorApiKey="apiKey"
       />
     );
