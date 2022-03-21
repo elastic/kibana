@@ -13,7 +13,6 @@ import { statusMap } from '../config';
 import { RULES_CHANGE_STATUS } from '../translations';
 
 export function Status({ type, disabled, onClick }: StatusProps) {
-  console.log(disabled, '!!disabled');
   const props = useMemo(
     () => ({
       color: statusMap[type].color,
