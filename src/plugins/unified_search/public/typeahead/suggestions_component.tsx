@@ -9,7 +9,7 @@
 import React, { PureComponent, ReactNode } from 'react';
 import { isEmpty } from 'lodash';
 import classNames from 'classnames';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import styled from 'styled-components';
 
 import useRafState from 'react-use/lib/useRafState';
