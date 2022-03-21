@@ -25,7 +25,6 @@ import {
 } from '../../../../common/lib/utils';
 import {
   CaseResponse,
-  CasesFindResponse,
   CaseStatuses,
   CommentType,
 } from '../../../../../../plugins/cases/common/api';
