@@ -34,60 +34,22 @@ const registerHttpRequestMockHelpers = (httpSetup) => {
       .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
 
-  const setLoadFollowerIndicesResponse = (response, error) =>
-    mockResponse(
-      'GET',
-      `${API_BASE_PATH}/follower_indices`,
-      {
-        indices: [],
-        ...response,
-      },
-      error
-    );
+  const setLoadFollowerIndicesResponse = (response = { indices: [] }, error) =>
+    mockResponse('GET', `${API_BASE_PATH}/follower_indices`, response, error);
 
-  const setLoadAutoFollowPatternsResponse = (response, error) =>
-    mockResponse(
-      'GET',
-      `${API_BASE_PATH}/auto_follow_patterns`,
-      {
-        patterns: [],
-        ...response,
-      },
-      error
-    );
+  const setLoadAutoFollowPatternsResponse = (response = { patterns: [] }, error) =>
+    mockResponse('GET', `${API_BASE_PATH}/auto_follow_patterns`, response, error);
 
   const setDeleteAutoFollowPatternResponse = (autoFollowId, response, error) =>
     mockResponse(
       'DELETE',
       `${API_BASE_PATH}/auto_follow_patterns/${autoFollowId}`,
-      {
-        errors: [],
-        itemsDeleted: [],
-        ...response,
-      },
+      response,
       error
     );
 
   const setAutoFollowStatsResponse = (response, error) =>
-    mockResponse(
-      'GET',
-      `${API_BASE_PATH}/stats/auto_follow`,
-      {
-        numberOfFailedFollowIndices: 0,
-        numberOfFailedRemoteClusterStateRequests: 0,
-        numberOfSuccessfulFollowIndices: 0,
-        recentAutoFollowErrors: [],
-        autoFollowedClusters: [
-          {
-            clusterName: 'new-york',
-            timeSinceLastCheckMillis: 13746,
-            lastSeenMetadataVersion: 22,
-          },
-        ],
-        ...response,
-      },
-      error
-    );
+    mockResponse('GET', `${API_BASE_PATH}/stats/auto_follow`, response, error);
 
   const setLoadRemoteClustersResponse = (response = [], error) =>
     mockResponse('GET', '/api/remote_clusters', response, error);
