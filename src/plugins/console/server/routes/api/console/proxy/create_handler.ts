@@ -31,6 +31,14 @@ import { RouteDependencies } from '../../../';
 import { Body, Query } from './validation_config';
 
 function toURL(base: string, path: string) {
+  const [p, query = ''] = path.split('?');
+
+  // if there is a '+' sign in query e.g. ?q=create_date:[2020-05-10T08:00:00.000+08:00 TO *]
+  // node url encodes it as a whitespace which results in a faulty request
+  // we need to replace '+' with '%2b' to encode it correctly
+  if (/\+/g.test(query)) {
+    path = `${p}?${query.replace(/\+/g, '%2b')}`;
+  }
   const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
   // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
@@ -116,7 +124,7 @@ export const createHandler =
   }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
   async (ctx, request, response) => {
     const { body, query } = request;
-    const { path, method, withProductOrigin } = query;
+    const { method, path, withProductOrigin } = query;
 
     if (kibanaVersion.major < 8) {
       // The "console.proxyFilter" setting in kibana.yaml has been deprecated in 8.x
