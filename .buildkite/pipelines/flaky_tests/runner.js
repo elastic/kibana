@@ -186,6 +186,8 @@ for (const testSuite of testSuites) {
         concurrency_group: UUID,
         concurrency_method: 'eager',
       });
+      break;
+
     case 'cypress':
       const CYPRESS_SUITE = CI_GROUP;
       const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));
