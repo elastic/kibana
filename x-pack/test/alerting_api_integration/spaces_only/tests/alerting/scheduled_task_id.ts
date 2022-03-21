@@ -87,7 +87,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
       expect(JSON.parse(taskRecordNew.task.params)).to.eql({
         alertId: MIGRATED_RULE_ID,
         spaceId: 'default',
-        consumer: 'alertsFixture',
+        consumer: 'alerts',
       });
     });
 
@@ -107,7 +107,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
       expect(JSON.parse(taskRecord.task.params)).to.eql({
         alertId: response.body.id,
         spaceId: 'default',
-        consumer: 'alertsFixture',
+        consumer: 'alerts',
       });
     });
   });
