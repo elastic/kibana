@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.dragFieldToWorkspace('runtimefield');
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
-        'Top values of runtimefield'
+        'Top 5 values of runtimefield'
       );
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('abc');
     });
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
-        'Top values of runtimefield2'
+        'Top 5 values of runtimefield2'
       );
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('abc');
     });
