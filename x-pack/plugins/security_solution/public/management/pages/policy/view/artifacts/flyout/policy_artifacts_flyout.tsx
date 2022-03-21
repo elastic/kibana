@@ -150,8 +150,9 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       if (!assignableArtifacts) {
         return (
           <EuiEmptyPrompt
+            titleSize="xs"
             data-test-subj="artifacts-no-assignable-items"
-            title={<p>{labels.flyoutNoArtifactsToBeAssignedMessage}</p>}
+            body={<p>{labels.flyoutNoArtifactsToBeAssignedMessage}</p>}
           />
         );
       }
@@ -160,8 +161,9 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       if (artifacts?.total === 0) {
         return (
           <EuiEmptyPrompt
+            titleSize="xs"
             data-test-subj="artifacts-no-items-found"
-            title={<p>{labels.flyoutNoSearchResultsMessage}</p>}
+            body={<p>{labels.flyoutNoSearchResultsMessage}</p>}
           />
         );
       }

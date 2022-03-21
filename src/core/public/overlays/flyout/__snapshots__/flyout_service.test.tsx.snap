@@ -40,7 +40,7 @@ Array [
 ]
 `;
 
-exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content</span></div></div>"`;
+exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\" aria-label=\\"Close this dialog\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content</span></div></div>"`;
 
 exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
 Array [
@@ -199,4 +199,4 @@ Array [
 ]
 `;
 
-exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content 2</span></div></div>"`;
+exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\" aria-label=\\"Close this dialog\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content 2</span></div></div>"`;

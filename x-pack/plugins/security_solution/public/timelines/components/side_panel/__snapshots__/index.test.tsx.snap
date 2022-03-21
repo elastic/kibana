@@ -107,7 +107,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                   <button
                     aria-label="close"
                     className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -260,6 +259,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       isHostIsolationPanelOpen={false}
       loadingEventDetails={true}
       onAddIsolationStatusClick={[Function]}
+      refetchFlyoutData={[Function]}
       timelineId="test"
     >
       <Memo()
@@ -277,6 +277,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
         isHostIsolationPanelOpen={false}
         loadingEventDetails={true}
         onAddIsolationStatusClick={[Function]}
+        refetchFlyoutData={[Function]}
         timelineId="test"
         timelineQuery={
           Object {
@@ -359,6 +360,7 @@ Array [
       role="dialog"
     >
       <button
+        aria-label="Close this dialog"
         data-test-subj="euiFlyoutCloseButton"
         onClick={[Function]}
         type="button"
@@ -556,6 +558,7 @@ Array [
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          refetchFlyoutData={[Function]}
           timelineId="test"
         >
           <Memo()
@@ -573,6 +576,7 @@ Array [
             isHostIsolationPanelOpen={false}
             loadingEventDetails={true}
             onAddIsolationStatusClick={[Function]}
+            refetchFlyoutData={[Function]}
             timelineId="test"
             timelineQuery={
               Object {
@@ -646,6 +650,7 @@ Array [
     role="dialog"
   >
     <button
+      aria-label="Close this dialog"
       data-test-subj="euiFlyoutCloseButton"
       onClick={[Function]}
       type="button"
@@ -843,6 +848,7 @@ Array [
         isHostIsolationPanelOpen={false}
         loadingEventDetails={true}
         onAddIsolationStatusClick={[Function]}
+        refetchFlyoutData={[Function]}
         timelineId="test"
       >
         <Memo()
@@ -860,6 +866,7 @@ Array [
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          refetchFlyoutData={[Function]}
           timelineId="test"
           timelineQuery={
             Object {

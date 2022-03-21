@@ -36,7 +36,7 @@ import { isTimerangeModeEnabled } from '../../../common/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 import { PanelModelContext } from '../contexts/panel_model_context';
 import { FormValidationContext } from '../contexts/form_validation_context';
-import { getDataStart, getUISettings } from '../../services';
+import { getUISettings, getDataViewsStart } from '../../services';
 import { UI_SETTINGS } from '../../../../../data/common';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
@@ -143,7 +143,7 @@ export const IndexPattern = ({
 
   useEffect(() => {
     async function fetchIndex() {
-      const { indexPatterns } = getDataStart();
+      const dataViews = getDataViewsStart();
       let fetchedIndexPattern = {
         indexPattern: undefined,
         indexPatternString: undefined,
@@ -153,12 +153,12 @@ export const IndexPattern = ({
 
       try {
         fetchedIndexPattern = indexPatternToFetch
-          ? await fetchIndexPattern(indexPatternToFetch, indexPatterns, {
+          ? await fetchIndexPattern(indexPatternToFetch, dataViews, {
               fetchKibanaIndexForStringIndexes: true,
             })
           : {
               ...fetchedIndexPattern,
-              defaultIndex: await indexPatterns.getDefault(),
+              defaultIndex: await dataViews.getDefault(),
             };
       } catch {
         // nothing to be here

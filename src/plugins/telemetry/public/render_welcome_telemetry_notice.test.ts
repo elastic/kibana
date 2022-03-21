@@ -8,24 +8,32 @@
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
-import { mockTelemetryService } from './mocks';
+import { mockTelemetryConstants, mockTelemetryService } from './mocks';
 
 describe('renderWelcomeTelemetryNotice', () => {
+  const telemetryConstants = mockTelemetryConstants();
+
   test('it should show the opt-out message', () => {
     const telemetryService = mockTelemetryService();
-    const component = mountWithIntl(renderWelcomeTelemetryNotice(telemetryService, (url) => url));
+    const component = mountWithIntl(
+      renderWelcomeTelemetryNotice(telemetryService, (url) => url, telemetryConstants)
+    );
     expect(component.exists('[id="telemetry.dataManagementDisableCollectionLink"]')).toBe(true);
   });
 
   test('it should show the opt-in message', () => {
     const telemetryService = mockTelemetryService({ config: { optIn: false } });
-    const component = mountWithIntl(renderWelcomeTelemetryNotice(telemetryService, (url) => url));
+    const component = mountWithIntl(
+      renderWelcomeTelemetryNotice(telemetryService, (url) => url, telemetryConstants)
+    );
     expect(component.exists('[id="telemetry.dataManagementEnableCollectionLink"]')).toBe(true);
   });
 
   test('it should not show opt-in/out options if user cannot change the settings', () => {
     const telemetryService = mockTelemetryService({ config: { allowChangingOptInStatus: false } });
-    const component = mountWithIntl(renderWelcomeTelemetryNotice(telemetryService, (url) => url));
+    const component = mountWithIntl(
+      renderWelcomeTelemetryNotice(telemetryService, (url) => url, telemetryConstants)
+    );
     expect(component.exists('[id="telemetry.dataManagementDisableCollectionLink"]')).toBe(false);
     expect(component.exists('[id="telemetry.dataManagementEnableCollectionLink"]')).toBe(false);
   });

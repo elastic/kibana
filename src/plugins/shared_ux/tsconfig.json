@@ -10,7 +10,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    ".storybook/**/*",
     "../../../typings/**/*"
   ],
   "references": [
@@ -19,9 +18,6 @@
     },
     {
       "path": "../data_view_editor/tsconfig.json"
-    },
-    {
-      "path": "../data_views/tsconfig.json"
     }
   ]
 }
