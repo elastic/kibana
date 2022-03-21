@@ -26,6 +26,10 @@ export const statusMap: Status = {
     color: 'default',
     label: 'Disabled',
   },
+  [RuleStatus.muted]: {
+    color: 'warning',
+    label: 'Muted',
+  },
 };
 
 export const DEFAULT_SEARCH_PAGE_SIZE: number = 25;

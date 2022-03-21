@@ -34,17 +34,5 @@ export function Name({ name, rule }: RuleNameProps) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-  return (
-    <>
-      {link}
-      {rule.enabled && rule.muteAll && (
-        <EuiBadge data-test-subj="mutedActionsBadge" color="hollow">
-          <FormattedMessage
-            id="xpack.observability.rules.rulesTable.columns.mutedBadge"
-            defaultMessage="Muted"
-          />
-        </EuiBadge>
-      )}
-    </>
-  );
+  return <>{link}</>;
 }

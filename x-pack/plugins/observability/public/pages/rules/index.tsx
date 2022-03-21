@@ -39,6 +39,7 @@ import {
   disableRule,
   muteRule,
   useLoadRuleTypes,
+  unmuteRule,
 } from '../../../../triggers_actions_ui/public';
 import { AlertExecutionStatus, ALERTS_FEATURE_ID } from '../../../../alerting/common';
 import { Pagination } from './types';
@@ -180,6 +181,7 @@ export function RulesPage() {
               enableRule={async () => await enableRule({ http, id: item.id })}
               disableRule={async () => await disableRule({ http, id: item.id })}
               muteRule={async () => await muteRule({ http, id: item.id })}
+              unMuteRule={async () => await unmuteRule({ http, id: item.id })}
             />
           );
         },

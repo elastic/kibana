@@ -16,6 +16,7 @@ export interface StatusProps {
 export enum RuleStatus {
   enabled = 'enabled',
   disabled = 'disabled',
+  muted = 'muted',
 }
 
 export type Status = Record<
@@ -33,6 +34,7 @@ export interface StatusContextProps {
   enableRule: (rule: Rule) => Promise<void>;
   disableRule: (rule: Rule) => Promise<void>;
   muteRule: (rule: Rule) => Promise<void>;
+  unMuteRule: (rule: Rule) => Promise<void>;
 }
 
 export interface StatusFilterProps {
