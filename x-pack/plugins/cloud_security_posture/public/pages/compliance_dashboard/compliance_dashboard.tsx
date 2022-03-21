@@ -33,21 +33,21 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
 });
 
 export const ComplianceDashboard = () => {
-  const getDashboarDataQuery = useComplianceDashboardDataApi();
+  const getDashboardDataQuery = useComplianceDashboardDataApi();
   useCspBreadcrumbs([allNavigationItems.dashboard]);
 
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
-      query={getDashboarDataQuery}
-      noDataConfig={getNoDataConfig(getDashboarDataQuery.refetch)}
+      query={getDashboardDataQuery}
+      noDataConfig={getNoDataConfig(getDashboardDataQuery.refetch)}
     >
-      {getDashboarDataQuery.data && (
+      {getDashboardDataQuery.data && (
         <>
-          <SummarySection complianceData={getDashboarDataQuery.data} />
+          <SummarySection complianceData={getDashboardDataQuery.data} />
           <EuiSpacer />
-          <BenchmarksSection complianceData={getDashboarDataQuery.data} />
+          <BenchmarksSection complianceData={getDashboardDataQuery.data} />
           <EuiSpacer />
         </>
       )}

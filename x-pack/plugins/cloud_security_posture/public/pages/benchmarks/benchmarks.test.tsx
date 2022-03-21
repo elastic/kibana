@@ -21,7 +21,7 @@ import {
   TABLE_COLUMN_HEADERS,
 } from './translations';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
-import { useCisKubernetesIntegraion } from '../../common/api/use_cis_kubernetes_integration';
+import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_kubebeat_data_view');
@@ -32,7 +32,7 @@ describe('<Benchmarks />', () => {
     jest.resetAllMocks();
 
     // Required for the page template to render the benchmarks page
-    (useCisKubernetesIntegraion as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
 
     (useKubebeatDataView as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({

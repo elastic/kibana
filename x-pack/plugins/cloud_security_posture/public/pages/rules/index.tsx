@@ -35,7 +35,6 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
 
   const pageProps: KibanaPageTemplateProps = useMemo(
     () => ({
-      template: integrationInfo.status !== 'success' ? 'centeredContent' : undefined,
       pageHeader: {
         bottomBorder: false, // TODO: border still shows.
         pageTitle: 'Rules',
@@ -46,12 +45,13 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         ),
       },
     }),
-    [integrationInfo.data, integrationInfo.status]
+    [integrationInfo.data]
   );
 
   return (
     <CspPageTemplate
       {...pageProps}
+      query={integrationInfo}
       errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
     >
       {integrationInfo.status === 'success' && <RulesContainer />}

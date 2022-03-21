@@ -18,7 +18,7 @@ import type { CspNavigationItem } from '../common/navigation/types';
 import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 import { CspLoadingState } from './csp_loading_state';
 import { LOADING, PACKAGE_NOT_INSTALLED_TEXT, DEFAULT_NO_DATA_TEXT } from './translations';
-import { useCisKubernetesIntegraion } from '../common/api/use_cis_kubernetes_integration';
+import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
 
 interface CspError {
@@ -127,7 +127,7 @@ export const CspPageTemplate: React.FC<
   errorRender = DefaultError,
   ...kibanaPageTemplateProps
 }) => {
-  const cisKubernetesPackageInfo = useCisKubernetesIntegraion();
+  const cisKubernetesPackageInfo = useCisKubernetesIntegration();
   const cisIntegrationLink = useCISIntegrationLink();
 
   const getNoDataConfig = (): KibanaPageTemplateProps['noDataConfig'] => {

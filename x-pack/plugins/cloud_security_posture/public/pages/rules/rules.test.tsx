@@ -15,10 +15,12 @@ import { type RouteComponentProps } from 'react-router-dom';
 import { cspLoadingStateTestId } from '../../components/csp_loading_state';
 import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
+import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegration: jest.fn(),
 }));
+jest.mock('../../common/api/use_cis_kubernetes_integration');
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +45,7 @@ describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
   });
 
   it('calls API with URL params', async () => {

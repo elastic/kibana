@@ -13,7 +13,7 @@ import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
 import { CspPageTemplate, getSideNavItems } from './csp_page_template';
 import { LOADING, PACKAGE_NOT_INSTALLED_TEXT, DEFAULT_NO_DATA_TEXT } from './translations';
-import { useCisKubernetesIntegraion } from '../common/api/use_cis_kubernetes_integration';
+import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { UseQueryResult } from 'react-query';
 
 const chance = new Chance();
@@ -52,8 +52,8 @@ describe('getSideNavItems', () => {
 describe('<CspPageTemplate />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    // if package installations status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
-    (useCisKubernetesIntegraion as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
+    // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
   });
 
   const renderCspPageTemplate = (props: ComponentProps<typeof CspPageTemplate> = {}) => {
@@ -91,7 +91,7 @@ describe('<CspPageTemplate />', () => {
   });
 
   it('renders integrations installation promprt if integraion is not installed', () => {
-    (useCisKubernetesIntegraion as jest.Mock).mockImplementation(() => ({
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
       status: 'not_installed',
     }));
 
