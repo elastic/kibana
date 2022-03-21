@@ -501,14 +501,15 @@ export class LensAttributes {
 
   getMainYAxis(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
     const { breakdown } = layerConfig;
-    const { sourceField, operationType, label } = layerConfig.seriesConfig.yAxisColumns[0];
+    const { sourceField, operationType, label, timeScale } =
+      layerConfig.seriesConfig.yAxisColumns[0];
 
     if (sourceField === RECORDS_PERCENTAGE_FIELD) {
       return getDistributionInPercentageColumn({ label, layerId, columnFilter }).main;
     }
 
     if (sourceField === RECORDS_FIELD || !sourceField) {
-      return this.getRecordsColumn(label);
+      return this.getRecordsColumn(label, undefined, timeScale);
     }
 
     return this.getColumnBasedOnType({
