@@ -319,7 +319,7 @@ export class JobsList extends Component {
               spacesApi={spacesApi}
               spaceIds={item.spaceIds}
               id={item.id}
-              jobType="anomaly-detector"
+              mlSavedObjectType="anomaly-detector"
               refresh={this.props.refreshJobs}
             />
           ),
