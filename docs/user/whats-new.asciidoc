@@ -1,12 +1,58 @@
 [[whats-new]]
-== What's new in 8.0
+== What's new in {minor-version}
 
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes-8.0.0>>. 
+coming::[8.2.0]
+
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check the <<release-notes, release notes>>.
+
+Previous versions: {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+[[new-in-discover]]
+=== New ways to explore in Discover
+
+This release brings three new features to *Discover* that make exploring
+your data more efficient.
+
+[float]
+==== Experience the new Document Explorer
+
+With a new look and new controls for data display,
+the document table is now known as the *Document Explorer*.
+Benefits of the Document Explorer include:
+
+* Changeable column widths
+* Adjustable row height
+* Sortable columns with drag and drop
+* Full screen mode
+* Improved sorting
+* Document selection and export to clipboard
+* Expanded documents view in a flyout, with navigation to previous and next documents
+
+https://videos.elastic.co/watch/Derc92pKX6VrWegqjZybNr[Watch the video].
+
+[float]
+==== Understand your data with Field Statistics
+
+Learn more about the shape of your data with *Field statistics*.
+This view summarizes how many documents in the sample contain each
+field for the selected time period the number of distinct values, and the distribution.
+
+Expand a field for even more detailed statistics.
+For example, for a geo field, *Discover* provides the document statistics,
+examples, and a map of the coordinates.
+
+For a quick how-to, check out {kibana-ref}/show-field-statistics.html[Explore the fields in your data].
+
+[float]
+==== Take action with Alerts
+
 
 // end::notable-highlights[]
