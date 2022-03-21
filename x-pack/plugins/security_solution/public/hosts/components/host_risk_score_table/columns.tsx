@@ -19,14 +19,14 @@ import { Provider } from '../../../timelines/components/timeline/data_providers/
 import { HostRiskScoreColumns } from '.';
 
 import * as i18n from './translations';
-import { HostRiskScore } from '../common/host_risk_score';
-import { HostRiskSeverity } from '../../../../common/search_strategy';
 import { HostsTableType } from '../../store/model';
+import { RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScore } from '../../../common/components/severity/common';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
 }: {
-  dispatchSeverityUpdate: (s: HostRiskSeverity) => void;
+  dispatchSeverityUpdate: (s: RiskSeverity) => void;
 }): HostRiskScoreColumns => [
   {
     field: 'host.name',
@@ -96,7 +96,7 @@ export const getHostRiskScoreColumns = ({
     render: (risk) => {
       if (risk != null) {
         return (
-          <HostRiskScore
+          <RiskScore
             toolTipContent={
               <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
                 <EuiText size="xs">{i18n.VIEW_HOSTS_BY_SEVERITY(risk.toLowerCase())}</EuiText>

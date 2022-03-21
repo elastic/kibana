@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
@@ -15,7 +15,8 @@ import type { Writable } from 'stream';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
 import type {
-  ScreenshotOptions as BaseScreenshotOptions,
+  PngScreenshotOptions as BasePngScreenshotOptions,
+  PdfScreenshotOptions as BasePdfScreenshotOptions,
   ScreenshottingStart,
 } from '../../screenshotting/server';
 import type {
@@ -29,7 +30,6 @@ import type { CancellationToken } from '../common/cancellation_token';
 import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
-import type { LevelLogger } from './lib';
 import type { ReportTaskParams } from './lib/tasks';
 
 /**
@@ -71,12 +71,12 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
 
 export type CreateJobFnFactory<CreateJobFnType> = (
   reporting: ReportingCore,
-  logger: LevelLogger
+  logger: Logger
 ) => CreateJobFnType;
 
 export type RunTaskFnFactory<RunTaskFnType> = (
   reporting: ReportingCore,
-  logger: LevelLogger
+  logger: Logger
 ) => RunTaskFnType;
 
 export interface ExportTypeDefinition<
@@ -118,7 +118,11 @@ export interface ReportingRequestHandlerContext {
 
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 
-export interface ScreenshotOptions extends Omit<BaseScreenshotOptions, 'timeouts' | 'urls'> {
+export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
+  urls: UrlOrUrlLocatorTuple[];
+}
+
+export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
 

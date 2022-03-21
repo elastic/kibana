@@ -206,7 +206,6 @@ exports[`KibanaPageTemplate render noDataContent 1`] = `
 exports[`KibanaPageTemplate render solutionNav 1`] = `
 <div
   class="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
-  solutionnav="[object Object]"
   style="min-height:460px"
 >
   <div

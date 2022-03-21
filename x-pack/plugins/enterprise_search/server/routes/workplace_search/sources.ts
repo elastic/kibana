@@ -32,6 +32,8 @@ const oauthConfigSchema = schema.object({
   base_url: schema.maybe(schema.string()),
   client_id: schema.maybe(schema.string()),
   client_secret: schema.maybe(schema.string()),
+  external_connector_api_key: schema.maybe(schema.string()),
+  external_connector_url: schema.maybe(schema.string()),
   service_type: schema.string(),
   private_key: schema.maybe(schema.string()),
   public_key: schema.maybe(schema.string()),

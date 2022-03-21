@@ -37,7 +37,7 @@ export const UsersContainer = React.memo(() => (
       }) => (
         <Redirect
           to={{
-            pathname: `${USERS_PATH}/${detailName}/${UsersTableType.allUsers}`,
+            pathname: `${USERS_PATH}/${detailName}/${UsersTableType.anomalies}`,
             search,
           }}
         />

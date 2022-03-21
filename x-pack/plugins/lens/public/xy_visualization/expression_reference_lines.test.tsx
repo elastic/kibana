@@ -8,23 +8,16 @@
 import { LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { PaletteOutput } from 'src/plugins/charts/common';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { FieldFormat } from 'src/plugins/field_formats/common';
-import { layerTypes, LensMultiTable } from '../../common';
-import { LayerArgs, YConfig } from '../../common/expressions';
+import { LensMultiTable } from '../../common';
+import { ReferenceLineLayerArgs, YConfig } from '../../common/expressions';
 import {
   ReferenceLineAnnotations,
   ReferenceLineAnnotationsProps,
 } from './expression_reference_lines';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
-
-const mockPaletteOutput: PaletteOutput = {
-  type: 'palette',
-  name: 'mock',
-  params: {},
-};
 
 const row: Record<string, number> = {
   xAccessorFirstId: 1,
@@ -57,18 +50,12 @@ const histogramData: LensMultiTable = {
   },
 };
 
-function createLayers(yConfigs: LayerArgs['yConfig']): LayerArgs[] {
+function createLayers(yConfigs: ReferenceLineLayerArgs['yConfig']): ReferenceLineLayerArgs[] {
   return [
     {
       layerId: 'firstLayer',
-      layerType: layerTypes.REFERENCE_LINE,
-      hide: false,
-      yScaleType: 'linear',
-      xScaleType: 'linear',
-      isHistogram: false,
-      seriesType: 'bar_stacked',
+      layerType: 'referenceLine',
       accessors: (yConfigs || []).map(({ forAccessor }) => forAccessor),
-      palette: mockPaletteOutput,
       yConfig: yConfigs,
     },
   ];

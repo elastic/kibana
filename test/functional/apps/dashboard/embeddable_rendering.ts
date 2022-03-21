@@ -21,7 +21,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
@@ -103,7 +102,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -122,12 +124,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
       await security.testUser.restoreDefaults();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('adding visualizations', async () => {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       visNames = await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
+      expect(visNames.length).to.be.equal(24);
       await dashboardExpect.visualizationsArePresent(visNames);
 
       // This one is rendered via svg which lets us do better testing of what is being rendered.

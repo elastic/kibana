@@ -91,7 +91,12 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).click();
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXCEPTIONS_TAB).trigger('click');
+      return $el.find(ADD_EXCEPTIONS_BTN);
+    })
+    .should('be.visible');
 };
 
 export const removeException = () => {

@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEqual } from 'lodash';
 
@@ -190,7 +190,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
-  const isPreviewRouteEnabled = useMemo(() => ruleType !== 'threat_match', [ruleType]);
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
@@ -504,31 +503,28 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
-        {isPreviewRouteEnabled && (
-          <>
-            <EuiSpacer size="s" />
-            <RulePreview
-              index={index}
-              isDisabled={getIsRulePreviewDisabled({
-                ruleType,
-                isQueryBarValid,
-                isThreatQueryBarValid,
-                index,
-                threatIndex,
-                threatMapping: formThreatMapping,
-                machineLearningJobId,
-              })}
-              query={formQuery}
-              ruleType={ruleType}
-              threatIndex={threatIndex}
-              threatQuery={formThreatQuery}
-              threatMapping={formThreatMapping}
-              threshold={formThreshold}
-              machineLearningJobId={machineLearningJobId}
-              anomalyThreshold={anomalyThreshold}
-            />
-          </>
-        )}
+        <EuiSpacer size="s" />
+        <RulePreview
+          index={index}
+          isDisabled={getIsRulePreviewDisabled({
+            ruleType,
+            isQueryBarValid,
+            isThreatQueryBarValid,
+            index,
+            threatIndex,
+            threatMapping: formThreatMapping,
+            machineLearningJobId,
+            queryBar: formQuery ?? initialState.queryBar,
+          })}
+          query={formQuery}
+          ruleType={ruleType}
+          threatIndex={threatIndex}
+          threatQuery={formThreatQuery}
+          threatMapping={formThreatMapping}
+          threshold={formThreshold}
+          machineLearningJobId={machineLearningJobId}
+          anomalyThreshold={anomalyThreshold}
+        />
       </StepContentWrapper>
 
       {!isUpdateView && (

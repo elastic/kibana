@@ -52,13 +52,7 @@ import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
-import {
-  Plugin,
-  AsyncPlugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginOpaqueId,
-} from './plugins';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
@@ -233,6 +227,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * use *only* to retrieve config values. There is no way to set injected values
    * in the new platform.
    * @deprecated
+   * @removeBy 8.8.0
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
@@ -296,6 +291,7 @@ export interface CoreStart {
    * use *only* to retrieve config values. There is no way to set injected values
    * in the new platform.
    * @deprecated
+   * @removeBy 8.8.0
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
@@ -332,7 +328,6 @@ export type {
   NotificationsSetup,
   NotificationsStart,
   Plugin,
-  AsyncPlugin,
   PluginInitializer,
   PluginInitializerContext,
   SavedObjectsStart,

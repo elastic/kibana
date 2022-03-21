@@ -38,9 +38,11 @@ import {
   AddSourceValues,
   AddSourceProps,
 } from './add_source_logic';
+import { ExternalConnectorLogic } from './external_connector_logic';
 
 describe('AddSourceLogic', () => {
   const { mount } = new LogicMounter(AddSourceLogic);
+  const { mount: mountExternalConnectorLogic } = new LogicMounter(ExternalConnectorLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
@@ -110,6 +112,7 @@ describe('AddSourceLogic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mount();
+    mountExternalConnectorLogic();
   });
 
   it('has expected default values', () => {
@@ -258,14 +261,15 @@ describe('AddSourceLogic', () => {
     });
 
     it('handles fallback states', () => {
-      const { publicKey, privateKey, consumerKey, apiKey } = sourceConfigData.configuredFields;
+      const { publicKey, privateKey, consumerKey, externalConnectorApiKey } =
+        sourceConfigData.configuredFields;
       const sourceConfigDataMock: SourceConfigData = {
         ...sourceConfigData,
         configuredFields: {
           publicKey,
           privateKey,
           consumerKey,
-          apiKey,
+          externalConnectorApiKey,
         },
       };
       AddSourceLogic.actions.setSourceConfigData(sourceConfigDataMock);
@@ -318,6 +322,18 @@ describe('AddSourceLogic', () => {
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReauthenticateStep);
+      });
+      it('sets SaveConfig as first step for external connectors', () => {
+        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+        const addSourceProps = {
+          sourceData: {
+            ...DEFAULT_SERVICE_TYPE,
+            serviceType: 'external',
+          },
+        };
+        AddSourceLogic.actions.initializeAddSource(addSourceProps);
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
       });
     });
 
@@ -571,6 +587,8 @@ describe('AddSourceLogic', () => {
             private_key: sourceConfigData.configuredFields?.privateKey,
             public_key: sourceConfigData.configuredFields?.publicKey,
             consumer_key: sourceConfigData.configuredFields?.consumerKey,
+            external_connector_url: sourceConfigData.configuredFields?.externalConnectorUrl,
+            external_connector_api_key: sourceConfigData.configuredFields?.externalConnectorApiKey,
           };
         });
 
@@ -596,13 +614,19 @@ describe('AddSourceLogic', () => {
         });
 
         it('calls API when creating with empty attributes', () => {
+          AddSourceLogic.actions.setSourceConfigData({
+            ...sourceConfigData,
+            serviceType: 'external',
+          });
           AddSourceLogic.actions.setClientIdValue('');
           AddSourceLogic.actions.setClientSecretValue('');
           AddSourceLogic.actions.setBaseUrlValue('');
+          ExternalConnectorLogic.actions.setExternalConnectorUrl('');
+          ExternalConnectorLogic.actions.setExternalConnectorApiKey('');
           AddSourceLogic.actions.saveSourceConfig(false);
 
           const createParams = {
-            service_type: sourceConfigData.serviceType,
+            service_type: 'external',
             private_key: sourceConfigData.configuredFields?.privateKey,
             public_key: sourceConfigData.configuredFields?.publicKey,
             consumer_key: sourceConfigData.configuredFields?.consumerKey,
@@ -614,6 +638,24 @@ describe('AddSourceLogic', () => {
               body: JSON.stringify(createParams),
             }
           );
+        });
+
+        it('does not call API when external connector URL fails validation', () => {
+          const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
+          const setUrlValidationSpy = jest.spyOn(
+            ExternalConnectorLogic.actions,
+            'setUrlValidation'
+          );
+          AddSourceLogic.actions.setSourceConfigData({
+            ...sourceConfigData,
+            serviceType: 'external',
+          });
+          ExternalConnectorLogic.actions.setExternalConnectorUrl('invalid_url');
+          AddSourceLogic.actions.saveSourceConfig(false);
+
+          expect(http.post).not.toHaveBeenCalled();
+          expect(setButtonNotLoadingSpy).toHaveBeenCalled();
+          expect(setUrlValidationSpy).toHaveBeenCalledWith(false);
         });
 
         itShowsServerErrorAsFlashMessage(http.put, () => {
@@ -664,11 +706,13 @@ describe('AddSourceLogic', () => {
         });
 
         it('handles error', async () => {
+          const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           http.post.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
           await nextTick();
 
+          expect(setButtonNotLoadingSpy).toHaveBeenCalled();
           expect(errorCallback).toHaveBeenCalled();
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });

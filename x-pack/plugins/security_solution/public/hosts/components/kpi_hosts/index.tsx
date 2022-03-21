@@ -15,7 +15,7 @@ import { HostsKpiProps } from './types';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import * as i18n from './translations';
-import { useHostRiskScore } from '../../containers/host_risk_score';
+import { useHostRiskScore } from '../../../risk_score/containers';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {

@@ -18,6 +18,10 @@ import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+
+jest.mock('../../../common/components/user_privileges');
 
 jest.mock('../user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
@@ -72,6 +76,7 @@ describe('take action dropdown', () => {
     onAddExceptionTypeClick: jest.fn(),
     onAddIsolationStatusClick: jest.fn(),
     refetch: jest.fn(),
+    refetchFlyoutData: jest.fn(),
     timelineId: TimelineId.active,
   };
 
@@ -229,6 +234,28 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
         ).toBeEnabled();
+      });
+    });
+
+    test('should disable the "Add Endpoint event filter" button if no endpoint management privileges', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+      });
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('endpoint')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+        ).toBeDisabled();
       });
     });
 

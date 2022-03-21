@@ -35,8 +35,8 @@ import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
-import { HostRisk } from '../../../../common/containers/hosts_risk/types';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
+import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -81,14 +81,16 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
-    docValueFields,
-    entityType,
-    indexName: expandedEvent.indexName ?? '',
-    eventId: expandedEvent.eventId ?? '',
-    runtimeMappings,
-    skip: !expandedEvent.eventId,
-  });
+  const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
+    {
+      docValueFields,
+      entityType,
+      indexName: expandedEvent.indexName ?? '',
+      eventId: expandedEvent.eventId ?? '',
+      runtimeMappings,
+      skip: !expandedEvent.eventId,
+    }
+  );
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
@@ -100,7 +102,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     services: { cases },
   } = useKibana();
 
-  const CasesContext = cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const casesPermissions = useGetUserCasesPermissions();
 
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
@@ -136,7 +138,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   );
 
   const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     pagination: {
       cursorStart: 0,
       querySize: 1,
@@ -240,6 +242,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         detailsData={detailsData}
         detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
+        refetchFlyoutData={refetchFlyoutData}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         loadingEventDetails={loading}
@@ -277,6 +280,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
+        refetchFlyoutData={refetchFlyoutData}
         timelineId={timelineId}
       />
     </CasesContext>

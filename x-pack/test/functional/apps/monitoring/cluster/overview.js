@@ -112,13 +112,9 @@ export default function ({ getService, getPageObjects }) {
         expect(await overview.getKbnConnections()).to.be('174');
         expect(await overview.getKbnMemoryUsage()).to.be('15.33%\n219.6 MB / 1.4 GB');
       });
-
-      it('does not show logstash panel', async () => {
-        expect(await overview.doesLsPanelExist()).to.be(false);
-      });
     });
 
-    describe('for Yellow cluster with Basic license and no Kibana and Logstash', () => {
+    describe('for Yellow cluster with Basic license and no other stack components', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
@@ -156,12 +152,8 @@ export default function ({ getService, getPageObjects }) {
         expect(await overview.getEsReplicaShards()).to.be('0');
       });
 
-      it('shows kibana panel', async () => {
-        expect(await overview.doesKbnPanelExist()).to.be(false);
-      });
-
-      it('does not show logstash panel', async () => {
-        expect(await overview.doesLsPanelExist()).to.be(false);
+      it('shows only elasticsearch panel', async () => {
+        expect(await overview.getPresentPanels()).to.eql(['Elasticsearch']);
       });
     });
 

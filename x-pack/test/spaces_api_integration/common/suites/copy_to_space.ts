@@ -416,7 +416,6 @@ export function copyToSpaceTestSuiteFactory(
             destinationId: `cts_dashboard_${destination}`, // this conflicted with another dashboard in the destination space because of a shared originId
           },
           id: `cts_dashboard_${spaceId}`,
-          title: `This is the ${spaceId} test space CTS dashboard`,
           type: 'dashboard',
           meta: {
             title: `This is the ${spaceId} test space CTS dashboard`,
@@ -429,7 +428,6 @@ export function copyToSpaceTestSuiteFactory(
             destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
           },
           id: `cts_ip_1_${spaceId}`,
-          title: `Copy to Space index pattern 1 from ${spaceId} space`,
           type: 'index-pattern',
           meta: {
             title: `Copy to Space index pattern 1 from ${spaceId} space`,
@@ -442,7 +440,6 @@ export function copyToSpaceTestSuiteFactory(
             destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
           },
           id: `cts_vis_3_${spaceId}`,
-          title: `CTS vis 3 from ${spaceId} space`,
           type: 'visualization',
           meta: {
             title: `CTS vis 3 from ${spaceId} space`,
@@ -591,7 +588,6 @@ export function copyToSpaceTestSuiteFactory(
                     error: { type: 'conflict', destinationId },
                     type,
                     id: inexactMatchIdA,
-                    title,
                     meta,
                   },
                 ]);
@@ -633,7 +629,6 @@ export function copyToSpaceTestSuiteFactory(
                     error: { type: 'conflict', destinationId },
                     type,
                     id: inexactMatchIdB,
-                    title,
                     meta,
                   },
                 ]);
@@ -675,7 +670,6 @@ export function copyToSpaceTestSuiteFactory(
                     error: { type: 'conflict', destinationId },
                     type,
                     id: inexactMatchIdC,
-                    title,
                     meta,
                   },
                 ]);
@@ -721,7 +715,6 @@ export function copyToSpaceTestSuiteFactory(
                     error: { type: 'ambiguous_conflict', destinations },
                     type,
                     id: ambiguousConflictId,
-                    title,
                     meta: { title, icon: 'beaker' },
                   },
                 ]);

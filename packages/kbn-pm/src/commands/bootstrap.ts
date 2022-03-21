@@ -40,7 +40,19 @@ export const BootstrapCommand: ICommand = {
     const kibanaProjectPath = projects.get('kibana')?.path || '';
     const runOffline = options?.offline === true;
     const reporter = CiStatsReporter.fromEnv(log);
-    const timings = [];
+
+    const timings: Array<{ id: string; ms: number }> = [];
+    const time = async <T>(id: string, body: () => Promise<T>): Promise<T> => {
+      const start = Date.now();
+      try {
+        return await body();
+      } finally {
+        timings.push({
+          id,
+          ms: Date.now() - start,
+        });
+      }
+    };
 
     // Force install is set in case a flag is passed or
     // if the `.yarn-integrity` file is not found which
@@ -70,20 +82,21 @@ export const BootstrapCommand: ICommand = {
     //
 
     if (forceInstall) {
-      const forceInstallStartTime = Date.now();
-      await runBazel(['run', '@nodejs//:yarn'], runOffline);
-      timings.push({
-        id: 'force install dependencies',
-        ms: Date.now() - forceInstallStartTime,
+      await time('force install dependencies', async () => {
+        await runBazel(['run', '@nodejs//:yarn'], runOffline, {
+          env: {
+            SASS_BINARY_SITE:
+              'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
+            RE2_DOWNLOAD_MIRROR:
+              'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
+          },
+        });
       });
     }
 
     // build packages
-    const packageStartTime = Date.now();
-    await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
-    timings.push({
-      id: 'build packages',
-      ms: Date.now() - packageStartTime,
+    await time('build packages', async () => {
+      await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
     });
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
@@ -112,30 +125,38 @@ export const BootstrapCommand: ICommand = {
       }
     }
 
-    await sortPackageJson(kbn);
+    await time('sort package json', async () => {
+      await sortPackageJson(kbn);
+    });
 
-    const yarnLock = await readYarnLock(kbn);
+    const yarnLock = await time('read yarn.lock', async () => await readYarnLock(kbn));
 
     if (options.validate) {
-      await validateDependencies(kbn, yarnLock);
+      await time('validate dependencies', async () => {
+        await validateDependencies(kbn, yarnLock);
+      });
     }
 
     // Assure all kbn projects with bin defined scripts
     // copy those scripts into the top level node_modules folder
     //
     // NOTE: We don't probably need this anymore, is actually not being used
-    await linkProjectExecutables(projects, projectGraph);
+    await time('link project executables', async () => {
+      await linkProjectExecutables(projects, projectGraph);
+    });
 
-    // Update vscode settings
-    await spawnStreaming(
-      process.execPath,
-      ['scripts/update_vscode_config'],
-      {
-        cwd: kbn.getAbsolute(),
-        env: process.env,
-      },
-      { prefix: '[vscode]', debug: false }
-    );
+    await time('update vscode config', async () => {
+      // Update vscode settings
+      await spawnStreaming(
+        process.execPath,
+        ['scripts/update_vscode_config'],
+        {
+          cwd: kbn.getAbsolute(),
+          env: process.env,
+        },
+        { prefix: '[vscode]', debug: false }
+      );
+    });
 
     // send timings
     await reporter.timings({

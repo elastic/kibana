@@ -99,7 +99,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     browserFields,
     indexPattern: indexPatterns,
-    loading: indexPatternsLoading,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
@@ -358,9 +357,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   const casesPermissions = useGetUserCasesPermissions();
-  const CasesContext = kibana.services.cases.getCasesContext();
+  const CasesContext = kibana.services.cases.ui.getCasesContext();
 
-  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
+  if (loading || isEmpty(selectedPatterns)) {
     return null;
   }
 

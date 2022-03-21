@@ -22,6 +22,7 @@ export interface MetricAggParam<TMetricAggConfig extends AggConfig>
   extends AggParamType<TMetricAggConfig> {
   filterFieldTypes?: FieldTypes;
   onlyAggregatable?: boolean;
+  scriptable?: boolean;
 }
 
 const metricType = 'metrics';

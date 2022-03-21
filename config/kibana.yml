@@ -62,6 +62,10 @@
 # must be a positive integer.
 #elasticsearch.requestTimeout: 30000
 
+# The maximum number of sockets that can be used for communications with elasticsearch.
+# Defaults to `Infinity`.
+#elasticsearch.maxSockets: 1024
+
 # Specifies whether Kibana should use compression for communications with elasticsearch
 # Defaults to `false`.
 #elasticsearch.compression: false
@@ -128,7 +132,7 @@
 #ops.interval: 5000
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
-# Supported languages are the following: English - en , by default , Chinese - zh-CN .
+# Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR".
 #i18n.locale: "en"
 
 # =================== Frequently used (Optional)===================

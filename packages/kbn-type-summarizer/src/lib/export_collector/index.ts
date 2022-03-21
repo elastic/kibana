@@ -8,3 +8,4 @@
 
 export * from './exports_collector';
 export * from './collector_results';
+export * from './imported_symbol';

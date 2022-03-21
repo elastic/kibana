@@ -86,7 +86,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   sort,
   tabType,
   timelineId,
-  createFieldComponent,
+  fieldBrowserOptions,
 }) => {
   const { timelines: timelinesUi } = useKibana().services;
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
@@ -184,7 +184,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
             browserFields,
             columnHeaders,
             timelineId,
-            createFieldComponent,
+            options: fieldBrowserOptions,
           })}
         </FieldBrowserContainer>
       </EventsTh>

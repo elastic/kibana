@@ -9,6 +9,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const OptionsListStrings = {
+  getDisplayName: () =>
+    i18n.translate('controls.optionsList.displayName', {
+      defaultMessage: 'Options list',
+    }),
+  getDescription: () =>
+    i18n.translate('controls.optionsList.description', {
+      defaultMessage: 'Add control that allows options to be selected from a dropdown.',
+    }),
   summary: {
     getSeparator: () =>
       i18n.translate('controls.optionsList.summary.separator', {

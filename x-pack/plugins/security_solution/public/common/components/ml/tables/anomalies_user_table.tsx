@@ -58,14 +58,14 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     initialPageSize: 10,
     totalItemCount: users.length,
     pageSizeOptions: [5, 10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   if (!hasMlUserPermissions(capabilities)) {
     return null;
   } else {
     return (
-      <Panel loading={loading}>
+      <Panel loading={loading} data-test-subj="user-anomalies-tab">
         <HeaderSection
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount

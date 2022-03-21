@@ -58,7 +58,19 @@ const mockCorePlugins = {
       ),
     },
   },
-  data: {},
+  data: {
+    query: {
+      timefilter: {
+        timefilter: {
+          setTime: jest.fn(),
+          getTime: jest.fn().mockReturnValue({}),
+          getTimeDefaults: jest.fn().mockReturnValue({}),
+          getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+          getRefreshInterval: jest.fn().mockReturnValue({}),
+        },
+      },
+    },
+  },
 };
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 

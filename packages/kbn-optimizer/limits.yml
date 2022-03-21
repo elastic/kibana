@@ -41,7 +41,7 @@ pageLoadAssetSize:
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
-  observability: 89709
+  observability: 95000
   painlessLab: 179748
   remoteClusters: 51327
   rollup: 97204
@@ -100,7 +100,7 @@ pageLoadAssetSize:
   bfetch: 22837
   kibanaUtils: 79713
   data: 491273
-  dataViews: 42532
+  dataViews: 43532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 74422

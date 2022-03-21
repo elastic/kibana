@@ -305,6 +305,7 @@ export enum RegistryDataStreamKeys {
 }
 
 export interface RegistryDataStream {
+  [key: string]: any;
   [RegistryDataStreamKeys.type]: string;
   [RegistryDataStreamKeys.ilm_policy]?: string;
   [RegistryDataStreamKeys.hidden]?: boolean;
@@ -323,6 +324,7 @@ export interface RegistryElasticsearch {
   privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
+  'ingest_pipeline.name'?: string;
 }
 
 export interface RegistryDataStreamPrivileges {
@@ -481,6 +483,25 @@ export interface IndexTemplate {
   _meta: object;
 }
 
+export interface ESAssetMetadata {
+  package?: {
+    name: string;
+  };
+  managed_by: string;
+  managed: boolean;
+}
+export interface TemplateMapEntry {
+  _meta: ESAssetMetadata;
+  template:
+    | {
+        mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
+      }
+    | {
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+      };
+}
+
+export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;

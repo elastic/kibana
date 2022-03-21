@@ -61,10 +61,6 @@ jest.mock('../../../../common/lib/kibana', () => {
               onBlur: jest.fn(),
               onKeyDown: jest.fn(),
             }),
-          getAddToCasePopover: jest
-            .fn()
-            .mockReturnValue(<div data-test-subj="add-to-case-action">{'Add to case'}</div>),
-          getAddToCaseAction: jest.fn(),
         },
       },
     }),
@@ -114,7 +110,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
   maxDelay: () => 3000,
 }));
 
-jest.mock('../../create_field_button', () => ({
+jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));
 

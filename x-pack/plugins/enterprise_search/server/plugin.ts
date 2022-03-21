@@ -26,7 +26,8 @@ import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
-  LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
 } from '../common/constants';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -43,6 +44,7 @@ import {
 
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
+import { registerListRoute } from './routes/enterprise_search/indices';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -154,6 +156,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
+    registerListRoute(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
@@ -178,11 +181,19 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register logs source configuration, used by LogStream components
      * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    infra.defineInternalSourceConfiguration(LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Logs',
+    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Search Relevance Logs',
       logIndices: {
         type: 'index_name',
-        indexName: '.ent-search-*',
+        indexName: 'logs-app_search.search_relevance_suggestions-*',
+      },
+    });
+
+    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Audit Logs',
+      logIndices: {
+        type: 'index_name',
+        indexName: 'logs-enterprise_search*',
       },
     });
   }

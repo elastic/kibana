@@ -9,11 +9,6 @@ import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { filter, get, pickBy } from 'lodash/fp';
 import styled from 'styled-components';
 
-import {
-  elementOrChildrenHasFocus,
-  skipFocusInContainerTo,
-  stopPropagationAndPreventDefault,
-} from '../../../../../common/utils/accessibility';
 import { TimelineId } from '../../../../../public/types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
@@ -27,44 +22,8 @@ export const LoadingSpinner = styled(EuiLoadingSpinner)`
 
 LoadingSpinner.displayName = 'LoadingSpinner';
 
-export const CATEGORY_PANE_WIDTH = 200;
-export const DESCRIPTION_COLUMN_WIDTH = 300;
-export const FIELD_COLUMN_WIDTH = 200;
 export const FIELD_BROWSER_WIDTH = 925;
-export const FIELDS_PANE_WIDTH = 670;
-export const HEADER_HEIGHT = 40;
-export const PANES_FLEX_GROUP_WIDTH = CATEGORY_PANE_WIDTH + FIELDS_PANE_WIDTH + 10;
-export const PANES_FLEX_GROUP_HEIGHT = 260;
 export const TABLE_HEIGHT = 260;
-export const TYPE_COLUMN_WIDTH = 50;
-
-/**
- * Returns the CSS class name for the title of a category shown in the left
- * side field browser
- */
-export const getCategoryPaneCategoryClassName = ({
-  categoryId,
-  timelineId,
-}: {
-  categoryId: string;
-  timelineId: string;
-}): string => `field-browser-category-pane-${categoryId}-${timelineId}`;
-
-/**
- * Returns the CSS class name for the title of a category shown in the right
- * side of field browser
- */
-export const getFieldBrowserCategoryTitleClassName = ({
-  categoryId,
-  timelineId,
-}: {
-  categoryId: string;
-  timelineId: string;
-}): string => `field-browser-category-title-${categoryId}-${timelineId}`;
-
-/** Returns the class name for a field browser search input */
-export const getFieldBrowserSearchInputClassName = (timelineId: string): string =>
-  `field-browser-search-input-${timelineId}`;
 
 /** Returns true if the specified category has at least one field */
 export const categoryHasFields = (category: Partial<BrowserField>): boolean =>
@@ -160,272 +119,22 @@ export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
     ? defaultHeaders.find((c) => c.id === fieldId) ?? {}
     : {};
 
-export const CATEGORIES_PANE_CLASS_NAME = 'categories-pane';
 export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
 export const CLOSE_BUTTON_CLASS_NAME = 'close-button';
 export const RESET_FIELDS_CLASS_NAME = 'reset-fields';
-export const VIEW_ALL_BUTTON_CLASS_NAME = 'view-all';
-
-export const categoriesPaneHasFocus = (containerElement: HTMLElement | null): boolean =>
-  elementOrChildrenHasFocus(
-    containerElement?.querySelector<HTMLDivElement>(`.${CATEGORIES_PANE_CLASS_NAME}`)
-  );
-
-export const categoryTableHasFocus = (containerElement: HTMLElement | null): boolean =>
-  elementOrChildrenHasFocus(
-    containerElement?.querySelector<HTMLDivElement>(`.${CATEGORY_TABLE_CLASS_NAME}`)
-  );
-
-export const closeButtonHasFocus = (containerElement: HTMLElement | null): boolean =>
-  elementOrChildrenHasFocus(
-    containerElement?.querySelector<HTMLDivElement>(`.${CLOSE_BUTTON_CLASS_NAME}`)
-  );
-
-export const searchInputHasFocus = ({
-  containerElement,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  timelineId: string;
-}): boolean =>
-  elementOrChildrenHasFocus(
-    containerElement?.querySelector<HTMLDivElement>(
-      `.${getFieldBrowserSearchInputClassName(timelineId)}`
-    )
-  );
-
-export const viewAllHasFocus = (containerElement: HTMLElement | null): boolean =>
-  elementOrChildrenHasFocus(
-    containerElement?.querySelector<HTMLDivElement>(`.${VIEW_ALL_BUTTON_CLASS_NAME}`)
-  );
-
-export const resetButtonHasFocus = (containerElement: HTMLElement | null): boolean =>
-  elementOrChildrenHasFocus(
-    containerElement?.querySelector<HTMLDivElement>(`.${RESET_FIELDS_CLASS_NAME}`)
-  );
-
-export const scrollCategoriesPane = ({
-  containerElement,
-  selectedCategoryId,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  selectedCategoryId: string;
-  timelineId: string;
-}) => {
-  if (selectedCategoryId !== '') {
-    const selectedCategories =
-      containerElement?.getElementsByClassName(
-        getCategoryPaneCategoryClassName({
-          categoryId: selectedCategoryId,
-          timelineId,
-        })
-      ) ?? [];
-
-    if (selectedCategories.length > 0) {
-      selectedCategories[0].scrollIntoView();
-    }
-  }
-};
-
-export const focusCategoriesPane = ({
-  containerElement,
-  selectedCategoryId,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  selectedCategoryId: string;
-  timelineId: string;
-}) => {
-  if (selectedCategoryId !== '') {
-    const selectedCategories =
-      containerElement?.getElementsByClassName(
-        getCategoryPaneCategoryClassName({
-          categoryId: selectedCategoryId,
-          timelineId,
-        })
-      ) ?? [];
-
-    if (selectedCategories.length > 0) {
-      (selectedCategories[0] as HTMLButtonElement).focus();
-    }
-  }
-};
-
-export const focusCategoryTable = (containerElement: HTMLElement | null) => {
-  const firstEntry = containerElement?.querySelector<HTMLDivElement>(
-    `.${CATEGORY_TABLE_CLASS_NAME} [data-colindex="1"]`
-  );
-
-  if (firstEntry != null) {
-    firstEntry.focus();
-  } else {
-    skipFocusInContainerTo({
-      containerElement,
-      className: CATEGORY_TABLE_CLASS_NAME,
-    });
-  }
-};
-
-export const focusCloseButton = (containerElement: HTMLElement | null) =>
-  skipFocusInContainerTo({
-    containerElement,
-    className: CLOSE_BUTTON_CLASS_NAME,
-  });
-
-export const focusResetFieldsButton = (containerElement: HTMLElement | null) =>
-  skipFocusInContainerTo({ containerElement, className: RESET_FIELDS_CLASS_NAME });
-
-export const focusSearchInput = ({
-  containerElement,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  timelineId: string;
-}) =>
-  skipFocusInContainerTo({
-    containerElement,
-    className: getFieldBrowserSearchInputClassName(timelineId),
-  });
-
-export const focusViewAllButton = (containerElement: HTMLElement | null) =>
-  skipFocusInContainerTo({ containerElement, className: VIEW_ALL_BUTTON_CLASS_NAME });
-
-export const onCategoriesPaneFocusChanging = ({
-  containerElement,
-  shiftKey,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  shiftKey: boolean;
-  timelineId: string;
-}) =>
-  shiftKey
-    ? focusSearchInput({
-        containerElement,
-        timelineId,
-      })
-    : focusViewAllButton(containerElement);
-
-export const onCategoryTableFocusChanging = ({
-  containerElement,
-  shiftKey,
-}: {
-  containerElement: HTMLElement | null;
-  shiftKey: boolean;
-}) => (shiftKey ? focusViewAllButton(containerElement) : focusResetFieldsButton(containerElement));
-
-export const onCloseButtonFocusChanging = ({
-  containerElement,
-  shiftKey,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  shiftKey: boolean;
-  timelineId: string;
-}) =>
-  shiftKey
-    ? focusResetFieldsButton(containerElement)
-    : focusSearchInput({ containerElement, timelineId });
-
-export const onSearchInputFocusChanging = ({
-  containerElement,
-  selectedCategoryId,
-  shiftKey,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  selectedCategoryId: string;
-  shiftKey: boolean;
-  timelineId: string;
-}) =>
-  shiftKey
-    ? focusCloseButton(containerElement)
-    : focusCategoriesPane({ containerElement, selectedCategoryId, timelineId });
-
-export const onViewAllFocusChanging = ({
-  containerElement,
-  selectedCategoryId,
-  shiftKey,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  selectedCategoryId: string;
-  shiftKey: boolean;
-  timelineId: string;
-}) =>
-  shiftKey
-    ? focusCategoriesPane({ containerElement, selectedCategoryId, timelineId })
-    : focusCategoryTable(containerElement);
-
-export const onResetButtonFocusChanging = ({
-  containerElement,
-  shiftKey,
-}: {
-  containerElement: HTMLElement | null;
-  shiftKey: boolean;
-}) => (shiftKey ? focusCategoryTable(containerElement) : focusCloseButton(containerElement));
-
-export const onFieldsBrowserTabPressed = ({
-  containerElement,
-  keyboardEvent,
-  selectedCategoryId,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  keyboardEvent: React.KeyboardEvent;
-  selectedCategoryId: string;
-  timelineId: string;
-}) => {
-  const { shiftKey } = keyboardEvent;
-
-  if (searchInputHasFocus({ containerElement, timelineId })) {
-    stopPropagationAndPreventDefault(keyboardEvent);
-    onSearchInputFocusChanging({
-      containerElement,
-      selectedCategoryId,
-      shiftKey,
-      timelineId,
-    });
-  } else if (categoriesPaneHasFocus(containerElement)) {
-    stopPropagationAndPreventDefault(keyboardEvent);
-    onCategoriesPaneFocusChanging({
-      containerElement,
-      shiftKey,
-      timelineId,
-    });
-  } else if (viewAllHasFocus(containerElement)) {
-    stopPropagationAndPreventDefault(keyboardEvent);
-    onViewAllFocusChanging({
-      containerElement,
-      selectedCategoryId,
-      shiftKey,
-      timelineId,
-    });
-  } else if (categoryTableHasFocus(containerElement)) {
-    stopPropagationAndPreventDefault(keyboardEvent);
-    onCategoryTableFocusChanging({
-      containerElement,
-      shiftKey,
-    });
-  } else if (resetButtonHasFocus(containerElement)) {
-    stopPropagationAndPreventDefault(keyboardEvent);
-    onResetButtonFocusChanging({
-      containerElement,
-      shiftKey,
-    });
-  } else if (closeButtonHasFocus(containerElement)) {
-    stopPropagationAndPreventDefault(keyboardEvent);
-    onCloseButtonFocusChanging({
-      containerElement,
-      shiftKey,
-      timelineId,
-    });
-  }
-};
 
 export const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
 ` as unknown as typeof EuiBadge;
 
 CountBadge.displayName = 'CountBadge';
+
+export const CategoryName = styled.span<{ bold: boolean }>`
+  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+`;
+CategoryName.displayName = 'CategoryName';
+
+export const CategorySelectableContainer = styled.div`
+  width: 300px;
+`;
+CategorySelectableContainer.displayName = 'CategorySelectableContainer';

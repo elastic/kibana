@@ -12,4 +12,25 @@
   in order to verify package integrity.
 */
 
-[]
+[
+  {
+    "name": "apm",
+    "version": "8.1.0"
+  },
+  {
+    "name": "elastic_agent",
+    "version": "1.3.0"
+  },
+  {
+    "name": "endpoint",
+    "version": "1.5.0"
+  },
+  {
+    "name": "fleet_server",
+    "version": "1.1.0"
+  },
+  {
+    "name": "synthetics",
+    "version": "0.9.2"
+  }
+]

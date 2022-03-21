@@ -8,7 +8,7 @@ import { map, mergeMap, catchError } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'src/core/server';
 import { from, of } from 'rxjs';
-import { isValidFeatureId } from '@kbn/rule-data-utils';
+import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import { ISearchStrategy, PluginStart } from '../../../../../src/plugins/data/server';
 import {
@@ -36,10 +36,22 @@ export const ruleRegistrySearchStrategyProvider = (
   security?: SecurityPluginSetup,
   spaces?: SpacesPluginStart
 ): ISearchStrategy<RuleRegistrySearchRequest, RuleRegistrySearchResponse> => {
-  const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
-
+  const internalUserEs = data.search.searchAsInternalUser;
+  const requestUserEs = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   return {
     search: (request, options, deps) => {
+      // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
+      // is different than every other solution so we need to special case
+      // those requests.
+      let siemRequest = false;
+      if (request.featureIds.length === 1 && request.featureIds[0] === AlertConsumers.SIEM) {
+        siemRequest = true;
+      } else if (request.featureIds.includes(AlertConsumers.SIEM)) {
+        throw new Error(
+          'The ruleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.'
+        );
+      }
+
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);
       const getAsync = async () => {
@@ -47,10 +59,14 @@ export const ruleRegistrySearchStrategyProvider = (
           getActiveSpace(),
           alerting.getAlertingAuthorizationWithRequest(deps.request),
         ]);
-        const authzFilter = (await getAuthzFilter(
-          authorization,
-          ReadOperations.Find
-        )) as estypes.QueryDslQueryContainer;
+        let authzFilter;
+
+        if (!siemRequest) {
+          authzFilter = (await getAuthzFilter(
+            authorization,
+            ReadOperations.Find
+          )) as estypes.QueryDslQueryContainer;
+        }
         return { space, authzFilter };
       };
       return from(getAsync()).pipe(
@@ -91,22 +107,26 @@ export const ruleRegistrySearchStrategyProvider = (
             filter.push(getSpacesFilter(space.id) as estypes.QueryDslQueryContainer);
           }
 
+          const sort = request.sort ?? [];
+
           const query = {
             bool: {
-              ...request.query?.bool,
               filter,
             },
           };
+          const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           const params = {
             index: indices,
             body: {
               _source: false,
               fields: ['*'],
-              size: MAX_ALERT_SEARCH_SIZE,
+              sort,
+              size,
+              from: request.pagination ? request.pagination.pageIndex * size : 0,
               query,
             },
           };
-          return es.search({ ...request, params }, options, deps);
+          return (siemRequest ? requestUserEs : internalUserEs).search({ params }, options, deps);
         }),
         map((response) => {
           // Do we have to loop over each hit? Yes.
@@ -141,9 +161,8 @@ export const ruleRegistrySearchStrategyProvider = (
       );
     },
     cancel: async (id, options, deps) => {
-      if (es.cancel) {
-        return es.cancel(id, options, deps);
-      }
+      if (internalUserEs.cancel) internalUserEs.cancel(id, options, deps);
+      if (requestUserEs.cancel) requestUserEs.cancel(id, options, deps);
     },
   };
 };

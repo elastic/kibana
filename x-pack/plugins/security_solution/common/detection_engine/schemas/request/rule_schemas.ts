@@ -60,6 +60,7 @@ import {
   enabled,
   outcome,
   alias_target_id,
+  alias_purpose,
   updated_at,
   updated_by,
   created_at,
@@ -149,6 +150,7 @@ const baseParams = {
     license,
     outcome,
     alias_target_id,
+    alias_purpose,
     output_index,
     timeline_id,
     timeline_title,
@@ -428,9 +430,11 @@ export interface RulePreviewLogs {
   errors: string[];
   warnings: string[];
   startedAt?: string;
+  duration: number;
 }
 
 export interface PreviewResponse {
   previewId: string | undefined;
   logs: RulePreviewLogs[] | undefined;
+  isAborted: boolean | undefined;
 }

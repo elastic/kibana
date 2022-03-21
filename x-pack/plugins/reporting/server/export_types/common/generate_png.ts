@@ -6,14 +6,14 @@
  */
 
 import apm from 'elastic-apm-node';
+import type { Logger } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
+import type { ReportingCore } from '../../';
 import { LayoutTypes } from '../../../../screenshotting/common';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
-import { ReportingCore } from '../../';
-import { ScreenshotOptions } from '../../types';
-import { LevelLogger } from '../../lib';
+import type { PngScreenshotOptions } from '../../types';
 
 interface PngResult {
   buffer: Buffer;
@@ -23,8 +23,8 @@ interface PngResult {
 
 export function generatePngObservable(
   reporting: ReportingCore,
-  logger: LevelLogger,
-  options: ScreenshotOptions
+  logger: Logger,
+  options: Omit<PngScreenshotOptions, 'format'>
 ): Rx.Observable<PngResult> {
   const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
   const apmLayout = apmTrans?.startSpan('create-layout', 'setup');
@@ -41,7 +41,7 @@ export function generatePngObservable(
   const apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', 'setup');
   let apmBuffer: typeof apm.currentSpan;
 
-  return reporting.getScreenshots({ ...options, layout }).pipe(
+  return reporting.getScreenshots({ ...options, layout, format: 'png' }).pipe(
     tap(({ metrics }) => {
       if (metrics) {
         apmTrans?.setLabel('cpu', metrics.cpu, false);

@@ -18,12 +18,12 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {
   index: string;
-  indexPattern: string;
+  dataView: string;
   initialized: boolean;
   onIndexChange(): void;
-  createIndexPattern: boolean;
-  onCreateIndexPatternChange(): void;
-  onIndexPatternChange(): void;
+  createDataView: boolean;
+  onCreateDataViewChange(): void;
+  onDataViewChange(): void;
   indexSettingsString: string;
   mappingsString: string;
   pipelineString: string;
@@ -31,7 +31,7 @@ interface Props {
   onMappingsStringChange(mappings: string): void;
   onPipelineStringChange(pipeline: string): void;
   indexNameError: string;
-  indexPatternNameError: string;
+  dataViewNameError: string;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
   results: FindFileStructureResponse;
@@ -39,12 +39,12 @@ interface Props {
 
 export const ImportSettings: FC<Props> = ({
   index,
-  indexPattern,
+  dataView,
   initialized,
   onIndexChange,
-  createIndexPattern,
-  onCreateIndexPatternChange,
-  onIndexPatternChange,
+  createDataView,
+  onCreateDataViewChange,
+  onDataViewChange,
   indexSettingsString,
   mappingsString,
   pipelineString,
@@ -52,7 +52,7 @@ export const ImportSettings: FC<Props> = ({
   onMappingsStringChange,
   onPipelineStringChange,
   indexNameError,
-  indexPatternNameError,
+  dataViewNameError,
   combinedFields,
   onCombinedFieldsChange,
   results,
@@ -80,8 +80,8 @@ export const ImportSettings: FC<Props> = ({
             index={index}
             initialized={initialized}
             onIndexChange={onIndexChange}
-            createIndexPattern={createIndexPattern}
-            onCreateIndexPatternChange={onCreateIndexPatternChange}
+            createDataView={createDataView}
+            onCreateDataViewChange={onCreateDataViewChange}
             indexNameError={indexNameError}
             combinedFields={combinedFields}
             canCreateDataView={canCreateDataView}
@@ -100,12 +100,12 @@ export const ImportSettings: FC<Props> = ({
 
           <AdvancedSettings
             index={index}
-            indexPattern={indexPattern}
+            dataView={dataView}
             initialized={initialized}
             onIndexChange={onIndexChange}
-            createIndexPattern={createIndexPattern}
-            onCreateIndexPatternChange={onCreateIndexPatternChange}
-            onIndexPatternChange={onIndexPatternChange}
+            createDataView={createDataView}
+            onCreateDataViewChange={onCreateDataViewChange}
+            onDataViewChange={onDataViewChange}
             indexSettingsString={indexSettingsString}
             mappingsString={mappingsString}
             pipelineString={pipelineString}
@@ -113,7 +113,7 @@ export const ImportSettings: FC<Props> = ({
             onMappingsStringChange={onMappingsStringChange}
             onPipelineStringChange={onPipelineStringChange}
             indexNameError={indexNameError}
-            indexPatternNameError={indexPatternNameError}
+            dataViewNameError={dataViewNameError}
             combinedFields={combinedFields}
             onCombinedFieldsChange={onCombinedFieldsChange}
             results={results}

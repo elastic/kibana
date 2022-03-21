@@ -12,7 +12,7 @@ import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   TaskManagerDoc,
 } from '../../../common/lib';
@@ -40,7 +40,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ enabled: false }))
+        .send(getTestRuleData({ enabled: false }))
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -72,7 +72,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ enabled: false }))
+        .send(getTestRuleData({ enabled: false }))
         .expect(200);
       objectRemover.add(Spaces.other.id, createdAlert.id, 'rule', 'alerting');
 
@@ -88,7 +88,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData({ enabled: false }))
+          .send(getTestRuleData({ enabled: false }))
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 

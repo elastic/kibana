@@ -9,12 +9,14 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../data/public';
+import type { DataViewsPublicPluginStart } from '../../../data_views/public';
 import { VisualizationsSetup } from '../../../visualizations/public';
 import { Setup as InspectorSetup } from '../../../inspector/public';
 
 import {
   setNotifications,
   setData,
+  setDataViews,
   setInjectedVars,
   setUISettings,
   setInjectedMetadata,
@@ -54,6 +56,7 @@ export interface VegaPluginSetupDependencies {
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /** @internal */
@@ -91,9 +94,10 @@ export class VegaPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(createVegaTypeDefinition());
   }
 
-  public start(core: CoreStart, { data, mapsEms }: VegaPluginStartDependencies) {
+  public start(core: CoreStart, { data, mapsEms, dataViews }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setData(data);
+    setDataViews(dataViews);
     setInjectedMetadata(core.injectedMetadata);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);

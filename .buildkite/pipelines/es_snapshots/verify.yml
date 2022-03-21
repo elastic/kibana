@@ -67,7 +67,7 @@ steps:
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
-    parallelism: 2
+    parallelism: 3
     agents:
       queue: n2-4
     timeout_in_minutes: 120

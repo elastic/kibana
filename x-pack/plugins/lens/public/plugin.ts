@@ -16,6 +16,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -93,6 +94,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
+import type { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -104,10 +106,12 @@ export interface LensPluginSetupDependencies {
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  discover?: DiscoverSetup;
 }
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
@@ -122,6 +126,7 @@ export interface LensPluginStartDependencies {
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
+  discover?: DiscoverStart;
 }
 
 export interface LensPublicSetup {
@@ -248,7 +253,6 @@ export class LensPlugin {
         fieldFormats,
         plugins.fieldFormats.deserialize
       );
-
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
 
       return {
@@ -260,7 +264,7 @@ export class LensPlugin {
         documentToExpression: this.editorFrameService!.documentToExpression,
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
-        indexPatternService: plugins.data.indexPatterns,
+        indexPatternService: plugins.dataViews,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
@@ -287,10 +291,10 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultDataView = async () => {
+    const ensureDefaultDataView = () => {
       // make sure a default index pattern exists
       // if not, the page will be redirected to management and visualize won't be rendered
-      await startServices().plugins.data.indexPatterns.ensureDefaultDataView();
+      startServices().plugins.dataViews.ensureDefaultDataView();
     };
 
     core.application.register({
@@ -300,22 +304,24 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
-        await this.initParts(
-          core,
-          data,
-          charts,
-          expressions,
-          fieldFormats,
-          deps.fieldFormats.deserialize
-        );
+        await Promise.all([
+          this.initParts(
+            core,
+            data,
+            charts,
+            expressions,
+            fieldFormats,
+            deps.fieldFormats.deserialize
+          ),
+          ensureDefaultDataView(),
+        ]);
 
         const { mountApp, stopReportManager, getLensAttributeService } = await import(
           './async_services'
         );
-        const frameStart = this.editorFrameService!.start(coreStart, deps);
-
         this.stopReportManager = stopReportManager;
-        await ensureDefaultDataView();
+
+        const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),

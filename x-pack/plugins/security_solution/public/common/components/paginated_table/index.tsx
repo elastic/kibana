@@ -303,12 +303,14 @@ const PaginatedTableComponent: FC<SiemTables> = ({
               </EuiFlexItem>
 
               <PaginationWrapper grow={false}>
-                <EuiPagination
-                  data-test-subj="numberedPagination"
-                  pageCount={pageCount}
-                  activePage={myActivePage}
-                  onPageClick={goToPage}
-                />
+                {totalCount > 0 && (
+                  <EuiPagination
+                    data-test-subj="numberedPagination"
+                    pageCount={pageCount}
+                    activePage={myActivePage}
+                    onPageClick={goToPage}
+                  />
+                )}
               </PaginationWrapper>
             </FooterAction>
             {(isInspect || myLoading) && (

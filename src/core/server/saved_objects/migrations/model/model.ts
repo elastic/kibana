@@ -72,7 +72,26 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   if (stateP.controlState === 'INIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
-    if (Either.isRight(res)) {
+    if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'unsupported_cluster_routing_allocation')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}`,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'.`,
+            },
+          ],
+        };
+      } else {
+        return throwBadResponse(stateP, left);
+      }
+    } else if (Either.isRight(res)) {
+      // cluster routing allocation is enabled and we can continue with the migration as normal
       const indices = res.right;
       const aliases = getAliases(indices);
 

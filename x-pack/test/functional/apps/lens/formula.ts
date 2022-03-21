@@ -145,7 +145,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
-      // Close immediately
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'formula',

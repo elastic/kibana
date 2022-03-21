@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { useAuthentications } from '../../../hosts/containers/authentications';
-import { AllUsersQueryProps } from './types';
+import { UsersComponentsQueryProps } from './types';
 
 import { AuthenticationTable } from '../../../hosts/components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -25,7 +25,7 @@ export const AllUsersQueryTabBody = ({
   type,
   docValueFields,
   deleteQuery,
-}: AllUsersQueryProps) => {
+}: UsersComponentsQueryProps) => {
   const [
     loading,
     { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },

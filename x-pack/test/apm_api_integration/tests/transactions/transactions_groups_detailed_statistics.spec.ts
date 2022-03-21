@@ -91,10 +91,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const transactionName = 'GET /api/product/list';
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoProdInstance
                   .transaction(transactionName)
                   .timestamp(timestamp)
@@ -102,10 +102,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .success()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_ERROR_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoProdInstance
                   .transaction(transactionName)
                   .duration(1000)

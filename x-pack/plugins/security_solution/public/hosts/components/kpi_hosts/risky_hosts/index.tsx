@@ -25,19 +25,16 @@ import {
 import { HostsKpiBaseComponentLoader } from '../common';
 import * as i18n from './translations';
 
-import {
-  HostRiskSeverity,
-  HostsKpiRiskyHostsStrategyResponse,
-} from '../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
-
 import { useInspectQuery } from '../../../../common/hooks/use_inspect_query';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
-import { HostRiskScore } from '../../common/host_risk_score';
+
 import {
   HostRiskInformationButtonIcon,
   HOST_RISK_INFO_BUTTON_CLASS,
 } from '../../host_risk_information';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
+import { KpiRiskScoreStrategyResponse, RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScore } from '../../../../common/components/severity/common';
 
 const QUERY_ID = 'hostsKpiRiskyHostsQuery';
 
@@ -63,7 +60,7 @@ const RiskScoreContainer = styled(EuiFlexItem)`
 const RiskyHostsComponent: React.FC<{
   error: unknown;
   loading: boolean;
-  data?: HostsKpiRiskyHostsStrategyResponse;
+  data?: KpiRiskScoreStrategyResponse;
 }> = ({ error, loading, data }) => {
   useInspectQuery(QUERY_ID, loading, data);
   useErrorToast(i18n.ERROR_TITLE, error);
@@ -72,8 +69,8 @@ const RiskyHostsComponent: React.FC<{
     return <HostsKpiBaseComponentLoader />;
   }
 
-  const criticalRiskCount = data?.riskyHosts.Critical ?? 0;
-  const hightlRiskCount = data?.riskyHosts.High ?? 0;
+  const criticalRiskCount = data?.kpiRiskScore.Critical ?? 0;
+  const hightlRiskCount = data?.kpiRiskScore.High ?? 0;
 
   const totalCount = criticalRiskCount + hightlRiskCount;
 
@@ -118,7 +115,7 @@ const RiskyHostsComponent: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <RiskScoreContainer grow={false}>
-                <HostRiskScore severity={HostRiskSeverity.critical} />
+                <RiskScore severity={RiskSeverity.critical} />
               </RiskScoreContainer>
               <EuiFlexItem>
                 <HostCount size="m" data-test-subj="riskyHostsCriticalQuantity">
@@ -130,7 +127,7 @@ const RiskyHostsComponent: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <RiskScoreContainer grow={false}>
-                <HostRiskScore severity={HostRiskSeverity.high} />
+                <RiskScore severity={RiskSeverity.high} />
               </RiskScoreContainer>
               <EuiFlexItem>
                 <HostCount size="m" data-test-subj="riskyHostsHighQuantity">

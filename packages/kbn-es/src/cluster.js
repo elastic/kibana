@@ -12,7 +12,7 @@ const chalk = require('chalk');
 const path = require('path');
 const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { ES_BIN } = require('./paths');
+const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
   log: defaultLog,
   parseEsLog,
@@ -154,6 +154,42 @@ exports.Cluster = class Cluster {
    * Starts ES and returns resolved promise once started
    *
    * @param {String} installPath
+   * @param {String} plugins - comma separated list of plugins to install
+   * @param {Object} options
+   * @returns {Promise}
+   */
+  async installPlugins(installPath, plugins, options) {
+    const esJavaOpts = this.javaOptions(options);
+    for (const plugin of plugins.split(',')) {
+      await execa(ES_PLUGIN_BIN, ['install', plugin.trim()], {
+        cwd: installPath,
+        env: {
+          JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+          ES_JAVA_OPTS: esJavaOpts.trim(),
+        },
+      });
+    }
+  }
+
+  async configureKeystoreWithSecureSettingsFiles(installPath, secureSettingsFiles) {
+    const env = { JAVA_HOME: '' };
+    for (const [secureSettingName, secureSettingFile] of secureSettingsFiles) {
+      this._log.info(
+        `setting secure setting %s to %s`,
+        chalk.bold(secureSettingName),
+        chalk.bold(secureSettingFile)
+      );
+      await execa(ES_KEYSTORE_BIN, ['add-file', secureSettingName, secureSettingFile], {
+        cwd: installPath,
+        env,
+      });
+    }
+  }
+
+  /**
+   * Starts ES and returns resolved promise once started
+   *
+   * @param {String} installPath
    * @param {ExecOptions} options
    * @returns {Promise<void>}
    */
@@ -280,19 +316,9 @@ exports.Cluster = class Cluster {
     );
 
     this._log.info('%s %s', ES_BIN, args.join(' '));
+    const esJavaOpts = this.javaOptions(options);
 
-    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
-
-    // ES now automatically sets heap size to 50% of the machine's available memory
-    // so we need to set it to a smaller size for local dev and CI
-    // especially because we currently run many instances of ES on the same machine during CI
-    // inital and max must be the same, so we only need to check the max
-    if (!esJavaOpts.includes('Xmx')) {
-      // 1536m === 1.5g
-      esJavaOpts += ' -Xms1536m -Xmx1536m';
-    }
-
-    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts.trim());
+    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
@@ -300,7 +326,7 @@ exports.Cluster = class Cluster {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-        ES_JAVA_OPTS: esJavaOpts.trim(),
+        ES_JAVA_OPTS: esJavaOpts,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -428,5 +454,19 @@ exports.Cluster = class Cluster {
         await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
       }
     }
+  }
+
+  javaOptions(options) {
+    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
+
+    // ES now automatically sets heap size to 50% of the machine's available memory
+    // so we need to set it to a smaller size for local dev and CI
+    // especially because we currently run many instances of ES on the same machine during CI
+    // inital and max must be the same, so we only need to check the max
+    if (!esJavaOpts.includes('Xmx')) {
+      // 1536m === 1.5g
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
+    }
+    return esJavaOpts.trim();
   }
 };

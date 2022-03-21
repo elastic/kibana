@@ -35,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         // retrieve rules from the filesystem but not from fleet for Cypress tests

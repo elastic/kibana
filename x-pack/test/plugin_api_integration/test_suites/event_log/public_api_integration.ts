@@ -97,7 +97,9 @@ export default function ({ getService }: FtrProviderContext) {
           await retry.try(async () => {
             const {
               body: { data: foundEvents },
-            } = await findEvents(namespace, id, { sort_field: 'event.end', sort_order: 'desc' });
+            } = await findEvents(namespace, id, {
+              sort: [{ sort_field: 'event.end', sort_order: 'desc' }],
+            });
 
             expect(foundEvents.length).to.be(expectedEvents.length);
             assertEventsFromApiMatchCreatedEvents(foundEvents, expectedEvents.reverse());
@@ -237,11 +239,13 @@ export default function ({ getService }: FtrProviderContext) {
     query: Record<string, any> = {}
   ) {
     const urlPrefix = urlPrefixFromNamespace(namespace);
-    const url = `${urlPrefix}/api/event_log/event_log_test/${id}/_find${
+    const url = `${urlPrefix}/internal/event_log/event_log_test/${id}/_find${
       isEmpty(query)
         ? ''
         : `?${Object.entries(query)
-            .map(([key, val]) => `${key}=${val}`)
+            .map(([key, val]) =>
+              typeof val === 'object' ? `${key}=${JSON.stringify(val)}` : `${key}=${val}`
+            )
             .join('&')}`
     }`;
     await delay(1000); // wait for buffer to be written
@@ -256,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
     legacyIds: string[] = []
   ) {
     const urlPrefix = urlPrefixFromNamespace(namespace);
-    const url = `${urlPrefix}/api/event_log/event_log_test/_find${
+    const url = `${urlPrefix}/internal/event_log/event_log_test/_find${
       isEmpty(query)
         ? ''
         : `?${Object.entries(query)

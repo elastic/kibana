@@ -77,12 +77,29 @@ describe('SuperUser - Packs', () => {
       findAndClickButton('Add query');
       cy.contains('Attach next query');
       inputQuery('select * from uptime');
+      findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);
+      cy.contains('ID must be unique').should('exist');
       findFormFieldByRowsLabelAndType('ID', NEW_QUERY_NAME);
+      cy.contains('ID must be unique').should('not.exist');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(NEW_QUERY_NAME);
       findAndClickButton('Update pack');
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
+    });
+
+    it('should trigger validation when saved query is being chosen', () => {
+      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      findAndClickButton('Edit');
+      findAndClickButton('Add query');
+      cy.contains('Attach next query');
+      cy.contains('ID must be unique').should('not.exist');
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type(SAVED_QUERY_ID);
+      cy.react('List').first().click();
+      cy.contains('ID must be unique').should('exist');
+      cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
     // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
     it.skip('to click the icon and visit discover', () => {

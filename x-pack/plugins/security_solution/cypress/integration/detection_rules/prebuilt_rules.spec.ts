@@ -18,7 +18,6 @@ import {
 } from '../../screens/alerts_detection_rules';
 
 import {
-  changeRowsPerPageTo100,
   deleteFirstRule,
   deleteSelectedRules,
   loadPrebuiltDetectionRules,
@@ -97,8 +96,6 @@ describe('Actions with prebuilt rules', () => {
     });
 
     it('Does not allow to delete one rule when more than one is selected', () => {
-      changeRowsPerPageTo100();
-
       const numberOfRulesToBeSelected = 2;
       selectNumberOfRules(numberOfRulesToBeSelected);
 
@@ -108,14 +105,10 @@ describe('Actions with prebuilt rules', () => {
     });
 
     it('Deletes and recovers one rule', () => {
-      changeRowsPerPageTo100();
-
       const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 1;
       const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
 
       deleteFirstRule();
-      cy.reload();
-      changeRowsPerPageTo100();
 
       cy.get(ELASTIC_RULES_BTN).should(
         'have.text',
@@ -128,9 +121,6 @@ describe('Actions with prebuilt rules', () => {
 
       cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
 
-      cy.reload();
-      changeRowsPerPageTo100();
-
       cy.get(ELASTIC_RULES_BTN).should(
         'have.text',
         `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
@@ -138,16 +128,12 @@ describe('Actions with prebuilt rules', () => {
     });
 
     it('Deletes and recovers more than one rule', () => {
-      changeRowsPerPageTo100();
-
       const numberOfRulesToBeSelected = 2;
       const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 2;
       const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
 
       selectNumberOfRules(numberOfRulesToBeSelected);
       deleteSelectedRules();
-      cy.reload();
-      changeRowsPerPageTo100();
 
       cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
       cy.get(RELOAD_PREBUILT_RULES_BTN).should(
@@ -162,9 +148,6 @@ describe('Actions with prebuilt rules', () => {
       reloadDeletedRules();
 
       cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
-
-      cy.reload();
-      changeRowsPerPageTo100();
 
       cy.get(ELASTIC_RULES_BTN).should(
         'have.text',

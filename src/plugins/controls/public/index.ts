@@ -39,6 +39,8 @@ export {
   type OptionsListEmbeddableInput,
 } from './control_types';
 
+export { LazyControlsCallout, type CalloutProps } from './controls_callout';
+
 export function plugin() {
   return new ControlsPlugin();
 }

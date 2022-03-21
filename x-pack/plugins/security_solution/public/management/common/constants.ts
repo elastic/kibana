@@ -15,6 +15,7 @@ export const MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH = `${MANAGEMENT_PATH}/:
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/trustedApps`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/eventFilters`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/hostIsolationExceptions`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/blocklists`;
 /** @deprecated use the paths defined above instead */
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;
 export const MANAGEMENT_ROUTING_TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.trustedApps})`;

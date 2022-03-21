@@ -30,9 +30,9 @@ import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
-  CreateFieldEditorActions,
-  useCreateFieldButton,
-} from '../../../timelines/components/create_field_button';
+  useFieldBrowserOptions,
+  FieldEditorActions,
+} from '../../../timelines/components/fields_browser';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -109,7 +109,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   unit,
 }) => {
   const dispatch = useDispatch();
-  const { timelines: timelinesUi, cases: casesUi } = useKibana().services;
+  const { timelines: timelinesUi, cases } = useKibana().services;
   const {
     browserFields,
     dataViewId,
@@ -125,7 +125,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
-  const editorActionsRef = useRef<CreateFieldEditorActions>(null);
+  const editorActionsRef = useRef<FieldEditorActions>(null);
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -177,10 +177,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
-  const createFieldComponent = useCreateFieldButton(scopeId, id, editorActionsRef);
+  const fieldBrowserOptions = useFieldBrowserOptions({
+    sourcererScope: scopeId,
+    timelineId: id,
+    editorActionsRef,
+  });
 
   const casesPermissions = useGetUserCasesPermissions();
-  const CasesContext = casesUi.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
 
   return (
     <>
@@ -201,6 +205,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               docValueFields,
               end,
               entityType,
+              fieldBrowserOptions,
               filters: globalFilters,
               filterStatus: currentFilter,
               globalFullScreen,
@@ -228,7 +233,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               trailingControlColumns,
               type: 'embedded',
               unit,
-              createFieldComponent,
             })}
           </InspectButtonContainer>
         </FullScreenContainer>

@@ -261,7 +261,7 @@ export async function ensureCachedArchiveInfo(
   }
 }
 
-async function fetchArchiveBuffer(
+export async function fetchArchiveBuffer(
   pkgName: string,
   pkgVersion: string
 ): Promise<{ archiveBuffer: Buffer; archivePath: string }> {

@@ -53,7 +53,7 @@ import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
-import type { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
+import type { DataLayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
 import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
@@ -77,7 +77,7 @@ import {
   ReferenceLineAnnotations,
 } from './expression_reference_lines';
 import { computeOverallDataDomain } from './reference_line_helpers';
-import { isDataLayer, isReferenceLayer } from './visualization_helpers';
+import { getReferenceLayers, isDataLayer } from './visualization_helpers';
 
 declare global {
   interface Window {
@@ -255,14 +255,14 @@ export function XYChart({
   const layersById = filteredLayers.reduce((memo, layer) => {
     memo[layer.layerId] = layer;
     return memo;
-  }, {} as Record<string, LayerArgs>);
+  }, {} as Record<string, DataLayerArgs>);
 
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
     datatables: Object.values(data.tables),
   });
 
   if (filteredLayers.length === 0) {
-    const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
+    const icon: IconType = getIconForSeriesType(layers?.[0]?.seriesType || 'bar');
     return <EmptyPlaceholder icon={icon} />;
   }
 
@@ -349,7 +349,7 @@ export function XYChart({
     );
   };
 
-  const referenceLineLayers = layers.filter((layer) => isReferenceLayer(layer));
+  const referenceLineLayers = getReferenceLayers(layers);
   const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
@@ -613,6 +613,7 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+        legendSize={legend.legendSize}
         theme={{
           ...chartTheme,
           barSeriesStyle: {
@@ -985,7 +986,7 @@ export function XYChart({
   );
 }
 
-function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
+function getFilteredLayers(layers: DataLayerArgs[], data: LensMultiTable) {
   return layers.filter((layer) => {
     const { layerId, xAccessor, accessors, splitAccessor } = layer;
     return (
