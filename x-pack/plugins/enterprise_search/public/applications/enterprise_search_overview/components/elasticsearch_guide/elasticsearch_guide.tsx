@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export const ROOT_PATH = '/';
-export const SETUP_GUIDE_PATH = '/setup_guide';
-export const ELASTICSEARCH_GUIDE_PATH = '/elasticsearch_guide';
+import React from 'react';
+
+import { EuiPageTemplate } from '@elastic/eui';
+
+export const ElasticsearchGuide: React.FC = () => (
+  <EuiPageTemplate pageHeader={{ pageTitle: 'Elasticsearch' }}>Content goes here</EuiPageTemplate>
+);
