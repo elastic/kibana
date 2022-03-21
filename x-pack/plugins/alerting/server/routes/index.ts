@@ -20,6 +20,7 @@ import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
 import { findRulesRoute, findInternalRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
+import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
 import { resolveRuleRoute } from './resolve_rule';
@@ -54,6 +55,7 @@ export function defineRoutes(opts: RouteOptions) {
   findRulesRoute(router, licenseState, usageCounter);
   findInternalRulesRoute(router, licenseState, usageCounter);
   getRuleAlertSummaryRoute(router, licenseState);
+  getRuleExecutionLogRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   ruleTypesRoute(router, licenseState);

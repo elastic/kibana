@@ -84,6 +84,11 @@ import {
   getModifiedSearch,
   modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
+import {
+  formatExecutionLogResult,
+  getExecutionLogAggregation,
+  IExecutionLogResult,
+} from '../lib/get_execution_log_aggregation';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 
@@ -233,6 +238,16 @@ export interface GetAlertSummaryParams {
   id: string;
   dateStart?: string;
   numberOfExecutions?: number;
+}
+
+export interface GetExecutionLogByIdParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -637,6 +652,70 @@ export class RulesClient {
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
+  }
+
+  public async getExecutionLogForRule({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetExecutionLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_EXECUTION_LOG,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_EXECUTION_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
+      'alert',
+      [id],
+      {
+        start: parsedDateStart.toISOString(),
+        end: parsedDateEnd.toISOString(),
+        filter,
+        aggs: getExecutionLogAggregation({
+          page,
+          perPage,
+          sort,
+        }),
+      },
+      rule.legacyId !== null ? [rule.legacyId] : undefined
+    );
+
+    return formatExecutionLogResult(results);
   }
 
   public async find<Params extends RuleTypeParams = never>({
@@ -1314,6 +1393,7 @@ export class RulesClient {
           lastDuration: 0,
           lastExecutionDate: new Date().toISOString(),
           error: null,
+          warning: null,
         },
       });
       try {
