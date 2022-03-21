@@ -48,7 +48,7 @@ describe('ManagedTable', () => {
           initialSortDirection="desc"
           initialPageIndex={1}
           initialPageSize={2}
-          hidePerPageOptions={false}
+          showPerPageOptions={false}
         />
       )
     ).toMatchSnapshot();

@@ -22,6 +22,10 @@ import React, { useMemo } from 'react';
 import * as i18n from './translations';
 import { Blockquote, ResetButton } from './helpers';
 import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
+import { TimelineId, TimelineType } from '../../../../common/types';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 interface Props {
   activePatterns?: string[];
@@ -36,11 +40,17 @@ interface Props {
 
 const translations = {
   deprecated: {
-    title: i18n.CALL_OUT_DEPRECATED_TITLE,
+    title: {
+      [TimelineType.default]: i18n.CALL_OUT_DEPRECATED_TITLE,
+      [TimelineType.template]: i18n.CALL_OUT_DEPRECATED_TEMPLATE_TITLE,
+    },
     update: i18n.UPDATE_INDEX_PATTERNS,
   },
   missingPatterns: {
-    title: i18n.CALL_OUT_MISSING_PATTERNS_TITLE,
+    title: {
+      [TimelineType.default]: i18n.CALL_OUT_MISSING_PATTERNS_TITLE,
+      [TimelineType.template]: i18n.CALL_OUT_MISSING_PATTERNS_TEMPLATE_TITLE,
+    },
     update: i18n.ADD_INDEX_PATTERN,
   },
 };
@@ -87,7 +97,11 @@ export const TemporarySourcererComp = React.memo<Props>(
       activePatterns && activePatterns.length > 0
         ? selectedPatterns.filter((p) => !activePatterns.includes(p))
         : [];
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
+    const timelineType = useDeepEqualSelector(
+      (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).timelineType
+    );
     return (
       <>
         <EuiCallOut
@@ -95,7 +109,7 @@ export const TemporarySourcererComp = React.memo<Props>(
           data-test-subj="sourcerer-deprecated-callout"
           iconType="alert"
           size="s"
-          title={translations[isModified].title}
+          title={translations[isModified].title[timelineType]}
         />
         <EuiSpacer size="s" />
         <EuiText size="s">

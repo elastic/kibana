@@ -24,7 +24,7 @@ import { getUISettings, getHttp, getTimeFilter, getCapabilities } from '../servi
 import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { IndexPattern } from '../../../data/public';
+import type { DataView } from '../../../data_views/public';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
 export const createVisEmbeddableFromObject =
@@ -51,7 +51,7 @@ export const createVisEmbeddableFromObject =
         return new DisabledLabEmbeddable(vis.title, input);
       }
 
-      let indexPatterns: IndexPattern[] = [];
+      let indexPatterns: DataView[] = [];
 
       if (vis.type.getUsedIndexPattern) {
         indexPatterns = await vis.type.getUsedIndexPattern(vis.params);

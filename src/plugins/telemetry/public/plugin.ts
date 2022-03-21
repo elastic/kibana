@@ -15,6 +15,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBatchResponse,
   ApplicationStart,
+  DocLinksStart,
 } from 'src/core/public';
 
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
@@ -30,7 +31,6 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { PRIVACY_STATEMENT_URL } from '../common/constants';
 import { HomePublicPluginSetup } from '../../home/public';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
@@ -67,6 +67,11 @@ export interface TelemetryPluginSetup {
 /**
  * Public's start exposed APIs by the telemetry plugin
  */
+export interface TelemetryConstants {
+  /** Elastic's privacy statement url **/
+  getPrivacyStatementUrl: () => string;
+}
+
 export interface TelemetryPluginStart {
   /** {@link TelemetryServicePublicApis} **/
   telemetryService: TelemetryServicePublicApis;
@@ -76,10 +81,7 @@ export interface TelemetryPluginStart {
     setOptedInNoticeSeen: () => Promise<void>;
   };
   /** Set of publicly exposed telemetry constants **/
-  telemetryConstants: {
-    /** Elastic's privacy statement url **/
-    getPrivacyStatementUrl: () => string;
-  };
+  telemetryConstants: TelemetryConstants;
 }
 
 interface TelemetryPluginSetupDependencies {
@@ -109,6 +111,12 @@ export interface TelemetryPluginConfig {
   userCanChangeSettings?: boolean;
 }
 
+function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
+  return {
+    getPrivacyStatementUrl: () => docLinks.links.legal.privacyStatement,
+  };
+}
+
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
@@ -124,7 +132,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { http, notifications }: CoreSetup,
+    { http, notifications, getStartServices }: CoreSetup,
     { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
     const config = this.config;
@@ -135,6 +143,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       http,
       notifications,
       currentKibanaVersion,
+    });
+
+    let telemetryConstants: TelemetryConstants;
+
+    getStartServices().then(([{ docLinks }]) => {
+      telemetryConstants = getTelemetryConstants(docLinks);
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
@@ -149,7 +163,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       });
 
       home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
-        renderWelcomeTelemetryNotice(this.telemetryService!, http.basePath.prepend)
+        renderWelcomeTelemetryNotice(
+          this.telemetryService!,
+          http.basePath.prepend,
+          telemetryConstants
+        )
       );
     }
 
@@ -158,18 +176,26 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({ http, overlays, application, savedObjects }: CoreStart): TelemetryPluginStart {
+  public start({
+    http,
+    overlays,
+    application,
+    savedObjects,
+    docLinks,
+  }: CoreStart): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
 
     this.canUserChangeSettings = this.getCanUserChangeSettings(application);
     this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
+    const telemetryConstants = getTelemetryConstants(docLinks);
 
     const telemetryNotifications = new TelemetryNotifications({
       http,
       overlays,
       telemetryService: this.telemetryService,
+      telemetryConstants,
     });
     this.telemetryNotifications = telemetryNotifications;
 
@@ -197,9 +223,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryNotifications: {
         setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
       },
-      telemetryConstants: {
-        getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
-      },
+      telemetryConstants,
     };
   }
 

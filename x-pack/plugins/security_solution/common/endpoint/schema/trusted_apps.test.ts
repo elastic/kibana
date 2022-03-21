@@ -12,7 +12,7 @@ import {
   PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import { ConditionEntry, NewTrustedApp, PutTrustedAppsRequestParams } from '../types';
+import { TrustedAppConditionEntry, NewTrustedApp, PutTrustedAppsRequestParams } from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -94,7 +94,7 @@ describe('When invoking Trusted Apps Schema', () => {
   });
 
   describe('for POST Create', () => {
-    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
+    const createConditionEntry = <T>(data?: T): TrustedAppConditionEntry => ({
       field: ConditionEntryField.PATH,
       type: 'match',
       operator: 'included',
@@ -378,7 +378,7 @@ describe('When invoking Trusted Apps Schema', () => {
   });
 
   describe('for PUT Update', () => {
-    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
+    const createConditionEntry = <T>(data?: T): TrustedAppConditionEntry => ({
       field: ConditionEntryField.PATH,
       type: 'match',
       operator: 'included',

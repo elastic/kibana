@@ -47,6 +47,7 @@ const RuleAdd = ({
   reloadRules,
   onSave,
   metadata,
+  filteredSolutions,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -252,6 +253,7 @@ const RuleAdd = ({
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
+                filteredSolutions={filteredSolutions}
               />
             </EuiFlyoutBody>
             <RuleAddFooter

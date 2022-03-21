@@ -58,7 +58,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     initialPageSize: 10,
     totalItemCount: users.length,
     pageSizeOptions: [5, 10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   if (!hasMlUserPermissions(capabilities)) {

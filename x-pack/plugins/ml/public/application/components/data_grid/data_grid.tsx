@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, useMemo, useRef, FC } from 'react';
+import React, { memo, useEffect, useCallback, useRef, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,6 +17,7 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiDataGrid,
+  EuiDataGridCellPopoverElementProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMutationObserver,
@@ -114,67 +115,67 @@ export const DataGrid: FC<Props> = memo(
     //   };
     // };
 
-    const popOverContent = useMemo(() => {
-      return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
-        ? {
-            featureImportance: ({ children }: { children: any }) => {
-              const rowIndex = children?.props?.rowIndex;
-              const row = data[rowIndex];
-              if (!row) return <div />;
-              // if resultsField for some reason is not available then use ml
-              const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
-              let predictedValue: string | number | undefined;
-              let predictedProbability: number | undefined;
-              let topClasses: TopClasses = [];
-              if (
-                predictionFieldName !== undefined &&
-                row &&
-                row[`${mlResultsField}.${predictionFieldName}`] !== undefined
-              ) {
-                predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
-                topClasses = getTopClasses(row, mlResultsField);
-                predictedProbability = row[`${mlResultsField}.prediction_probability`];
-              }
+    const renderCellPopover = useCallback(
+      (popoverProps: EuiDataGridCellPopoverElementProps) => {
+        const { schema, rowIndex, cellContentsElement, DefaultCellPopover } = popoverProps;
+        if (
+          analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+          analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
+          analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
+        ) {
+          if (schema === 'featureImportance') {
+            const row = data[rowIndex];
+            if (!row) return <div />;
+            // if resultsField for some reason is not available then use ml
+            const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
+            let predictedValue: string | number | undefined;
+            let predictedProbability: number | undefined;
+            let topClasses: TopClasses = [];
+            if (
+              predictionFieldName !== undefined &&
+              row &&
+              row[`${mlResultsField}.${predictionFieldName}`] !== undefined
+            ) {
+              predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
+              topClasses = getTopClasses(row, mlResultsField);
+              predictedProbability = row[`${mlResultsField}.prediction_probability`];
+            }
 
-              const isClassTypeBoolean = topClasses.reduce(
-                (p, c) => typeof c.class_name === 'boolean' || p,
-                false
-              );
+            const isClassTypeBoolean = topClasses.reduce(
+              (p, c) => typeof c.class_name === 'boolean' || p,
+              false
+            );
 
-              const parsedFIArray: FeatureImportance[] = getFeatureImportance(
-                row,
-                mlResultsField,
-                isClassTypeBoolean
-              );
+            const parsedFIArray: FeatureImportance[] = getFeatureImportance(
+              row,
+              mlResultsField,
+              isClassTypeBoolean
+            );
 
-              return (
-                <div data-test-subj="mlDFAFeatureImportancePopover">
-                  <DecisionPathPopover
-                    analysisType={analysisType}
-                    predictedValue={predictedValue}
-                    predictedProbability={predictedProbability}
-                    baseline={baseline}
-                    featureImportance={parsedFIArray}
-                    topClasses={topClasses}
-                    predictionFieldName={
-                      predictionFieldName
-                        ? predictionFieldName.replace('_prediction', '')
-                        : undefined
-                    }
-                  />
-                </div>
-              );
-            },
-            featureInfluence: ({
-              cellContentsElement,
-            }: {
-              cellContentsElement: HTMLDivElement;
-            }) => <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>,
+            return (
+              <div data-test-subj="mlDFAFeatureImportancePopover">
+                <DecisionPathPopover
+                  analysisType={analysisType}
+                  predictedValue={predictedValue}
+                  predictedProbability={predictedProbability}
+                  baseline={baseline}
+                  featureImportance={parsedFIArray}
+                  topClasses={topClasses}
+                  predictionFieldName={
+                    predictionFieldName ? predictionFieldName.replace('_prediction', '') : undefined
+                  }
+                />
+              </div>
+            );
+          } else if (schema === 'featureInfluence') {
+            return <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>;
           }
-        : undefined;
-    }, [baseline, data]);
+        } else {
+          return <DefaultCellPopover {...popoverProps} />;
+        }
+      },
+      [baseline, data]
+    );
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
@@ -341,6 +342,7 @@ export const DataGrid: FC<Props> = memo(
                 gridStyle={euiDataGridStyle}
                 rowCount={rowCount}
                 renderCellValue={renderCellValue}
+                renderCellPopover={renderCellPopover}
                 sorting={{ columns: sortingColumns, onSort }}
                 toolbarVisibility={{
                   ...euiDataGridToolbarSettings,
@@ -381,7 +383,6 @@ export const DataGrid: FC<Props> = memo(
                       }
                     : {}),
                 }}
-                popoverContents={popOverContent}
                 pagination={{
                   ...pagination,
                   pageSizeOptions: [5, 10, 25],

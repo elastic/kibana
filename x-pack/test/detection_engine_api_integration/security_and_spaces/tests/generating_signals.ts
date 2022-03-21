@@ -674,23 +674,36 @@ export default ({ getService }: FtrProviderContext) => {
           const rule: EqlCreateSchema = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [any where true] [any where true]',
+            max_signals: 200,
           };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
           // For EQL rules, max_signals is the maximum number of detected sequences: each sequence has a building block
-          // alert for each event in the sequence, so max_signals=100 results in 200 building blocks in addition to
-          // 100 regular alerts
-          await waitForSignalsToBePresent(supertest, log, 300, [id]);
+          // alert for each event in the sequence, so max_signals=200 results in 400 building blocks in addition to
+          // 200 regular alerts
+          await waitForSignalsToBePresent(supertest, log, 600, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id], 1000);
-          expect(signalsOpen.hits.hits.length).eql(300);
+          expect(signalsOpen.hits.hits.length).eql(600);
           const shellSignals = signalsOpen.hits.hits.filter(
             (signal) => signal._source?.[ALERT_DEPTH] === 2
           );
           const buildingBlocks = signalsOpen.hits.hits.filter(
             (signal) => signal._source?.[ALERT_DEPTH] === 1
           );
-          expect(shellSignals.length).eql(100);
-          expect(buildingBlocks.length).eql(200);
+          expect(shellSignals.length).eql(200);
+          expect(buildingBlocks.length).eql(400);
+        });
+
+        it('generates signals when an index name contains special characters to encode', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['auditbeat-*', '<my-index-{now/d}*>']),
+            query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(1);
         });
       });
 
