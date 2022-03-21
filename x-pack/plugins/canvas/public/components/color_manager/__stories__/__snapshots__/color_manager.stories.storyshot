@@ -796,7 +796,6 @@ Array [
       <button
         aria-label="Add Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -892,7 +891,6 @@ Array [
       <button
         aria-label="Remove Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -958,7 +956,6 @@ Array [
       <button
         aria-label="Add Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -973,7 +970,6 @@ Array [
       <button
         aria-label="Remove Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >

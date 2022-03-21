@@ -360,6 +360,16 @@ export const sourceConfigData: SourceConfigData = {
   },
 };
 
+export const externalConfiguredConnector = {
+  serviceType: 'external',
+  name: 'External Connector',
+  configured: true,
+  needsPermissions: false,
+  accountContextOnly: true,
+  supportedByLicense: false,
+  privateSourcesEnabled: false,
+};
+
 export const oauthApplication = {
   name: 'app',
   uid: '123uid123',

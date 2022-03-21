@@ -26,7 +26,7 @@ import { BreakdownItem } from '../../../../../typings/ui_filters';
 export function PageViewsTrend() {
   const { http } = useKibanaServices();
 
-  const { urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
   const { serviceName } = uxUiFilters;
 
   const { start, end, searchTerm, rangeTo, rangeFrom } = urlParams;
@@ -54,7 +54,9 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [start, end, serviceName, uxUiFilters, searchTerm, breakdown]
+    // `rangeId` acts as a cache buster for stable ranges like "Today"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [start, end, serviceName, uxUiFilters, searchTerm, breakdown, rangeId]
   );
 
   const exploratoryViewLink = createExploratoryViewUrl(

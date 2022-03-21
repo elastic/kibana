@@ -7,7 +7,7 @@
  */
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import type { DataView } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import type { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { createSearchSourceMock } from '../../../data/common/search/search_source/mocks';

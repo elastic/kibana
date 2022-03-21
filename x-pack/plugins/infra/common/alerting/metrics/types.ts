@@ -112,3 +112,8 @@ export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetri
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 
 export type FilterQuery = string | typeof QUERY_INVALID;
+
+export interface AlertExecutionDetails {
+  alertId: string;
+  executionId: string;
+}

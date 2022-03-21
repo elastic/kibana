@@ -58,5 +58,8 @@ export default function ({ loadTestFile, getService }) {
 
     // Telemetry
     loadTestFile(require.resolve('./fleet_telemetry'));
+
+    // Integrations
+    loadTestFile(require.resolve('./integrations'));
   });
 }

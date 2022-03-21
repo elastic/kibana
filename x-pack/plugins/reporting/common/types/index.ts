@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { ScreenshotResult } from '../../../screenshotting/server';
+import type { FormattedScreenshotResult } from '../../../screenshotting/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
 export type { JobParamsPNGDeprecated } from './export_types/png';
@@ -35,7 +35,7 @@ export interface ReportOutput extends TaskRunResult {
   size: number;
 }
 
-type ScreenshotMetrics = Required<ScreenshotResult>['metrics'];
+type ScreenshotMetrics = Required<FormattedScreenshotResult>['metrics'];
 
 export interface CsvMetrics {
   rows: number;

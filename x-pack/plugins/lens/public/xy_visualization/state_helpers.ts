@@ -7,7 +7,14 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type { SeriesType, XYLayerConfig, YConfig, ValidLayer } from '../../common/expressions';
+import type {
+  SeriesType,
+  XYLayerConfig,
+  YConfig,
+  ValidLayer,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+} from '../../common/expressions';
 import { visualizationTypes } from './types';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
@@ -54,7 +61,10 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   );
 };
 
-export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: DatasourcePublicAPI) => {
+export const getColumnToLabelMap = (
+  layer: XYDataLayerConfig | XYReferenceLineLayerConfig,
+  datasource: DatasourcePublicAPI
+) => {
   const columnToLabel: Record<string, string> = {};
   layer.accessors
     .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])

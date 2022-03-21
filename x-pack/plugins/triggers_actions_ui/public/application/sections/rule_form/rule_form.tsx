@@ -42,14 +42,12 @@ import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
 } from '../../../../../alerting/common/parse_duration';
-import { loadRuleTypes } from '../../lib/rule_api';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
   Rule,
   IErrorObject,
   RuleAction,
-  RuleTypeIndex,
   RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
@@ -76,6 +74,7 @@ import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compa
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
 import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 
 const ENTER_KEY = 13;
 
@@ -95,6 +94,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
+  filteredSolutions?: string[] | undefined;
 }
 
 const defaultScheduleInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
@@ -112,9 +112,9 @@ export const RuleForm = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
+  filteredSolutions,
 }: RuleFormProps) => {
   const {
-    http,
     notifications: { toasts },
     docLinks,
     application: { capabilities },
@@ -143,7 +143,6 @@ export const RuleForm = ({
     rule.throttle ? getDurationUnitValue(rule.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | null>(null);
 
   const [availableRuleTypes, setAvailableRuleTypes] = useState<
     Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>
@@ -156,53 +155,77 @@ export const RuleForm = ({
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
   let hasDisabledByLicenseRuleTypes: boolean = false;
+  const {
+    ruleTypes,
+    error: loadRuleTypesError,
+    ruleTypeIndex,
+  } = useLoadRuleTypes({ filteredSolutions });
 
   // load rule types
   useEffect(() => {
-    (async () => {
-      try {
-        const ruleTypesResult = await loadRuleTypes({ http });
-        const index: RuleTypeIndex = new Map();
-        for (const ruleTypeItem of ruleTypesResult) {
-          index.set(ruleTypeItem.id, ruleTypeItem);
-        }
-        if (rule.ruleTypeId && index.has(rule.ruleTypeId)) {
-          setDefaultActionGroupId(index.get(rule.ruleTypeId)!.defaultActionGroupId);
-        }
-        setRuleTypeIndex(index);
+    if (rule.ruleTypeId && ruleTypeIndex?.has(rule.ruleTypeId)) {
+      setDefaultActionGroupId(ruleTypeIndex.get(rule.ruleTypeId)!.defaultActionGroupId);
+    }
 
-        const availableRuleTypesResult = getAvailableRuleTypes(ruleTypesResult);
-        setAvailableRuleTypes(availableRuleTypesResult);
-
-        const solutionsResult = availableRuleTypesResult.reduce(
-          (result: Map<string, string>, ruleTypeItem) => {
-            if (!result.has(ruleTypeItem.ruleType.producer)) {
-              result.set(
-                ruleTypeItem.ruleType.producer,
-                (kibanaFeatures
-                  ? getProducerFeatureName(ruleTypeItem.ruleType.producer, kibanaFeatures)
-                  : capitalize(ruleTypeItem.ruleType.producer)) ??
-                  capitalize(ruleTypeItem.ruleType.producer)
-              );
+    const getAvailableRuleTypes = (ruleTypesResult: RuleType[]) =>
+      ruleTypeRegistry
+        .list()
+        .reduce(
+          (
+            arr: Array<{ ruleType: RuleType; ruleTypeModel: RuleTypeModel }>,
+            ruleTypeRegistryItem: RuleTypeModel
+          ) => {
+            const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
+            if (ruleType) {
+              arr.push({
+                ruleType,
+                ruleTypeModel: ruleTypeRegistryItem,
+              });
             }
-            return result;
+            return arr;
           },
-          new Map()
+          []
+        )
+        .filter((item) => item.ruleType && hasAllPrivilege(rule, item.ruleType))
+        .filter((item) =>
+          rule.consumer === ALERTS_FEATURE_ID
+            ? !item.ruleTypeModel.requiresAppContext
+            : item.ruleType!.producer === rule.consumer
         );
-        setSolutions(
-          new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
-        );
-      } catch (e) {
-        toasts.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.ruleForm.unableToLoadRuleTypesMessage',
-            { defaultMessage: 'Unable to load rule types' }
-          ),
-        });
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
+    setAvailableRuleTypes(availableRuleTypesResult);
+
+    const solutionsResult = availableRuleTypesResult.reduce(
+      (result: Map<string, string>, ruleTypeItem) => {
+        if (!result.has(ruleTypeItem.ruleType.producer)) {
+          result.set(
+            ruleTypeItem.ruleType.producer,
+            (kibanaFeatures
+              ? getProducerFeatureName(ruleTypeItem.ruleType.producer, kibanaFeatures)
+              : capitalize(ruleTypeItem.ruleType.producer)) ??
+              capitalize(ruleTypeItem.ruleType.producer)
+          );
+        }
+        return result;
+      },
+      new Map()
+    );
+    setSolutions(
+      new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
+    );
+  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule, ruleTypeRegistry]);
+
+  useEffect(() => {
+    if (loadRuleTypesError) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleForm.unableToLoadRuleTypesMessage',
+          { defaultMessage: 'Unable to load rule types' }
+        ),
+      });
+    }
+  }, [loadRuleTypesError, toasts]);
 
   useEffect(() => {
     setRuleTypeModel(rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null);
@@ -280,31 +303,6 @@ export const RuleForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableRuleTypes, searchText, JSON.stringify(solutionsFilter)]);
 
-  const getAvailableRuleTypes = (ruleTypesResult: RuleType[]) =>
-    ruleTypeRegistry
-      .list()
-      .reduce(
-        (
-          arr: Array<{ ruleType: RuleType; ruleTypeModel: RuleTypeModel }>,
-          ruleTypeRegistryItem: RuleTypeModel
-        ) => {
-          const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
-          if (ruleType) {
-            arr.push({
-              ruleType,
-              ruleTypeModel: ruleTypeRegistryItem,
-            });
-          }
-          return arr;
-        },
-        []
-      )
-      .filter((item) => item.ruleType && hasAllPrivilege(rule, item.ruleType))
-      .filter((item) =>
-        rule.consumer === ALERTS_FEATURE_ID
-          ? !item.ruleTypeModel.requiresAppContext
-          : item.ruleType!.producer === rule.consumer
-      );
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
   const getDefaultActionParams = useCallback(

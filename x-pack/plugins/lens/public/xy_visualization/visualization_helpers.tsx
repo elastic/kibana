@@ -136,8 +136,9 @@ export const getDataLayers = (layers: XYLayerConfig[]) =>
 export const getFirstDataLayer = (layers: XYLayerConfig[]) =>
   (layers || []).find((layer): layer is XYDataLayerConfig => isDataLayer(layer));
 
-export const isReferenceLayer = (layer: XYLayerConfig): layer is XYReferenceLineLayerConfig =>
-  layer.layerType === layerTypes.REFERENCELINE;
+export const isReferenceLayer = (
+  layer: Pick<XYLayerConfig, 'layerType'>
+): layer is XYReferenceLineLayerConfig => layer.layerType === layerTypes.REFERENCELINE;
 
 export const getReferenceLayers = (layers: XYLayerConfig[]) =>
   (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
@@ -236,17 +237,36 @@ export function getMessageIdsForDimension(
   return { shortMessage: '', longMessage: '' };
 }
 
-export function newLayerState(
-  seriesType: SeriesType,
-  layerId: string,
-  layerType: LayerType = layerTypes.DATA
-): XYLayerConfig {
-  return {
+const newLayerFn = {
+  [layerTypes.DATA]: ({
     layerId,
     seriesType,
+  }: {
+    layerId: string;
+    seriesType: SeriesType;
+  }): XYDataLayerConfig => ({
+    layerId,
+    layerType: layerTypes.DATA,
     accessors: [],
-    layerType,
-  };
+    seriesType,
+  }),
+  [layerTypes.REFERENCELINE]: ({ layerId }: { layerId: string }): XYReferenceLineLayerConfig => ({
+    layerId,
+    layerType: layerTypes.REFERENCELINE,
+    accessors: [],
+  }),
+};
+
+export function newLayerState({
+  layerId,
+  layerType = layerTypes.DATA,
+  seriesType,
+}: {
+  layerId: string;
+  layerType?: LayerType;
+  seriesType: SeriesType;
+}) {
+  return newLayerFn[layerType]({ layerId, seriesType });
 }
 
 export function getLayersByType(state: State, byType?: string) {

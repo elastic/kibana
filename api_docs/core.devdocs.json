@@ -728,166 +728,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-public.AsyncPlugin",
-        "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "AsyncPlugin",
-        "description": [
-          "\nA plugin with asynchronous lifecycle methods.\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.AsyncPlugin",
-            "text": "AsyncPlugin"
-          },
-          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
-        ],
-        "path": "src/core/public/plugins/plugin.ts",
-        "deprecated": true,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.AsyncPlugin.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<TPluginsStart, TStart>, plugins: TPluginsSetup) => TSetup | Promise<TSetup>"
-            ],
-            "path": "src/core/public/plugins/plugin.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.AsyncPlugin.setup.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<TPluginsStart, TStart>"
-                ],
-                "path": "src/core/public/plugins/plugin.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "core",
-                "id": "def-public.AsyncPlugin.setup.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "plugins",
-                "description": [],
-                "signature": [
-                  "TPluginsSetup"
-                ],
-                "path": "src/core/public/plugins/plugin.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.AsyncPlugin.start",
-            "type": "Function",
-            "tags": [],
-            "label": "start",
-            "description": [],
-            "signature": [
-              "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
-              ", plugins: TPluginsStart) => TStart | Promise<TStart>"
-            ],
-            "path": "src/core/public/plugins/plugin.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.AsyncPlugin.start.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
-                ],
-                "path": "src/core/public/plugins/plugin.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "core",
-                "id": "def-public.AsyncPlugin.start.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "plugins",
-                "description": [],
-                "signature": [
-                  "TPluginsStart"
-                ],
-                "path": "src/core/public/plugins/plugin.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.AsyncPlugin.stop",
-            "type": "Function",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/core/public/plugins/plugin.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-public.Capabilities",
         "type": "Interface",
         "tags": [],
@@ -1090,6 +930,27 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.CoreSetup.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "{@link ExecutionContextSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              }
+            ],
+            "path": "src/core/public/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.CoreSetup.injectedMetadata",
             "type": "Object",
             "tags": [
@@ -1230,6 +1091,27 @@
                 "docId": "kibCorePluginApi",
                 "section": "def-public.DocLinksStart",
                 "text": "DocLinksStart"
+              }
+            ],
+            "path": "src/core/public/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreStart.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "{@link ExecutionContextStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
               }
             ],
             "path": "src/core/public/index.ts",
@@ -1452,10 +1334,6 @@
               {
                 "plugin": "visTypeVega",
                 "path": "src/plugins/vis_types/vega/public/plugin.ts"
-              },
-              {
-                "plugin": "visTypeVega",
-                "path": "src/plugins/vis_types/vega/target/types/public/data_model/search_api.d.ts"
               }
             ]
           }
@@ -1780,6 +1658,162 @@
             ],
             "path": "src/core/public/notifications/toasts/toasts_api.tsx",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ExecutionContextSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecutionContextSetup",
+        "description": [
+          "\nKibana execution context.\nUsed to provide execution context to Elasticsearch, reporting, performance monitoring, etc."
+        ],
+        "path": "src/core/public/execution_context/execution_context_service.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ExecutionContextSetup.context$",
+            "type": "Object",
+            "tags": [],
+            "label": "context$",
+            "description": [
+              "\nThe current context observable"
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              "KibanaExecutionContext",
+              ">"
+            ],
+            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ExecutionContextSetup.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "\nSet the current top level context"
+            ],
+            "signature": [
+              "(c$: ",
+              "KibanaExecutionContext",
+              ") => void"
+            ],
+            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ExecutionContextSetup.set.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "c$",
+                "description": [],
+                "signature": [
+                  "KibanaExecutionContext"
+                ],
+                "path": "src/core/public/execution_context/execution_context_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ExecutionContextSetup.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGet the current top level context"
+            ],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext"
+            ],
+            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ExecutionContextSetup.clear",
+            "type": "Function",
+            "tags": [],
+            "label": "clear",
+            "description": [
+              "\nclears the context"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ExecutionContextSetup.getAsLabels",
+            "type": "Function",
+            "tags": [],
+            "label": "getAsLabels",
+            "description": [
+              "\nreturns apm labels"
+            ],
+            "signature": [
+              "() => ",
+              "Labels"
+            ],
+            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ExecutionContextSetup.withGlobalContext",
+            "type": "Function",
+            "tags": [],
+            "label": "withGlobalContext",
+            "description": [
+              "\nmerges the current top level context with the specific event context"
+            ],
+            "signature": [
+              "(context?: ",
+              "KibanaExecutionContext",
+              " | undefined) => ",
+              "KibanaExecutionContext"
+            ],
+            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ExecutionContextSetup.withGlobalContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "KibanaExecutionContext",
+                  " | undefined"
+                ],
+                "path": "src/core/public/execution_context/execution_context_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5349,22 +5383,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.SavedObjectsImportFailure.title",
-            "type": "string",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/saved_objects/import/types.ts",
-            "deprecated": true,
-            "references": []
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-public.SavedObjectsImportFailure.meta",
             "type": "Object",
             "tags": [],
@@ -6448,6 +6466,28 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.ExecutionContextStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecutionContextStart",
+        "description": [
+          "\nSee {@link ExecutionContextSetup}."
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          }
+        ],
+        "path": "src/core/public/execution_context/execution_context_service.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.FatalErrorsStart",
         "type": "Type",
         "tags": [],
@@ -6638,7 +6678,7 @@
         "label": "KibanaExecutionContext",
         "description": [],
         "signature": [
-          "{ readonly type: string; readonly name: string; readonly id: string; readonly description?: string | undefined; readonly url?: string | undefined; child?: ",
+          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; child?: ",
           "KibanaExecutionContext",
           " | undefined; }"
         ],
@@ -6714,14 +6754,6 @@
             "docId": "kibCorePluginApi",
             "section": "def-public.Plugin",
             "text": "Plugin"
-          },
-          "<TSetup, TStart, TPluginsSetup, TPluginsStart> | ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.AsyncPlugin",
-            "text": "AsyncPlugin"
           },
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
@@ -7754,7 +7786,7 @@
                 "label": "rawConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
+                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; healthCheck: Readonly<{} & { delay: moment.Duration; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
                 ],
                 "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
                 "deprecated": false,
@@ -8020,16 +8052,7 @@
         ],
         "path": "src/core/server/plugins/types.ts",
         "deprecated": true,
-        "references": [
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/target/types/server/plugin.d.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/target/types/server/plugin.d.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "core",
@@ -10486,32 +10509,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchServiceStart.legacy",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "legacy",
-            "description": [],
-            "signature": [
-              "{ readonly config$: ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchConfig",
-                "text": "ElasticsearchConfig"
-              },
-              ">; }"
-            ],
-            "path": "src/core/server/elasticsearch/types.ts",
-            "deprecated": true,
-            "references": []
           }
         ],
         "initialIsOpen": false
@@ -10671,6 +10668,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ExecutionContextSetup.getAsLabels",
+            "type": "Function",
+            "tags": [],
+            "label": "getAsLabels",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Labels"
+            ],
+            "path": "src/core/server/execution_context/execution_context_service.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -11882,6 +11895,10 @@
               "; helpers: ",
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "default",
+              "; child: (opts: ",
+              "ClientOptions",
+              ") => ",
               "default",
               "; Internal: ",
               "default",
@@ -14278,6 +14295,10 @@
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
+              "; child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
               "; Internal: ",
               "default",
               "; asyncSearch: ",
@@ -15476,6 +15497,10 @@
               "; helpers: ",
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "default",
+              "; child: (opts: ",
+              "ClientOptions",
+              ") => ",
               "default",
               "; Internal: ",
               "default",
@@ -18744,6 +18769,10 @@
               "; helpers: ",
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "default",
+              "; child: (opts: ",
+              "ClientOptions",
+              ") => ",
               "default",
               "; Internal: ",
               "default",
@@ -22243,6 +22272,10 @@
           "default",
           "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
           "default",
+          "; child: (opts: ",
+          "ClientOptions",
+          ") => ",
+          "default",
           "; Internal: ",
           "default",
           "; asyncSearch: ",
@@ -24108,7 +24141,7 @@
         "label": "KibanaExecutionContext",
         "description": [],
         "signature": [
-          "{ readonly type: string; readonly name: string; readonly id: string; readonly description?: string | undefined; readonly url?: string | undefined; child?: ",
+          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; child?: ",
           "KibanaExecutionContext",
           " | undefined; }"
         ],

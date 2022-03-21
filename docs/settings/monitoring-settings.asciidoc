@@ -116,6 +116,11 @@ Specifies the name of the indices that are shown on the
 <<logs-monitor-page,*Logs*>> page in *{stack-monitor-app}*. The default value
 is `filebeat-*`.
 
+`monitoring.ui.metricbeat.index`::
+deprecated:[8.1.1]
+Used as a workaround to avoid querying `metricbeat-*` indices which are now no longer queried. The default value
+is `metricbeat-*`.
+
 `monitoring.ui.max_bucket_size`::
 Specifies the number of term buckets to return out of the overall terms list when
 performing terms aggregations to retrieve index and node metrics. For more
