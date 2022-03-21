@@ -398,7 +398,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
         await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
-      ).to.eql(['Top 5 values of geo.dest', 'Top 5 values of geo.src']);
+      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
       );
