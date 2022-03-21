@@ -15,7 +15,7 @@ export const OptionsListStrings = {
     }),
   getDescription: () =>
     i18n.translate('controls.optionsList.description', {
-      defaultMessage: 'Add a dropdown of selectable values from a field.',
+      defaultMessage: 'Add a menu for selecting field values.',
     }),
   summary: {
     getSeparator: () =>
