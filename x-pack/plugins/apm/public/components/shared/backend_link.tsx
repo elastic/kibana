@@ -17,11 +17,11 @@ import { TruncateWithoutTooltip } from './truncate_with_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`min-width: 0`;
 
-const tooltipAnchorClassname = '_apm_truncate_tooltip_anchor_';
+const truncateAnchorClassname = '_apm_truncate_anchor_';
 
-const Wrapper = euiStyled.div`
+const TruncationWrapper = euiStyled.div`
   width: 50px;
-  .${tooltipAnchorClassname} {
+  .${truncateAnchorClassname} {
     width: 100% !important;
     display: block !important;
   }
@@ -54,12 +54,12 @@ export function BackendLink({
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <Wrapper>
+          <TruncationWrapper>
             <TruncateWithoutTooltip
               text={query.backendName}
               content={query.backendName}
             />
-          </Wrapper>
+          </TruncationWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>

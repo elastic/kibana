@@ -18,11 +18,11 @@ import { TruncateWithoutTooltip } from './truncate_with_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`min-width: 0;`;
 
-const tooltipAnchorClassname = '_apm_truncate_tooltip_anchor_';
+const truncateAnchorClassname = '_apm_truncate_anchor_';
 
-const Wrapper = euiStyled.div`
+const TruncationWrapper = euiStyled.div`
   width: 175px;
-  .${tooltipAnchorClassname} {
+  .${truncateAnchorClassname} {
     width: 100% !important;
     display: block !important;
   }
@@ -54,9 +54,9 @@ export function ServiceLink({
           <AgentIcon agentName={agentName} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <Wrapper>
+          <TruncationWrapper>
             <TruncateWithoutTooltip text={serviceName} content={serviceName} />
-          </Wrapper>
+          </TruncationWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
