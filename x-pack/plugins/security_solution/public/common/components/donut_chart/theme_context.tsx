@@ -35,11 +35,11 @@ export interface ThemeContextValues {
  */
 const defaultContext: ThemeContextValues = {
   colors: {
-    danger: euiLightVars.euiColorDanger,
-    dangerBehindText: euiDarkVars.euiColorVis9_behindText,
-    mean: euiLightVars.euiColorPrimary,
-    range: euiLightVars.euiFocusBackgroundColor,
-    success: euiLightVars.euiColorSuccess,
+    danger: '#EF6550',
+    dangerBehindText: '#EE9266',
+    mean: '#F3B689',
+    range: '#F8D9B2',
+    success: euiLightVars.euiColorPrimaryText,
     warning: euiLightVars.euiColorWarning,
     gray: euiLightVars.euiColorLightShade,
     lightestShade: euiLightVars.euiColorLightestShade,

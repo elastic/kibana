@@ -10,12 +10,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { DonutChartLegendRow } from './donut_chart_legend_row';
 import { ThemeContext } from './theme_context';
-import {
-  STATUS_DOWN_LABEL,
-  STATUS_HIGH_LABEL,
-  STATUS_LOW_LABEL,
-  STATUS_MEDIUM_LABEL,
-} from './translations';
+import { STATUS_HIGH_LABEL, STATUS_LOW_LABEL, STATUS_MEDIUM_LABEL } from './translations';
 
 const LegendContainer = styled.div`
   max-width: 150px;
@@ -34,29 +29,29 @@ interface Props {
 
 export const DonutChartLegend = ({ low, high, medium }: Props) => {
   const {
-    colors: { gray, danger, warning },
+    colors: { mean, danger, dangerBehindText },
   } = useContext(ThemeContext);
   return (
     <LegendContainer>
       <DonutChartLegendRow
         color={danger}
-        content={low}
-        message={STATUS_LOW_LABEL}
-        data-test-subj={'donutChart-low'}
+        content={high}
+        message={STATUS_HIGH_LABEL}
+        data-test-subj={'donutChart-high'}
       />
       <EuiSpacer size="m" />
       <DonutChartLegendRow
-        color={warning}
+        color={dangerBehindText}
         content={medium}
         message={STATUS_MEDIUM_LABEL}
         data-test-subj={'donutChart-medium'}
       />
       <EuiSpacer size="m" />
       <DonutChartLegendRow
-        color={gray}
-        content={high}
-        message={STATUS_HIGH_LABEL}
-        data-test-subj={'donutChart-high'}
+        color={mean}
+        content={low}
+        message={STATUS_LOW_LABEL}
+        data-test-subj={'donutChart-low'}
       />
     </LegendContainer>
   );

@@ -80,7 +80,7 @@ const DetectionResponseComponent = () => {
                         {alertsData().map((data) => (
                           <EuiFlexItem key={`alerts-status-${data.key}`}>
                             <DonutChart
-                              height={90}
+                              height={180}
                               {...data.statusBySeverity.buckets.reduce((acc, curr) => {
                                 return { ...acc, name: data.key, [curr.key]: curr.doc_count };
                               }, {})}

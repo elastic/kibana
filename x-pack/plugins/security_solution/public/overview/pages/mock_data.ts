@@ -4,6 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Status } from '../../../common/detection_engine/schemas/common';
+
+interface StatusBySeverityBucket {
+  key: 'high' | 'medium' | 'low';
+  doc_count: number;
+}
+interface StatusBySeverity {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: StatusBySeverityBucket[];
+}
+interface AlertsByStatusBucket {
+  key: Status;
+  doc_count: number;
+  statusBySeverity: StatusBySeverity;
+}
+
 export const alertsData = () => {
   const response = {
     took: 4,
@@ -98,5 +116,14 @@ export const alertsData = () => {
     },
   };
 
-  return response.aggregations.alertsByStatus.buckets;
+  const sequence: Status[] = ['open', 'acknowledged', 'closed'];
+  const resp: AlertsByStatusBucket[] = [];
+  response.aggregations.alertsByStatus.buckets.forEach((bucket, idx) => {
+    const key = sequence.indexOf(bucket.key as Status);
+    if (key >= 0) {
+      resp[key] = bucket;
+    }
+  });
+
+  return resp;
 };

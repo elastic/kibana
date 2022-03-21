@@ -35,25 +35,39 @@ const themeOverrides: PartialTheme = {
   },
 };
 
-export const DonutChart = ({ name, height, low, high, medium, showLegend }: DonutChartProps) => {
+export const DonutChart = ({
+  name,
+  height,
+  low,
+  high,
+  medium,
+  showLegend = true,
+}: DonutChartProps) => {
   const {
-    colors: { danger, gray, warning },
+    colors: { danger, dangerBehindText, mean, success },
     chartTheme,
   } = useContext(ThemeContext);
-
   return (
     <EuiFlexGroup alignItems="stretch" justifyContent="center" responsive={false} gutterSize="none">
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         {name && (
           <EuiFlexGroup
             direction="column"
-            style={{ top: '30px', width: '100%', position: 'absolute', zIndex: 1 }}
+            style={{ top: '42%', width: '100%', position: 'absolute', zIndex: 1 }}
             gutterSize="none"
             alignItems="center"
             justifyContent="center"
           >
-            <EuiFlexItem>{high + low + medium}</EuiFlexItem>
-            <EuiFlexItem>{name}</EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong>{high + low + medium}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color={success} size="s">
+                {name}
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         )}
         <Chart
@@ -70,9 +84,9 @@ export const DonutChart = ({ name, height, low, high, medium, showLegend }: Donu
           <Partition
             id="spec_1"
             data={[
-              { value: low, label: 'Low' },
-              { value: high, label: 'High' },
-              { value: medium, label: 'Medium' },
+              { value: low, label: 'Low', name },
+              { value: high, label: 'High', name },
+              { value: medium, label: 'Medium', name },
             ]}
             layout={PartitionLayout.sunburst}
             valueAccessor={(d: Datum) => d.value as number}
@@ -82,8 +96,27 @@ export const DonutChart = ({ name, height, low, high, medium, showLegend }: Donu
                 nodeLabel: (d: Datum) => d,
                 shape: {
                   fillColor: (d: Datum) => {
-                    return d.dataName === 'Low' ? danger : d.dataName === 'Medium' ? warning : gray;
+                    return d.dataName === 'Low'
+                      ? mean
+                      : d.dataName === 'Medium'
+                      ? dangerBehindText
+                      : danger;
                   },
+                },
+              },
+              /* The two layers below are for styling purpose,
+               to make the one above thinner.
+               */
+              {
+                groupByRollup: (d: Datum) => d.name,
+                shape: {
+                  fillColor: '#fff',
+                },
+              },
+              {
+                groupByRollup: (d: Datum) => d.name,
+                shape: {
+                  fillColor: '#fff',
                 },
               },
             ]}
@@ -91,7 +124,7 @@ export const DonutChart = ({ name, height, low, high, medium, showLegend }: Donu
         </Chart>
       </EuiFlexItem>
       {showLegend && (
-        <EuiFlexItem>
+        <EuiFlexItem style={{ alignSelf: 'center' }}>
           <DonutChartLegend low={low} high={high} medium={medium} />
         </EuiFlexItem>
       )}
