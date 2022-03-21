@@ -65,6 +65,17 @@ describe('helpers', () => {
       runWithIdentityHelper('{{{{identity}}}}{{{{/identity}}}}', '');
     });
 
+    it.skip('helper for nested raw block works if nested raw blocks are broken', () => {
+      // This test was introduced in 4.4.4, but it was not the actual problem that lead to the patch release
+      // The test is deactivated, because in 3.x this template cases an exception and it also does not work in 4.4.3
+      // If anyone can make this template work without breaking everything else, then go for it,
+      // but for now, this is just a known bug, that will be documented.
+      runWithIdentityHelper(
+        '{{{{identity}}}} {{{{a}}}} {{{{ {{{{/ }}}} }}}} {{{{/identity}}}}',
+        ' {{{{a}}}} {{{{ {{{{/ }}}} }}}} '
+      );
+    });
+
     it('helper for nested raw block closes after first matching close', () => {
       runWithIdentityHelper(
         '{{{{identity}}}}abc{{{{/identity}}}} {{{{identity}}}}abc{{{{/identity}}}}',
