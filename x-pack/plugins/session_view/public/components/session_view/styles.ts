@@ -23,7 +23,6 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
 
     const processTree: CSSObject = {
       height: `${height}px`,
-      paddingTop: euiTheme.size.s,
       position: 'relative',
     };
 
@@ -37,10 +36,21 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       zIndex: 2,
     };
 
+    const searchBar: CSSObject = {
+      position: 'relative',
+      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+    };
+
+    const buttonsEyeDetail: CSSObject = {
+      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+    };
+
     return {
       processTree,
       detailPanel,
       resizeHandle,
+      searchBar,
+      buttonsEyeDetail,
     };
   }, [height, euiTheme]);
 

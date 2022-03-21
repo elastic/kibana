@@ -8,6 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
+import { PluginInitializerContext } from 'kibana/server';
 import { Plugin } from './plugin';
 
 export type {
@@ -42,8 +43,8 @@ export { AlertConditions, AlertConditionsGroup } from './application/sections';
 
 export * from './common';
 
-export function plugin() {
-  return new Plugin();
+export function plugin(context: PluginInitializerContext) {
+  return new Plugin(context);
 }
 
 export { Plugin };

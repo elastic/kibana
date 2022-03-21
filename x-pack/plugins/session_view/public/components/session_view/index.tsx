@@ -11,14 +11,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiResizableContainer,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import { Process } from '../../../common/types/process_tree';
+import { DisplayOptionsState } from '../../../common/types/session_view';
 import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
+import { SessionViewDisplayOptions } from '../session_view_display_options';
 import { useStyles } from './styles';
 import { useFetchSessionViewProcessEvents, useFetchSessionViewAlerts } from './hooks';
 
@@ -39,12 +42,12 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     // TODO: hook into callback for alert flyout.
   }, []);
 
-  const toggleDetailPanel = () => {
-    setIsDetailOpen(!isDetailOpen);
-  };
-
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
+  const [displayOptions, setDisplayOptions] = useState<DisplayOptionsState>({
+    timestamp: true,
+    verboseMode: true,
+  });
 
   const {
     data,
@@ -63,6 +66,13 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   const hasError = error || alertsError;
   const renderIsLoading = (isFetching || alertsFetching) && !data;
   const renderDetails = isDetailOpen && selectedProcess;
+
+  const toggleDetailPanel = useCallback(() => {
+    setIsDetailOpen(!isDetailOpen);
+  }, [isDetailOpen]);
+  const handleOptionChange = useCallback((checkedOptions: DisplayOptionsState) => {
+    setDisplayOptions(checkedOptions);
+  }, []);
 
   if (!isFetching && !hasData) {
     return (
@@ -90,32 +100,41 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem
-          data-test-subj="sessionView:sessionViewProcessEventsSearch"
-          css={{ position: 'relative' }}
-        >
-          <SessionViewSearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            onProcessSelected={onProcessSelected}
-            searchResults={searchResults}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={toggleDetailPanel}
-            iconType="list"
-            fill
-            data-test-subj="sessionViewDetailPanelToggle"
+      <EuiPanel color={'subdued'}>
+        <EuiFlexGroup>
+          <EuiFlexItem
+            data-test-subj="sessionView:sessionViewProcessEventsSearch"
+            css={styles.searchBar}
           >
-            <FormattedMessage
-              id="xpack.sessionView.buttonOpenDetailPanel"
-              defaultMessage="Detail panel"
+            <SessionViewSearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onProcessSelected={onProcessSelected}
+              searchResults={searchResults}
             />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+            <SessionViewDisplayOptions
+              displayOptions={displayOptions}
+              onChange={handleOptionChange}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+            <EuiButton
+              onClick={toggleDetailPanel}
+              iconType="list"
+              data-test-subj="sessionView:sessionViewDetailPanelToggle"
+            >
+              <FormattedMessage
+                id="xpack.sessionView.buttonOpenDetailPanel"
+                defaultMessage="Detail panel"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
       <EuiResizableContainer>
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
@@ -172,6 +191,8 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     fetchNextPage={fetchNextPage}
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
+                    timeStampOn={displayOptions.timestamp}
+                    verboseModeOn={displayOptions.verboseMode}
                   />
                 </div>
               )}
@@ -207,6 +228,5 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     </>
   );
 };
-
 // eslint-disable-next-line import/no-default-export
 export { SessionView as default };

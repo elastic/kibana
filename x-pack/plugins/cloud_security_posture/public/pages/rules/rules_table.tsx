@@ -60,7 +60,7 @@ export const RulesTable = ({
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [1, 5, 10, 25],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
@@ -134,7 +134,7 @@ const getColumns = ({
   },
   {
     field: 'updatedAt',
-    name: TEXT.UPDATED_AT,
+    name: TEXT.LAST_MODIFIED,
     width: '15%',
     render: (timestamp) => moment(timestamp).fromNow(),
   },

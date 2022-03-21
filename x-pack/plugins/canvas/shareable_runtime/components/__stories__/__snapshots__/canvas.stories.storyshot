@@ -1429,7 +1429,6 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     aria-label="Next Page"
                     className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsNextPage"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -1459,7 +1458,6 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
@@ -2913,7 +2911,6 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     aria-label="Next Page"
                     className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsNextPage"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -2943,7 +2940,6 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
@@ -3242,7 +3238,6 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >

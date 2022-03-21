@@ -66,7 +66,6 @@ export class ProcessImpl implements Process {
     if (this.orphans.length) {
       children = [...children, ...this.orphans].sort(sortProcesses);
     }
-
     // When verboseMode is false, we filter out noise via a few techniques.
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {

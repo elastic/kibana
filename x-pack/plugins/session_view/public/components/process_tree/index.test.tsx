@@ -18,6 +18,7 @@ describe('ProcessTree component', () => {
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
   const sessionLeader = mockData[0].events[0];
+  const sessionLeaderVerboseTest = mockData[0].events[3];
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
@@ -88,6 +89,54 @@ describe('ProcessTree component', () => {
       expect(onProcessSelected).toHaveBeenCalled();
     });
 
+    it('When Verbose mode is OFF, it should not show all childrens', () => {
+      renderResult = mockedContext.render(
+        <ProcessTree
+          sessionEntityId={sessionLeader.process.entity_id}
+          data={mockData}
+          isFetching={false}
+          fetchNextPage={() => true}
+          hasNextPage={false}
+          fetchPreviousPage={() => true}
+          hasPreviousPage={false}
+          onProcessSelected={jest.fn()}
+          timeStampOn={true}
+          verboseModeOn={false}
+        />
+      );
+      expect(renderResult.queryByText('cat')).toBeFalsy();
+
+      const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
+      const result = selectionArea.map((a) => a?.getAttribute('data-id'));
+
+      expect(result.includes(sessionLeader.process.entity_id)).toBeTruthy();
+      expect(result.includes(sessionLeaderVerboseTest.process.entity_id)).toBeFalsy();
+    });
+
+    it('When Verbose mode is ON, it should show all childrens', () => {
+      renderResult = mockedContext.render(
+        <ProcessTree
+          sessionEntityId={sessionLeader.process.entity_id}
+          data={mockData}
+          isFetching={false}
+          fetchNextPage={() => true}
+          hasNextPage={false}
+          fetchPreviousPage={() => true}
+          hasPreviousPage={false}
+          onProcessSelected={jest.fn()}
+          timeStampOn={true}
+          verboseModeOn={true}
+        />
+      );
+      expect(renderResult.queryByText('cat')).toBeTruthy();
+
+      const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
+      const result = selectionArea.map((a) => a?.getAttribute('data-id'));
+
+      expect(result.includes(sessionLeader.process.entity_id)).toBeTruthy();
+      expect(result.includes(sessionLeaderVerboseTest.process.entity_id)).toBeTruthy();
+    });
+
     it('should insert a DOM element used to highlight a process when selectedProcess is set', () => {
       const mockSelectedProcess = new ProcessImpl(mockData[0].events[0].process.entity_id);
 
@@ -103,11 +152,9 @@ describe('ProcessTree component', () => {
           hasPreviousPage={false}
           selectedProcess={mockSelectedProcess}
           onProcessSelected={jest.fn()}
+          verboseModeOn={true}
         />
       );
-
-      // click on view more button
-      renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton').click();
 
       expect(
         renderResult

@@ -55,6 +55,7 @@ describe('resolveRule', () => {
       ],
       outcome: 'aliasMatch',
       alias_target_id: '2',
+      alias_purpose: 'savedObjectConversion',
     };
     http.get.mockResolvedValueOnce(resolvedValue);
 
@@ -98,6 +99,7 @@ describe('resolveRule', () => {
       ],
       outcome: 'aliasMatch',
       alias_target_id: '2',
+      alias_purpose: 'savedObjectConversion',
     });
     expect(http.get).toHaveBeenCalledWith(`/internal/alerting/rule/${ruleIdEncoded}/_resolve`);
   });

@@ -10,11 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import {
-  FilterManager,
-  IndexPatternsContract,
-  TimefilterContract,
-} from '../../../../../src/plugins/data/public';
+import { FilterManager, TimefilterContract } from '../../../../../src/plugins/data/public';
+import type { DataViewsContract } from '../../../../../src/plugins/data_views/public';
 import { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactoryDefinition,
@@ -38,7 +35,7 @@ export interface LensEmbeddableStartServices {
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
   expressionRenderer: ReactExpressionRendererType;
-  indexPatternService: IndexPatternsContract;
+  indexPatternService: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
   documentToExpression: (
