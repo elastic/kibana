@@ -111,10 +111,17 @@ export function CasesAppCommonServiceProvider({ getService, getPageObject }: Ftr
 
     async deleteAllBulkListAction() {
       await testSubjects.setCheckbox('checkboxSelectAll', 'check');
-      const button = await find.byCssSelector('[data-test-subj="case-table-bulk-actions"] button');
+      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
       await button.click();
       await testSubjects.click('cases-bulk-delete-button');
       await testSubjects.click('confirmModalConfirmButton');
+    },
+
+    async waitForCasesTableLoading(): Promise<void> {
+      const div = await find.allByCssSelector("[data-test-subj='cases-table-loading']", 200);
+      if (div.length > 0) {
+        return this.waitForCasesTableLoading();
+      }
     },
 
     async deleteAllCasesFromListUi() {
@@ -124,6 +131,7 @@ export function CasesAppCommonServiceProvider({ getService, getPageObject }: Ftr
         if (rows.length > 0) {
           await this.deleteAllBulkListAction();
           await header.waitUntilLoadingHasFinished();
+          await this.waitForCasesTableLoading();
         }
       } while (rows.length > 0);
     },
