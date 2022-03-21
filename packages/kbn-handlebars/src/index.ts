@@ -21,7 +21,7 @@ export type ExtendedCompileOptions = Pick<
   CompileOptions,
   'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'noEscape'
 >;
-export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers'>;
+export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers' | 'blockParams'>;
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace ExtendedHandlebars {
@@ -82,6 +82,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private template: string;
   private compileOptions: ExtendedCompileOptions;
   private initialHelpers: { [name: string]: Handlebars.HelperDelegate };
+  private blockParamNames: any[][] = [];
+  private blockParamValues: any[][] = [];
   private ast?: hbs.AST.Program;
   private container: Container;
   // @ts-expect-error
@@ -172,6 +174,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // ***    Visitor AST Traversal Functions     *** //
   // ********************************************** //
 
+  Program(program: hbs.AST.Program) {
+    this.blockParamNames.unshift(program.blockParams);
+    super.Program(program);
+    this.blockParamNames.shift();
+  }
+
   MustacheStatement(mustache: hbs.AST.MustacheStatement) {
     this.processStatementOrExpression(mustache);
   }
@@ -188,7 +196,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const context = this.scopes[path.depth];
     const value = path.parts[0] === undefined ? context : get(context, path.parts);
 
-    if (this.compileOptions.noEscape === true || typeof value !== 'string') {
+    const name = path.parts[0];
+    const scoped = AST.helpers.scopedId(path);
+    const blockParamId = !path.depth && !scoped && this.blockParamIndex(name);
+
+    if (blockParamId) {
+      this.output.push(this.lookupBlockParam(blockParamId, path.parts));
+    } else if (this.compileOptions.noEscape === true || typeof value !== 'string') {
       this.output.push(value);
     } else {
       this.output.push(Handlebars.escapeExpression(value));
@@ -242,15 +256,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // Liftet from lib/handlebars/compiler/compiler.js (original name: classifySexpr)
   private classifyNode(node: { path: hbs.AST.PathExpression }): NodeType {
     const isSimple = AST.helpers.simpleId(node.path);
+    const isBlockParam = isSimple && !!this.blockParamIndex(node.path.parts[0]);
 
     // a mustache is an eligible helper if:
     // * its id is simple (a single part, not `this` or `..`)
-    let isHelper = AST.helpers.helperExpression(node);
+    let isHelper = !isBlockParam && AST.helpers.helperExpression(node);
 
     // if a mustache is an eligible helper but not a definite
     // helper, it is ambiguous, and will be resolved in a later
     // pass or at runtime.
-    let isEligible = isHelper || isSimple;
+    let isEligible = !isBlockParam && (isHelper || isSimple);
 
     // if ambiguous, we can possibly resolve the ambiguity now
     // An eligible helper is one that does not have a complex path, i.e. `this.foo`, `../foo` etc.
@@ -271,6 +286,23 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     } else {
       return kSimple;
     }
+  }
+
+  // Liftet from lib/handlebars/compiler/compiler.js
+  private blockParamIndex(name: string): [number, any] | undefined {
+    for (let depth = 0, len = this.blockParamNames.length; depth < len; depth++) {
+      const blockParams = this.blockParamNames[depth];
+      const param = blockParams && indexOf(blockParams, name);
+      if (blockParams && param >= 0) {
+        return [depth, param];
+      }
+    }
+  }
+
+  // Looks up the value of `parts` on the given block param and pushes
+  // it onto the stack.
+  lookupBlockParam(blockParamId: [number, any], parts: any) {
+    return this.blockParamValues[blockParamId[0]][blockParamId[1]];
   }
 
   private processSimpleNode(node: ProcessableNodeWithPathParts) {
@@ -432,12 +464,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     if (isBlock(node)) {
       const generateProgramFunction = (program: hbs.AST.Program) => {
-        return (nextContext: any) => {
+        const prog = (nextContext: any, runtimeOptions: ExtendedRuntimeOptions = {}) => {
           this.scopes.unshift(nextContext);
+          this.blockParamValues.unshift(runtimeOptions.blockParams || []);
           const result = this.resolveNodes(program).join('');
+          this.blockParamValues.shift();
           this.scopes.shift();
           return result;
         };
+        prog.blockParams = node.program?.blockParams?.length ?? 0;
+        return prog;
       };
 
       options.fn = node.program ? generateProgramFunction(node.program) : noop;

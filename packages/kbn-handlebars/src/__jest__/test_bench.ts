@@ -14,18 +14,24 @@ declare global {
 
 global.kbnHandlebarsEnv = null;
 
-export function expectTemplate(template: string) {
-  return new HandlebarsTestBench(template);
+interface TestOptions {
+  beforeEach?: Function;
+}
+
+export function expectTemplate(template: string, options?: TestOptions) {
+  return new HandlebarsTestBench(template, options);
 }
 
 class HandlebarsTestBench {
   private template: string;
+  private options: TestOptions;
   private compileOptions?: ExtendedCompileOptions;
   private helpers: { [key: string]: HelperDelegate } = {};
   private input: any;
 
-  constructor(template: string) {
+  constructor(template: string, options: TestOptions = {}) {
     this.template = template;
+    this.options = options;
   }
 
   withCompileOptions(compileOptions?: ExtendedCompileOptions) {
@@ -108,11 +114,19 @@ class HandlebarsTestBench {
   }
 
   private compileEval(handlebarsEnv = getHandlebarsEnv()) {
+    this.execBeforeEach();
     return handlebarsEnv.compile(this.template, this.compileOptions);
   }
 
   private compileAST(handlebarsEnv = getHandlebarsEnv()) {
+    this.execBeforeEach();
     return handlebarsEnv.compileAST(this.template, this.compileOptions);
+  }
+
+  private execBeforeEach() {
+    if (this.options.beforeEach) {
+      this.options.beforeEach();
+    }
   }
 }
 

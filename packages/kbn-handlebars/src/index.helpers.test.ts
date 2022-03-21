@@ -789,6 +789,75 @@ describe('helpers', () => {
     });
   });
 
+  describe('block params', () => {
+    it('should take presedence over context values', () => {
+      expectTemplate('{{#goodbyes as |value|}}{{value}}{{/goodbyes}}{{value}}')
+        .withInput({ value: 'foo' })
+        .withHelper('goodbyes', function (options) {
+          expect(options.fn.blockParams).toEqual(1);
+          return options.fn({ value: 'bar' }, { blockParams: [1, 2] });
+        })
+        .toCompileTo('1foo');
+    });
+
+    it('should take presedence over helper values', () => {
+      expectTemplate('{{#goodbyes as |value|}}{{value}}{{/goodbyes}}{{value}}')
+        .withHelper('value', function () {
+          return 'foo';
+        })
+        .withHelper('goodbyes', function (options) {
+          expect(options.fn.blockParams).toEqual(1);
+          return options.fn({}, { blockParams: [1, 2] });
+        })
+        .toCompileTo('1foo');
+    });
+
+    it('should not take presedence over pathed values', () => {
+      expectTemplate('{{#goodbyes as |value|}}{{./value}}{{/goodbyes}}{{value}}')
+        .withInput({ value: 'bar' })
+        .withHelper('value', function () {
+          return 'foo';
+        })
+        .withHelper('goodbyes', function (this: any, options) {
+          expect(options.fn.blockParams).toEqual(1);
+          return options.fn(this, { blockParams: [1, 2] });
+        })
+        .toCompileTo('barfoo');
+    });
+
+    it('should take presednece over parent block params', () => {
+      let value: number;
+      expectTemplate(
+        '{{#goodbyes as |value|}}{{#goodbyes}}{{value}}{{#goodbyes as |value|}}{{value}}{{/goodbyes}}{{/goodbyes}}{{/goodbyes}}{{value}}',
+        {
+          beforeEach() {
+            value = 1;
+          },
+        }
+      )
+        .withInput({ value: 'foo' })
+        .withHelper('goodbyes', function (options) {
+          return options.fn(
+            { value: 'bar' },
+            {
+              blockParams: options.fn.blockParams === 1 ? [value++, value++] : undefined,
+            }
+          );
+        })
+        .toCompileTo('13foo');
+    });
+
+    it('should allow block params on chained helpers', () => {
+      expectTemplate('{{#if bar}}{{else goodbyes as |value|}}{{value}}{{/if}}{{value}}')
+        .withInput({ value: 'foo' })
+        .withHelper('goodbyes', function (options) {
+          expect(options.fn.blockParams).toEqual(1);
+          return options.fn({ value: 'bar' }, { blockParams: [1, 2] });
+        })
+        .toCompileTo('1foo');
+    });
+  });
+
   describe('built-in helpers malformed arguments ', () => {
     it('if helper - too few arguments', () => {
       expectTemplate('{{#if}}{{/if}}').toThrow(/#if requires exactly one argument/);
