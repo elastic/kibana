@@ -80,7 +80,9 @@ const RenameDialog = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onActionDismiss}>{cancel}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onActionDismiss} data-test-subj="cancelEditName">
+          {cancel}
+        </EuiButtonEmpty>
 
         <EuiButton
           disabled={!isNewNameValid}

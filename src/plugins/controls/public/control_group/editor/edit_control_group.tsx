@@ -65,6 +65,7 @@ export const EditControlGroup = ({
             width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
             controlStyle={controlStyle ?? DEFAULT_CONTROL_STYLE}
             setAllWidths={false}
+            controlCount={Object.keys(panels ?? {}).length}
             updateControlStyle={setControlStyle}
             updateWidth={setDefaultControlWidth}
             updateAllControlWidths={setAllControlWidths}
@@ -86,7 +87,7 @@ export const EditControlGroup = ({
       closePopover();
     },
     icon: 'gear',
-    'data-test-subj': 'controls-sorting-button',
+    'data-test-subj': 'controls-settings-button',
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
