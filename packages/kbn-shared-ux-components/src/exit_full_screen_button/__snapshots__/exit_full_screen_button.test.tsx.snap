@@ -33,7 +33,19 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
   }
   platform={
     Object {
-      "setIsFullscreen": [MockFunction],
+      "setIsFullscreen": [MockFunction] {
+        "calls": Array [
+          Array [
+            false,
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
     }
   }
 >

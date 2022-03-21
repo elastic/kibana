@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DeleteJobCheckModal } from './delete_job_check_modal';
+export { setupLensChoroplethChart } from './choropleth_chart';
