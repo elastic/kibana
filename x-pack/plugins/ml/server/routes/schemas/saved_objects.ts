@@ -34,13 +34,13 @@ export const updateTrainedModelsSpaces = schema.object({
 });
 
 export const itemsAndCurrentSpace = schema.object({
-  jobType: itemTypeLiterals,
+  mlSavedObjectType: itemTypeLiterals,
   ids: schema.arrayOf(schema.string()),
 });
 
 export const syncJobObjects = schema.object({ simulate: schema.maybe(schema.boolean()) });
 
-export const syncCheckSchema = schema.object({ jobType: schema.maybe(schema.string()) });
+export const syncCheckSchema = schema.object({ mlSavedObjectType: schema.maybe(schema.string()) });
 
 export const canDeleteMLSpaceAwareItemsSchema = schema.object({
   /** List of job or trained model IDs. */
