@@ -23,6 +23,8 @@ import {
 
 import { ElasticsearchResources } from '../elasticsearch_resources';
 
+import { LanguageInstructions } from './language_instructions';
+
 export const ElasticsearchGuide: React.FC = () => {
   const languages = [
     { value: 'java', text: 'Java' },
@@ -89,9 +91,7 @@ export const ElasticsearchGuide: React.FC = () => {
                       onChange={(e) => onChange(e)}
                       aria-label="Use aria labels when no actual label is in use"
                     />
-                    <EuiLink href="#" external>
-                      Learn more about the Elasticsearch JavaScript client
-                    </EuiLink>
+                    <LanguageInstructions language={selectedLanguage} />
                   </>
                 ),
               },
