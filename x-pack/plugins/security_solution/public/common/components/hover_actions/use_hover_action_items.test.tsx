@@ -22,6 +22,7 @@ describe('useHoverActionItems', () => {
     defaultFocusedButtonRef: null,
     field: 'kibana.alert.rule.name',
     handleHoverActionClicked: jest.fn(),
+    hideAddToTimeline: false,
     hideTopN: false,
     isCaseView: false,
     isObjectArray: false,
@@ -272,6 +273,23 @@ describe('useHoverActionItems', () => {
       expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
         'hover-actions-show-top-n'
       );
+    });
+  });
+
+  test('when timeline button is disabled, it should not show', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          hideAddToTimeline: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      result.current.allActionItems.forEach((actionItem) => {
+        expect(actionItem.props['data-test-subj']).not.toEqual('hover-actions-add-timeline');
+      });
     });
   });
 });

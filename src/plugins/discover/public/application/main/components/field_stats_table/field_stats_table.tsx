@@ -25,7 +25,7 @@ import type { GetStateReturn } from '../../services/discover_state';
 import { AvailableFields$, DataRefetch$ } from '../../utils/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-  indexPattern: DataView;
+  dataView: DataView;
   savedSearch?: SavedSearch;
   query?: Query;
   visibleFieldNames?: string[];
@@ -148,7 +148,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
-        indexPattern,
+        dataView: indexPattern,
         savedSearch,
         query,
         filters,
@@ -194,7 +194,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
-            indexPattern,
+            dataView: indexPattern,
             savedSearch,
             query,
             showPreviewByDefault,

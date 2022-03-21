@@ -22,7 +22,7 @@ const getUISetting = (setting: string) => uiSettings[setting];
 export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getBasePath: () => '/base/path',
   getBasePathInterface: noop,
-  getDocLinkVersion: () => 'dockLinkVersion',
+  getDocLinkVersion: () => 'docLinkVersion',
   getElasticWebsiteUrl: () => 'https://elastic.co',
   getKibanaVersion: () => 'kibanaVersion',
   getHasWriteAccess: () => true,

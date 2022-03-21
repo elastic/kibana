@@ -8,10 +8,12 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "maps"],
   "requiredPlugins": [
+    "lens",
     "licensing",
     "features",
     "inspector",
     "data",
+    "fieldFormats",
     "fileUpload",
     "uiActions",
     "navigation",
