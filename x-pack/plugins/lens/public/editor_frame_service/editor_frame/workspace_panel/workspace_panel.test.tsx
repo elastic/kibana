@@ -29,7 +29,7 @@ import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from 'src/core/public/mocks';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
@@ -602,7 +602,7 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
-    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const indexPattern = { id: 'index1' } as unknown as DataView;
     const field = { name: 'myfield' } as unknown as FieldSpec;
 
     act(() => {

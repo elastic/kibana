@@ -102,6 +102,7 @@ export const ControlGroup = () => {
           borderRadius="m"
           color={panelBg}
           paddingSize={emptyState ? 's' : 'none'}
+          data-test-subj="controls-group-wrapper"
           className={classNames('controlsWrapper', {
             'controlsWrapper--empty': emptyState,
             'controlsWrapper--twoLine': controlStyle === 'twoLine',

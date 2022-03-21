@@ -44,6 +44,7 @@ export type SecurityNavKey =
   | SecurityPageName.administration
   | SecurityPageName.alerts
   | SecurityPageName.blocklist
+  | SecurityPageName.detectionAndResponse
   | SecurityPageName.case
   | SecurityPageName.endpoints
   | SecurityPageName.policies
