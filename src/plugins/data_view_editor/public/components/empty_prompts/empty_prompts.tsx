@@ -10,7 +10,7 @@ import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import { NoDataViewsComponent } from '@kbn/shared-ux-components';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody } from '@elastic/eui';
 import { useKibana } from '../../shared_imports';
 
 import { MatchedItem, DataViewEditorContext } from '../../types';
@@ -80,14 +80,16 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       // load data
       return (
         <>
-          <EmptyIndexListPrompt
-            onRefresh={loadSources}
-            closeFlyout={onCancel}
-            createAnyway={() => setGoToForm(true)}
-            canSaveIndexPattern={!!application.capabilities.indexPatterns.save}
-            navigateToApp={application.navigateToApp}
-            addDataUrl={docLinks.links.indexPatterns.introduction}
-          />
+          <EuiFlyoutBody>
+            <EmptyIndexListPrompt
+              onRefresh={loadSources}
+              closeFlyout={onCancel}
+              createAnyway={() => setGoToForm(true)}
+              canSaveIndexPattern={!!application.capabilities.indexPatterns.save}
+              navigateToApp={application.navigateToApp}
+              addDataUrl={docLinks.links.indexPatterns.introduction}
+            />
+          </EuiFlyoutBody>
           <PromptFooter onCancel={onCancel} />
         </>
       );
@@ -95,16 +97,18 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       // first time
       return (
         <>
-          <EuiFlexGroup justifyContent={'spaceAround'} direction={'column'}>
-            <EuiFlexItem grow={false}>
-              <NoDataViewsComponent
-                onClickCreate={() => setGoToForm(true)}
-                canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
-                dataViewsDocLink={docLinks.links.indexPatterns.introduction}
-                emptyPromptColor={'subdued'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFlyoutBody>
+            <EuiFlexGroup justifyContent={'spaceAround'} direction={'column'}>
+              <EuiFlexItem grow={false}>
+                <NoDataViewsComponent
+                  onClickCreate={() => setGoToForm(true)}
+                  canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
+                  dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+                  emptyPromptColor={'subdued'}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutBody>
           <PromptFooter onCancel={onCancel} />
         </>
       );
