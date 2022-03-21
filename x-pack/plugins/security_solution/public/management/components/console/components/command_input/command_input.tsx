@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import { KeyCapture, KeyCaptureProps } from './key_capture';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 
 const CommandInputContainer = styled.div`
   .prompt {
@@ -60,7 +61,7 @@ export const CommandInput = memo<CommandInputProps>(
     const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
     const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
     const textDisplayRef = useRef<HTMLDivElement | null>(null);
-    const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
+    const getTestId = useTestIdGenerator(useDataTestSubj());
 
     const keyCaptureFocusRef = focusRef || _focusRef;
 
@@ -116,13 +117,13 @@ export const CommandInput = memo<CommandInputProps>(
           justifyContent="flexStart"
           ref={textDisplayRef}
         >
-          <EuiFlexItem grow={false} data-test-subj={getTestId('prompt')}>
+          <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
             <span className="eui-displayInlineBlock prompt">{prompt}</span>
           </EuiFlexItem>
           <EuiFlexItem
             className="textEntered"
             grow={false}
-            data-test-subj={getTestId('userTextInput')}
+            data-test-subj={getTestId('cmdInput-userTextInput')}
           >
             {textEntered}
           </EuiFlexItem>
@@ -134,7 +135,6 @@ export const CommandInput = memo<CommandInputProps>(
           onCapture={handleKeyCapture}
           focusRef={keyCaptureFocusRef}
           onStateChange={handleKeyCaptureOnStateChange}
-          data-test-subj={getTestId('keyCapture')}
         />
       </CommandInputContainer>
     );

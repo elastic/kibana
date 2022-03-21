@@ -68,7 +68,7 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     cmd,
     { inputOnly = false, useKeyboard = false } = {}
   ) => {
-    const keyCaptureInput = renderResult.getByTestId('test-cmdInput-keyCapture-input');
+    const keyCaptureInput = renderResult.getByTestId('test-keyCapture-input');
 
     act(() => {
       if (useKeyboard) {
