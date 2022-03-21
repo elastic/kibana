@@ -233,6 +233,7 @@ export async function getSavedVisualization(
     saved_object: resp,
     outcome,
     alias_target_id: aliasTargetId,
+    alias_purpose: aliasPurpose,
   } = await services.savedObjectsClient.resolve<SavedObjectAttributes>(SAVED_VIS_TYPE, id);
 
   if (!resp._version) {
@@ -254,6 +255,7 @@ export async function getSavedVisualization(
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,
     outcome,
+    aliasPurpose,
     errorJSON:
       outcome === 'conflict' && services.spaces
         ? JSON.stringify({

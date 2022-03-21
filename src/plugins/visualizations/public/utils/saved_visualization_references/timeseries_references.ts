@@ -8,7 +8,7 @@
 
 import { SavedObjectReference } from '../../../../../core/types';
 import { VisParams } from '../../../common';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../data_views/common';
 
 /** @internal **/
 const REF_NAME_POSTFIX = '_ref_name';
@@ -49,7 +49,7 @@ export const extractTimeSeriesReferences = (
         object[key + REF_NAME_POSTFIX] = name;
         references.push({
           name,
-          type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+          type: DATA_VIEW_SAVED_OBJECT_TYPE,
           id: object[key].id,
         });
         delete object[key];

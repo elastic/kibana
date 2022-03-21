@@ -38,6 +38,7 @@ interface EditControlGroupProps {
   width: ControlWidth;
   controlStyle: ControlStyle;
   setAllWidths: boolean;
+  controlCount: number;
   updateControlStyle: (controlStyle: ControlStyle) => void;
   updateWidth: (newWidth: ControlWidth) => void;
   updateAllControlWidths: (newWidth: ControlWidth) => void;
@@ -49,6 +50,7 @@ export const ControlGroupEditor = ({
   width,
   controlStyle,
   setAllWidths,
+  controlCount,
   updateControlStyle,
   updateWidth,
   updateAllControlWidths,
@@ -66,12 +68,13 @@ export const ControlGroupEditor = ({
           <h2>{ControlGroupStrings.management.getFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="control-group-settings-flyout">
         <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
           <EuiButtonGroup
             color="primary"
             idSelected={currentControlStyle}
             legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
+            data-test-subj="control-group-layout-options"
             options={CONTROL_LAYOUT_OPTIONS}
             onChange={(newControlStyle: string) => {
               setCurrentControlStyle(newControlStyle as ControlStyle);
@@ -84,33 +87,39 @@ export const ControlGroupEditor = ({
             color="primary"
             idSelected={currentWidth}
             legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+            data-test-subj="control-group-default-size-options"
             options={CONTROL_WIDTH_OPTIONS}
             onChange={(newWidth: string) => {
               setCurrentWidth(newWidth as ControlWidth);
             }}
           />
         </EuiFormRow>
-        <EuiSpacer size="s" />
-        <EuiCheckbox
-          id="editControls_setAllSizesCheckbox"
-          label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-          checked={applyToAll}
-          onChange={(e) => {
-            setApplyToAll(e.target.checked);
-          }}
-        />
-        <EuiSpacer size="l" />
-
-        <EuiButtonEmpty
-          onClick={onCancel}
-          aria-label={'delete-all'}
-          iconType="trash"
-          color="danger"
-          flush="left"
-          size="s"
-        >
-          {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-        </EuiButtonEmpty>
+        {controlCount > 0 ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCheckbox
+              id="editControls_setAllSizesCheckbox"
+              data-test-subj="set-all-control-sizes-checkbox"
+              label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
+              checked={applyToAll}
+              onChange={(e) => {
+                setApplyToAll(e.target.checked);
+              }}
+            />
+            <EuiSpacer size="l" />
+            <EuiButtonEmpty
+              onClick={onCancel}
+              aria-label={'delete-all'}
+              data-test-subj="delete-all-controls-button"
+              iconType="trash"
+              color="danger"
+              flush="left"
+              size="s"
+            >
+              {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+            </EuiButtonEmpty>
+          </>
+        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
@@ -130,6 +139,7 @@ export const ControlGroupEditor = ({
               aria-label={`save-group`}
               iconType="check"
               color="primary"
+              data-test-subj="control-group-editor-save"
               onClick={() => {
                 if (currentControlStyle && currentControlStyle !== controlStyle) {
                   updateControlStyle(currentControlStyle);

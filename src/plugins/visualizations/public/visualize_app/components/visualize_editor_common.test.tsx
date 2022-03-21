@@ -100,6 +100,7 @@ describe('VisualizeEditorCommon', () => {
               sharingSavedObjectProps: {
                 outcome: 'aliasMatch',
                 aliasTargetId: 'alias_id',
+                aliasPurpose: 'savedObjectConversion',
               },
             },
             vis: {
@@ -111,10 +112,11 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-      '#/edit/alias_id?_g=test',
-      'TSVB visualization'
-    );
+    expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/edit/alias_id?_g=test',
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'TSVB visualization',
+    });
   });
 
   it('should display a warning callout for new heatmap implementation with split aggs', async () => {
