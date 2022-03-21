@@ -214,14 +214,14 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForDelete(undefined);
     }, []);
 
-    const handleArtifactFlyoutOnClose = useCallback(() => {
-      setSelectedItemForEdit(undefined);
-    }, []);
-
     const handleArtifactFlyoutOnSuccess = useCallback(() => {
       setSelectedItemForEdit(undefined);
       refetchListData();
     }, [refetchListData]);
+
+    const handleArtifactFlyoutOnClose = useCallback(() => {
+      setSelectedItemForEdit(undefined);
+    }, []);
 
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
@@ -255,6 +255,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             labels={labels}
             size={flyoutSize}
             submitHandler={onFormSubmit}
+            policies={policiesRequest.data?.items || []}
+            policiesIsLoading={policiesRequest.isLoading}
             data-test-subj={getTestId('flyout')}
           />
         )}

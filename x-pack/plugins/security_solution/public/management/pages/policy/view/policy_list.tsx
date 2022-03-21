@@ -23,7 +23,12 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { PolicyData } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
-import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import {
+  useGetAgentCountForPolicy,
+  useGetEndpointSpecificPolicies,
+} from '../../../services/policies/hooks';
+import { AgentPolicy } from '../../../../../../fleet/common';
+import { PolicyEndpointListLink } from '../../../components/policy_endpoint_list_link';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -33,6 +38,21 @@ export const PolicyList = memo(() => {
     page: pagination.page,
     perPage: pagination.pageSize,
   });
+
+  // endpoint count per policy
+  const policyIds = data?.items.map((policies) => policies.id) ?? [];
+  const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
+    policyIds,
+    customQueryOptions: { enabled: policyIds.length > 0 },
+  });
+
+  const policyIdToEndpointCount = useMemo(() => {
+    const map = new Map<AgentPolicy['package_policies'][number], number>();
+    for (const policy of endpointCount?.items) {
+      map.set(policy.package_policies[0], policy.agents ?? 0);
+    }
+    return map;
+  }, [endpointCount]);
 
   const totalItemCount = data?.total ?? 0;
 
@@ -131,10 +151,23 @@ export const PolicyList = memo(() => {
         },
       },
       {
-        field: '-',
+        field: '',
         name: i18n.translate('xpack.securitySolution.policy.list.endpoints', {
           defaultMessage: 'Endpoints',
         }),
+        dataType: 'number',
+        width: '8%',
+        render: (policy: PolicyData) => {
+          return (
+            <PolicyEndpointListLink
+              className="eui-textTruncate"
+              data-test-subj="policyEndpointCountLink"
+              policyId={policy.id}
+            >
+              {policyIdToEndpointCount.get(policy.id)}
+            </PolicyEndpointListLink>
+          );
+        },
       },
       {
         field: '-',
@@ -143,7 +176,7 @@ export const PolicyList = memo(() => {
         }),
       },
     ];
-  }, []);
+  }, [policyIdToEndpointCount]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {

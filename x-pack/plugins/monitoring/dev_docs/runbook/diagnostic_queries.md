@@ -16,19 +16,39 @@ POST .monitoring-*/_search
     "clusters": {
       "terms": {
         "field": "cluster_uuid",
-        "size": 1000
+        "size": 100
       },
       "aggs": {
         "indices": {
           "terms": {
             "field": "_index",
-            "size": 1000
+            "size": 100
           },
           "aggs": {
-            "documentTypes": {
+            "types": {
               "terms": {
                 "field": "type",
-                "size": 1000
+                "size": 100
+              },
+              "aggs": {
+                "latest_timestamp": {
+                  "max": {
+                    "field": "timestamp"
+                  }
+                }
+              }
+            },
+            "metricset_names": {
+              "terms": {
+                "field": "metricset.name",
+                "size": 100
+              },
+              "aggs": {
+                "latest_timestamp": {
+                  "max": {
+                    "field": "timestamp"
+                  }
+                }
               }
             }
           }

@@ -34,7 +34,13 @@ describe('renderApp', () => {
       data: {
         query: {
           timefilter: {
-            timefilter: { setTime: jest.fn(), getTime: jest.fn().mockImplementation(() => ({})) },
+            timefilter: {
+              setTime: jest.fn(),
+              getTime: jest.fn().mockReturnValue({}),
+              getTimeDefaults: jest.fn().mockReturnValue({}),
+              getRefreshInterval: jest.fn().mockReturnValue({}),
+              getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+            },
           },
         },
       },

@@ -1,0 +1,142 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticAgentCardComponent props button 1`] = `
+<RedirectAppLinks
+  currentAppId$={
+    Observable {
+      "_isScalar": false,
+      "source": Subject {
+        "_isScalar": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
+  navigateToUrl={[MockFunction]}
+>
+  <NoDataCard
+    button="Button"
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    image="test-file-stub"
+    title="Add Elastic Agent"
+  />
+</RedirectAppLinks>
+`;
+
+exports[`ElasticAgentCardComponent props href 1`] = `
+<RedirectAppLinks
+  currentAppId$={
+    Observable {
+      "_isScalar": false,
+      "source": Subject {
+        "_isScalar": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
+  navigateToUrl={[MockFunction]}
+>
+  <NoDataCard
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    href="some path"
+    image="test-file-stub"
+    title="Add Elastic Agent"
+  />
+</RedirectAppLinks>
+`;
+
+exports[`ElasticAgentCardComponent props recommended 1`] = `
+<RedirectAppLinks
+  currentAppId$={
+    Observable {
+      "_isScalar": false,
+      "source": Subject {
+        "_isScalar": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
+  navigateToUrl={[MockFunction]}
+>
+  <NoDataCard
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    image="test-file-stub"
+    recommended={true}
+    title="Add Elastic Agent"
+  />
+</RedirectAppLinks>
+`;
+
+exports[`ElasticAgentCardComponent renders 1`] = `
+<RedirectAppLinks
+  currentAppId$={
+    Observable {
+      "_isScalar": false,
+      "source": Subject {
+        "_isScalar": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
+  navigateToUrl={[MockFunction]}
+>
+  <NoDataCard
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    image="test-file-stub"
+    title="Add Elastic Agent"
+  />
+</RedirectAppLinks>
+`;
+
+exports[`ElasticAgentCardComponent renders with canAccessFleet false 1`] = `
+<RedirectAppLinks
+  currentAppId$={
+    Observable {
+      "_isScalar": false,
+      "source": Subject {
+        "_isScalar": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
+  navigateToUrl={[MockFunction]}
+>
+  <NoDataCard
+    description={
+      <EuiTextColor
+        color="default"
+      >
+        This integration is not yet enabled. Your administrator has the required permissions to turn it on.
+      </EuiTextColor>
+    }
+    image="test-file-stub"
+    isDisabled={true}
+    title={
+      <EuiTextColor
+        color="default"
+      >
+        Contact your administrator
+      </EuiTextColor>
+    }
+  />
+</RedirectAppLinks>
+`;

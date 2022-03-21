@@ -747,6 +747,7 @@ describe('Execution', () => {
             help: '',
             multi: true,
             options: ['valid'],
+            strict: true,
           },
         },
         help: '',

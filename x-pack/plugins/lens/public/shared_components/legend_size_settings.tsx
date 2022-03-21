@@ -12,10 +12,10 @@ import { TooltipWrapper } from './tooltip_wrapper';
 
 export enum LegendSizes {
   AUTO = '0',
-  SMALL = '50',
-  MEDIUM = '100',
-  LARGE = '150',
-  EXTRA_LARGE = '200',
+  SMALL = '80',
+  MEDIUM = '130',
+  LARGE = '180',
+  EXTRA_LARGE = '230',
 }
 
 interface LegendSizeSettingsProps {

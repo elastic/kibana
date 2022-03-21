@@ -10,7 +10,7 @@ import { HttpFetchQuery } from 'kibana/public';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { useMlKibana } from '../../contexts/kibana';
-import {
+import type {
   TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,

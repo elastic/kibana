@@ -9,9 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { AlertType } from '../../../../../common/alert_types';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
@@ -67,8 +64,6 @@ export function LatencyChart({ height, kuery }: Props) {
     });
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
-
-  const { alerts } = useApmServiceContext();
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     ApmMlDetectorType.txLatency
@@ -137,13 +132,6 @@ export function LatencyChart({ height, kuery }: Props) {
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={preferredAnomalyTimeseries}
-          alerts={alerts.filter(
-            (alert) =>
-              alert[ALERT_RULE_TYPE_ID]?.[0] ===
-                AlertType.TransactionDuration ||
-              alert[ALERT_RULE_TYPE_ID]?.[0] ===
-                AlertType.TransactionDurationAnomaly
-          )}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -3866,30 +3866,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.HttpServiceSetup.auth",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "auth",
-            "description": [
-              "\nAuth status.\nSee {@link HttpAuth}\n"
-            ],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.HttpAuth",
-                "text": "HttpAuth"
-              }
-            ],
-            "path": "src/core/server/http/types.ts",
-            "deprecated": true,
-            "references": []
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-server.HttpServiceSetup.csp",
             "type": "Object",
             "tags": [],

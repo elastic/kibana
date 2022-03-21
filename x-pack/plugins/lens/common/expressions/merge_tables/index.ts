@@ -50,14 +50,16 @@ export const mergeTables: ExpressionFunctionDefinition<
   inputTypes: ['kibana_context', 'null'],
   fn(input, { layerIds, tables }, context) {
     const resultTables: Record<string, Datatable> = {};
+
+    if (context.inspectorAdapters?.tables) {
+      context.inspectorAdapters.tables.reset();
+      context.inspectorAdapters.tables.allowCsvExport = true;
+    }
+
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
-      // adapter is always defined at that point because we make sure by the beginning of the function
-      if (context?.inspectorAdapters?.tables) {
-        context.inspectorAdapters.tables.allowCsvExport = true;
-        context.inspectorAdapters.tables.logDatatable(layerIds[index], table);
-      }
     });
+
     return {
       type: 'lens_multitable',
       tables: resultTables,

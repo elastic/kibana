@@ -36,6 +36,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   }),
   URL: '/app/enterprise_search/content',
   LOGO: 'logoEnterpriseSearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
 export const APP_SEARCH_PLUGIN = {

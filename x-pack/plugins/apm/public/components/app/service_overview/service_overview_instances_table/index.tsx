@@ -137,7 +137,7 @@ export function ServiceOverviewInstancesTable({
     pageIndex,
     pageSize: PAGE_SIZE,
     totalItemCount: mainStatsItemCount,
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
   };
 
   return (

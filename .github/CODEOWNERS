@@ -118,7 +118,11 @@
 /x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
 
 # Fleet
+/fleet_packages.json @elastic/fleet
 /x-pack/plugins/fleet/ @elastic/fleet
+/x-pack/test/fleet_api_integration @elastic/fleet
+/x-pack/test/fleet_cypress @elastic/fleet
+/x-pack/test/fleet_functional @elastic/fleet
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
