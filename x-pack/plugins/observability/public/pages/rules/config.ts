@@ -26,9 +26,9 @@ export const statusMap: Status = {
     color: 'default',
     label: 'Disabled',
   },
-  [RuleStatus.muted]: {
+  [RuleStatus.snoozed]: {
     color: 'warning',
-    label: 'Muted',
+    label: 'Snoozed',
   },
 };
 

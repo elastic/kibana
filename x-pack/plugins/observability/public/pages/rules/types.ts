@@ -16,7 +16,7 @@ export interface StatusProps {
 export enum RuleStatus {
   enabled = 'enabled',
   disabled = 'disabled',
-  muted = 'muted',
+  snoozed = 'snoozed',
 }
 
 export type Status = Record<

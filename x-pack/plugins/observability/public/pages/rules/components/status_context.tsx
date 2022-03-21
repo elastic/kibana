@@ -31,7 +31,7 @@ export function StatusContext({
 
   let currentStatus: RuleStatus;
   if (item.enabled) {
-    currentStatus = item.muteAll ? RuleStatus.muted : RuleStatus.enabled;
+    currentStatus = item.muteAll ? RuleStatus.snoozed : RuleStatus.enabled;
   } else {
     currentStatus = RuleStatus.disabled;
   }
@@ -53,7 +53,7 @@ export function StatusContext({
           }
         } else if (status === RuleStatus.disabled) {
           await disableRule({ ...item, enabled: false });
-        } else if (status === RuleStatus.muted) {
+        } else if (status === RuleStatus.snoozed) {
           await muteRule({ ...item, muteAll: true });
         }
         setIsUpdating(false);
@@ -79,7 +79,7 @@ export function StatusContext({
           icon={status === currentStatus ? 'check' : 'empty'}
           key={status}
           onClick={() => onContextMenuItemClick(status)}
-          disabled={status === RuleStatus.muted && currentStatus === RuleStatus.disabled}
+          disabled={status === RuleStatus.snoozed && currentStatus === RuleStatus.disabled}
         >
           {statusMap[status].label}
         </EuiContextMenuItem>
