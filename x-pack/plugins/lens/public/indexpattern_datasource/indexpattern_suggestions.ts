@@ -179,7 +179,8 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
   indexPattern: IndexPattern,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer | undefined {
-  const { timeFieldName, splitMode, splitFilters, metrics, timeInterval } = layer;
+  const { timeFieldName, splitMode, splitFilters, metrics, timeInterval, dropPartialBuckets } =
+    layer;
   const dateField = indexPattern.getFieldByName(timeFieldName!);
 
   const splitFields = layer.splitFields
@@ -217,6 +218,7 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
       visualizationGroups: [],
       columnParams: {
         interval: timeInterval,
+        dropPartials: dropPartialBuckets,
       },
     });
   }

@@ -24,7 +24,7 @@ export const setMonitor = async ({
 }: {
   monitor: SyntheticsMonitor;
   id?: string;
-}): Promise<ServiceLocationErrors> => {
+}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {

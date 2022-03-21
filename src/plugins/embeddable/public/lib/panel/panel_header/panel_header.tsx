@@ -131,7 +131,6 @@ export function PanelHeader({
   const showPanelBar =
     !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle || description;
   const classes = classNames('embPanel__header', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
   const placeholderTitle = i18n.translate('embeddableApi.panel.placeholderTitle', {

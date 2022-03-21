@@ -14,6 +14,9 @@ const mockClusterBuckets: ClusterBucket[] = [
     benchmarks: {
       buckets: [{ key: 'CIS Kubernetes', doc_count: 10 }],
     },
+    timestamps: {
+      buckets: [{ key: 123, doc_count: 1 }],
+    },
     failed_findings: {
       doc_count: 6,
     },
@@ -53,6 +56,7 @@ describe('getClustersFromAggs', () => {
     expect(clusters).toEqual([
       {
         meta: {
+          lastUpdate: 123,
           clusterId: 'cluster_id',
           benchmarkName: 'CIS Kubernetes',
         },

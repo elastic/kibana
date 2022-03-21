@@ -55,8 +55,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         return eventLog.findEventsBySavedObjectIds(soType, soIds, {
           page: 1,
           per_page: count,
-          sort_field: '@timestamp',
-          sort_order: 'desc',
+          sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
           filter: kqlFilter,
         });
       });

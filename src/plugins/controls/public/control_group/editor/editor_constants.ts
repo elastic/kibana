@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ControlWidth } from '../../types';
+import { ControlStyle, ControlWidth } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 
 export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'auto';
+export const DEFAULT_CONTROL_STYLE: ControlStyle = 'oneLine';
 
 export const CONTROL_WIDTH_OPTIONS = [
   {
@@ -37,10 +38,12 @@ export const CONTROL_WIDTH_OPTIONS = [
 export const CONTROL_LAYOUT_OPTIONS = [
   {
     id: `oneLine`,
+    'data-test-subj': 'control-editor-layout-oneLine',
     label: ControlGroupStrings.management.controlStyle.getSingleLineTitle(),
   },
   {
     id: `twoLine`,
+    'data-test-subj': 'control-editor-layout-twoLine',
     label: ControlGroupStrings.management.controlStyle.getTwoLineTitle(),
   },
 ];

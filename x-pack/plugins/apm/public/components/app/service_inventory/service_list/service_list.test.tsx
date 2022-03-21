@@ -21,6 +21,7 @@ const query = {
   rangeTo: 'now',
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
+  serviceGroup: '',
 };
 
 const service: any = {

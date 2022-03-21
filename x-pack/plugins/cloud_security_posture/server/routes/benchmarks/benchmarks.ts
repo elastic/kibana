@@ -8,37 +8,23 @@ import { uniq, map } from 'lodash';
 import type { IRouter, SavedObjectsClientContract } from 'src/core/server';
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { string } from 'io-ts';
-import {
+import type {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
   AgentService,
 } from '../../../../fleet/server';
-import { GetAgentPoliciesResponseItem, PackagePolicy, AgentPolicy } from '../../../../fleet/common';
+import type {
+  GetAgentPoliciesResponseItem,
+  PackagePolicy,
+  AgentPolicy,
+  ListResult,
+} from '../../../../fleet/common';
 import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
-
-// TODO: use the same method from common/ once PR 106 is merged
-export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
-  v !== null && v !== undefined;
+import type { Benchmark } from '../../../common/types';
+import { isNonNullable } from '../../../common/utils/helpers';
 
 type BenchmarksQuerySchema = TypeOf<typeof benchmarksInputSchema>;
-
-export interface Benchmark {
-  package_policy: Pick<
-    PackagePolicy,
-    | 'id'
-    | 'name'
-    | 'policy_id'
-    | 'namespace'
-    | 'package'
-    | 'updated_at'
-    | 'updated_by'
-    | 'created_at'
-    | 'created_by'
-  >;
-  agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
-}
 
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
@@ -46,31 +32,29 @@ export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): string => {
   const integrationNameQuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
   const kquery = benchmarkFilter
-    ? `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
+    ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
     : integrationNameQuery;
 
   return kquery;
 };
 
-export const getPackagePolicies = async (
+export const getPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
   queryParams: BenchmarksQuerySchema
-): Promise<PackagePolicy[]> => {
+): Promise<ListResult<PackagePolicy>> => {
   if (!packagePolicyService) {
     throw new Error('packagePolicyService is undefined');
   }
 
-  const packageNameQuery = getPackageNameQuery(packageName, queryParams.benchmark_name);
-
-  const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
-    kuery: packageNameQuery,
+  return packagePolicyService?.list(soClient, {
+    kuery: getPackageNameQuery(packageName, queryParams.benchmark_name),
     page: queryParams.page,
     perPage: queryParams.per_page,
-  })) ?? { items: [] as PackagePolicy[] };
-
-  return packagePolicies;
+    sortField: queryParams.sort_field,
+    sortOrder: queryParams.sort_order,
+  });
 };
 
 export const getAgentPolicies = async (
@@ -133,16 +117,20 @@ const createBenchmarks = (
   agentPolicies: GetAgentPoliciesResponseItem[],
   packagePolicies: PackagePolicy[]
 ): Benchmark[] =>
-  agentPolicies
-    .flatMap((agentPolicy) =>
-      agentPolicy.package_policies.map((agentPackagePolicy) => {
-        const id = string.is(agentPackagePolicy) ? agentPackagePolicy : agentPackagePolicy.id;
-        const packagePolicy = packagePolicies.find((pkgPolicy) => pkgPolicy.id === id);
-        if (!packagePolicy) return;
-        return createBenchmarkEntry(agentPolicy, packagePolicy);
+  packagePolicies.flatMap((packagePolicy) => {
+    return agentPolicies
+      .map((agentPolicy) => {
+        const agentPkgPolicies = agentPolicy.package_policies as string[];
+        const isExistsOnAgent = agentPkgPolicies.find(
+          (pkgPolicy) => pkgPolicy === packagePolicy.id
+        );
+        if (isExistsOnAgent) {
+          return createBenchmarkEntry(agentPolicy, packagePolicy);
+        }
+        return;
       })
-    )
-    .filter(isNonNullable);
+      .filter(isNonNullable);
+  });
 
 export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
@@ -170,12 +158,19 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
           query
         );
 
-        const agentPolicies = await getAgentPolicies(soClient, packagePolicies, agentPolicyService);
+        const agentPolicies = await getAgentPolicies(
+          soClient,
+          packagePolicies.items,
+          agentPolicyService
+        );
         const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
-        const benchmarks = createBenchmarks(enrichAgentPolicies, packagePolicies);
+        const benchmarks = createBenchmarks(enrichAgentPolicies, packagePolicies.items);
 
         return response.ok({
-          body: benchmarks,
+          body: {
+            ...packagePolicies,
+            items: benchmarks,
+          },
         });
       } catch (err) {
         const error = transformError(err);
@@ -197,6 +192,32 @@ export const benchmarksInputSchema = rt.object({
    * The number of objects to include in each page
    */
   per_page: rt.number({ defaultValue: DEFAULT_BENCHMARKS_PER_PAGE, min: 0 }),
+  /**
+   *  Once of PackagePolicy fields for sorting the found objects.
+   *  Sortable fields: id, name, policy_id, namespace, updated_at, updated_by, created_at, created_by,
+   *  package.name,  package.title, package.version
+   */
+  sort_field: rt.maybe(
+    rt.oneOf(
+      [
+        rt.literal('id'),
+        rt.literal('name'),
+        rt.literal('policy_id'),
+        rt.literal('namespace'),
+        rt.literal('updated_at'),
+        rt.literal('updated_by'),
+        rt.literal('created_at'),
+        rt.literal('created_by'),
+        rt.literal('package.name'),
+        rt.literal('package.title'),
+      ],
+      { defaultValue: 'name' }
+    )
+  ),
+  /**
+   * The order to sort by
+   */
+  sort_order: rt.oneOf([rt.literal('asc'), rt.literal('desc')], { defaultValue: 'desc' }),
   /**
    * Benchmark filter
    */

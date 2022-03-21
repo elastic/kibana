@@ -86,6 +86,13 @@ export const aggHistogram = (): FunctionDefinition => ({
         defaultMessage: 'Calculate interval to get approximately this many bars',
       }),
     },
+    autoExtendBounds: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.histogram.autoExtendBounds.help', {
+        defaultMessage:
+          'Set to true to extend bounds to the domain of the data. This makes sure each interval bucket within these bounds will create a separate table row',
+      }),
+    },
     has_extended_bounds: {
       types: ['boolean'],
       help: i18n.translate('data.search.aggs.buckets.histogram.hasExtendedBounds.help', {

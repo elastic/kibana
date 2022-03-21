@@ -183,7 +183,10 @@ export class UploadLicense extends React.PureComponent {
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty {...reactRouterNavigate(history, '/home')}>
+                <EuiButtonEmpty
+                  data-test-subj="cancelUploadButton"
+                  {...reactRouterNavigate(history, '/home')}
+                >
                   <FormattedMessage
                     id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                     defaultMessage="Cancel"

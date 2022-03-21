@@ -112,5 +112,24 @@ describe('Color Format', () => {
 
       expect(converter('<', HTML_CONTEXT_TYPE)).toBe('&lt;');
     });
+
+    test('returns original value (escaped) on regex with syntax error', () => {
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'string',
+          colors: [
+            {
+              regex: 'nogroup(',
+              text: 'blue',
+              background: 'yellow',
+            },
+          ],
+        },
+        jest.fn()
+      );
+      const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
+
+      expect(converter('<', HTML_CONTEXT_TYPE)).toBe('&lt;');
+    });
   });
 });

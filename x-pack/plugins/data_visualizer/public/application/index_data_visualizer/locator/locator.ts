@@ -23,9 +23,9 @@ export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
   savedSearchId?: string;
 
   /**
-   * Optionally set index pattern ID.
+   * Optionally set data view ID.
    */
-  indexPatternId?: string;
+  dataViewId?: string;
 
   /**
    * Optionally set the time range in the time picker.
@@ -89,7 +89,7 @@ export class IndexDataVisualizerLocatorDefinition
 
   public readonly getLocation = async (params: IndexDataVisualizerLocatorParams) => {
     const {
-      indexPatternId,
+      dataViewId,
       query,
       refreshInterval,
       savedSearchId,
@@ -158,7 +158,7 @@ export class IndexDataVisualizerLocatorDefinition
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     const urlState: Dictionary<any> = {
-      ...(savedSearchId ? { savedSearchId } : { index: indexPatternId }),
+      ...(savedSearchId ? { savedSearchId } : { index: dataViewId }),
       ...(searchSessionId ? { searchSessionId } : {}),
       _a: { DATA_VISUALIZER_INDEX_VIEWER: appState },
       _g: queryState,

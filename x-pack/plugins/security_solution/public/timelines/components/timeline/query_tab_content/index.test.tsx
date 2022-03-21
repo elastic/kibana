@@ -34,6 +34,9 @@ jest.mock('../../../containers/index', () => ({
 jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
+}));
 jest.mock('../body/events/index', () => ({
   Events: () => <></>,
 }));
@@ -61,7 +64,9 @@ jest.mock('../../../../common/lib/kibana', () => {
           getUrlForApp: jest.fn(),
         },
         cases: {
-          getCasesContext: () => mockCasesContext,
+          ui: {
+            getCasesContext: () => mockCasesContext,
+          },
         },
         uiSettings: {
           get: jest.fn(),

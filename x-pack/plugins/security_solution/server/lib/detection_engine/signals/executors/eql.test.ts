@@ -31,14 +31,13 @@ describe('eql_executor', () => {
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
-  const searchAfterSize = 7;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
     logger = loggingSystemMock.createLogger();
-    alertServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValue({
+    alertServices.scopedClusterClient.asCurrentUser.eql.search.mockResolvedValue({
       hits: {
-        total: { value: 10 },
+        total: { relation: 'eq', value: 10 },
         events: [],
       },
     });
@@ -55,7 +54,6 @@ describe('eql_executor', () => {
         services: alertServices,
         version,
         logger,
-        searchAfterSize,
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),

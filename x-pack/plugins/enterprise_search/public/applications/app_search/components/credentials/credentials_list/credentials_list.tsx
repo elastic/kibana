@@ -152,7 +152,7 @@ export const CredentialsList: React.FC = () => {
       loading={!isCredentialsDataComplete}
       pagination={{
         ...convertMetaToPagination(meta),
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       }}
       onChange={handlePageChange(onPaginate)}
     />

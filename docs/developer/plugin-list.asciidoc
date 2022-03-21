@@ -523,8 +523,8 @@ newly created modules as well.
 Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring[monitoring]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/monitoring/readme.md[monitoring]
+|This plugin provides the Stack Monitoring kibana application.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection/README.md[monitoringCollection]

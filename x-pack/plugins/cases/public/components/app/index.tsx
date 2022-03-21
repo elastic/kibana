@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { APP_OWNER } from '../../../common/constants';
+import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 
-import { getCasesLazy } from '../../methods';
 import { Wrapper } from '../wrappers';
 import { CasesRoutesProps } from './types';
 
@@ -23,9 +23,9 @@ const CasesAppComponent: React.FC = () => {
       {getCasesLazy({
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
-        userCanCrud: userCapabilities.crud,
+        userCanCrud: userCapabilities.generalCases.crud,
         basePath: '/',
-        features: { alerts: { sync: false } },
+        features: { alerts: { enabled: false } },
         releasePhase: 'experimental',
       })}
     </Wrapper>

@@ -34,7 +34,7 @@ import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useFieldBrowserOptions, CreateFieldEditorActions } from '../../../fields_browser';
+import { useFieldBrowserOptions, FieldEditorActions } from '../../../fields_browser';
 
 export interface ColumnHeadersComponentProps {
   actionsColumnWidth: number;
@@ -103,7 +103,7 @@ export const ColumnHeadersComponent = ({
   trailingControlColumns,
 }: ColumnHeadersComponentProps) => {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const fieldEditorActionsRef = useRef<CreateFieldEditorActions>(null);
+  const fieldEditorActionsRef = useRef<FieldEditorActions>(null);
 
   useEffect(() => {
     return () => {

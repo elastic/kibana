@@ -20,7 +20,6 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useTimeRange } from '../../hooks/use_time_range';
 import { useAlertIndexNames } from '../../hooks/use_alert_index_names';
 import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
@@ -32,6 +31,8 @@ import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alert
 import { SectionContainer } from '../../components/app/section';
 import { ObservabilityAppServices } from '../../application/types';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { paths } from '../../config';
+import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -54,32 +55,25 @@ export function OverviewPage({ routeParams }: Props) {
   ]);
 
   const indexNames = useAlertIndexNames();
+  const { cases, docLinks, http } = useKibana<ObservabilityAppServices>().services;
+  const { ObservabilityPageTemplate, config } = usePluginContext();
 
-  const { core, ObservabilityPageTemplate } = usePluginContext();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, refreshInterval, refreshPaused } =
+    useDatePickerContext();
 
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
-
-  const relativeTime = { start: relativeStart, end: relativeEnd };
-  const absoluteTime = { start: absoluteStart, end: absoluteEnd };
-
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
+  const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
-  const bucketSize = calculateBucketSize({
-    start: absoluteTime.start,
-    end: absoluteTime.end,
-  });
-
-  const bucketSizeValue = useMemo(() => {
-    if (bucketSize?.bucketSize) {
-      return {
-        bucketSize: bucketSize.bucketSize,
-        intervalString: bucketSize.intervalString,
-      };
-    }
-  }, [bucketSize?.bucketSize, bucketSize?.intervalString]);
+  const bucketSize = useMemo(
+    () =>
+      calculateBucketSize({
+        start: absoluteStart,
+        end: absoluteEnd,
+      }),
+    [absoluteStart, absoluteEnd]
+  );
 
   const setRefetch = useCallback((ref) => {
     refetch.current = ref;
@@ -89,8 +83,7 @@ export function OverviewPage({ routeParams }: Props) {
     return refetch.current && refetch.current();
   }, []);
 
-  const kibana = useKibana<ObservabilityAppServices>();
-  const CasesContext = kibana.services.cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (hasAnyData === undefined) {
@@ -101,11 +94,13 @@ export function OverviewPage({ routeParams }: Props) {
 
   const noDataConfig = getNoDataConfig({
     hasData,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
-  const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
+  const alertsLink = config.unsafe.alertingExperience.enabled
+    ? paths.observability.alerts
+    : paths.management.rules;
 
   return (
     <ObservabilityPageTemplate
@@ -116,8 +111,8 @@ export function OverviewPage({ routeParams }: Props) {
               pageTitle: overviewPageTitle,
               rightSideItems: [
                 <DatePicker
-                  rangeFrom={relativeTime.start}
-                  rangeTo={relativeTime.end}
+                  rangeFrom={relativeStart}
+                  rangeTo={relativeEnd}
                   refreshInterval={refreshInterval}
                   refreshPaused={refreshPaused}
                   onTimeRangeRefresh={onTimeRangeRefresh}
@@ -137,6 +132,13 @@ export function OverviewPage({ routeParams }: Props) {
                   defaultMessage: 'Alerts',
                 })}
                 hasError={false}
+                appLink={{
+                  href: alertsLink,
+                  label: i18n.translate('xpack.observability.overview.alerts.appLink', {
+                    defaultMessage: 'Show alerts',
+                  }),
+                }}
+                showExperimentalBadge={true}
               >
                 <CasesContext
                   owner={[observabilityFeatureId]}
@@ -145,8 +147,8 @@ export function OverviewPage({ routeParams }: Props) {
                 >
                   <AlertsTableTGrid
                     setRefetch={setRefetch}
-                    rangeFrom={relativeTime.start}
-                    rangeTo={relativeTime.end}
+                    rangeFrom={relativeStart}
+                    rangeTo={relativeEnd}
                     indexNames={indexNames}
                   />
                 </CasesContext>
@@ -154,7 +156,7 @@ export function OverviewPage({ routeParams }: Props) {
             </EuiFlexItem>
             <EuiFlexItem>
               {/* Data sections */}
-              {hasAnyData && <DataSections bucketSize={bucketSizeValue} />}
+              {hasAnyData && <DataSections bucketSize={bucketSize} />}
               <EmptySections />
             </EuiFlexItem>
             <EuiSpacer size="s" />
