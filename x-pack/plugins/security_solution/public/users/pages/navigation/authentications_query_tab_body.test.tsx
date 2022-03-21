@@ -8,69 +8,61 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
-
+import { useAuthentications } from '../../../hosts/containers/authentications';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { AllUsersQueryTabBody } from './all_users_query_tab_body';
+import { AuthenticationsQueryTabBody } from './authentications_query_tab_body';
 import { UsersType } from '../../store/model';
 
+jest.mock('../../../hosts/containers/authentications');
 jest.mock('../../../common/containers/query_toggle');
 jest.mock('../../../common/lib/kibana');
 
-const mockSearch = jest.fn();
-
-jest.mock('../../../common/containers/use_search_strategy', () => {
-  const original = jest.requireActual('../../../common/containers/use_search_strategy');
-  return {
-    ...original,
-    useSearchStrategy: () => ({
-      search: mockSearch,
-      loading: false,
-      inspect: {
-        dsl: [],
-        response: [],
-      },
-      result: {
-        users: [],
-        totalCount: 0,
-        pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
-      },
-      refetch: jest.fn(),
-    }),
-  };
-});
-
-describe('All users query tab body', () => {
+describe('Authentications query tab body', () => {
+  const mockUseAuthentications = useAuthentications as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
-    skip: false,
     indexNames: [],
     setQuery: jest.fn(),
+    skip: false,
     startDate: '2019-06-25T04:31:59.345Z',
     endDate: '2019-06-25T06:31:59.345Z',
     type: UsersType.page,
   };
-
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('calls search when toggleStatus=true', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    mockUseAuthentications.mockReturnValue([
+      false,
+      {
+        authentications: [],
+        id: '123',
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        isInspected: false,
+        totalCount: 0,
+        pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
+        loadPage: jest.fn(),
+        refetch: jest.fn(),
+      },
+    ]);
+  });
+  it('toggleStatus=true, do not skip', () => {
     render(
       <TestProviders>
-        <AllUsersQueryTabBody {...defaultProps} />
+        <AuthenticationsQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockSearch).toHaveBeenCalled();
+    expect(mockUseAuthentications.mock.calls[0][0].skip).toEqual(false);
   });
-
-  it("doesn't calls search when toggleStatus=false", () => {
+  it('toggleStatus=false, skip', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
     render(
       <TestProviders>
-        <AllUsersQueryTabBody {...defaultProps} />
+        <AuthenticationsQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockSearch).not.toHaveBeenCalled();
+    expect(mockUseAuthentications.mock.calls[0][0].skip).toEqual(true);
   });
 });
