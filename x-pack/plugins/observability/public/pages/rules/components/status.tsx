@@ -10,6 +10,7 @@ import { EuiBadge } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { StatusProps } from '../types';
 import { statusMap } from '../config';
+import { RULES_CHANGE_STATUS } from '../translations';
 
 export function Status({ type, disabled, onClick }: StatusProps) {
   console.log(disabled, '!!disabled');
@@ -23,7 +24,11 @@ export function Status({ type, disabled, onClick }: StatusProps) {
     [disabled, onClick, type]
   );
   return (
-    <EuiBadge {...props} onClickAriaLabel="Change status" iconOnClickAriaLabel="Change status">
+    <EuiBadge
+      {...props}
+      onClickAriaLabel={RULES_CHANGE_STATUS}
+      iconOnClickAriaLabel={RULES_CHANGE_STATUS}
+    >
       {statusMap[type].label}
     </EuiBadge>
   );

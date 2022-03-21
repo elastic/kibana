@@ -144,6 +144,13 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'Search' }
 );
 
+export const RULES_CHANGE_STATUS = i18n.translate(
+  'xpack.observability.rules.rulesTable.changeStatusAriaLabel',
+  {
+    defaultMessage: 'Change status',
+  }
+);
+
 export const confirmModalText = (
   numIdsToDelete: number,
   singleTitle: string,
