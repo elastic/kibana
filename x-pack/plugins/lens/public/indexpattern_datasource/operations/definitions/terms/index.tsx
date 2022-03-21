@@ -84,7 +84,8 @@ function ofName(
     });
   }
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
-    defaultMessage: 'Top {numberOfTermsLabel}{termsCount, plural, one {value} other {values}} of {name}',
+    defaultMessage:
+      'Top {numberOfTermsLabel}{termsCount, plural, one {value} other {values}} of {name}',
     values: {
       name: name ?? missingFieldLabel,
       termsCount: termsSize,
