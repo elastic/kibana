@@ -10,18 +10,14 @@ import { mount, ReactWrapper } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 
 import { Connectors, Props } from './connectors';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/api';
-import { useKibana } from '../../common/lib/kibana';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
-
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
+  let appMockRender: AppMockRenderer;
   const onChangeConnector = jest.fn();
   const handleShowEditFlyout = jest.fn();
 
@@ -37,28 +33,30 @@ describe('Connectors', () => {
     updateConnectorDisabled: false,
   };
 
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
   beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
     wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
   });
 
-  test('it shows the connectors from group', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
+  });
+
+  it('shows the connectors from group', () => {
     expect(wrapper.find('[data-test-subj="case-connectors-form-group"]').first().exists()).toBe(
       true
     );
   });
 
-  test('it shows the connectors form row', () => {
+  it('shows the connectors form row', () => {
     expect(wrapper.find('[data-test-subj="case-connectors-form-row"]').first().exists()).toBe(true);
   });
 
-  test('it shows the connectors dropdown', () => {
+  it('shows the connectors dropdown', () => {
     expect(wrapper.find('[data-test-subj="case-connectors-dropdown"]').first().exists()).toBe(true);
   });
 
-  test('it pass the correct props to child', () => {
+  it('pass the correct props to child', () => {
     const connectorsDropdownProps = wrapper.find(ConnectorsDropdown).props();
     expect(connectorsDropdownProps).toMatchObject({
       disabled: false,
@@ -69,7 +67,7 @@ describe('Connectors', () => {
     });
   });
 
-  test('the connector is changed successfully', () => {
+  it('the connector is changed successfully', () => {
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
 
@@ -77,7 +75,7 @@ describe('Connectors', () => {
     expect(onChangeConnector).toHaveBeenCalledWith('resilient-2');
   });
 
-  test('the connector is changed successfully to none', () => {
+  it('the connector is changed successfully to none', () => {
     onChangeConnector.mockClear();
     const newWrapper = mount(
       <Connectors
@@ -96,7 +94,7 @@ describe('Connectors', () => {
     expect(onChangeConnector).toHaveBeenCalledWith('none');
   });
 
-  test('it shows the add connector button', () => {
+  it('shows the add connector button', () => {
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
 
@@ -105,7 +103,7 @@ describe('Connectors', () => {
     ).toBeTruthy();
   });
 
-  test('the text of the update button is shown correctly', () => {
+  it('the text of the update button is shown correctly', () => {
     const newWrapper = mount(
       <Connectors
         {...props}
@@ -123,7 +121,7 @@ describe('Connectors', () => {
     ).toBe('Update My Connector');
   });
 
-  test('it shows the deprecated callout when the connector is deprecated', async () => {
+  it('shows the deprecated callout when the connector is deprecated', async () => {
     render(
       <Connectors
         {...props}
@@ -139,12 +137,25 @@ describe('Connectors', () => {
     expect(screen.getByText('Update this connector, or create a new one.')).toBeInTheDocument();
   });
 
-  test('it does not shows the deprecated callout when the connector is none', async () => {
+  it('does not shows the deprecated callout when the connector is none', async () => {
     render(<Connectors {...props} />, {
       // wrapper: TestProviders produces a TS error
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(screen.queryByText('Deprecated connector type')).not.toBeInTheDocument();
+  });
+
+  it('shows the actions permission message if the user does not have read access to actions', async () => {
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    const result = appMockRender.render(<Connectors {...props} />);
+    expect(
+      result.getByTestId('configure-case-connector-permissions-error-msg')
+    ).toBeInTheDocument();
+    expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
   });
 });

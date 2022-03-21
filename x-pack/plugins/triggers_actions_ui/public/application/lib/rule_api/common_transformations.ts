@@ -65,12 +65,15 @@ export const transformRule: RewriteRequestCase<Rule> = ({
 export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_target_id,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  alias_purpose,
   outcome,
   ...rest
 }: any) => {
   return {
     ...transformRule(rest),
     alias_target_id,
+    alias_purpose,
     outcome,
   };
 };

@@ -17,7 +17,7 @@ export type {
   ErrorThatHandlesItsOwnResponse,
   ElasticsearchError,
 } from './errors';
-export { AlertTypeDisabledError, isErrorThatHandlesItsOwnResponse } from './errors';
+export { AlertTypeDisabledError, RuleMutedError, isErrorThatHandlesItsOwnResponse } from './errors';
 export {
   executionStatusFromState,
   executionStatusFromError,

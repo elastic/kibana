@@ -12,7 +12,7 @@ import {
   fetchIndexPattern,
 } from './index_patterns_utils';
 import { Panel } from './types';
-import { IndexPattern, IndexPatternsService } from '../../../data/common';
+import type { DataView, DataViewsService } from '../../../data_views/public';
 
 describe('isStringTypeIndexPattern', () => {
   test('should returns true on string-based index', () => {
@@ -54,8 +54,8 @@ describe('extractIndexPatterns', () => {
 });
 
 describe('fetchIndexPattern', () => {
-  let mockedIndices: IndexPattern[] | [];
-  let indexPatternsService: IndexPatternsService;
+  let mockedIndices: DataView[] | [];
+  let indexPatternsService: DataViewsService;
 
   beforeEach(() => {
     mockedIndices = [];
@@ -64,7 +64,7 @@ describe('fetchIndexPattern', () => {
       getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
       find: jest.fn(() => Promise.resolve(mockedIndices || [])),
-    } as unknown as IndexPatternsService;
+    } as unknown as DataViewsService;
   });
 
   test('should return default index on no input value', async () => {
@@ -87,7 +87,7 @@ describe('fetchIndexPattern', () => {
           id: 'indexId',
           title: 'indexTitle',
         },
-      ] as IndexPattern[];
+      ] as DataView[];
 
       const value = await fetchIndexPattern('indexTitle', indexPatternsService, {
         fetchKibanaIndexForStringIndexes: true,
@@ -125,7 +125,7 @@ describe('fetchIndexPattern', () => {
           id: 'indexId',
           title: 'indexTitle',
         },
-      ] as IndexPattern[];
+      ] as DataView[];
 
       const value = await fetchIndexPattern({ id: 'indexId' }, indexPatternsService);
 
