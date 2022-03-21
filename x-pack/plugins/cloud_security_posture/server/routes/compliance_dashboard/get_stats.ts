@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
-import { CloudPostureStats, Score } from '../../../common/types';
+import { ComplianceDashboardData, Score } from '../../../common/types';
 
 /**
  * @param value value is [0, 1] range
@@ -44,7 +44,7 @@ export const getEvaluationsQuery = (query: QueryDslQueryContainer): SearchReques
 
 export const getStatsFromFindingsEvaluationsAggs = (
   findingsEvaluationsAggs: FindingsEvaluationsQueryResult
-): CloudPostureStats['stats'] => {
+): ComplianceDashboardData['stats'] => {
   const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count || 0;
   const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count || 0;
   const totalFindings = failedFindings + passedFindings;
@@ -62,7 +62,7 @@ export const getStatsFromFindingsEvaluationsAggs = (
 export const getStats = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer
-): Promise<CloudPostureStats['stats']> => {
+): Promise<ComplianceDashboardData['stats']> => {
   const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
     getEvaluationsQuery(query),
     { meta: true }

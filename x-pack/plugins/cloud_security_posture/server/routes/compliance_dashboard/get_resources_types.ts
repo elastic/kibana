@@ -11,7 +11,7 @@ import {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { CloudPostureStats } from '../../../common/types';
+import { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 
@@ -53,7 +53,7 @@ export const getRisksEsQuery = (query: QueryDslQueryContainer): SearchRequest =>
 
 export const getResourceTypeFromAggs = (
   queryResult: ResourceTypeBucket[]
-): CloudPostureStats['resourcesTypes'] =>
+): ComplianceDashboardData['resourcesTypes'] =>
   queryResult.map((bucket) => ({
     name: bucket.key,
     totalFindings: bucket.doc_count,
@@ -64,7 +64,7 @@ export const getResourceTypeFromAggs = (
 export const getResourcesTypes = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer
-): Promise<CloudPostureStats['resourcesTypes']> => {
+): Promise<ComplianceDashboardData['resourcesTypes']> => {
   const resourceTypesQueryResult = await esClient.search<unknown, ResourceTypeQueryResult>(
     getRisksEsQuery(query),
     { meta: true }

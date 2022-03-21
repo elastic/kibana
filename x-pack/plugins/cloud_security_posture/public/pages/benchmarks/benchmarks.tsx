@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
 import {
   EuiFieldSearch,
   EuiFieldSearchProps,
@@ -15,7 +17,6 @@ import {
   EuiTextColor,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { allNavigationItems } from '../../common/navigation/constants';
@@ -119,6 +120,8 @@ const PAGE_HEADER: EuiPageHeaderProps = {
   pageTitle: BENCHMARK_INTEGRATIONS,
   rightSideItems: [<AddCisIntegrationButton />],
 };
+
+const BenchmarksLoadingState = () => <CspLoadingState>{LOADING_BENCHMARKS}</CspLoadingState>;
 
 export const Benchmarks = () => {
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
