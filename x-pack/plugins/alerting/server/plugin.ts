@@ -63,7 +63,7 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
-import { getRulesConfig } from './lib/get_rules_config';
+import { getExecutionConfigForRuleType } from './lib/get_rules_config';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -290,7 +290,7 @@ export class AlertingPlugin {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
-        ruleType.config = getRulesConfig({
+        ruleType.config = getExecutionConfigForRuleType({
           config: alertingConfig.rules,
           ruleTypeId: ruleType.id,
         });
