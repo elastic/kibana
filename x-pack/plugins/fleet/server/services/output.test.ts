@@ -10,10 +10,13 @@ import type { OutputSOAttributes } from '../types';
 
 import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
+import { agentPolicyService } from './agent_policy';
 
 jest.mock('./app_context');
+jest.mock('./agent_policy');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
 const CLOUD_ID =
   'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==';
@@ -145,6 +148,9 @@ function getMockedSoClient(
 }
 
 describe('Output Service', () => {
+  beforeEach(() => {
+    mockedAgentPolicyService.removeOutputFromAll.mockReset();
+  });
   describe('create', () => {
     it('work with a predefined id', async () => {
       const soClient = getMockedSoClient();
@@ -445,6 +451,15 @@ describe('Output Service', () => {
         fromPreconfiguration: true,
       });
 
+      expect(soClient.delete).toBeCalled();
+    });
+
+    it('Call removeOutputFromAll before deleting the output', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.delete(soClient, 'existing-preconfigured-default-output', {
+        fromPreconfiguration: true,
+      });
+      expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalled();
       expect(soClient.delete).toBeCalled();
     });
   });

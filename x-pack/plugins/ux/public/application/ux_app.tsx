@@ -34,6 +34,7 @@ import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
 import {
+  DatePickerContextProvider,
   InspectorContextProvider,
   useBreadcrumbs,
 } from '../../../observability/public';
@@ -133,14 +134,16 @@ export function UXAppRoot({
       >
         <i18nCore.Context>
           <RouterProvider history={history} router={uxRouter}>
-            <InspectorContextProvider>
-              <UrlParamsProvider>
-                <EuiErrorBoundary>
-                  <UxApp />
-                </EuiErrorBoundary>
-                <UXActionMenu appMountParameters={appMountParameters} />
-              </UrlParamsProvider>
-            </InspectorContextProvider>
+            <DatePickerContextProvider>
+              <InspectorContextProvider>
+                <UrlParamsProvider>
+                  <EuiErrorBoundary>
+                    <UxApp />
+                  </EuiErrorBoundary>
+                  <UXActionMenu appMountParameters={appMountParameters} />
+                </UrlParamsProvider>
+              </InspectorContextProvider>
+            </DatePickerContextProvider>
           </RouterProvider>
         </i18nCore.Context>
       </KibanaContextProvider>

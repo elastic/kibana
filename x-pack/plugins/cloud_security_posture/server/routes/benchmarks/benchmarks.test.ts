@@ -101,6 +101,42 @@ describe('benchmarks API', () => {
     });
   });
 
+  it('should throw when sort_field is not string', async () => {
+    expect(() => {
+      benchmarksInputSchema.validate({ sort_field: true });
+    }).toThrow();
+  });
+
+  it('should not throw when sort_field is a string', async () => {
+    expect(() => {
+      benchmarksInputSchema.validate({ sort_field: 'name' });
+    }).not.toThrow();
+  });
+
+  it('should throw when sort_order is not `asc` or `desc`', async () => {
+    expect(() => {
+      benchmarksInputSchema.validate({ sort_order: 'Other Direction' });
+    }).toThrow();
+  });
+
+  it('should not throw when `asc` is input for sort_order field', async () => {
+    expect(() => {
+      benchmarksInputSchema.validate({ sort_order: 'asc' });
+    }).not.toThrow();
+  });
+
+  it('should not throw when `desc` is input for sort_order field', async () => {
+    expect(() => {
+      benchmarksInputSchema.validate({ sort_order: 'desc' });
+    }).not.toThrow();
+  });
+
+  it('should not throw when fields is a known string literal', async () => {
+    expect(() => {
+      benchmarksInputSchema.validate({ sort_field: 'name' });
+    }).not.toThrow();
+  });
+
   describe('test benchmarks utils', () => {
     let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
 
@@ -115,6 +151,7 @@ describe('benchmarks API', () => {
         await getPackagePolicies(mockSoClient, mockPackagePolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
+          sort_order: 'desc',
         });
 
         expect(mockPackagePolicyService.list.mock.calls[0][1]).toMatchObject(
@@ -122,6 +159,48 @@ describe('benchmarks API', () => {
             kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
             page: 1,
             perPage: 100,
+          })
+        );
+      });
+
+      it('should build sort request by `sort_field` and default `sort_order`', async () => {
+        const mockAgentPolicyService = createPackagePolicyServiceMock();
+
+        await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+          page: 1,
+          per_page: 100,
+          sort_field: 'name',
+          sort_order: 'desc',
+        });
+
+        expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
+          expect.objectContaining({
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
+            page: 1,
+            perPage: 100,
+            sortField: 'name',
+            sortOrder: 'desc',
+          })
+        );
+      });
+
+      it('should build sort request by `sort_field` and asc `sort_order`', async () => {
+        const mockAgentPolicyService = createPackagePolicyServiceMock();
+
+        await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+          page: 1,
+          per_page: 100,
+          sort_field: 'name',
+          sort_order: 'asc',
+        });
+
+        expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
+          expect.objectContaining({
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
+            page: 1,
+            perPage: 100,
+            sortField: 'name',
+            sortOrder: 'asc',
           })
         );
       });
@@ -133,6 +212,7 @@ describe('benchmarks API', () => {
       await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
         page: 1,
         per_page: 100,
+        sort_order: 'desc',
         benchmark_name: 'my_cis_benchmark',
       });
 

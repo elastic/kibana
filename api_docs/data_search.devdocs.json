@@ -439,47 +439,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              ") => string | undefined; datatableUtilities: { getIndexPattern: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              },
-              " | undefined>; getAggConfig: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggConfig",
-                "text": "AggConfig"
-              },
-              " | undefined>; isFilterable: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => boolean; }; createAggConfigs: (indexPattern: ",
+              ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5089,7 +5049,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ getConfig, getIndexPattern, isDefaultTimezone, }: ",
+              "({ getConfig }: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -5114,7 +5074,7 @@
                 "id": "def-common.AggsCommonService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    getConfig,\n    getIndexPattern,\n    isDefaultTimezone,\n  }",
+                "label": "{ getConfig }",
                 "description": [],
                 "signature": [
                   {
@@ -5536,7 +5496,7 @@
                   "- Response to the main request"
                 ],
                 "signature": [
-                  "SearchResponse",
+                  "SearchResponseBody",
                   "<any, Record<string, ",
                   "AggregationsAggregate",
                   ">>"
@@ -9709,6 +9669,22 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggTopMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "aggTopMetrics",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics_fn.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.calcAutoIntervalLessThan",
         "type": "Function",
         "tags": [],
@@ -12669,6 +12645,30 @@
           "<any>"
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.getTopMetricsMetricAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getTopMetricsMetricAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -15985,6 +15985,52 @@
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggTopMetrics",
+            "type": "Object",
+            "tags": [],
+            "label": "aggTopMetrics",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggTopMetrics\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableRecord",
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -18812,6 +18858,85 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.AggParamsTopMetrics",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsTopMetrics",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsTopMetrics",
+            "text": "AggParamsTopMetrics"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetrics.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetrics.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetrics.sortOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortOrder",
+            "description": [],
+            "signature": [
+              "\"asc\" | \"desc\" | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetrics.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.AggsCommonSetup",
         "type": "Interface",
         "tags": [],
@@ -18987,59 +19112,6 @@
                 "deprecated": false
               }
             ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggsCommonStart.datatableUtilities",
-            "type": "Object",
-            "tags": [],
-            "label": "datatableUtilities",
-            "description": [],
-            "signature": [
-              "{ getIndexPattern: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              },
-              " | undefined>; getAggConfig: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggConfig",
-                "text": "AggConfig"
-              },
-              " | undefined>; isFilterable: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => boolean; }"
-            ],
-            "path": "src/plugins/data/common/search/aggs/types.ts",
-            "deprecated": false
           },
           {
             "parentPluginId": "data",
@@ -20808,7 +20880,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "SearchResponse",
+              "SearchResponseBody",
               "<T, Record<string, ",
               "AggregationsAggregate",
               ">>"
@@ -22414,6 +22486,19 @@
             "type": "CompoundType",
             "tags": [],
             "label": "onlyAggregatable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MetricAggParam.scriptable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scriptable",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -24667,47 +24752,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ") => string | undefined; datatableUtilities: { getIndexPattern: (column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.IndexPattern",
-            "text": "IndexPattern"
-          },
-          " | undefined>; getAggConfig: (column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => Promise<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.AggConfig",
-            "text": "AggConfig"
-          },
-          " | undefined>; isFilterable: (column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => boolean; }; createAggConfigs: (indexPattern: ",
+          ") => string | undefined; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24798,6 +24843,20 @@
           "\"aggTopHit\""
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/top_hit_fn.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggTopMetricsFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggTopMetricsFnName",
+        "description": [],
+        "signature": [
+          "\"aggTopMetrics\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics_fn.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

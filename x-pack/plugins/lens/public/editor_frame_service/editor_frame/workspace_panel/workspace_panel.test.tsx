@@ -29,7 +29,7 @@ import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from 'src/core/public/mocks';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
@@ -410,7 +410,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
     mockDatasource.toExpression.mockReturnValue('datasource');
-    mockDatasource.getLayers.mockReturnValue(['first']);
+    mockDatasource.getLayers.mockReturnValue(['table1']);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -430,12 +430,15 @@ describe('workspace_panel', () => {
 
     const onData = expressionRendererMock.mock.calls[0][0].onData$!;
 
-    const tableData = { table1: { columns: [], rows: [] } };
-    onData(undefined, { tables: { tables: tableData } });
+    const tablesData = {
+      table1: { columns: [], rows: [] },
+      table2: { columns: [], rows: [] },
+    };
+    onData(undefined, { tables: { tables: tablesData } });
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/onActiveDataChange',
-      payload: tableData,
+      payload: tablesData,
     });
   });
 
@@ -599,7 +602,7 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
-    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const indexPattern = { id: 'index1' } as unknown as DataView;
     const field = { name: 'myfield' } as unknown as FieldSpec;
 
     act(() => {

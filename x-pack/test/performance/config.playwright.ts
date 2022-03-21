@@ -11,8 +11,8 @@ import { services } from './services';
 import { pageObjects } from './page_objects';
 
 // These "secret" values are intentionally written in the source. We would make the APM server accept anonymous traffic if we could
-const APM_SERVER_URL = 'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gcp.cloud.es.io:443';
-const APM_PUBLIC_TOKEN = 'Q5q5rWQEw6tKeirBpw';
+const APM_SERVER_URL = 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443';
+const APM_PUBLIC_TOKEN = 'CTs9y3cvcfq13bQqsB';
 
 export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));

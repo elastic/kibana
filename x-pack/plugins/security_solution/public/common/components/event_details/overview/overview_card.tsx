@@ -75,18 +75,20 @@ ClampedContent.displayName = 'ClampedContent';
 type OverviewCardWithActionsProps = OverviewCardProps & {
   contextId: string;
   enrichedFieldInfo: EnrichedFieldInfo;
+  dataTestSubj?: string;
 };
 
 export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = ({
   title,
   children,
   contextId,
+  dataTestSubj,
   enrichedFieldInfo,
 }) => {
   return (
     <OverviewCard title={title}>
       <EuiFlexGroup alignItems="center" gutterSize="none">
-        <ClampedContent>{children}</ClampedContent>
+        <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>
 
         <ActionWrapper>
           <ActionCell {...enrichedFieldInfo} contextId={contextId} applyWidthAndPadding={false} />

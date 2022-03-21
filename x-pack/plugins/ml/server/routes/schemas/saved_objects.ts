@@ -12,25 +12,37 @@ export const jobTypeLiterals = schema.oneOf([
   schema.literal('data-frame-analytics'),
 ]);
 
-export const jobTypeSchema = schema.object({ jobType: jobTypeLiterals });
+export const itemTypeLiterals = schema.oneOf([
+  schema.literal('anomaly-detector'),
+  schema.literal('data-frame-analytics'),
+  schema.literal('trained-model'),
+]);
 
-export const jobsAndSpaces = schema.object({
+export const itemTypeSchema = schema.object({ jobType: itemTypeLiterals });
+
+export const updateJobsSpaces = schema.object({
   jobType: jobTypeLiterals,
   jobIds: schema.arrayOf(schema.string()),
   spacesToAdd: schema.arrayOf(schema.string()),
   spacesToRemove: schema.arrayOf(schema.string()),
 });
 
-export const jobsAndCurrentSpace = schema.object({
-  jobType: jobTypeLiterals,
-  jobIds: schema.arrayOf(schema.string()),
+export const updateTrainedModelsSpaces = schema.object({
+  modelIds: schema.arrayOf(schema.string()),
+  spacesToAdd: schema.arrayOf(schema.string()),
+  spacesToRemove: schema.arrayOf(schema.string()),
+});
+
+export const itemsAndCurrentSpace = schema.object({
+  jobType: itemTypeLiterals,
+  ids: schema.arrayOf(schema.string()),
 });
 
 export const syncJobObjects = schema.object({ simulate: schema.maybe(schema.boolean()) });
 
 export const syncCheckSchema = schema.object({ jobType: schema.maybe(schema.string()) });
 
-export const canDeleteJobSchema = schema.object({
-  /** List of job IDs. */
-  jobIds: schema.arrayOf(schema.string()),
+export const canDeleteMLSpaceAwareItemsSchema = schema.object({
+  /** List of job or trained model IDs. */
+  ids: schema.arrayOf(schema.string()),
 });

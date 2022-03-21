@@ -18,6 +18,7 @@ export const QueryInput = ({
   isInvalid,
   onSubmit,
   disableAutoFocus,
+  ['data-test-subj']: dataTestSubj,
 }: {
   value: Query;
   onChange: (input: Query) => void;
@@ -25,12 +26,13 @@ export const QueryInput = ({
   isInvalid: boolean;
   onSubmit: () => void;
   disableAutoFocus?: boolean;
+  'data-test-subj'?: string;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
 
   return (
     <QueryStringInput
-      dataTestSubj="indexPattern-filters-queryStringInput"
+      dataTestSubj={dataTestSubj ?? 'indexPattern-filters-queryStringInput'}
       size="s"
       disableAutoFocus={disableAutoFocus}
       isInvalid={isInvalid}

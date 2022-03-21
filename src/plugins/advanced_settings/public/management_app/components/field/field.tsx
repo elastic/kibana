@@ -41,7 +41,7 @@ interface FieldProps {
   setting: FieldSetting;
   handleChange: (name: string, value: FieldState) => void;
   enableSaving: boolean;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   clearChange?: (name: string) => void;
   unsavedChanges?: FieldState;
@@ -459,7 +459,7 @@ export class Field extends PureComponent<FieldProps> {
     let deprecation;
 
     if (setting.deprecation) {
-      const links = this.props.dockLinks;
+      const links = this.props.docLinks;
 
       deprecation = (
         <>
@@ -616,9 +616,7 @@ export class Field extends PureComponent<FieldProps> {
     const isInvalid = unsavedChanges?.isInvalid;
 
     const className = classNames('mgtAdvancedSettings__field', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--unsaved': unsavedChanges,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--invalid': isInvalid,
     });
     const groupId = `${setting.name}-group`;

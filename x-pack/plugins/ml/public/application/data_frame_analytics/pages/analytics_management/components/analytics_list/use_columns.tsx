@@ -293,7 +293,7 @@ export const useColumns = (
             <JobSpacesList
               spacesApi={spacesApi}
               spaceIds={item.spaceIds ?? []}
-              jobId={item.id}
+              id={item.id}
               jobType="data-frame-analytics"
               refresh={refresh}
             />

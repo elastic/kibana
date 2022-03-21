@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, partition } from 'lodash';
+import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -61,6 +61,7 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
@@ -358,7 +359,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy> {
     const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
@@ -386,7 +387,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
 
-    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
+    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
     let elasticsearch: PackagePolicy['elasticsearch'];
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
@@ -677,7 +678,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         pkgVersion
       ));
 
-      return this.calculateDiff(packagePolicy, packageInfo);
+      return this.calculateDiff(soClient, packagePolicy, packageInfo);
     } catch (error) {
       return {
         hasErrors: true,
@@ -687,6 +688,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   }
 
   private async calculateDiff(
+    soClient: SavedObjectsClientContract,
     packagePolicy: PackagePolicy,
     packageInfo: PackageInfo
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
@@ -722,6 +724,9 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     return {
       name: updatedPackagePolicy.name,
       diff: [packagePolicy, updatedPackagePolicy],
+      // TODO: Currently only returns the agent inputs for current package policy, not the upgraded one
+      // as we only show this version in the UI
+      agent_diff: [storedPackagePolicyToAgentInputs(packagePolicy, packageInfo)],
       hasErrors,
     };
   }
@@ -1119,21 +1124,25 @@ async function _compilePackageStream(
   return { ...stream };
 }
 
-function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: PackagePolicyInput[]) {
+function enforceFrozenInputs(
+  oldInputs: PackagePolicyInput[],
+  newInputs: PackagePolicyInput[],
+  force = false
+) {
   const resultInputs = [...newInputs];
 
   for (const input of resultInputs) {
     const oldInput = oldInputs.find((i) => i.type === input.type);
     if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
-      input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
+      input.vars = _enforceFrozenVars(oldInput.vars, input.vars, force);
     }
     if (input.streams && oldInput?.streams) {
       for (const stream of input.streams) {
         const oldStream = oldInput.streams.find((s) => s.id === stream.id);
         if (oldStream?.keep_enabled) stream.enabled = oldStream.enabled;
         if (stream.vars && oldStream?.vars) {
-          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
+          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars, force);
         }
       }
     }
@@ -1144,12 +1153,21 @@ function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: Package
 
 function _enforceFrozenVars(
   oldVars: Record<string, PackagePolicyConfigRecordEntry>,
-  newVars: Record<string, PackagePolicyConfigRecordEntry>
+  newVars: Record<string, PackagePolicyConfigRecordEntry>,
+  force = false
 ) {
   const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
   for (const [key, val] of Object.entries(newVars)) {
     if (oldVars[key]?.frozen) {
-      resultVars[key] = oldVars[key];
+      if (force) {
+        resultVars[key] = val;
+      } else if (!isEqual(oldVars[key].value, val.value) || oldVars[key].type !== val.type) {
+        throw new PackagePolicyValidationError(
+          `${key} is a frozen variable and cannot be modified`
+        );
+      } else {
+        resultVars[key] = oldVars[key];
+      }
     } else {
       resultVars[key] = val;
     }
@@ -1206,7 +1224,7 @@ export interface PackagePolicyServiceInterface {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy>;
 

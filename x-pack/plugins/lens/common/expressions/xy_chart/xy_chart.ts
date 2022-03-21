@@ -10,6 +10,7 @@ import type { ExpressionValueSearchContext } from '../../../../../../src/plugins
 import type { LensMultiTable } from '../../types';
 import type { XYArgs } from './xy_args';
 import { fittingFunctionDefinitions } from './fitting_function';
+import { logDataTable } from '../expressions_utils';
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -157,6 +158,9 @@ export const xyChart: ExpressionFunctionDefinition<
     },
   },
   fn(data: LensMultiTable, args: XYArgs, handlers) {
+    if (handlers?.inspectorAdapters?.tables) {
+      logDataTable(handlers.inspectorAdapters.tables, data.tables);
+    }
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',

@@ -85,7 +85,7 @@ export class EndpointTestResources extends FtrService {
    * @param [options.alertsPerHost=1] Number of Alerts and Events to be loaded per Endpoint Host
    * @param [options.enableFleetIntegration=true] When set to `true`, Fleet data will also be loaded (ex. Integration Policies, Agent Policies, "fake" Agents)
    * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
-   * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processd by the transform
+   * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
    */
   async loadEndpointData(
     options: Partial<{
@@ -93,7 +93,6 @@ export class EndpointTestResources extends FtrService {
       numHostDocs: number;
       alertsPerHost: number;
       enableFleetIntegration: boolean;
-      logsEndpoint: boolean;
       generatorSeed: string;
       waitUntilTransformed: boolean;
     }> = {}
@@ -103,7 +102,6 @@ export class EndpointTestResources extends FtrService {
       numHostDocs = 1,
       alertsPerHost = 1,
       enableFleetIntegration = true,
-      logsEndpoint = false,
       generatorSeed = 'seed',
       waitUntilTransformed = true,
     } = options;
@@ -120,8 +118,7 @@ export class EndpointTestResources extends FtrService {
       'logs-endpoint.events.process-default',
       'logs-endpoint.alerts-default',
       alertsPerHost,
-      enableFleetIntegration,
-      logsEndpoint
+      enableFleetIntegration
     );
 
     if (waitUntilTransformed) {

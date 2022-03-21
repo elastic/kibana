@@ -6,25 +6,14 @@
  */
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
-import { Dictionary } from '../../../../../common/types/common';
-
 import {
   getDefaultChartsData,
   ExplorerChartsData,
 } from '../../explorer_charts/explorer_charts_container_service';
-import {
-  getDefaultSwimlaneData,
-  AnomaliesTableData,
-  ExplorerJob,
-  AppStateSelectedCells,
-  OverallSwimlaneData,
-  SwimlaneData,
-  ViewBySwimLaneData,
-} from '../../explorer_utils';
+import { AnomaliesTableData, ExplorerJob } from '../../explorer_utils';
 import { AnnotationsTable } from '../../../../../common/types/annotations';
-import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
-import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
-import { TimeBucketsInterval } from '../../../util/time_buckets';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import type { InfluencerValueData } from '../../../components/influencers_list/influencers_list';
 
 export interface ExplorerState {
   overallAnnotations: AnnotationsTable;
@@ -32,38 +21,24 @@ export interface ExplorerState {
   anomalyChartsDataLoading: boolean;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
-  filterActive: boolean;
-  filteredFields: any[];
-  filterPlaceHolder: any;
-  indexPattern: { title: string; fields: any[] };
-  influencersFilterQuery?: InfluencersFilterQuery;
-  influencers: Dictionary<any>;
+  filterPlaceHolder: string | undefined;
+  indexPattern: {
+    title: string;
+    fields: Array<{ name: string; type: string; aggregatable: boolean; searchable: boolean }>;
+  };
+  influencers: Record<string, InfluencerValueData[]>;
   isAndOperator: boolean;
   loading: boolean;
   maskAll: boolean;
   noInfluencersConfigured: boolean;
-  overallSwimlaneData: SwimlaneData | OverallSwimlaneData;
   queryString: string;
-  selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
-  swimlaneBucketInterval: TimeBucketsInterval | undefined;
-  swimlaneContainerWidth: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
-  viewByLoadedForTimeFormatted: string | null;
-  viewBySwimlaneData: SwimlaneData | ViewBySwimLaneData;
-  viewBySwimlaneDataLoading: boolean;
-  viewBySwimlaneFieldName?: string;
-  viewByPerPage: number;
-  viewByFromPage: number;
-  viewBySwimlaneOptions: string[];
-  swimlaneLimit?: number;
-  swimLaneSeverity?: number;
-  showCharts: boolean;
 }
 
 function getDefaultIndexPattern() {
-  return { title: ML_RESULTS_INDEX_PATTERN, fields: [] };
+  return { title: ML_RESULTS_INDEX_PATTERN, fields: [] } as unknown as DataView;
 }
 
 export function getExplorerDefaultState(): ExplorerState {
@@ -79,22 +54,15 @@ export function getExplorerDefaultState(): ExplorerState {
     anomalyChartsDataLoading: true,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
-    filterActive: false,
-    filteredFields: [],
     filterPlaceHolder: undefined,
     indexPattern: getDefaultIndexPattern(),
-    influencersFilterQuery: undefined,
     influencers: {},
     isAndOperator: false,
     loading: true,
     maskAll: false,
     noInfluencersConfigured: true,
-    overallSwimlaneData: getDefaultSwimlaneData(),
     queryString: '',
-    selectedCells: undefined,
     selectedJobs: null,
-    swimlaneBucketInterval: undefined,
-    swimlaneContainerWidth: 0,
     tableData: {
       anomalies: [],
       examplesByJobId: [''],
@@ -103,14 +71,5 @@ export function getExplorerDefaultState(): ExplorerState {
       showViewSeriesLink: false,
     },
     tableQueryString: '',
-    viewByLoadedForTimeFormatted: null,
-    viewBySwimlaneData: getDefaultSwimlaneData(),
-    viewBySwimlaneDataLoading: false,
-    viewBySwimlaneFieldName: undefined,
-    viewBySwimlaneOptions: [],
-    viewByPerPage: SWIM_LANE_DEFAULT_PAGE_SIZE,
-    viewByFromPage: 1,
-    swimlaneLimit: undefined,
-    showCharts: true,
   };
 }

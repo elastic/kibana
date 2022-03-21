@@ -139,7 +139,7 @@ describe('Timeline scope', () => {
     loginAndWaitForPage(TIMELINES_URL);
   });
 
-  it.skip('correctly loads SIEM data view before and after signals index exists', () => {
+  it('correctly loads SIEM data view before and after signals index exists', () => {
     openTimelineUsingToggle();
     openSourcerer('timeline');
     isDataViewSelection(siemDataViewTitle);

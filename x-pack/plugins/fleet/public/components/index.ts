@@ -11,8 +11,6 @@ export { PackageIcon } from './package_icon';
 export { ContextMenuActions } from './context_menu_actions';
 export { LinkedAgentCount } from './linked_agent_count';
 export { ExtensionWrapper } from './extension_wrapper';
-export { AlphaMessaging } from './alpha_messaging';
-export { AlphaFlyout } from './alpha_flyout';
 export type { HeaderProps } from './header';
 export { Header } from './header';
 export { NewEnrollmentTokenModal } from './new_enrollment_key_modal';

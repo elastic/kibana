@@ -15,7 +15,7 @@ export function createUseRulesLink(isNewRuleManagementEnabled = false) {
         }
       : {
           app: 'management',
-          pathname: '/insightsAndAlerting/triggersActions/alerts',
+          pathname: '/insightsAndAlerting/triggersActions/rules',
         };
     return useLinkProps(linkProps, options);
   };

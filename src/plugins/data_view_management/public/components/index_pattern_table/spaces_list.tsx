@@ -8,7 +8,6 @@
 
 import React, { FC, useState } from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   SpacesPluginStart,
@@ -33,7 +32,6 @@ export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh 
 
   function onClose() {
     setShowFlyout(false);
-    refresh();
   }
 
   const LazySpaceList = spacesApi.ui.components.getSpaceList;
@@ -47,18 +45,18 @@ export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh 
       title,
       noun,
     },
+    onUpdate: refresh,
     onClose,
   };
 
   return (
     <>
-      <EuiButtonEmpty
-        onClick={() => setShowFlyout(true)}
-        style={{ height: 'auto' }}
-        data-test-subj="manageSpacesButton"
-      >
-        <LazySpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
-      </EuiButtonEmpty>
+      <LazySpaceList
+        namespaces={spaceIds}
+        displayLimit={8}
+        behaviorContext="outside-space"
+        listOnClick={() => setShowFlyout(true)}
+      />
       {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
     </>
   );

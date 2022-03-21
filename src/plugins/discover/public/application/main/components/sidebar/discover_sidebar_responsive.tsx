@@ -28,7 +28,11 @@ import {
 } from '@elastic/eui';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { DataViewField, DataView, DataViewAttributes } from '../../../../../../data/common';
+import type {
+  DataViewField,
+  DataView,
+  DataViewAttributes,
+} from '../../../../../../data_views/public';
 import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';

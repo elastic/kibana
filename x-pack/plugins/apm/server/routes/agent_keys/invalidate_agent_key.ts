@@ -9,17 +9,16 @@ import { ApmPluginRequestHandlerContext } from '../typings';
 export async function invalidateAgentKey({
   context,
   id,
+  isAdmin,
 }: {
   context: ApmPluginRequestHandlerContext;
   id: string;
+  isAdmin: boolean;
 }) {
   const { invalidated_api_keys: invalidatedAgentKeys } =
     await context.core.elasticsearch.client.asCurrentUser.security.invalidateApiKey(
       {
-        body: {
-          ids: [id],
-          owner: true,
-        },
+        body: { ids: [id], owner: !isAdmin },
       }
     );
 

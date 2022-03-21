@@ -29,7 +29,8 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
       !JSON.parse(String(localStorage.getItem(SOLUTION_NAV_COLLAPSED_KEY)))
     );
-    const { solutionNav, children, isEmptyState, template } = props;
+    const { solutionNav, ...propagatedProps } = props;
+    const { children, isEmptyState, template } = propagatedProps;
     const toggleOpenOnDesktop = () => {
       setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
       // Have to store it as the opposite of the default we want
@@ -38,7 +39,6 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
     const sideBarClasses = classNames(
       'kbnPageTemplate__pageSideBar',
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'kbnPageTemplate__pageSideBar--shrink':
           isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
       },
@@ -61,7 +61,7 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
     } as EuiPageSideBarProps; // needed because for some reason 'none' is not recognized as a valid value for paddingSize
     return (
       <WrappedComponent
-        {...props}
+        {...propagatedProps}
         pageSideBar={pageSideBar}
         pageSideBarProps={pageSideBarProps}
         template={templateToUse}

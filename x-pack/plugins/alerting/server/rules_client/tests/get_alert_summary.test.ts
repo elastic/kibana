@@ -92,6 +92,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
       status: 'unknown',
       lastExecutionDate: '2020-08-20T19:23:38Z',
       error: null,
+      warning: null,
     },
   },
   references: [],
@@ -223,7 +224,12 @@ describe('getAlertSummary()', () => {
           "end": "2019-02-12T21:01:22.479Z",
           "page": 1,
           "per_page": 10000,
-          "sort_order": "desc",
+          "sort": Array [
+            Object {
+              "sort_field": "@timestamp",
+              "sort_order": "desc",
+            },
+          ],
           "start": "2019-02-12T21:00:22.479Z",
         },
         undefined,
@@ -260,7 +266,12 @@ describe('getAlertSummary()', () => {
           "end": "2019-02-12T21:01:22.479Z",
           "page": 1,
           "per_page": 10000,
-          "sort_order": "desc",
+          "sort": Array [
+            Object {
+              "sort_field": "@timestamp",
+              "sort_order": "desc",
+            },
+          ],
           "start": "2019-02-12T21:00:22.479Z",
         },
         Array [

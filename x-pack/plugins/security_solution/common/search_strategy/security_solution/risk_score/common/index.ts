@@ -19,6 +19,10 @@ export const buildHostNamesFilter = (hostNames: string[]) => {
   return { terms: { 'host.name': hostNames } };
 };
 
+export const buildUserNamesFilter = (userNames: string[]) => {
+  return { terms: { 'user.name': userNames } };
+};
+
 export enum RiskQueries {
   riskScore = 'riskScore',
   kpiRiskScore = 'kpiRiskScore',

@@ -13,6 +13,7 @@ import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../
 import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
 import { OutputUnauthorizedError } from '../errors';
 
+import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
@@ -240,6 +241,12 @@ class OutputService {
     if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
+
+    await agentPolicyService.removeOutputFromAll(
+      soClient,
+      appContextService.getInternalUserESClient(),
+      id
+    );
 
     return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }

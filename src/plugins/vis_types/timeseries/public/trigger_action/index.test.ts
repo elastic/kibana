@@ -136,6 +136,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           splitWithDateHistogram: false,
           timeFieldName: 'timeField2',
           timeInterval: 'auto',
+          dropPartialBuckets: false,
         },
       },
     });
@@ -254,6 +255,15 @@ describe('triggerTSVBtoLensConfiguration', () => {
     expect(triggerOptions?.layers[0]?.timeInterval).toBe('1h');
   });
 
+  test('should return dropPartialbuckets if enabled', async () => {
+    const modelWithDropBuckets = {
+      ...model,
+      drop_last_bucket: 1,
+    };
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithDropBuckets);
+    expect(triggerOptions?.layers[0]?.dropPartialBuckets).toBe(true);
+  });
+
   test('should return the correct chart configuration', async () => {
     const modelWithConfig = {
       ...model,
@@ -299,6 +309,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           splitWithDateHistogram: false,
           timeFieldName: 'timeField2',
           timeInterval: 'auto',
+          dropPartialBuckets: false,
         },
       },
     });

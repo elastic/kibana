@@ -45,6 +45,7 @@ export function getSuggestions({
   keptLayerIds,
   subVisualizationId,
   mainPalette,
+  isFromContext,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   const incompleteTable =
     !table.isMultiRow ||
@@ -72,7 +73,7 @@ export function getSuggestions({
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
-    table.columns.some((col) => col.operation.isStaticValue) ||
+    table.columns.some((col) => col.operation.isStaticValue && !isFromContext) ||
     // do not use suggestions with non-numeric metrics
     table.columns.some((col) => !col.operation.isBucketed && col.operation.dataType !== 'number')
   ) {

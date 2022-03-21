@@ -8,6 +8,7 @@
 import React, { FC, memo, useCallback } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldFormat } from '../../../../field_formats/common';
 import type { CustomPaletteState, PaletteOutput } from '../../../../charts/public';
 import { EmptyPlaceholder } from '../../../../charts/public';
 import { isVisDimension } from '../../../../visualizations/common/utils';
@@ -183,8 +184,23 @@ const calculateRealRangeValueMax = (
   return max;
 };
 
+const getPreviousSectionValue = (value: number, bands: number[]) => {
+  // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
+  // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
+
+  let prevSectionValue = value - 1;
+  const valueIndex = bands.indexOf(value);
+  const prevBand = bands[valueIndex - 1];
+  const curBand = bands[valueIndex];
+  if (valueIndex > 0) {
+    prevSectionValue = value - (curBand - prevBand) / 2;
+  }
+
+  return prevSectionValue;
+};
+
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
-  ({ data, args, formatFactory, paletteService, chartsThemeService }) => {
+  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService }) => {
     const {
       shape: gaugeType,
       palette,
@@ -228,6 +244,34 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           .getColorForValue?.(value, { ...paletteConfig.params, stops }, { min, max });
       },
       [paletteService]
+    );
+
+    // Legacy chart was not formatting numbers, when was forming overrideColors.
+    // To support the behavior of the color overriding, it is required to skip all the formatting, except percent.
+    const overrideColor = useCallback(
+      (value: number, bands: number[], formatter?: FieldFormat) => {
+        const overrideColors = uiState?.get('vis.colors') ?? {};
+        const valueIndex = bands.findIndex((band, index, allBands) => {
+          if (index === allBands.length - 1) {
+            return false;
+          }
+
+          return value >= band && value < allBands[index + 1];
+        });
+
+        if (valueIndex < 0 || valueIndex === bands.length - 1) {
+          return undefined;
+        }
+        const curValue = bands[valueIndex];
+        const nextValue = bands[valueIndex + 1];
+
+        return overrideColors[
+          `${formatter?.convert(curValue) ?? curValue} - ${
+            formatter?.convert(nextValue) ?? nextValue
+          }`
+        ];
+      },
+      [uiState]
     );
 
     const table = data;
@@ -353,12 +397,16 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           bandFillColor={
             colorMode === GaugeColorModes.PALETTE
               ? (val) => {
-                  // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
-                  // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
-                  let value = val.value - 1;
-                  const valueIndex = bands.indexOf(val.value);
-                  if (valueIndex > 0) {
-                    value = val.value - (bands[valueIndex] - bands[valueIndex - 1]) / 2;
+                  const value = getPreviousSectionValue(val.value, bands);
+
+                  const overridedColor = overrideColor(
+                    value,
+                    args.percentageMode ? bands : args.palette?.params?.stops ?? [],
+                    args.percentageMode ? tickFormatter : undefined
+                  );
+
+                  if (overridedColor) {
+                    return overridedColor;
                   }
 
                   return args.palette

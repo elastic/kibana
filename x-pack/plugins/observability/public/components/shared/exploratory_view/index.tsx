@@ -12,7 +12,7 @@ import { ExploratoryView } from './exploratory_view';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
+import { DataViewContextProvider } from './hooks/use_app_data_view';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -73,11 +73,11 @@ export function ExploratoryViewPage({
 
   return (
     <ObservabilityPageTemplate pageHeader={{ pageTitle: PAGE_TITLE }}>
-      <IndexPatternContextProvider>
+      <DataViewContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
           <ExploratoryView saveAttributes={saveAttributes} />
         </UrlStorageContextProvider>
-      </IndexPatternContextProvider>
+      </DataViewContextProvider>
     </ObservabilityPageTemplate>
   );
 }

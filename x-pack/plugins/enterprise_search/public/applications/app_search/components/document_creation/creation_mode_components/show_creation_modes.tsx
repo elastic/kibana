@@ -38,7 +38,7 @@ export const ShowCreationModes: React.FC = () => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <DocumentCreationButtons />
+        <DocumentCreationButtons isFlyout />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>

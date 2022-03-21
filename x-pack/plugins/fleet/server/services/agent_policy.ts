@@ -414,6 +414,49 @@ class AgentPolicyService {
     return res;
   }
 
+  /**
+   * Remove an output from all agent policies that are using it, and replace the output by the default ones.
+   * @param soClient
+   * @param esClient
+   * @param outputId
+   */
+  public async removeOutputFromAll(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    outputId: string
+  ) {
+    const agentPolicies = (
+      await soClient.find<AgentPolicySOAttributes>({
+        type: SAVED_OBJECT_TYPE,
+        fields: ['revision', 'data_output_id', 'monitoring_output_id'],
+        searchFields: ['data_output_id', 'monitoring_output_id'],
+        search: escapeSearchQueryPhrase(outputId),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).saved_objects.map((so) => ({
+      id: so.id,
+      ...so.attributes,
+    }));
+
+    if (agentPolicies.length > 0) {
+      await pMap(
+        agentPolicies,
+        (agentPolicy) =>
+          this.update(soClient, esClient, agentPolicy.id, {
+            data_output_id:
+              agentPolicy.data_output_id === outputId ? null : agentPolicy.data_output_id,
+            monitoring_output_id:
+              agentPolicy.monitoring_output_id === outputId
+                ? null
+                : agentPolicy.monitoring_output_id,
+          }),
+        {
+          concurrency: 50,
+        }
+      );
+    }
+  }
+
   public async bumpAllAgentPoliciesForOutput(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -667,6 +710,7 @@ class AgentPolicyService {
     const res = await esClient.search({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           term: {
@@ -678,8 +722,7 @@ class AgentPolicyService {
       },
     });
 
-    // @ts-expect-error value is number | TotalHits
-    if (res.body.hits.total.value === 0) {
+    if ((res.hits.total as number) === 0) {
       return null;
     }
 

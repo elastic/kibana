@@ -28,7 +28,8 @@
     "taskManager",
     "globalSearch",
     "savedObjectsTagging",
-    "spaces"
+    "spaces",
+    "discover"
   ],
   "configPath": [
     "xpack",

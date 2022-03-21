@@ -13,6 +13,10 @@ export const ControlGroupStrings = {
     i18n.translate('controls.controlGroup.title', {
       defaultMessage: 'Control group',
     }),
+  getControlButtonTitle: () =>
+    i18n.translate('controls.controlGroup.toolbarButtonTitle', {
+      defaultMessage: 'Controls',
+    }),
   emptyState: {
     getCallToAction: () =>
       i18n.translate('controls.controlGroup.emptyState.callToAction', {
@@ -25,6 +29,10 @@ export const ControlGroupStrings = {
     getTwoLineLoadingTitle: () =>
       i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
         defaultMessage: '...',
+      }),
+    getDismissButton: () =>
+      i18n.translate('controls.controlGroup.emptyState.dismissButton', {
+        defaultMessage: 'Dismiss',
       }),
   },
   manageControl: {
@@ -60,11 +68,11 @@ export const ControlGroupStrings = {
       }),
     getManageButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.buttonTitle', {
-        defaultMessage: 'Configure controls',
+        defaultMessage: 'Settings',
       }),
     getFlyoutTitle: () =>
       i18n.translate('controls.controlGroup.management.flyoutTitle', {
-        defaultMessage: 'Configure controls',
+        defaultMessage: 'Control settings',
       }),
     getDefaultWidthTitle: () =>
       i18n.translate('controls.controlGroup.management.defaultWidthTitle', {

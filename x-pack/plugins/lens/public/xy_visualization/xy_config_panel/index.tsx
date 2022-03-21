@@ -394,6 +394,16 @@ export const XyToolbar = memo(function XyToolbar(
                 valuesInLegend: !state.valuesInLegend,
               });
             }}
+            legendSize={state.legend.legendSize}
+            onLegendSizeChange={(legendSize) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  legendSize,
+                },
+              });
+            }}
           />
         </EuiFlexGroup>
       </EuiFlexItem>

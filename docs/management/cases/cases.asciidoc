@@ -5,7 +5,8 @@ preview::[]
 
 Cases are used to open and track issues directly in {kib}. All cases list
 the original reporter and all the users who contribute to a case (_participants_).
-You can also send cases to third party systems by configuring external connectors.
+You can also send cases to external incident management systems by configuring
+connectors.
 
 [role="screenshot"]
 image::images/cases.png[Cases page]
@@ -18,3 +19,4 @@ cases in *{stack-manage-app}*.
 
 * <<setup-cases>>
 * <<manage-cases>>
+* <<add-case-connectors>>

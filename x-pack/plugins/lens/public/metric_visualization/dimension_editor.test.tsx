@@ -16,7 +16,7 @@ import { ColorMode, PaletteOutput, PaletteRegistry } from 'src/plugins/charts/pu
 import { act } from 'react-dom/test-utils';
 import { CustomizablePalette, PalettePanelContainer } from '../shared_components';
 import { CustomPaletteParams, layerTypes } from '../../common';
-import { MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

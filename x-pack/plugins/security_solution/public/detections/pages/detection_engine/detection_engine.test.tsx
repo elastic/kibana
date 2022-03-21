@@ -74,7 +74,7 @@ jest.mock('../../../common/lib/kibana', () => {
           },
         },
         cases: {
-          getCasesContext: mockCasesContext,
+          ui: { getCasesContext: mockCasesContext },
         },
         uiSettings: {
           get: jest.fn(),

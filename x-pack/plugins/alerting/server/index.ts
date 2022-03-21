@@ -36,11 +36,6 @@ export type { PublicAlert as Alert } from './alert';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
 export type { PublicAlertingConfig } from './config';
-export type {
-  IAbortableEsClient,
-  IAbortableClusterClient,
-} from './lib/create_abortable_es_client_factory';
-export { createAbortableEsClientFactory } from './lib/create_abortable_es_client_factory';
 export {
   ReadOperations,
   AlertingAuthorizationFilterType,

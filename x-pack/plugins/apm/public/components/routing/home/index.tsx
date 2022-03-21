@@ -7,9 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { RedirectTo } from '../redirect_to';
 import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
@@ -21,15 +20,20 @@ import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
+import { ServiceGroupTemplate } from '../templates/service_group_template';
+import { ServiceGroupsRedirect } from '../service_groups_redirect';
+import { RedirectTo } from '../redirect_to';
 
 function page<TPath extends string>({
   path,
   element,
   title,
+  showServiceGroupSaveButton = false,
 }: {
   path: TPath;
   element: React.ReactElement<any, any>;
   title: string;
+  showServiceGroupSaveButton?: boolean;
 }): Record<
   TPath,
   {
@@ -40,14 +44,61 @@ function page<TPath extends string>({
     [path]: {
       element: (
         <Breadcrumb title={title} href={path}>
-          <ApmMainTemplate pageTitle={title}>{element}</ApmMainTemplate>
+          <ApmMainTemplate
+            pageTitle={title}
+            showServiceGroupSaveButton={showServiceGroupSaveButton}
+          >
+            {element}
+          </ApmMainTemplate>
         </Breadcrumb>
       ),
+    },
+  } as Record<TPath, { element: React.ReactElement<any, any> }>;
+}
+
+function serviceGroupPage<TPath extends string>({
+  path,
+  element,
+  title,
+  serviceGroupContextTab,
+}: {
+  path: TPath;
+  element: React.ReactElement<any, any>;
+  title: string;
+  serviceGroupContextTab: ComponentProps<
+    typeof ServiceGroupTemplate
+  >['serviceGroupContextTab'];
+}): Record<
+  TPath,
+  {
+    element: React.ReactElement<any, any>;
+    params: t.TypeC<{ query: t.TypeC<{ serviceGroup: t.StringC }> }>;
+    defaults: { query: { serviceGroup: string } };
+  }
+> {
+  return {
+    [path]: {
+      element: (
+        <Breadcrumb title={title} href={path}>
+          <ServiceGroupTemplate
+            pageTitle={title}
+            serviceGroupContextTab={serviceGroupContextTab}
+          >
+            {element}
+          </ServiceGroupTemplate>
+        </Breadcrumb>
+      ),
+      params: t.type({
+        query: t.type({ serviceGroup: t.string }),
+      }),
+      defaults: { query: { serviceGroup: '' } },
     },
   } as Record<
     TPath,
     {
       element: React.ReactElement<any, any>;
+      params: t.TypeC<{ query: t.TypeC<{ serviceGroup: t.StringC }> }>;
+      defaults: { query: { serviceGroup: string } };
     }
   >;
 }
@@ -56,6 +107,12 @@ export const ServiceInventoryTitle = i18n.translate(
   'xpack.apm.views.serviceInventory.title',
   {
     defaultMessage: 'Services',
+  }
+);
+export const ServiceMapTitle = i18n.translate(
+  'xpack.apm.views.serviceMap.title',
+  {
+    defaultMessage: 'Service Map',
   }
 );
 
@@ -92,10 +149,11 @@ export const home = {
       },
     },
     children: {
-      ...page({
+      ...serviceGroupPage({
         path: '/services',
         title: ServiceInventoryTitle,
         element: <ServiceInventory />,
+        serviceGroupContextTab: 'service-inventory',
       }),
       ...page({
         path: '/traces',
@@ -104,12 +162,11 @@ export const home = {
         }),
         element: <TraceOverview />,
       }),
-      ...page({
+      ...serviceGroupPage({
         path: '/service-map',
-        title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service Map',
-        }),
+        title: ServiceMapTitle,
         element: <ServiceMapHome />,
+        serviceGroupContextTab: 'service-map',
       }),
       '/backends': {
         element: <Outlet />,
@@ -144,7 +201,11 @@ export const home = {
         },
       },
       '/': {
-        element: <RedirectTo pathname="/services" />,
+        element: (
+          <ServiceGroupsRedirect>
+            <RedirectTo pathname="/service-groups" />
+          </ServiceGroupsRedirect>
+        ),
       },
     },
   },

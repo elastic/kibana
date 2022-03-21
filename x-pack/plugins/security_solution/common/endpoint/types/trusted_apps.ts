@@ -19,6 +19,7 @@ import {
   PutTrustedAppUpdateRequestSchema,
   GetTrustedAppsSummaryRequestSchema,
 } from '../schema/trusted_apps';
+import { ConditionEntry } from './exception_list_items';
 
 /** API request params for deleting Trusted App entry */
 export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
@@ -75,17 +76,18 @@ export enum OperatorFieldIds {
   matches = 'matches',
 }
 
-export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
+export interface TrustedAppConditionEntry<T extends ConditionEntryField = ConditionEntryField>
+  extends ConditionEntry {
   field: T;
   type: TrustedAppEntryTypes;
   operator: 'included';
   value: string;
 }
 
-export type MacosLinuxConditionEntry = ConditionEntry<
+export type MacosLinuxConditionEntry = TrustedAppConditionEntry<
   ConditionEntryField.HASH | ConditionEntryField.PATH
 >;
-export type WindowsConditionEntry = ConditionEntry<
+export type WindowsConditionEntry = TrustedAppConditionEntry<
   ConditionEntryField.HASH | ConditionEntryField.PATH | ConditionEntryField.SIGNER
 >;
 

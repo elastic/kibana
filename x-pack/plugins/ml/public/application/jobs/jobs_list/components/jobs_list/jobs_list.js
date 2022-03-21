@@ -318,7 +318,7 @@ export class JobsList extends Component {
             <JobSpacesList
               spacesApi={spacesApi}
               spaceIds={item.spaceIds}
-              jobId={item.id}
+              id={item.id}
               jobType="anomaly-detector"
               refresh={this.props.refreshJobs}
             />

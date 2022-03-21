@@ -46,7 +46,7 @@ const importedCase = {
   reporter: 'glo@test.co',
   tags: 'export case',
   numberOfAlerts: '2',
-  numberOfComments: '4',
+  numberOfComments: '2',
   description:
     "This is the description of the 7.16 case that I'm going to import in future versions.",
   timeline: 'This is just a timeline',
@@ -59,7 +59,7 @@ const updateStatusRegex = new RegExp(
   `\\S${importedCase.user}marked case as${importedCase.status}\\S*\\s?(\\S*)?\\s?(\\S*)?`
 );
 const alertUpdateRegex = new RegExp(
-  `\\S${importedCase.user}added an alert from ${importedCase.ruleName}\\S*\\s?(\\S*)?\\s?(\\S*)?`
+  `\\S${importedCase.user}added an alert from Unknown\\S*\\s?(\\S*)?\\s?(\\S*)?`
 );
 const incidentManagementSystemRegex = new RegExp(
   `\\S${importedCase.participants[0]}selected ${importedCase.connector} as incident management system\\S*\\s?(\\S*)?\\s?(\\S*)?`
@@ -110,7 +110,7 @@ describe('Import case after upgrade', () => {
 
   it('Displays the correct case details on the cases page', () => {
     cy.get(ALL_CASES_NAME).should('have.text', importedCase.title);
-    cy.get(ALL_CASES_REPORTER).should('have.text', importedCase.reporter);
+    cy.get(ALL_CASES_REPORTER).should('have.text', importedCase.user);
     cy.get(ALL_CASES_NUMBER_OF_ALERTS).should('have.text', importedCase.numberOfAlerts);
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', importedCase.numberOfComments);
     cy.get(ALL_CASES_NOT_PUSHED).should('be.visible');

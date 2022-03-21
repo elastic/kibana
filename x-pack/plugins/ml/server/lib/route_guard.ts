@@ -101,6 +101,7 @@ export class RouteGuard {
         internalSavedObjectsClient,
         this._spacesPlugin !== undefined,
         this._authorization,
+        client,
         this._isMlReady
       );
 

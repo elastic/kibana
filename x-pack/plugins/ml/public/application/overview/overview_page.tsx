@@ -26,10 +26,6 @@ export const OverviewPage: FC = () => {
   const canViewMlNodes = checkPermission('canViewMlNodes');
 
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
-  const disableCreateAnalyticsButton =
-    !mlNodesAvailable() ||
-    !checkPermission('canCreateDataFrameAnalytics') ||
-    !checkPermission('canStartStopDataFrameAnalytics');
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -72,7 +68,6 @@ export const OverviewPage: FC = () => {
 
       <OverviewContent
         createAnomalyDetectionJobDisabled={disableCreateAnomalyDetectionJob}
-        createAnalyticsJobDisabled={disableCreateAnalyticsButton}
         setAdLazyJobCount={setAdLazyJobCount}
         setDfaLazyJobCount={setDfaLazyJobCount}
       />

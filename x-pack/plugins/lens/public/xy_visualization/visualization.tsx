@@ -15,6 +15,7 @@ import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+import type { FillStyle } from '../../common/expressions/xy_chart';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -52,6 +53,7 @@ import {
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import { XYState } from '..';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
 
 export const getXyVisualization = ({
   paletteService,
@@ -93,7 +95,11 @@ export const getXyVisualization = ({
       ...state,
       layers: [
         ...state.layers,
-        newLayerState(firstUsedSeriesType || state.preferredSeriesType, layerId, layerType),
+        newLayerState({
+          seriesType: firstUsedSeriesType || state.preferredSeriesType,
+          layerId,
+          layerType,
+        }),
       ],
     };
   },
@@ -102,7 +108,9 @@ export const getXyVisualization = ({
     return {
       ...state,
       layers: state.layers.map((l) =>
-        l.layerId !== layerId ? l : newLayerState(state.preferredSeriesType, layerId)
+        l.layerId !== layerId
+          ? l
+          : newLayerState({ seriesType: state.preferredSeriesType, layerId })
       ),
     };
   },
@@ -290,12 +298,14 @@ export const getXyVisualization = ({
     if (!foundLayer) {
       return prevState;
     }
+    const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
     const yConfig = metrics.map((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
         ...(axisMode && { axisMode }),
+        ...(isReferenceLine && { fill: chartType === 'area' ? 'below' : ('none' as FillStyle) }),
       };
     });
     const newLayer = {
@@ -303,7 +313,8 @@ export const getXyVisualization = ({
       ...(chartType && { seriesType: chartType as SeriesType }),
       ...(palette && { palette }),
       yConfig,
-    };
+      layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
+    } as XYLayerConfig;
 
     const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
 
@@ -431,15 +442,20 @@ export const getXyVisualization = ({
   },
 
   renderDimensionEditor(domElement, props) {
+    const allProps = {
+      ...props,
+      formatFactory: fieldFormats.deserialize,
+      paletteService,
+    };
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    const dimensionEditor = isReferenceLayer(layer) ? (
+      <ReferenceLinePanel {...allProps} />
+    ) : (
+      <DimensionEditor {...allProps} />
+    );
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <DimensionEditor
-            {...props}
-            formatFactory={fieldFormats.deserialize}
-            paletteService={paletteService}
-          />
-        </I18nProvider>
+        <I18nProvider>{dimensionEditor}</I18nProvider>
       </KibanaThemeProvider>,
       domElement
     );

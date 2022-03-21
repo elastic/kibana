@@ -26,7 +26,7 @@ describe('find', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/event_log/{type}/{id}/_find"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/event_log/{type}/{id}/_find"`);
 
     const events = [fakeEvent(), fakeEvent()];
     const result = {

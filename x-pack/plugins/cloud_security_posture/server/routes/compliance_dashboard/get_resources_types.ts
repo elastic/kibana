@@ -31,7 +31,7 @@ export interface ResourceTypeBucket extends KeyDocCount {
 export const resourceTypeAggQuery = {
   aggs_by_resource_type: {
     terms: {
-      field: 'resource.type.keyword',
+      field: 'type.keyword',
     },
     aggs: {
       failed_findings: {

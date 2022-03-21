@@ -18,6 +18,8 @@ import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
 
+type UnixEpochTime = number;
+
 export interface ClusterBucket extends ResourceTypeQueryResult, KeyDocCount {
   failed_findings: {
     doc_count: number;
@@ -26,6 +28,7 @@ export interface ClusterBucket extends ResourceTypeQueryResult, KeyDocCount {
     doc_count: number;
   };
   benchmarks: Aggregation<KeyDocCount>;
+  timestamps: Aggregation<KeyDocCount<UnixEpochTime>>;
 }
 
 interface ClustersQueryResult {
@@ -47,6 +50,15 @@ export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest =
             field: 'rule.benchmark.name.keyword',
           },
         },
+        timestamps: {
+          terms: {
+            field: '@timestamp',
+            size: 1,
+            order: {
+              _key: 'desc',
+            },
+          },
+        },
         ...resourceTypeAggQuery,
         ...findingsEvaluationAggsQuery,
       },
@@ -59,10 +71,13 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): CloudPostureStat
     // get cluster's meta data
     const benchmarks = cluster.benchmarks.buckets;
     if (!Array.isArray(benchmarks)) throw new Error('missing aggs by benchmarks per cluster');
+    const timestamps = cluster.timestamps.buckets;
+    if (!Array.isArray(timestamps)) throw new Error('missing aggs by timestamps per cluster');
 
     const meta = {
       clusterId: cluster.key,
       benchmarkName: benchmarks[0].key,
+      lastUpdate: timestamps[0].key,
     };
 
     // get cluster's stats

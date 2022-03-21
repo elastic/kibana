@@ -13,8 +13,11 @@ import type {
   SerializedFieldFormat,
 } from '../../../../src/plugins/field_formats/common';
 import type { Datatable } from '../../../../src/plugins/expressions/common';
-import type { PaletteContinuity } from '../../../../src/plugins/charts/common';
-import type { PaletteOutput } from '../../../../src/plugins/charts/common';
+import type {
+  PaletteContinuity,
+  PaletteOutput,
+  ColorMode,
+} from '../../../../src/plugins/charts/common';
 import {
   CategoryDisplay,
   layerTypes,
@@ -108,6 +111,7 @@ export interface SharedPieLayerState {
   percentDecimals?: number;
   emptySizeRatio?: number;
   legendMaxLines?: number;
+  legendSize?: number;
   truncateLegend?: boolean;
 }
 
@@ -120,4 +124,14 @@ export interface PieVisualizationState {
   shape: $Values<typeof PieChartTypes>;
   layers: PieLayerState[];
   palette?: PaletteOutput;
+}
+export interface MetricState {
+  layerId: string;
+  accessor?: string;
+  layerType: LayerType;
+  colorMode?: ColorMode;
+  palette?: PaletteOutput<CustomPaletteParams>;
+  titlePosition?: 'top' | 'bottom';
+  size?: string;
+  textAlign?: 'left' | 'right' | 'center';
 }

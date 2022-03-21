@@ -39,8 +39,13 @@ describe('Fleet preconfiguration reset', () => {
     const startKibana = async () => {
       const root = kbnTestServer.createRootWithCorePlugins(
         {
-          ...CLOUD_KIBANA_CONFIG,
-          'xpack.fleet.registryUrl': registryUrl,
+          xpack: {
+            ...CLOUD_KIBANA_CONFIG.xpack,
+            fleet: {
+              ...CLOUD_KIBANA_CONFIG.xpack.fleet,
+              registryUrl,
+            },
+          },
           logging: {
             appenders: {
               file: {

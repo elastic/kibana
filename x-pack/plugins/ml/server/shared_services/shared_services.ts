@@ -201,13 +201,16 @@ function getRequestItemsProvider(
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
-    const jobSavedObjectService = jobSavedObjectServiceFactory(
-      savedObjectsClient,
-      internalSavedObjectsClient,
-      spaceEnabled,
-      authorization,
-      isMlReady
-    );
+    const getSobSavedObjectService = (client: IScopedClusterClient) => {
+      return jobSavedObjectServiceFactory(
+        savedObjectsClient,
+        internalSavedObjectsClient,
+        spaceEnabled,
+        authorization,
+        client,
+        isMlReady
+      );
+    };
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
@@ -235,9 +238,11 @@ function getRequestItemsProvider(
       return fieldFormatRegistry;
     };
 
+    let jobSavedObjectService;
     if (request instanceof KibanaRequest) {
       hasMlCapabilities = getHasMlCapabilities(request);
       scopedClient = clusterClient.asScoped(request);
+      jobSavedObjectService = getSobSavedObjectService(scopedClient);
       mlClient = getMlClient(scopedClient, jobSavedObjectService);
     } else {
       hasMlCapabilities = () => Promise.resolve();
@@ -246,6 +251,7 @@ function getRequestItemsProvider(
         asInternalUser,
         asCurrentUser: asInternalUser,
       };
+      jobSavedObjectService = getSobSavedObjectService(scopedClient);
       mlClient = getMlClient(scopedClient, jobSavedObjectService);
     }
 
