@@ -1,21 +1,17 @@
+
+/*
+Global print styling
+*/
 $a4PageHeight: 297mm;
 $a4PageWidth: 210mm;
 $a4PageMargin: 0;
-
-$visualisationsPerPage: 2;
-
-.printViewport {
-  &__vis {
-    margin: 5mm auto;
-    height: calc(#{$a4PageHeight} / #{$visualisationsPerPage});
-    width: $a4PageWidth;
-  }
-}
+$a4PagePadding: 0;
 
 @page {
   size: A4;
   orientation: portrait;
-  padding: $a4PageMargin;
+  margin: $a4PageMargin;
+  padding: $a4PagePadding;
 }
 
 @mixin globalPrintRules {
@@ -31,21 +27,63 @@ $visualisationsPerPage: 2;
     break-inside: avoid;
   }
 
-  code {
-    -webkit-print-color-adjust: exact;  /* Chrome/Safari/Edge/Opera */
-    color-adjust: exact;  /* Firefox */
+  * {
+    -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
+    color-adjust: exact !important;                 /*Firefox*/
   }
 }
 
 /*
-General rules for print media
+Dashboard styling
 */
+$visualisationsPerPage: 2;
+$visPadding: 2mm;
+
+/*
+We set the same visual padding on the browser and print versions of the UI so that
+we don't hit a race condition where padding is being updated while the print image
+is being formed. This can result in parts of the vis being cut out.
+*/
+@mixin visualizationPadding {
+  padding-left: $visPadding;
+  padding-right: $visPadding;
+
+  &:nth-child(2n - 1) {
+    padding-top: $visPadding;
+  }
+
+  &:nth-child(#{$visualisationsPerPage}n) {
+    page-break-after: always;
+    padding-top: $visPadding;
+    padding-bottom: $visPadding;
+  }
+}
+
+@media screen, projection {
+  .printViewport {
+    &__vis {
+      @include visualizationPadding();
+
+      & .embPanel__header button {
+        display: none;
+      }
+
+      margin: $euiSizeL auto;
+      height: calc(#{$a4PageHeight} / #{$visualisationsPerPage});
+      width: $a4PageWidth;
+      padding: $visPadding;
+    }
+  }
+}
+
 @media print {
   @include globalPrintRules();
 
   .printViewport {
     &__vis {
-      margin: 0 auto;
+
+      @include visualizationPadding();
+
       height: calc(#{$a4PageHeight} / #{$visualisationsPerPage});
       width: $a4PageWidth;
 
@@ -57,10 +95,7 @@ General rules for print media
         display: none;
       }
 
-      &:nth-child(#{$visualisationsPerPage}n) {
-        page-break-after: always;
-        margin-top: 5mm;
-      }
+      page-break-inside: avoid;
 
       & * {
         overflow: hidden !important;
