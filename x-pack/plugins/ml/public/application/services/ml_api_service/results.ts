@@ -6,21 +6,21 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
-import {
+import { HttpService } from '../http_service';
+import { basePath } from './index';
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
+import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
 } from '../../../../common/types/results';
-import { HttpService } from '../http_service';
-import { basePath } from './index';
-import { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
-import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
-import { PartitionFieldsConfig } from '../../../../common/types/storage';
-import {
+import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
+import type { PartitionFieldsConfig } from '../../../../common/types/storage';
+import type {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
-import { MLAnomalyDoc } from '../../../../common/types/anomalies';
+import type { MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { EntityField } from '../../../../common/util/anomaly_utils';
 
 export const resultsApiProvider = (httpService: HttpService) => ({

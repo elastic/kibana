@@ -9,13 +9,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { fetchConnectors } from './api';
 import { ActionConnector } from './types';
-import { useToasts } from '../../common/lib/kibana';
+import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import * as i18n from './translations';
 
 interface ConnectorsState {
   loading: boolean;
   connectors: ActionConnector[];
-  permissionsError?: string;
 }
 
 export interface UseConnectorsResponse {
@@ -30,12 +29,9 @@ export interface UseConnectorsResponse {
  *
  * @param toastPermissionsErrors boolean controlling whether 403 and 401 errors should be displayed in a toast error
  */
-export const useConnectors = ({
-  toastPermissionsErrors = true,
-}: {
-  toastPermissionsErrors?: boolean;
-} = {}): UseConnectorsResponse => {
+export const useConnectors = (): UseConnectorsResponse => {
   const toasts = useToasts();
+  const { actions } = useApplicationCapabilities();
   const [state, setState] = useState<ConnectorsState>({
     loading: true,
     connectors: [],
@@ -43,8 +39,16 @@ export const useConnectors = ({
 
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
-
   const refetchConnectors = useCallback(async () => {
+    if (!actions.read) {
+      setState({
+        loading: false,
+        connectors: [],
+      });
+
+      return;
+    }
+
     try {
       isCancelledRef.current = false;
       abortCtrlRef.current.abort();
@@ -63,26 +67,15 @@ export const useConnectors = ({
       }
     } catch (error) {
       if (!isCancelledRef.current) {
-        let permissionsError: string | undefined;
         if (error.name !== 'AbortError') {
-          // if the error was related to permissions then let's return a boilerplate error message describing the problem
-          if (error.body?.statusCode === 403 || error.body?.statusCode === 401) {
-            permissionsError = i18n.READ_PERMISSIONS_ERROR_MSG;
-          }
-
-          // if the error was not permissions related then toast it
-          // if it was permissions related (permissionsError was defined) and the caller wants to toast, then create a toast
-          if (permissionsError === undefined || toastPermissionsErrors) {
-            toasts.addError(
-              error.body && error.body.message ? new Error(error.body.message) : error,
-              { title: i18n.ERROR_TITLE }
-            );
-          }
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
         }
         setState({
           loading: false,
           connectors: [],
-          permissionsError,
         });
       }
     }
@@ -102,6 +95,5 @@ export const useConnectors = ({
     loading: state.loading,
     connectors: state.connectors,
     refetchConnectors,
-    permissionsError: state.permissionsError,
   };
 };
