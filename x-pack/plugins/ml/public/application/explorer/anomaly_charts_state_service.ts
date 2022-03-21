@@ -8,17 +8,13 @@
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { skipWhile, switchMap } from 'rxjs/operators';
 import { StateService } from '../services/state_service';
-import type { ResultsApiService } from '../services/ml_api_service/results';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
-import { TimefilterContract } from '../../../../../../src/plugins/data/public';
 import {
   ExplorerChartsData,
   getDefaultChartsData,
 } from './explorer_charts/explorer_charts_container_service';
-import { SeriesConfigWithMetadata } from '../services/anomaly_explorer_charts_service';
-
-const MAX_CHARTS_PER_ROW = 4;
+import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 
 export class AnomalyChartsStateService extends StateService {
   private _isChartsDataLoading$ = new BehaviorSubject<boolean>(false);
@@ -27,8 +23,7 @@ export class AnomalyChartsStateService extends StateService {
   constructor(
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private anomalyTimelineStateServices: AnomalyTimelineStateService,
-    private resultsApiServices: ResultsApiService,
-    private timeFilter: TimefilterContract
+    private anomalyExplorerChartsService: AnomalyExplorerChartsService
   ) {
     super();
     this._init();
@@ -43,43 +38,23 @@ export class AnomalyChartsStateService extends StateService {
     ])
       .pipe(
         switchMap(([selectedJobs, influencerFilterQuery, containerWidth, selectedCells]) => {
+          if (!selectedCells) return of(getDefaultChartsData());
           const jobIds = selectedJobs.map((v) => v.id);
-
-          if (!selectedCells) return of([]) as Observable<SeriesConfigWithMetadata[]>;
-
           this._isChartsDataLoading$.next(true);
 
-          const optimumPointSpacing = 5;
-          const optimumNumPoints = Math.ceil(containerWidth! / optimumPointSpacing);
-
-          const bounds = this.timeFilter.getActiveBounds();
-          const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
-          const boundsMax = bounds?.max ? bounds.max.valueOf() : undefined;
-
-          return this.resultsApiServices.getAnomalyCharts$(
+          return this.anomalyExplorerChartsService.getAnomalyData$(
             jobIds,
-            [],
-            0,
+            containerWidth!,
             selectedCells?.times[0] * 1000,
             selectedCells?.times[1] * 1000,
-            { min: boundsMin, max: boundsMax },
-            6,
-            optimumNumPoints,
-            influencerFilterQuery
+            influencerFilterQuery,
+            0,
+            6
           );
         })
       )
       .subscribe((v) => {
-        const data = getDefaultChartsData();
-
-        // Calculate the number of charts per row, depending on the width available, to a max of 4.
-        const chartsPerRow = Math.min(Math.max(Math.floor(900 / 550), 1), MAX_CHARTS_PER_ROW);
-
-        data.seriesToPlot = v;
-
-        data.chartsPerRow = chartsPerRow;
-
-        this._chartsData$.next(data);
+        this._chartsData$.next(v);
         this._isChartsDataLoading$.next(false);
       });
   }

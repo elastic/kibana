@@ -173,7 +173,7 @@ describe('useAnomalyChartsInputResolver', () => {
     const explorerServices = services[2];
 
     expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
-    expect(explorerServices.anomalyExplorerService.getAnomalyData).toHaveBeenCalledTimes(1);
+    expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       embeddableInput.next({
@@ -192,7 +192,7 @@ describe('useAnomalyChartsInputResolver', () => {
     });
 
     expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
-    expect(explorerServices.anomalyExplorerService.getAnomalyData).toHaveBeenCalledTimes(2);
+    expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(2);
   });
 
   test('should not complete the observable on error', async () => {

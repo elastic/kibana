@@ -13,6 +13,7 @@ import { mlResultsServiceProvider } from '../services/results_service';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 import { AnomalyChartsStateService } from './anomaly_charts_state_service';
+import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 
 export type AnomalyExplorerContextValue =
   | {
@@ -74,11 +75,16 @@ export function useAnomalyExplorerContextValue(
       timefilter
     );
 
+    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
+      timefilter,
+      mlApiServices,
+      mlResultsService
+    );
+
     const chartsStateService = new AnomalyChartsStateService(
       anomalyExplorerCommonStateService,
       anomalyTimelineStateService,
-      mlApiServices.results,
-      timefilter
+      anomalyExplorerChartsService
     );
 
     return {
