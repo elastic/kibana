@@ -45,6 +45,7 @@ export interface TakeActionDropdownProps {
   onAddExceptionTypeClick: (type: ExceptionListType) => void;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   refetch: (() => void) | undefined;
+  refetchFlyoutData: () => Promise<void>;
   timelineId: string;
   onOsqueryClick: (id: string) => void;
 }
@@ -61,6 +62,7 @@ export const TakeActionDropdown = React.memo(
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
     refetch,
+    refetchFlyoutData,
     timelineId,
     onOsqueryClick,
   }: TakeActionDropdownProps) => {
@@ -212,6 +214,7 @@ export const TakeActionDropdown = React.memo(
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
+      onSuccess: refetchFlyoutData,
       timelineId,
     });
 
