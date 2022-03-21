@@ -131,12 +131,14 @@ export function useFieldStatsSearchStrategy(
       dataVisualizerListState.visibleFieldNames,
       dataVisualizerListState.visibleFieldTypes
     );
+
     const { pageIndex, pageSize } = dataVisualizerListState;
-    const sortedConfigs = filteredItems.filteredFields?.slice(
-      pageIndex * pageSize,
-      (pageIndex + 1) * pageSize
-    );
-    if (!sortedConfigs) return;
+
+    const pageOfConfigs = filteredItems.filteredFields
+      ?.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+      .filter((d) => d.existsInDocs === true);
+
+    if (!pageOfConfigs) return;
 
     const filterCriteria = buildBaseFilterCriteria(
       searchStrategyParams.timeFieldName,
@@ -166,7 +168,7 @@ export function useFieldStatsSearchStrategy(
     };
 
     const batches = createBatchedRequests(
-      sortedConfigs.map((config, idx) => ({
+      pageOfConfigs.map((config, idx) => ({
         fieldName: config.fieldName,
         type: config.type,
         cardinality: config.cardinality,
@@ -228,7 +230,7 @@ export function useFieldStatsSearchStrategy(
 
             setFieldStats(statsMapTmp);
             setFetchState({
-              loaded: (statsMapTmp.size / sortedConfigs.length) * 100,
+              loaded: (statsMapTmp.size / pageOfConfigs.length) * 100,
               isRunning: true,
             });
 
@@ -269,7 +271,7 @@ export function useFieldStatsSearchStrategy(
           });
           setFieldStats(statsMap);
           setFetchState({
-            loaded: (statsMap.size / sortedConfigs.length) * 100,
+            loaded: (statsMap.size / pageOfConfigs.length) * 100,
             isRunning: true,
           });
         }

@@ -226,11 +226,11 @@ export const useDataVisualizerGridData = (
     if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
       .map((config) => {
-        if (config.existsInDocs === false) return;
         return {
           fieldName: config.fieldName,
           type: config.type,
           cardinality: config.stats?.cardinality ?? 0,
+          existsInDocs: config.existsInDocs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -239,11 +239,11 @@ export const useDataVisualizerGridData = (
     // Top values will be obtained on a sample if cardinality > 100000.
     const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
       .map((config) => {
-        if (config.existsInDocs === false) return;
         return {
           fieldName: config.fieldName,
           type: config.type,
           cardinality: config.stats?.cardinality ?? 0,
+          existsInDocs: config.existsInDocs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
