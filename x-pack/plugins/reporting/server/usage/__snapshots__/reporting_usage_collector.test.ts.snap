@@ -2211,6 +2211,7 @@ Object {
       },
       "total": 0,
     },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2313,6 +2314,7 @@ Object {
       },
     },
   },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2680,6 +2682,7 @@ Object {
       },
       "total": 0,
     },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2776,6 +2779,7 @@ Object {
     },
     "statuses": Object {},
   },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -3137,6 +3141,7 @@ Object {
       },
       "total": 0,
     },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -3233,6 +3238,7 @@ Object {
     },
     "statuses": undefined,
   },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -3624,6 +3630,7 @@ Object {
       },
       "total": 0,
     },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -3731,6 +3738,7 @@ Object {
       },
     },
   },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -4103,6 +4111,7 @@ Object {
       },
       "total": 0,
     },
+    "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -4199,6 +4208,7 @@ Object {
     },
     "statuses": Object {},
   },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
