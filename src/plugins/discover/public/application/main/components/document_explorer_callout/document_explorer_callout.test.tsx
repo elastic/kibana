@@ -15,6 +15,7 @@ import { DiscoverServices } from '../../../../build_services';
 
 const defaultServices = {
   addBasePath: () => '',
+  docLinks: { links: { discover: { documentExplorer: '' } } },
   capabilities: { advancedSettings: { save: true } },
   storage: new LocalStorageMock({ [CALLOUT_STATE_KEY]: false }),
 } as unknown as DiscoverServices;
