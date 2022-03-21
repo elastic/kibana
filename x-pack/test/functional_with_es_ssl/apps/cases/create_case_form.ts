@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  describe('Create case ', function () {
+  describe('Create case', function () {
     const common = getPageObject('common');
     const find = getService('find');
     const casesApp = getService('casesApp');
@@ -20,16 +20,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      casesApp.api.deleteAllCases();
+      await casesApp.api.deleteAllCases();
     });
 
-    describe('creating a case', () => {
-      it('creates a case from the stack managament page', async () => {
-        const caseTitle = 'test-' + uuid.v4();
-        await casesApp.common.createCaseFromCreateCasePage(caseTitle);
-        const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
-        expect(await title.getVisibleText()).equal(caseTitle);
-      });
+    it('creates a case from the stack managament page', async () => {
+      const caseTitle = 'test-' + uuid.v4();
+      await casesApp.common.createCaseFromCreateCasePage(caseTitle);
+      const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+      expect(await title.getVisibleText()).equal(caseTitle);
     });
   });
 };

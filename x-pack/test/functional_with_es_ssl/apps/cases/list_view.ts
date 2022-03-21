@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -24,7 +23,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      casesApp.api.deleteAllCases();
+      await casesApp.api.deleteAllCases();
     });
 
     beforeEach(async () => {

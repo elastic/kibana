@@ -26,7 +26,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      casesApp.api.deleteAllCases();
+      await casesApp.api.deleteAllCases();
     });
 
     beforeEach(async () => {
