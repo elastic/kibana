@@ -66,6 +66,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.version=latest`,
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
+        // Enable debug fleet logs by default
+        `--logging.loggers[0].name=plugins.fleet`,
+        `--logging.loggers[0].level=debug`,
+        `--logging.loggers[0].appenders=${JSON.stringify(['default'])}`,
       ],
     },
   };

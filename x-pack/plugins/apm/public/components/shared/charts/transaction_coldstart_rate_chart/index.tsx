@@ -74,7 +74,7 @@ export function TransactionColdstartRateChart({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { serviceName, transactionType } = useApmServiceContext();
-  const comparisonChartThem = getComparisonChartTheme();
+  const comparisonChartTheme = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -177,7 +177,7 @@ export function TransactionColdstartRateChart({
         timeseries={timeseries}
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
-        customTheme={comparisonChartThem}
+        customTheme={comparisonChartTheme}
       />
     </EuiPanel>
   );

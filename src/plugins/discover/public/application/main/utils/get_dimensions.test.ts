@@ -9,7 +9,7 @@ import { dataPluginMock } from '../../../../../data/public/mocks';
 
 import { getDimensions } from './get_dimensions';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
-import { ISearchSource, calculateBounds } from '../../../../../data/common';
+import { ISearchSource, calculateBounds } from '../../../../../data/public';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 
 test('getDimensions', () => {

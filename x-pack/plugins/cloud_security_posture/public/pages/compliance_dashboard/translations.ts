@@ -15,8 +15,8 @@ export const CLOUD_POSTURE_SCORE = i18n.translate('xpack.csp.cloud_posture_score
   defaultMessage: 'Cloud Posture Score',
 });
 
-export const RISKS = i18n.translate('xpack.csp.risks', {
-  defaultMessage: 'Risks',
+export const RISKS = i18n.translate('xpack.csp.complianceDashboard.failedFindingsChartLabel', {
+  defaultMessage: 'Failed Findings',
 });
 
 export const OPEN_CASES = i18n.translate('xpack.csp.open_cases', {

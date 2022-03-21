@@ -11,11 +11,12 @@ import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
-import { usePluginContext } from '../hooks/use_plugin_context';
-import { useTimeRange } from '../hooks/use_time_range';
+import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { ApmIndicesConfig } from '../../common/typings';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../application/types';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
@@ -42,9 +43,9 @@ export const HasDataContext = createContext({} as HasDataContextValue);
 const apps: DataContextApps[] = ['apm', 'synthetics', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
-  const { core } = usePluginContext();
+  const { http } = useKibana<ObservabilityAppServices>().services;
   const [forceUpdate, setForceUpdate] = useState('');
-  const { absoluteStart, absoluteEnd } = useTimeRange();
+  const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
@@ -76,7 +77,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
             };
             switch (app) {
               case 'ux':
-                const params = { absoluteTime: { start: absoluteStart, end: absoluteEnd } };
+                const params = { absoluteTime: { start: absoluteStart!, end: absoluteEnd! } };
                 const resultUx = await getDataHandler(app)?.hasData(params);
                 updateState({
                   hasData: resultUx?.hasData,
@@ -124,7 +125,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     async function fetchAlerts() {
       try {
-        const alerts = await getObservabilityAlerts({ core });
+        const alerts = await getObservabilityAlerts({ http });
         setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
@@ -144,7 +145,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     }
 
     fetchAlerts();
-  }, [forceUpdate, core]);
+  }, [forceUpdate, http]);
 
   const isAllRequestsComplete = apps.every((app) => {
     const appStatus = hasDataMap[app]?.status;

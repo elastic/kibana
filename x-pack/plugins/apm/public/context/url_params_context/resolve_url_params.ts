@@ -19,10 +19,7 @@ import {
 } from './helpers';
 import { UrlParams } from './types';
 
-type TimeUrlParams = Pick<
-  UrlParams,
-  'start' | 'end' | 'rangeFrom' | 'rangeTo' | 'exactStart' | 'exactEnd'
->;
+type TimeUrlParams = Pick<UrlParams, 'start' | 'end' | 'rangeFrom' | 'rangeTo'>;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   const query = toQuery(location.search);

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
-import { DataViewType } from '../../../../../data_views/common';
+import { DataViewType } from '../../../../../data_views/public';
 import { FetchDeps } from './fetch_all';
 
 export function fetchTotalHits(

@@ -100,15 +100,17 @@ export const useInitSourcerer = (
     activeDataViewIds.forEach((id) => {
       if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
         searchedIds.current = [...searchedIds.current, id];
-        indexFieldsSearch(
-          id,
-          id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
-          id === scopeDataViewId
-            ? selectedPatterns.length === 0 && missingPatterns.length === 0
-            : timelineDataViewId === id
-            ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
-            : false
-        );
+        indexFieldsSearch({
+          dataViewId: id,
+          scopeId:
+            id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
+          needToBeInit:
+            id === scopeDataViewId
+              ? selectedPatterns.length === 0 && missingPatterns.length === 0
+              : timelineDataViewId === id
+              ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
+              : false,
+        });
       }
     });
   }, [
@@ -188,7 +190,7 @@ export const useInitSourcerer = (
           if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
-            indexFieldsSearch(response.defaultDataView.id);
+            indexFieldsSearch({ dataViewId: response.defaultDataView.id });
           }
           dispatch(sourcererActions.setSourcererDataViews(response));
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));

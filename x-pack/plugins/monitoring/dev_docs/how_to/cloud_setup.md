@@ -38,6 +38,7 @@ elasticsearch.hosts: ${ELASTICSEARCH_ENDPOINT}
 elasticsearch.username: kibana_dev
 elasticsearch.password: ${ELASTIC_PASSWORD}
 elasticsearch.ignoreVersionMismatch: true
+monitoring.ui.container.elasticsearch.enabled: true
 YAML
 ```
 

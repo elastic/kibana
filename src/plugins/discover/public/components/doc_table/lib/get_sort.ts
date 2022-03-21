@@ -7,7 +7,7 @@
  */
 
 import { isPlainObject } from 'lodash';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 
 export type SortPairObj = Record<string, string>;
 export type SortPairArr = [string, string];
