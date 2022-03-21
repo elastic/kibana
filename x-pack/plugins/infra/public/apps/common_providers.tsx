@@ -43,11 +43,18 @@ export const CommonInfraProviders: React.FC<{
   );
 };
 
-export const CoreProviders: React.FC<{
+export interface CoreProvidersProps {
   core: CoreStart;
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
-}> = ({ children, core, plugins, theme$ }) => {
+}
+
+export const CoreProviders: React.FC<CoreProvidersProps> = ({
+  children,
+  core,
+  plugins,
+  theme$,
+}) => {
   const { Provider: KibanaContextProviderForPlugin } = useMemo(
     () => createKibanaContextForPlugin(core, plugins),
     [core, plugins]
