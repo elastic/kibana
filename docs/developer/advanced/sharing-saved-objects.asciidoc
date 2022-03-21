@@ -456,10 +456,8 @@ const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     title: myObject.attributes.title, <2>
     noun: OBJECT_NOUN, <3>
   },
-  onUpdate: () => { /* callback when object is updated */ },
-  onClose: () => {
-    setShowFlyout(false);
-  },
+  onUpdate: () => { /* callback when the object is updated */ },
+  onClose: () => setShowFlyout(false),
 };
 
 return (
