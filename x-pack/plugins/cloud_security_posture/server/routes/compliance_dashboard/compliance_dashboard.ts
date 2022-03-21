@@ -95,6 +95,8 @@ export const defineGetComplianceDashboardRoute = (
           },
         };
 
+        throw new Error('demo error message');
+
         const [stats, resourcesTypes, clusters] = await Promise.all([
           getStats(esClient, query),
           getResourcesTypes(esClient, query),

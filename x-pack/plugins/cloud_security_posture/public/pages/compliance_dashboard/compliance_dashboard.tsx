@@ -45,8 +45,8 @@ export const ComplianceDashboard = () => {
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       query={getDashboarDataQuery}
       noDataConfig={getNoDataConfig(getDashboarDataQuery.refetch)}
-      // errorRender={() => <div>{'test'}</div>}
-      // loadingRender={Test}
+      errorRender={(error) => <div>{`custom error render: ${error.body.message}`}</div>}
+      loadingRender={() => <div>{'custom loader render'}</div>}
     >
       {getDashboarDataQuery.data && (
         <>
