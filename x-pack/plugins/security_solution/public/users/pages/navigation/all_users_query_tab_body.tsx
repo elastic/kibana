@@ -36,7 +36,7 @@ export const AllUsersQueryTabBody = ({
     indexNames,
     skip,
     startDate,
-    // TODO Move authentication table, hook and store to the user folder when 'usersEnabled' is removed
+    // TODO Move authentication table and hook store to 'public/common' folder when 'usersEnabled' FF is removed
     // @ts-ignore
     type,
     deleteQuery,
@@ -57,7 +57,7 @@ export const AllUsersQueryTabBody = ({
       totalCount={totalCount}
       docValueFields={docValueFields}
       indexNames={indexNames}
-      // TODO Move authentication table, hook and store to the user folder when 'usersEnabled' is removed
+      // TODO Move authentication table and hook store to 'public/common' folder when 'usersEnabled' FF is removed
       // @ts-ignore
       type={type}
     />
