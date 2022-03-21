@@ -54,14 +54,18 @@ export const SaveCustom: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
-            <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
+            <EuiFlexGroup
+              direction="column"
+              alignItems="center"
+              style={{ marginTop: 'auto', marginBottom: 'auto' }}
+            >
               <EuiFlexItem>
                 <EuiIcon type="checkInCircleFilled" color="#42CC89" size="xxl" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="l">
                   <EuiTextAlign textAlign="center">
-                    <h1>
+                    <h2>
                       {i18n.translate(
                         'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.heading',
                         {
@@ -69,7 +73,7 @@ export const SaveCustom: React.FC = () => {
                           values: { name: newCustomSource.name },
                         }
                       )}
-                    </h1>
+                    </h2>
                   </EuiTextAlign>
                 </EuiTitle>
               </EuiFlexItem>
@@ -171,12 +175,10 @@ export const SaveCustom: React.FC = () => {
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiCallOut
+                heading="h3"
                 size="s"
                 title={
-                  <EuiLinkTo
-                    target="_blank"
-                    to={''} // TODO Add to link to feedback page
-                  >
+                  <EuiLinkTo target="_blank" to={'https://www.elastic.co/kibana/feedback'}>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.workplaceSearch.sources.feedbackLinkLabel"
                       defaultMessage="Have feedback about deploying a {name} connector? Let us know."
