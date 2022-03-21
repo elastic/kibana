@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await dashboardPanelActions.openContextMenuMorePanel();
+      await dashboardPanelActions.openContextMenu();
 
       await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
 
@@ -79,14 +79,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.clickCancelOutOfEditMode();
 
-      await dashboardPanelActions.openContextMenuMorePanel();
+      await dashboardPanelActions.openContextMenu();
 
       await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
-      expect(await filterBarService.getFilterCount()).to.be(3);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('filter count to be correct', async () => {
+        const filterCount = await filterBarService.getFilterCount();
+        return filterCount === 3;
+      });
+
       expect(
         await filterBarService.hasFilter('host.raw', 'cdn.theacademyofperformingartsandscience.org')
       ).to.be.ok();

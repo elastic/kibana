@@ -18,7 +18,7 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart) =>
   createAction<{ embeddable: IEmbeddable }>({
     type: ACTION_OPEN_IN_DISCOVER,
     id: ACTION_OPEN_IN_DISCOVER,
-    order: 4,
+    order: 19, // right after Inspect which is 20
     getIconType: () => 'popout',
     getDisplayName: () =>
       i18n.translate('xpack.lens.actions.openInDiscover', {
