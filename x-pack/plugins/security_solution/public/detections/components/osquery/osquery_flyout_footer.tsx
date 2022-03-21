@@ -16,7 +16,7 @@ interface EventDetailsFooterProps {
 export const OsqueryEventDetailsFooterComponent = ({ handleClick }: EventDetailsFooterProps) => {
   const renderFooterBody = useMemo(() => {
     return (
-      <EuiButtonEmpty onClick={handleClick} data-test-subj={'osquery-empty-button'}>
+      <EuiButtonEmpty onClick={handleClick} data-test-subj="osquery-empty-button">
         <FormattedMessage id="xpack.securitySolution.footer.cancel" defaultMessage="Cancel" />
       </EuiButtonEmpty>
     );
