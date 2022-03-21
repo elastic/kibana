@@ -11,7 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { useKibana } from '../../shared_imports';
 
-import { MatchedItem, ResolveIndexResponseItemAlias, DataViewEditorContext } from '../../types';
+import { MatchedItem, DataViewEditorContext } from '../../types';
 
 import { getIndices } from '../../lib';
 
@@ -20,8 +20,7 @@ import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../../../data/common';
 
-const removeAliases = (item: MatchedItem) =>
-  !(item as unknown as ResolveIndexResponseItemAlias).indices;
+const removeAliases = (mItem: MatchedItem) => !mItem.item.indices;
 
 interface Props {
   onCancel: () => void;

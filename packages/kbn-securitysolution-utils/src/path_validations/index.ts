@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const FILENAME_WILDCARD_WARNING = i18n.translate('utils.filename.wildcardWarning', {
-  defaultMessage: `A wildcard in the filename will affect the endpoint's performance`,
+  defaultMessage: `Using wildcards in file paths can impact Endpoint performance`,
 });
 
 export const FILEPATH_WARNING = i18n.translate('utils.filename.pathWarning', {

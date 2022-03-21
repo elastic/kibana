@@ -22,10 +22,39 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.over
   defaultMessage: 'Overview',
 });
 
-export const HIGHLIGHTES_FIELDS = i18n.translate(
+export const HIGHLIGHTED_FIELDS = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.highlightedFields',
   {
     defaultMessage: 'Highlighted fields',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_FIELD = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.field',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.value',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
+  {
+    defaultMessage: 'Alert Prevalence',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip',
+  {
+    defaultMessage:
+      'The total count of alerts with the same value within the currently selected timerange. This value is not affected by additional filters.',
   }
 );
 

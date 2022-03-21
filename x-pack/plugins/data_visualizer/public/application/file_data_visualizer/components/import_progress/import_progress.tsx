@@ -23,10 +23,10 @@ export interface Statuses {
   parseJSONStatus: IMPORT_STATUS;
   indexCreatedStatus: IMPORT_STATUS;
   ingestPipelineCreatedStatus: IMPORT_STATUS;
-  indexPatternCreatedStatus: IMPORT_STATUS;
+  dataViewCreatedStatus: IMPORT_STATUS;
   uploadProgress: number;
   uploadStatus: IMPORT_STATUS;
-  createIndexPattern: boolean;
+  createDataView: boolean;
   createPipeline: boolean;
   permissionCheckStatus: IMPORT_STATUS;
 }
@@ -38,10 +38,10 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     parseJSONStatus,
     indexCreatedStatus,
     ingestPipelineCreatedStatus,
-    indexPatternCreatedStatus,
+    dataViewCreatedStatus,
     uploadProgress,
     uploadStatus,
-    createIndexPattern,
+    createDataView,
     createPipeline,
   } = statuses;
 
@@ -75,7 +75,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   if (uploadStatus === IMPORT_STATUS.COMPLETE) {
     completedStep = 4;
   }
-  if (indexPatternCreatedStatus === IMPORT_STATUS.COMPLETE) {
+  if (dataViewCreatedStatus === IMPORT_STATUS.COMPLETE) {
     completedStep = 5;
   }
 
@@ -198,7 +198,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
         defaultMessage: 'Data uploaded',
       }
     );
-    if (createIndexPattern === true) {
+    if (createDataView === true) {
       createDataViewTitle = i18n.translate(
         'xpack.dataVisualizer.file.importProgress.creatingDataViewTitle',
         {
@@ -265,12 +265,12 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     });
   }
 
-  if (createIndexPattern === true) {
+  if (createDataView === true) {
     steps.push({
       title: createDataViewTitle,
       isSelected: uploadStatus === IMPORT_STATUS.COMPLETE,
-      isComplete: indexPatternCreatedStatus === IMPORT_STATUS.COMPLETE,
-      status: indexPatternCreatedStatus,
+      isComplete: dataViewCreatedStatus === IMPORT_STATUS.COMPLETE,
+      status: dataViewCreatedStatus,
       onClick: () => {},
     });
   }

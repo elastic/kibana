@@ -20,25 +20,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { CspPageTemplate } from '../../components/page_template';
 import { BenchmarksTable } from './benchmarks_table';
 import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS } from './translations';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
-import { pagePathGetters } from '../../../../fleet/public';
-import { useKibana } from '../../common/hooks/use_kibana';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { SEARCH_PLACEHOLDER } from './translations';
 
-const integrationPath = pagePathGetters.integrations_all({ searchTerm: 'CIS' }).join('');
 const BENCHMARKS_BREADCRUMBS = [allNavigationItems.benchmarks];
 const SEARCH_DEBOUNCE_MS = 300;
 export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'cspBenchmarksTable';
 
 const AddCisIntegrationButton = () => {
-  const { http } = useKibana().services;
+  const cisIntegrationLink = useCISIntegrationLink();
 
   return (
-    <EuiButton fill iconType="plusInCircle" href={http.basePath.prepend(integrationPath)}>
+    <EuiButton fill iconType="plusInCircle" href={cisIntegrationLink}>
       {ADD_A_CIS_INTEGRATION}
     </EuiButton>
   );
