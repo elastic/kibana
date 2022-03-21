@@ -145,6 +145,9 @@ export class Printer {
         modifiers.push(exportInfo.type);
       }
     }
+    if ((keyword === 'var' || keyword === 'const') && !exportInfo) {
+      modifiers.push('declare');
+    }
     if (flags & ts.ModifierFlags.Default) {
       modifiers.push('default');
     }
@@ -301,10 +304,13 @@ export class Printer {
       case ts.SyntaxKind.BigIntLiteral:
       case ts.SyntaxKind.NumericLiteral:
       case ts.SyntaxKind.StringKeyword:
-      case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.TypeReference:
       case ts.SyntaxKind.IntersectionType:
         return [node.getFullText().trim()];
+    }
+
+    if (ts.isEnumDeclaration(node)) {
+      return [node.getFullText().trim() + '\n'];
     }
 
     if (ts.isFunctionDeclaration(node)) {
