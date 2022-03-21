@@ -39,6 +39,15 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
     ),
     protectionField: 'network',
   },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data',
+      {
+        defaultMessage: 'Session Data',
+      }
+    ),
+    protectionField: 'session_data',
+  },
 ];
 
 export const LinuxEvents = memo(() => {
