@@ -118,18 +118,19 @@ export function CasesAppCommonServiceProvider({ getService, getPageObject }: Ftr
     },
 
     async deleteAllCasesFromListUi() {
+      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
       let rows: WebElementWrapper[];
       do {
         rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         if (rows.length > 0) {
           await this.deleteAllBulkListAction();
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
         }
       } while (rows.length > 0);
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
+      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
       expect(rows.length).equal(nrRows);
     },
