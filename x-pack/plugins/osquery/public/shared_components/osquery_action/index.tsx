@@ -75,7 +75,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
           <p>
             <FormattedMessage
               id="xpack.osquery.action.empty"
-              defaultMessage={` 'To access this page, ask your administrator for {text} Kibana privileges.'`}
+              defaultMessage="To access this page, ask your administrator for {text} Kibana privileges."
               values={euiCodeText}
             />
           </p>
