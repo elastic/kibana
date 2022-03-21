@@ -33,7 +33,7 @@ function getAvailableTotalForFeature(
     available: isAvailable(featureAvailability, typeKey),
     total: jobType.total,
     deprecated,
-    output_size: jobType.sizes,
+    output_size: jobType.output_size,
     app: { ...defaultTotalsForFeature.app, ...jobType.app },
     layout: { ...defaultTotalsForFeature.layout, ...jobType.layout },
   };

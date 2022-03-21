@@ -37,7 +37,7 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -96,7 +96,7 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -164,7 +164,7 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -223,7 +223,7 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -282,7 +282,7 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -345,7 +345,7 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -404,7 +404,7 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -466,7 +466,7 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -525,7 +525,7 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -584,7 +584,7 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -666,7 +666,7 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -725,7 +725,7 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -1327,7 +1327,7 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -1386,7 +1386,7 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },

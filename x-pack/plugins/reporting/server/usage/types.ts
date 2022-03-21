@@ -20,7 +20,7 @@ interface DocCount {
 }
 
 interface SizeStats {
-  sizes?: { values: SizePercentiles };
+  output_size?: { values: SizePercentiles };
 }
 
 export interface KeyCountBucket extends DocCount, SizeStats {
@@ -73,7 +73,7 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  sizes?: SizePercentiles;
+  output_size?: SizePercentiles;
   app?: {
     search?: number;
     dashboard?: number;
