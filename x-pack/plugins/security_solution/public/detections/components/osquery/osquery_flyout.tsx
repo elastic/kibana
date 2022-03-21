@@ -17,12 +17,12 @@ const OsqueryActionWrapper = styled.div`
   padding: 8px;
 `;
 
-export interface IProps {
+export interface OsqueryFlyoutProps {
   agentId: string;
   onClose: () => void;
 }
 
-export const OsqueryFlyout: React.FC<IProps> = ({ agentId, onClose }) => {
+export const OsqueryFlyout: React.FC<OsqueryFlyoutProps> = ({ agentId, onClose }) => {
   const {
     services: { osquery },
   } = useKibana();

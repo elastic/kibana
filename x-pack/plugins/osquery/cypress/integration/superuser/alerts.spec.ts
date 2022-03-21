@@ -18,7 +18,7 @@ import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 
-describe.only('Alert Event Details', () => {
+describe('Alert Event Details', () => {
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
@@ -36,7 +36,7 @@ describe.only('Alert Event Details', () => {
     const PACK_NAME = 'testpack';
     const RULE_NAME = 'Test-rule';
     navigateTo('/app/osquery/packs');
-    preparePack(PACK_NAME, 'placeholder');
+    preparePack(PACK_NAME);
     findAndClickButton('Edit');
     cy.contains(`Edit ${PACK_NAME}`);
     findFormFieldByRowsLabelAndType(
