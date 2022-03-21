@@ -404,7 +404,6 @@ export function getIndexPatternDatasource({
               });
             }}
             {...props}
-            data={data}
           />
         </KibanaThemeProvider>,
         domElement
@@ -452,18 +451,22 @@ export function getIndexPatternDatasource({
 
     refreshIndexPatternsList: async ({ indexPatternId, setState }) => {
       const newlyMappedIndexPattern = await loadIndexPatterns({
-        indexPatternsService: data.indexPatterns,
+        indexPatternsService: dataViews,
         cache: {},
         patterns: [indexPatternId],
       });
+      const indexPatternRefs = await dataViews.getIdsWithTitle();
       const indexPattern = newlyMappedIndexPattern[indexPatternId];
-      setState((s) => ({
-        ...s,
-        indexPatterns: {
-          ...s.indexPatterns,
-          [indexPattern.id]: indexPattern,
-        },
-      }));
+      setState((s) => {
+        return {
+          ...s,
+          indexPatterns: {
+            ...s.indexPatterns,
+            [indexPattern.id]: indexPattern,
+          },
+          indexPatternRefs,
+        };
+      });
     },
 
     // Reset the temporary invalid state when closing the editor, but don't

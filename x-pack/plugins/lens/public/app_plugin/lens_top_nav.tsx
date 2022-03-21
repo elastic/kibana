@@ -662,10 +662,11 @@ export const LensTopNavMenu = ({
             indexPatternId: dataView.id,
             setDatasourceState,
           });
+          refreshFieldList();
         }
       },
     });
-  }, [dataViewEditor, datasourceMap, datasourceStates, setDatasourceState]);
+  }, [dataViewEditor, datasourceMap, datasourceStates, refreshFieldList, setDatasourceState]);
 
   const dataViewPickerProps = {
     trigger: {
