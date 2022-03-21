@@ -9,6 +9,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useEuiTheme, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useMountedState from 'react-use/lib/useMountedState';
 
 import { usePlatformService } from '@kbn/shared-ux-services';
 
@@ -33,9 +34,10 @@ export interface Props {
  *
  * See shared-ux/public/services for information.
  */
-export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = false }: Props) => {
+export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { setIsFullscreen } = usePlatformService();
+  const isMounted = useMountedState();
 
   const onClick = useCallback(() => {
     if (toggleChrome) {
@@ -65,6 +67,12 @@ export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = false }
       document.removeEventListener('keydown', onKeyDown, false);
     };
   }, [onKeyDown, toggleChrome, setIsFullscreen]);
+
+  useEffect(() => {
+    if (!isMounted() && toggleChrome) {
+      setIsFullscreen(true);
+    }
+  }, [isMounted, setIsFullscreen, toggleChrome]);
 
   // override the z-index: 1 applied to all non-eui elements that are in :focus via kui
   // see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
