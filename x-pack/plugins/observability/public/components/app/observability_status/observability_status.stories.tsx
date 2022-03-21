@@ -82,7 +82,7 @@ const testBoxes = [
     id: 'alert',
     title: 'Alerting',
     description:
-      'Detect complex conditions within Observability and trigger actions when those conditions are met.',
+      'Detect complex conditions in Observability and trigger actions when those conditions are met.',
     addTitle: 'Create rules',
     addLink: '/app/management/insightsAndAlerting/triggersActions/rules',
     learnMoreLink: 'http://lean-more-link-example.com',
