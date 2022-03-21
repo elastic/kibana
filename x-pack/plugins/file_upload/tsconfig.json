@@ -13,6 +13,5 @@
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

@@ -18,14 +18,12 @@ import {
 } from './api';
 import { setStartServices } from './kibana_services';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileUploadSetupDependencies {}
 export interface FileUploadStartDependencies {
   data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export type FileUploadPluginSetup = ReturnType<FileUploadPlugin['setup']>;
