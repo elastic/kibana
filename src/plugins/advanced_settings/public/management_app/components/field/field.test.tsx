@@ -207,7 +207,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -226,7 +226,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -240,7 +240,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={false}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
         expect(component).toMatchSnapshot();
@@ -257,7 +257,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -274,7 +274,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
         expect(component).toMatchSnapshot();
@@ -289,7 +289,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
             unsavedChanges={{
               // @ts-ignore
               value: exampleValues[setting.type],
@@ -311,7 +311,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
@@ -333,7 +333,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
             {...props}
           />
         </I18nProvider>

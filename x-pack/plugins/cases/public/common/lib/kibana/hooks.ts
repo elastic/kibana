@@ -177,6 +177,5 @@ export const useKibanaCapabilities = (): { visualize?: boolean; dashboard?: bool
 
   return {
     visualize: !!capabilities?.visualize?.save,
-    dashboard: !!capabilities?.dashboard?.show && !!capabilities?.dashboard?.createNew,
   };
 };
