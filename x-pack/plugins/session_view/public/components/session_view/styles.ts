@@ -35,11 +35,22 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
     };
 
+    const sessionViewerComponent: CSSObject = {
+      border: euiTheme.border.thin,
+      borderRadius: euiTheme.border.radius.medium,
+    };
+
+    const toolBar: CSSObject = {
+      backgroundColor: `#EEF2F7 !important`,
+    };
+
     return {
       processTree,
       detailPanel,
       searchBar,
       buttonsEyeDetail,
+      sessionViewerComponent,
+      toolBar,
     };
   }, [height, euiTheme]);
 

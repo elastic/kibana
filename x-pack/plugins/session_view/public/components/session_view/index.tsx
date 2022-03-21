@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiResizableContainer,
   EuiPanel,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
@@ -92,127 +93,130 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
 
   return (
     <>
-      <EuiPanel color={'subdued'}>
-        <EuiFlexGroup>
-          <EuiFlexItem
-            data-test-subj="sessionView:sessionViewProcessEventsSearch"
-            css={styles.searchBar}
-          >
-            <SessionViewSearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              onProcessSelected={onProcessSelected}
-              searchResults={searchResults}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
-            <SessionViewDisplayOptions
-              displayOptions={displayOptions}
-              onChange={handleOptionChange}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
-            <EuiButton
-              onClick={toggleDetailPanel}
-              iconType="list"
-              data-test-subj="sessionView:sessionViewDetailPanelToggle"
+      <div css={styles.sessionViewerComponent}>
+        <EuiPanel css={styles.toolBar}>
+          <EuiFlexGroup>
+            <EuiFlexItem
+              data-test-subj="sessionView:sessionViewProcessEventsSearch"
+              css={styles.searchBar}
             >
-              <FormattedMessage
-                id="xpack.sessionView.buttonOpenDetailPanel"
-                defaultMessage="Detail panel"
+              <SessionViewSearchBar
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                onProcessSelected={onProcessSelected}
+                searchResults={searchResults}
               />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiResizableContainer>
-        {(EuiResizablePanel, EuiResizableButton) => (
-          <>
-            <EuiResizablePanel
-              initialSize={isDetailOpen ? 70 : 100}
-              minSize="600px"
-              paddingSize="none"
-            >
-              {renderIsLoading && (
-                <SectionLoading>
-                  <FormattedMessage
-                    id="xpack.sessionView.loadingProcessTree"
-                    defaultMessage="Loading session…"
-                  />
-                </SectionLoading>
-              )}
+            </EuiFlexItem>
 
-              {error && (
-                <EuiEmptyPrompt
-                  iconType="alert"
-                  color="danger"
-                  title={
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.sessionView.errorHeading"
-                        defaultMessage="Error loading Session View"
-                      />
-                    </h2>
-                  }
-                  body={
-                    <p>
-                      <FormattedMessage
-                        id="xpack.sessionView.errorMessage"
-                        defaultMessage="There was an error loading the Session View."
-                      />
-                    </p>
-                  }
+            <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+              <SessionViewDisplayOptions
+                displayOptions={displayOptions}
+                onChange={handleOptionChange}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+              <EuiButton
+                onClick={toggleDetailPanel}
+                iconType="list"
+                data-test-subj="sessionView:sessionViewDetailPanelToggle"
+              >
+                <FormattedMessage
+                  id="xpack.sessionView.buttonOpenDetailPanel"
+                  defaultMessage="Detail panel"
                 />
-              )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiHorizontalRule margin="none" />
+        <EuiResizableContainer>
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                initialSize={isDetailOpen ? 70 : 100}
+                minSize="600px"
+                paddingSize="none"
+              >
+                {renderIsLoading && (
+                  <SectionLoading>
+                    <FormattedMessage
+                      id="xpack.sessionView.loadingProcessTree"
+                      defaultMessage="Loading session…"
+                    />
+                  </SectionLoading>
+                )}
 
-              {hasData && (
-                <div css={styles.processTree}>
-                  <ProcessTree
-                    sessionEntityId={sessionEntityId}
-                    data={data.pages}
-                    searchQuery={searchQuery}
-                    selectedProcess={selectedProcess}
-                    onProcessSelected={onProcessSelected}
-                    jumpToEvent={jumpToEvent}
-                    isFetching={isFetching}
-                    hasPreviousPage={hasPreviousPage}
-                    hasNextPage={hasNextPage}
-                    fetchNextPage={fetchNextPage}
-                    fetchPreviousPage={fetchPreviousPage}
-                    setSearchResults={setSearchResults}
-                    timeStampOn={displayOptions.timestamp}
-                    verboseModeOn={displayOptions.verboseMode}
+                {error && (
+                  <EuiEmptyPrompt
+                    iconType="alert"
+                    color="danger"
+                    title={
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.sessionView.errorHeading"
+                          defaultMessage="Error loading Session View"
+                        />
+                      </h2>
+                    }
+                    body={
+                      <p>
+                        <FormattedMessage
+                          id="xpack.sessionView.errorMessage"
+                          defaultMessage="There was an error loading the Session View."
+                        />
+                      </p>
+                    }
                   />
-                </div>
-              )}
-            </EuiResizablePanel>
+                )}
 
-            {renderDetails ? (
-              <>
-                <EuiResizableButton />
-                <EuiResizablePanel
-                  id="session-detail-panel"
-                  initialSize={30}
-                  minSize="200px"
-                  paddingSize="none"
-                  css={styles.detailPanel}
-                >
-                  <SessionViewDetailPanel
-                    selectedProcess={selectedProcess}
-                    onProcessSelected={onProcessSelected}
-                  />
-                </EuiResizablePanel>
-              </>
-            ) : (
-              <>
-                {/* Returning an empty element here (instead of false) to avoid a bug in EuiResizableContainer */}
-              </>
-            )}
-          </>
-        )}
-      </EuiResizableContainer>
+                {hasData && (
+                  <div css={styles.processTree}>
+                    <ProcessTree
+                      sessionEntityId={sessionEntityId}
+                      data={data.pages}
+                      searchQuery={searchQuery}
+                      selectedProcess={selectedProcess}
+                      onProcessSelected={onProcessSelected}
+                      jumpToEvent={jumpToEvent}
+                      isFetching={isFetching}
+                      hasPreviousPage={hasPreviousPage}
+                      hasNextPage={hasNextPage}
+                      fetchNextPage={fetchNextPage}
+                      fetchPreviousPage={fetchPreviousPage}
+                      setSearchResults={setSearchResults}
+                      timeStampOn={displayOptions.timestamp}
+                      verboseModeOn={displayOptions.verboseMode}
+                    />
+                  </div>
+                )}
+              </EuiResizablePanel>
+
+              {renderDetails ? (
+                <>
+                  <EuiResizableButton />
+                  <EuiResizablePanel
+                    id="session-detail-panel"
+                    initialSize={30}
+                    minSize="200px"
+                    paddingSize="none"
+                    css={styles.detailPanel}
+                  >
+                    <SessionViewDetailPanel
+                      selectedProcess={selectedProcess}
+                      onProcessSelected={onProcessSelected}
+                    />
+                  </EuiResizablePanel>
+                </>
+              ) : (
+                <>
+                  {/* Returning an empty element here (instead of false) to avoid a bug in EuiResizableContainer */}
+                </>
+              )}
+            </>
+          )}
+        </EuiResizableContainer>
+      </div>
     </>
   );
 };

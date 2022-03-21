@@ -54,7 +54,7 @@ export const SessionViewSearchBar = ({
 
   return (
     <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>
-      <EuiSearchBar query={searchQuery} onChange={onSearch} />
+      <EuiSearchBar query={searchQuery} onChange={onSearch} box={{ placeholder: 'Find...' }} />
       {showPagination && (
         <EuiPagination
           data-test-subj="sessionView:searchPagination"

@@ -23,7 +23,7 @@ export const useStyles = () => {
       height: '100%',
       backgroundColor: colors.lightestShade,
       paddingTop: size.base,
-      paddingLeft: size.base
+      paddingLeft: size.s,
     };
 
     const selectionArea: CSSObject = {

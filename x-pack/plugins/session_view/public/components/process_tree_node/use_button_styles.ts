@@ -34,6 +34,9 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       marginRight: size.xs,
       minWidth: 0,
       padding: `${size.s} ${size.xxs}`,
+      span: {
+        padding: `0px ${size.xxs} !important`,
+      },
     };
 
     const buttonArrow: CSSObject = {
@@ -76,6 +79,10 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       textTransform: 'capitalize',
     };
 
+    const buttonSize: CSSObject = {
+      padding: `0px ${euiTheme.size.xs}`,
+    };
+
     const expandedIcon = isExpanded ? 'arrowUp' : 'arrowDown';
 
     return {
@@ -85,6 +92,7 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       alertsCountNumber,
       userChangedButton,
       userChangedButtonUsername,
+      buttonSize,
       expandedIcon,
     };
   }, [euiTheme, isExpanded]);
