@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import { JobType } from '../../../../../plugins/ml/common/types/saved_objects';
+import { MlSavedObjectType } from '../../../../../plugins/ml/common/types/saved_objects';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -20,30 +20,32 @@ export default ({ getService }: FtrProviderContext) => {
   const adJobIdStarSpace = 'fq_single_star_space';
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
-  const idStarSpace = '-';
 
   async function runRequest(
-    jobType: JobType,
-    jobIds: string[],
+    mlSavedObjectType: MlSavedObjectType,
+    ids: string[],
     user: USER,
     expectedStatusCode: number,
     space?: string
   ) {
     const { body, status } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/can_delete_job/${jobType}`)
+      .post(
+        `${
+          space ? `/s/${space}` : ''
+        }/api/ml/saved_objects/can_delete_ml_space_aware_item/${mlSavedObjectType}`
+      )
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ jobIds });
+      .send({ ids });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
 
-  describe('POST saved_objects/can_delete_job', () => {
+  describe('POST saved_objects/can_delete_ml_space_aware_item jobs', () => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
-      await spacesService.create({ id: idStarSpace, name: '*', disabledFeatures: [] });
 
       await ml.api.createAnomalyDetectionJob(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdSpace12),
@@ -51,11 +53,21 @@ export default ({ getService }: FtrProviderContext) => {
       );
       await ml.api.createAnomalyDetectionJob(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdStarSpace),
-        idStarSpace
+        idSpace1
       );
 
       await ml.api.updateJobSpaces(adJobIdSpace12, 'anomaly-detector', [idSpace2], [], idSpace1);
       await ml.api.assertJobSpaces(adJobIdSpace12, 'anomaly-detector', [idSpace1, idSpace2]);
+
+      // move the job to the * space
+      await ml.api.updateJobSpaces(
+        adJobIdStarSpace,
+        'anomaly-detector',
+        ['*'],
+        [idSpace1],
+        idSpace1
+      );
+      await ml.api.assertJobSpaces(adJobIdStarSpace, 'anomaly-detector', ['*']);
 
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
@@ -63,7 +75,6 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
-      await spacesService.delete(idStarSpace);
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
     });
@@ -109,8 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
         'anomaly-detector',
         [adJobIdStarSpace],
         USER.ML_POWERUSER_ALL_SPACES,
-        200,
-        idStarSpace
+        200
       );
 
       expect(body).to.eql({ [adJobIdStarSpace]: { canDelete: true, canRemoveFromSpace: false } });
