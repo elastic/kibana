@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "inspector"],
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "inspector", "dataViews"],
   "optionalPlugins": ["home","usageCollection"],
   "requiredBundles": ["unifiedSearch", "kibanaUtils", "kibanaReact", "fieldFormats"],
   "owner": {

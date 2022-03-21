@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { JobSpacesList } from './job_spaces_list';
+import * as hunterNoActionsUser from './detections_user.json';
+import * as hunterNoActionsRole from './detections_role.json';
+export { hunterNoActionsUser, hunterNoActionsRole };
