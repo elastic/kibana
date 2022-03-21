@@ -10,20 +10,19 @@ import React, { FC, useCallback, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  JobType,
-  TrainedModelType,
   ML_JOB_SAVED_OBJECT_TYPE,
   SavedObjectResult,
+  MlSavedObjectType,
 } from '../../../../common/types/saved_objects';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '../../../../../spaces/public';
-import { ml } from '../../services/ml_api_service';
+import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
   spacesApi: SpacesPluginStart;
   spaceIds: string[];
   id: string;
-  jobType: JobType | TrainedModelType;
+  mlSavedObjectType: MlSavedObjectType;
   refresh(): void;
 }
 
@@ -36,7 +35,16 @@ const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.model
   defaultMessage: 'trained model',
 });
 
-export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, id, jobType, refresh }) => {
+export const MLSavedObjectsSpacesList: FC<Props> = ({
+  spacesApi,
+  spaceIds,
+  id,
+  mlSavedObjectType,
+  refresh,
+}) => {
+  const {
+    savedObjects: { updateJobsSpaces, updateModelsSpaces },
+  } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
 
   const [showFlyout, setShowFlyout] = useState(false);
@@ -50,16 +58,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, id, jobType, ref
     const spacesToRemove = spacesToAdd.includes(ALL_SPACES_ID) ? [] : spacesToMaybeRemove;
 
     if (spacesToAdd.length || spacesToRemove.length) {
-      if (jobType === 'trained-model') {
-        const resp = await ml.savedObjects.updateModelsSpaces([id], spacesToAdd, spacesToRemove);
+      if (mlSavedObjectType === 'trained-model') {
+        const resp = await updateModelsSpaces([id], spacesToAdd, spacesToRemove);
         handleApplySpaces(resp);
       } else {
-        const resp = await ml.savedObjects.updateJobsSpaces(
-          jobType,
-          [id],
-          spacesToAdd,
-          spacesToRemove
-        );
+        const resp = await updateJobsSpaces(mlSavedObjectType, [id], spacesToAdd, spacesToRemove);
         handleApplySpaces(resp);
       }
     }
@@ -94,7 +97,7 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, id, jobType, ref
       id,
       namespaces: spaceIds,
       title: id,
-      noun: jobType === 'trained-model' ? modelObjectNoun : jobObjectNoun,
+      noun: mlSavedObjectType === 'trained-model' ? modelObjectNoun : jobObjectNoun,
     },
     behaviorContext: 'outside-space',
     changeSpacesHandler,
