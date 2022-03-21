@@ -57,7 +57,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -84,7 +83,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -123,7 +121,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -153,7 +150,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -186,7 +182,6 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -280,7 +275,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -315,7 +309,6 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -354,7 +347,6 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -397,7 +389,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -429,7 +420,6 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         ruleTaskTimeout: '20m',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -467,7 +457,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -496,7 +485,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -518,7 +506,6 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           producer: 'alerts',
           config: {
-            minimumScheduleInterval: { value: '1m', enforce: false },
             execution: {
               actions: { max: 1000 },
             },
@@ -546,7 +533,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -575,10 +561,6 @@ describe('Create Lifecycle', () => {
             "actions": Object {
               "max": 1000,
             },
-          },
-          "minimumScheduleInterval": Object {
-            "enforce": false,
-            "value": "1m",
           },
         },
         "defaultActionGroupId": "default",
@@ -630,7 +612,6 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -730,7 +711,6 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         config: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 1000 },
           },
@@ -769,7 +749,6 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     async executor() {},
     producer: 'alerts',
     config: {
-      minimumScheduleInterval: { value: '1m', enforce: false },
       execution: {
         actions: { max: 1000 },
       },

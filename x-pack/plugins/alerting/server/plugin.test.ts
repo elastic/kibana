@@ -50,7 +50,6 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   defaultActionGroupId: 'default',
   producer: 'test',
   config: {
-    minimumScheduleInterval: { value: '1m', enforce: false },
     execution: {
       actions: {
         max: 1000,

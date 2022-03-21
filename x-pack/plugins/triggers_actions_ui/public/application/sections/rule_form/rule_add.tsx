@@ -79,6 +79,7 @@ const RuleAdd = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
+  const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -147,27 +148,27 @@ const RuleAdd = ({
   }, [rule, actionTypeRegistry]);
 
   useEffect(() => {
+    if (config.minimumScheduleInterval && !initialValues?.schedule?.interval) {
+      setRuleProperty('schedule', {
+        interval: getInitialInterval(config.minimumScheduleInterval.value),
+      });
+    }
+  }, [config.minimumScheduleInterval, initialValues]);
+
+  useEffect(() => {
     if (rule.ruleTypeId && ruleTypeIndex) {
-      // rule type selected
       const type = ruleTypeIndex.get(rule.ruleTypeId);
-      if (type?.defaultScheduleInterval) {
+      if (type?.defaultScheduleInterval && !changedFromDefaultInterval) {
         setRuleProperty('schedule', { interval: type.defaultScheduleInterval });
       }
-    } else {
-      // no rule type selection and no initial value set; set schedule to global default or configured minimum, whichever is larger
-      if (!initialValues?.schedule?.interval) {
-        setRuleProperty('schedule', {
-          interval: getInitialInterval(config.minimumScheduleInterval?.value),
-        });
-      }
     }
-  }, [
-    initialValues,
-    rule.ruleTypeId,
-    ruleTypeIndex,
-    rule.schedule.interval,
-    config.minimumScheduleInterval,
-  ]);
+  }, [rule.ruleTypeId, ruleTypeIndex, rule.schedule.interval, changedFromDefaultInterval]);
+
+  useEffect(() => {
+    if (rule.schedule.interval !== DEFAULT_RULE_INTERVAL && !changedFromDefaultInterval) {
+      setChangedFromDefaultInterval(true);
+    }
+  }, [rule.schedule.interval, changedFromDefaultInterval]);
 
   const checkForChangesAndCloseFlyout = () => {
     if (
