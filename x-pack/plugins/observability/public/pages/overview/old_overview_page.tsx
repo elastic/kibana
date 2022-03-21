@@ -15,6 +15,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -197,11 +198,30 @@ export function OverviewPage({ routeParams }: Props) {
         </>
       )}
       {isFlyoutVisible && (
-        <EuiFlyout size="s" ownFocus onClose={() => setIsFlyoutVisible(false)}>
+        <EuiFlyout
+          size="s"
+          ownFocus
+          onClose={() => setIsFlyoutVisible(false)}
+          aria-labelledby="statusVisualizationFlyoutTitle"
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id="flyout-id">Status</h2>
+              <h2 id="statusVisualizationFlyoutTitle">
+                <FormattedMessage
+                  id="xpack.observability.overview.statusVisualizationFlyoutTitle"
+                  defaultMessage="Guided setup"
+                />
+              </h2>
             </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.observability.overview.statusVisualizationFlyoutDescription"
+                  defaultMessage="Track your progress towards adding observability integrations and features."
+                />
+              </p>
+            </EuiText>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <ObservabilityStatus />
