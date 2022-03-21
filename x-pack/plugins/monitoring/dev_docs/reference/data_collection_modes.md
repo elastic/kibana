@@ -9,7 +9,7 @@ And two log collection modes:
 - Current standard: [Filebeat log collection](#logs-collection-filebeat)
 - Planned future standard: [Package-driven collection](#package-driven-collection)
 
-> **Note**: In the following sections "Beats" is used to refer to any stack component based on libbeat because the data collection modes are the same for any process in this group. This includes apm-server.
+> **Note**: In the following sections "Beats" is used to refer to any stack component based on libbeat because the data collection modes are the same for any process in this group. This notably includes apm-server and fleet server.
  
 ## Metrics collection
 

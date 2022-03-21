@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  getCapabilitiesForRollupIndices,
-  IndexPatternsService,
-} from '../../../../../../data/server';
+import { getCapabilitiesForRollupIndices } from '../../../../../../data/server';
+import type { DataViewsService } from '../../../../../../data_views/common';
 import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 
@@ -93,7 +91,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
 
   async getFieldsForWildcard(
     fetchedIndexPattern: FetchedIndexPattern,
-    indexPatternsService: IndexPatternsService,
+    indexPatternsService: DataViewsService,
     getCachedIndexPatternFetcher: CachedIndexPatternFetcher,
     capabilities?: unknown
   ) {

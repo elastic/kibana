@@ -67,7 +67,7 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
       {hasNoiseWarning ?? <CustomWarning message={i18n.QUERY_PREVIEW_NOISE_WARNING} />}
       <LogAccordion logs={sortedLogs.errors} isError />
       <LogAccordion logs={sortedLogs.warnings}>
-        {isAborted && <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} />}
+        {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
       </LogAccordion>
     </>
   );

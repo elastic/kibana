@@ -14,7 +14,7 @@ import type { DataViewsService } from '../../../../../../src/plugins/data_views/
 import type { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 import type { MlClient } from '../../lib/ml_client';
-import type { JobSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 const callAs = () => Promise.resolve({ body: {} });
 
@@ -34,7 +34,7 @@ describe('ML - data recognizer', () => {
       bulkCreate: jest.fn(),
     } as unknown as SavedObjectsClientContract,
     { find: jest.fn() } as unknown as DataViewsService,
-    {} as JobSavedObjectService,
+    {} as MLSavedObjectService,
     { headers: { authorization: '' } } as unknown as KibanaRequest
   );
 
