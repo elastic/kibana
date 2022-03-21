@@ -32,6 +32,7 @@ export interface DocLinks {
     readonly upgrading: string;
     readonly metaData: string;
     readonly overview: string;
+    readonly tailSamplingPolicies: string;
   };
   readonly canvas: {
     readonly guide: string;
