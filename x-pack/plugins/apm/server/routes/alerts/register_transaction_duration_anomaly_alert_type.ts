@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import datemath from '@elastic/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import {
@@ -132,7 +132,12 @@ export function registerTransactionDurationAnomalyAlertType({
         }
 
         // Window size must be at least 30, does like this to support rules created before this change where default was 15
-        const windowSize = Math.max(ruleParams.windowSize, 30);
+        const windowSize = Math.min(
+          datemath.parse('now-30m')!.valueOf(),
+          datemath
+            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)
+            ?.valueOf() || 0
+        );
 
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
@@ -147,7 +152,7 @@ export function registerTransactionDurationAnomalyAlertType({
                   {
                     range: {
                       timestamp: {
-                        gte: `now-${windowSize}${ruleParams.windowUnit}`,
+                        gte: windowSize,
                         format: 'epoch_millis',
                       },
                     },
@@ -219,6 +224,7 @@ export function registerTransactionDurationAnomalyAlertType({
               anomaly ? anomaly.score >= threshold : false
             ) ?? [];
 
+        console.log('### caue ~ anomalies', anomalies);
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
           const severityLevel = getSeverity(score);
