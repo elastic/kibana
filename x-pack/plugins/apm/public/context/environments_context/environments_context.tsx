@@ -4,19 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { Environment } from '../../../common/environment_rt';
 import { useApmParams } from '../../hooks/use_apm_params';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useEnvironmentsFetcher } from '../../hooks/use_environments_fetcher';
 
 export const EnvironmentsContext = React.createContext<{
+  setFieldValue: (fieldValue: string) => void;
   environment: Environment;
+  environments: string[];
+  environmentOptions: Array<EuiComboBoxOptionOption<string>>;
   serviceName?: string;
   start?: string;
   end?: string;
+  status: FETCH_STATUS;
 }>({
   environment: ENVIRONMENT_ALL.value,
+  environments: [],
+  environmentOptions: [],
+  status: FETCH_STATUS.NOT_INITIATED,
+  setFieldValue: () => null,
 });
 
 export function EnvironmentsContextProvider({
@@ -24,6 +35,8 @@ export function EnvironmentsContextProvider({
 }: {
   children: React.ReactElement;
 }) {
+  const [fieldValue, setFieldValue] = useState('');
+
   const { path, query } = useApmParams('/*');
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
@@ -36,9 +49,20 @@ export function EnvironmentsContextProvider({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
+  const { environments, status, environmentOptions } = useEnvironmentsFetcher({
+    serviceName,
+    start,
+    end,
+    fieldValue,
+  });
+
   return (
     <EnvironmentsContext.Provider
       value={{
+        setFieldValue,
+        environments,
+        environmentOptions,
+        status,
         environment,
         serviceName,
         start,

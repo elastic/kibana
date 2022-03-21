@@ -7,7 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { throttle } from 'lodash';
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface SuggestionsSelectProps {
@@ -88,15 +88,7 @@ export function SuggestionsSelect({
     [handleChange]
   );
 
-  const terms: string[] = useMemo(() => data?.terms ?? [], [data]);
-
-  useEffect(() => {
-    if (terms.length === 1) {
-      const [term] = terms;
-      handleChange([{ label: term, value: term }]);
-    }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [terms]);
+  const terms = data?.terms ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(customOptions ? customOptions : []),

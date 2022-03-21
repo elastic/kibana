@@ -61,7 +61,28 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
       }),
     ];
 
+    describe('with one environment', () => {
+      const environments = [PROD];
+
+      describe('and all being selected', () => {
+        const environment = ENVIRONMENT_ALL.value;
+        it('returns the series for prod', () => {
+          expect(
+            getPreferredServiceAnomalyTimeseries({
+              allAnomalyTimeseries,
+              detectorType: ApmMlDetectorType.txLatency,
+              environment,
+              environments,
+              fallbackToTransactions: false,
+            })?.environment
+          ).toBe(PROD);
+        });
+      });
+    });
+
     describe('with multiple environments', () => {
+      const environments = [PROD, DEV];
+
       describe('and all being selected', () => {
         const environment = ENVIRONMENT_ALL.value;
 
@@ -71,6 +92,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
               allAnomalyTimeseries,
               detectorType: ApmMlDetectorType.txLatency,
               environment,
+              environments,
               fallbackToTransactions: false,
             })
           ).toBeUndefined();
@@ -80,6 +102,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
               allAnomalyTimeseries,
               detectorType: ApmMlDetectorType.txLatency,
               environment,
+              environments,
               fallbackToTransactions: true,
             })
           ).toBeUndefined();
@@ -94,6 +117,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
             allAnomalyTimeseries,
             detectorType: ApmMlDetectorType.txFailureRate,
             environment,
+            environments,
             fallbackToTransactions: false,
           });
 
@@ -119,13 +143,15 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
       }),
     ];
 
-    const environment = PROD;
+    const environments = [PROD];
+    const environment = ENVIRONMENT_ALL.value;
 
     it('selects the most recent version when transaction metrics are being used', () => {
       const series = getPreferredServiceAnomalyTimeseries({
         allAnomalyTimeseries,
         detectorType: ApmMlDetectorType.txLatency,
         environment,
+        environments,
         fallbackToTransactions: false,
       });
 
@@ -137,6 +163,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
         allAnomalyTimeseries,
         detectorType: ApmMlDetectorType.txLatency,
         environment,
+        environments,
         fallbackToTransactions: true,
       });
 

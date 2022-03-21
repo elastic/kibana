@@ -7,54 +7,64 @@
 
 import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../common/environment_filter_values';
+import { SERVICE_ENVIRONMENT } from '../../common/elasticsearch_fieldnames';
 
 function getEnvironmentOptions(environments: string[]) {
-  const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
-    .map((environment) => ({
-      value: environment,
-      text: environment,
-    }));
+  const environmentOptions = environments.map((environment) => ({
+    value: environment,
+    label: environment,
+  }));
 
-  return [ENVIRONMENT_ALL, ...environmentOptions];
+  return environmentOptions;
 }
 
-const INITIAL_DATA = { environments: [] };
+const INITIAL_DATA = { terms: [] };
 
 export function useEnvironmentsFetcher({
   serviceName,
   start,
   end,
+  fieldValue,
 }: {
   serviceName?: string;
   start?: string;
   end?: string;
+  fieldValue?: string;
 }) {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/environments', {
+      if (serviceName) {
+        return callApmApi('GET /internal/apm/suggestions_by_service_name', {
           params: {
             query: {
+              serviceName,
               start,
               end,
-              serviceName,
+              fieldName: SERVICE_ENVIRONMENT,
+              fieldValue: fieldValue ?? '',
             },
           },
         });
       }
+
+      return callApmApi('GET /internal/apm/suggestions', {
+        params: {
+          query: {
+            start,
+            end,
+            fieldName: SERVICE_ENVIRONMENT,
+            fieldValue: fieldValue ?? '',
+          },
+        },
+      });
     },
-    [start, end, serviceName]
+    [start, end, serviceName, fieldValue]
   );
 
   const environmentOptions = useMemo(
-    () => getEnvironmentOptions(data.environments),
-    [data?.environments]
+    () => getEnvironmentOptions(data.terms),
+    [data.terms]
   );
 
-  return { environments: data.environments, status, environmentOptions };
+  return { environments: data.terms, status, environmentOptions };
 }

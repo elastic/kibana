@@ -6,44 +6,81 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
+import { throttle } from 'lodash';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
-import { Environment } from '../../../../common/environment_rt';
-import { SuggestionsSelect } from '../suggestions_select';
 import { useEnvironmentCustomOptions } from '../../../hooks/use_environment_custom_options';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 
 export function EnvironmentSelect({
-  environment,
-  prepend,
   onChange,
-  hasNotDefinedEnvironment,
-  start,
-  end,
 }: {
-  environment: Environment;
-  prepend?: string;
   onChange: (value?: string) => void;
-  hasNotDefinedEnvironment?: boolean;
-  start?: string;
-  end?: string;
 }) {
-  const customOptions = useEnvironmentCustomOptions({ start, end });
+  let defaultOption: EuiComboBoxOptionOption<string> | undefined;
+  const {
+    setFieldValue,
+    environment,
+    serviceName,
+    environmentOptions,
+    start,
+    end,
+    status,
+  } = useEnvironmentsContext();
+
+  const customOptions = useEnvironmentCustomOptions({
+    serviceName,
+    start,
+    end,
+  });
+
+  if (environment) {
+    defaultOption = {
+      value: environment,
+      label: getEnvironmentLabel(environment),
+    };
+  }
+
+  const [selectedOptions, setSelectedOptions] = useState(
+    defaultOption ? [defaultOption] : []
+  );
+
+  const options: Array<EuiComboBoxOptionOption<string>> = [
+    ...(customOptions ? customOptions : []),
+    ...environmentOptions,
+  ];
+
+  const handleChange = useCallback(
+    (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedOptions(changedOptions);
+
+      if (changedOptions.length === 1) {
+        const [selectedOption] = changedOptions;
+        onChange(selectedOption.value);
+      }
+    },
+    [onChange]
+  );
 
   return (
-    <SuggestionsSelect
+    <EuiComboBox
+      async
       isClearable={false}
-      customOptions={customOptions}
+      style={{ minWidth: '256px' }}
       placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
         defaultMessage: 'Select environment',
       })}
-      prepend={prepend}
-      onChange={onChange}
-      defaultValue={getEnvironmentLabel(environment)}
-      fieldName={SERVICE_ENVIRONMENT}
-      start={start}
-      end={end}
-      data-test-subj="environmentFilter"
+      prepend={i18n.translate('xpack.apm.filter.environment.label', {
+        defaultMessage: 'Environment',
+      })}
+      singleSelection={{ asPlainText: true }}
+      options={options}
+      selectedOptions={selectedOptions}
+      onChange={(changedOptions) => handleChange(changedOptions)}
+      onSearchChange={throttle(setFieldValue, 500)}
+      isLoading={status === FETCH_STATUS.LOADING}
     />
   );
 }

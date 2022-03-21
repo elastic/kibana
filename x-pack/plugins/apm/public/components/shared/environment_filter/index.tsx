@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { fromQuery, toQuery } from '../links/url_helpers';
-import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { EnvironmentSelect } from '../environment_select';
-import { ServiceEnvironmentSelect } from '../service_environment_select';
 
 function updateEnvironmentUrl(
   history: History,
@@ -31,34 +28,14 @@ function updateEnvironmentUrl(
 }
 
 export function ApmEnvironmentFilter() {
-  const { environment, serviceName, start, end } = useEnvironmentsContext();
   const history = useHistory();
   const location = useLocation();
 
-  const prepend = i18n.translate('xpack.apm.filter.environment.label', {
-    defaultMessage: 'Environment',
-  });
-
-  return serviceName ? (
-    <ServiceEnvironmentSelect
-      prepend={prepend}
-      onChange={(changeValue) =>
-        updateEnvironmentUrl(history, location, changeValue)
-      }
-      start={start}
-      end={end}
-      environment={environment}
-      serviceName={serviceName}
-    />
-  ) : (
+  return (
     <EnvironmentSelect
-      prepend={prepend}
       onChange={(changeValue) =>
         updateEnvironmentUrl(history, location, changeValue)
       }
-      start={start}
-      end={end}
-      environment={environment}
     />
   );
 }

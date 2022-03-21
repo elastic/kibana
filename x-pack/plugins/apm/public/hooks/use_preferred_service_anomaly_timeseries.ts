@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { ApmMlDetectorType } from '../../common/anomaly_detection/apm_ml_detectors';
 import { Environment } from '../../common/environment_rt';
 import { ServiceAnomalyTimeseries } from '../../common/anomaly_detection/service_anomaly_timeseries';
@@ -14,11 +15,13 @@ import { useServiceAnomalyTimeseriesContext } from '../context/service_anomaly_t
 
 export function getPreferredServiceAnomalyTimeseries({
   environment,
+  environments,
   detectorType,
   allAnomalyTimeseries,
   fallbackToTransactions,
 }: {
   environment: Environment;
+  environments: string[];
   detectorType: ApmMlDetectorType;
   allAnomalyTimeseries: ServiceAnomalyTimeseries[];
   fallbackToTransactions: boolean;
@@ -27,9 +30,14 @@ export function getPreferredServiceAnomalyTimeseries({
     (serie) => serie.type === detectorType
   );
 
+  const preferredEnvironment =
+    environment === ENVIRONMENT_ALL.value && environments.length === 1
+      ? environments[0]
+      : environment;
+
   return seriesForType.find(
     (serie) =>
-      serie.environment === environment &&
+      serie.environment === preferredEnvironment &&
       (fallbackToTransactions ? serie.version <= 2 : serie.version >= 3)
   );
 }
@@ -39,12 +47,13 @@ export function usePreferredServiceAnomalyTimeseries(
 ) {
   const { allAnomalyTimeseries } = useServiceAnomalyTimeseriesContext();
 
-  const { environment } = useEnvironmentsContext();
+  const { environment, environments } = useEnvironmentsContext();
 
   const { fallbackToTransactions } = useApmServiceContext();
 
   return getPreferredServiceAnomalyTimeseries({
     environment,
+    environments,
     fallbackToTransactions,
     detectorType,
     allAnomalyTimeseries,
