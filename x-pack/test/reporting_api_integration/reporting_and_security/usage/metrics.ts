@@ -51,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('includes report stats', async () => {
       // over all time
       expectSnapshot(reporting._all).toMatchInline(`undefined`);
+      expect(reporting.output_size).keys(['1_0', '25_0', '50_0', '5_0', '75_0', '95_0', '99_0']);
       expectSnapshot(reporting.status).toMatchInline(`
         Object {
           "completed": 3,
@@ -60,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // over last 7 days
       expectSnapshot(last7Days._all).toMatchInline(`undefined`);
+      expect(last7Days.output_size).keys(['1_0', '25_0', '50_0', '5_0', '75_0', '95_0', '99_0']);
       expectSnapshot(last7Days.status).toMatchInline(`
         Object {
           "completed": 3,
