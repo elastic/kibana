@@ -102,7 +102,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
         props: { index: 1, item: { attributes: { id: savedQueryId } } },
       }).click();
       deleteAndConfirm('query');
-      cy.contains(savedQueryId);
-      cy.contains(/^No items found/);
+      cy.contains(savedQueryId).should('exist');
+      cy.contains(savedQueryId).should('not.exist');
     }
   );

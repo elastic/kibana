@@ -20,8 +20,9 @@ import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
-  const SAVED_QUERY_ID = 'Saved-Query-Id-T2';
-  const SAVED_QUERY_DESCRIPTION = 'Test saved query description T2';
+  const SAVED_QUERY_ID = 'Saved-Query-Id';
+  const NEW_SAVED_QUERY_ID = 'Saved-Query-Id-T2';
+  const NEW_SAVED_QUERY_DESCRIPTION = 'Test saved query description T2';
   beforeEach(() => {
     login(ROLES.t2_analyst);
     navigateTo('/app/osquery');
@@ -34,7 +35,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
+  getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
 
   it('should not be able to add nor edit packs', () => {
     const PACK_NAME = 'removing-pack';

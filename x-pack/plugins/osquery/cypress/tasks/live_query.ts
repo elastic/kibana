@@ -14,7 +14,7 @@ export const selectAllAgents = () => {
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type('All agents');
   cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type(
-    '{downArrow}{enter}'
+    '{downArrow}{enter}{esc}'
   );
 };
 
