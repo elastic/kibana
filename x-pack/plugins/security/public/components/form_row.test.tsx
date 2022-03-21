@@ -13,25 +13,32 @@ import React from 'react';
 import { FormRow } from './form_row';
 
 describe('FormRow', () => {
-  it('should render form row with correct error state', () => {
-    const wrapper = mount(
-      <Formik
-        onSubmit={jest.fn()}
-        initialValues={{ email: '' }}
-        initialErrors={{ email: 'Error' }}
-        initialTouched={{ email: true }}
-      >
-        <FormRow>
-          <input name="email" />
-        </FormRow>
-      </Formik>
-    );
-
-    expect(wrapper.find(EuiFormRow).props()).toEqual(
-      expect.objectContaining({
-        error: 'Error',
-        isInvalid: true,
-      })
-    );
+  it('should render form row with correct error states', () => {
+    const assertions = [
+      { error: 'Error', touched: true, isInvalid: true },
+      { error: 'Error', touched: false, isInvalid: false },
+      { error: undefined, touched: true, isInvalid: false },
+    ];
+    assertions.forEach(({error, touched, isInvalid}) => {
+      const wrapper = mount(
+        <Formik
+          onSubmit={jest.fn()}
+          initialValues={{ email: '' }}
+          initialErrors={{ email: error }}
+          initialTouched={{ email: touched }}
+        >
+          <FormRow>
+            <input name="email" />
+          </FormRow>
+        </Formik>
+      );
+  
+      expect(wrapper.find(EuiFormRow).props()).toEqual(
+        expect.objectContaining({
+          error,
+          isInvalid,
+        })
+      );
+    })
   });
 });
