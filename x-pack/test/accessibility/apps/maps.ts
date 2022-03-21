@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'maps']);
 
   describe('Maps app meets ally validations', () => {
@@ -91,6 +92,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.maps.expectExistAddLayerButton();
       await a11y.testAppSnapshot();
       await PageObjects.maps.saveMap('my test map');
+      await a11y.testAppSnapshot();
+    });
+
+    it('maps listing page', async function () {
+      await PageObjects.common.navigateToApp('maps');
+      await retry.waitFor(
+        'maps workpads visible',
+        async () => await testSubjects.exists('itemsInMemTable')
+      );
+      await a11y.testAppSnapshot();
+    });
+
+    it('provides bulk selection', async function () {
+      await testSubjects.click('checkboxSelectAll');
+      await a11y.testAppSnapshot();
+    });
+
+    it('provides bulk delete', async function () {
+      await testSubjects.click('deleteSelectedItems');
+      await a11y.testAppSnapshot();
+    });
+
+    it('single delete modal', async function () {
+      await testSubjects.click('confirmModalConfirmButton');
+      await a11y.testAppSnapshot();
+    });
+
+    it('single cancel modal', async function () {
+      await testSubjects.click('confirmModalCancelButton');
       await a11y.testAppSnapshot();
     });
   });
