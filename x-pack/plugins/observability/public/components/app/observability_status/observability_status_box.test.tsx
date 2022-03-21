@@ -38,7 +38,7 @@ describe('ObservabilityStatusBox', () => {
     });
 
     it('should have a learn more button', () => {
-      const learnMoreLink = screen.getByText('Learn more') as HTMLAnchorElement;
+      const learnMoreLink = screen.getByText('Learn more') as HTMLElement;
       expect(learnMoreLink.closest('a')?.href).toContain('learnMoreUrl.com');
     });
   });
@@ -72,7 +72,7 @@ describe('ObservabilityStatusBox', () => {
     // it('should have a check icon', () => {});
 
     it('should have the integration link', () => {
-      const addIntegrationLink = screen.getByText('logs add title') as HTMLAnchorElement;
+      const addIntegrationLink = screen.getByText('logs add title') as HTMLElement;
       expect(addIntegrationLink.closest('a')?.href).toContain('addIntegrationUrl.com');
     });
 
