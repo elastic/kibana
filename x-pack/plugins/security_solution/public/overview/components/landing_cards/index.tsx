@@ -7,34 +7,58 @@
 
 import React, { memo } from 'react';
 import {
+  EuiButton,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
   EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
+  EuiPageHeader,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
+import endpointSvg from '../../images/endpoint.svg';
+import siemSvg from '../../images/siem.svg';
+import videoSvg from '../../images/video.svg';
 
 const imgUrls = {
-  siem: 'https://raw.githubusercontent.com/elastic/eui/v51.0.0/src-docs/src/images/page.svg',
-  endpoint: 'https://raw.githubusercontent.com/elastic/eui/v51.0.0/src-docs/src/images/text.svg',
-  cloud: 'https://raw.githubusercontent.com/elastic/eui/v51.0.0/src-docs/src/images/icons.svg',
-  timeline: 'https://raw.githubusercontent.com/elastic/eui/v51.0.0/src-docs/src/images/tables.svg',
-  analyzer: 'https://raw.githubusercontent.com/elastic/eui/v51.0.0/src-docs/src/images/forms.svg',
-  sessionViewer:
-    'https://raw.githubusercontent.com/elastic/eui/v51.0.0/src-docs/src/images/flexgrid.svg',
-  correlation:
-    'https://raw.githubusercontent.com/elastic/eui/v51.0.0/src-docs/src/images/charts.svg',
+  siem: siemSvg,
+  video: videoSvg,
+  endpoint: endpointSvg,
 };
-const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
+
+const StyledEuiCard = styled(EuiCard)`
+  span.euiTitle {
+    font-size: 36px;
+    line-height: 100%;
+  }
 `;
+const StyledEuiCardTop = styled(EuiCard)`
+  span.euiTitle {
+    font-size: 36px;
+    line-height: 100%;
+  }
+  max-width: 600px;
+  display: block;
+  margin: 20px auto 0;
+`;
+const StyledEuiPageHeader = styled(EuiPageHeader)`
+  h1 {
+    font-size: 18px;
+  }
+`;
+
+const StyledEuiImage = styled(EuiImage)`
+  img {
+    display: block;
+    margin: 0 auto;
+  }
+`;
+
 const StyledEuiFlexItem = styled(EuiFlexItem)`
-  margin-top: 20px;
+  background: ${({ theme }) => theme.eui.euiColorLightestShade};
+  padding: 20px;
+  margin: -12px !important;
 `;
 
 export const LandingCards = memo(() => (
@@ -42,118 +66,51 @@ export const LandingCards = memo(() => (
     <EuiFlexItem>
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
-          <EuiCard
+          <StyledEuiPageHeader pageTitle={i18n.SIEM_HEADER} iconType="logoSecurity" />
+          <StyledEuiCard
+            display="plain"
             description={i18n.SIEM_DESCRIPTION}
-            hasBorder
-            image={imgUrls.siem}
-            textAlign="center"
+            textAlign="left"
             title={i18n.SIEM_TITLE}
-            footer={
-              <EuiText size="s">
-                <p>
-                  <EuiLink href="#">{i18n.SIEM_CTA}</EuiLink>
-                </p>
-              </EuiText>
-            }
+            footer={<EuiButton href="#">{i18n.SIEM_CTA}</EuiButton>}
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel hasBorder>
-            <StyledEuiFlexGroup gutterSize="none" direction="column" justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFlexGroup
-                      gutterSize="none"
-                      direction="column"
-                      justifyContent="spaceBetween"
-                    >
-                      <EuiFlexItem>
-                        <EuiImage alt={i18n.ENDPOINT_TITLE} src={imgUrls.endpoint} />
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs">
-                          <h4>{i18n.ENDPOINT_TITLE}</h4>
-                          <p>{i18n.ENDPOINT_DESCRIPTION}</p>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-                      <EuiFlexItem>
-                        <EuiImage alt={i18n.CLOUD_TITLE} src={imgUrls.cloud} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs">
-                          <h4>{i18n.CLOUD_TITLE}</h4>
-                          <p>{i18n.CLOUD_DESCRIPTION}</p>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <StyledEuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="spaceAround">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <p>
-                        <EuiLink href="#">{i18n.SIEM_CTA}</EuiLink>
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </StyledEuiFlexItem>
-            </StyledEuiFlexGroup>
-          </EuiPanel>
+          <EuiLink href="https://www.elastic.co/security" external={false} target="_blank">
+            <StyledEuiImage alt={i18n.SIEM_HEADER} size="xl" margin="l" src={imgUrls.video} />
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiFlexGroup gutterSize="l">
+    <StyledEuiFlexItem>
+      <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <EuiCard
-            description={i18n.TIMELINE_DESCRIPTION}
-            hasBorder
-            image={imgUrls.timeline}
+            description={i18n.SIEM_CARD_DESCRIPTION}
+            image={imgUrls.siem}
             textAlign="center"
-            title={i18n.TIMELINE_TITLE}
-            href={'#'}
+            title={i18n.SIEM_CARD_TITLE}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
-            description={i18n.ANALYZER_DESCRIPTION}
-            hasBorder
-            image={imgUrls.analyzer}
+            description={i18n.ENDPOINT_DESCRIPTION}
+            image={imgUrls.endpoint}
             textAlign="center"
-            title={i18n.ANALYZER_TITLE}
-            href={'#'}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            description={i18n.SESSION_VIEWER_DESCRIPTION}
-            hasBorder
-            image={imgUrls.sessionViewer}
-            textAlign="center"
-            title={i18n.SESSION_VIEWER_TITLE}
-            href={'#'}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            description={i18n.CORRELATION_DESCRIPTION}
-            hasBorder
-            image={imgUrls.correlation}
-            textAlign="center"
-            title={i18n.CORRELATION_TITLE}
-            href={'#'}
+            title={i18n.ENDPOINT_TITLE}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+    </StyledEuiFlexItem>
+    <EuiFlexItem>
+      <StyledEuiCardTop
+        display="plain"
+        description={i18n.UNIFY_DESCRIPTION}
+        paddingSize="l"
+        textAlign="center"
+        title={i18n.UNIFY_TITLE}
+        footer={<EuiButton href="#">{i18n.SIEM_CTA}</EuiButton>}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

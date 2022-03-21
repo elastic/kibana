@@ -14,7 +14,7 @@ import { LandingCards } from '../components/landing_cards';
 export const LandingPage = memo(() => {
   return (
     <>
-      <SecuritySolutionPageWrapper>
+      <SecuritySolutionPageWrapper noPadding noTimeline>
         <LandingCards />
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.landing} />
