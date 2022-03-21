@@ -204,3 +204,15 @@ Specifies the default timeout for the all rule types tasks. The time is formatte
 `<count>[ms,s,m,h,d,w,M,Y]`
 +
 For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
+
+`xpack.alerting.rules.execution.ruleTypeOverrides`::
+Overrides the configs under `xpack.alerting.rules.execution` for the rule type with the given ID. The value is array of objects consists of the key(s) that are wanted to be overridden under execution object and the id of the specific rule type that is wanted to be modified.
++
+For example:
+```
+xpack.alerting.rules.execution:
+    timeout: '5m'
+    ruleTypeOverrides:
+        - id: '.index-threshold'
+          timeout: '15m'
+```

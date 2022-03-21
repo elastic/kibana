@@ -32,9 +32,15 @@ describe('execution duration', () => {
   });
 
   describe('shouldShowDurationWarning', () => {
-    it('should return false if rule type or config.timeout is undefined', () => {
+    it('should return false if rule type or config or config.timeout is undefined', () => {
       expect(shouldShowDurationWarning(undefined, 1000)).toEqual(false);
       expect(shouldShowDurationWarning(mockRuleType(), 1000)).toEqual(false);
+      expect(
+        shouldShowDurationWarning(
+          { ...mockRuleType(), config: { execution: { actions: { max: 1000 } } } } as RuleType,
+          1000
+        )
+      ).toEqual(false);
     });
 
     it('should return false if average duration is less than rule task timeout', () => {
