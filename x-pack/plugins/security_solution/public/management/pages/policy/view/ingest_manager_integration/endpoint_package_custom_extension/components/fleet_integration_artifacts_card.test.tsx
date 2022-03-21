@@ -14,16 +14,19 @@ import {
 } from '../../../../../../../common/mock/endpoint';
 
 import { eventFiltersListQueryHttpMock } from '../../../../../event_filters/test_utils';
-import { FleetIntegrationEventFiltersCard } from './fleet_integration_event_filters_card';
+import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_card';
 import { EndpointDocGenerator } from '../../../../../../../../common/endpoint/generate_data';
 import { getPolicyEventFiltersPath } from '../../../../../../common/routing';
 import { PolicyData } from '../../../../../../../../common/endpoint/types';
 import { getSummaryExceptionListSchemaMock } from '../../../../../../../../../lists/common/schemas/response/exception_list_summary_schema.mock';
+import { EventFiltersApiClient } from '../../../../../event_filters/service/event_filters_api_client';
+import { SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
+import { EVENT_FILTERS_LABELS } from '../../endpoint_policy_edit_extension';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 
 describe('Fleet integration policy endpoint security event filters card', () => {
-  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
@@ -35,10 +38,20 @@ describe('Fleet integration policy endpoint security event filters card', () => 
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     ({ history } = mockedContext);
-    render = async () => {
+    render = async (externalPrivileges = true) => {
       await act(async () => {
         renderResult = mockedContext.render(
-          <FleetIntegrationEventFiltersCard policyId={policy.id} />
+          <FleetIntegrationArtifactsCard
+            policyId={policy.id}
+            artifactApiClientInstance={EventFiltersApiClient.getInstance(
+              mockedContext.coreStart.http
+            )}
+            searchableFields={SEARCHABLE_FIELDS}
+            getArtifactsPath={getPolicyEventFiltersPath}
+            labels={EVENT_FILTERS_LABELS}
+            privileges={externalPrivileges}
+            data-test-subj="artifacts"
+          />
         );
         await waitFor(() =>
           expect(mockedApi.responseProvider.eventFiltersGetSummary).toHaveBeenCalled()
@@ -58,7 +71,7 @@ describe('Fleet integration policy endpoint security event filters card', () => 
     );
 
     await render();
-    expect(renderResult.getByTestId('eventFilters-fleet-integration-card')).toHaveTextContent(
+    expect(renderResult.getByTestId('artifacts-fleet-integration-card')).toHaveTextContent(
       'Event filters3'
     );
   });
@@ -69,7 +82,25 @@ describe('Fleet integration policy endpoint security event filters card', () => 
     );
 
     await render();
-    expect(renderResult.getByTestId('eventFilters-fleet-integration-card')).toBeTruthy();
+    expect(renderResult.getByTestId('artifacts-fleet-integration-card')).toBeTruthy();
+  });
+
+  it('should not show the card when no permissions and no results', async () => {
+    mockedApi.responseProvider.eventFiltersGetSummary.mockReturnValue(
+      getSummaryExceptionListSchemaMock({ total: 0 })
+    );
+
+    await render(false);
+    expect(renderResult.queryByTestId('artifacts-fleet-integration-card')).toBeNull();
+  });
+
+  it('should show the card when no permissions but results', async () => {
+    mockedApi.responseProvider.eventFiltersGetSummary.mockReturnValue(
+      getSummaryExceptionListSchemaMock({ total: 1 })
+    );
+
+    await render(false);
+    expect(renderResult.getByTestId('artifacts-fleet-integration-card')).toBeTruthy();
   });
 
   it('should have the correct manage event filters link', async () => {
@@ -78,14 +109,15 @@ describe('Fleet integration policy endpoint security event filters card', () => 
     );
 
     await render();
-    expect(renderResult.getByTestId('eventFilters-link-to-exceptions')).toHaveAttribute(
+    expect(renderResult.getByTestId('artifacts-link-to-exceptions')).toHaveAttribute(
       'href',
       `/app/security/administration/policy/${policy.id}/eventFilters`
     );
   });
 
   it('should show an error toast when API request fails', async () => {
-    const error = new Error('Uh oh! API error!');
+    const errorMessage = 'Uh oh! API error!';
+    const error = new Error(errorMessage);
     mockedApi.responseProvider.eventFiltersGetSummary.mockImplementation(() => {
       throw error;
     });
@@ -94,7 +126,7 @@ describe('Fleet integration policy endpoint security event filters card', () => 
     await waitFor(() => {
       expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
       expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        `There was an error trying to fetch event filters stats: "${error}"`
+        `There was an error trying to fetch event filters stats: "${errorMessage}"`
       );
     });
   });

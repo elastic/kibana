@@ -54,7 +54,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     render: (packageName, benchmark) => (
       <Link
         to={generatePath(allNavigationItems.rules.path, {
-          packageId: benchmark.package_policy.id,
+          packagePolicyId: benchmark.package_policy.id,
           policyId: benchmark.package_policy.policy_id,
         })}
         title={packageName}
@@ -125,7 +125,7 @@ export const BenchmarksTable = ({
     onClick: () =>
       history.push(
         generatePath(allNavigationItems.rules.path, {
-          packageId: benchmark.package_policy.id,
+          packagePolicyId: benchmark.package_policy.id,
           policyId: benchmark.package_policy.policy_id,
         })
       ),
