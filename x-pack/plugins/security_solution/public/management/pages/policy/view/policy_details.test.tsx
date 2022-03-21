@@ -13,7 +13,7 @@ import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../../fle
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getEndpointListPath, getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
+import { getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
 import { getHostIsolationExceptionItems } from '../../host_isolation_exceptions/service';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
@@ -27,7 +27,6 @@ const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jes
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
-  const endpointListPath = getEndpointListPath({ name: 'endpointList' });
   const policyListPath = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();

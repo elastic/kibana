@@ -30,13 +30,13 @@ import {
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
 import { AgentPolicy } from '../../../../../../fleet/common';
-import { PolicyToEndpointListLink } from '../../../components/policy_endpoint_list_link';
 import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreatePackagePolicyRouteState } from '../../../../../../fleet/public';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { getPoliciesPath } from '../../../common/routing';
 import { useAppUrl } from '../../../../common/lib/kibana';
+import { PolicyEndpointLink } from './components/policy_endpoint_link';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -211,19 +211,18 @@ export const PolicyList = memo(() => {
         name: i18n.translate('xpack.securitySolution.policy.list.endpoints', {
           defaultMessage: 'Endpoints',
         }),
-        dataType: 'number',
         width: '8%',
         render: (policy: PolicyData) => {
           const count = policyIdToEndpointCount.get(policy.id);
           return (
-            <PolicyToEndpointListLink
+            <PolicyEndpointLink
               className="eui-textTruncate"
               data-test-subj="policyEndpointCountLink"
               policyId={policy.id}
-              endpointCount={count ?? 0}
+              nonLinkCondition={count === 0}
             >
               {count}
-            </PolicyToEndpointListLink>
+            </PolicyEndpointLink>
           );
         },
       },
