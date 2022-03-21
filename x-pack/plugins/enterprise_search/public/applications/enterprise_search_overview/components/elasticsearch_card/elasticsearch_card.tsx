@@ -13,12 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { ELASTICSEARCH_GUIDE_PATH } from '../../routes';
+import { ElasticsearchResources } from '../elasticsearch_resources';
 
 export const ElasticsearchCard: React.FC = () => {
   return (
-    <EuiPanel hasBorder color="transparent" paddingSize="l">
-      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={7}>
+    <EuiPanel paddingSize="l">
+      <EuiFlexGroup gutterSize="xl" alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem>
           <EuiText>
             <h3>
               <FormattedMessage
@@ -33,15 +34,15 @@ export const ElasticsearchCard: React.FC = () => {
               defaultMessage="Design and build performant, relevant search-powered application or large-scale search implementations directly in Elasticsearch"
             />
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={false}>
           <EuiButtonTo to={`${ELASTICSEARCH_GUIDE_PATH}`}>
             <FormattedMessage
               id="xpack.enterpriseSearch.overview.elasticsearchCard.button"
               defaultMessage="Get Started"
             />
           </EuiButtonTo>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ElasticsearchResources />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
