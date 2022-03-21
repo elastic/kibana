@@ -9,7 +9,6 @@ import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@e
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { LiveQuery } from '../../live_queries';
@@ -56,9 +55,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
   if (!agentId || (agentFetched && !agentData)) {
     return emptyPrompt;
   }
-  const euiCodeText = {
-    text: <EuiCode>osquery</EuiCode>,
-  };
+
   if (!(permissions.runSavedQueries || permissions.writeLiveQueries)) {
     return (
       <EuiEmptyPrompt
@@ -73,11 +70,8 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
         titleSize="xs"
         body={
           <p>
-            <FormattedMessage
-              id="xpack.osquery.action.emptyWithCustomText"
-              defaultMessage={`To access this page, ask your administrator for {text} Kibana privileges.`}
-              values={euiCodeText}
-            />
+            To access this page, ask your administrator for <EuiCode>osquery</EuiCode> Kibana
+            privileges.
           </p>
         }
       />
