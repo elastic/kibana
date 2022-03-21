@@ -318,7 +318,7 @@
       "threat": {
         "indicator": {
           "description": "domain should match the auditbeat hosts' data's source.ip",
-          "domain": "122.33.33.33",
+          "domain": "172.16.0.0",
           "ip": "8.8.8.8",
           "port": 777,
           "first_seen": "2021-01-26T11:09:04.000Z",
@@ -389,7 +389,7 @@
       "threat": {
         "indicator": {
           "description": "domain should match the auditbeat hosts' data's source.ip",
-          "domain": "122.33.33.34",
+          "domain": "172.16.0.0",
           "ip": "9.9.9.9",
           "port": 123,
           "first_seen": "2021-01-26T11:09:04.000Z",
