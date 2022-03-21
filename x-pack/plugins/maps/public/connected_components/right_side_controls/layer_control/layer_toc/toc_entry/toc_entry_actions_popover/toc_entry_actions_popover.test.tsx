@@ -51,6 +51,8 @@ const defaultProps = {
   editModeActiveForLayer: false,
   numLayers: 2,
   showThisLayerOnly: () => {},
+  updateSourceProp: () => {},
+  setLayerQuery: () => {},
 };
 
 describe('TOCEntryActionsPopover', () => {

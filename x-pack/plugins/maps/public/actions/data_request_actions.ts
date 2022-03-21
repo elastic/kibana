@@ -68,7 +68,7 @@ export type DataRequestContext = {
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
-  isEditingFeatures: boolean;
+  isEditingFeatures?: boolean;
 };
 
 export function clearDataRequests(layer: ILayer) {
