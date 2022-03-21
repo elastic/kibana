@@ -46,7 +46,6 @@ export const OsqueryFlyout: React.FC<IProps> = ({ agentId, onClose }) => {
       <EuiFlyoutBody>
         <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
           <OsqueryAction agentId={agentId} formType="steps" />
-          {/* {osquery?.OsqueryAction?.({ agentId, formType: 'steps' })} */}
         </OsqueryActionWrapper>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

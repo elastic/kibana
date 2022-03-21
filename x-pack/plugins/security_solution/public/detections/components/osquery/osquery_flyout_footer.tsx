@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -14,16 +14,13 @@ interface EventDetailsFooterProps {
 }
 
 export const OsqueryEventDetailsFooterComponent = ({ handleClick }: EventDetailsFooterProps) => {
-  const renderFooterBody = useMemo(() => {
-    return (
-      <EuiButtonEmpty onClick={handleClick} data-test-subj={'osquery-empty-button'}>
-        <FormattedMessage id="xpack.securitySolution.footer.cancel" defaultMessage="Cancel" />
-      </EuiButtonEmpty>
-    );
-  }, [handleClick]);
   return (
     <EuiFlexGroup justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{renderFooterBody}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={handleClick} data-test-subj={'osquery-empty-button'}>
+          <FormattedMessage id="xpack.securitySolution.footer.cancel" defaultMessage="Cancel" />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

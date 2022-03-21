@@ -9,6 +9,7 @@ import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@e
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { LiveQuery } from '../../live_queries';
@@ -29,7 +30,13 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
     () => (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Osquery is not available</h2>}
+        title={
+          <h2>
+            {i18n.translate('xpack.osquery.action.shortEmptyTitle', {
+              defaultMessage: 'Osquery is not available',
+            })}
+          </h2>
+        }
         titleSize="xs"
         body={
           <p>
@@ -49,17 +56,28 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
   if (!agentId || (agentFetched && !agentData)) {
     return emptyPrompt;
   }
-
+  const euiCodeText = {
+    text: <EuiCode>osquery</EuiCode>,
+  };
   if (!(permissions.runSavedQueries || permissions.writeLiveQueries)) {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Permissions denied</h2>}
+        title={
+          <h2>
+            {i18n.translate('xpack.osquery.action.permissionDenied', {
+              defaultMessage: 'Permission denied',
+            })}
+          </h2>
+        }
         titleSize="xs"
         body={
           <p>
-            To access this page, ask your administrator for <EuiCode>osquery</EuiCode> Kibana
-            privileges.
+            <FormattedMessage
+              id="xpack.osquery.action.empty"
+              defaultMessage={` 'To access this page, ask your administrator for {text} Kibana privileges.'`}
+              values={euiCodeText}
+            />
           </p>
         }
       />
@@ -78,12 +96,20 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Osquery is not available</h2>}
+        title={
+          <h2>
+            {i18n.translate('xpack.osquery.action.shortEmptyTitle', {
+              defaultMessage: 'Osquery is not available',
+            })}
+          </h2>
+        }
         titleSize="xs"
         body={
           <p>
-            The Osquery Manager integration is not added to the agent policy. To run queries on the
-            host, add the Osquery Manager integration to the agent policy in Fleet.
+            {i18n.translate('xpack.osquery.action.unavailable', {
+              defaultMessage:
+                'The Osquery Manager integration is not added to the agent policy. To run queries on the host, add the Osquery Manager integration to the agent policy in Fleet.',
+            })}
           </p>
         }
       />
@@ -94,12 +120,20 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Osquery is not available</h2>}
+        title={
+          <h2>
+            {i18n.translate('xpack.osquery.action.shortEmptyTitle', {
+              defaultMessage: 'Osquery is not available',
+            })}
+          </h2>
+        }
         titleSize="xs"
         body={
           <p>
-            To run queries on this host, the Elastic Agent must be active. Check the status of this
-            agent in Fleet.
+            {i18n.translate('xpack.osquery.action.agentStatus', {
+              defaultMessage:
+                'To run queries on this host, the Elastic Agent must be active. Check the status of this agent in Fleet.',
+            })}
           </p>
         }
       />

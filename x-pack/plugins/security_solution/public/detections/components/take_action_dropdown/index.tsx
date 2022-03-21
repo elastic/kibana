@@ -181,11 +181,15 @@ export const TakeActionDropdown = React.memo(
     const handleOnOsqueryClick = useCallback(() => {
       onOsqueryClick(agentId);
       setIsPopoverOpen(false);
-    }, [onOsqueryClick, agentId]);
+    }, [onOsqueryClick, setIsPopoverOpen, agentId]);
 
-    const osqueryActionItem = OsqueryActionItem({
-      handleClick: handleOnOsqueryClick,
-    });
+    const osqueryActionItem = useMemo(
+      () =>
+        OsqueryActionItem({
+          handleClick: handleOnOsqueryClick,
+        }),
+      [handleOnOsqueryClick]
+    );
 
     const alertsActionItems = useMemo(
       () =>
