@@ -7075,8 +7075,6 @@
     "xpack.apm.fleet_integration.settings.apm.urlLabel": "URL",
     "xpack.apm.fleet_integration.settings.apm.writeTimeoutLabel": "写入响应的最大持续时间",
     "xpack.apm.fleet_integration.settings.apmAgent.description": "为 {title} 应用程序配置检测。",
-    "xpack.apm.fleet_integration.settings.betaBadgeLabel": "公测版",
-    "xpack.apm.fleet_integration.settings.betaBadgeTooltip": "此模块不是 GA 版。请通过报告错误来帮助我们。",
     "xpack.apm.fleet_integration.settings.disabledLabel": "已禁用",
     "xpack.apm.fleet_integration.settings.enabledLabel": "已启用",
     "xpack.apm.fleet_integration.settings.optionalLabel": "可选",
