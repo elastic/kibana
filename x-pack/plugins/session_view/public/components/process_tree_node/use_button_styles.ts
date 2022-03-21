@@ -18,7 +18,7 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { colors, border, size } = euiTheme;
+    const { colors, border, size, font } = euiTheme;
 
     const button: CSSObject = {
       background: transparentize(theme.euiColorVis6, 0.04),
@@ -26,14 +26,18 @@ export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
       lineHeight: '18px',
       height: '20px',
       fontSize: size.m,
-      borderRadius: border.radius.medium,
+      fontFamily: font.family,
+      fontWeight: font.weight.medium,
+      borderRadius: border.radius.small,
       color: shade(theme.euiColorVis6, 0.25),
-      marginLeft: size.s,
+      marginLeft: size.xs,
+      marginRight: size.xs,
       minWidth: 0,
+      padding: `${size.s} ${size.xxs}`,
     };
 
     const buttonArrow: CSSObject = {
-      marginLeft: size.s,
+      marginLeft: size.xs,
     };
 
     const alertButton: CSSObject = {

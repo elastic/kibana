@@ -22,6 +22,8 @@ export const useStyles = () => {
       overflow: 'auto',
       height: '100%',
       backgroundColor: colors.lightestShade,
+      paddingTop: size.base,
+      paddingLeft: size.base
     };
 
     const selectionArea: CSSObject = {

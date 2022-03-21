@@ -25,6 +25,9 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
 
     const darkText: CSSObject = {
       color: colors.text,
+      fontFamily: font.familyCode,
+      paddingLeft: size.xxs,
+      paddingRight: size.xs,
     };
 
     const searchHighlight = `
@@ -96,6 +99,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
 
     const workingDir: CSSObject = {
       color: colors.successText,
+      fontFamily: font.familyCode,
+      fontWeight: font.weight.medium,
+      paddingLeft: size.s,
+      paddingRight: size.xxs,
     };
 
     const timeStamp: CSSObject = {
