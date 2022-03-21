@@ -85,23 +85,36 @@ export class ServiceAPIClient {
     return this.callAPI('POST', { ...data, runOnce: true });
   }
 
-  async checkIfAccountAllowed(url: string) {
-    try {
-      const { data } = await axios({
-        method: 'GET',
-        url: url + '/allowed',
-        headers:
-          process.env.NODE_ENV !== 'production' && this.authorization
-            ? {
-                Authorization: this.authorization,
-              }
-            : undefined,
-        httpsAgent: this.getHttpsAgent(),
-      });
-      this.logger.info(JSON.stringify(data));
-    } catch (e) {
-      this.logger.error(e);
+  async checkIfAccountAllowed() {
+    if (this.authorization) {
+      // in case username/password is provided, we assume it's always allowed
+      return true;
     }
+
+    const httpsAgent = this.getHttpsAgent();
+
+    if (this.locations.length > 0 && httpsAgent) {
+      // get a url from a random location
+      const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
+
+      try {
+        const { data } = await axios({
+          method: 'GET',
+          url: url + '/allowed',
+          headers:
+            process.env.NODE_ENV !== 'production' && this.authorization
+              ? {
+                  Authorization: this.authorization,
+                }
+              : undefined,
+          httpsAgent,
+        });
+        return data.allowed;
+      } catch (e) {
+        this.logger.error(e);
+      }
+    }
+    return false;
   }
 
   async callAPI(
@@ -118,8 +131,6 @@ export class ServiceAPIClient {
       const monitorsStreams = monitors.map(({ locations, ...rest }) =>
         convertToDataStreamFormat(rest)
       );
-
-      this.checkIfAccountAllowed(url);
 
       return axios({
         method,

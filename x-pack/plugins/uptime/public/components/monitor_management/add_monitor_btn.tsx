@@ -10,15 +10,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { MONITOR_ADD_ROUTE } from '../../../common/constants';
+import { useServiceEnabled } from './hooks/use_service_enabled';
 
 export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
   const history = useHistory();
+
+  const { data, loading } = useServiceEnabled();
 
   return (
     <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false} data-test-subj="addMonitorButton">
       <EuiButton
         fill
-        isDisabled={isDisabled}
+        isLoading={loading}
+        isDisabled={isDisabled || !data?.serviceEnabled}
         iconType="plus"
         data-test-subj="addMonitorBtn"
         href={history.createHref({

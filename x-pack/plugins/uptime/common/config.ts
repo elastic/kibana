@@ -21,15 +21,6 @@ const serviceConfig = schema.object({
 
 const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
-  ui: schema.maybe(
-    schema.object({
-      monitorManagement: schema.maybe(
-        schema.object({
-          enabled: schema.boolean(),
-        })
-      ),
-    })
-  ),
   service: schema.maybe(serviceConfig),
 });
 

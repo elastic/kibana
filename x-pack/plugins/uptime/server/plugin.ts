@@ -39,14 +39,11 @@ export class Plugin implements PluginType {
   private server?: UptimeServerSetup;
   private syntheticService?: SyntheticsService;
   private readonly telemetryEventsSender: TelemetryEventsSender;
-  private readonly isServiceEnabled?: boolean;
 
   constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
     this.initContext = initializerContext;
     this.logger = initializerContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
-    const config = this.initContext.config.get<UptimeConfig>();
-    this.isServiceEnabled = config?.ui?.monitorManagement?.enabled && Boolean(config.service);
   }
 
   public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
@@ -82,7 +79,7 @@ export class Plugin implements PluginType {
       telemetry: this.telemetryEventsSender,
     } as UptimeServerSetup;
 
-    if (this.isServiceEnabled && this.server.config.service) {
+    if (this.server.config.service) {
       this.syntheticService = new SyntheticsService(
         this.logger,
         this.server,
@@ -98,7 +95,7 @@ export class Plugin implements PluginType {
     registerUptimeSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
-      Boolean(this.isServiceEnabled)
+      Boolean(this.server.config.service)
     );
 
     KibanaTelemetryAdapter.registerUsageCollector(
@@ -112,7 +109,7 @@ export class Plugin implements PluginType {
   }
 
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
-    if (this.isServiceEnabled) {
+    if (this.server?.config.service) {
       this.savedObjectsClient = new SavedObjectsClient(
         coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
       );
@@ -129,7 +126,7 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
-    if (this.isServiceEnabled) {
+    if (this.server?.config.service) {
       this.syntheticService?.init();
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {

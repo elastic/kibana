@@ -59,6 +59,7 @@ import { UptimeConfig } from '../common/config';
 import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
 import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
+import { ServiceEnabledWrapper } from './pages/monitor_management/service_enabled_wrapper';
 
 interface PageRouterProps {
   config: UptimeConfig;
@@ -190,69 +191,73 @@ const getRoutes = (config: UptimeConfig, canSave: boolean): RouteProps[] => {
         rightSideItems: [],
       },
     },
-    ...(config.ui?.monitorManagement?.enabled
-      ? [
-          {
-            title: i18n.translate('xpack.uptime.addMonitorRoute.title', {
-              defaultMessage: 'Add Monitor | {baseTitle}',
-              values: { baseTitle },
-            }),
-            path: MONITOR_ADD_ROUTE,
-            component: AddMonitorPage,
-            dataTestSubj: 'uptimeMonitorAddPage',
-            telemetryId: UptimePage.MonitorAdd,
-            pageHeader: {
-              pageTitle: (
-                <FormattedMessage
-                  id="xpack.uptime.addMonitor.pageHeader.title"
-                  defaultMessage="Add Monitor"
-                />
-              ),
-            },
-            bottomBar: <MonitorManagementBottomBar />,
-            bottomBarProps: { paddingSize: 'm' as const },
-          },
-          {
-            title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
-              defaultMessage: 'Edit Monitor | {baseTitle}',
-              values: { baseTitle },
-            }),
-            path: MONITOR_EDIT_ROUTE,
-            component: EditMonitorPage,
-            dataTestSubj: 'uptimeMonitorEditPage',
-            telemetryId: UptimePage.MonitorEdit,
-            pageHeader: {
-              pageTitle: (
-                <FormattedMessage
-                  id="xpack.uptime.editMonitor.pageHeader.title"
-                  defaultMessage="Edit Monitor"
-                />
-              ),
-            },
-            bottomBar: <MonitorManagementBottomBar />,
-            bottomBarProps: { paddingSize: 'm' as const },
-          },
-          {
-            title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
-              defaultMessage: 'Manage Monitors | {baseTitle}',
-              values: { baseTitle },
-            }),
-            path: MONITOR_MANAGEMENT_ROUTE,
-            component: MonitorManagementPage,
-            dataTestSubj: 'uptimeMonitorManagementListPage',
-            telemetryId: UptimePage.MonitorManagement,
-            pageHeader: {
-              pageTitle: (
-                <FormattedMessage
-                  id="xpack.uptime.monitorManagement.pageHeader.title"
-                  defaultMessage="Manage monitors"
-                />
-              ),
-              rightSideItems: [<AddMonitorBtn isDisabled={!canSave} />],
-            },
-          },
-        ]
-      : []),
+    {
+      title: i18n.translate('xpack.uptime.addMonitorRoute.title', {
+        defaultMessage: 'Add Monitor | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_ADD_ROUTE,
+      component: () => (
+        <ServiceEnabledWrapper>
+          <AddMonitorPage />
+        </ServiceEnabledWrapper>
+      ),
+      dataTestSubj: 'uptimeMonitorAddPage',
+      telemetryId: UptimePage.MonitorAdd,
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.uptime.addMonitor.pageHeader.title"
+            defaultMessage="Add Monitor"
+          />
+        ),
+      },
+      bottomBar: <MonitorManagementBottomBar />,
+      bottomBarProps: { paddingSize: 'm' as const },
+    },
+    {
+      title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
+        defaultMessage: 'Edit Monitor | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_EDIT_ROUTE,
+      component: EditMonitorPage,
+      dataTestSubj: 'uptimeMonitorEditPage',
+      telemetryId: UptimePage.MonitorEdit,
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.uptime.editMonitor.pageHeader.title"
+            defaultMessage="Edit Monitor"
+          />
+        ),
+      },
+      bottomBar: <MonitorManagementBottomBar />,
+      bottomBarProps: { paddingSize: 'm' as const },
+    },
+    {
+      title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
+        defaultMessage: 'Manage Monitors | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_MANAGEMENT_ROUTE,
+      component: () => (
+        <ServiceEnabledWrapper>
+          <MonitorManagementPage />
+        </ServiceEnabledWrapper>
+      ),
+      dataTestSubj: 'uptimeMonitorManagementListPage',
+      telemetryId: UptimePage.MonitorManagement,
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.uptime.monitorManagement.pageHeader.title"
+            defaultMessage="Manage monitors"
+          />
+        ),
+        rightSideItems: [<AddMonitorBtn isDisabled={!canSave} />],
+      },
+    },
   ];
 };
 

@@ -77,23 +77,21 @@ export function ActionMenuContent({ config }: { config: UptimeConfig }): React.R
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      {config.ui?.monitorManagement?.enabled && (
-        <EuiHeaderLink
-          aria-label={i18n.translate('xpack.uptime.page_header.manageLink.label', {
-            defaultMessage: 'Navigate to the Uptime monitor management page',
-          })}
-          color="text"
-          data-test-subj="management-page-link"
-          href={history.createHref({
-            pathname: MONITOR_MANAGEMENT_ROUTE,
-          })}
-        >
-          <FormattedMessage
-            id="xpack.uptime.page_header.manageLink"
-            defaultMessage="Monitor management"
-          />
-        </EuiHeaderLink>
-      )}
+      <EuiHeaderLink
+        aria-label={i18n.translate('xpack.uptime.page_header.manageLink.label', {
+          defaultMessage: 'Navigate to the Uptime monitor management page',
+        })}
+        color="text"
+        data-test-subj="management-page-link"
+        href={history.createHref({
+          pathname: MONITOR_MANAGEMENT_ROUTE,
+        })}
+      >
+        <FormattedMessage
+          id="xpack.uptime.page_header.manageLink"
+          defaultMessage="Monitor management"
+        />
+      </EuiHeaderLink>
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {

@@ -78,3 +78,7 @@ export interface TestNowResponse {
 export const testNowMonitor = async (configId: string): Promise<TestNowResponse | undefined> => {
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
 };
+
+export const fetchServiceEnabled = async (): Promise<{ serviceEnabled: boolean }> => {
+  return await apiService.get(API_URLS.SERVICE_ENABLED);
+};
