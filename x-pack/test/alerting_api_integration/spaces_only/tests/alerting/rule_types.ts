@@ -47,9 +47,6 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         enabled_in_license: true,
         config: {
           execution: {
-            actions: {
-              max: 100000,
-            },
             timeout: '5m',
           },
         },
