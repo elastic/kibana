@@ -492,8 +492,6 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
     }
   );
   getDefineContinueButton().should('exist').click({ force: true });
-
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
 };
 
 export const goToAboutStepTab = () => {

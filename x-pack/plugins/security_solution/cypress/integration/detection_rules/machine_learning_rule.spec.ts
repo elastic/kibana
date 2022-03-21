@@ -49,7 +49,7 @@ import {
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../../tasks/create_new_rule';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
@@ -62,10 +62,11 @@ describe('Detection rules, machine learning', () => {
 
   before(() => {
     cleanKibana();
+    login();
+    visitWithoutDateRange(RULE_CREATION);
   });
 
   it('Creates and enables a new ml rule', () => {
-    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectMachineLearningRuleType();
     fillDefineMachineLearningRuleAndContinue(getMachineLearningRule());
     fillAboutRuleAndContinue(getMachineLearningRule());
@@ -112,7 +113,7 @@ describe('Detection rules, machine learning', () => {
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       getMachineLearningRule().machineLearningJobs.forEach((machineLearningJob, jobIndex) => {
-        cy.get(MACHINE_LEARNING_JOB_STATUS).eq(jobIndex).should('have.text', 'Stopped');
+        cy.get(MACHINE_LEARNING_JOB_STATUS).eq(jobIndex).should('contain', 'Stopped');
         cy.get(MACHINE_LEARNING_JOB_ID).eq(jobIndex).should('have.text', machineLearningJob);
       });
     });
