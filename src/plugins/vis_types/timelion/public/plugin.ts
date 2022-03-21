@@ -97,7 +97,10 @@ export class TimelionVisPlugin
     visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
   }
 
-  public start(core: CoreStart, { data, charts, dataViews, fieldFormats }: TimelionVisStartDependencies) {
+  public start(
+    core: CoreStart,
+    { data, charts, dataViews, fieldFormats }: TimelionVisStartDependencies
+  ) {
     setIndexPatterns(dataViews);
     setDataSearch(data.search);
     setCharts(charts);
