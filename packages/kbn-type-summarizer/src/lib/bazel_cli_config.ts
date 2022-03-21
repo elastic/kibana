@@ -21,6 +21,7 @@ const TYPE_SUMMARIZER_PACKAGES = [
   '@kbn/alerts',
   '@kbn/analytics',
   '@kbn/apm-config-loader',
+  '@kbn/apm-utils',
 ];
 
 type TypeSummarizerType = 'api-extractor' | 'type-summarizer';
