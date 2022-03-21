@@ -37,7 +37,7 @@ export const CommandList = memo<CommandListProps>(({ commands }) => {
       <EuiFlexGroup wrap gutterSize="xs" data-test-subj={getTestId('commandList')}>
         {commands.map(({ name, about }) => {
           return (
-            <EuiFlexItem grow={2} style={{ flexBasis: '20%' }}>
+            <EuiFlexItem grow={2} style={{ flexBasis: '20%' }} key={name}>
               <EuiDescriptionList
                 compressed
                 listItems={[{ title: name, description: about }]}
