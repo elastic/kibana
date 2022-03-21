@@ -21,13 +21,7 @@ export const ManageLicenseButton: React.FC<EuiButtonProps> = (props) => {
   const { canManageLicense } = useValues(LicensingLogic);
 
   return canManageLicense ? (
-    <EuiButtonTo
-      {...props}
-      color="primary"
-      size="s"
-      to="/app/management/stack/license_management"
-      shouldNotCreateHref
-    >
+    <EuiButtonTo {...props} to="/app/management/stack/license_management" shouldNotCreateHref>
       {i18n.translate('xpack.enterpriseSearch.licenseManagementLink', {
         defaultMessage: 'Manage your license',
       })}
