@@ -210,6 +210,12 @@ logging:
 -------------------
 
 [float]
+==== Logging configuration removed from systemd service file
+*Details:* Previously `logging.dest` was passed as a command line argument to Kibana in the systemd service file.  This configuration was moved to the default `kibana.yml`
+
+*Impact:* Installations relying on the service file configuration for logging should define logging settings in `kibana.yml`.
+
+[float]
 ==== `xpack.security.authProviders` is no longer valid
 *Details:* The deprecated `xpack.security.authProviders` setting in the `kibana.yml` file has been removed.
 
