@@ -21,6 +21,7 @@ import type {
   DataPublicPluginStart,
   TimefilterContract,
 } from 'src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import type { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
 
@@ -52,6 +53,7 @@ export interface TimelionVisSetupDependencies {
 /** @internal */
 export interface TimelionVisStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
 }
 
@@ -88,8 +90,8 @@ export class TimelionVisPlugin
     visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
   }
 
-  public start(core: CoreStart, { data, charts }: TimelionVisStartDependencies) {
-    setIndexPatterns(data.indexPatterns);
+  public start(core: CoreStart, { data, charts, dataViews }: TimelionVisStartDependencies) {
+    setIndexPatterns(dataViews);
     setDataSearch(data.search);
     setCharts(charts);
 
