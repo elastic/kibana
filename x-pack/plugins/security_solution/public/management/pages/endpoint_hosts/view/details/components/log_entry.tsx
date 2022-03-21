@@ -65,7 +65,7 @@ const useLogEntryUIProps = (
       username = logEntry.item.data.user_id;
       if (logEntry.item.data.data) {
         const data = logEntry.item.data.data;
-        if (data.command === 'isolate') {
+        if (data.commandDef === 'isolate') {
           iconType = 'lock';
           isIsolateAction = true;
         }
@@ -85,7 +85,7 @@ const useLogEntryUIProps = (
       failedActionEventTitle = i18.ACTIVITY_LOG.LogEntry.action.failedEndpointReleaseAction;
       if (logEntry.item.data.EndpointActions.data) {
         const data = logEntry.item.data.EndpointActions.data;
-        if (data.command === 'isolate') {
+        if (data.commandDef === 'isolate') {
           iconType = 'lock';
           failedActionEventTitle = i18.ACTIVITY_LOG.LogEntry.action.failedEndpointIsolateAction;
         }
@@ -95,7 +95,7 @@ const useLogEntryUIProps = (
       }
     } else if (logEntry.type === ActivityLogItemTypes.FLEET_RESPONSE) {
       isResponseEvent = true;
-      if (logEntry.item.data.action_data.command === 'isolate') {
+      if (logEntry.item.data.action_data.commandDef === 'isolate') {
         isIsolateAction = true;
       }
       if (!!logEntry.item.data.completed_at && !logEntry.item.data.error) {
@@ -106,7 +106,7 @@ const useLogEntryUIProps = (
     } else if (logEntry.type === ActivityLogItemTypes.RESPONSE) {
       iconType = 'check';
       isResponseEvent = true;
-      if (logEntry.item.data.EndpointActions.data.command === 'isolate') {
+      if (logEntry.item.data.EndpointActions.data.commandDef === 'isolate') {
         isIsolateAction = true;
       }
       if (logEntry.item.data.EndpointActions.completed_at) {

@@ -30,7 +30,7 @@ export const BadArgument = memo<BadArgumentProps>(
         </EuiText>
         <EuiCallOut color="danger" data-test-subj={getTestId('badArgument')}>
           {children}
-          <CommandInputUsage command={commandDefinition} />
+          <CommandInputUsage commandDef={commandDefinition} />
         </EuiCallOut>
       </>
     );

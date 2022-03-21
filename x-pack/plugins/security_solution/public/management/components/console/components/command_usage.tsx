@@ -20,10 +20,10 @@ import { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
-export const CommandInputUsage = memo<Pick<CommandUsageProps, 'command'>>(({ command }) => {
+export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
   const usageHelp = useMemo(() => {
-    return usageFromCommandDefinition(command);
-  }, [command]);
+    return usageFromCommandDefinition(commandDef);
+  }, [commandDef]);
 
   return (
     <EuiFlexGroup>
@@ -48,23 +48,23 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'command'>>(({ com
 CommandInputUsage.displayName = 'CommandInputUsage';
 
 export interface CommandUsageProps {
-  command: CommandDefinition;
+  commandDef: CommandDefinition;
 }
 
-export const CommandUsage = memo<CommandUsageProps>(({ command }) => {
+export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
-  const hasArgs = useMemo(() => Object.keys(command.args ?? []).length > 0, [command.args]);
+  const hasArgs = useMemo(() => Object.keys(commandDef.args ?? []).length > 0, [commandDef.args]);
   const commandOptions = useMemo(() => {
     // `command.args` only here to silence TS check
-    if (!hasArgs || !command.args) {
+    if (!hasArgs || !commandDef.args) {
       return [];
     }
 
-    return Object.entries(command.args).map(([option, { about: description }]) => ({
+    return Object.entries(commandDef.args).map(([option, { about: description }]) => ({
       title: `--${option}`,
       description,
     }));
-  }, [command.args, hasArgs]);
+  }, [commandDef.args, hasArgs]);
   const additionalProps = useMemo(
     () => ({
       className: 'euiTruncateText',
@@ -74,8 +74,8 @@ export const CommandUsage = memo<CommandUsageProps>(({ command }) => {
 
   return (
     <EuiPanel color="transparent" data-test-subj={getTestId('commandUsage')}>
-      <EuiText>{command.about}</EuiText>
-      <CommandInputUsage command={command} />
+      <EuiText>{commandDef.about}</EuiText>
+      <CommandInputUsage commandDef={commandDef} />
       {hasArgs && (
         <>
           <EuiSpacer />
@@ -85,7 +85,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ command }) => {
                 id="xpack.securitySolution.console.commandUsage.optionsLabel"
                 defaultMessage="Options:"
               />
-              {command.mustHaveArgs && command.args && hasArgs && (
+              {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
                 <EuiText size="s" color="subdued">
                   <FormattedMessage
                     id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
@@ -95,7 +95,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ command }) => {
               )}
             </EuiText>
           </p>
-          {command.args && (
+          {commandDef.args && (
             <EuiDescriptionList
               compressed
               type="column"

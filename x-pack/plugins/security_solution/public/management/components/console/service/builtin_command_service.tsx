@@ -96,7 +96,7 @@ export class ConsoleBuiltinCommandsService implements BuiltinCommandServiceInter
 
   async getCommandUsage(command: CommandDefinition): Promise<{ result: ReactNode }> {
     return {
-      result: <CommandUsage command={command} />,
+      result: <CommandUsage commandDef={command} />,
     };
   }
 }
