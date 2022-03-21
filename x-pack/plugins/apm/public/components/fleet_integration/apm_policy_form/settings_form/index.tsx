@@ -98,8 +98,7 @@ interface Props {
 }
 
 export function SettingsForm({ settingsSection, vars, onChange }: Props) {
-  const { title, subtitle, settings, isBeta, isPlatinumLicence } =
-    settingsSection;
+  const { title, subtitle, settings, isPlatinumLicence } = settingsSection;
   return (
     <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -126,25 +125,6 @@ export function SettingsForm({ settingsSection, vars, onChange }: Props) {
                     {
                       defaultMessage:
                         'Configurations are saved but ignored if your Kibana licence is not Platinum.',
-                    }
-                  )}
-                />
-              )}
-              &nbsp;
-              {isBeta && (
-                <EuiBetaBadge
-                  color="subdued"
-                  label={i18n.translate(
-                    'xpack.apm.fleet_integration.settings.betaBadgeLabel',
-                    {
-                      defaultMessage: 'Beta',
-                    }
-                  )}
-                  tooltipContent={i18n.translate(
-                    'xpack.apm.fleet_integration.settings.betaBadgeTooltip',
-                    {
-                      defaultMessage:
-                        'This module is not GA. Please help us by reporting any bugs.',
                     }
                   )}
                 />

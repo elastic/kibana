@@ -28,12 +28,12 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER,
     expectedStatusCode: number
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors/${jobId}/_forecast`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ duration })
-      .expect(expectedStatusCode);
+      .send({ duration });
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

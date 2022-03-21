@@ -145,6 +145,49 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-autocomplete",
+        "id": "def-common.AutocompleteFieldWildcardComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "AutocompleteFieldWildcardComponent",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<AutocompleteFieldWildcardProps>"
+        ],
+        "path": "packages/kbn-securitysolution-autocomplete/src/field_value_wildcard/index.tsx",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.AutocompleteFieldWildcardComponent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.AutocompleteFieldWildcardComponent.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-autocomplete",
         "id": "def-common.checkEmptyValue",
         "type": "Function",
         "tags": [],

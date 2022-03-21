@@ -28,17 +28,13 @@ import {
   useLink,
   sendGetOneAgentPolicyFull,
   sendGetOneAgentPolicy,
+  useKibanaVersion,
 } from '../../hooks';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
 
 import type { PackagePolicy } from '../../../common';
 
-import {
-  FLEET_KUBERNETES_PACKAGE,
-  KUBERNETES_RUN_INSTRUCTIONS,
-  STANDALONE_RUN_INSTRUCTIONS_LINUXMAC,
-  STANDALONE_RUN_INSTRUCTIONS_WINDOWS,
-} from '../../../common';
+import { FLEET_KUBERNETES_PACKAGE } from '../../../common';
 
 import { PlatformSelector } from '../enrollment_instructions/manual/platform_selector';
 
@@ -57,12 +53,35 @@ export const StandaloneInstructions = React.memo<InstructionProps>(
       'IS_LOADING'
     );
     const [yaml, setYaml] = useState<string | string>('');
-    const linuxMacCommand =
-      isK8s === 'IS_KUBERNETES'
-        ? KUBERNETES_RUN_INSTRUCTIONS
-        : STANDALONE_RUN_INSTRUCTIONS_LINUXMAC;
+    const kibanaVersion = useKibanaVersion();
+
+    const KUBERNETES_RUN_INSTRUCTIONS = 'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
+
+    const STANDALONE_RUN_INSTRUCTIONS_LINUX = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+sudo ./elastic-agent install`;
+
+    const STANDALONE_RUN_INSTRUCTIONS_MAC = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+sudo ./elastic-agent install`;
+
+    const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+.\\elastic-agent.exe install`;
+
+    const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
+sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+
+    const linuxRpmCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-x86_64.rpm
+sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+
+    const linuxCommand =
+      isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_LINUX;
+    const macCommand =
+      isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_MAC;
     const windowsCommand =
       isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_WINDOWS;
+
     const { docLinks } = useStartServices();
 
     useEffect(() => {
@@ -231,9 +250,11 @@ export const StandaloneInstructions = React.memo<InstructionProps>(
         }),
         children: (
           <PlatformSelector
-            linuxMacCommand={linuxMacCommand}
+            linuxCommand={linuxCommand}
+            macCommand={macCommand}
             windowsCommand={windowsCommand}
-            installAgentLink={docLinks.links.fleet.installElasticAgentStandalone}
+            linuxDebCommand={linuxDebCommand}
+            linuxRpmCommand={linuxRpmCommand}
             troubleshootLink={docLinks.links.fleet.troubleshooting}
             isK8s={isK8s === 'IS_KUBERNETES'}
           />

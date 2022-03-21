@@ -15,9 +15,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
-import { IFieldType } from 'src/plugins/data/public';
+import { DataViewField } from 'src/plugins/data_views/public';
 
-function fieldsToOptions(fields?: IFieldType[]): Array<EuiComboBoxOptionOption<IFieldType>> {
+function fieldsToOptions(fields?: DataViewField[]): Array<EuiComboBoxOptionOption<DataViewField>> {
   if (!fields) {
     return [];
   }
@@ -36,12 +36,12 @@ interface Props {
   placeholder: string;
   value: string | null; // data view field name
   onChange: (fieldName?: string) => void;
-  fields: IFieldType[];
+  fields: DataViewField[];
 }
 
 export function SingleFieldSelect({ placeholder, value, onChange, fields }: Props) {
   function renderOption(
-    option: EuiComboBoxOptionOption<IFieldType>,
+    option: EuiComboBoxOptionOption<DataViewField>,
     searchValue: string,
     contentClassName: string
   ) {
@@ -57,13 +57,13 @@ export function SingleFieldSelect({ placeholder, value, onChange, fields }: Prop
     );
   }
 
-  const onSelection = (selectedOptions: Array<EuiComboBoxOptionOption<IFieldType>>) => {
+  const onSelection = (selectedOptions: Array<EuiComboBoxOptionOption<DataViewField>>) => {
     onChange(_.get(selectedOptions, '0.value.name'));
   };
 
-  const selectedOptions: Array<EuiComboBoxOptionOption<IFieldType>> = [];
+  const selectedOptions: Array<EuiComboBoxOptionOption<DataViewField>> = [];
   if (value && fields) {
-    const selectedField = fields.find((field: IFieldType) => field.name === value);
+    const selectedField = fields.find((field: DataViewField) => field.name === value);
     if (selectedField) {
       selectedOptions.push({ value: selectedField, label: value });
     }

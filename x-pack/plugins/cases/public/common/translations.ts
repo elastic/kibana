@@ -276,3 +276,11 @@ export const APP_TITLE = i18n.translate('xpack.cases.common.appTitle', {
 export const APP_DESC = i18n.translate('xpack.cases.common.appDescription', {
   defaultMessage: 'Open and track issues, push information to third party systems.',
 });
+
+export const READ_ACTIONS_PERMISSIONS_ERROR_MSG = i18n.translate(
+  'xpack.cases.configure.readPermissionsErrorDescription',
+  {
+    defaultMessage:
+      'You do not have permissions to view connectors. If you would like to view connectors, contact your Kibana administrator.',
+  }
+);

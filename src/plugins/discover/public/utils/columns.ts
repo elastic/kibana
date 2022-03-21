@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '../../../data/common';
+import { DataView } from '../../../data_views/public';
 
 // We store this outside the function as a constant, so we're not creating a new array every time
 // the function is returning this. A changing array might cause the data grid to think it got

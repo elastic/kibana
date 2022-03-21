@@ -65,6 +65,8 @@ export async function rollUiCounterIndices(
        * Migration from one SO registry to another is not yet supported.
        * In a future release we can remove this piece of code and
        * migrate any docs to the Usage Counters Saved object.
+       *
+       * @removeBy 8.0.0
        */
 
       stopUsingUiCounterIndicies$.complete();

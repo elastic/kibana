@@ -87,7 +87,7 @@ export const BenchmarksSection = () => {
                       <EuiSpacer size="xs" />
                       <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
                         <EuiIcon type="clock" />
-                        {moment(cluster.meta.lastUpdate).fromNow()}
+                        {` ${moment(cluster.meta.lastUpdate).fromNow()}`}
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

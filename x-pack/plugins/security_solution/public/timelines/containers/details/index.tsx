@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { isEmpty, noop } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
@@ -51,10 +50,12 @@ export const useTimelineEventsDetails = ({
   boolean,
   EventsArgs['detailsData'],
   object | undefined,
-  EventsArgs['ecs']
+  EventsArgs['ecs'],
+  () => Promise<void>
 ] => {
+  const asyncNoop = () => Promise.resolve();
   const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
+  const refetch = useRef<() => Promise<void>>(asyncNoop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
@@ -141,5 +142,5 @@ export const useTimelineEventsDetails = ({
     };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
-  return [loading, timelineDetailsResponse, rawEventData, ecsData];
+  return [loading, timelineDetailsResponse, rawEventData, ecsData, refetch.current];
 };

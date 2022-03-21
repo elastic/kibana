@@ -21,34 +21,45 @@ describe('ProcessTreeAlerts component', () => {
 
   describe('When ProcessTreeAlerts is mounted', () => {
     it('should return null if no alerts', async () => {
-      renderResult = mockedContext.render(<ProcessTreeAlerts alerts={[]} />);
+      renderResult = mockedContext.render(
+        <ProcessTreeAlerts alerts={[]} onAlertSelected={jest.fn()} />
+      );
 
       expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeNull();
     });
 
     it('should return an array of alert details', async () => {
-      renderResult = mockedContext.render(<ProcessTreeAlerts alerts={mockAlerts} />);
+      renderResult = mockedContext.render(
+        <ProcessTreeAlerts alerts={mockAlerts} onAlertSelected={jest.fn()} />
+      );
 
       expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
       mockAlerts.forEach((alert) => {
         if (!alert.kibana) {
           return;
         }
-        const { uuid, rule, original_event: event, workflow_status: status } = alert.kibana.alert;
-        const { name, query, severity } = rule;
+        const { uuid } = alert.kibana.alert;
 
         expect(
           renderResult.queryByTestId(`sessionView:sessionViewAlertDetail-${uuid}`)
         ).toBeTruthy();
-        expect(
-          renderResult.queryByTestId(`sessionView:sessionViewAlertDetailViewRule-${uuid}`)
-        ).toBeTruthy();
-        expect(renderResult.queryAllByText(new RegExp(event.action, 'i')).length).toBeTruthy();
-        expect(renderResult.queryAllByText(new RegExp(status, 'i')).length).toBeTruthy();
-        expect(renderResult.queryAllByText(new RegExp(name, 'i')).length).toBeTruthy();
-        expect(renderResult.queryAllByText(new RegExp(query, 'i')).length).toBeTruthy();
-        expect(renderResult.queryAllByText(new RegExp(severity, 'i')).length).toBeTruthy();
       });
+    });
+
+    it('should execute onAlertSelected when clicking on an alert', async () => {
+      const mockFn = jest.fn();
+      renderResult = mockedContext.render(
+        <ProcessTreeAlerts alerts={mockAlerts} onAlertSelected={mockFn} />
+      );
+
+      expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
+
+      const testAlertRow = renderResult.queryByTestId(
+        `sessionView:sessionViewAlertDetail-${mockAlerts[0].kibana?.alert.uuid}`
+      );
+      expect(testAlertRow).toBeTruthy();
+      testAlertRow?.click();
+      expect(mockFn).toHaveBeenCalledTimes(1);
     });
   });
 });

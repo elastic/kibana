@@ -26,9 +26,9 @@ import { SourceMapper } from '../source_mapper';
 import { isNodeModule } from '../is_node_module';
 
 interface ResolvedNmImport {
-  type: 'import';
-  node: ts.ImportDeclaration | ExportFromDeclaration;
-  targetPath: string;
+  type: 'import_from_node_modules';
+  symbol: DecSymbol;
+  moduleId: string;
 }
 interface ResolvedSymbol {
   type: 'symbol';
@@ -93,15 +93,14 @@ export class ExportCollector {
 
   private getImportFromNodeModules(symbol: DecSymbol): undefined | ResolvedNmImport {
     const parentImport = this.getParentImport(symbol);
-    if (parentImport) {
-      // this symbol is within an import statement, is it an import from a node_module?
+    if (parentImport && ts.isStringLiteral(parentImport.moduleSpecifier)) {
+      // this symbol is within an import statement, is it an import from a node_module? first
+      // we resolve the import alias to it's source symbol, which we will show us the file that
+      // the import resolves to
       const aliased = this.resolveAliasSymbolStep(symbol);
-
-      // symbol is in an import or export-from statement, make sure we want to traverse to that file
       const targetPaths = [
         ...new Set(aliased.declarations.map((d) => this.sourceMapper.getSourceFile(d).fileName)),
       ];
-
       if (targetPaths.length > 1) {
         throw new Error('importing a symbol from multiple locations is unsupported at this time');
       }
@@ -109,9 +108,9 @@ export class ExportCollector {
       const targetPath = targetPaths[0];
       if (isNodeModule(this.dtsDir, targetPath)) {
         return {
-          type: 'import',
-          node: parentImport,
-          targetPath,
+          type: 'import_from_node_modules',
+          symbol,
+          moduleId: parentImport.moduleSpecifier.text,
         };
       }
     }
@@ -148,8 +147,8 @@ export class ExportCollector {
     this.traversedSymbols.add(symbol);
 
     const source = this.resolveAliasSymbol(symbol);
-    if (source.type === 'import') {
-      results.addImport(!!exportInfo, source.node, symbol);
+    if (source.type === 'import_from_node_modules') {
+      results.addImportFromNodeModules(exportInfo, source.symbol, source.moduleId);
       return;
     }
 
@@ -157,7 +156,7 @@ export class ExportCollector {
     if (seen) {
       for (const node of symbol.declarations) {
         assertExportedValueNode(node);
-        results.ensureExported(node);
+        results.addNode(exportInfo, node);
       }
       return;
     }
@@ -185,7 +184,7 @@ export class ExportCollector {
       }
 
       if (isExportedValueNode(node)) {
-        results.addNode(!!exportInfo, node);
+        results.addNode(exportInfo, node);
       }
     }
   }
@@ -201,7 +200,7 @@ export class ExportCollector {
 
     for (const symbol of this.typeChecker.getExportsOfModule(moduleSymbol)) {
       assertDecSymbol(symbol);
-      this.collectResults(results, new ExportInfo(`${symbol.escapedName}`), symbol);
+      this.collectResults(results, ExportInfo.fromSymbol(symbol), symbol);
     }
 
     return results;
