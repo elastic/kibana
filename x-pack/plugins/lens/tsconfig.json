@@ -21,6 +21,7 @@
     { "path": "../global_search/tsconfig.json"},
     { "path": "../saved_objects_tagging/tsconfig.json"},
     { "path": "../../../src/plugins/data/tsconfig.json"},
+    { "path": "../../../src/plugins/data_views/tsconfig.json"},
     { "path": "../../../src/plugins/data_view_field_editor/tsconfig.json"},
     { "path": "../../../src/plugins/charts/tsconfig.json"},
     { "path": "../../../src/plugins/expressions/tsconfig.json"},

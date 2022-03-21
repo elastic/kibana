@@ -15,6 +15,7 @@ import {
 import { useKubebeatDataView } from '../common/api/use_kubebeat_data_view';
 import { allNavigationItems } from '../common/navigation/constants';
 import type { CspNavigationItem } from '../common/navigation/types';
+import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
 import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 import { CspLoadingState } from './csp_loading_state';
 import {
@@ -45,12 +46,16 @@ export const getSideNavItems = (
 const DEFAULT_PROPS: KibanaPageTemplateProps = {
   solutionNav: {
     name: CLOUD_SECURITY_POSTURE,
-    items: getSideNavItems(allNavigationItems),
+    items: getSideNavItems({
+      dashboard: allNavigationItems.dashboard,
+      findings: allNavigationItems.findings,
+      benchmark: allNavigationItems.benchmarks,
+    }),
   },
   restrictWidth: false,
 };
 
-const NO_DATA_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
+const getNoDataConfig = (cisIntegrationLink: string): KibanaPageTemplateProps['noDataConfig'] => ({
   pageTitle: NO_DATA_CONFIG_TITLE,
   solution: NO_DATA_CONFIG_SOLUTION_NAME,
   // TODO: Add real docs link once we have it
@@ -58,20 +63,21 @@ const NO_DATA_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
   logo: 'logoSecurity',
   actions: {
     elasticAgent: {
-      // TODO: Use `href` prop to link to our own integration once we have it
+      href: cisIntegrationLink,
       title: NO_DATA_CONFIG_BUTTON,
       description: NO_DATA_CONFIG_DESCRIPTION,
     },
   },
-};
+});
 
 export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, ...props }) => {
   // TODO: Consider using more sophisticated logic to find out if our integration is installed
   const kubeBeatQuery = useKubebeatDataView();
+  const cisIntegrationLink = useCISIntegrationLink();
 
   let noDataConfig: KibanaPageTemplateProps['noDataConfig'];
   if (kubeBeatQuery.status === 'success' && !kubeBeatQuery.data) {
-    noDataConfig = NO_DATA_CONFIG;
+    noDataConfig = getNoDataConfig(cisIntegrationLink);
   }
 
   let template: KibanaPageTemplateProps['template'] = 'default';

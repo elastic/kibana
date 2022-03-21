@@ -34,6 +34,7 @@ interface EventDetailsFooterProps {
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
+  refetchFlyoutData: () => Promise<void>;
 }
 
 interface AddExceptionModalWrapperData {
@@ -55,6 +56,7 @@ export const EventDetailsFooterComponent = React.memo(
     timelineId,
     globalQuery,
     timelineQuery,
+    refetchFlyoutData,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
       () =>
@@ -122,6 +124,7 @@ export const EventDetailsFooterComponent = React.memo(
                   onAddEventFilterClick={onAddEventFilterClick}
                   onAddExceptionTypeClick={onAddExceptionTypeClick}
                   onAddIsolationStatusClick={onAddIsolationStatusClick}
+                  refetchFlyoutData={refetchFlyoutData}
                   refetch={refetchAll}
                   indexName={expandedEvent.indexName}
                   timelineId={timelineId}
