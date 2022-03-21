@@ -6,11 +6,10 @@
  */
 
 import React, { ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { ITooltipProperty } from './tooltip_property';
-import { InnerJoin } from '../joins/inner_join';
+import { ITooltipProperty } from '../tooltip_property';
+import { InnerJoin } from '../../joins/inner_join';
+import { JoinKeyLabel } from './join_key_label';
 
 export class JoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
@@ -30,26 +29,11 @@ export class JoinTooltipProperty implements ITooltipProperty {
   }
 
   getPropertyName(): ReactNode {
-    const content = i18n.translate('xpack.maps.tooltip.joinPropertyTooltipContent', {
-      defaultMessage: `Shared key '{leftFieldName}' is joined with {rightSources}`,
-      values: {
-        leftFieldName: this._tooltipProperty.getPropertyName() as string,
-        rightSources: this._innerJoins
-          .map((innerJoin) => {
-            const rightSource = innerJoin.getRightJoinSource();
-            const termField = rightSource.getTermField();
-            return `'${termField.getName()}'`;
-          })
-          .join(','),
-      },
-    });
     return (
-      <>
-        {this._tooltipProperty.getPropertyName()}
-        <EuiToolTip position="bottom" content={content}>
-          <EuiIcon type="link" />
-        </EuiToolTip>
-      </>
+      <JoinKeyLabel
+        leftFieldName={this._tooltipProperty.getPropertyName() as string}
+        innerJoins={this._innerJoins}
+      />
     );
   }
 

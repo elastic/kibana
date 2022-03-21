@@ -11,6 +11,13 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overvi
   defaultMessage: 'Overview',
 });
 
+export const DETECTION_RESPONSE = i18n.translate(
+  'xpack.securitySolution.navigation.detectionResponse',
+  {
+    defaultMessage: 'Detection & Response',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
