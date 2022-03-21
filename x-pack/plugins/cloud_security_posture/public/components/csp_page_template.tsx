@@ -5,13 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type {
-  QueryStatus,
-  UseQueryResult,
-  QueryObserverLoadingResult,
-  QueryObserverLoadingErrorResult,
-  QueryObserverRefetchErrorResult,
-} from 'react-query';
+import type { QueryStatus, UseQueryResult } from 'react-query';
 import { NavLink } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiErrorBoundary, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -131,21 +125,21 @@ export const CspPageTemplate: React.FC<
   const getNoDataConfig = (): KibanaPageTemplateProps['noDataConfig'] => {
     // TODO: add 'installed_failed' configurations
     if (cisKubernetesPackageInfo?.status === 'not_installed') return PACKAGE_NOT_INSTALLED_CONFIG;
-    if (query && !query.isLoading && !query.isError && !query.data)
+    if (query && query.isSuccess && !query.data)
       return kibanaPageTemplateProps.noDataConfig || DEFAULT_NO_DATA_CONFIG;
   };
 
   const getTemplate = (): KibanaPageTemplateProps['template'] => {
-    if (query?.status === 'loading' || query?.status === 'error') return 'centeredContent';
+    if (query?.isLoading || query?.isError) return 'centeredContent';
 
     return 'default';
   };
 
   const render = () => {
     // TODO: pass query to render functions
-    if (query?.status === 'loading') return loadingRender();
-    if (query?.status === 'error') return errorRender(query.error as CspError);
-    if (query?.status === 'success') return children;
+    if (query?.isLoading) return loadingRender();
+    if (query?.isError) return errorRender(query.error as CspError);
+    if (query?.isSuccess) return children;
 
     return children;
   };

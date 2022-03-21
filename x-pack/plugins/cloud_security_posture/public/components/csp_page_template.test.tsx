@@ -8,22 +8,23 @@ import React, { type ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
 import Chance from 'chance';
 import { coreMock } from '../../../../../src/core/public/mocks';
-import { createStubDataView } from '../../../../../src/plugins/data_views/public/data_views/data_view.stub';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../common/constants';
-import { useKubebeatDataView } from '../common/api/use_kubebeat_data_view';
 import { createNavigationItemFixture } from '../test/fixtures/navigation_item';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
 import { CspPageTemplate, getSideNavItems } from './csp_page_template';
 import { LOADING, PACKAGE_NOT_INSTALLED_TEXT, DEFAULT_NO_DATA_TEXT } from './translations';
 import { useCisKubernetesIntegraion } from '../common/api/use_cis_kubernetes_integration';
+import { UseQueryResult } from 'react-query';
 
 const chance = new Chance();
 
 // Synchronized to the error message in the formatted message in `page_template.tsx`
 const ERROR_LOADING_DATA_DEFAULT_MESSAGE = "We couldn't fetch your cloud security posture data";
+const packageNotInstalledUniqueTexts = [
+  PACKAGE_NOT_INSTALLED_TEXT.PAGE_TITLE,
+  PACKAGE_NOT_INSTALLED_TEXT.DESCRIPTION,
+];
 
-// jest.mock('../common/api/use_kubebeat_data_view');
 jest.mock('../common/api/use_cis_kubernetes_integration');
 
 describe('getSideNavItems', () => {
@@ -48,11 +49,11 @@ describe('getSideNavItems', () => {
   });
 });
 
-// =======================================
-
 describe('<CspPageTemplate />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    // if package installations status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
+    (useCisKubernetesIntegraion as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
   });
 
   const renderCspPageTemplate = (props: ComponentProps<typeof CspPageTemplate> = {}) => {
@@ -78,92 +79,167 @@ describe('<CspPageTemplate />', () => {
   };
 
   it('renders children if integraion is installed', () => {
-    (useCisKubernetesIntegraion as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
-
     const children = chance.sentence();
     renderCspPageTemplate({ children });
 
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
-    [PACKAGE_NOT_INSTALLED_TEXT.PAGE_TITLE, PACKAGE_NOT_INSTALLED_TEXT.DESCRIPTION].forEach(
-      (text: string) => expect(screen.queryByText(text)).not.toBeInTheDocument()
+    packageNotInstalledUniqueTexts.forEach((text: string) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
   });
 
-  // ---
-  // it('renders children when data view is found', () => {
-  //   (useKubebeatDataView as jest.Mock).mockImplementation(() =>
-  //     createReactQueryResponse({
-  //       status: 'success',
-  //       data: createStubDataView({
-  //         spec: {
-  //           id: CSP_KUBEBEAT_INDEX_PATTERN,
-  //         },
-  //       }),
-  //     })
-  //   );
+  it('renders integrations installation promprt if integraion is not installed', () => {
+    (useCisKubernetesIntegraion as jest.Mock).mockImplementation(() => ({
+      status: 'not_installed',
+    }));
 
-  //   const children = chance.sentence();
-  //   renderCspPageTemplate({ children });
+    const children = chance.sentence();
+    renderCspPageTemplate({ children });
 
-  //   expect(screen.getByText(children)).toBeInTheDocument();
-  //   expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
-  //   expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
-  //   BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
-  //     expect(screen.queryByText(blankPageGraphicText)).not.toBeInTheDocument()
-  //   );
-  // });
+    Object.values(PACKAGE_NOT_INSTALLED_TEXT).forEach((text: string) =>
+      expect(screen.queryByText(text)).toBeInTheDocument()
+    );
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
+  });
 
-  // --
-  // it('renders loading text when data view is loading', () => {
-  //   (useKubebeatDataView as jest.Mock).mockImplementation(() =>
-  //     createReactQueryResponse({ status: 'loading' })
-  //   );
+  it('renders loading text when query is loading', () => {
+    const query = createReactQueryResponse({
+      status: 'loading',
+    }) as unknown as UseQueryResult;
 
-  //   const children = chance.sentence();
-  //   renderCspPageTemplate({ children });
+    const children = chance.sentence();
+    renderCspPageTemplate({ children, query });
 
-  //   expect(screen.getByText(LOADING)).toBeInTheDocument();
-  //   expect(screen.queryByText(children)).not.toBeInTheDocument();
-  //   expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
-  //   BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
-  //     expect(screen.queryByText(blankPageGraphicText)).not.toBeInTheDocument()
-  //   );
-  // });
+    expect(screen.queryByText(LOADING)).toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
+    packageNotInstalledUniqueTexts.forEach((text: string) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
+  });
 
-  // ---
-  // it('renders an error view when data view fetching has an error', () => {
-  //   (useKubebeatDataView as jest.Mock).mockImplementation(() =>
-  //     createReactQueryResponse({ status: 'error', error: new Error('') })
-  //   );
+  it('renders error text when query is error', () => {
+    const query = createReactQueryResponse({
+      status: 'error',
+      error: {
+        body: {
+          error: chance.sentence(),
+          message: chance.sentence(),
+          statusCode: chance.integer(),
+        },
+      },
+    }) as unknown as UseQueryResult;
 
-  //   const children = chance.sentence();
-  //   renderCspPageTemplate({ children });
+    const children = chance.sentence();
+    renderCspPageTemplate({ children, query });
 
-  //   expect(screen.getByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).toBeInTheDocument();
-  //   expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
-  //   expect(screen.queryByText(children)).not.toBeInTheDocument();
-  //   BLANK_PAGE_GRAPHIC_TEXTS.forEach((blankPageGraphicText) =>
-  //     expect(screen.queryByText(blankPageGraphicText)).not.toBeInTheDocument()
-  //   );
-  // });
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).toBeInTheDocument();
+    expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    packageNotInstalledUniqueTexts.forEach((text: string) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
+  });
 
-  // ---
-  // it('renders the blank page graphic when data view is missing', () => {
-  //   (useKubebeatDataView as jest.Mock).mockImplementation(() =>
-  //     createReactQueryResponse({
-  //       status: 'success',
-  //       data: undefined,
-  //     })
-  //   );
+  it('prefers custom error render', () => {
+    const message = chance.sentence();
 
-  //   const children = chance.sentence();
-  //   renderCspPageTemplate({ children });
+    const query = createReactQueryResponse({
+      status: 'error',
+      error: {
+        body: {
+          error: chance.sentence(),
+          message,
+          statusCode: chance.integer(),
+        },
+      },
+    }) as unknown as UseQueryResult;
 
-  //   BLANK_PAGE_GRAPHIC_TEXTS.forEach((text) => expect(screen.getByText(text)).toBeInTheDocument());
-  //   expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
-  //   expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
-  //   expect(screen.queryByText(children)).not.toBeInTheDocument();
-  // });
+    const children = chance.sentence();
+    renderCspPageTemplate({
+      children,
+      query,
+      errorRender: (error) => <div>{error.body.message}</div>,
+    });
+
+    expect(screen.queryByText(message)).toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
+    expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    packageNotInstalledUniqueTexts.forEach((text: string) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
+  });
+
+  it('prefers custom loading render', () => {
+    const loading = chance.sentence();
+
+    const query = createReactQueryResponse({
+      status: 'loading',
+    }) as unknown as UseQueryResult;
+
+    const children = chance.sentence();
+    renderCspPageTemplate({
+      children,
+      query,
+      loadingRender: () => <div>{loading}</div>,
+    });
+
+    expect(screen.queryByText(loading)).toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
+    expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    packageNotInstalledUniqueTexts.forEach((text: string) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
+  });
+
+  it('renders noDataConfig prompt when query data is undefined', () => {
+    const query = createReactQueryResponse({
+      status: 'success',
+      data: undefined,
+    }) as unknown as UseQueryResult;
+
+    const children = chance.sentence();
+    renderCspPageTemplate({ children, query });
+
+    expect(screen.queryByText(DEFAULT_NO_DATA_TEXT.PAGE_TITLE)).toBeInTheDocument();
+    expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
+    packageNotInstalledUniqueTexts.forEach((text: string) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
+  });
+
+  it('prefers custom noDataConfig prompt', () => {
+    const pageTitle = chance.sentence();
+    const solution = chance.sentence();
+    const docsLink = chance.sentence();
+
+    const query = createReactQueryResponse({
+      status: 'success',
+      data: undefined,
+    }) as unknown as UseQueryResult;
+
+    const children = chance.sentence();
+    renderCspPageTemplate({
+      children,
+      query,
+      noDataConfig: { pageTitle, solution, docsLink, actions: {} },
+    });
+
+    expect(screen.queryByText(pageTitle)).toBeInTheDocument();
+    expect(screen.getByText(solution, { exact: false })).toBeInTheDocument();
+    expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
+    packageNotInstalledUniqueTexts.forEach((text: string) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
+  });
 });
