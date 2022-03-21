@@ -237,6 +237,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
 
@@ -315,6 +316,7 @@ describe('Task Runner', () => {
         generateEventLog({
           task: true,
           action: EVENT_LOG_ACTIONS.executeStart,
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -421,6 +423,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -674,6 +677,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -902,6 +906,7 @@ describe('Task Runner', () => {
         generateEventLog({
           task: true,
           action: EVENT_LOG_ACTIONS.executeStart,
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1036,6 +1041,7 @@ describe('Task Runner', () => {
         generateEventLog({
           task: true,
           action: EVENT_LOG_ACTIONS.executeStart,
+          consumer: 'bar',
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1314,6 +1320,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1495,6 +1502,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1536,6 +1544,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1546,6 +1555,7 @@ describe('Task Runner', () => {
         task: true,
         reason: 'decrypt',
         status: 'error',
+        consumer: 'bar',
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -1577,6 +1587,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1878,6 +1889,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -2000,6 +2012,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -2092,6 +2105,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -2174,6 +2188,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -2263,6 +2278,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -2361,6 +2377,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(
@@ -2398,6 +2415,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -2610,6 +2628,7 @@ describe('Task Runner', () => {
       generateEventLog({
         task: true,
         action: EVENT_LOG_ACTIONS.executeStart,
+        consumer: 'bar',
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(

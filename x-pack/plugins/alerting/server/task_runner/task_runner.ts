@@ -599,7 +599,6 @@ export class TaskRunner<
       enabled = decryptedAttributes.enabled;
       consumer = decryptedAttributes.consumer;
     } catch (err) {
-      // If decryption fails, the event log execute event will be written without a consumer field
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
 
@@ -666,11 +665,23 @@ export class TaskRunner<
 
   async run(): Promise<RuleTaskRunResult> {
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId, consumer },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
+
+    // Initially use consumer as stored inside the task instance
+    // Replace this with consumer as read from the rule saved object after
+    // we successfully read the rule SO. This allows us to populate a consumer
+    // value for `execute-start` events (which are written before the rule SO is read)
+    // and in the event of decryption errors (where we cannot read the rule SO)
+    // Because "consumer" is set when a rule is created, this value should be static
+    // for the life of a rule but there may be edge cases where migrations cause
+    // the consumer values to become out of sync.
+    if (consumer) {
+      this.ruleConsumer = consumer;
+    }
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
@@ -720,7 +731,6 @@ export class TaskRunner<
       message: `rule execution start: "${ruleId}"`,
     });
 
-    // execute-start event is written without "consumer" field
     eventLogger.logEvent(startEvent);
 
     const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
@@ -892,9 +902,13 @@ export class TaskRunner<
 
     // Write event log entry
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId, consumer },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
+
+    if (consumer && !this.ruleConsumer) {
+      this.ruleConsumer = consumer;
+    }
 
     this.logger.debug(
       `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`

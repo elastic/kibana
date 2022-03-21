@@ -255,6 +255,7 @@ describe('enable()', () => {
       params: {
         alertId: '1',
         spaceId: 'default',
+        consumer: 'myApp',
       },
       schedule: {
         interval: '10s',
@@ -536,6 +537,7 @@ describe('enable()', () => {
       params: {
         alertId: '1',
         spaceId: 'default',
+        consumer: 'myApp',
       },
       schedule: {
         interval: '10s',

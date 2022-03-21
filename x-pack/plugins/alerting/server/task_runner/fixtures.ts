@@ -176,6 +176,7 @@ export const mockTaskInstance = () => ({
   params: {
     alertId: RULE_ID,
     spaceId: 'default',
+    consumer: 'bar',
   },
   ownerId: null,
 });

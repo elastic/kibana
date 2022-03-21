@@ -87,6 +87,7 @@ describe('Task Runner Cancel', () => {
       params: {
         alertId: '1',
         spaceId: 'default',
+        consumer: 'bar',
       },
       ownerId: null,
     };
@@ -248,6 +249,7 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -285,6 +287,7 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -521,6 +524,7 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -558,6 +562,7 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -677,6 +682,7 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -715,6 +721,7 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },

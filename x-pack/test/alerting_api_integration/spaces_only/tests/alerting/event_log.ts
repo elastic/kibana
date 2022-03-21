@@ -162,6 +162,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     license: 'basic',
                     ruleset: 'alertsFixture',
                   },
+                  consumer: 'alertsFixture',
                 });
                 break;
               case 'execute':
@@ -266,6 +267,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   shouldHaveTask: true,
                   ruleTypeId: response.body.rule_type_id,
                   rule: undefined,
+                  consumer: 'alertsFixture',
                 });
                 break;
             }
@@ -496,6 +498,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     license: 'basic',
                     ruleset: 'alertsFixture',
                   },
+                  consumer: 'alertsFixture',
                 });
                 break;
               case 'execute':
@@ -664,6 +667,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               license: 'basic',
               ruleset: 'alertsFixture',
             },
+            consumer: 'alertsFixture',
           });
 
           validateEvent(executeEvent, {

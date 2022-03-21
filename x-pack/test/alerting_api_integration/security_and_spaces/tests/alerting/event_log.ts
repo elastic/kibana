@@ -83,6 +83,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         reason: 'decrypt',
         shouldHaveTask: true,
         ruleTypeId: response.body.rule_type_id,
+        consumer: 'alertsFixture',
         rule: {
           id: alertId,
           category: response.body.rule_type_id,
