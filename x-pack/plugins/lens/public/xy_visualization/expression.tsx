@@ -277,7 +277,7 @@ export function XYChart({
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
       ? (value as string)
-      : xAxisFormatter.convert(value);
+      : String(xAxisFormatter.convert(value));
 
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
