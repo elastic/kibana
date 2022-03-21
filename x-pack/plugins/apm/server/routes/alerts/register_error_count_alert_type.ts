@@ -12,6 +12,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
+import { join } from 'path';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -53,6 +54,7 @@ export function registerErrorCountAlertType({
   logger,
   ruleDataClient,
   config$,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -149,9 +151,16 @@ export function registerErrorCountAlertType({
               windowSize: ruleParams.windowSize,
               windowUnit: ruleParams.windowUnit,
             });
+
             const relativeViewInAppUrl = getAlertUrl(serviceName, [
               getEnvironmentLabel(environment),
             ]);
+            const viewInAppUrl = basePath.publicBaseUrl
+              ? new URL(
+                  join(basePath.serverBasePath, relativeViewInAppUrl),
+                  basePath.publicBaseUrl
+                ).toString()
+              : relativeViewInAppUrl;
 
             services
               .alertWithLifecycle({
@@ -174,7 +183,7 @@ export function registerErrorCountAlertType({
                 triggerValue: errorCount,
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
                 reason: alertReason,
-                viewInAppUrl: relativeViewInAppUrl,
+                viewInAppUrl,
               });
           });
 
