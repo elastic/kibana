@@ -91,7 +91,6 @@ export enum KibanaSavedObjectType {
   mlModule = 'ml-module',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
-  // cloudSecurityPostureRuleTemplate = 'cloud-security-posture-rule-template',
   tag = 'tag',
 }
 
