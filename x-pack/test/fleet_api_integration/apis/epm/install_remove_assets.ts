@@ -448,12 +448,10 @@ const expectAssetsInstalled = ({
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
     const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
-      type: 'cloud-security-posture-rule-template',
-      id: 'sample_cloud_security_posture_rule_template',
+      type: 'csp-rule-template',
+      id: 'sample_csp_rule_template',
     });
-    expect(resCloudSecurityPostureRuleTemplate.id).equal(
-      'sample_cloud_security_posture_rule_template'
-    );
+    expect(resCloudSecurityPostureRuleTemplate.id).equal('sample_csp_rule_template');
     const resTag = await kibanaServer.savedObjects.get({
       type: 'tag',
       id: 'sample_tag',
@@ -502,12 +500,11 @@ const expectAssetsInstalled = ({
       installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
       package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
     };
-
     expect(sortedRes).eql({
       installed_kibana: [
         {
-          id: 'sample_cloud_security_posture_rule_template',
-          type: 'cloud-security-posture-rule-template',
+          id: 'sample_csp_rule_template',
+          type: 'csp-rule-template',
         },
         {
           id: 'sample_dashboard',
@@ -663,7 +660,7 @@ const expectAssetsInstalled = ({
           type: 'epm-packages-assets',
         },
         {
-          id: '1d25cf2e-8d7f-5b38-a5d6-3f7b53eb6613',
+          id: '943d5767-41f5-57c3-ba02-48e0f6a837db',
           type: 'epm-packages-assets',
         },
         {

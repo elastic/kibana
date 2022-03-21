@@ -58,7 +58,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
-          cloud_security_posture_rule_template: [],
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -171,7 +171,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
-          cloud_security_posture_rule_template: [],
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -264,7 +264,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
-          cloud_security_posture_rule_template: [],
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -389,7 +389,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
-          cloud_security_posture_rule_template: [],
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],

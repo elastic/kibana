@@ -374,8 +374,8 @@ export default function (providerContext: FtrProviderContext) {
         installed_kibana_space_id: 'default',
         installed_kibana: [
           {
-            id: 'sample_cloud_security_posture_rule_template',
-            type: 'cloud-security-posture-rule-template',
+            id: 'sample_csp_rule_template',
+            type: 'csp-rule-template',
           },
           {
             id: 'sample_dashboard',

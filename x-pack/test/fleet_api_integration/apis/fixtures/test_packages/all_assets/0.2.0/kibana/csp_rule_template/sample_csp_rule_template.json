@@ -13,5 +13,5 @@
     "tags": ["Kubernetes", "Containers"]
   },
   "id": "sample_cloud_security_posture_rule_template",
-  "type": "cloud-security-posture-rule-template"
+  "type": "csp-rule-template"
 }
