@@ -23,6 +23,13 @@ describe('config validation', () => {
         },
         "maxEphemeralActionsPerAlert": 10,
         "minimumScheduleInterval": "1m",
+        "rules": Object {
+          "execution": Object {
+            "actions": Object {
+              "max": 100000,
+            },
+          },
+        },
       }
     `);
   });

@@ -9,6 +9,6 @@
   "description": "A plugin providing components and services for shared user experiences in Kibana.",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["dataViewEditor", "dataViews"],
+  "requiredPlugins": ["dataViewEditor"],
   "optionalPlugins": []
 }

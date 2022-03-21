@@ -102,7 +102,6 @@ jest.mock('../../../../../util/index_utils', () => {
   };
 });
 
-const mockOnClose = jest.fn();
 const mockGetDataViewAndSavedSearch = getDataViewAndSavedSearch as jest.Mock;
 
 describe('Data Frame Analytics: <SourceSelection />', () => {
@@ -115,12 +114,11 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
     // assert
-    expect(screen.queryByText('New analytics job')).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
     expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledTimes(0);
   });
@@ -129,7 +127,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
@@ -149,7 +147,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
@@ -172,7 +170,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
@@ -197,7 +195,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
