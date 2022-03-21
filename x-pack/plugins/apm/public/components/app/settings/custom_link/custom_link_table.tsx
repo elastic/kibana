@@ -19,7 +19,8 @@ import React, { useState } from 'react';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import type { ITableColumn } from '../../../shared/managed_table';
+import { ManagedTableSyncUrl } from '../../../shared/managed_table/managed_table_sync_url';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 
 interface Props {
@@ -109,7 +110,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         )}
       />
       <EuiSpacer size="s" />
-      <ManagedTable
+      <ManagedTableSyncUrl
         noItemsMessage={
           isEmpty(items) ? (
             <LoadingStatePrompt />

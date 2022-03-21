@@ -37,7 +37,7 @@ import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ListMetric } from '../../../shared/list_metric';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import type { ITableColumn } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import {
@@ -46,6 +46,7 @@ import {
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { HealthBadge } from './health_badge';
 import { ServiceListItem } from '../../../../../common/service_inventory';
+import { ManagedTableSyncUrl } from '../../../shared/managed_table/managed_table_sync_url';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
@@ -324,7 +325,7 @@ export function ServiceList({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ManagedTable
+        <ManagedTableSyncUrl
           isLoading={isLoading}
           error={isFailure}
           columns={serviceColumns}

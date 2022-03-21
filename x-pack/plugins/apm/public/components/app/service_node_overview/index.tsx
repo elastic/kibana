@@ -23,7 +23,8 @@ import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/links/apm/service_node_metric_overview_link';
-import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+import type { ITableColumn } from '../../shared/managed_table';
+import { ManagedTableSyncUrl } from '../../shared/managed_table/managed_table_sync_url';
 
 const INITIAL_SORT_FIELD = 'cpu';
 const INITIAL_SORT_DIRECTION = 'desc';
@@ -164,7 +165,7 @@ function ServiceNodeOverview() {
   ];
 
   return (
-    <ManagedTable
+    <ManagedTableSyncUrl
       isLoading={status === FETCH_STATUS.LOADING}
       noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
         defaultMessage: 'No JVMs were found',

@@ -24,13 +24,14 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../empty_message';
 import { ImpactBar } from '../impact_bar';
 import { ListMetric } from '../list_metric';
-import { ITableColumn, ManagedTable } from '../managed_table';
+import type { ITableColumn } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../charts/helper/get_timeseries_color';
+import { ManagedTableSyncState } from '../managed_table/managed_table_sync_state';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,
@@ -227,7 +228,7 @@ export function DependenciesTable(props: Props) {
             items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
           }
         >
-          <ManagedTable
+          <ManagedTableSyncState
             isLoading={status === FETCH_STATUS.LOADING}
             error={status === FETCH_STATUS.FAILURE}
             columns={columns}

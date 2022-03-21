@@ -24,9 +24,10 @@ import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_p
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../../hooks/use_theme';
 import { LoadingStatePrompt } from '../../../../shared/loading_state_prompt';
-import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
+import type { ITableColumn } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
+import { ManagedTableSyncUrl } from '../../../../shared/managed_table/managed_table_sync_url';
 
 type Config =
   APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
@@ -239,10 +240,11 @@ export function AgentConfigurationList({
         />
       )}
 
-      <ManagedTable
+      <ManagedTableSyncUrl
         noItemsMessage={<LoadingStatePrompt />}
         columns={columns}
         items={configurations}
+        // @ts-ignore
         initialSortField="service.name"
         initialSortDirection="asc"
       />

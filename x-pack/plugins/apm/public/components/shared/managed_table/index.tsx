@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import {
+  CriteriaWithPagination,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
-import React, { ReactNode, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { fromQuery, toQuery } from '../links/url_helpers';
+import React, { ReactNode, useMemo } from 'react';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
@@ -26,47 +27,48 @@ export interface ITableColumn<T> {
   render?: (value: any, item: T) => unknown;
 }
 
-interface Props<T> {
+type SortDirection = 'asc' | 'desc';
+
+export interface CommonProps<T> {
   items: T[];
   columns: Array<ITableColumn<T>>;
   initialPageIndex?: number;
   initialPageSize?: number;
-  initialSortField?: ITableColumn<T>['field'];
-  initialSortDirection?: 'asc' | 'desc';
+  initialSortField?: keyof T;
+  initialSortDirection?: SortDirection;
   showPerPageOptions?: boolean;
   noItemsMessage?: React.ReactNode;
   sortItems?: boolean;
-  sortFn?: (
-    items: T[],
-    sortField: string,
-    sortDirection: 'asc' | 'desc'
-  ) => T[];
+  sortFn?: (items: T[], sortField: string, sortDirection: SortDirection) => T[];
   pagination?: boolean;
   isLoading?: boolean;
   error?: boolean;
   tableLayout?: 'auto' | 'fixed';
 }
 
+interface Props<T> extends CommonProps<T> {
+  page?: number;
+  pageSize?: number;
+  sortField?: keyof T;
+  sortDirection?: string;
+  onTableChange: (tableOptions: CriteriaWithPagination<T>) => void;
+}
+
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const INITIAL_PAGE_SIZE = 25;
+export const INITIAL_PAGE_SIZE = 25;
 
 function defaultSortFn<T extends any>(
   items: T[],
   sortField: string,
-  sortDirection: 'asc' | 'desc'
+  sortDirection: SortDirection
 ) {
   return orderBy(items, sortField, sortDirection);
 }
 
 function UnoptimizedManagedTable<T>(props: Props<T>) {
-  const history = useHistory();
   const {
     items,
     columns,
-    initialPageIndex = 0,
-    initialPageSize = INITIAL_PAGE_SIZE,
-    initialSortField = props.columns[0]?.field || '',
-    initialSortDirection = 'asc',
     showPerPageOptions = true,
     noItemsMessage,
     sortItems = true,
@@ -75,20 +77,16 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     isLoading = false,
     error = false,
     tableLayout,
+    page = 0,
+    pageSize = INITIAL_PAGE_SIZE,
+    sortField = props.columns[0]?.field || '',
+    sortDirection = 'asc',
+    onTableChange,
   } = props;
-
-  const {
-    urlParams: {
-      page = initialPageIndex,
-      pageSize = initialPageSize,
-      sortField = initialSortField,
-      sortDirection = initialSortDirection,
-    },
-  } = useLegacyUrlParams();
 
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
-      ? sortFn(items, sortField, sortDirection as 'asc' | 'desc')
+      ? sortFn(items, sortField as string, sortDirection as SortDirection)
       : items;
 
     return sortedItems.slice(page * pageSize, (page + 1) * pageSize);
@@ -98,29 +96,10 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     return {
       sort: {
         field: sortField as keyof T,
-        direction: sortDirection as 'asc' | 'desc',
+        direction: sortDirection as SortDirection,
       },
     };
   }, [sortField, sortDirection]);
-
-  const onTableChange = useCallback(
-    (options: {
-      page: { index: number; size: number };
-      sort?: { field: keyof T; direction: 'asc' | 'desc' };
-    }) => {
-      history.push({
-        ...history.location,
-        search: fromQuery({
-          ...toQuery(history.location.search),
-          page: options.page.index,
-          pageSize: options.page.size,
-          sortField: options.sort?.field,
-          sortDirection: options.sort?.direction,
-        }),
-      });
-    },
-    [history]
-  );
 
   const paginationProps = useMemo(() => {
     if (!pagination) {

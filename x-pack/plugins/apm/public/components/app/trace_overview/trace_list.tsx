@@ -21,10 +21,11 @@ import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/empty_message';
 import { ImpactBar } from '../../shared/impact_bar';
 import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
-import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+import type { ITableColumn } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/service_link';
 import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { ManagedTableSyncUrl } from '../../shared/managed_table/managed_table_sync_url';
 
 type TraceGroup = APIReturnType<'GET /internal/apm/traces'>['items'][0];
 
@@ -161,7 +162,7 @@ export function TraceList({ items = [], isLoading, isFailure }: Props) {
     [query]
   );
   return (
-    <ManagedTable
+    <ManagedTableSyncUrl
       isLoading={isLoading}
       error={isFailure}
       columns={traceListColumns}

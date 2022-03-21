@@ -21,13 +21,14 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import type { ITableColumn } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
+import { ManagedTableSyncUrl } from '../../../shared/managed_table/managed_table_sync_url';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -232,7 +233,7 @@ function ErrorGroupList({
   }, [serviceName, query, detailedStatistics, comparisonEnabled]);
 
   return (
-    <ManagedTable
+    <ManagedTableSyncUrl
       noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
         defaultMessage: 'No errors found',
       })}

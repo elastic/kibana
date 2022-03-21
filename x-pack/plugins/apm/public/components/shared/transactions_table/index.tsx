@@ -22,9 +22,9 @@ import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { ManagedTable } from '../managed_table';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { ManagedTableSyncState } from '../managed_table/managed_table_sync_state';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -33,6 +33,7 @@ interface InitialState {
   requestId: string;
   mainStatisticsData: ApiResponse & {
     transactionGroupsTotalItems: number;
+    transactionNames: string[];
   };
 }
 
@@ -43,6 +44,7 @@ const INITIAL_STATE: InitialState = {
     isAggregationAccurate: true,
     bucketSize: 0,
     transactionGroupsTotalItems: 0,
+    transactionNames: [],
   },
 };
 
@@ -78,11 +80,11 @@ export function TransactionsTable({
   start,
   end,
 }: Props) {
-  const [tableOptions] = useState<{
+  const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
-      direction: SortDirection;
-      field: SortField;
+      direction?: SortDirection;
+      field?: SortField;
     };
   }>({
     pageIndex: 0,
@@ -137,9 +139,6 @@ export function TransactionsTable({
           response.transactionGroups,
           field,
           direction
-        ).slice(
-          pageIndex * numberOfTransactionsPerPage,
-          (pageIndex + 1) * numberOfTransactionsPerPage
         );
 
         return {
@@ -147,8 +146,15 @@ export function TransactionsTable({
           requestId: uuid(),
           mainStatisticsData: {
             ...response,
-            transactionGroups: currentPageTransactionGroups,
+            // transactionGroups: currentPageTransactionGroups,
             transactionGroupsTotalItems: response.transactionGroups.length,
+            transactionNames: currentPageTransactionGroups
+              .slice(
+                pageIndex * numberOfTransactionsPerPage,
+                (pageIndex + 1) * numberOfTransactionsPerPage
+              )
+              .map(({ name }) => name)
+              .sort(),
           },
         };
       });
@@ -179,6 +185,7 @@ export function TransactionsTable({
       isAggregationAccurate,
       bucketSize,
       transactionGroupsTotalItems,
+      transactionNames,
     },
   } = data;
 
@@ -205,9 +212,7 @@ export function TransactionsTable({
                 transactionType,
                 latencyAggregationType:
                   latencyAggregationType as LatencyAggregationType,
-                transactionNames: JSON.stringify(
-                  transactionGroups.map(({ name }) => name).sort()
-                ),
+                transactionNames: JSON.stringify(transactionNames),
                 comparisonStart,
                 comparisonEnd,
               },
@@ -312,7 +317,7 @@ export function TransactionsTable({
               transactionGroupsTotalItems === 0 && isNotInitiated
             }
           >
-            <ManagedTable
+            <ManagedTableSyncState
               isLoading={isLoading}
               error={status === FETCH_STATUS.FAILURE}
               columns={columns}
@@ -330,6 +335,15 @@ export function TransactionsTable({
                     })
               }
               showPerPageOptions={showPerPageOptions}
+              onNavigate={(options) => {
+                setTableOptions({
+                  pageIndex: options.page.index,
+                  sort: {
+                    field: options.sort?.field as SortField,
+                    direction: options.sort?.direction,
+                  },
+                });
+              }}
             />
           </OverviewTableContainer>
         </EuiFlexItem>
