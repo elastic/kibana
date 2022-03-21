@@ -13,7 +13,13 @@ import { set } from '@elastic/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import { ensureDeepObject } from './ensure_deep_object';
 
-const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
+const readYaml = (path: string) => {
+  try {
+    return safeLoad(readFileSync(path, 'utf8'));
+  } catch (e) {
+    /* tslint:disable:no-empty */
+  }
+};
 
 function replaceEnvVarRefs(val: string) {
   return val.replace(/\$\{(\w+)\}/g, (match, envVarName) => {
@@ -43,13 +49,9 @@ export const getConfigFromFiles = (configFiles: readonly string[]): Record<strin
   let mergedYaml: Record<string, any> = {};
 
   for (const configFile of configFiles) {
-    try {
-      const yaml = readYaml(configFile);
-      if (yaml !== null) {
-        mergedYaml = merge(mergedYaml, yaml);
-      }
-    } catch (e) {
-      /* tslint:disable:no-empty */
+    const yaml = readYaml(configFile);
+    if (yaml !== null) {
+      mergedYaml = merge(mergedYaml, yaml);
     }
   }
 
