@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from 'kibana/public';
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../app_links';
 
 interface Props {

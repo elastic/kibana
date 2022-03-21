@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import { capitalize } from 'lodash';
 import React from 'react';
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../';
 import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';

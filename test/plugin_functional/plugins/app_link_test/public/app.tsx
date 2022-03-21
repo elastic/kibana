@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, IBasePath, ApplicationStart } from 'kibana/public';
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 const FooApp = ({

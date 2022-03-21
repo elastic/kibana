@@ -16,6 +16,7 @@ import {
   SearchSessionState,
   SearchUsageCollector,
 } from '../../../../../../../src/plugins/data/public';
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApplicationStart, IBasePath } from '../../../../../../../src/core/public';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';

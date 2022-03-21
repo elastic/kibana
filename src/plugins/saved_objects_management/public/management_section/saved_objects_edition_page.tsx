@@ -11,6 +11,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../kibana_react/public';
 import { SavedObjectEdition } from './object_view';
 import './saved_objects_edition_page.scss';

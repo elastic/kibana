@@ -10,6 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Prompt } from 'react-router-dom';
 import type { AppMountParameters, IBasePath, ApplicationStart } from 'kibana/public';
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 const HomePage = ({

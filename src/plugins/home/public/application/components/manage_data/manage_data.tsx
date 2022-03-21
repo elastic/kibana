@@ -23,6 +23,7 @@ import { createAppNavigationHandler } from '../app_navigation_handler';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../kibana_react/public';
 
 interface Props {

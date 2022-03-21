@@ -9,7 +9,7 @@ import React, { memo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { TutorialDirectoryHeaderLinkComponent } from 'src/plugins/home/public';
-
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public';
 import { useLink, useStartServices } from '../../hooks';
 
