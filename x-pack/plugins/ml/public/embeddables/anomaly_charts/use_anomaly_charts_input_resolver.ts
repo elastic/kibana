@@ -87,7 +87,6 @@ export function useAnomalyChartsInputResolver(
             type: SWIMLANE_TYPE.OVERALL,
           };
 
-          // TODO
           const selectionInfluencers = getSelectionInfluencers(selections, viewBySwimlaneFieldName);
 
           const jobIds = getSelectionJobIds(selections, explorerJobs);
@@ -100,6 +99,7 @@ export function useAnomalyChartsInputResolver(
             timeRange.earliestMs,
             timeRange.latestMs,
             influencersFilterQuery,
+            selectionInfluencers,
             severityValue ?? 0,
             maxSeriesToPlot
           );

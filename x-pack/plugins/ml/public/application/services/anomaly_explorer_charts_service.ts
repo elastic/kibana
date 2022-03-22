@@ -113,6 +113,7 @@ export class AnomalyExplorerChartsService {
     selectedEarliestMs: number,
     selectedLatestMs: number,
     influencerFilterQuery?: InfluencersFilterQuery,
+    influencers?: EntityField[],
     severity = 0,
     maxSeries = DEFAULT_MAX_SERIES_TO_PLOT
   ): Observable<ExplorerChartsData> {
@@ -126,7 +127,7 @@ export class AnomalyExplorerChartsService {
     return this.mlApiServices.results
       .getAnomalyCharts$(
         jobIds,
-        [],
+        influencers ?? [],
         severity,
         selectedEarliestMs,
         selectedLatestMs,

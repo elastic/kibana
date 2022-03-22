@@ -12,6 +12,7 @@ import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anom
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
+  SeriesConfigWithMetadata,
 } from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
@@ -20,10 +21,9 @@ import type {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
-import type { MLAnomalyDoc, Influencer } from '../../../../common/types/anomalies';
+import type { MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import type { SeriesConfigWithMetadata } from '../anomaly_explorer_charts_service';
 
 export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
 
@@ -170,7 +170,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   getAnomalyCharts$(
     jobIds: string[],
-    influencers: Influencer[],
+    influencers: EntityField[],
     threshold: number,
     earliestMs: number,
     latestMs: number,

@@ -15,6 +15,7 @@ import {
   getDefaultChartsData,
 } from './explorer_charts/explorer_charts_container_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
+import { getSelectionInfluencers } from './explorer_utils';
 
 export class AnomalyChartsStateService extends StateService {
   private _isChartsDataLoading$ = new BehaviorSubject<boolean>(false);
@@ -35,23 +36,38 @@ export class AnomalyChartsStateService extends StateService {
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
       this.anomalyTimelineStateServices.getContainerWidth$().pipe(skipWhile((v) => v === 0)),
       this.anomalyTimelineStateServices.getSelectedCells$(),
+      this.anomalyTimelineStateServices.getViewBySwimlaneFieldName$(),
     ])
       .pipe(
-        switchMap(([selectedJobs, influencerFilterQuery, containerWidth, selectedCells]) => {
-          if (!selectedCells) return of(getDefaultChartsData());
-          const jobIds = selectedJobs.map((v) => v.id);
-          this._isChartsDataLoading$.next(true);
-
-          return this.anomalyExplorerChartsService.getAnomalyData$(
-            jobIds,
-            containerWidth!,
-            selectedCells?.times[0] * 1000,
-            selectedCells?.times[1] * 1000,
+        switchMap(
+          ([
+            selectedJobs,
             influencerFilterQuery,
-            0,
-            6
-          );
-        })
+            containerWidth,
+            selectedCells,
+            viewBySwimlaneFieldName,
+          ]) => {
+            if (!selectedCells) return of(getDefaultChartsData());
+            const jobIds = selectedJobs.map((v) => v.id);
+            this._isChartsDataLoading$.next(true);
+
+            const selectionInfluencers = getSelectionInfluencers(
+              selectedCells,
+              viewBySwimlaneFieldName!
+            );
+
+            return this.anomalyExplorerChartsService.getAnomalyData$(
+              jobIds,
+              containerWidth!,
+              selectedCells?.times[0] * 1000,
+              selectedCells?.times[1] * 1000,
+              influencerFilterQuery,
+              selectionInfluencers,
+              0,
+              6
+            );
+          }
+        )
       )
       .subscribe((v) => {
         this._chartsData$.next(v);
