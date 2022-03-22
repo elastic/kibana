@@ -251,11 +251,7 @@ export class AnomalySource implements IVectorSource {
         continue;
       }
       if (properties.hasOwnProperty(key)) {
-        const label = ANOMALY_SOURCE_FIELDS[key]?.label;
-        if (label) {
-          tooltipProperties.push(new AnomalySourceTooltipProperty(label, properties[key]));
-        } else if (!ANOMALY_SOURCE_FIELDS[key]) {
-          // partition field keys will be different each time so won't be in ANOMALY_SOURCE_FIELDS
+        if (!ANOMALY_SOURCE_FIELDS[key] || ANOMALY_SOURCE_FIELDS[key].label) {
           tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
         }
       }
