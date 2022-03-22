@@ -86,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Visualize Library', 'Cloud Security');
+        expect(navLinks).to.contain('Visualize Library');
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {

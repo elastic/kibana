@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Maps', 'Cloud Security');
+        expect(navLinks).to.contain('Maps');
       });
 
       it(`allows a map to be created`, async () => {
