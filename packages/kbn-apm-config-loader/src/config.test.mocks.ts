@@ -17,13 +17,6 @@ export const packageMock = {
 };
 jest.doMock(join(mockedRootDir, 'package.json'), () => packageMock.raw, { virtual: true });
 
-export const devConfigMock = {
-  raw: {} as any,
-};
-jest.doMock(join(mockedRootDir, 'config', 'apm.dev.js'), () => devConfigMock.raw, {
-  virtual: true,
-});
-
 export const gitRevExecMock = jest.fn();
 jest.doMock('child_process', () => ({
   ...childProcessModule,
@@ -48,7 +41,6 @@ jest.doMock('fs', () => ({
 
 export const resetAllMocks = () => {
   packageMock.raw = {};
-  devConfigMock.raw = {};
   gitRevExecMock.mockReset();
   readUuidFileMock.mockReset();
   jest.resetModules();

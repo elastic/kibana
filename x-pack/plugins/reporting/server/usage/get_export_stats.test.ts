@@ -79,14 +79,14 @@ test('Model of jobTypes', () => {
       PNG: {
         available: true,
         total: 3,
-        sizes: sizesAggResponse,
+        output_size: sizesAggResponse,
         app: { dashboard: 0, visualization: 3, 'canvas workpad': 0 },
         metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
       },
       printable_pdf: {
         available: true,
         total: 3,
-        sizes: sizesAggResponse,
+        output_size: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
         layout: { preserve_layout: 3, print: 0, canvas: 0 },
         metrics: { pdf_cpu: {}, pdf_memory: {}, pdf_pages: {} } as MetricsStats,
@@ -95,7 +95,7 @@ test('Model of jobTypes', () => {
         available: true,
         total: 3,
         app: { search: 3 },
-        sizes: sizesAggResponse,
+        output_size: sizesAggResponse,
         metrics: { csv_rows: {} } as MetricsStats,
       },
     },
@@ -118,7 +118,7 @@ test('Model of jobTypes', () => {
         "png_cpu": Object {},
         "png_memory": Object {},
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
@@ -144,7 +144,7 @@ test('Model of jobTypes', () => {
       "metrics": Object {
         "csv_rows": Object {},
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
@@ -176,7 +176,7 @@ test('Model of jobTypes', () => {
         "pdf_memory": Object {},
         "pdf_pages": Object {},
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
@@ -197,7 +197,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         available: true,
         total: 15,
         deprecated: 5,
-        sizes: sizesAggResponse,
+        output_size: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 0 },
         metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
       },
@@ -220,7 +220,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         "png_cpu": Object {},
         "png_memory": Object {},
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
@@ -240,7 +240,7 @@ test('Incorporate metric stats', () => {
       PNGV2: {
         available: true,
         total: 3,
-        sizes: sizesAggResponse,
+        output_size: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
         metrics: {
           png_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
@@ -250,7 +250,7 @@ test('Incorporate metric stats', () => {
       printable_pdf_v2: {
         available: true,
         total: 3,
-        sizes: sizesAggResponse,
+        output_size: sizesAggResponse,
         metrics: {
           pdf_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
           pdf_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
@@ -288,7 +288,7 @@ test('Incorporate metric stats', () => {
           "99.0": 3782,
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
@@ -335,7 +335,7 @@ test('Incorporate metric stats', () => {
           "99.0": 4,
         },
       },
-      "sizes": Object {
+      "output_size": Object {
         "1.0": 5093470,
         "25.0": 5093470,
         "5.0": 5093470,
