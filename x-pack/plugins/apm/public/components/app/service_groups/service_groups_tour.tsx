@@ -31,21 +31,27 @@ export function ServiceGroupsTour({
     <EuiTourStep
       content={
         <>
-          <EuiText size="s" color="subdued">
-            {content}
-          </EuiText>
+          <EuiText size="s">{content}</EuiText>
           <EuiSpacer />
-          <ElasticDocsLink
-            section="/kibana"
-            path="/services.html"
-            target="blank"
-          >
+          <div style={{ display: 'flex' }}>
             <EuiText size="s" color="subdued">
               {i18n.translate('xpack.apm.serviceGroups.tour.content.link', {
-                defaultMessage: 'Learn more in our documentation',
-              })}
+                defaultMessage: 'Learn more in the',
+              })}{' '}
+              <ElasticDocsLink
+                section="/kibana"
+                path="/services.html"
+                target="blank"
+              >
+                {i18n.translate(
+                  'xpack.apm.serviceGroups.tour.content.link.docs',
+                  {
+                    defaultMessage: 'docs.',
+                  }
+                )}
+              </ElasticDocsLink>
             </EuiText>
-          </ElasticDocsLink>
+          </div>
         </>
       }
       isStepOpen={tourEnabled}
