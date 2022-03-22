@@ -32,11 +32,6 @@
 }
 
 .lnsXyAnnotationIcon_rotate90 {
-  transform: rotate(90deg);
-}
-.lnsXyAnnotationIcon_rotate180 {
-  transform: rotate(180deg);
-}
-.lnsXyAnnotationIcon_rotate270 {
-  transform: rotate(270deg);
+  transform: rotate(45deg);
+  transform-origin: center;
 }

@@ -22,7 +22,6 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
       lineStyle,
       lineWidth,
       icon,
-      iconPosition,
       textVisibility,
       time,
     }) => {
@@ -38,8 +37,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               color: [color || defaultAnnotationColor],
               lineWidth: [lineWidth || 1],
               lineStyle: [lineStyle || 'solid'],
-              icon: hasIcon(icon) ? [icon] : ['empty'],
-              iconPosition: hasIcon(icon) || textVisibility ? [iconPosition || 'auto'] : ['auto'],
+              icon: hasIcon(icon) ? [icon] : ['triangle'],
               textVisibility: [textVisibility || false],
               isHidden: [Boolean(isHidden)],
             },

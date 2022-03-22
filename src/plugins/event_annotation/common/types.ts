@@ -7,7 +7,6 @@
  */
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
-export type IconPosition = 'auto' | 'left' | 'right' | 'above' | 'below';
 export type AnnotationType = 'manual';
 export type KeyType = 'point_in_time';
 
@@ -17,7 +16,6 @@ export interface StyleProps {
   icon?: string;
   lineWidth?: number;
   lineStyle?: LineStyle;
-  iconPosition?: IconPosition;
   textVisibility?: boolean;
   isHidden?: boolean;
 }

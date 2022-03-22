@@ -7,6 +7,7 @@
 
 import * as React from 'react';
 import { EuiIconProps } from '@elastic/eui';
+import classnames from 'classnames';
 
 export const IconCircle = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
@@ -19,13 +20,12 @@ export const IconCircle = ({ title, titleId, ...props }: Omit<EuiIconProps, 'typ
   >
     {title ? <title id={titleId}>{title}</title> : null}
     <circle
-      clipPath="circle()"
+      strokeWidth="1"
+      stroke="currentColor"
       cx="8"
       cy="8"
-      r="8"
-      className="lensAnnotationIconFill"
-      strokeWidth={typeof props.strokeWidth === 'number' ? Math.max(props.strokeWidth, 2) : 2}
-      stroke={'currentColor'}
+      className={classnames('lensAnnotationIconNoFill', props.className)}
+      r="7"
     />
   </svg>
 );

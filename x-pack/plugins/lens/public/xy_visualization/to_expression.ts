@@ -425,7 +425,6 @@ const annotationLayerToExpression = (
                     label: ann.label || defaultAnnotationLabel,
                     textVisibility: ann.textVisibility,
                     icon: ann.icon,
-                    iconPosition: ann.iconPosition,
                     lineStyle: ann.lineStyle,
                     lineWidth: ann.lineWidth,
                     color: ann.color,

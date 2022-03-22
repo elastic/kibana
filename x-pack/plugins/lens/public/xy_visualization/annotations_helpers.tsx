@@ -7,12 +7,12 @@
 
 import './expression_reference_lines.scss';
 import React from 'react';
-import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText, IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import classnames from 'classnames';
 import type { IconPosition, YAxisMode, YConfig } from '../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
-import { IconCircle, IconTriangle } from '../assets/annotation_icons';
+import { annotationsIconSet } from './annotations/config_panel/icon_set';
 
 export const LINES_MARKER_SIZE = 20;
 
@@ -168,16 +168,6 @@ export function MarkerBody({
 
 const isNumericalString = (value: string) => !isNaN(Number(value));
 
-const shapes = ['circle', 'triangle'] as const;
-type Shape = typeof shapes[number];
-
-const shapesIconMap: Record<Shape, { icon: IconType; shouldRotate?: boolean }> = {
-  triangle: { icon: IconTriangle, shouldRotate: true },
-  circle: { icon: IconCircle },
-};
-
-const isCustomAnnotationShape = (value: string): value is Shape => shapes.includes(value as Shape);
-
 function NumberIcon({ number }: { number: number }) {
   return (
     <EuiFlexGroup
@@ -200,46 +190,35 @@ interface MarkerConfig {
   iconPosition?: IconPosition;
 }
 
-export const getIconRotationClass = (markerPosition?: string) => {
-  if (markerPosition === 'left') {
-    return 'lnsXyAnnotationIcon_rotate270';
-  }
-  if (markerPosition === 'right') {
-    return 'lnsXyAnnotationIcon_rotate90';
-  }
-  if (markerPosition === 'bottom') {
-    return 'lnsXyAnnotationIcon_rotate180';
-  }
-};
-
 export const AnnotationIcon = ({
   type,
-  rotationClass = '',
+  rotateClassName = '',
   isHorizontal,
-  strokeWidth,
+  renderedInChart,
   ...rest
 }: {
   type: string;
-  rotationClass?: string;
+  rotateClassName?: string;
   isHorizontal?: boolean;
-  strokeWidth?: number;
+  renderedInChart?: boolean;
 } & EuiIconProps) => {
   if (isNumericalString(type)) {
     return <NumberIcon number={Number(type)} />;
   }
-  const isCustom = isCustomAnnotationShape(type);
-  if (!isCustom) {
-    return <EuiIcon {...rest} type={type} />;
+  const iconConfig = annotationsIconSet.find((i) => i.value === type);
+  if (!iconConfig) {
+    return null;
   }
-
-  const rotationClassName = shapesIconMap[type].shouldRotate ? rotationClass : '';
   return (
     <EuiIcon
       {...rest}
-      type={shapesIconMap[type].icon}
-      className={classnames(rotationClassName)}
-      strokeWidth={strokeWidth}
-      stroke={strokeWidth ? 'currentColor' : undefined}
+      type={iconConfig.icon || type}
+      className={classnames(
+        { [rotateClassName]: iconConfig.shouldRotate },
+        {
+          lensAnnotationIconFill: renderedInChart && iconConfig.canFill,
+        }
+      )}
     />
   );
 };
@@ -249,19 +228,17 @@ export function Marker({
   isHorizontal,
   hasReducedPadding,
   label,
-  rotationClass,
-  strokeWidth,
+  rotateClassName,
 }: {
   config: MarkerConfig;
   isHorizontal: boolean;
   hasReducedPadding: boolean;
   label?: string;
-  rotationClass?: string;
-  strokeWidth?: number;
+  rotateClassName?: string;
 }) {
   if (hasIcon(config.icon)) {
     return (
-      <AnnotationIcon type={config.icon} rotationClass={rotationClass} strokeWidth={strokeWidth} />
+      <AnnotationIcon type={config.icon} rotateClassName={rotateClassName} renderedInChart={true} />
     );
   }
 

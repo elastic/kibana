@@ -2967,7 +2967,6 @@ describe('xy_expression', () => {
         time: '2022-03-18T08:25:00.000Z',
         label: 'Event 1',
         icon: 'triangle',
-        iconPosition: 'below',
         type: 'manual_event_annotation',
         color: 'red',
         lineStyle: 'dashed',

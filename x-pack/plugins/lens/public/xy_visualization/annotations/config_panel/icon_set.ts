@@ -9,12 +9,6 @@ import { IconTriangle, IconCircle } from '../../../assets/annotation_icons';
 
 export const annotationsIconSet = [
   {
-    value: 'empty',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.noIconLabel', {
-      defaultMessage: 'None',
-    }),
-  },
-  {
     value: 'asterisk',
     label: i18n.translate('xpack.lens.xyChart.iconSelect.asteriskIconLabel', {
       defaultMessage: 'Asterisk',
@@ -50,6 +44,7 @@ export const annotationsIconSet = [
       defaultMessage: 'Circle',
     }),
     icon: IconCircle,
+    canFill: true,
   },
 
   {
@@ -76,5 +71,7 @@ export const annotationsIconSet = [
       defaultMessage: 'Triangle',
     }),
     icon: IconTriangle,
+    shouldRotate: true,
+    canFill: true,
   },
 ];

@@ -143,7 +143,8 @@ export const MarkerDecorationSettings = ({
           }}
         />
       </EuiFormRow>
-      {hasIcon(currentConfig?.icon) || currentConfig?.textVisibility ? (
+      {currentConfig?.iconPosition &&
+      (hasIcon(currentConfig?.icon) || currentConfig?.textVisibility) ? (
         <EuiFormRow
           display="columnCompressed"
           fullWidth

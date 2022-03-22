@@ -60,13 +60,6 @@ export const manualEventAnnotation: ExpressionFunctionDefinition<
         defaultMessage: 'An optional icon used for annotation lines',
       }),
     },
-    iconPosition: {
-      types: ['string'],
-      options: ['auto', 'above', 'below', 'left', 'right'],
-      help: i18n.translate('event_annotation.manual_annotation_group.args.iconPosition', {
-        defaultMessage: 'The placement of the icon for the annotation line',
-      }),
-    },
     textVisibility: {
       types: ['boolean'],
       help: i18n.translate('event_annotation.manual_annotation_group.args.textVisibility', {

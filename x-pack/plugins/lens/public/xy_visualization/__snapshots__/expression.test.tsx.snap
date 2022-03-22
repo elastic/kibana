@@ -28,7 +28,6 @@ exports[`xy_expression XYChart component annotations should render basic annotat
       hasReducedPadding={false}
       isHorizontal={true}
       label="Annotation"
-      strokeWidth={1}
     />
   }
   markerBody={
@@ -57,14 +56,14 @@ exports[`xy_expression XYChart component annotations should render grouped annot
     Array [
       Object {
         "dataValue": 1647591900025,
-        "details": "",
+        "details": "Event 1",
         "header": 1647591900000,
       },
     ]
   }
   domainType="xDomain"
-  id=""
-  key=""
+  id="event_1"
+  key="event_1"
   marker={
     <Marker
       config={
@@ -73,8 +72,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
           "color": "red",
           "customTooltipDetails": [Function],
           "icon": "3",
-          "iconPosition": "below",
-          "label": "",
+          "label": "Event 1",
           "lineStyle": "dashed",
           "lineWidth": 3,
           "roundedTimestamp": 1647591900000,
@@ -85,9 +83,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
       }
       hasReducedPadding={true}
       isHorizontal={true}
-      label=""
-      rotationClassName="lnsXyAnnotationIcon_rotate180"
-      strokeWidth={3}
+      label="Event 1"
     />
   }
   markerBody={
@@ -95,7 +91,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
       isHorizontal={true}
     />
   }
-  markerPosition="bottom"
+  markerPosition="top"
   style={
     Object {
       "line": Object {
@@ -119,14 +115,14 @@ exports[`xy_expression XYChart component annotations should render grouped annot
     Array [
       Object {
         "dataValue": 1647591900025,
-        "details": "",
+        "details": "Event 1",
         "header": 1647591900000,
       },
     ]
   }
   domainType="xDomain"
-  id=""
-  key=""
+  id="event_1"
+  key="event_1"
   marker={
     <Marker
       config={
@@ -135,8 +131,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
           "color": "#f04e98",
           "customTooltipDetails": [Function],
           "icon": "2",
-          "iconPosition": "below",
-          "label": "",
+          "label": "Event 1",
           "lineStyle": "solid",
           "lineWidth": 1,
           "roundedTimestamp": 1647591900000,
@@ -147,9 +142,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
       }
       hasReducedPadding={true}
       isHorizontal={true}
-      label=""
-      rotationClassName="lnsXyAnnotationIcon_rotate180"
-      strokeWidth={1}
+      label="Event 1"
     />
   }
   markerBody={
@@ -157,7 +150,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
       isHorizontal={true}
     />
   }
-  markerPosition="bottom"
+  markerPosition="top"
   style={
     Object {
       "line": Object {
@@ -199,7 +192,6 @@ exports[`xy_expression XYChart component annotations should render simplified an
       hasReducedPadding={false}
       isHorizontal={true}
       label="Annotation"
-      strokeWidth={1}
     />
   }
   markerBody={

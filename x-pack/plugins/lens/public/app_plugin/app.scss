@@ -38,6 +38,9 @@
     fill: makeGraphicContrastColor($euiColorVis0, $euiColorDarkShade);
   }
 }
+.lensAnnotationIconNoFill {
+  fill: none;
+}
 
 .lensAnnotationIconFill {
   fill: $euiColorLightestShade;

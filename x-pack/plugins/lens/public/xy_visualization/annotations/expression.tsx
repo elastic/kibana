@@ -19,16 +19,14 @@ import type { EventAnnotationArgs } from 'src/plugins/event_annotation/common';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-import type { AnnotationLayerArgs, IconPosition } from '../../../common/expressions';
+import type { AnnotationLayerArgs } from '../../../common/expressions';
 import { hasIcon } from '../xy_config_panel/shared/icon_select';
 import {
-  getBaseIconPlacement,
   mapVerticalToHorizontalPlacement,
   LINES_MARKER_SIZE,
   MarkerBody,
   Marker,
   AnnotationIcon,
-  getIconRotationClass,
 } from '../annotations_helpers';
 
 const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
@@ -120,8 +118,6 @@ const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
     ),
     lineWidth: getCommonProperty(configArr, 'lineWidth', 1),
     lineStyle: getCommonProperty(configArr, 'lineStyle', 'solid'),
-    iconPosition: getCommonProperty(configArr, 'iconPosition', Position.Top as IconPosition),
-    label: getCommonProperty(configArr, 'label', ''),
     textVisibility: getCommonProperty(configArr, 'textVisibility', false),
   };
 };
@@ -165,7 +161,7 @@ export const Annotations = ({
   return (
     <>
       {groupedAnnotations.map((annotation) => {
-        const markerPositionVertical = getBaseIconPlacement(annotation.iconPosition);
+        const markerPositionVertical = Position.Top;
         const markerPosition = isHorizontal
           ? mapVerticalToHorizontalPlacement(markerPositionVertical)
           : markerPositionVertical;
@@ -190,8 +186,7 @@ export const Annotations = ({
                     isHorizontal: !isHorizontal,
                     hasReducedPadding,
                     label: annotation.label,
-                    rotationClass: getIconRotationClass(markerPosition),
-                    strokeWidth,
+                    rotateClassName: isHorizontal ? 'lnsXyAnnotationIcon_rotate90' : undefined,
                   }}
                 />
               ) : undefined
