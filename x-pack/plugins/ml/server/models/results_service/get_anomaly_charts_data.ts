@@ -75,6 +75,8 @@ export function getDefaultChartsData(): ExplorerChartsData {
 }
 
 export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClusterClient) {
+  let handleError: (errorMsg: string, jobId: string) => void = () => {};
+
   async function fetchMetricData(
     index: string,
     entityFields: EntityField[],
@@ -845,6 +847,21 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     };
   }
 
+  function initErrorHandler(data: ExplorerChartsData) {
+    handleError = (errorMsg: string, jobId: string) => {
+      // Group the jobIds by the type of error message
+      if (!data.errorMessages) {
+        data.errorMessages = {};
+      }
+
+      if (data.errorMessages[errorMsg]) {
+        data.errorMessages[errorMsg].add(jobId);
+      } else {
+        data.errorMessages[errorMsg] = new Set([jobId]);
+      }
+    };
+  }
+
   async function getAnomalyData(
     combinedJobRecords: Record<string, MlJob>,
     anomalyRecords: ChartRecord[],
@@ -856,6 +873,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     maxSeries = 6
   ) {
     const data = getDefaultChartsData();
+
+    initErrorHandler(data);
 
     const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= severity;
@@ -1131,21 +1150,31 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     if (useSourceData) {
       const datafeedQuery = get(config, 'datafeedConfig.query', null);
 
-      return await fetchMetricData(
-        Array.isArray(config.datafeedConfig.indices)
-          ? config.datafeedConfig.indices.join()
-          : config.datafeedConfig.indices,
-        entityFields,
-        datafeedQuery,
-        config.metricFunction,
-        config.metricFieldName,
-        config.summaryCountFieldName,
-        config.timeField,
-        range.min,
-        range.max,
-        bucketSpanSeconds * 1000,
-        config.datafeedConfig
-      );
+      try {
+        return await fetchMetricData(
+          Array.isArray(config.datafeedConfig.indices)
+            ? config.datafeedConfig.indices.join()
+            : config.datafeedConfig.indices,
+          entityFields,
+          datafeedQuery,
+          config.metricFunction,
+          config.metricFieldName,
+          config.summaryCountFieldName,
+          config.timeField,
+          range.min,
+          range.max,
+          bucketSpanSeconds * 1000,
+          config.datafeedConfig
+        );
+      } catch (error) {
+        handleError(
+          i18n.translate('xpack.ml.timeSeriesJob.metricDataErrorMessage', {
+            defaultMessage: 'an error occurred while retrieving metric data',
+          }),
+          job.job_id
+        );
+        return { success: false, results: {}, error };
+      }
     } else {
       // Extract the partition, by, over fields on which to filter.
       const criteriaFields: CriteriaField[] = [];
@@ -1187,21 +1216,32 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         results: {} as Record<string, number>,
       };
 
-      const resp = await getModelPlotOutput(
-        jobId,
-        detectorIndex,
-        criteriaFields,
-        range.min,
-        range.max,
-        bucketSpanSeconds * 1000
-      );
-      // Return data in format required by the explorer charts.
-      const results = resp.results;
-      Object.keys(results).forEach((time) => {
-        obj.results[time] = results[time].actual;
-      });
+      try {
+        const resp = await getModelPlotOutput(
+          jobId,
+          detectorIndex,
+          criteriaFields,
+          range.min,
+          range.max,
+          bucketSpanSeconds * 1000
+        );
+        // Return data in format required by the explorer charts.
+        const results = resp.results;
+        Object.keys(results).forEach((time) => {
+          obj.results[time] = results[time].actual;
+        });
 
-      return obj;
+        return obj;
+      } catch (error) {
+        handleError(
+          i18n.translate('xpack.ml.timeSeriesJob.modelPlotDataErrorMessage', {
+            defaultMessage: 'an error occurred while retrieving model plot data',
+          }),
+          job.job_id
+        );
+
+        return { success: false, results: {}, error };
+      }
     }
   }
 
@@ -1316,15 +1356,24 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   async function getScheduledEvents(config: SeriesConfigWithMetadata, range: ChartRange) {
-    const resp = await getScheduledEventsByBucket(
-      [config.jobId],
-      range.min,
-      range.max,
-      config.bucketSpanSeconds * 1000,
-      1,
-      MAX_SCHEDULED_EVENTS
-    );
-    return resp;
+    try {
+      return await getScheduledEventsByBucket(
+        [config.jobId],
+        range.min,
+        range.max,
+        config.bucketSpanSeconds * 1000,
+        1,
+        MAX_SCHEDULED_EVENTS
+      );
+    } catch (error) {
+      handleError(
+        i18n.translate('xpack.ml.timeSeriesJob.scheduledEventsByBucketErrorMessage', {
+          defaultMessage: 'an error occurred while retrieving scheduled events',
+        }),
+        config.jobId
+      );
+      return { success: false, events: {}, error };
+    }
   }
 
   async function getEventDistributionData(
@@ -1512,22 +1561,29 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const datafeedQuery = get(config, 'datafeedConfig.query', null);
 
-    const resp = await getEventDistributionData(
-      Array.isArray(config.datafeedConfig.indices)
-        ? config.datafeedConfig.indices.join()
-        : config.datafeedConfig.indices,
-      splitField,
-      filterField,
-      datafeedQuery,
-      config.metricFunction,
-      config.metricFieldName,
-      config.timeField,
-      range.min,
-      range.max,
-      config.bucketSpanSeconds * 1000
-    );
-
-    return resp;
+    try {
+      return await getEventDistributionData(
+        Array.isArray(config.datafeedConfig.indices)
+          ? config.datafeedConfig.indices.join()
+          : config.datafeedConfig.indices,
+        splitField,
+        filterField,
+        datafeedQuery,
+        config.metricFunction,
+        config.metricFieldName,
+        config.timeField,
+        range.min,
+        range.max,
+        config.bucketSpanSeconds * 1000
+      );
+    } catch (e) {
+      handleError(
+        i18n.translate('xpack.ml.timeSeriesJob.eventDistributionDataErrorMessage', {
+          defaultMessage: 'an error occurred while retrieving data',
+        }),
+        config.jobId
+      );
+    }
   }
 
   async function getRecordsForCriteriaChart(config: SeriesConfigWithMetadata, range: ChartRange) {
@@ -1535,16 +1591,17 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     criteria.push({ fieldName: 'detector_index', fieldValue: config.detectorIndex });
     criteria = criteria.concat(config.entityFields);
 
-    const resp = await getRecordsForCriteria(
-      [config.jobId],
-      criteria,
-      0,
-      range.min,
-      range.max,
-      500
-    );
-
-    return resp;
+    try {
+      return await getRecordsForCriteria([config.jobId], criteria, 0, range.min, range.max, 500);
+    } catch (error) {
+      handleError(
+        i18n.translate('xpack.ml.timeSeriesJob.recordsForCriteriaErrorMessage', {
+          defaultMessage: 'an error occurred while retrieving anomaly records',
+        }),
+        config.jobId
+      );
+      return { success: false, records: [], error };
+    }
   }
 
   /**
