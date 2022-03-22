@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
@@ -117,33 +115,36 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       },
     };
   },
-  paramEditor: function ParamEditor({
+  getAdvancedOptions: ({
     layer,
     columnId,
     currentColumn,
     updateLayer,
-  }: ParamEditorProps<CardinalityIndexPatternColumn>) {
-    return (
-      <EuiFormRow display="rowCompressed" hasChildLabel={false}>
-        <EuiSwitch
-          label={i18n.translate('xpack.lens.indexPattern.cardinality.hideZero', {
-            defaultMessage: 'Hide in case of no data',
-          })}
-          checked={Boolean(currentColumn.params?.emptyAsNull)}
-          onChange={(ev) => {
-            updateLayer(
-              updateColumnParam({
-                layer,
-                columnId,
-                paramName: 'emptyAsNull',
-                value: ev.target.checked,
-              })
-            );
-          }}
-          compressed
-        />
-      </EuiFormRow>
-    );
+  }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
+    return [
+      {
+        dataTestSubj: 'hide-zero-values',
+        title: currentColumn.params?.emptyAsNull
+          ? i18n.translate('xpack.lens.indexPattern.cardinality.showZero', {
+              defaultMessage: 'Show zero values',
+            })
+          : i18n.translate('xpack.lens.indexPattern.cardinality.hideZero', {
+              defaultMessage: 'Hide zero values',
+            }),
+        showInPopover: true,
+        inlineElement: null,
+        onClick: () => {
+          updateLayer(
+            updateColumnParam({
+              layer,
+              columnId,
+              paramName: 'emptyAsNull',
+              value: !currentColumn.params?.emptyAsNull,
+            })
+          );
+        },
+      },
+    ];
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {

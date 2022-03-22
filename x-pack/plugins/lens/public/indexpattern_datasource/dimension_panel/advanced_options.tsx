@@ -8,15 +8,7 @@
 import { EuiLink, EuiText, EuiPopover, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-
-interface AdvancedOption {
-  title: string;
-  dataTestSubj: string;
-  onClick: () => void;
-  showInPopover: boolean;
-  inlineElement: React.ReactElement | null;
-  helpPopup?: string | null;
-}
+import { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {
   const [popoverOpen, setPopoverOpen] = useState(false);

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition, ParamEditorProps } from './index';
@@ -137,31 +135,33 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    paramEditor: hideZeroOption
-      ? function ParamEditor({ layer, columnId, currentColumn, updateLayer }: ParamEditorProps<T>) {
-          return (
-            <EuiFormRow display="rowCompressed" hasChildLabel={false}>
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.metrics.hideZero', {
-                  defaultMessage: 'Hide in case of no data',
-                })}
-                checked={Boolean(currentColumn.params?.emptyAsNull)}
-                onChange={(ev) => {
-                  updateLayer(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'emptyAsNull',
-                      value: ev.target.checked,
-                    })
-                  );
-                }}
-                compressed
-              />
-            </EuiFormRow>
-          );
-        }
-      : undefined,
+    getAdvancedOptions: ({ layer, columnId, currentColumn, updateLayer }: ParamEditorProps<T>) => {
+      if (!hideZeroOption) return [];
+      return [
+        {
+          dataTestSubj: 'hide-zero-values',
+          title: currentColumn.params?.emptyAsNull
+            ? i18n.translate('xpack.lens.indexPattern.showZero', {
+                defaultMessage: 'Show zero values',
+              })
+            : i18n.translate('xpack.lens.indexPattern.hideZero', {
+                defaultMessage: 'Hide zero values',
+              }),
+          showInPopover: true,
+          inlineElement: null,
+          onClick: () => {
+            updateLayer(
+              updateColumnParam({
+                layer,
+                columnId,
+                paramName: 'emptyAsNull',
+                value: !currentColumn.params?.emptyAsNull,
+              })
+            );
+          },
+        },
+      ];
+    },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
         id: columnId,
