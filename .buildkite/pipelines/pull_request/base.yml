@@ -19,7 +19,7 @@ steps:
     label: 'Default CI Group'
     parallelism: 27
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
@@ -31,7 +31,7 @@ steps:
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
@@ -44,7 +44,7 @@ steps:
     label: 'OSS CI Group'
     parallelism: 11
     agents:
-      queue: ci-group-4d
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
@@ -56,7 +56,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_accessibility.sh
     label: 'OSS Accessibility Tests'
     agents:
-      queue: ci-group-4d
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -67,7 +67,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_accessibility.sh
     label: 'Default Accessibility Tests'
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -78,7 +78,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_firefox.sh
     label: 'OSS Firefox Tests'
     agents:
-      queue: ci-group-4d
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -89,7 +89,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_firefox.sh
     label: 'Default Firefox Tests'
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -100,7 +100,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_misc.sh
     label: 'OSS Misc Functional Tests'
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -111,7 +111,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_saved_object_field_metrics.sh
     label: 'Saved Object Field Metrics'
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -123,7 +123,7 @@ steps:
     label: 'Jest Tests'
     parallelism: 8
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     timeout_in_minutes: 90
     key: jest
 
@@ -131,48 +131,48 @@ steps:
     label: 'Jest Integration Tests'
     parallelism: 3
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     timeout_in_minutes: 120
     key: jest-integration
 
   - command: .buildkite/scripts/steps/test/api_integration.sh
     label: 'API Integration Tests'
     agents:
-      queue: n2-2
+      queue: n2-4-spot
     timeout_in_minutes: 120
     key: api-integration
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      queue: n2-2
+      queue: n2-4-spot
     key: linting
     timeout_in_minutes: 90
 
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      queue: c2-16
+      queue: n2-4-spot
     key: linting_with_types
     timeout_in_minutes: 90
 
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
-      queue: c2-8
+      queue: n2-4-spot
     key: checks
     timeout_in_minutes: 120
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:
-      queue: c2-4
+      queue: n2-4-spot
     key: storybooks
     timeout_in_minutes: 60
 
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
     label: 'Build Webpack Bundle Analyzer reports'
     agents:
-      queue: n2-2
+      queue: n2-4-spot
     key: webpack_bundle_analyzer
     timeout_in_minutes: 60
