@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { FC } from 'react';
 import { get } from 'lodash';
 import {
   EuiFlexGroup,
@@ -20,8 +20,10 @@ import {
 import { TextField, SelectField, SuperSelectField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
 import { useFormData } from '../../hooks';
+import { FormConfig } from '../../types';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
+import { FormWrapper } from './form_utils';
 
 const { emptyField } = fieldValidators;
 
@@ -89,13 +91,15 @@ const valueOptions = [
   },
 ];
 
+const configSelect = { label: 'Config' };
+
 const PercentageConfigSelect = ({ path }: { path: string }) => {
   return (
     <UseField
       path={path}
       component={SuperSelectField}
       defaultValue={percentageOptions[0].value}
-      config={{ label: 'Config' }}
+      config={configSelect}
       componentProps={{
         euiFieldProps: {
           options: percentageOptions,
@@ -111,7 +115,7 @@ const ValueConfigSelect = ({ path }: { path: string }) => {
       path={path}
       component={SuperSelectField}
       defaultValue={valueOptions[0].value}
-      config={{ label: 'Config' }}
+      config={configSelect}
       componentProps={{
         euiFieldProps: {
           options: valueOptions,
@@ -121,18 +125,32 @@ const ValueConfigSelect = ({ path }: { path: string }) => {
   );
 };
 
+const percentageProcessorTypeConfig = { label: 'Processor type', defaultValue: 'percentage' };
+
 const ProcessorTypeConfigurator = ({ basePath }: { basePath: string }) => {
   const processorTypePath = `${basePath}.type`;
   const processorConfigPath = `${basePath}.config`;
   const [formData] = useFormData({ watch: processorTypePath });
   const processorType = get(formData, processorTypePath);
 
+  const renderSelect = () => {
+    if (!processorType) {
+      return null;
+    }
+
+    return processorType === 'percentage' ? (
+      <PercentageConfigSelect path={processorConfigPath} />
+    ) : (
+      <ValueConfigSelect path={processorConfigPath} />
+    );
+  };
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <UseField
           path={processorTypePath}
-          config={{ label: 'Processor type', defaultValue: 'percentage' }}
+          config={percentageProcessorTypeConfig}
           component={SelectField}
           componentProps={{
             euiFieldProps: {
@@ -141,30 +159,24 @@ const ProcessorTypeConfigurator = ({ basePath }: { basePath: string }) => {
           }}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        {processorType === 'percentage' ? (
-          <PercentageConfigSelect path={processorConfigPath} />
-        ) : (
-          <ValueConfigSelect path={processorConfigPath} />
-        )}
-      </EuiFlexItem>
+      <EuiFlexItem>{renderSelect()}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-export function Complex() {
+const FormContent: FC = () => {
+  const [{ ruleType }] = useFormData({ watch: 'ruleType' });
+
   return (
     <>
       <EuiTitle>
         <h2>Rule configurator</h2>
       </EuiTitle>
       <EuiSpacer size="xl" />
+
+      {/* Rule type */}
       <UseField
         path="ruleType"
-        config={{
-          label: 'Rule type',
-          defaultValue: 'type_one',
-        }}
         component={SelectField}
         componentProps={{
           euiFieldProps: {
@@ -178,54 +190,89 @@ export function Complex() {
         <h2>Processors</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <UseArray path="processors">
-        {({ items, addItem, removeItem }) => {
-          return (
-            <>
-              {items.map(({ id, path }) => {
-                return (
-                  <EuiFlexGroup key={id} alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <UseField
-                        path={`${path}.name`}
-                        config={{
-                          label: 'Name',
-                          validations: [{ validator: emptyField('A name is required.') }],
-                        }}
-                        component={TextField}
-                        componentProps={{
-                          euiFieldProps: {
-                            style: {
-                              maxWidth: '180px',
-                            },
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <ProcessorTypeConfigurator basePath={path} />
-                    </EuiFlexItem>
-                    {items.length > 1 && (
+      {ruleType !== undefined && (
+        <UseArray
+          key={ruleType}
+          path={`processors_${ruleType}`}
+          initialNumberOfItems={ruleType === 'type_one' ? 1 : 3}
+        >
+          {({ items, addItem, removeItem }) => {
+            return (
+              <>
+                {items.map(({ id, path }) => {
+                  return (
+                    <EuiFlexGroup key={id} alignItems="center">
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="minusInCircle"
-                          onClick={() => removeItem(id)}
-                          aria-label="Remove processor"
+                        {/* Processor name */}
+                        <UseField
+                          path={`${path}.name`}
+                          config={{
+                            label: 'Name',
+                            validations: [{ validator: emptyField('A name is required.') }],
+                          }}
+                          component={TextField}
+                          componentProps={{
+                            euiFieldProps: {
+                              style: {
+                                maxWidth: '180px',
+                              },
+                            },
+                          }}
                         />
                       </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                );
-              })}
-              <EuiSpacer size="m" />
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiButtonEmpty onClick={addItem}>Add processor</EuiButtonEmpty>
-              </EuiFlexGroup>
-            </>
-          );
-        }}
-      </UseArray>
+                      <EuiFlexItem>
+                        {/* Processor type & config */}
+                        <ProcessorTypeConfigurator basePath={path} />
+                      </EuiFlexItem>
+                      {items.length > 1 && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            iconType="minusInCircle"
+                            onClick={() => removeItem(id)}
+                            aria-label="Remove processor"
+                          />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  );
+                })}
+                <EuiSpacer size="m" />
+
+                {/* Add processor button */}
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiButtonEmpty onClick={addItem}>Add processor</EuiButtonEmpty>
+                </EuiFlexGroup>
+              </>
+            );
+          }}
+        </UseArray>
+      )}
     </>
+  );
+};
+
+const defaultValue = {
+  ruleType: 'type_one',
+  processors_type_one: [{ name: 'Processor 1 name', type: 'value', config: 'value_config_1' }],
+};
+
+const schema = {
+  ruleType: {
+    label: 'Rule type',
+    defaultValue: 'type_one',
+  },
+};
+
+const formConfig: FormConfig = {
+  schema,
+  defaultValue,
+};
+
+export function Complex() {
+  return (
+    <FormWrapper formConfig={formConfig}>
+      <FormContent />
+    </FormWrapper>
   );
 }
 
