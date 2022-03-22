@@ -528,16 +528,18 @@ export const Overview: React.FC = () => {
                     source={contentSource}
                     sourceData={sourceData}
                     title={
-                      <EuiTitle size="xs">
+                      <EuiText size="s">
                         <h6>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.workplaceSearch.gettingStarted.title',
-                            {
-                              defaultMessage: 'Getting started?',
-                            }
-                          )}
+                          <EuiTextColor color="subdued">
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.workplaceSearch.gettingStarted.title',
+                              {
+                                defaultMessage: 'Getting started?',
+                              }
+                            )}
+                          </EuiTextColor>
                         </h6>
-                      </EuiTitle>
+                      </EuiText>
                     }
                     small
                   />
