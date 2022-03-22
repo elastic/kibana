@@ -8,19 +8,23 @@
 
 import { xyVisFunction } from '../expression_functions';
 import { createMockExecutionContext } from '../../../../../plugins/expressions/common/mocks';
-import { sampleArgs } from '../__mocks__';
+import { sampleArgs, sampleLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
 
 describe('xyVis', () => {
   test('it renders with the specified data and args', () => {
     const { data, args } = sampleArgs();
-    const result = xyVisFunction.fn(data, args, createMockExecutionContext());
-
     const { layers, ...rest } = args;
+    const result = xyVisFunction.fn(
+      data,
+      { ...rest, dataLayer: sampleLayer },
+      createMockExecutionContext()
+    );
+
     expect(result).toEqual({
       type: 'render',
       as: XY_VIS,
-      value: { args: { ...rest, layers } },
+      value: { args: { ...rest, layers: [sampleLayer] } },
     });
   });
 });

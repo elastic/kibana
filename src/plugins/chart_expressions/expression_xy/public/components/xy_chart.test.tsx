@@ -189,6 +189,7 @@ describe('XYChart component', () => {
                 seriesType: 'line',
                 xScaleType: 'time',
                 type: 'dataLayer',
+                table: timeSampleLayer.table,
               } as DataLayerConfigResult,
             ],
           }}
@@ -412,7 +413,7 @@ describe('XYChart component', () => {
 
       test('it renders endzone component bridging gap between domain and extended domain', () => {
         const component = shallow(
-          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={defaultTimeArgs} />
+          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={timeArgs} />
         );
 
         expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
