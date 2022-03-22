@@ -19,6 +19,7 @@ import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
 import { TimeBuckets } from '../../../../common/services/time_buckets';
 import {
   DataViewField,
+  ISearchOptions,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/common';
@@ -38,6 +39,11 @@ import { useOverallStats } from './use_overall_stats';
 import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 import { Dictionary } from '../../common/util/url_state';
 import { AggregatableField, NonAggregatableField } from '../types/overall_stats';
+import {
+  getDocumentCountStatsRequest,
+  processDocumentCountRandomStats,
+  processDocumentCountStats,
+} from '../search_strategy/requests/get_document_stats';
 
 const defaults = getDefaultPageState();
 
@@ -55,6 +61,9 @@ export const useDataVisualizerGridData = (
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
+  const [documentCountStatsRandom, setDocumentCountStatsRandom] = useState<any>();
+  const [documentCountStats, setDocumentCountStats] = useState<any>();
+
   const searchSessionId = input.sessionId;
 
   const {
@@ -250,6 +259,77 @@ export const useDataVisualizerGridData = (
 
     return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
   }, [metricConfigs, nonMetricConfigs, overallStatsProgress.loaded]);
+
+  useEffect(() => {
+    const abortCtrl = new AbortController();
+
+    let unmounted = false;
+    const fetchDocCountStats = async () => {
+      if (!fieldStatsRequest || fieldStatsRequest.intervalMs === 0) return;
+
+      const searchOptions: ISearchOptions = {
+        abortSignal: abortCtrl.signal,
+      };
+
+      const startTime = Date.now();
+      const _documentCountStats = await data.search
+        .search(
+          {
+            params: getDocumentCountStatsRequest(fieldStatsRequest),
+          },
+          searchOptions
+        )
+        .toPromise();
+
+      if (!unmounted) {
+        setDocumentCountStats({
+          results: processDocumentCountStats(_documentCountStats?.rawResponse, fieldStatsRequest),
+          time: Date.now() - startTime,
+        });
+      }
+    };
+    fetchDocCountStats();
+    return () => {
+      unmounted = true;
+    };
+  }, [fieldStatsRequest]);
+
+  useEffect(() => {
+    const abortCtrl = new AbortController();
+
+    let unmounted = false;
+    const fetchDocCountStatsRandom = async () => {
+      if (!fieldStatsRequest || fieldStatsRequest.intervalMs === 0) return;
+
+      const searchOptions: ISearchOptions = {
+        abortSignal: abortCtrl.signal,
+      };
+      const startTime = Date.now();
+
+      const _documentCountStatsRandom = await data.search
+        .search(
+          {
+            params: getDocumentCountStatsRequest(fieldStatsRequest, true),
+          },
+          searchOptions
+        )
+        .toPromise();
+
+      if (!unmounted) {
+        setDocumentCountStatsRandom({
+          results: processDocumentCountRandomStats(
+            _documentCountStatsRandom?.rawResponse,
+            fieldStatsRequest
+          ),
+          time: Date.now() - startTime,
+        });
+      }
+    };
+    fetchDocCountStatsRandom();
+    return () => {
+      unmounted = true;
+    };
+  }, [fieldStatsRequest]);
 
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
@@ -515,6 +595,7 @@ export const useDataVisualizerGridData = (
     return [actionColumn];
   }, [input.dataView, services, searchQueryLanguage, searchString, input.allowEditDataView]);
 
+  // console.log('documentCountStats', documentCountStats);
   return {
     progress: combinedProgress,
     configs,
@@ -522,8 +603,13 @@ export const useDataVisualizerGridData = (
     searchString,
     searchQuery,
     extendedColumns,
-    documentCountStats: overallStats.documentCountStats,
-    documentCountStatsRandom: overallStats.documentCountStatsRandom,
+    documentCountStats,
+    documentCountStatsRandom,
+    // documentCountStats: documentCountStats.results,
+    // documentCountStatsTime: documentCountStats.time,
+    // documentCountStatsRandom: documentCountStatsRandom.results,
+    // documentCountStatsRandomTime: documentCountStatsRandom.time,
+
     metricsStats,
     overallStats,
     timefilter,

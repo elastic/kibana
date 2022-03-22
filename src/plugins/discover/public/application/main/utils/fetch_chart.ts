@@ -42,6 +42,7 @@ export function fetchChart(
   const executionContext = {
     description: 'fetch chart data and total hits',
   };
+  console.log('searchSource', searchSource.serialize());
 
   const fetch$ = searchSource
     .fetch$({

@@ -11,13 +11,18 @@ import { TotalCountHeader } from './total_count_header';
 import { DocumentCountStats } from '../../../../../common/types/field_stats';
 
 export interface Props {
-  documentCountStats?: DocumentCountStats;
+  documentCountStats?: { results: DocumentCountStats; time: number };
   totalCount: number;
   // @todo: remove
   random?: boolean;
 }
 
-export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount, random }) => {
+export const DocumentCountContent: FC<Props> = ({
+  documentCountStats: stats,
+  totalCount,
+  random,
+}) => {
+  const documentCountStats = stats?.results;
   if (documentCountStats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
@@ -34,7 +39,10 @@ export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount
   return (
     <>
       <TotalCountHeader totalCount={totalCount} />
-      {random ?? 'random'}
+      <div>
+        {random ?? 'random '}
+        {stats?.time}
+      </div>
       <DocumentCountChart
         chartPoints={chartPoints}
         timeRangeEarliest={timeRangeEarliest}

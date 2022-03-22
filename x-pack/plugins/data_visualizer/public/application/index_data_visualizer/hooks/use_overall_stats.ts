@@ -224,8 +224,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
     >(
       [
-        documentCountStats$,
-        documentCountStatsRandom$,
+        // documentCountStats$,
+        // documentCountStatsRandom$,
         ...aggregatableOverallStatsObs,
         ...nonAggregatableFieldsObs,
       ],
@@ -237,10 +237,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         {
           const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
           const nonAggregatableOverallStatsResp: IKibanaSearchResponse[] = [];
-          const documentCountStatsResp = value[0];
-          const documentCountStatsRandomResp = value[1];
-          // @todo: remove
-          console.log('documentCountStatsRandomResp', documentCountStatsRandomResp);
+          // const documentCountStatsResp = value[0];
+          // const documentCountStatsRandomResp = value[1];
 
           value.forEach((resp, idx) => {
             if (!resp) return;
@@ -263,14 +261,14 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           );
 
           setOverallStats({
-            documentCountStats: processDocumentCountStats(
-              documentCountStatsResp?.rawResponse,
-              searchStrategyParams
-            ),
-            documentCountStatsRandom: processDocumentCountRandomStats(
-              documentCountStatsRandomResp?.rawResponse,
-              searchStrategyParams
-            ),
+            // documentCountStats: processDocumentCountStats(
+            //   documentCountStatsResp?.rawResponse,
+            //   searchStrategyParams
+            // ),
+            // documentCountStatsRandom: processDocumentCountRandomStats(
+            //   documentCountStatsRandomResp?.rawResponse,
+            //   searchStrategyParams
+            // ),
 
             ...nonAggregatableOverallStats,
             ...aggregatableOverallStats,
