@@ -175,18 +175,22 @@ async function queryFlameGraph(
     logger,
     'query to find downsampled index',
     async () => {
-      const resp = await client.search({
-        index: downsampledIndex + initialExp,
-        body: {
-          query: filter,
-          size: 0,
-          track_total_hits: true,
-        },
-      });
-      const sampleCountFromInitialExp = resp.body.hits.total?.value as number;
+      let sampleCountFromInitialExp = 0;
+      try {
+        const resp = await client.search({
+          index: downsampledIndex + initialExp,
+          body: {
+            query: filter,
+            size: 0,
+            track_total_hits: true,
+          },
+        });
+        sampleCountFromInitialExp = resp.body.hits.total?.value as number;
+      } catch (e) {
+        logger.info(e.message);
+      }
 
       logger.info('sampleCountFromPow6 ' + sampleCountFromInitialExp);
-
       return getSampledTraceEventsIndex(index, sampleSize, sampleCountFromInitialExp, initialExp);
     }
   );
