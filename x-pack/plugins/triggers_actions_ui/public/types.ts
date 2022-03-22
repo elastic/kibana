@@ -251,6 +251,7 @@ export interface RuleTableItem extends Rule {
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
+  showIntervalWarning: boolean;
 }
 
 export interface RuleTypeParamsExpressionProps<
