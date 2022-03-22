@@ -27902,7 +27902,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle": "ルールを実行するのにかかる時間。",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editAriaLabel": "編集",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editButtonTooltip": "編集",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.enabledTitle": "有効",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle": "前回の実行の開始時間。",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.mutedBadge": "ミュート",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.nameTitle": "名前",

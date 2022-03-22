@@ -427,11 +427,6 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
 
-    // Enabled switch column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-enabled"]').length).toEqual(
-      mockedRulesData.length
-    );
-
     // Name and rule type column
     const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
     expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
@@ -499,10 +494,10 @@ describe('rules_list component with items', () => {
       'The length of time it took for the rule to run (mm:ss).'
     );
 
-    // Status column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
-      mockedRulesData.length
-    );
+    // Last response column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
+    ).toEqual(mockedRulesData.length);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
@@ -521,6 +516,11 @@ describe('rules_list component with items', () => {
     );
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
       'License Error'
+    );
+
+    // Status control column
+    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
+      mockedRulesData.length
     );
 
     // Monitoring column
@@ -714,7 +714,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -733,10 +733,10 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('sorts rules when clicking the enabled column', async () => {
+  it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_8"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
