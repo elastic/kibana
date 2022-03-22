@@ -17,7 +17,7 @@ export const OsqueryEventDetailsFooterComponent = ({ handleClick }: EventDetails
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleClick} data-test-subj={'osquery-empty-button'}>
+        <EuiButtonEmpty onClick={handleClick} data-test-subj="osquery-empty-button">
           <FormattedMessage id="xpack.securitySolution.footer.cancel" defaultMessage="Cancel" />
         </EuiButtonEmpty>
       </EuiFlexItem>
