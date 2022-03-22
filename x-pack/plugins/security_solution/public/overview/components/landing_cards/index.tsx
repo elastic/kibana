@@ -14,6 +14,7 @@ import {
   EuiImage,
   EuiLink,
   EuiPageHeader,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
@@ -76,6 +77,13 @@ export const LandingCards = memo(() => {
       basePath: { prepend },
     },
   } = useKibana().services;
+
+  const tooltipContent = (
+    <EuiLink color="ghost" href="https://elastic.co/security" target="_blank">
+      {`elastic.co/security`}
+    </EuiLink>
+  );
+
   const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
   return (
     <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="l">
@@ -92,9 +100,11 @@ export const LandingCards = memo(() => {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink href="https://www.elastic.co/security" external={false} target="_blank">
-              <StyledEuiImage alt={i18n.SIEM_HEADER} size="xl" margin="l" src={imgUrls.video} />
-            </EuiLink>
+            <EuiToolTip content={tooltipContent} position="top">
+              <EuiLink href="https://www.elastic.co/security" external={false} target="_blank">
+                <StyledEuiImage alt={i18n.SIEM_HEADER} size="xl" margin="l" src={imgUrls.video} />
+              </EuiLink>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
