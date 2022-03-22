@@ -59,6 +59,7 @@ class DocLinks {
   public workplaceSearchSecurity: string;
   public workplaceSearchServiceNow: string;
   public workplaceSearchSharePoint: string;
+  public workplaceSearchSharePointServer: string;
   public workplaceSearchSlack: string;
   public workplaceSearchSynch: string;
   public workplaceSearchZendesk: string;
@@ -115,6 +116,7 @@ class DocLinks {
     this.workplaceSearchSecurity = '';
     this.workplaceSearchServiceNow = '';
     this.workplaceSearchSharePoint = '';
+    this.workplaceSearchSharePointServer = '';
     this.workplaceSearchSlack = '';
     this.workplaceSearchSynch = '';
     this.workplaceSearchZendesk = '';
@@ -174,6 +176,7 @@ class DocLinks {
     this.workplaceSearchSecurity = docLinks.links.workplaceSearch.security;
     this.workplaceSearchServiceNow = docLinks.links.workplaceSearch.serviceNow;
     this.workplaceSearchSharePoint = docLinks.links.workplaceSearch.sharePoint;
+    this.workplaceSearchSharePointServer = docLinks.links.workplaceSearch.sharePointServer;
     this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
     this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
     this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;
