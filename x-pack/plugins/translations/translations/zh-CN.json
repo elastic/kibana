@@ -25268,8 +25268,6 @@
     "xpack.securitySolution.pages.common.solutionName": "安全",
     "xpack.securitySolution.pages.common.updateAlertStatusFailed": "无法更新{ conflicts } 个{conflicts, plural, other {告警}}。",
     "xpack.securitySolution.pages.common.updateAlertStatusFailedDetailed": "{ updated } 个{updated, plural, other {告警}}已成功更新，但是 { conflicts } 个无法更新，\n         因为{ conflicts, plural, other {其}}已被修改。",
-    "xpack.securitySolution.pages.emptyPage.beatsCard.description": "使用 Elastic 代理来收集安全事件并防止您的终端受到威胁。",
-    "xpack.securitySolution.pages.emptyPage.beatsCard.title": "添加安全集成",
     "xpack.securitySolution.pages.fourohfour.pageNotFoundDescription": "未找到页面",
     "xpack.securitySolution.paginatedTable.rowsButtonLabel": "每页行数",
     "xpack.securitySolution.paginatedTable.showingSubtitle": "正在显示",

@@ -78,7 +78,7 @@ export const LandingCards = memo(() => {
   } = useKibana().services;
   const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="l">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
