@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RuleTypeId } from '@kbn/securitysolution-rules';
 
 /**
@@ -13,7 +14,9 @@ import type { RuleTypeId } from '@kbn/securitysolution-rules';
  * @param ruleType The rule type such as "siem.eqlRule" | "siem.mlRule" etc...
  * @returns The aggregation to put into a search
  */
-export const getEventLogAggByRuleTypeMetrics = (ruleType: RuleTypeId) => {
+export const getEventLogAggByRuleTypeMetrics = (
+  ruleType: RuleTypeId
+): AggregationsAggregationContainer => {
   return {
     filter: {
       term: {
