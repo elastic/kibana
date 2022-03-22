@@ -33,7 +33,9 @@ describe('getChartAggConfigs', () => {
         Object {
           "enabled": true,
           "id": "1",
-          "params": Object {},
+          "params": Object {
+            "emptyAsNull": false,
+          },
           "schema": "metric",
           "type": "count",
         },
@@ -42,6 +44,7 @@ describe('getChartAggConfigs', () => {
           "id": "2",
           "params": Object {
             "drop_partials": false,
+            "extendToTimeRange": false,
             "extended_bounds": Object {},
             "field": "timestamp",
             "interval": "auto",

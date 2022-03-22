@@ -22,11 +22,6 @@ export const INSPECT_HOSTS_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
     tabId: '[data-test-subj="navigation-allHosts"]',
   },
   {
-    id: '[data-test-subj="table-authentications-loading-false"]',
-    title: 'Authentications Table',
-    tabId: '[data-test-subj="navigation-authentications"]',
-  },
-  {
     id: '[data-test-subj="table-uncommonProcesses-loading-false"]',
     title: 'Uncommon processes Table',
     tabId: '[data-test-subj="navigation-uncommonProcesses"]',
