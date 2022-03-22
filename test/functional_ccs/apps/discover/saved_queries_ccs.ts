@@ -148,75 +148,75 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
-      // it('allows saving changes to a currently loaded query via the saved query management component', async () => {
-      //   await queryBar.setQuery('response:404');
-      //   await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
-      //   await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
-      //   await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      //   expect(await queryBar.getQueryString()).to.eql('');
-      //   await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-      //   expect(await queryBar.getQueryString()).to.eql('response:404');
-      // });
+      it('allows saving changes to a currently loaded query via the saved query management component', async () => {
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        expect(await queryBar.getQueryString()).to.eql('');
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        expect(await queryBar.getQueryString()).to.eql('response:404');
+      });
 
-      // it('allows saving the currently loaded query as a new query', async () => {
-      //   await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-      //     'OkResponseCopy',
-      //     '200 responses',
-      //     false,
-      //     false
-      //   );
-      //   await savedQueryManagementComponent.savedQueryExistOrFail('OkResponseCopy');
-      // });
+      it('allows saving the currently loaded query as a new query', async () => {
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+          'OkResponseCopy',
+          '200 responses',
+          false,
+          false
+        );
+        await savedQueryManagementComponent.savedQueryExistOrFail('OkResponseCopy');
+      });
 
-      // it('allows deleting the currently loaded saved query in the saved query management component and clears the query', async () => {
-      //   await savedQueryManagementComponent.deleteSavedQuery('OkResponseCopy');
-      //   await savedQueryManagementComponent.savedQueryMissingOrFail('OkResponseCopy');
-      //   expect(await queryBar.getQueryString()).to.eql('');
-      // });
+      it('allows deleting the currently loaded saved query in the saved query management component and clears the query', async () => {
+        await savedQueryManagementComponent.deleteSavedQuery('OkResponseCopy');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('OkResponseCopy');
+        expect(await queryBar.getQueryString()).to.eql('');
+      });
 
-      // it('does not allow saving a query with a non-unique name', async () => {
-      //   // this check allows this test to run stand alone, also should fix occacional flakiness
-      //   const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
-      //   if (!savedQueryExists) {
-      //     await savedQueryManagementComponent.saveNewQuery(
-      //       'OkResponse',
-      //       '200 responses for .jpg over 24 hours',
-      //       true,
-      //       true
-      //     );
-      //     await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      //   }
-      //   await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
-      // });
+      it('does not allow saving a query with a non-unique name', async () => {
+        // this check allows this test to run stand alone, also should fix occacional flakiness
+        const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
+        if (!savedQueryExists) {
+          await savedQueryManagementComponent.saveNewQuery(
+            'OkResponse',
+            '200 responses for .jpg over 24 hours',
+            true,
+            true
+          );
+          await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        }
+        await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
+      });
 
-      // it('resets any changes to a loaded query on reloading the same saved query', async () => {
-      //   await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-      //   await queryBar.setQuery('response:503');
-      //   await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-      //   expect(await queryBar.getQueryString()).to.eql('response:404');
-      // });
+      it('resets any changes to a loaded query on reloading the same saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await queryBar.setQuery('response:503');
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        expect(await queryBar.getQueryString()).to.eql('response:404');
+      });
 
-      // it('allows clearing the currently loaded saved query', async () => {
-      //   await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-      //   await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      //   expect(await queryBar.getQueryString()).to.eql('');
-      // });
+      it('allows clearing the currently loaded saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        expect(await queryBar.getQueryString()).to.eql('');
+      });
 
-      // it('allows clearing if non default language was remembered in localstorage', async () => {
-      //   await queryBar.switchQueryLanguage('lucene');
-      //   await PageObjects.common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
-      //   await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
-      //   await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-      //   await queryBar.expectQueryLanguageOrFail('kql');
-      //   await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      //   await queryBar.expectQueryLanguageOrFail('lucene');
-      // });
+      it('allows clearing if non default language was remembered in localstorage', async () => {
+        await queryBar.switchQueryLanguage('lucene');
+        await PageObjects.common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
+        await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await queryBar.expectQueryLanguageOrFail('kql');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await queryBar.expectQueryLanguageOrFail('lucene');
+      });
 
-      // it('changing language removes saved query', async () => {
-      //   await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-      //   await queryBar.switchQueryLanguage('lucene');
-      //   expect(await queryBar.getQueryString()).to.eql('');
-      // });
+      it('changing language removes saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await queryBar.switchQueryLanguage('lucene');
+        expect(await queryBar.getQueryString()).to.eql('');
+      });
     });
   });
 }

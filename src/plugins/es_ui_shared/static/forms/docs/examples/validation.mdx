@@ -360,24 +360,33 @@ const schema = {
 import { firstValueFrom } from '@kbn/std';
 
 const MyForm = () => {
-  ...
+  const { form } = useForm();
   const [indices, setIndices] = useState([]);
   const [indices$, nextIndices] = useBehaviorSubject(null); // Use the provided util hook to create an observable
 
+  const onIndexNameChange = useCallback(({ indexName }) => {
+    // Whenever the indexName changes reset the subject to not send stale data to the validator
+    nextIndices(null);
+  }, []);
+
+  const [{ indexName }] = useFormData({
+    form,
+    watch: 'indexName',
+    onChange: onIndexNameChange, // React to changes before any validation is executed
+  });
+
   const indicesProvider = useCallback(() => {
-    // We wait until we have fetched the indices.
-    // The result will then be sent to the validator (await provider() call);
+    // Wait until we have fetched the indices.
+    // The result will then be sent to the field validator(s) (when calling await provider(););
     return await firstValueFrom(indices$.pipe(first((data) => data !== null)));
   }, [indices$, nextIndices]);
 
   const fetchIndices = useCallback(async () => {
-    // Reset the subject to not send stale data to the validator
-    nextIndices(null);
-
     const result = await httpClient.get(`/api/search/${indexName}`);
+    // update the component state
     setIndices(result);
 
-    // Send the indices to the BehaviorSubject to resolve the validator "provider()"
+    // Send the indices to the BehaviorSubject to resolve the "indicesProvider()" promise
     nextIndices(result);
   }, [indexName]);
 
@@ -400,23 +409,3 @@ const MyForm = () => {
 ```
 
 Et voilà! We have provided dynamic data asynchronously to our validator.
-
-The above example could be simplified a bit by using the optional `state` argument of the `useAsyncValidationData(/* state */)` hook.
-
-```js
-const MyForm = () => {
-  ...
-  const [indices, setIndices] = useState([]);
-  // We don't need the second element of the array (the "nextIndices()" handler)
-  // as whenever the "indices" state changes the "indices$" Observable will receive its value
-  const [indices$] = useAsyncValidationData(indices);
-  
-  ...
- 
-  const fetchIndices = useCallback(async () => {
-    const result = await httpClient.get(`/api/search/${indexName}`);
-    setIndices(result); // This will also update the Observable
-  }, [indexName]);
-
-  ...
-```

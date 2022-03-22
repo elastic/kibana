@@ -27,10 +27,11 @@ interface ProductCardProps {
     CARD_DESCRIPTION: string;
     URL: string;
   };
+  image: string;
   url?: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, url }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, image, url }) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { config } = useValues(KibanaLogic);
 
@@ -53,19 +54,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, url }) => {
   return (
     <EuiCard
       className="productCard"
-      textAlign="left"
       titleElement="h2"
-      hasBorder
       title={i18n.translate('xpack.enterpriseSearch.overview.productCard.heading', {
         defaultMessage: 'Elastic {productName}',
         values: { productName: product.NAME },
       })}
+      image={
+        <div className="productCard__imageContainer">
+          <img src={image} className="productCard__image" alt="" role="presentation" />
+        </div>
+      }
       paddingSize="l"
       description={<EuiTextColor color="subdued">{product.CARD_DESCRIPTION}</EuiTextColor>}
       footer={
         <EuiButtonTo
+          fill
           to={url || product.URL}
-          color="success"
           shouldNotCreateHref
           onClick={() =>
             sendEnterpriseSearchTelemetry({

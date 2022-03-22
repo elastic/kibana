@@ -17,13 +17,13 @@ import {
   basicCaseMetrics,
   caseUserActions,
   getAlertUserAction,
+  connectorsMock,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { ConnectorTypes } from '../../../common/api';
