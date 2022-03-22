@@ -59,7 +59,6 @@ describe('aggregateRulesRoute', () => {
       },
       ruleSnoozedStatus: {
         snoozed: 4,
-        not_snoozed: 37,
       },
     };
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
@@ -93,7 +92,6 @@ describe('aggregateRulesRoute', () => {
             "unmuted": 39,
           },
           "rule_snoozed_status": Object {
-            "not_snoozed": 37,
             "snoozed": 4,
           },
         },
@@ -130,7 +128,6 @@ describe('aggregateRulesRoute', () => {
         },
         rule_snoozed_status: {
           snoozed: 4,
-          not_snoozed: 37,
         },
       },
     });

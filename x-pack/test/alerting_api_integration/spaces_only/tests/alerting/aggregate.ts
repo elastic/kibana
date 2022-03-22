@@ -44,7 +44,6 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         },
         rule_snoozed_status: {
           snoozed: 0,
-          not_snoozed: 0,
         },
       });
     });
@@ -124,7 +123,6 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         },
         rule_snoozed_status: {
           snoozed: 0,
-          not_snoozed: 7,
         },
       });
     });
@@ -205,7 +203,6 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           },
           ruleSnoozedStatus: {
             snoozed: 0,
-            notSnoozed: 7,
           },
         });
       });

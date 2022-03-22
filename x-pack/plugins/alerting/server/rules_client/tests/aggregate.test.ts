@@ -157,7 +157,6 @@ describe('aggregate()', () => {
           "unmuted": 27,
         },
         "ruleSnoozedStatus": Object {
-          "not_snoozed": 30,
           "snoozed": 0,
         },
       }
