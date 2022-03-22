@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CoreStart } from 'kibana/public';
 import { useQuery } from 'react-query';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo, epmRouteService } from '../../../../fleet/common';
@@ -16,10 +17,10 @@ const CIS_KUBERNETES_INTEGRATION_VERSION = '0.0.1';
  * This hook will find our cis intergation and return it's PackageInfo
  * */
 export const useCisKubernetesIntegration = () => {
-  const { http } = useKibana().services;
+  const { http } = useKibana<CoreStart>().services;
 
   const integrationQuery = useQuery(['integrations'], () =>
-    http?.get<{ item: PackageInfo }>(
+    http.get<{ item: PackageInfo }>(
       epmRouteService.getInfoPath(CIS_KUBERNETES_PACKAGE_NAME, CIS_KUBERNETES_INTEGRATION_VERSION),
       {
         query: { experimental: true },
