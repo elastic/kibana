@@ -167,7 +167,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       <>
         <DeleteSpaceAwareItemCheckModal
           ids={jobIds}
-          jobType="anomaly-detector"
+          mlSavedObjectType="anomaly-detector"
           canDeleteCallback={() => {
             setCanDelete(true);
           }}
