@@ -112,25 +112,7 @@ exports[`KibanaPageTemplate render default empty prompt 1`] = `
 `;
 
 exports[`KibanaPageTemplate render noDataContent 1`] = `
-<WithSolutionNavBarprops => {
-  const {
-    className,
-    noDataConfig,
-    ...rest
-  } = props;
-
-  if (!noDataConfig) {
-    return null;
-  }
-
-  const template = _util.NO_DATA_PAGE_TEMPLATE_PROPS.template;
-  const classes = (0, _util.getClasses)(template, className);
-  return /*#__PURE__*/_react.default.createElement(_eui.EuiPageTemplate, (0, _extends2.default)({
-    "data-test-subj": props['data-test-subj'],
-    template: template,
-    className: classes
-  }, rest, _util.NO_DATA_PAGE_TEMPLATE_PROPS), /*#__PURE__*/_react.default.createElement(_no_data_page.NoDataPage, noDataConfig));
-}
+<WithSolutionNavBar(NoDataConfigPage)
   noDataConfig={
     Object {
       "actions": Object {
