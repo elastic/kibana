@@ -15,7 +15,7 @@ import {
   RULE_STATUS_WARNING,
   RULE_STATUS_ENABLED,
   RULE_STATUS_DISABLED,
-  RULE_STATUS_SNOOZED_PERMANENTLY,
+  RULE_STATUS_SNOOZED_INDEFINITELY,
 } from './translations';
 import { AlertExecutionStatuses } from '../../../../alerting/common';
 import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/public';
@@ -31,7 +31,7 @@ export const statusMap: Status = {
   },
   [RuleStatus.snoozed]: {
     color: 'warning',
-    label: RULE_STATUS_SNOOZED_PERMANENTLY,
+    label: RULE_STATUS_SNOOZED_INDEFINITELY,
   },
 };
 

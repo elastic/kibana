@@ -67,10 +67,10 @@ export const RULE_STATUS_DISABLED = i18n.translate(
   }
 );
 
-export const RULE_STATUS_SNOOZED_PERMANENTLY = i18n.translate(
-  'xpack.observability.rules.rulesTable.ruleStatusSnoozedPermanently',
+export const RULE_STATUS_SNOOZED_INDEFINITELY = i18n.translate(
+  'xpack.observability.rules.rulesTable.ruleStatusSnoozedIndefinitely',
   {
-    defaultMessage: 'Snoozed permanently',
+    defaultMessage: 'Snoozed indefinitely',
   }
 );
 
