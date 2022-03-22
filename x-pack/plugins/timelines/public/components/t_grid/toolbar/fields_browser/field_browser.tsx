@@ -166,7 +166,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {CreateFieldButton && dataViewId != null && dataViewId.length > 0 && (
-                <CreateFieldButton onClick={onHide} />
+                <CreateFieldButton onHide={onHide} />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -185,6 +185,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             searchInput={appliedFilterInput}
             selectedCategoryIds={selectedCategoryIds}
             getFieldTableColumns={getFieldTableColumns}
+            onHide={onHide}
           />
         </EuiModalBody>
 

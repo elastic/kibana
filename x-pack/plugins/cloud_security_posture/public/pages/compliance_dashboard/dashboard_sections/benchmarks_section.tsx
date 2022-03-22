@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
 } from '@elastic/eui';
+import moment from 'moment';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { PartitionElementEvent } from '@elastic/charts';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
@@ -83,12 +84,11 @@ export const BenchmarksSection = () => {
                       <EuiText style={{ textAlign: 'center' }}>
                         <h4>{`Cluster ID ${shortId || mockClusterId}`}</h4>
                       </EuiText>
-                      {INTERNAL_FEATURE_FLAGS.showClusterMetaMock && (
-                        <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
-                          <EuiIcon type="clock" />
-                          {' Updated 7 second ago'}
-                        </EuiText>
-                      )}
+                      <EuiSpacer size="xs" />
+                      <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
+                        <EuiIcon type="clock" />
+                        {` ${moment(cluster.meta.lastUpdate).fromNow()}`}
+                      </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiIcon type={getBenchmarkLogo(cluster.meta.benchmarkName)} size="xxl" />

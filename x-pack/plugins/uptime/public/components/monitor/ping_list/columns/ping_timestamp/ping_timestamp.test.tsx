@@ -16,16 +16,9 @@ import moment from 'moment';
 import '../../../../../lib/__mocks__/use_composite_image.mock';
 import { mockRef } from '../../../../../lib/__mocks__/screenshot_ref.mock';
 
+jest.mock('../../../../../../../observability/public');
+
 mockReduxHooks();
-
-jest.mock('../../../../../../../observability/public', () => {
-  const originalModule = jest.requireActual('../../../../../../../observability/public');
-
-  return {
-    ...originalModule,
-    useFetcher: jest.fn().mockReturnValue({ data: null, status: 'pending' }),
-  };
-});
 
 describe('Ping Timestamp component', () => {
   let checkGroup: string;

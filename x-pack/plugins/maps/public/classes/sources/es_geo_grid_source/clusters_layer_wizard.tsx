@@ -28,11 +28,13 @@ import {
   RENDER_AS,
   VECTOR_STYLES,
   STYLE_TYPE,
+  WIZARD_ID,
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 import { ClustersLayerIcon } from '../../layers/wizards/icons/clusters_layer_icon';
 
 export const clustersLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.CLUSTERS,
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGridClustersDescription', {

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -20,11 +19,14 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 
 export function BackendInventoryDependenciesTable() {
   const {
-    urlParams: { comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
-
-  const {
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      comparisonEnabled,
+      comparisonType,
+    },
   } = useApmParams('/backends');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });

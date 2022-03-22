@@ -216,7 +216,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
           deserialize: jest.fn().mockReturnValue({
             convert: () => 'formatted',
           }),
-        } as unknown as DataPublicPluginStart['fieldFormats'],
+        },
+        search: {
+          aggs: {
+            calculateAutoTimeExpression: jest.fn(),
+          },
+        },
       } as unknown as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],

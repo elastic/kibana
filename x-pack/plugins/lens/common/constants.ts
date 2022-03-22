@@ -7,7 +7,6 @@
 
 import rison from 'rison-node';
 import type { TimeRange } from '../../../../src/plugins/data/common/query';
-import { LayerType } from './types';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
@@ -43,10 +42,10 @@ export const LegendDisplay = {
   HIDE: 'hide',
 } as const;
 
-export const layerTypes: Record<string, LayerType> = {
+export const layerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',
-};
+} as const;
 
 // might collide with user-supplied field names, try to make as unique as possible
 export const DOCUMENT_FIELD_NAME = '___records___';

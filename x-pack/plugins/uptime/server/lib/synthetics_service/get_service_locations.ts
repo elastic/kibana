@@ -8,13 +8,25 @@
 import axios from 'axios';
 import {
   ManifestLocation,
+  ServiceLocation,
   Locations,
   ServiceLocationsApiResponse,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../adapters/framework';
 
+export const getDevLocation = (devUrl: string): ServiceLocation => ({
+  id: 'localhost',
+  label: 'Local Synthetics Service',
+  geo: { lat: 0, lon: 0 },
+  url: devUrl,
+});
+
 export async function getServiceLocations(server: UptimeServerSetup) {
-  const locations: Locations = [];
+  let locations: Locations = [];
+
+  if (process.env.NODE_ENV !== 'production' && server.config.service?.devUrl) {
+    locations = [getDevLocation(server.config.service.devUrl)];
+  }
 
   if (!server.config.service?.manifestUrl) {
     return { locations };

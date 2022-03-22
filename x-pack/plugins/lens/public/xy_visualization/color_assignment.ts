@@ -122,6 +122,7 @@ export function getAccessorColorConfig(
   if (isReferenceLayer(layer)) {
     return getReferenceLineAccessorColorConfig(layer);
   }
+
   const layerContainsSplits = Boolean(layer.splitAccessor);
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
   const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;

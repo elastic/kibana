@@ -5,15 +5,30 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { Breadcrumb } from '../app/breadcrumb';
 import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
 import { home } from './home';
 import { serviceDetail } from './service_detail';
 import { settings } from './settings';
+import { ApmMainTemplate } from './templates/apm_main_template';
+import { ServiceGroupsList } from '../app/service_groups';
+import { ServiceGroupsRedirect } from './service_groups_redirect';
+import { comparisonTypeRt } from '../../../common/runtime_types/comparison_type_rt';
+
+const ServiceGroupsBreadcrumnbLabel = i18n.translate(
+  'xpack.apm.views.serviceGroups.breadcrumbLabel',
+  { defaultMessage: 'Services' }
+);
+const ServiceGroupsTitle = i18n.translate(
+  'xpack.apm.views.serviceGroups.title',
+  { defaultMessage: 'Service groups' }
+);
 
 /**
  * The array of route definitions to be used when the application
@@ -59,6 +74,42 @@ const apmRoutes = {
       </Breadcrumb>
     ),
     children: {
+      // this route fails on navigation unless it's defined before home
+      '/service-groups': {
+        element: (
+          <Breadcrumb
+            title={ServiceGroupsBreadcrumnbLabel}
+            href={'/service-groups'}
+          >
+            <ApmMainTemplate
+              pageTitle={ServiceGroupsTitle}
+              environmentFilter={false}
+              showServiceGroupSaveButton
+            >
+              <ServiceGroupsRedirect>
+                <ServiceGroupsList />
+              </ServiceGroupsRedirect>
+            </ApmMainTemplate>
+          </Breadcrumb>
+        ),
+        params: t.type({
+          query: t.intersection([
+            t.type({
+              rangeFrom: t.string,
+              rangeTo: t.string,
+            }),
+            t.partial({
+              serviceGroup: t.string,
+            }),
+            t.partial({
+              refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+              refreshInterval: t.string,
+              comparisonEnabled: toBooleanRt,
+              comparisonType: comparisonTypeRt,
+            }),
+          ]),
+        }),
+      },
       ...settings,
       ...serviceDetail,
       ...home,

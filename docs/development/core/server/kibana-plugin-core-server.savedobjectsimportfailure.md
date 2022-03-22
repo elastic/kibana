@@ -20,6 +20,5 @@ export interface SavedObjectsImportFailure
 |  [id](./kibana-plugin-core-server.savedobjectsimportfailure.id.md) | string |  |
 |  [meta](./kibana-plugin-core-server.savedobjectsimportfailure.meta.md) | { title?: string; icon?: string; } |  |
 |  [overwrite?](./kibana-plugin-core-server.savedobjectsimportfailure.overwrite.md) | boolean | <i>(Optional)</i> If <code>overwrite</code> is specified, an attempt was made to overwrite an existing object. |
-|  [title?](./kibana-plugin-core-server.savedobjectsimportfailure.title.md) | string | <i>(Optional)</i> |
 |  [type](./kibana-plugin-core-server.savedobjectsimportfailure.type.md) | string |  |
 

@@ -64,6 +64,8 @@ export class SyntheticsService {
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
 
     this.locations = [];
+
+    this.registerServiceLocations();
   }
 
   public init() {
@@ -103,6 +105,14 @@ export class SyntheticsService {
     }
   }
 
+  public registerServiceLocations() {
+    const service = this;
+    getServiceLocations(service.server).then((result) => {
+      service.locations = result.locations;
+      service.apiClient.locations = result.locations;
+    });
+  }
+
   public registerSyncTask(taskManager: TaskManagerSetupContract) {
     const service = this;
 
@@ -121,11 +131,7 @@ export class SyntheticsService {
               const { state } = taskInstance;
 
               service.setupIndexTemplates();
-
-              getServiceLocations(service.server).then((result) => {
-                service.locations = result.locations;
-                service.apiClient.locations = result.locations;
-              });
+              service.registerServiceLocations();
 
               await service.pushConfigs();
 

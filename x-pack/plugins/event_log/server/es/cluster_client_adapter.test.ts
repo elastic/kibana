@@ -10,10 +10,13 @@ import {
   ClusterClientAdapter,
   IClusterClientAdapter,
   EVENT_BUFFER_LENGTH,
+  getQueryBody,
+  FindEventsOptionsBySavedObjectFilter,
+  AggregateEventsOptionsBySavedObjectFilter,
 } from './cluster_client_adapter';
-import { findOptionsSchema } from '../event_log_client';
+import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
-import { times } from 'lodash';
+import { pick, times } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
@@ -567,10 +570,93 @@ describe('createIndex', () => {
 });
 
 describe('queryEventsBySavedObject', () => {
-  const DEFAULT_OPTIONS = findOptionsSchema.validate({});
+  const DEFAULT_OPTIONS = queryOptionsSchema.validate({});
 
-  test('should call cluster with proper arguments with non-default namespace', async () => {
+  test('should call cluster with correct options', async () => {
     clusterClient.search.mockResponse({
+      hits: {
+        hits: [{ _index: 'index-name-00001', _id: '1', _source: { foo: 'bar' } }],
+        total: { relation: 'eq', value: 1 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
+    const options = {
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: {
+        ...DEFAULT_OPTIONS,
+        page: 3,
+        per_page: 6,
+        sort: [
+          { sort_field: '@timestamp', sort_order: 'asc' },
+          { sort_field: 'event.end', sort_order: 'desc' },
+        ],
+      },
+    };
+    const result = await clusterClientAdapter.queryEventsBySavedObjects(options);
+
+    const [query] = clusterClient.search.mock.calls[0];
+    expect(query).toEqual({
+      index: 'index-name',
+      track_total_hits: true,
+      body: {
+        size: 6,
+        from: 12,
+        query: getQueryBody(logger, options, pick(options.findOptions, ['start', 'end', 'filter'])),
+        sort: [{ '@timestamp': { order: 'asc' } }, { 'event.end': { order: 'desc' } }],
+      },
+    });
+    expect(result).toEqual({
+      page: 3,
+      per_page: 6,
+      total: 1,
+      data: [{ foo: 'bar' }],
+    });
+  });
+});
+
+describe('aggregateEventsBySavedObject', () => {
+  const DEFAULT_OPTIONS = {
+    ...queryOptionsSchema.validate({}),
+    aggs: {
+      genericAgg: {
+        term: {
+          field: 'event.action',
+          size: 10,
+        },
+      },
+    },
+  };
+
+  test('should call cluster with correct options', async () => {
+    clusterClient.search.mockResponse({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
       hits: {
         hits: [],
         total: { relation: 'eq', value: 0 },
@@ -584,650 +670,737 @@ describe('queryEventsBySavedObject', () => {
         skipped: 0,
       },
     });
-    await clusterClientAdapter.queryEventsBySavedObjects({
+    const options: AggregateEventsOptionsBySavedObjectFilter = {
       index: 'index-name',
       namespace: 'namespace',
       type: 'saved-object-type',
       ids: ['saved-object-id'],
-      findOptions: DEFAULT_OPTIONS,
-    });
+      aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
+    };
+    const result = await clusterClientAdapter.aggregateEventsBySavedObjects(options);
 
     const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchInlineSnapshot(
-      {
-        body: {
-          from: 0,
-          query: {
-            bool: {
-              filter: [],
-              must: [
-                {
-                  nested: {
-                    path: 'kibana.saved_objects',
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              'kibana.saved_objects.rel': {
-                                value: 'primary',
-                              },
-                            },
-                          },
-                          {
-                            term: {
-                              'kibana.saved_objects.type': {
-                                value: 'saved-object-type',
-                              },
-                            },
-                          },
-                          {
-                            term: {
-                              'kibana.saved_objects.namespace': {
-                                value: 'namespace',
-                              },
-                            },
-                          },
-                        ],
+    expect(query).toEqual({
+      index: 'index-name',
+      body: {
+        size: 0,
+        query: getQueryBody(
+          logger,
+          options,
+          pick(options.aggregateOptions, ['start', 'end', 'filter'])
+        ),
+        aggs: {
+          genericAgg: {
+            term: {
+              field: 'event.action',
+              size: 10,
+            },
+          },
+        },
+      },
+    });
+    expect(result).toEqual({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+    });
+  });
+});
+
+describe('getQueryBody', () => {
+  const options = {
+    index: 'index-name',
+    namespace: undefined,
+    type: 'saved-object-type',
+    ids: ['saved-object-id'],
+  };
+  test('should correctly build query with namespace filter when namespace is undefined', () => {
+    expect(getQueryBody(logger, options as FindEventsOptionsBySavedObjectFilter, {})).toEqual({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
                       },
                     },
-                  },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          exists: {
+                            field: 'kibana.saved_objects.namespace',
+                          },
+                        },
+                      },
+                    },
+                  ],
                 },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
                 {
                   bool: {
-                    should: [
+                    must: [
                       {
-                        bool: {
-                          must: [
-                            {
-                              nested: {
-                                path: 'kibana.saved_objects',
-                                query: {
-                                  bool: {
-                                    must: [
-                                      {
-                                        terms: {
-                                          'kibana.saved_objects.id': ['saved-object-id'],
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                              },
-                            },
-                            {
-                              range: {
-                                'kibana.version': {
-                                  gte: '8.0.0',
-                                },
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-          size: 10,
-          sort: [
-            {
-              '@timestamp': {
-                order: 'asc',
-              },
-            },
-          ],
-        },
-        index: 'index-name',
-        track_total_hits: true,
-      },
-      `
-      Object {
-        "body": Object {
-          "from": 0,
-          "query": Object {
-            "bool": Object {
-              "filter": Array [],
-              "must": Array [
-                Object {
-                  "nested": Object {
-                    "path": "kibana.saved_objects",
-                    "query": Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.rel": Object {
-                                "value": "primary",
-                              },
-                            },
-                          },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.type": Object {
-                                "value": "saved-object-type",
-                              },
-                            },
-                          },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.namespace": Object {
-                                "value": "namespace",
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "should": Array [
-                      Object {
-                        "bool": Object {
-                          "must": Array [
-                            Object {
-                              "nested": Object {
-                                "path": "kibana.saved_objects",
-                                "query": Object {
-                                  "bool": Object {
-                                    "must": Array [
-                                      Object {
-                                        "terms": Object {
-                                          "kibana.saved_objects.id": Array [
-                                            "saved-object-id",
-                                          ],
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                              },
-                            },
-                            Object {
-                              "range": Object {
-                                "kibana.version": Object {
-                                  "gte": "8.0.0",
-                                },
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-          "size": 10,
-          "sort": Array [
-            Object {
-              "@timestamp": Object {
-                "order": "asc",
-              },
-            },
-          ],
-        },
-        "index": "index-name",
-        "track_total_hits": true,
-      }
-    `
-    );
-  });
-
-  test('should call cluster with proper arguments with default namespace', async () => {
-    clusterClient.search.mockResponse({
-      hits: {
-        hits: [],
-        total: { relation: 'eq', value: 0 },
-      },
-      took: 0,
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        successful: 0,
-        total: 0,
-        skipped: 0,
-      },
-    });
-    await clusterClientAdapter.queryEventsBySavedObjects({
-      index: 'index-name',
-      namespace: undefined,
-      type: 'saved-object-type',
-      ids: ['saved-object-id'],
-      findOptions: DEFAULT_OPTIONS,
-    });
-
-    const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchObject({
-      body: {
-        from: 0,
-        query: {
-          bool: {
-            filter: [],
-            must: [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.rel': {
-                              value: 'primary',
-                            },
-                          },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: 'saved-object-type',
-                            },
-                          },
-                        },
-                        {
-                          bool: {
-                            must_not: {
-                              exists: {
-                                field: 'kibana.saved_objects.namespace',
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        must: [
-                          {
-                            nested: {
-                              path: 'kibana.saved_objects',
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      terms: {
-                                        'kibana.saved_objects.id': ['saved-object-id'],
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            },
-                          },
-                          {
-                            range: {
-                              'kibana.version': {
-                                gte: '8.0.0',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        size: 10,
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
-      },
-      index: 'index-name',
-      track_total_hits: true,
-    });
-  });
-
-  test('should call cluster with sort', async () => {
-    clusterClient.search.mockResponse({
-      hits: {
-        hits: [],
-        total: { relation: 'eq', value: 0 },
-      },
-      took: 0,
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        successful: 0,
-        total: 0,
-        skipped: 0,
-      },
-    });
-    await clusterClientAdapter.queryEventsBySavedObjects({
-      index: 'index-name',
-      namespace: 'namespace',
-      type: 'saved-object-type',
-      ids: ['saved-object-id'],
-      findOptions: { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' },
-    });
-
-    const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchObject({
-      index: 'index-name',
-      body: {
-        sort: [{ 'event.end': { order: 'desc' } }],
-      },
-    });
-  });
-
-  test('supports open ended date', async () => {
-    clusterClient.search.mockResponse({
-      hits: {
-        hits: [],
-        total: { relation: 'eq', value: 0 },
-      },
-      took: 0,
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        successful: 0,
-        total: 0,
-        skipped: 0,
-      },
-    });
-
-    const start = '2020-07-08T00:52:28.350Z';
-
-    await clusterClientAdapter.queryEventsBySavedObjects({
-      index: 'index-name',
-      namespace: 'namespace',
-      type: 'saved-object-type',
-      ids: ['saved-object-id'],
-      findOptions: { ...DEFAULT_OPTIONS, start },
-    });
-
-    const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchObject({
-      body: {
-        from: 0,
-        query: {
-          bool: {
-            filter: [],
-            must: [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.rel': {
-                              value: 'primary',
-                            },
-                          },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: 'saved-object-type',
-                            },
-                          },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.namespace': {
-                              value: 'namespace',
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        must: [
-                          {
-                            nested: {
-                              path: 'kibana.saved_objects',
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      terms: {
-                                        'kibana.saved_objects.id': ['saved-object-id'],
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            },
-                          },
-                          {
-                            range: {
-                              'kibana.version': {
-                                gte: '8.0.0',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: '2020-07-08T00:52:28.350Z',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        size: 10,
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
-      },
-      index: 'index-name',
-      track_total_hits: true,
-    });
-  });
-
-  test('supports optional date range', async () => {
-    clusterClient.search.mockResponse({
-      hits: {
-        hits: [],
-        total: { relation: 'eq', value: 0 },
-      },
-      took: 0,
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        successful: 0,
-        total: 0,
-        skipped: 0,
-      },
-    });
-
-    const start = '2020-07-08T00:52:28.350Z';
-    const end = '2020-07-08T00:00:00.000Z';
-
-    await clusterClientAdapter.queryEventsBySavedObjects({
-      index: 'index-name',
-      namespace: 'namespace',
-      type: 'saved-object-type',
-      ids: ['saved-object-id'],
-      findOptions: { ...DEFAULT_OPTIONS, start, end },
-      legacyIds: ['legacy-id'],
-    });
-
-    const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchObject({
-      body: {
-        from: 0,
-        query: {
-          bool: {
-            filter: [],
-            must: [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.rel': {
-                              value: 'primary',
-                            },
-                          },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: 'saved-object-type',
-                            },
-                          },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.namespace': {
-                              value: 'namespace',
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        must: [
-                          {
-                            nested: {
-                              path: 'kibana.saved_objects',
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      terms: {
-                                        'kibana.saved_objects.id': ['saved-object-id'],
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            },
-                          },
-                          {
-                            range: {
-                              'kibana.version': {
-                                gte: '8.0.0',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          {
-                            nested: {
-                              path: 'kibana.saved_objects',
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      terms: {
-                                        'kibana.saved_objects.id': ['legacy-id'],
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            },
-                          },
-                          {
+                        nested: {
+                          path: 'kibana.saved_objects',
+                          query: {
                             bool: {
-                              should: [
+                              must: [
                                 {
-                                  range: {
-                                    'kibana.version': {
-                                      lt: '8.0.0',
-                                    },
-                                  },
-                                },
-                                {
-                                  bool: {
-                                    must_not: {
-                                      exists: {
-                                        field: 'kibana.version',
-                                      },
-                                    },
+                                  terms: {
+                                    'kibana.saved_objects.id': ['saved-object-id'],
                                   },
                                 },
                               ],
                             },
                           },
-                        ],
+                        },
+                      },
+                      {
+                        range: {
+                          'kibana.version': {
+                            gte: '8.0.0',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query with namespace filter when namespace is specified', () => {
+    expect(
+      getQueryBody(
+        logger,
+        { ...options, namespace: 'namespace' } as FindEventsOptionsBySavedObjectFilter,
+        {}
+      )
+    ).toEqual({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.namespace': {
+                          value: 'namespace',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        nested: {
+                          path: 'kibana.saved_objects',
+                          query: {
+                            bool: {
+                              must: [
+                                {
+                                  terms: {
+                                    'kibana.saved_objects.id': ['saved-object-id'],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          'kibana.version': {
+                            gte: '8.0.0',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query when filter is specified', () => {
+    expect(
+      getQueryBody(logger, options as FindEventsOptionsBySavedObjectFilter, {
+        filter: 'event.provider: alerting AND event.action:execute',
+      })
+    ).toEqual({
+      bool: {
+        filter: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        'event.provider': 'alerting',
                       },
                     },
                   ],
                 },
               },
               {
-                range: {
-                  '@timestamp': {
-                    gte: '2020-07-08T00:52:28.350Z',
-                  },
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    lte: '2020-07-08T00:00:00.000Z',
-                  },
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        'event.action': 'execute',
+                      },
+                    },
+                  ],
                 },
               },
             ],
           },
         },
-        size: 10,
-        sort: [
+        must: [
           {
-            '@timestamp': {
-              order: 'asc',
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          exists: {
+                            field: 'kibana.saved_objects.namespace',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        nested: {
+                          path: 'kibana.saved_objects',
+                          query: {
+                            bool: {
+                              must: [
+                                {
+                                  terms: {
+                                    'kibana.saved_objects.id': ['saved-object-id'],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          'kibana.version': {
+                            gte: '8.0.0',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
           },
         ],
       },
-      index: 'index-name',
-      track_total_hits: true,
+    });
+  });
+
+  test('should correctly build query when legacyIds are specified', () => {
+    expect(
+      getQueryBody(
+        logger,
+        { ...options, legacyIds: ['legacy-id-1'] } as FindEventsOptionsBySavedObjectFilter,
+        {}
+      )
+    ).toEqual({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          exists: {
+                            field: 'kibana.saved_objects.namespace',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        nested: {
+                          path: 'kibana.saved_objects',
+                          query: {
+                            bool: {
+                              must: [
+                                {
+                                  terms: {
+                                    'kibana.saved_objects.id': ['saved-object-id'],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          'kibana.version': {
+                            gte: '8.0.0',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    must: [
+                      {
+                        nested: {
+                          path: 'kibana.saved_objects',
+                          query: {
+                            bool: {
+                              must: [
+                                {
+                                  terms: {
+                                    'kibana.saved_objects.id': ['legacy-id-1'],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              range: {
+                                'kibana.version': {
+                                  lt: '8.0.0',
+                                },
+                              },
+                            },
+                            {
+                              bool: {
+                                must_not: {
+                                  exists: {
+                                    field: 'kibana.version',
+                                  },
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query when start is specified', () => {
+    expect(
+      getQueryBody(logger, options as FindEventsOptionsBySavedObjectFilter, {
+        start: '2020-07-08T00:52:28.350Z',
+      })
+    ).toEqual({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          exists: {
+                            field: 'kibana.saved_objects.namespace',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        nested: {
+                          path: 'kibana.saved_objects',
+                          query: {
+                            bool: {
+                              must: [
+                                {
+                                  terms: {
+                                    'kibana.saved_objects.id': ['saved-object-id'],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          'kibana.version': {
+                            gte: '8.0.0',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: '2020-07-08T00:52:28.350Z',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query when end is specified', () => {
+    expect(
+      getQueryBody(logger, options as FindEventsOptionsBySavedObjectFilter, {
+        end: '2020-07-10T00:52:28.350Z',
+      })
+    ).toEqual({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          exists: {
+                            field: 'kibana.saved_objects.namespace',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        nested: {
+                          path: 'kibana.saved_objects',
+                          query: {
+                            bool: {
+                              must: [
+                                {
+                                  terms: {
+                                    'kibana.saved_objects.id': ['saved-object-id'],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          'kibana.version': {
+                            gte: '8.0.0',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                lte: '2020-07-10T00:52:28.350Z',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query when start and end are specified', () => {
+    expect(
+      getQueryBody(logger, options as FindEventsOptionsBySavedObjectFilter, {
+        start: '2020-07-08T00:52:28.350Z',
+        end: '2020-07-10T00:52:28.350Z',
+      })
+    ).toEqual({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          exists: {
+                            field: 'kibana.saved_objects.namespace',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        nested: {
+                          path: 'kibana.saved_objects',
+                          query: {
+                            bool: {
+                              must: [
+                                {
+                                  terms: {
+                                    'kibana.saved_objects.id': ['saved-object-id'],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          'kibana.version': {
+                            gte: '8.0.0',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: '2020-07-08T00:52:28.350Z',
+              },
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                lte: '2020-07-10T00:52:28.350Z',
+              },
+            },
+          },
+        ],
+      },
     });
   });
 });

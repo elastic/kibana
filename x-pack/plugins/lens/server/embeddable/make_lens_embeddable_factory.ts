@@ -13,11 +13,13 @@ import {
 } from '../../../../../src/plugins/kibana_utils/common';
 import { DOC_TYPE } from '../../common';
 import {
+  commonEnhanceTableRowHeight,
   commonMakeReversePaletteAsCustom,
   commonRemoveTimezoneDateHistogramParam,
   commonRenameFilterReferences,
   commonRenameOperationsForFormula,
   commonRenameRecordsField,
+  commonSetLastValueShowArrayValues,
   commonUpdateVisLayerType,
   getLensCustomVisualizationMigrations,
   getLensFilterMigrations,
@@ -26,8 +28,10 @@ import {
   CustomVisualizationMigrations,
   LensDocShape713,
   LensDocShape715,
+  LensDocShape810,
   LensDocShapePre712,
   VisState716,
+  VisState810,
   VisStatePre715,
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
@@ -83,6 +87,15 @@ export const makeLensEmbeddableFactory =
               const migratedLensState = commonRenameRecordsField(
                 commonRenameFilterReferences(lensState.attributes)
               );
+              return {
+                ...lensState,
+                attributes: migratedLensState,
+              } as unknown as SerializableRecord;
+            },
+            '8.2.0': (state) => {
+              const lensState = state as unknown as { attributes: LensDocShape810<VisState810> };
+              let migratedLensState = commonSetLastValueShowArrayValues(lensState.attributes);
+              migratedLensState = commonEnhanceTableRowHeight(lensState.attributes);
               return {
                 ...lensState,
                 attributes: migratedLensState,

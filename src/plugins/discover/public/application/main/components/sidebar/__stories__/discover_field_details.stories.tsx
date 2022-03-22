@@ -10,7 +10,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DiscoverFieldDetails } from '../discover_field_details';
-import { DataView, IndexPatternField } from '../../../../../../../data_views/common';
+import { DataView, IndexPatternField } from '../../../../../../../data_views/public';
 import { fieldSpecMap } from './fields';
 import { numericField as field } from './fields';
 import { Bucket } from '../types';

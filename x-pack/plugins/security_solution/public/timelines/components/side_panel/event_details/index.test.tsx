@@ -137,7 +137,9 @@ describe('event details footer component', () => {
           get: jest.fn().mockReturnValue([]),
         },
         cases: {
-          getCasesContext: () => mockCasesContext,
+          ui: {
+            getCasesContext: () => mockCasesContext,
+          },
         },
       },
     });

@@ -47,7 +47,7 @@ export function SelectedWildcards({ indexPattern }: Props) {
 
   return searchTerm ? (
     <FilterValueLabel
-      indexPattern={indexPattern}
+      dataView={indexPattern}
       removeFilter={() => {
         updateSearchTerm('');
       }}

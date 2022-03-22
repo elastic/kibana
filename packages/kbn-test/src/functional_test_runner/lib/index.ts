@@ -9,7 +9,7 @@
 export { Lifecycle } from './lifecycle';
 export { LifecyclePhase } from './lifecycle_phase';
 export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection } from './providers';
+export * from './providers';
 // @internal
 export { runTests, setupMocha } from './mocha';
 export * from './test_metadata';

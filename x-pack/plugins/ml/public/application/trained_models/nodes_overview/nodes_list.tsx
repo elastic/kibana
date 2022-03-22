@@ -123,6 +123,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeNameHeader', {
         defaultMessage: 'Name',
       }),
+      width: '200px',
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlNodesTableColumnName',

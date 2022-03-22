@@ -27,13 +27,13 @@ import type { LensMultiTable } from '../../common';
 import { layerTypes } from '../../common';
 import { xyChart } from '../../common/expressions';
 import {
-  layerConfig,
+  dataLayerConfig,
   legendConfig,
   tickLabelsConfig,
   gridlinesConfig,
   XYArgs,
   LegendConfig,
-  LayerArgs,
+  DataLayerArgs,
   AxesSettingsConfig,
   XYChartProps,
   labelsOrientationConfig,
@@ -212,7 +212,7 @@ const dateHistogramData: LensMultiTable = {
   },
 };
 
-const dateHistogramLayer: LayerArgs = {
+const dateHistogramLayer: DataLayerArgs = {
   layerId: 'timeLayer',
   layerType: layerTypes.DATA,
   hide: false,
@@ -254,7 +254,7 @@ const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable => ({
   rows,
 });
 
-const sampleLayer: LayerArgs = {
+const sampleLayer: DataLayerArgs = {
   layerId: 'first',
   layerType: layerTypes.DATA,
   seriesType: 'line',
@@ -268,7 +268,7 @@ const sampleLayer: LayerArgs = {
   palette: mockPaletteOutput,
 };
 
-const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
+const createArgsWithLayers = (layers: DataLayerArgs[] = [sampleLayer]): XYArgs => ({
   xTitle: '',
   yTitle: '',
   yRightTitle: '',
@@ -392,8 +392,8 @@ describe('xy_expression', () => {
       });
     });
 
-    test('layerConfig produces the correct arguments', () => {
-      const args: LayerArgs = {
+    test('dataLayerConfig produces the correct arguments', () => {
+      const args: DataLayerArgs = {
         layerId: 'first',
         layerType: layerTypes.DATA,
         seriesType: 'line',
@@ -406,10 +406,10 @@ describe('xy_expression', () => {
         palette: mockPaletteOutput,
       };
 
-      const result = layerConfig.fn(null, args, createMockExecutionContext());
+      const result = dataLayerConfig.fn(null, args, createMockExecutionContext());
 
       expect(result).toEqual({
-        type: 'lens_xy_layer',
+        type: 'lens_xy_data_layer',
         ...args,
       });
     });
@@ -556,7 +556,7 @@ describe('xy_expression', () => {
     });
 
     describe('date range', () => {
-      const timeSampleLayer: LayerArgs = {
+      const timeSampleLayer: DataLayerArgs = {
         layerId: 'first',
         layerType: layerTypes.DATA,
         seriesType: 'line',
@@ -649,7 +649,7 @@ describe('xy_expression', () => {
       });
 
       describe('axis time', () => {
-        const defaultTimeLayer: LayerArgs = {
+        const defaultTimeLayer: DataLayerArgs = {
           layerId: 'first',
           layerType: layerTypes.DATA,
           seriesType: 'line',
@@ -707,7 +707,7 @@ describe('xy_expression', () => {
         });
         test('it should disable the new time axis for a vertical bar with break down dimension', () => {
           const { data } = sampleArgs();
-          const timeLayer: LayerArgs = {
+          const timeLayer: DataLayerArgs = {
             ...defaultTimeLayer,
             seriesType: 'bar',
           };
@@ -734,7 +734,7 @@ describe('xy_expression', () => {
 
         test('it should enable the new time axis for a stacked vertical bar with break down dimension', () => {
           const { data } = sampleArgs();
-          const timeLayer: LayerArgs = {
+          const timeLayer: DataLayerArgs = {
             ...defaultTimeLayer,
             seriesType: 'bar_stacked',
           };
@@ -1227,7 +1227,7 @@ describe('xy_expression', () => {
     test('onBrushEnd returns correct context data for number histogram data', () => {
       const { args } = sampleArgs();
 
-      const numberLayer: LayerArgs = {
+      const numberLayer: DataLayerArgs = {
         layerId: 'numberLayer',
         layerType: layerTypes.DATA,
         hide: false,
@@ -1436,7 +1436,7 @@ describe('xy_expression', () => {
     test('onElementClick returns correct context data for numeric histogram', () => {
       const { args } = sampleArgs();
 
-      const numberLayer: LayerArgs = {
+      const numberLayer: DataLayerArgs = {
         layerId: 'numberLayer',
         layerType: layerTypes.DATA,
         hide: false,
@@ -1757,7 +1757,7 @@ describe('xy_expression', () => {
 
     test('it applies histogram mode to the series for single series', () => {
       const { data, args } = sampleArgs();
-      const firstLayer: LayerArgs = {
+      const firstLayer: DataLayerArgs = {
         ...args.layers[0],
         accessors: ['b'],
         seriesType: 'bar',
@@ -1772,7 +1772,7 @@ describe('xy_expression', () => {
 
     test('it does not apply histogram mode to more than one bar series for unstacked bar chart', () => {
       const { data, args } = sampleArgs();
-      const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
+      const firstLayer: DataLayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
       delete firstLayer.splitAccessor;
       const component = shallow(
         <XYChart {...defaultProps} data={data} args={{ ...args, layers: [firstLayer] }} />
@@ -1783,9 +1783,17 @@ describe('xy_expression', () => {
 
     test('it applies histogram mode to more than one the series for unstacked line/area chart', () => {
       const { data, args } = sampleArgs();
-      const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'line', isHistogram: true };
+      const firstLayer: DataLayerArgs = {
+        ...args.layers[0],
+        seriesType: 'line',
+        isHistogram: true,
+      };
       delete firstLayer.splitAccessor;
-      const secondLayer: LayerArgs = { ...args.layers[0], seriesType: 'line', isHistogram: true };
+      const secondLayer: DataLayerArgs = {
+        ...args.layers[0],
+        seriesType: 'line',
+        isHistogram: true,
+      };
       delete secondLayer.splitAccessor;
       const component = shallow(
         <XYChart
@@ -2874,7 +2882,7 @@ describe('xy_expression', () => {
           toDate: new Date('2019-01-03T05:00:00.000Z'),
         },
       };
-      const timeSampleLayer: LayerArgs = {
+      const timeSampleLayer: DataLayerArgs = {
         layerId: 'first',
         layerType: layerTypes.DATA,
         seriesType: 'line',

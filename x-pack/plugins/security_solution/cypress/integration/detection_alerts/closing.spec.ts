@@ -6,6 +6,7 @@
  */
 
 import { getNewRule } from '../../objects/rule';
+import { ROLES } from '../../../common/test';
 import {
   ALERTS_COUNT,
   SELECTED_ALERTS,
@@ -31,7 +32,7 @@ import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Closing alerts', () => {
+describe('Closing alerts', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
@@ -171,6 +172,47 @@ describe.skip('Closing alerts', () => {
         cy.get(ALERTS_COUNT).should('not.exist');
         cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should('not.exist');
         cy.get(ALERTS_TREND_SIGNAL_RULE_NAME_PANEL).should('not.exist');
+      });
+  });
+});
+
+describe('Closing alerts with read only role', () => {
+  beforeEach(() => {
+    cleanKibana();
+    loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
+    createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
+    refreshPage();
+    waitForAlertsToPopulate(100);
+    deleteCustomRule();
+  });
+
+  it('Closes alerts', () => {
+    const numberOfAlertsToBeClosed = 3;
+    cy.get(ALERTS_COUNT)
+      .invoke('text')
+      .then((alertNumberString) => {
+        const numberOfAlerts = alertNumberString.split(' ')[0];
+        cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should('have.text', `${numberOfAlerts}`);
+
+        selectNumberOfAlerts(numberOfAlertsToBeClosed);
+
+        cy.get(SELECTED_ALERTS).should('have.text', `Selected ${numberOfAlertsToBeClosed} alerts`);
+
+        closeAlerts();
+        waitForAlerts();
+
+        const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
+        cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlertsAfterClosing} alerts`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+          'have.text',
+          `${expectedNumberOfAlertsAfterClosing}`
+        );
+
+        goToClosedAlerts();
+        waitForAlerts();
+
+        cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alerts`);
       });
   });
 });

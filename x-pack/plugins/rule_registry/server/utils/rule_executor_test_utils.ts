@@ -74,7 +74,6 @@ export const createDefaultAlertExecutorOptions = <
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
-    search: alertsMock.createAlertServices<InstanceState, InstanceContext>().search,
   },
   state,
   updatedBy: null,

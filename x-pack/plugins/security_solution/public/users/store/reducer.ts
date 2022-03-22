@@ -6,18 +6,19 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { get } from 'lodash/fp';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
   setUsersTablesActivePageToZero,
-  updateUsersTable,
   updateTableActivePage,
   updateTableLimit,
+  updateTableSorting,
+  updateUserRiskScoreSeverityFilter,
 } from './actions';
 import { setUsersPageQueriesActivePageToZero } from './helpers';
 import { UsersTableType, UsersModel } from './model';
-import { HostsTableType } from '../../hosts/store/model';
+import { Direction } from '../../../common/search_strategy/common';
+import { RiskScoreFields } from '../../../common/search_strategy';
 
 export const initialUsersState: UsersModel = {
   page: {
@@ -26,34 +27,26 @@ export const initialUsersState: UsersModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.anomalies]: null,
+      [UsersTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
+      [UsersTableType.anomalies]: null,
     },
   },
   details: {
     queries: {
-      [UsersTableType.allUsers]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      [HostsTableType.anomalies]: null,
+      [UsersTableType.anomalies]: null,
     },
   },
 };
 
 export const usersReducer = reducerWithInitialState(initialUsersState)
-  .case(updateUsersTable, (state, { usersType, tableType, updates }) => ({
-    ...state,
-    [usersType]: {
-      ...state[usersType],
-      queries: {
-        ...state[usersType].queries,
-        [tableType]: {
-          ...get([usersType, 'queries', tableType], state),
-          ...updates,
-        },
-      },
-    },
-  }))
   .case(setUsersTablesActivePageToZero, (state) => ({
     ...state,
     page: {
@@ -61,28 +54,55 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       queries: setUsersPageQueriesActivePageToZero(state),
     },
   }))
-  .case(updateTableActivePage, (state, { activePage, usersType, tableType }) => ({
+  .case(updateTableActivePage, (state, { activePage, tableType }) => ({
     ...state,
-    [usersType]: {
-      ...state[usersType],
+    page: {
+      ...state.page,
       queries: {
-        ...state[usersType].queries,
+        ...state.page.queries,
         [tableType]: {
-          ...state[usersType].queries[tableType],
+          ...state.page.queries[tableType],
           activePage,
         },
       },
     },
   }))
-  .case(updateTableLimit, (state, { limit, usersType, tableType }) => ({
+  .case(updateTableLimit, (state, { limit, tableType }) => ({
     ...state,
-    [usersType]: {
-      ...state[usersType],
+    page: {
+      ...state.page,
       queries: {
-        ...state[usersType].queries,
+        ...state.page.queries,
         [tableType]: {
-          ...state[usersType].queries[tableType],
+          ...state.page.queries[tableType],
           limit,
+        },
+      },
+    },
+  }))
+  .case(updateTableSorting, (state, { sort }) => ({
+    ...state,
+    page: {
+      ...state.page,
+      queries: {
+        ...state.page.queries,
+        [UsersTableType.risk]: {
+          ...state.page.queries[UsersTableType.risk],
+          sort,
+        },
+      },
+    },
+  }))
+  .case(updateUserRiskScoreSeverityFilter, (state, { severitySelection }) => ({
+    ...state,
+    page: {
+      ...state.page,
+      queries: {
+        ...state.page.queries,
+        [UsersTableType.risk]: {
+          ...state.page.queries[UsersTableType.risk],
+          severitySelection,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
       },
     },

@@ -271,9 +271,9 @@ describe('chart_switch', () => {
       },
     ]);
     datasourceMap.testDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-      { columnId: 'col1' },
-      { columnId: 'col2' },
-      { columnId: 'col3' },
+      { columnId: 'col1', fields: [] },
+      { columnId: 'col2', fields: [] },
+      { columnId: 'col3', fields: [] },
     ]);
 
     const { instance } = await mountWithProvider(

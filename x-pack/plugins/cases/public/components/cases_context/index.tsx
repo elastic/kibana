@@ -15,7 +15,7 @@ import {
   casesContextReducer,
   getInitialCasesContextState,
 } from './cases_context_reducer';
-import { CasesContextFeatures, CasesFeatures } from '../../containers/types';
+import { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
 import { ReleasePhase } from '../types';
 
@@ -27,7 +27,7 @@ export interface CasesContextValue {
   appTitle: string;
   userCanCrud: boolean;
   basePath: string;
-  features: CasesContextFeatures;
+  features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
 }
@@ -59,7 +59,11 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
      * The empty object at the beginning avoids the mutation
      * of the DEFAULT_FEATURES object
      */
-    features: merge({}, DEFAULT_FEATURES, features),
+    features: merge<object, CasesFeaturesAllRequired, CasesFeatures>(
+      {},
+      DEFAULT_FEATURES,
+      features
+    ),
     releasePhase,
     dispatch,
   }));

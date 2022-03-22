@@ -590,7 +590,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
       () => ({
         key: {
           type: FIELD_TYPES.COMBO_BOX,
-          fieldsToValidateOnChange: ['result.value'],
+          fieldsToValidateOnChange: ['result.value', 'key'],
           validations: [
             {
               validator: getEcsFieldValidator(editForm),
@@ -638,7 +638,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
 
     const handleSubmit = useCallback(async () => {
       validate();
-      validateFields(['result.value']);
+      validateFields(['result.value', 'key']);
       const { data, isValid } = await submit();
 
       if (isValid) {

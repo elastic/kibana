@@ -113,4 +113,8 @@ export class ReportingPlugin
 
     return reportingCore.getContract();
   }
+
+  stop() {
+    this.reportingCore?.pluginStop();
+  }
 }

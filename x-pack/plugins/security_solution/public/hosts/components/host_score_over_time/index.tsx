@@ -27,10 +27,10 @@ import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
-import { useHostRiskScore } from '../../containers/host_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
+import { buildHostNamesFilter } from '../../../../common/search_strategy/security_solution/risk_score';
+import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
 
 export interface HostRiskScoreOverTimeProps
   extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
@@ -80,7 +80,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   const theme = useTheme();
 
   const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     onlyLatest: false,
     timerange,
   });

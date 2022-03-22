@@ -4,7 +4,9 @@
 
 ## ResolvedSimpleSavedObject.alias\_target\_id property
 
-The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`<!-- -->.
+The ID of the object that the legacy URL alias points to.
+
+\*\*Note:\*\* this field is \*only\* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`<!-- -->).
 
 <b>Signature:</b>
 

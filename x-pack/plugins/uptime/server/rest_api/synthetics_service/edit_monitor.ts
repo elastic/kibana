@@ -78,8 +78,10 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       );
 
       // Return service sync errors in OK response
-      if (errors) {
-        return errors;
+      if (errors && errors.length > 0) {
+        return response.ok({
+          body: { message: 'error pushing monitor to the service', attributes: { errors } },
+        });
       }
 
       return editMonitor;

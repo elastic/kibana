@@ -12,3 +12,11 @@ export const DEPLOYMENT_STATE = {
 } as const;
 
 export type DeploymentState = typeof DEPLOYMENT_STATE[keyof typeof DEPLOYMENT_STATE];
+
+export const TRAINED_MODEL_TYPE = {
+  PYTORCH: 'pytorch',
+  TREE_ENSEMBLE: 'tree_ensemble',
+  LANG_IDENT: 'lang_ident',
+} as const;
+
+export type TrainedModelType = typeof TRAINED_MODEL_TYPE[keyof typeof TRAINED_MODEL_TYPE];
