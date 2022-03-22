@@ -7,26 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { stringify } from 'querystring';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import {
+  getAlertUrlErrorCount,
+  getAlertUrlTransactionDuration,
+  getAlertUrlTransactionErrorRate,
+  getAlertUrlTransactionDurationAnomaly,
+} from '../../../common/utils/formatters';
 import { AlertType } from '../../../common/alert_types';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
-
-const format = ({
-  pathname,
-  query,
-}: {
-  pathname: string;
-  query: Record<string, any>;
-}): string => {
-  return `${pathname}?${stringify(query)}`;
-};
 
 export function registerApmAlerts(
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
@@ -40,16 +34,10 @@ export function registerApmAlerts(
     format: ({ fields }) => {
       return {
         reason: fields[ALERT_REASON]!,
-        link: format({
-          pathname: `/app/apm/services/${String(
-            fields[SERVICE_NAME][0]
-          )}/errors`,
-          query: {
-            ...(fields[SERVICE_ENVIRONMENT]?.[0]
-              ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-              : { environment: ENVIRONMENT_ALL.value }),
-          },
-        }),
+        link: getAlertUrlErrorCount(
+          fields[SERVICE_NAME],
+          fields[SERVICE_ENVIRONMENT]
+        ),
       };
     },
     iconClass: 'bell',
@@ -84,22 +72,13 @@ export function registerApmAlerts(
       }
     ),
     format: ({ fields, formatters: { asDuration } }) => {
-      const query = {
-        transactionType: fields[TRANSACTION_TYPE][0]!,
-        ...(fields[SERVICE_ENVIRONMENT]?.[0]
-          ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-          : { environment: ENVIRONMENT_ALL.value }),
-      };
-      console.log(fields[SERVICE_NAME]);
-      console.log(fields[SERVICE_ENVIRONMENT]);
-
       return {
         reason: fields[ALERT_REASON]!,
-
-        link: format({
-          pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
-          query,
-        }),
+        link: getAlertUrlTransactionDuration(
+          fields[SERVICE_NAME],
+          fields[SERVICE_ENVIRONMENT],
+          fields[TRANSACTION_TYPE]
+        ),
       };
     },
     iconClass: 'bell',
@@ -138,15 +117,11 @@ export function registerApmAlerts(
     ),
     format: ({ fields, formatters: { asPercent } }) => ({
       reason: fields[ALERT_REASON]!,
-      link: format({
-        pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0]!)}`,
-        query: {
-          transactionType: String(fields[TRANSACTION_TYPE][0]!),
-          ...(fields[SERVICE_ENVIRONMENT]?.[0]
-            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
+      link: getAlertUrlTransactionErrorRate(
+        fields[SERVICE_NAME],
+        fields[SERVICE_ENVIRONMENT],
+        fields[TRANSACTION_TYPE]
+      ),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
@@ -183,15 +158,11 @@ export function registerApmAlerts(
     ),
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
-      link: format({
-        pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0])}`,
-        query: {
-          transactionType: String(fields[TRANSACTION_TYPE][0]),
-          ...(fields[SERVICE_ENVIRONMENT]?.[0]
-            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
+      link: getAlertUrlTransactionDurationAnomaly(
+        fields[SERVICE_NAME],
+        fields[SERVICE_ENVIRONMENT],
+        fields[TRANSACTION_TYPE]
+      ),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {

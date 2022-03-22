@@ -14,7 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { take } from 'rxjs/operators';
 import { join } from 'path';
-import { getAlertUrlTransactionDuration } from '../../../common/utils/formatters/alertUrl';
+import { getAlertUrlTransactionDuration } from '../../../common/utils/formatters';
 import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';

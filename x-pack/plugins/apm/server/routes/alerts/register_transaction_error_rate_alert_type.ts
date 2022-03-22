@@ -18,7 +18,7 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
-import { getAlertUrlTransactionErrorRate } from '../../../common/utils/formatters/alertUrl';
+import { getAlertUrlTransactionErrorRate } from '../../../common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   AlertType,

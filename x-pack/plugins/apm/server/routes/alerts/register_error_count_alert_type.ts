@@ -19,7 +19,7 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
-import { getAlertUrlErrorCount } from '../../../common/utils/formatters/alertUrl';
+import { getAlertUrlErrorCount } from '../../../common/utils/formatters';
 import {
   AlertType,
   APM_SERVER_FEATURE_ID,

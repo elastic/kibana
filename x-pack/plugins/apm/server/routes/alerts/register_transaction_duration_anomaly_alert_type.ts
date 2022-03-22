@@ -25,7 +25,7 @@ import {
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { getAlertUrlTransactionDurationAnomaly } from '../../../common/utils/formatters/alertUrl';
+import { getAlertUrlTransactionDurationAnomaly } from '../../../common/utils/formatters';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { KibanaRequest } from '../../../../../../src/core/server';
