@@ -1,0 +1,6 @@
+steps:
+  - command: .buildkite/scripts/steps/artifacts/build.sh
+    label: Build Kibana Artifacts
+    agents:
+      queue: c2-16
+    timeout_in_minutes: 60
