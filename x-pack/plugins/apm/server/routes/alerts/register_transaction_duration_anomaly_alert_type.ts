@@ -226,7 +226,7 @@ export function registerTransactionDurationAnomalyAlertType({
           const relativeViewInAppUrl = getAlertUrlTransactionDurationAnomaly(
             [serviceName],
             [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]],
-            [ruleParams.transactionType]
+            [transactionType]
           );
 
           const viewInAppUrl = basePath.publicBaseUrl
