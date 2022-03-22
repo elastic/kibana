@@ -55,7 +55,7 @@ export interface FormArrayField {
  */
 export const UseArray = ({
   path,
-  initialNumberOfItems,
+  initialNumberOfItems = 1,
   validations,
   readDefaultValueOnForm = true,
   children,

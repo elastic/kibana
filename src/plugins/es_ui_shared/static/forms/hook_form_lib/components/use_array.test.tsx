@@ -25,6 +25,39 @@ describe('<UseArray />', () => {
     jest.useRealTimers();
   });
 
+  test('it should render by default 1 array item', () => {
+    const TestComp = () => {
+      const { form } = useForm();
+      return (
+        <Form form={form}>
+          <UseArray path="myArray">
+            {({ items }) => {
+              return (
+                <>
+                  {items.map(({ id }) => {
+                    return (
+                      <p key={id} data-test-subj="arrayItem">
+                        Array item
+                      </p>
+                    );
+                  })}
+                </>
+              );
+            }}
+          </UseArray>
+        </Form>
+      );
+    };
+
+    const setup = registerTestBed(TestComp, {
+      memoryRouter: { wrapComponent: false },
+    });
+
+    const { find } = setup();
+
+    expect(find('arrayItem').length).toBe(1);
+  });
+
   test('it should allow to listen to array item field value change', async () => {
     const onFormData = jest.fn();
 
