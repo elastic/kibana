@@ -11,7 +11,6 @@ import {
   EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
