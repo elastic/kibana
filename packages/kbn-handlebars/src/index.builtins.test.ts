@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import Handlebars from '.';
 import { expectTemplate } from './__jest__/test_bench';
 
@@ -57,6 +59,54 @@ describe('builtin helpers', () => {
 
     it('each on implicit context', () => {
       expectTemplate('{{#each}}{{text}}! {{/each}}cruel world!').toThrow(Handlebars.Exception);
+    });
+
+    it('each on iterable', () => {
+      class Iterator {
+        private arr: any[];
+        private index: number = 0;
+
+        constructor(arr: any[]) {
+          this.arr = arr;
+        }
+
+        next() {
+          const value = this.arr[this.index];
+          const done = this.index === this.arr.length;
+          if (!done) {
+            this.index++;
+          }
+          return { value, done };
+        }
+      }
+
+      class Iterable {
+        private arr: any[];
+
+        constructor(arr: any[]) {
+          this.arr = arr;
+        }
+
+        [Symbol.iterator]() {
+          return new Iterator(this.arr);
+        }
+      }
+
+      const string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+
+      expectTemplate(string)
+        .withInput({
+          goodbyes: new Iterable([{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }]),
+          world: 'world',
+        })
+        .toCompileTo('goodbye! Goodbye! GOODBYE! cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbyes: new Iterable([]),
+          world: 'world',
+        })
+        .toCompileTo('cruel world!');
     });
   });
 
