@@ -224,7 +224,6 @@ export function registerTransactionDurationAnomalyAlertType({
               anomaly ? anomaly.score >= threshold : false
             ) ?? [];
 
-        console.log('### caue ~ anomalies', anomalies);
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
           const severityLevel = getSeverity(score);
