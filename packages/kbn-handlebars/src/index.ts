@@ -194,9 +194,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   PathExpression(path: hbs.AST.PathExpression) {
     const context = this.scopes[path.depth];
-    const value = path.parts[0] === undefined ? context : get(context, path.parts);
-
     const name = path.parts[0];
+    const value = name === undefined ? context : get(context, path.parts);
     const scoped = AST.helpers.scopedId(path);
     const blockParamId = !path.depth && !scoped && this.blockParamIndex(name);
 
@@ -333,20 +332,21 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const name = path.parts[0];
 
     if (this.compileOptions.knownHelpers && this.compileOptions.knownHelpers[name]) {
-      this.invokeKnownHelper(node, name);
+      this.invokeKnownHelper(node);
     } else if (this.compileOptions.knownHelpersOnly) {
       throw new Handlebars.Exception(
         'You specified knownHelpersOnly, but used the unknown helper ' + name,
         node
       );
     } else {
-      this.invokeHelper(node, path.original); // TODO: Should this be `name` instead of `path.original`?
+      this.invokeHelper(node);
     }
   }
 
   // This operation is used when the helper is known to exist,
   // so a `helperMissing` fallback is not required.
-  private invokeKnownHelper(node: ProcessableNodeWithPathParts, name: string) {
+  private invokeKnownHelper(node: ProcessableNodeWithPathParts) {
+    const name = node.path.parts[0];
     const helper = this.setupHelper(node, name);
     const result = helper.fn.apply(helper.context, helper.params);
     this.output.push(result);
@@ -356,14 +356,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // and pushes the helper's return value onto the stack.
   //
   // If the helper is not found, `helperMissing` is called.
-  private invokeHelper(node: ProcessableNodeWithPathParts, name: string) {
+  private invokeHelper(node: ProcessableNodeWithPathParts) {
+    const path = node.path;
+    const name = path.original;
     const helper = this.setupHelper(node, name);
 
     if (!helper.fn) {
       if (this.compileOptions.strict) {
         helper.fn = this.container.strict(helper.context, name, node.loc);
       } else {
-        helper.fn = this.resolveNodes(node.path)[0] || this.container.hooks.helperMissing;
+        helper.fn = this.resolveNodes(path)[0] || this.container.hooks.helperMissing;
       }
     }
 
@@ -373,8 +375,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private processAmbiguousNode(node: ProcessableNodeWithPathParts) {
-    const name = node.path.parts[0];
-    const invokeResult = this.invokeAmbiguous(node, name);
+    const invokeResult = this.invokeAmbiguous(node);
 
     if (isBlock(node)) {
       const result = this.ambiguousBlockValue(node, invokeResult);
@@ -397,7 +398,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // This operation emits more code than the other options,
   // and can be avoided by passing the `knownHelpers` and
   // `knownHelpersOnly` flags at compile-time.
-  private invokeAmbiguous(node: ProcessableNodeWithPathParts, name: string) {
+  private invokeAmbiguous(node: ProcessableNodeWithPathParts) {
+    const name = node.path.parts[0];
     const helper = this.setupHelper(node, name);
 
     if (!helper.fn) {
