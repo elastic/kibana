@@ -28,6 +28,7 @@ import {
   overallMinOperation,
   overallMaxOperation,
   overallAverageOperation,
+  timeScaleOperation,
 } from './calculations';
 import { countOperation } from './count';
 import { mathOperation, formulaOperation } from './formula';
@@ -75,6 +76,7 @@ export type {
   OverallMinIndexPatternColumn,
   OverallMaxIndexPatternColumn,
   OverallAverageIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './calculations';
 export type { CountIndexPatternColumn } from './count';
 export type { LastValueIndexPatternColumn } from './last_value';
@@ -110,6 +112,7 @@ const internalOperationDefinitions = [
   overallMaxOperation,
   overallAverageOperation,
   staticValueOperation,
+  timeScaleOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -129,6 +132,7 @@ export {
   overallAverageOperation,
   overallMaxOperation,
   overallMinOperation,
+  timeScaleOperation,
 } from './calculations';
 export { formulaOperation } from './formula/formula';
 export { staticValueOperation } from './static_value';
