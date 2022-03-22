@@ -12,6 +12,7 @@ import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../brow
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
+import type { PngScreenshotOptions } from '../formats';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
 import { Screenshots, ScreenshotOptions } from '.';
 
@@ -59,7 +60,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await screenshots.getScreenshots(options).toPromise();
+    const result = await screenshots.getScreenshots(options as PngScreenshotOptions).toPromise();
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -120,7 +121,7 @@ describe('Screenshot Observable Pipeline', () => {
       .getScreenshots({
         ...options,
         urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
-      })
+      } as PngScreenshotOptions)
       .toPromise();
 
     expect(result).toHaveProperty('results');
@@ -260,7 +261,7 @@ describe('Screenshot Observable Pipeline', () => {
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
-        })
+        } as PngScreenshotOptions)
         .toPromise();
 
       expect(result).toHaveProperty('results');
@@ -376,7 +377,7 @@ describe('Screenshot Observable Pipeline', () => {
       );
 
       layout.getViewport = () => null;
-      const result = await screenshots.getScreenshots(options).toPromise();
+      const result = await screenshots.getScreenshots(options as PngScreenshotOptions).toPromise();
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`
