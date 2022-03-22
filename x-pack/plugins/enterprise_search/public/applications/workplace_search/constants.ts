@@ -479,6 +479,20 @@ export const BASE_URL_LABEL = i18n.translate(
   }
 );
 
+export const EXTERNAL_CONNECTOR_URL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.externalConnectorUrl.label',
+  {
+    defaultMessage: 'Connector URL',
+  }
+);
+
+export const EXTERNAL_CONNECTOR_API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.externalConnectorApiKey.label',
+  {
+    defaultMessage: 'Connector API key',
+  }
+);
+
 export const CLIENT_ID_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.clientId.label',
   {

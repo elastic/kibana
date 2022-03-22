@@ -12,6 +12,7 @@ export enum ROLES {
   t1_analyst = 't1_analyst',
   t2_analyst = 't2_analyst',
   hunter = 'hunter',
+  hunter_no_actions = 'hunter_no_actions',
   rule_author = 'rule_author',
   platform_engineer = 'platform_engineer',
   detections_admin = 'detections_admin',
