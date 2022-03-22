@@ -16,9 +16,17 @@ import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
+import { dataViewPluginMocks } from '../../../../../data_views/public/mocks';
+
 import type { IServiceSettings } from '../vega_map_view/service_settings/service_settings_types';
 
-import { setInjectedVars, setData, setNotifications, setUISettings } from '../../services';
+import {
+  setInjectedVars,
+  setData,
+  setNotifications,
+  setUISettings,
+  setDataViews,
+} from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
@@ -59,6 +67,7 @@ describe('vega_map_view/view', () => {
 
     const coreStart = coreMock.createStart();
     const dataPluginStart = dataPluginMock.createStartContract();
+    const dataViewsStart = dataViewPluginMocks.createStartContract();
     const mockGetServiceSettings = async () => {
       return {
         getAttributionsFromTMSServce() {
@@ -98,6 +107,7 @@ describe('vega_map_view/view', () => {
       enableExternalUrls: true,
     });
     setData(dataPluginStart);
+    setDataViews(dataViewsStart);
     setNotifications(coreStart.notifications);
     setUISettings(coreStart.uiSettings);
 
@@ -125,7 +135,7 @@ describe('vega_map_view/view', () => {
         JSON.stringify(vegaMap),
         new SearchAPI({
           search: dataPluginStart.search,
-          indexPatterns: dataPluginStart.indexPatterns,
+          indexPatterns: dataViewsStart,
           uiSettings: coreStart.uiSettings,
           injectedMetadata: coreStart.injectedMetadata,
         }),
