@@ -90,14 +90,20 @@ export const AddCustomSourceLogic = kea<
 
       const { customSourceNameValue } = values;
 
-      const params: Record<string, string> = {
+      const baseParams = {
         service_type: 'custom',
         name: customSourceNameValue,
       };
 
-      if (props.sourceData.serviceType !== 'custom') {
-        params.base_service_type = props.sourceData.serviceType;
-      }
+      // pre-configured custom sources have a serviceType reflecting their target service
+      // we submit this as `base_service_type` to keep track of
+      const params =
+        props.sourceData.serviceType === 'custom'
+          ? baseParams
+          : {
+              ...baseParams,
+              base_service_type: props.sourceData.serviceType,
+            };
 
       try {
         const response = await HttpLogic.values.http.post<CustomSource>(route, {
