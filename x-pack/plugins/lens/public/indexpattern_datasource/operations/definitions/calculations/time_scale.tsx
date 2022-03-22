@@ -132,6 +132,9 @@ This function can only be used if there's a date histogram function used in the 
 
 Example: Sum of bytes per second, independent of date histogram interval
 \`time_scale(sum(bytes), unit='s')\`
+
+Example: Adding a counter metric and a gauge metric:
+\`time_scale(counter_rate(max(in_bytes)), unit=s) + last_value(internal_traffic_speed)\`
       `,
       }),
     },
