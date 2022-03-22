@@ -42,7 +42,12 @@ export class ExportInfo {
       }
     }
 
-    return new ExportInfo(node.getText(), type, symbol);
+    let name;
+    if ((ts.isFunctionDeclaration(node) || ts.isExportSpecifier(node)) && node.name) {
+      name = node.name.getText();
+    }
+
+    return new ExportInfo(name ?? node.getText(), type, symbol);
   }
 
   constructor(

@@ -12,6 +12,7 @@ import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } 
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -186,6 +187,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
@@ -433,7 +435,7 @@ describe('IndexPattern Data Source', () => {
                             "1d",
                           ],
                           "min_doc_count": Array [
-                            0,
+                            1,
                           ],
                           "schema": Array [
                             "segment",

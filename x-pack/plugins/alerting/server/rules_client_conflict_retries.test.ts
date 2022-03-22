@@ -52,7 +52,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -295,7 +295,7 @@ function setupRawAlertMocks(
 
   // splitting this out as it's easier to set a breakpoint :-)
   // eslint-disable-next-line prettier/prettier
-  unsecuredSavedObjectsClient.get.mockImplementation(async () => 
+  unsecuredSavedObjectsClient.get.mockImplementation(async () =>
     cloneDeep(rawAlert)
   );
 

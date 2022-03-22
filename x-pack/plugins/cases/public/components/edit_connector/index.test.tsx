@@ -8,17 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { render, waitFor, screen } from '@testing-library/react';
-
-import { EditConnector, EditConnectorProps } from './index';
-import { TestProviders } from '../../common/mock';
-import { connectorsMock } from '../../containers/configure/mock';
-import { basicCase, basicPush, caseUserActions } from '../../containers/mock';
-import { useKibana } from '../../common/lib/kibana';
-import { CaseConnector } from '../../containers/configure/types';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+import { EditConnector, EditConnectorProps } from './index';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import { basicCase, basicPush, caseUserActions, connectorsMock } from '../../containers/mock';
+import { CaseConnector } from '../../containers/configure/types';
 
 const onSubmit = jest.fn();
 const updateCase = jest.fn();
@@ -48,12 +43,10 @@ const getDefaultProps = (): EditConnectorProps => {
 };
 
 describe('EditConnector ', () => {
+  let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.servicenow',
-      iconClass: 'logoSecurity',
-    });
+    appMockRender = createAppMockRenderer();
   });
 
   it('Renders servicenow connector from case initially', async () => {
@@ -224,28 +217,6 @@ describe('EditConnector ', () => {
     expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeFalsy();
   });
 
-  it('displays the permissions error message when one is provided', async () => {
-    const defaultProps = getDefaultProps();
-    const props = { ...defaultProps, permissionsError: 'error message' };
-    const wrapper = mount(
-      <TestProviders>
-        <EditConnector {...props} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="edit-connector-permissions-error-msg"]`).exists()
-      ).toBeTruthy();
-
-      expect(
-        wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
-      ).toBeFalsy();
-
-      expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeFalsy();
-    });
-  });
-
   it('displays the callout message when none is selected', async () => {
     const defaultProps = getDefaultProps();
     const props = { ...defaultProps, connectors: [] };
@@ -334,6 +305,60 @@ describe('EditConnector ', () => {
     // this strange assertion is required because of existing race conditions inside the EditConnector component
     await waitFor(() => {
       expect(true).toBeTruthy();
+    });
+  });
+
+  it('shows the actions permission message if the user does not have read access to actions', async () => {
+    const defaultProps = getDefaultProps();
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    const result = appMockRender.render(<EditConnector {...defaultProps} />);
+    await waitFor(() => {
+      expect(result.getByTestId('edit-connector-permissions-error-msg')).toBeInTheDocument();
+    });
+  });
+
+  it('does not show the actions permission message if the user has read access to actions', async () => {
+    const defaultProps = getDefaultProps();
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: true, show: true },
+    };
+
+    const result = appMockRender.render(<EditConnector {...defaultProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('edit-connector-permissions-error-msg')).toBe(null);
+    });
+  });
+
+  it('does not show the callout if the user does not have read access to actions', async () => {
+    const defaultProps = getDefaultProps();
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    const result = appMockRender.render(<EditConnector {...props} />);
+    await waitFor(() => {
+      expect(result.getByTestId('edit-connector-permissions-error-msg')).toBeInTheDocument();
+      expect(result.queryByTestId('push-callouts')).toBe(null);
+    });
+  });
+
+  it('does not show the push button if the user does not have read access to actions', async () => {
+    const defaultProps = getDefaultProps();
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    const result = appMockRender.render(<EditConnector {...defaultProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('has-data-to-push-button')).toBe(null);
     });
   });
 });

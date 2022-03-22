@@ -306,14 +306,23 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
-  const additionalFiltersComponent = (
-    <AditionalFiltersAction
-      areEventsLoading={loadingEventIds.length > 0}
-      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
-      showBuildingBlockAlerts={showBuildingBlockAlerts}
-      onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
-      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-    />
+  const additionalFiltersComponent = useMemo(
+    () => (
+      <AditionalFiltersAction
+        areEventsLoading={loadingEventIds.length > 0}
+        onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+        showBuildingBlockAlerts={showBuildingBlockAlerts}
+        onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
+        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+      />
+    ),
+    [
+      loadingEventIds.length,
+      onShowBuildingBlockAlertsChanged,
+      onShowOnlyThreatIndicatorAlertsChanged,
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+    ]
   );
 
   const defaultFiltersMemo = useMemo(() => {

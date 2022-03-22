@@ -38,7 +38,7 @@ const createTestCases = (spaceId: string) => [
   CASES.NAMESPACE_AGNOSTIC,
   { ...CASES.HIDDEN, ...fail404() },
   { ...CASES.ALIAS_CONFLICT_OBJ, upsert: false, ...fail404() },
-  { ...CASES.ALIAS_CONFLICT_OBJ, upsert: true, ...fail409(spaceId === SPACE_1_ID) },
+  { ...CASES.ALIAS_CONFLICT_OBJ, upsert: true, ...fail409(spaceId !== SPACE_2_ID) }, // upsert fails if this is the default space or space_1, because an alias exists in those spaces
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
 
