@@ -139,7 +139,7 @@ describe('CurationsTable', () => {
         pageIndex: 4,
         pageSize: 10,
         totalItemCount: 50,
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       });
     });
 

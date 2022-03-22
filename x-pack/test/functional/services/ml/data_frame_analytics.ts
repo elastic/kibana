@@ -59,7 +59,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
         } else {
           throw new Error('No Analytics create button found');
         }
-        await testSubjects.existOrFail('analyticsCreateSourceIndexModal', { timeout: 5000 });
+        await testSubjects.existOrFail('mlDFAPageSourceSelection', { timeout: 5000 });
       });
     },
 

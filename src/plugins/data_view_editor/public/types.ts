@@ -127,21 +127,6 @@ export interface IndexPatternTableItem {
   sort: string;
 }
 
-// copied from index pattern management, needs review
-export interface MatchedItem {
-  name: string;
-  tags: Tag[];
-  item: {
-    name: string;
-    backing_indices?: string[];
-    timestamp_field?: string;
-    indices?: string[];
-    aliases?: string[];
-    attributes?: ResolveIndexResponseItemIndexAttrs[];
-    data_stream?: string;
-  };
-}
-
 export enum ResolveIndexResponseItemIndexAttrs {
   OPEN = 'open',
   CLOSED = 'closed',

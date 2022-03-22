@@ -39,11 +39,19 @@ class Harness {
   }
 
   public get rowHeight() {
-    return this.wrapper.find(EuiButtonGroup);
+    return this.wrapper.find('[data-test-subj="lnsRowHeightSettings"]').find(EuiButtonGroup);
+  }
+
+  public get headerRowHeight() {
+    return this.wrapper.find('[data-test-subj="lnsHeaderHeightSettings"]').find(EuiButtonGroup);
   }
 
   changeRowHeight(newMode: 'single' | 'auto' | 'custom') {
     this.rowHeight.prop('onChange')!(newMode);
+  }
+
+  changeHeaderRowHeight(newMode: 'single' | 'auto' | 'custom') {
+    this.headerRowHeight.prop('onChange')!(newMode);
   }
 
   public get rowHeightLines() {
@@ -83,6 +91,7 @@ describe('datatable toolbar', () => {
       frame: {} as FramePublicAPI,
       state: {
         rowHeight: 'single',
+        headerRowHeight: 'single',
       } as DatatableVisualizationState,
     };
 
@@ -93,6 +102,7 @@ describe('datatable toolbar', () => {
     harness.togglePopover();
 
     expect(harness.rowHeight.prop('idSelected')).toBe('single');
+    expect(harness.headerRowHeight.prop('idSelected')).toBe('single');
     expect(harness.paginationSwitch.prop('checked')).toBe(false);
 
     harness.wrapper.setProps({
@@ -113,16 +123,17 @@ describe('datatable toolbar', () => {
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
+      headerRowHeight: 'single',
       rowHeight: 'auto',
       rowHeightLines: undefined,
     });
 
-    harness.wrapper.setProps({ state: { rowHeight: 'auto' } }); // update state manually
     harness.changeRowHeight('single'); // turn it off
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(2);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(2, {
       rowHeight: 'single',
+      headerRowHeight: 'single',
       rowHeightLines: 1,
     });
   });
@@ -135,12 +146,22 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
       rowHeight: 'custom',
+      headerRowHeight: 'single',
       rowHeightLines: 2,
     });
+  });
 
-    harness.wrapper.setProps({ state: { rowHeight: 'custom' } }); // update state manually
+  it('should change header height to "Custom" mode', async () => {
+    harness.togglePopover();
 
-    expect(harness.rowHeightLines.prop('value')).toBe(2);
+    harness.changeHeaderRowHeight('custom');
+
+    expect(defaultProps.setState).toHaveBeenCalledTimes(1);
+    expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
+      rowHeight: 'single',
+      headerRowHeight: 'custom',
+      headerRowHeightLines: 2,
+    });
   });
 
   it('should toggle table pagination', async () => {
@@ -152,17 +173,19 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
       paging: defaultPagingState,
       rowHeight: 'single',
+      headerRowHeight: 'single',
     });
 
     // update state manually
     harness.wrapper.setProps({
-      state: { rowHeight: 'single', paging: defaultPagingState },
+      state: { rowHeight: 'single', headerRowHeight: 'single', paging: defaultPagingState },
     });
     harness.togglePagination(); // turn it off. this should disable pagination but preserve the default page size
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(2);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(2, {
       rowHeight: 'single',
+      headerRowHeight: 'single',
       paging: { ...defaultPagingState, enabled: false },
     });
   });
