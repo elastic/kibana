@@ -161,7 +161,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             String(preconfiguredAgentPolicy.id),
             fields,
             {
-              fromPreconfiguration: true,
+              force: true,
             }
           );
           return { created, policy: updatedPolicy };
@@ -263,7 +263,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           policy!.id,
           { is_managed: true },
           {
-            fromPreconfiguration: true,
+            force: true,
           }
         );
       }

@@ -346,7 +346,7 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
-    options?: { user?: AuthenticatedUser; fromPreconfiguration?: boolean }
+    options?: { user?: AuthenticatedUser; force?: boolean }
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
@@ -361,7 +361,7 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    if (existingAgentPolicy.is_managed && !options?.fromPreconfiguration) {
+    if (existingAgentPolicy.is_managed && !options?.force) {
       Object.entries(agentPolicy)
         .filter(([key]) => !KEY_EDITABLE_FOR_MANAGED_POLICIES.includes(key))
         .forEach(([key, val]) => {
