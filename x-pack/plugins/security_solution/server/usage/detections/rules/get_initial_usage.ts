@@ -89,12 +89,23 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
   },
 });
 
+/**
+ * Returns the initial usage of event logs specific to rules.
+ * This returns them for all rules, custom rules, and "elastic_rules"/"immutable rules"/pre-packaged rules
+ * @returns The initial event log usage
+ */
 export const getInitialEventLogUsage = (): EventLogStatusMetric => ({
   all_rules: getInitialSingleEventLogUsage(),
   custom_rules: getInitialSingleEventLogUsage(),
   elastic_rules: getInitialSingleEventLogUsage(),
 });
 
+/**
+ * Returns the initial single event metric for a particular event log.
+ * This returns the initial single event metric for either rules, custom rules, or "elastic_rules"/"immutable rules"/pre-packaged rules
+ * @see getInitialEventLogUsage
+ * @returns The initial event log usage for a single event metric.
+ */
 export const getInitialSingleEventLogUsage = (): SingleEventLogStatusMetric => ({
   eql: getInitialSingleEventMetric(),
   indicator: getInitialSingleEventMetric(),
@@ -109,6 +120,12 @@ export const getInitialSingleEventLogUsage = (): SingleEventLogStatusMetric => (
   },
 });
 
+/**
+ * Returns the initial single event metric.
+ * This returns the initial single event metric for either rules, custom rules, or "elastic_rules"/"immutable rules"/pre-packaged rules
+ * @see getInitialEventLogUsage
+ * @returns The initial event log usage for a single event metric.
+ */
 export const getInitialSingleEventMetric = (): SingleEventMetric => ({
   failed: 0,
   top_failed: {},
@@ -121,6 +138,12 @@ export const getInitialSingleEventMetric = (): SingleEventMetric => ({
   gap_count: 0,
 });
 
+/**
+ * Returns the max, avg, or min for an event.
+ * This returns the max, avg, or min for a single event metric.
+ * @see getInitialEventLogUsage
+ * @returns The max, avg, or min.
+ */
 export const getInitialMaxAvgMin = (): MaxAvgMin => ({
   max: 0.0,
   avg: 0.0,

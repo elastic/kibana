@@ -47,48 +47,35 @@ export interface RuleMetric {
   has_notification: boolean;
 }
 
-export interface SingleEventLogStatusMetric2 {
-  failed: {
-    eql: number;
-    indicator: number;
-    mlRule: number;
-    query: number;
-    savedQuery: number;
-    threshold: number;
-    total: number;
-  };
-  partial_failure: {
-    eql: number;
-    indicator: number;
-    mlRule: number;
-    query: number;
-    savedQuery: number;
-    threshold: number;
-    total: number;
-  };
-  succeeded: {
-    eql: number;
-    indicator: number;
-    mlRule: number;
-    query: number;
-    savedQuery: number;
-    threshold: number;
-    total: number;
-  };
-}
-
+/**
+ * All the metrics for
+ *   - all_rules, All the rules which includes "custom" and "elastic rules"/"immutable"/"pre-packaged"
+ *   - custom_rules, All the rules which are _not_ "elastic rules"/"immutable"/"pre-packaged", thus custom rules
+ *   - elastic_rules, All the "elastic rules"/"immutable"/"pre-packaged"
+ * @see get_event_log_by_type_and_status
+ */
 export interface EventLogStatusMetric {
   all_rules: SingleEventLogStatusMetric;
   custom_rules: SingleEventLogStatusMetric;
   elastic_rules: SingleEventLogStatusMetric;
 }
 
+/**
+ * Simple max, avg, min interface.
+ * @see SingleEventMetric
+ * @see EventLogStatusMetric
+ */
 export interface MaxAvgMin {
   max: number;
   avg: number;
   min: number;
 }
 
+/**
+ * Single event metric and how many failures, succeeded, index, durations.
+ * @see SingleEventLogStatusMetric
+ * @see EventLogStatusMetric
+ */
 export interface SingleEventMetric {
   failed: number;
   top_failed: Top10Failure;
@@ -101,6 +88,10 @@ export interface SingleEventMetric {
   gap_count: number;
 }
 
+/**
+ * This contains the single event log status metric
+ * @see EventLogStatusMetric
+ */
 export interface SingleEventLogStatusMetric {
   eql: SingleEventMetric;
   indicator: SingleEventMetric;
@@ -115,11 +106,21 @@ export interface SingleEventLogStatusMetric {
   };
 }
 
+/**
+ * This is the format for a failure message which is the message
+ * and a count of how many rules had that failure message.
+ * @see EventLogStatusMetric
+ */
 export interface FailureMessage {
   message: string;
   count: number;
 }
 
+/**
+ * This is used to get the top 10 failure messages
+ * or top 10 partial failure messages from the metrics
+ * @see EventLogStatusMetric
+ */
 export interface Top10Failure {
   '1'?: FailureMessage | undefined;
   '2'?: FailureMessage | undefined;
