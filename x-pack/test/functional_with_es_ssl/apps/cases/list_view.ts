@@ -50,11 +50,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('filters cases from the list with partial match', async () => {
+      await cases.api.deleteAllCases();
       await cases.api.createNthRandomCases(5);
       const id = uuid.v4();
-      const caseTitle = 'test-' + id;
+      const caseTitle = 'matchme-' + id;
       await cases.api.createCaseWithData({ title: caseTitle });
       await common.navigateToApp('cases');
+      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
 
       // search
       const input = await testSubjects.find('search-cases');
