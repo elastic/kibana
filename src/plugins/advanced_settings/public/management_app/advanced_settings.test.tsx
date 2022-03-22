@@ -268,6 +268,35 @@ describe('AdvancedSettings', () => {
     ).toHaveLength(1);
   });
 
+  it('should should not render a custom setting', async () => {
+    // The manual mock for the uiSettings client returns false for isConfig, override that
+    const uiSettings = mockConfig().core.uiSettings;
+    uiSettings.isCustom = (key) => true;
+
+    const customSettingQuery = 'test:customstring:setting';
+    mockQuery(customSettingQuery);
+    const component = mountWithI18nProvider(
+      <AdvancedSettings
+        history={mockHistory}
+        enableSaving={true}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        docLinks={docLinksServiceMock.createStartContract().links}
+        uiSettings={uiSettings}
+        componentRegistry={new ComponentRegistry().start}
+        theme={themeServiceMock.createStartContract().theme$}
+      />
+    );
+
+    expect(
+      component
+        .find('Field')
+        .filterWhere(
+          (n: ReactWrapper) =>
+            (n.prop('setting') as Record<string, any>).name === customSettingQuery
+        )
+    ).toEqual({});
+  });
+
   it('should render read-only when saving is disabled', async () => {
     mockQuery();
     const component = mountWithI18nProvider(

@@ -24,6 +24,7 @@ export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
   outcome: SavedObjectsResolveResponse['outcome'];
   aliasId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export interface CanvasWorkpadService {

@@ -46,6 +46,13 @@ export const RULE_STATUS_UNKNOWN = i18n.translate(
   }
 );
 
+export const RULE_STATUS_WARNING = i18n.translate(
+  'xpack.observability.rules.rulesTable.ruleStatusWarning',
+  {
+    defaultMessage: 'warning',
+  }
+);
+
 export const LAST_RESPONSE_COLUMN_TITLE = i18n.translate(
   'xpack.observability.rules.rulesTable.columns.lastResponseTitle',
   {
