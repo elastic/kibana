@@ -75,7 +75,7 @@ export const StdErrorLogs = ({
       return discover.locator?.getUrl({
         query: { language: 'kuery', query: `monitor.check_group: ${checkGroup}` },
         indexPatternId: dataView?.id,
-        columns: ['synthetics.payload.message'],
+        columns: ['synthetics.payload.message', 'error.message'],
         timeRange: timestamp
           ? {
               from: moment(timestamp).subtract(10, 'minutes').toISOString(),
