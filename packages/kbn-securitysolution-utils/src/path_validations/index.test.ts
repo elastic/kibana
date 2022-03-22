@@ -55,6 +55,7 @@ describe('validateFilePathInput', () => {
       expect(validateFilePathInput({ os, value: 'c:\\path/opt' })).toEqual(FILEPATH_WARNING);
       expect(validateFilePathInput({ os, value: '1242' })).toEqual(FILEPATH_WARNING);
       expect(validateFilePathInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
+      expect(validateFilePathInput({ os, value: 'c:\\folder\\' })).toEqual(FILEPATH_WARNING);
     });
   });
   describe('unix paths', () => {
@@ -89,6 +90,7 @@ describe('validateFilePathInput', () => {
       expect(validateFilePathInput({ os, value: 'opt/bin\\file.exe' })).toEqual(FILEPATH_WARNING);
       expect(validateFilePathInput({ os, value: '1242' })).toEqual(FILEPATH_WARNING);
       expect(validateFilePathInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
+      expect(validateFilePathInput({ os, value: '/folder/' })).toEqual(FILEPATH_WARNING);
     });
   });
 });
