@@ -38,7 +38,7 @@ export const Page: FC<{
   const jobIdToUse = jobId ?? analyticsId?.job_id;
   const analysisTypeToUse = analysisType || analyticsId?.analysis_type;
 
-  const [ , setGlobalState] = useUrlState('_g');
+  const [, setGlobalState] = useUrlState('_g');
 
   const checkJobsExist = async () => {
     try {
@@ -54,16 +54,19 @@ export const Page: FC<{
     checkJobsExist();
   }, []);
 
-  useEffect(function updateUrl() {
-    if (analyticsId !== undefined) {
-      setGlobalState({
-        ml: {
-          ...(analyticsId.analysis_type ? { analysisType: analyticsId. analysis_type } : {}),
-          ...(analyticsId.job_id ? { jobId: analyticsId.job_id } : {}),
-        },
-      });
-    }
-  }, [analyticsId?.job_id, analyticsId?.model_id]);
+  useEffect(
+    function updateUrl() {
+      if (analyticsId !== undefined) {
+        setGlobalState({
+          ml: {
+            ...(analyticsId.analysis_type ? { analysisType: analyticsId.analysis_type } : {}),
+            ...(analyticsId.job_id ? { jobId: analyticsId.job_id } : {}),
+          },
+        });
+      }
+    },
+    [analyticsId?.job_id, analyticsId?.model_id]
+  );
 
   const getEmptyState = () => {
     if (jobsExist === false) {

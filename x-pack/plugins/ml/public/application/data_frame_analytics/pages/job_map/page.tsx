@@ -51,16 +51,19 @@ export const Page: FC = () => {
     checkJobsExist();
   }, []);
 
-  useEffect(function updateUrl() {
-    if (analyticsId !== undefined) {
-      setGlobalState({
-        ml: {
-          ...(analyticsId.job_id && !analyticsId.model_id ? { jobId: analyticsId.job_id } : {}),
-          ...(analyticsId.model_id ? { modelId: analyticsId.model_id } : {}),
-        },
-      });
-    }
-  }, [analyticsId?.job_id, analyticsId?.model_id]);
+  useEffect(
+    function updateUrl() {
+      if (analyticsId !== undefined) {
+        setGlobalState({
+          ml: {
+            ...(analyticsId.job_id && !analyticsId.model_id ? { jobId: analyticsId.job_id } : {}),
+            ...(analyticsId.model_id ? { modelId: analyticsId.model_id } : {}),
+          },
+        });
+      }
+    },
+    [analyticsId?.job_id, analyticsId?.model_id]
+  );
 
   const getEmptyState = () => {
     if (jobsExist === false) {
