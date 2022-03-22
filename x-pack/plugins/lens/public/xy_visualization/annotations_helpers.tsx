@@ -9,6 +9,7 @@ import './expression_reference_lines.scss';
 import React from 'react';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
+import classnames from 'classnames';
 import type { IconPosition, YAxisMode, YConfig } from '../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { IconCircle, IconTriangle } from '../assets/annotation_icons';
@@ -215,11 +216,13 @@ export const AnnotationIcon = ({
   type,
   rotationClass = '',
   isHorizontal,
+  strokeWidth,
   ...rest
 }: {
   type: string;
   rotationClass?: string;
   isHorizontal?: boolean;
+  strokeWidth?: number;
 } & EuiIconProps) => {
   if (isNumericalString(type)) {
     return <NumberIcon number={Number(type)} />;
@@ -230,7 +233,15 @@ export const AnnotationIcon = ({
   }
 
   const rotationClassName = shapesIconMap[type].shouldRotate ? rotationClass : '';
-  return <EuiIcon {...rest} type={shapesIconMap[type].icon} className={rotationClassName} />;
+  return (
+    <EuiIcon
+      {...rest}
+      type={shapesIconMap[type].icon}
+      className={classnames(rotationClassName)}
+      strokeWidth={strokeWidth}
+      stroke={strokeWidth ? 'currentColor' : undefined}
+    />
+  );
 };
 
 export function Marker({
@@ -239,15 +250,19 @@ export function Marker({
   hasReducedPadding,
   label,
   rotationClass,
+  strokeWidth,
 }: {
   config: MarkerConfig;
   isHorizontal: boolean;
   hasReducedPadding: boolean;
   label?: string;
   rotationClass?: string;
+  strokeWidth?: number;
 }) {
   if (hasIcon(config.icon)) {
-    return <AnnotationIcon type={config.icon} rotationClass={rotationClass} />;
+    return (
+      <AnnotationIcon type={config.icon} rotationClass={rotationClass} strokeWidth={strokeWidth} />
+    );
   }
 
   // if there's some text, check whether to show it as marker, or just show some padding for the icon

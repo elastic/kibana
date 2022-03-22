@@ -176,6 +176,7 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
+        const strokeWidth = annotation.lineWidth || 1;
         return (
           <LineAnnotation
             id={id}
@@ -190,6 +191,7 @@ export const Annotations = ({
                     hasReducedPadding,
                     label: annotation.label,
                     rotationClass: getIconRotationClass(markerPosition),
+                    strokeWidth,
                   }}
                 />
               ) : undefined
@@ -217,13 +219,13 @@ export const Annotations = ({
             customTooltipDetails={annotation.customTooltipDetails}
             style={{
               line: {
-                strokeWidth: annotation.lineWidth || 1,
+                strokeWidth,
                 stroke: annotation.color || defaultAnnotationColor,
                 dash:
                   annotation.lineStyle === 'dashed'
-                    ? [(annotation.lineWidth || 1) * 3, annotation.lineWidth || 1]
+                    ? [strokeWidth * 3, strokeWidth]
                     : annotation.lineStyle === 'dotted'
-                    ? [annotation.lineWidth || 1, annotation.lineWidth || 1]
+                    ? [strokeWidth, strokeWidth]
                     : undefined,
                 opacity: 1,
               },

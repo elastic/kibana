@@ -19,6 +19,15 @@ export const IconTriangle = ({ title, titleId, ...props }: Omit<EuiIconProps, 't
     {...props}
   >
     {title ? <title id={titleId}>{title}</title> : null}
-    <path fillRule="evenodd" d="M8 12h.47L16 0H0l7.53 12H8zm0-1.011L14.424.75H1.576L8 10.989z" />
+    <clipPath id="lnsAnnotationIconTriangle">
+      <path fillRule="evenodd" d="M8 12h.47L16 0H0l7.53 12H8zm0-1.011L14.424.75H1.576L8 10.989z" />
+    </clipPath>
+    <path
+      strokeWidth={props.strokeWidth}
+      stroke="currentColor"
+      clipPath="url(#lnsAnnotationIconTriangle)"
+      d="M8 12h.47L16 0H0l7.53 12H8zm0-1.011L14.424.75H1.576L8 10.989z"
+      className="lensAnnotationIconFill"
+    />
   </svg>
 );
