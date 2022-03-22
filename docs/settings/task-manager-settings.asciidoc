@@ -41,9 +41,9 @@ These non-persisted action tasks have a risk that they won't be run at all if th
 Sets the size of the ephemeral queue defined above. Defaults to 10.
 
 `xpack.task_manager.event_loop_delay.monitor`::
-Enables event loop delay monitoring, which will log a warning when a task causes an event loop delay which exceeds the `warn_on_delay` setting.  Defaults to true.
+Enables event loop delay monitoring, which will log a warning when a task causes an event loop delay which exceeds the `warn_threshold` setting.  Defaults to true.
 
-`xpack.task_manager.event_loop_delay.warn_on_delay`::
+`xpack.task_manager.event_loop_delay.warn_threshold`::
 Sets the amount of event loop delay during a task execution which will cause a warning to be logged. Defaults to 5000 milliseconds (5 seconds).
 
 [float]

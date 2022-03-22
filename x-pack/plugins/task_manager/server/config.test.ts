@@ -18,7 +18,7 @@ describe('config validation', () => {
         },
         "event_loop_delay": Object {
           "monitor": true,
-          "warn_on_delay": 5000,
+          "warn_threshold": 5000,
         },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
@@ -68,7 +68,7 @@ describe('config validation', () => {
         },
         "event_loop_delay": Object {
           "monitor": true,
-          "warn_on_delay": 5000,
+          "warn_threshold": 5000,
         },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
@@ -116,7 +116,7 @@ describe('config validation', () => {
         },
         "event_loop_delay": Object {
           "monitor": true,
-          "warn_on_delay": 5000,
+          "warn_threshold": 5000,
         },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,

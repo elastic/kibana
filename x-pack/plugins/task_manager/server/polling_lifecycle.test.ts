@@ -69,7 +69,7 @@ describe('TaskPollingLifecycle', () => {
       },
       event_loop_delay: {
         monitor: true,
-        warn_on_delay: 5000,
+        warn_threshold: 5000,
       },
     },
     taskStore: mockTaskStore,

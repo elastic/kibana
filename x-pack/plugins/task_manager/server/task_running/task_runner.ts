@@ -625,11 +625,11 @@ export class TaskManagerRunner implements TaskRunner {
 
     const { eventLoopBlockMs = 0 } = taskTiming;
     const taskLabel = `${this.taskType} ${this.instance.task.id}`;
-    if (eventLoopBlockMs > this.eventLoopDelayConfig.warn_on_delay) {
+    if (eventLoopBlockMs > this.eventLoopDelayConfig.warn_threshold) {
       this.logger.warn(
         `event loop blocked for at least ${eventLoopBlockMs} ms while running task ${taskLabel}`,
         {
-          tags: [taskLabel, 'event-loop-blocked'],
+          tags: [this.taskType, taskLabel, 'event-loop-blocked'],
         }
       );
     }

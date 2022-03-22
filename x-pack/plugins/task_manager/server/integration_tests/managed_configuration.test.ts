@@ -59,7 +59,7 @@ describe.skip('managed configuration', () => {
       },
       event_loop_delay: {
         monitor: true,
-        warn_on_delay: 5000,
+        warn_threshold: 5000,
       },
     });
     logger = context.logger.get('taskManager');

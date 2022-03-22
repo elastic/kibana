@@ -49,7 +49,7 @@ describe('task_events', () => {
     test('non-blocking', async () => {
       const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
         monitor: true,
-        warn_on_delay: 5000,
+        warn_threshold: 5000,
       });
       await nonBlockingTask();
       const result = stopTaskTimer();
@@ -60,7 +60,7 @@ describe('task_events', () => {
     test('blocking', async () => {
       const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
         monitor: true,
-        warn_on_delay: 5000,
+        warn_threshold: 5000,
       });
       await blockingTask();
       const result = stopTaskTimer();
@@ -71,7 +71,7 @@ describe('task_events', () => {
     test('not monitoring', async () => {
       const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
         monitor: false,
-        warn_on_delay: 5000,
+        warn_threshold: 5000,
       });
       await blockingTask();
       const result = stopTaskTimer();

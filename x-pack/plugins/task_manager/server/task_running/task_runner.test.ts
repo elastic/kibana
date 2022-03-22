@@ -1596,7 +1596,7 @@ describe('TaskManagerRunner', () => {
       usageCounter,
       eventLoopDelayConfig: {
         monitor: true,
-        warn_on_delay: 5000,
+        warn_threshold: 5000,
       },
     });
 

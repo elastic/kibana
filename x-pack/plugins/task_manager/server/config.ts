@@ -43,7 +43,7 @@ export const taskExecutionFailureThresholdSchema = schema.object(
 
 const eventLoopDelaySchema = schema.object({
   monitor: schema.boolean({ defaultValue: true }),
-  warn_on_delay: schema.number({
+  warn_threshold: schema.number({
     defaultValue: 5000,
     min: 10,
   }),
