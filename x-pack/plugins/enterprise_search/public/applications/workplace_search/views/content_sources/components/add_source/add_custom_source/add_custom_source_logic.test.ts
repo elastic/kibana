@@ -145,6 +145,31 @@ describe('AddCustomSourceLogic', () => {
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
         });
 
+        it('submits a base service type for pre-configured sources', () => {
+          mount(
+            {
+              customSourceNameValue: MOCK_NAME,
+            },
+            {
+              ...MOCK_PROPS,
+              sourceData: {
+                ...CUSTOM_SOURCE_DATA_ITEM,
+                serviceType: 'sharepoint-server',
+              },
+            }
+          );
+
+          AddCustomSourceLogic.actions.createContentSource();
+
+          expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/create_source', {
+            body: JSON.stringify({
+              service_type: 'custom',
+              name: MOCK_NAME,
+              base_service_type: 'sharepoint-server',
+            }),
+          });
+        });
+
         itShowsServerErrorAsFlashMessage(http.post, () => {
           AddCustomSourceLogic.actions.createContentSource();
         });
@@ -164,6 +189,34 @@ describe('AddCustomSourceLogic', () => {
             '/internal/workplace_search/account/create_source',
             {
               body: JSON.stringify({ service_type: 'custom', name: MOCK_NAME }),
+            }
+          );
+        });
+
+        it('submits a base service type for pre-configured sources', () => {
+          mount(
+            {
+              customSourceNameValue: MOCK_NAME,
+            },
+            {
+              ...MOCK_PROPS,
+              sourceData: {
+                ...CUSTOM_SOURCE_DATA_ITEM,
+                serviceType: 'sharepoint-server',
+              },
+            }
+          );
+
+          AddCustomSourceLogic.actions.createContentSource();
+
+          expect(http.post).toHaveBeenCalledWith(
+            '/internal/workplace_search/account/create_source',
+            {
+              body: JSON.stringify({
+                service_type: 'custom',
+                name: MOCK_NAME,
+                base_service_type: 'sharepoint-server',
+              }),
             }
           );
         });

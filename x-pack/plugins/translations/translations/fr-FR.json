@@ -13601,7 +13601,6 @@
     "xpack.ingestPipelines.processors.label.urldecode": "Décodage d'URL",
     "xpack.ingestPipelines.processors.label.userAgent": "Agent utilisateur",
     "xpack.ingestPipelines.processors.uriPartsDescription": "Analyse une chaîne d'URI (Uniform Resource Identifier, identifiant uniforme de ressource) et extrait ses composants sous forme d'objet.",
-    "xpack.ingestPipelines.requestFlyout.closeButtonLabel": "Fermer",
     "xpack.ingestPipelines.requestFlyout.descriptionText": "Cette requête Elasticsearch créera ou mettra à jour le pipeline.",
     "xpack.ingestPipelines.requestFlyout.namedTitle": "Requête pour \"{name}\"",
     "xpack.ingestPipelines.requestFlyout.unnamedTitle": "Requête",

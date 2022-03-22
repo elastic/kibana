@@ -15729,7 +15729,6 @@
     "xpack.ingestPipelines.processors.label.urldecode": "URLデコード",
     "xpack.ingestPipelines.processors.label.userAgent": "ユーザーエージェント",
     "xpack.ingestPipelines.processors.uriPartsDescription": "Uniform Resource Identifier（URI）文字列を解析し、コンポーネントをオブジェクトとして抽出します。",
-    "xpack.ingestPipelines.requestFlyout.closeButtonLabel": "閉じる",
     "xpack.ingestPipelines.requestFlyout.descriptionText": "このElasticsearchリクエストは、このパイプラインを作成または更新します。",
     "xpack.ingestPipelines.requestFlyout.namedTitle": "「{name}」のリクエスト",
     "xpack.ingestPipelines.requestFlyout.unnamedTitle": "リクエスト",
