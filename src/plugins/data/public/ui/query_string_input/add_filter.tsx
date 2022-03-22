@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -71,7 +72,9 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
     <EuiButtonIcon
       display="fill"
       iconType="plusInCircleFilled"
-      aria-label="Add filter"
+      aria-label={i18n.translate('data.filter.filterBar.addFilterButtonLabel', {
+        defaultMessage: 'Add filter',
+      })}
       data-test-subj="addFilter"
       onClick={() => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen)}
       size="m"
