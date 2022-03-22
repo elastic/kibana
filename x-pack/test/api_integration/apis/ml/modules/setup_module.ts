@@ -317,7 +317,7 @@ export default ({ getService }: FtrProviderContext) => {
         'for siem_auditbeat_auth with prefix, startDatafeed true and estimateModelMemory true',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_auditbeat',
       indexPattern: { name: 'ft_module_siem_auditbeat', timeField: '@timestamp' },
-      module: 'siem_auditbeat_auth',
+      module: 'security_auth',
       user: USER.ML_POWERUSER,
       requestBody: {
         prefix: 'pf11_',
