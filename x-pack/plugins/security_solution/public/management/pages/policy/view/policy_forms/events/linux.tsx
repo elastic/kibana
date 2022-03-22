@@ -12,7 +12,11 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { setIn } from '../../../models/policy_details_config';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { EventFormOption, EventsForm } from '../../components/events_form';
+import {
+  EventFormOption,
+  EventsForm,
+  SupplementalEventFormOption,
+} from '../../components/events_form';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   {
@@ -39,15 +43,25 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
     ),
     protectionField: 'network',
   },
+];
+
+const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingSystem.LINUX>> = [
   {
     name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data',
       {
-        defaultMessage: 'Include session data in process events',
+        defaultMessage: 'Include session data',
       }
     ),
     protectionField: 'session_data',
-    displayAsSwitch: true,
+    tooltipText: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.tooltip',
+      {
+        defaultMessage:
+          'Session data enables Session View which is a tool for introspecting process activity and understanding user and service behavior in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.',
+      }
+    ),
+    beta: true,
   },
 ];
 
@@ -60,6 +74,7 @@ export const LinuxEvents = memo(() => {
       os={OperatingSystem.LINUX}
       selection={policyDetailsConfig.linux.events}
       options={OPTIONS}
+      supplementalOptions={SUPPLEMENTAL_OPTIONS}
       onValueSelection={(value, selected) =>
         dispatch({
           type: 'userChangedPolicyConfig',
