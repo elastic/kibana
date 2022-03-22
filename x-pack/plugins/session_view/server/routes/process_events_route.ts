@@ -50,15 +50,13 @@ export const doSearch = async (
           [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId,
         },
       },
-      // This runtime_mappings is a temporary fix, so we are able to Query these ECS fields while they are not available
-      // TODO: Remove the runtime_mappings once process.entry_leader.entity_id is implemented to ECS
-      runtime_mappings: {
-        [ENTRY_SESSION_ENTITY_ID_PROPERTY]: {
-          type: 'keyword',
-        },
-      },
       size: PROCESS_EVENTS_PER_PAGE,
-      sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
+      // we first sort by process.start, this allows lifecycle events to load all at once for a given process, and
+      // avoid issues like where the session leaders 'end' event is loaded at the very end of what could be multiple pages of events
+      sort: [
+        { 'process.start': forward ? 'asc' : 'desc' },
+        { '@timestamp': forward ? 'asc' : 'desc' },
+      ],
       search_after: cursor ? [cursor] : undefined,
     },
   });

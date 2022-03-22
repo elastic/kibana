@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mockData, mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
-import { mockData } from '../../../common/mocks/constants/session_view_process.mock';
 import { Process } from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessImpl } from './hooks';
@@ -52,6 +51,7 @@ describe('ProcessTree component', () => {
         <ProcessTree
           sessionEntityId={sessionLeader.process.entity_id}
           data={mockData}
+          alerts={mockAlerts}
           isFetching={false}
           fetchNextPage={() => true}
           hasNextPage={false}
@@ -75,6 +75,7 @@ describe('ProcessTree component', () => {
         <ProcessTree
           sessionEntityId={sessionLeader.process.entity_id}
           data={mockData}
+          alerts={mockAlerts}
           isFetching={false}
           fetchNextPage={() => true}
           hasNextPage={false}
@@ -94,6 +95,7 @@ describe('ProcessTree component', () => {
         <ProcessTree
           sessionEntityId={sessionLeader.process.entity_id}
           data={mockData}
+          alerts={mockAlerts}
           isFetching={false}
           fetchNextPage={() => true}
           hasNextPage={false}
@@ -118,6 +120,7 @@ describe('ProcessTree component', () => {
         <ProcessTree
           sessionEntityId={sessionLeader.process.entity_id}
           data={mockData}
+          alerts={mockAlerts}
           isFetching={false}
           fetchNextPage={() => true}
           hasNextPage={false}
