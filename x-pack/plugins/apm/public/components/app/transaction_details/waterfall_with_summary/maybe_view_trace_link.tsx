@@ -15,12 +15,35 @@ import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/wa
 import { Environment } from '../../../../../common/environment_rt';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 
+function FullTraceButton({
+  isLoading,
+  isDisabled,
+}: {
+  isLoading?: boolean;
+  isDisabled?: boolean;
+}) {
+  return (
+    <EuiButton
+      fill
+      iconType="apmTrace"
+      isLoading={isLoading}
+      disabled={isDisabled}
+    >
+      {i18n.translate('xpack.apm.transactionDetails.viewFullTraceButtonLabel', {
+        defaultMessage: 'View full trace',
+      })}
+    </EuiButton>
+  );
+}
+
 export function MaybeViewTraceLink({
+  isLoading,
   transaction,
   waterfall,
   environment,
 }: {
-  transaction: ITransaction;
+  isLoading: boolean;
+  transaction?: ITransaction;
   waterfall: IWaterfall;
   environment: Environment;
 }) {
@@ -28,12 +51,9 @@ export function MaybeViewTraceLink({
     query: { latencyAggregationType, comparisonEnabled, comparisonType },
   } = useApmParams('/services/{serviceName}/transactions/view');
 
-  const viewFullTraceButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.viewFullTraceButtonLabel',
-    {
-      defaultMessage: 'View full trace',
-    }
-  );
+  if (isLoading || !transaction) {
+    return <FullTraceButton isLoading={isLoading} />;
+  }
 
   const { rootTransaction } = waterfall;
   // the traceroot cannot be found, so we cannot link to it
@@ -48,9 +68,7 @@ export function MaybeViewTraceLink({
             }
           )}
         >
-          <EuiButton fill iconType="apmTrace" disabled={true}>
-            {viewFullTraceButtonLabel}
-          </EuiButton>
+          <FullTraceButton isDisabled />
         </EuiToolTip>
       </EuiFlexItem>
     );
@@ -70,9 +88,7 @@ export function MaybeViewTraceLink({
             }
           )}
         >
-          <EuiButton fill iconType="apmTrace" disabled={true}>
-            {viewFullTraceButtonLabel}
-          </EuiButton>
+          <FullTraceButton isDisabled />
         </EuiToolTip>
       </EuiFlexItem>
     );
@@ -85,23 +101,19 @@ export function MaybeViewTraceLink({
     });
 
     return (
-      <EuiFlexItem grow={false}>
-        <TransactionDetailLink
-          serviceName={rootTransaction.service.name}
-          transactionId={rootTransaction.transaction.id}
-          traceId={rootTransaction.trace.id}
-          transactionName={rootTransaction.transaction.name}
-          transactionType={rootTransaction.transaction.type}
-          environment={nextEnvironment}
-          latencyAggregationType={latencyAggregationType}
-          comparisonEnabled={comparisonEnabled}
-          comparisonType={comparisonType}
-        >
-          <EuiButton fill iconType="apmTrace">
-            {viewFullTraceButtonLabel}
-          </EuiButton>
-        </TransactionDetailLink>
-      </EuiFlexItem>
+      <TransactionDetailLink
+        serviceName={rootTransaction.service.name}
+        transactionId={rootTransaction.transaction.id}
+        traceId={rootTransaction.trace.id}
+        transactionName={rootTransaction.transaction.name}
+        transactionType={rootTransaction.transaction.type}
+        environment={nextEnvironment}
+        latencyAggregationType={latencyAggregationType}
+        comparisonEnabled={comparisonEnabled}
+        comparisonType={comparisonType}
+      >
+        <FullTraceButton />
+      </TransactionDetailLink>
     );
   }
 }

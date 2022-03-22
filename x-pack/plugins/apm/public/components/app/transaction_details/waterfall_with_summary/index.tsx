@@ -26,8 +26,10 @@ import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTabs } from './transaction_tabs';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 interface Props {
+  status: FETCH_STATUS;
   urlParams: ApmUrlParams;
   waterfall: IWaterfall;
   isLoading: boolean;
@@ -35,6 +37,7 @@ interface Props {
 }
 
 export function WaterfallWithSummary({
+  status,
   urlParams,
   waterfall,
   isLoading,
@@ -65,10 +68,9 @@ export function WaterfallWithSummary({
   };
 
   const { entryWaterfallTransaction } = waterfall;
-  if (!entryWaterfallTransaction) {
-    const content = isLoading ? (
-      <LoadingStatePrompt />
-    ) : (
+
+  if (!entryWaterfallTransaction && !isLoading) {
+    return (
       <EuiEmptyPrompt
         title={
           <div>
@@ -80,11 +82,9 @@ export function WaterfallWithSummary({
         titleSize="s"
       />
     );
-
-    return content;
   }
 
-  const entryTransaction = entryWaterfallTransaction.doc;
+  const entryTransaction = entryWaterfallTransaction?.doc;
 
   return (
     <>
@@ -99,43 +99,52 @@ export function WaterfallWithSummary({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          {traceSamples && (
-            <EuiPagination
-              pageCount={traceSamples.length}
-              activePage={sampleActivePage}
-              onPageClick={goToSample}
-              compressed
-            />
-          )}
+          <EuiPagination
+            pageCount={traceSamples?.length ?? 0}
+            activePage={sampleActivePage}
+            onPageClick={goToSample}
+            compressed
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <TransactionActionMenu transaction={entryTransaction} />
+              <TransactionActionMenu
+                isLoading={isLoading}
+                transaction={entryTransaction}
+              />
             </EuiFlexItem>
-            <MaybeViewTraceLink
-              transaction={entryTransaction}
-              waterfall={waterfall}
-              environment={environment}
-            />
+            <EuiFlexItem grow={false}>
+              <MaybeViewTraceLink
+                isLoading={isLoading}
+                transaction={entryTransaction}
+                waterfall={waterfall}
+                environment={environment}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 
-      <TransactionSummary
-        errorCount={waterfall.apiResponse.errorDocs.length}
-        totalDuration={waterfall.rootTransaction?.transaction.duration.us}
-        transaction={entryTransaction}
-      />
-      <EuiSpacer size="s" />
-
-      <TransactionTabs
-        transaction={entryTransaction}
-        urlParams={urlParams}
-        waterfall={waterfall}
-      />
+      {isLoading || !entryTransaction ? (
+        <LoadingStatePrompt />
+      ) : (
+        <>
+          <TransactionSummary
+            errorCount={waterfall.apiResponse.errorDocs.length}
+            totalDuration={waterfall.rootTransaction?.transaction.duration.us}
+            transaction={entryTransaction}
+          />
+          <EuiSpacer size="s" />
+          <TransactionTabs
+            transaction={entryTransaction}
+            urlParams={urlParams}
+            waterfall={waterfall}
+          />
+        </>
+      )}
     </>
   );
 }

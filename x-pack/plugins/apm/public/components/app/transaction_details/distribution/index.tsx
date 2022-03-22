@@ -70,6 +70,10 @@ export function TransactionDistribution({
   const { urlParams } = useLegacyUrlParams();
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
+  const isLoading =
+    waterfallStatus === FETCH_STATUS.NOT_INITIATED ||
+    waterfallStatus === FETCH_STATUS.LOADING;
+
   const markerCurrentTransaction =
     waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
 
@@ -189,7 +193,8 @@ export function TransactionDistribution({
         <WaterfallWithSummary
           urlParams={urlParams}
           waterfall={waterfall}
-          isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+          status={waterfallStatus}
+          isLoading={isLoading}
           traceSamples={traceSamples}
         />
       </div>
