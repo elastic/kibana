@@ -11,12 +11,12 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { EuiButtonIcon, EuiCopy, EuiFieldText } from '@elastic/eui';
+
 import { ElasticsearchCloudId } from './';
 
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-import { EuiButtonIcon, EuiCopy, EuiFieldText } from '@elastic/eui';
 
 describe('Elasticsearch Cloud Id', () => {
   let wrapper: ShallowWrapper;

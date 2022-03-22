@@ -20,9 +20,7 @@ import {
   EuiFormRow,
   EuiLink,
   EuiPanel,
-  EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
