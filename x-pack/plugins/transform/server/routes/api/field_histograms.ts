@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  indexPatternTitleSchema,
-  IndexPatternTitleSchema,
-} from '../../../common/api_schemas/common';
+import { dataViewTitleSchema, DataViewTitleSchema } from '../../../common/api_schemas/common';
 import {
   fieldHistogramsRequestSchema,
   FieldHistogramsRequestSchema,
@@ -21,23 +18,23 @@ import { addBasePath } from '../index';
 import { wrapError, wrapEsError } from './error_utils';
 
 export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
-  router.post<IndexPatternTitleSchema, undefined, FieldHistogramsRequestSchema>(
+  router.post<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
     {
-      path: addBasePath('field_histograms/{indexPatternTitle}'),
+      path: addBasePath('field_histograms/{dataViewTitle}'),
       validate: {
-        params: indexPatternTitleSchema,
+        params: dataViewTitleSchema,
         body: fieldHistogramsRequestSchema,
       },
     },
-    license.guardApiRoute<IndexPatternTitleSchema, undefined, FieldHistogramsRequestSchema>(
+    license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
       async (ctx, req, res) => {
-        const { indexPatternTitle } = req.params;
+        const { dataViewTitle } = req.params;
         const { query, fields, runtimeMappings, samplerShardSize } = req.body;
 
         try {
           const resp = await getHistogramsForFields(
             ctx.core.elasticsearch.client,
-            indexPatternTitle,
+            dataViewTitle,
             query,
             fields,
             samplerShardSize,

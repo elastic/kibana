@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { IndexPattern } from '../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../src/plugins/data_views/common';
 
 import { isPopulatedObject } from '../shared_imports';
 
-// Custom minimal type guard for IndexPattern to check against the attributes used in transforms code.
-export function isIndexPattern(arg: any): arg is IndexPattern {
+// Custom minimal type guard for DataView to check against the attributes used in transforms code.
+export function isDataView(arg: any): arg is DataView {
   return (
     isPopulatedObject(arg, ['title', 'fields']) &&
     // `getComputedFields` is inherited, so it's not possible to
     // check with `hasOwnProperty` which is used by isPopulatedObject()
-    'getComputedFields' in (arg as IndexPattern) &&
-    typeof (arg as IndexPattern).getComputedFields === 'function' &&
+    'getComputedFields' in (arg as DataView) &&
+    typeof (arg as DataView).getComputedFields === 'function' &&
     typeof arg.title === 'string' &&
     Array.isArray(arg.fields)
   );

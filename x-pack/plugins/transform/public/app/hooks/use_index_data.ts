@@ -31,7 +31,7 @@ import type { StepDefineExposedState } from '../sections/create_transform/compon
 import { isRuntimeMappings } from '../../../common/shared_imports';
 
 export const useIndexData = (
-  indexPattern: SearchItems['indexPattern'],
+  dataView: SearchItems['dataView'],
   query: PivotQuery,
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
 ): UseIndexDataReturnType => {
@@ -51,7 +51,7 @@ export const useIndexData = (
     },
   } = useAppDependencies();
 
-  const [indexPatternFields, setIndexPatternFields] = useState<string[]>();
+  const [dataViewFields, setDataViewFields] = useState<string[]>();
 
   // Fetch 500 random documents to determine populated fields.
   // This is a workaround to avoid passing potentially thousands of unpopulated fields
@@ -62,7 +62,7 @@ export const useIndexData = (
     setStatus(INDEX_STATUS.LOADING);
 
     const esSearchRequest = {
-      index: indexPattern.title,
+      index: dataView.title,
       body: {
         fields: ['*'],
         _source: false,
@@ -84,21 +84,21 @@ export const useIndexData = (
       return;
     }
 
-    const isCrossClusterSearch = indexPattern.title.includes(':');
+    const isCrossClusterSearch = dataView.title.includes(':');
     const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
 
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
     // Get all field names for each returned doc and flatten it
     // to a list of unique field names used across all docs.
-    const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+    const allKibanaDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
     const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-      .filter((d) => allKibanaIndexPatternFields.includes(d))
+      .filter((d) => allKibanaDataViewFields.includes(d))
       .sort();
 
     setCcsWarning(isCrossClusterSearch && isMissingFields);
     setStatus(INDEX_STATUS.LOADED);
-    setIndexPatternFields(populatedFields);
+    setDataViewFields(populatedFields);
   };
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export const useIndexData = (
   }, []);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
-    if (typeof indexPatternFields === 'undefined') {
+    if (typeof dataViewFields === 'undefined') {
       return [];
     }
 
@@ -124,8 +124,8 @@ export const useIndexData = (
     }
 
     // Combine the runtime field that are defined from API field
-    indexPatternFields.forEach((id) => {
-      const field = indexPattern.fields.getByName(id);
+    dataViewFields.forEach((id) => {
+      const field = dataView.fields.getByName(id);
       if (!field?.runtimeField) {
         const schema = getDataGridSchemaFromKibanaFieldType(field);
         result.push({ id, schema });
@@ -134,8 +134,8 @@ export const useIndexData = (
 
     return result.sort((a, b) => a.id.localeCompare(b.id));
   }, [
-    indexPatternFields,
-    indexPattern.fields,
+    dataViewFields,
+    dataView.fields,
     combinedRuntimeMappings,
     getDataGridSchemaFromESFieldType,
     getDataGridSchemaFromKibanaFieldType,
@@ -176,7 +176,7 @@ export const useIndexData = (
     }, {} as EsSorting);
 
     const esSearchRequest = {
-      index: indexPattern.title,
+      index: dataView.title,
       body: {
         fields: ['*'],
         _source: false,
@@ -198,7 +198,7 @@ export const useIndexData = (
       return;
     }
 
-    const isCrossClusterSearch = indexPattern.title.includes(':');
+    const isCrossClusterSearch = dataView.title.includes(':');
     const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
 
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
@@ -215,16 +215,16 @@ export const useIndexData = (
   };
 
   const fetchColumnChartsData = async function () {
-    const allIndexPatternFieldNames = new Set(indexPattern.fields.map((f) => f.name));
+    const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
     const columnChartsData = await api.getHistogramsForFields(
-      indexPattern.title,
+      dataView.title,
       columns
         .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
         .map((cT) => {
           // If a column field name has a corresponding keyword field,
           // fetch the keyword field instead to be able to do aggregations.
           const fieldName = cT.id;
-          return hasKeywordDuplicate(fieldName, allIndexPatternFieldNames)
+          return hasKeywordDuplicate(fieldName, allDataViewFieldNames)
             ? {
                 fieldName: `${fieldName}.keyword`,
                 type: getFieldType(undefined),
@@ -247,7 +247,7 @@ export const useIndexData = (
       // revert field names with `.keyword` used to do aggregations to their original column name
       columnChartsData.map((d) => ({
         ...d,
-        ...(isKeywordDuplicate(d.id, allIndexPatternFieldNames)
+        ...(isKeywordDuplicate(d.id, allDataViewFieldNames)
           ? { id: removeKeywordPostfix(d.id) }
           : {}),
       }))
@@ -259,15 +259,9 @@ export const useIndexData = (
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    indexPattern.title,
+    dataView.title,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([
-      query,
-      pagination,
-      sortingColumns,
-      indexPatternFields,
-      combinedRuntimeMappings,
-    ]),
+    JSON.stringify([query, pagination, sortingColumns, dataViewFields, combinedRuntimeMappings]),
   ]);
 
   useEffect(() => {
@@ -278,12 +272,12 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     chartsVisible,
-    indexPattern.title,
+    dataView.title,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings]),
   ]);
 
-  const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);
+  const renderCellValue = useRenderCellValue(dataView, pagination, tableItems);
 
   return {
     ...dataGrid,
