@@ -254,12 +254,11 @@ export const Overview: React.FC = () => {
 
   const groupsSummary = (
     <>
-      <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>{GROUP_ACCESS_TITLE}</h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiPanel color="subdued">
+        <EuiTitle size="xs">
+          <h5>{GROUP_ACCESS_TITLE}</h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiListGroup flush maxWidth={false} data-test-subj="GroupsSummary">
           {groups.map((group, index) => (
             <EuiListGroupItemTo
@@ -363,18 +362,16 @@ export const Overview: React.FC = () => {
 
   const sourceStatus = (
     <EuiPanel hasShadow={false} color="subdued">
-      <EuiText size="s">
-        <h6>
-          <EuiTextColor color="subdued">{STATUS_HEADER}</EuiTextColor>
-        </h6>
-      </EuiText>
+      <EuiTitle size="xs">
+        <h6>{STATUS_HEADER}</h6>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon size="l" type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText size="s">
             <strong>{STATUS_HEADING}</strong>
           </EuiText>
           <EuiText size="s">
