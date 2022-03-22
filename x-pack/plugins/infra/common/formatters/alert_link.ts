@@ -6,7 +6,7 @@
  */
 
 import { modifyUrl } from '@kbn/std';
-export const getAlertLink = (timestamp: number | null) =>
+export const getLogsAppAlertUrl = (timestamp: number | null) =>
   modifyUrl('/app/logs/link-to/default/logs', ({ query, ...otherUrlParts }) => ({
     ...otherUrlParts,
     query: {

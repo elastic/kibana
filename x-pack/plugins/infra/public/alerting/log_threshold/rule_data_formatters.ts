@@ -7,7 +7,7 @@
 
 import { ALERT_REASON, ALERT_START } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
-import { getAlertLink } from '../../../common/formatters/alert_link';
+import { getLogsAppAlertUrl } from '../../../common/formatters/alert_link';
 
 export const formatRuleData: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '';
@@ -16,6 +16,6 @@ export const formatRuleData: ObservabilityRuleTypeFormatter = ({ fields }) => {
 
   return {
     reason,
-    link: getAlertLink(timestamp), // TODO: refactor to URL generators
+    link: getLogsAppAlertUrl(timestamp), // TODO: refactor to URL generators
   };
 };

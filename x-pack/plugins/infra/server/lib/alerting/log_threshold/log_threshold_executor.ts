@@ -45,7 +45,7 @@ import {
 } from '../../../../common/alerting/logs/log_threshold';
 import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import { getAlertLink } from '../../../../common/formatters/alert_link';
+import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
@@ -113,7 +113,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       });
     };
 
-    const relativeViewInAppUrl = getAlertLink(new Date(indexedStartedAt).getTime());
+    const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
     const viewInAppUrl = basePath.publicBaseUrl
       ? new URL(
           join(basePath.serverBasePath, relativeViewInAppUrl),
