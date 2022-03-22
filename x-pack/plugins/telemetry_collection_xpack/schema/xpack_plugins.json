@@ -5878,6 +5878,22 @@
                   }
                 }
               }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -5950,6 +5966,22 @@
                       "type": "long"
                     }
                   }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
                 }
               }
             }
@@ -6042,6 +6074,31 @@
                   }
                 }
               }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                },
+                "browser_could_not_launch_error": {
+                  "type": "long"
+                },
+                "browser_unexpectedly_closed_error": {
+                  "type": "long"
+                },
+                "browser_screenshot_error": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -6130,6 +6187,31 @@
                       "type": "long"
                     }
                   }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                },
+                "browser_could_not_launch_error": {
+                  "type": "long"
+                },
+                "browser_unexpectedly_closed_error": {
+                  "type": "long"
+                },
+                "browser_screenshot_error": {
+                  "type": "long"
                 }
               }
             }
@@ -6251,6 +6333,34 @@
                   }
                 }
               }
+            },
+            "error_codes": {
+              "properties": {
+                "pdf_worker_out_of_memory_error": {
+                  "type": "long"
+                },
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                },
+                "browser_could_not_launch_error": {
+                  "type": "long"
+                },
+                "browser_unexpectedly_closed_error": {
+                  "type": "long"
+                },
+                "browser_screenshot_error": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -6368,6 +6478,34 @@
                       "type": "long"
                     }
                   }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "pdf_worker_out_of_memory_error": {
+                  "type": "long"
+                },
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                },
+                "browser_could_not_launch_error": {
+                  "type": "long"
+                },
+                "browser_unexpectedly_closed_error": {
+                  "type": "long"
+                },
+                "browser_screenshot_error": {
+                  "type": "long"
                 }
               }
             }
@@ -7003,6 +7141,22 @@
                       }
                     }
                   }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -7075,6 +7229,22 @@
                           "type": "long"
                         }
                       }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -7167,6 +7337,31 @@
                       }
                     }
                   }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    },
+                    "browser_could_not_launch_error": {
+                      "type": "long"
+                    },
+                    "browser_unexpectedly_closed_error": {
+                      "type": "long"
+                    },
+                    "browser_screenshot_error": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -7255,6 +7450,31 @@
                           "type": "long"
                         }
                       }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    },
+                    "browser_could_not_launch_error": {
+                      "type": "long"
+                    },
+                    "browser_unexpectedly_closed_error": {
+                      "type": "long"
+                    },
+                    "browser_screenshot_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -7376,6 +7596,34 @@
                       }
                     }
                   }
+                },
+                "error_codes": {
+                  "properties": {
+                    "pdf_worker_out_of_memory_error": {
+                      "type": "long"
+                    },
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    },
+                    "browser_could_not_launch_error": {
+                      "type": "long"
+                    },
+                    "browser_unexpectedly_closed_error": {
+                      "type": "long"
+                    },
+                    "browser_screenshot_error": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -7493,6 +7741,34 @@
                           "type": "long"
                         }
                       }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "pdf_worker_out_of_memory_error": {
+                      "type": "long"
+                    },
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    },
+                    "browser_could_not_launch_error": {
+                      "type": "long"
+                    },
+                    "browser_unexpectedly_closed_error": {
+                      "type": "long"
+                    },
+                    "browser_screenshot_error": {
+                      "type": "long"
                     }
                   }
                 }
