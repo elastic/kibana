@@ -206,6 +206,7 @@ export function registerAccountCreateSourceRoute({
       validate: {
         body: schema.object({
           service_type: schema.string(),
+          base_service_type: schema.maybe(schema.string()),
           name: schema.maybe(schema.string()),
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
@@ -272,9 +273,6 @@ export function registerAccountSourceReauthPrepareRoute({
       validate: {
         params: schema.object({
           id: schema.string(),
-        }),
-        query: schema.object({
-          kibana_host: schema.string(),
         }),
       },
     },
@@ -355,7 +353,6 @@ export function registerAccountPrepareSourcesRoute({
           serviceType: schema.string(),
         }),
         query: schema.object({
-          kibana_host: schema.string(),
           subdomain: schema.maybe(schema.string()),
         }),
       },
@@ -570,6 +567,7 @@ export function registerOrgCreateSourceRoute({
       validate: {
         body: schema.object({
           service_type: schema.string(),
+          base_service_type: schema.maybe(schema.string()),
           name: schema.maybe(schema.string()),
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
@@ -639,9 +637,6 @@ export function registerOrgSourceReauthPrepareRoute({
       validate: {
         params: schema.object({
           id: schema.string(),
-        }),
-        query: schema.object({
-          kibana_host: schema.string(),
         }),
       },
     },
@@ -722,7 +717,6 @@ export function registerOrgPrepareSourcesRoute({
           serviceType: schema.string(),
         }),
         query: schema.object({
-          kibana_host: schema.string(),
           index_permissions: schema.boolean(),
           subdomain: schema.maybe(schema.string()),
         }),
@@ -995,7 +989,6 @@ export function registerOauthConnectorParamsRoute({
       path: '/internal/workplace_search/sources/create',
       validate: {
         query: schema.object({
-          kibana_host: schema.string(),
           code: schema.maybe(schema.string()),
           session_state: schema.maybe(schema.string()),
           authuser: schema.maybe(schema.string()),
