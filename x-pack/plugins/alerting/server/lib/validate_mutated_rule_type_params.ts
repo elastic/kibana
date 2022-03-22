@@ -9,18 +9,19 @@ import Boom from '@hapi/boom';
 import { AlertTypeParams, AlertTypeParamsValidator } from '../types';
 
 export function validateMutatedRuleTypeParams<Params extends AlertTypeParams>(
-  params: Params,
+  mutatedParams: Params,
+  origParams?: Params,
   validator?: AlertTypeParamsValidator<Params>
 ): Params {
   if (!validator) {
-    return params as Params;
+    return mutatedParams;
   }
 
   try {
     if (validator.validateMutatedParams) {
-      return validator.validateMutatedParams(params);
+      return validator.validateMutatedParams(mutatedParams, origParams);
     }
-    return params;
+    return mutatedParams;
   } catch (err) {
     throw Boom.badRequest(`mutated params invalid: ${err.message}`);
   }

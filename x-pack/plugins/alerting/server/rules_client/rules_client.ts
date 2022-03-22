@@ -7,7 +7,19 @@
 
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues, set, get } from 'lodash';
+import {
+  omit,
+  isEqual,
+  map,
+  uniq,
+  pick,
+  truncate,
+  trim,
+  mapValues,
+  set,
+  get,
+  cloneDeep,
+} from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import pMap from 'p-map';
@@ -1270,7 +1282,7 @@ export class RulesClient {
 
             const ruleType = this.ruleTypeRegistry.get(rule.attributes.alertTypeId);
 
-            let attributes = rule.attributes;
+            let attributes = cloneDeep(rule.attributes);
             let ruleActions = {
               actions: this.injectReferencesIntoActions(
                 rule.id,
