@@ -50,7 +50,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   snoozeRule,
   unsnoozeRule,
 }: ComponentOpts) => {
-  const [isEnabled, setIsEnabled] = useState<boolean>(!item.enabled);
+  const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(isItemSnoozed(item));
   useEffect(() => {
     setIsEnabled(item.enabled);
@@ -124,6 +124,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
           isOpen={isPopoverOpen}
           closePopover={onClosePopover}
           panelPaddingSize="s"
+          data-test-subj="statusDropdown"
         >
           <RuleStatusMenu
             onClosePopover={onClosePopover}
@@ -135,7 +136,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
           />
         </EuiPopover>
       </EuiFlexItem>
-      <EuiFlexItem>{remainingSnoozeTime}</EuiFlexItem>
+      <EuiFlexItem data-test-subj="remainingSnoozeTime">{remainingSnoozeTime}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -362,7 +363,7 @@ const isItemSnoozed = (item: { snoozeEndTime?: Date | null }) => {
   if (!snoozeEndTime) {
     return false;
   }
-  return moment().isBefore(snoozeEndTime);
+  return moment(Date.now()).isBefore(snoozeEndTime);
 };
 
 const futureTimeToInterval = (time?: Date | null) => {
