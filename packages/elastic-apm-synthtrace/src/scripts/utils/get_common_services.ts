@@ -27,15 +27,15 @@ export function getCommonServices(
     username,
     password,
   };
-  //options.Connection = HttpConnection;
   // Useful when debugging trough mitmproxy
   /*
+  options.Connection = HttpConnection;
   options.proxy = "http://localhost:8080";
-   */
   options.tls = {
     rejectUnauthorized: false
   };
 
+   */
   const client = new Client(options);
 
   logger = logger ?? createLogger(logLevel);

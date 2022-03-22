@@ -62,7 +62,7 @@ async function setup() {
     }
   };
   streamProcessor = new StreamProcessor({
-    version: version,
+    version,
     processors: StreamProcessor.apmProcessors,
     maxSourceEvents: runOptions.maxDocs,
     logger: l,

@@ -5,20 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// import pLimit from 'p-limit';
 import moment from 'moment';
 import { Worker } from 'worker_threads';
 import Path from 'path';
 import { range } from 'lodash';
 import pLimit from 'p-limit';
+import { cpus } from 'os';
 import { RunOptions } from './parse_run_cli_flags';
 import { getScenario } from './get_scenario';
 import { ApmSynthtraceEsClient, LogLevel } from '../..';
 import { Logger } from '../../lib/utils/create_logger';
-import { cpus } from 'os';
 
-
-export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient, logger: Logger ,runOptions: RunOptions, from: Date, to: Date, version: string) {
+export async function startHistoricalDataUpload(
+  esClient: ApmSynthtraceEsClient,
+  logger: Logger,
+  runOptions: RunOptions,
+  from: Date,
+  to: Date,
+  version: string
+) {
   // if we want to generate a maximum number of documents reverse generation to descend.
   [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
 
@@ -38,9 +43,7 @@ export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient,
     logger.info(
       `updating maxWorkers to ${maxWorkers} and maxConcurrency to ${maxConcurrency} because it was explicitly set through --workers`
     );
-
   }
-
 
   const events = logger.perf('generate_scenario', () => generate({ from, to }));
   const ratePerMinute = events.ratePerMinute();
@@ -84,7 +87,6 @@ export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient,
       }));
   }
 
-
   logger.info(`Generating data from ${from.toISOString()} to ${to2.toISOString()}`);
 
   type WorkerMessages =
@@ -124,14 +126,16 @@ export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient,
         );
         return resolve(null);
       }
-      const progressToConsole = runOptions?.maxDocs ? Math.min(2000000, runOptions.maxDocs / 20) : 2000000;
+      const progressToConsole = runOptions?.maxDocs
+        ? Math.min(2000000, runOptions.maxDocs / 20)
+        : 2000000;
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData: {
           runOptions,
           bucketFrom,
           bucketTo,
           workerIndex,
-          version
+          version,
         },
       });
       worker.on('message', (message: WorkerMessages) => {
@@ -188,12 +192,13 @@ export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient,
   const workers = range(0, intervals.length).map((index) => () => runService(intervals[index]));
   return Promise.all(workers.map((worker) => limiter(() => worker())))
     .then(async () => {
-      if (!runOptions.dryRun)
-        await esClient.refresh()
-
+      if (!runOptions.dryRun) {
+        await esClient.refresh();
+      }
     })
     .then(() => {
-      console.table(workerProcessed)
+      // eslint-disable-next-line no-console
+      console.table(workerProcessed);
       logger.info(`Finished producing ${totalProcessed} events`);
-  });
+    });
 }
