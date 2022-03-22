@@ -11,6 +11,8 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+/** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
 import {
   AddFromLibraryButton,
   QuickButtonGroup,

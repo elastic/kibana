@@ -45,6 +45,7 @@ import {
   useDashboardSelector,
 } from '../state';
 
+/** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
 import {
   AddFromLibraryButton,
   LazyLabsFlyout,

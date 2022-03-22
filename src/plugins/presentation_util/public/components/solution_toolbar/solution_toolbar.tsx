@@ -9,6 +9,7 @@
 import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+/** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
 import {
   QuickButtonGroup,
   PrimaryActionButton,

@@ -13,6 +13,8 @@ import { EuiContextMenu } from '@elastic/eui';
 
 import { SolutionToolbar } from './solution_toolbar';
 import { SolutionToolbarPopover } from './items';
+
+/** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
 import { AddFromLibraryButton, PrimaryActionButton, QuickButtonGroup } from './items';
 
 const quickButtons = [
