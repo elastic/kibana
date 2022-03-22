@@ -50,6 +50,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Session management filtered by applications meets a11y requirements', async () => {
+      await retry.waitFor(
+        'dashboards as a selection visible on app dropdown',
+        async () => await find.byCssSelector('[title="dashboards"]')
+      );
       await (await find.byCssSelector('[title="dashboards"]')).click();
       await a11y.testAppSnapshot();
     });
