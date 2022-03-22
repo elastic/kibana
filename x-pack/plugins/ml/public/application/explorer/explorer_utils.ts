@@ -430,7 +430,7 @@ export function loadAnnotationsTableData(
 export async function loadAnomaliesTableData(
   selectedCells: AppStateSelectedCells | undefined,
   selectedJobs: ExplorerJob[],
-  dateFormatTz: any,
+  dateFormatTz: string,
   bounds: Required<TimeRangeBounds>,
   fieldName: string,
   tableInterval: string,
