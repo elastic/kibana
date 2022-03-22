@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { snoozeRuleRoute } from './snooze_rule';
+import { unsnoozeRuleRoute } from './unsnooze_rule';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -26,13 +26,13 @@ describe('unsnoozeAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    snoozeRuleRoute(router, licenseState);
+    unsnoozeRuleRoute(router, licenseState);
 
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_unsnooze"`);
 
-    rulesClient.snooze.mockResolvedValueOnce();
+    rulesClient.unsnooze.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -46,8 +46,8 @@ describe('unsnoozeAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.unsnooze).toHaveBeenCalledTimes(1);
+    expect(rulesClient.unsnooze.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -62,11 +62,11 @@ describe('unsnoozeAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    snoozeRuleRoute(router, licenseState);
+    unsnoozeRuleRoute(router, licenseState);
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.snooze.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.unsnooze.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
