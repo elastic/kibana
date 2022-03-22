@@ -36,6 +36,7 @@ describe('ProcessTreeNode component', () => {
       },
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
+    handleOnAlertDetailsClosed: (_alertUuid: string) => {},
   };
 
   beforeEach(() => {
