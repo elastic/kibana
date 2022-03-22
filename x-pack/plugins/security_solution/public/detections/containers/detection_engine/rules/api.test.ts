@@ -142,7 +142,37 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.name: hello world',
+          filter:
+            '(alert.attributes.name: "hello world" OR alert.attributes.params.index: "hello world" OR alert.attributes.params.threat.tactic.id: "hello world" OR alert.attributes.params.threat.tactic.name: "hello world" OR alert.attributes.params.threat.technique.id: "hello world" OR alert.attributes.params.threat.technique.name: "hello world")',
+          page: 1,
+          per_page: 20,
+          sort_field: 'enabled',
+          sort_order: 'desc',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, query with a filter get escaped correctly', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: '" OR (foo:bar)',
+          showCustomRules: false,
+          showElasticRules: false,
+          tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
+        },
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
+        method: 'GET',
+        query: {
+          filter:
+            '(alert.attributes.name: "\\" OR (foo:bar)" OR alert.attributes.params.index: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo:bar)")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -226,7 +256,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
+          filter: 'alert.attributes.tags:("hello" AND "world")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -254,7 +284,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
+          filter: 'alert.attributes.tags:("hello" AND "world")',
           page: 1,
           per_page: 20,
           sort_field: 'updatedAt',
@@ -353,7 +383,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND (alert.attributes.tags: "hello" AND alert.attributes.tags: "world")',
+            'alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND alert.attributes.tags:("hello" AND "world") AND (alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
