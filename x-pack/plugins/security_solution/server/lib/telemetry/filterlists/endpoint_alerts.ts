@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from './types';
-
-export interface AllowlistFields {
-  [key: string]: boolean | AllowlistFields;
-}
+import type { AllowlistFields } from './types';
 
 // Allow list process fields within events.  This includes "process" and "Target.process".'
-const allowlistProcessFields: AllowlistFields = {
+const baseAllowlistFields: AllowlistFields = {
   args: true,
   entity_id: true,
   name: true,
@@ -76,8 +72,8 @@ const allowlistBaseEventFields: AllowlistFields = {
     },
   },
   process: {
-    parent: allowlistProcessFields,
-    ...allowlistProcessFields,
+    parent: baseAllowlistFields,
+    ...baseAllowlistFields,
   },
   network: {
     direction: true,
@@ -93,8 +89,8 @@ const allowlistBaseEventFields: AllowlistFields = {
   },
   Target: {
     process: {
-      parent: allowlistProcessFields,
-      ...allowlistProcessFields,
+      parent: baseAllowlistFields,
+      ...baseAllowlistFields,
     },
   },
   user: {
@@ -105,7 +101,7 @@ const allowlistBaseEventFields: AllowlistFields = {
 // Allow list for the data we include in the events. True means that it is deep-cloned
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
-export const allowlistEventFields: AllowlistFields = {
+export const endpointAllowlistFields: AllowlistFields = {
   _id: true,
   '@timestamp': true,
   signal_id: true,
@@ -134,48 +130,3 @@ export const allowlistEventFields: AllowlistFields = {
   },
   ...allowlistBaseEventFields,
 };
-
-export const exceptionListEventFields: AllowlistFields = {
-  created_at: true,
-  effectScope: true,
-  entries: true,
-  id: true,
-  name: true,
-  os_types: true,
-  rule_version: true,
-  scope: true,
-};
-
-/**
- * Filters out information not required for downstream analysis
- *
- * @param allowlist
- * @param event
- * @returns TelemetryEvent with explicitly required fields
- */
-export function copyAllowlistedFields(
-  allowlist: AllowlistFields,
-  event: TelemetryEvent
-): TelemetryEvent {
-  return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
-    const eventValue = event[allowKey];
-    if (eventValue !== null && eventValue !== undefined) {
-      if (allowValue === true) {
-        return { ...newEvent, [allowKey]: eventValue };
-      } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
-        const subValues = eventValue.filter((v) => typeof v === 'object');
-        return {
-          ...newEvent,
-          [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
-        };
-      } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
-        const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
-        return {
-          ...newEvent,
-          ...(Object.keys(values).length > 0 ? { [allowKey]: values } : {}),
-        };
-      }
-    }
-    return newEvent;
-  }, {});
-}
