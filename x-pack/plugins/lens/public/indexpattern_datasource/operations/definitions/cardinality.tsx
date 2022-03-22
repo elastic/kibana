@@ -6,6 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiSwitch } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition, ParamEditorProps } from './index';
@@ -124,25 +127,36 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     return [
       {
         dataTestSubj: 'hide-zero-values',
-        title: currentColumn.params?.emptyAsNull
-          ? i18n.translate('xpack.lens.indexPattern.cardinality.showZero', {
-              defaultMessage: 'Show zero values',
-            })
-          : i18n.translate('xpack.lens.indexPattern.cardinality.hideZero', {
-              defaultMessage: 'Hide zero values',
-            }),
+        optionElement: (
+          <>
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+                defaultMessage: 'Hide zero values',
+              })}
+              labelProps={{
+                style: {
+                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                },
+              }}
+              checked={Boolean(currentColumn.params?.emptyAsNull)}
+              onChange={() => {
+                updateLayer(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'emptyAsNull',
+                    value: !currentColumn.params?.emptyAsNull,
+                  })
+                );
+              }}
+              compressed
+            />
+          </>
+        ),
+        title: '',
         showInPopover: true,
         inlineElement: null,
-        onClick: () => {
-          updateLayer(
-            updateColumnParam({
-              layer,
-              columnId,
-              paramName: 'emptyAsNull',
-              value: !currentColumn.params?.emptyAsNull,
-            })
-          );
-        },
+        onClick: () => {},
       },
     ];
   },

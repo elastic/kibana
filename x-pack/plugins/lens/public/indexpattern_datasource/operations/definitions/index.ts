@@ -193,6 +193,7 @@ export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
 export interface AdvancedOption {
   title: string;
+  optionElement?: React.ReactElement;
   dataTestSubj: string;
   onClick: () => void;
   showInPopover: boolean;

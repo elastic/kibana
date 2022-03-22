@@ -41,20 +41,24 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
               setPopoverOpen(false);
             }}
           >
-            {popoverOptions.map(({ dataTestSubj, onClick, title }, index) => (
+            {popoverOptions.map(({ dataTestSubj, onClick, title, optionElement }, index) => (
               <React.Fragment key={dataTestSubj}>
-                <EuiText size="s">
-                  <EuiLink
-                    data-test-subj={dataTestSubj}
-                    color="text"
-                    onClick={() => {
-                      setPopoverOpen(false);
-                      onClick();
-                    }}
-                  >
-                    {title}
-                  </EuiLink>
-                </EuiText>
+                {optionElement ? (
+                  optionElement
+                ) : (
+                  <EuiText size="s">
+                    <EuiLink
+                      data-test-subj={dataTestSubj}
+                      color="text"
+                      onClick={() => {
+                        setPopoverOpen(false);
+                        onClick();
+                      }}
+                    >
+                      {title}
+                    </EuiLink>
+                  </EuiText>
+                )}
                 {popoverOptions.length - 1 !== index && <EuiSpacer size="s" />}
               </React.Fragment>
             ))}
