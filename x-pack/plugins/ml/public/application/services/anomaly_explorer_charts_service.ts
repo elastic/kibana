@@ -141,7 +141,10 @@ export class AnomalyExplorerChartsService {
           const data = getDefaultChartsData();
 
           // Calculate the number of charts per row, depending on the width available, to a max of 4.
-          const chartsPerRow = Math.min(Math.max(Math.floor(900 / 550), 1), MAX_CHARTS_PER_ROW);
+          const chartsPerRow = Math.min(
+            Math.max(Math.floor(chartsContainerWidth / 550), 1),
+            MAX_CHARTS_PER_ROW
+          );
 
           data.seriesToPlot = v;
 
