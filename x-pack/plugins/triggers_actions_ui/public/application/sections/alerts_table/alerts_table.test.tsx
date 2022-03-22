@@ -73,6 +73,7 @@ describe('AlertsTable', () => {
     showCheckboxes: false,
     trailingControlColumns: [],
     useFetchAlertsData,
+    'data-test-subj': 'testTable',
   };
 
   it('should support sorting', async () => {

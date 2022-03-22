@@ -4,6 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { useFetchDataViews } from './use_fetch_data_views';
 export { usePagination } from './use_pagination';
 export { useSorting } from './use_sorting';

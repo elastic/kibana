@@ -11,6 +11,7 @@ import {
   EuiDataGridControlColumn,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiSpacer,
 } from '@elastic/eui';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -24,9 +25,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { AlertsData } from '../../../../types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Props {}
-
 const consumers = [
   AlertConsumers.APM,
   AlertConsumers.LOGS,
@@ -39,14 +37,22 @@ const defaultPagination = {
   pageIndex: 0,
 };
 
-const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
+const defaultSort: estypes.SortCombinations[] = [
+  {
+    'kibana.alert.rule.name': {
+      order: 'asc',
+    },
+  },
+];
+
+const AlertsPage: React.FunctionComponent = () => {
   const { data, notifications } = useKibana().services;
   const [showCheckboxes] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [alertsCount, setAlertsCount] = useState(0);
   const [alerts, setAlerts] = useState<AlertsData[]>([]);
-  const [sort, setSort] = useState<estypes.SortCombinations[]>([]);
+  const [sort, setSort] = useState<estypes.SortCombinations[]>(defaultSort);
   const [pagination, setPagination] = useState(defaultPagination);
 
   const onPageChange = (_pagination: RuleRegistrySearchRequestPagination) => {
@@ -79,12 +85,6 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
       })
       .subscribe({
         next: (res) => {
-          // eslint-disable-next-line no-console
-          console.log('response from search strategy', {
-            isPartial: res.isPartial,
-            isRunning: res.isRunning,
-            res,
-          });
           const alertsResponse = res.rawResponse.hits.hits.map(
             (hit) => hit.fields as unknown as AlertsData
           ) as AlertsData[];
@@ -159,11 +159,13 @@ const AlertsPage: React.FunctionComponent<Props> = (props: Props) => {
     showCheckboxes,
     trailingControlColumns: [],
     useFetchAlertsData,
+    'data-test-subj': 'internalAlertsPage',
   };
 
   return (
     <section>
       <h1>THIS IS AN INTERNAL TEST PAGE</h1>
+      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <AlertsTable {...tableProps} />

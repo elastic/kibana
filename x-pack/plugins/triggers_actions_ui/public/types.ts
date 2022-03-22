@@ -397,4 +397,5 @@ export interface AlertsTableProps {
   showCheckboxes: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
+  'data-test-subj': string;
 }
