@@ -12,7 +12,7 @@ import { ToolbarButton } from './primary';
 import mdx from './primary.mdx';
 
 export default {
-  title: 'Toolbar/Primary button',
+  title: 'Toolbar/Buttons/Primary button',
   description: 'A primary button that is a part of a toolbar.',
   parameters: {
     docs: {
