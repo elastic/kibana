@@ -11,10 +11,10 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { LocationDescriptorObject } from 'history';
 import { HttpSetup } from 'kibana/public';
 
+import { ApplicationStart } from 'src/core/public';
 import { MockUrlService } from 'src/plugins/share/common/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
-import { ApplicationStart } from 'src/core/public';
 import {
   notificationServiceMock,
   docLinksServiceMock,
