@@ -190,11 +190,10 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
 
   const selectionValue = {
     selectable: (item: TableItem) => {
-      const selectedId = selected?.job_id ?? selected?.model_id;
       const isDFA = isDataFrameAnalyticsConfigs(item);
       const itemId = isDFA ? item.id : item.model_id;
       const isBuiltInModel = isDFA ? false : item.tags.includes(BUILT_IN_MODEL_TAG);
-      return (selected === undefined || selectedId === itemId) && !isBuiltInModel;
+      return (selected === undefined || selected?.job_id === itemId || selected?.model_id === itemId) && !isBuiltInModel;
     },
     onSelectionChange: (selectedItem: TableItem[]) => {
       const item = selectedItem[0];
