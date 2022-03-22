@@ -56,8 +56,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.reorderDimensions('lnsDatatable_rows', 3, 1);
         await PageObjects.lens.waitForVisualization();
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsDatatable_rows')).to.eql([
-          'Top values of @message.raw',
-          'Top values of clientip',
+          'Top 3 values of @message.raw',
+          'Top 3 values of clientip',
           'bytes',
         ]);
       });
