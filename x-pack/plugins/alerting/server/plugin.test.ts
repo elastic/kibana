@@ -31,8 +31,8 @@ const generateAlertingConfig = (): AlertingConfig => ({
   maxEphemeralActionsPerAlert: 10,
   defaultRuleTaskTimeout: '5m',
   cancelAlertsOnRuleTimeout: true,
-  minimumScheduleInterval: '1m',
   rules: {
+    minimumScheduleInterval: { value: '1m', enforce: false },
     execution: {
       actions: {
         max: 1000,
@@ -115,13 +115,16 @@ describe('Alerting Plugin', () => {
 
       const setupContract = await plugin.setup(setupMocks, mockPlugins);
 
-      expect(setupContract.getConfig()).toEqual({ minimumScheduleInterval: '1m' });
+      expect(setupContract.getConfig()).toEqual({
+        minimumScheduleInterval: { value: '1m', enforce: false },
+      });
     });
 
     it(`applies the default config if there is no rule type specific config `, async () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         ...generateAlertingConfig(),
         rules: {
+          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: {
               max: 123,
@@ -147,6 +150,7 @@ describe('Alerting Plugin', () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         ...generateAlertingConfig(),
         rules: {
+          minimumScheduleInterval: { value: '1m', enforce: false },
           execution: {
             actions: { max: 123 },
             ruleTypeOverrides: [{ id: sampleRuleType.id, timeout: '1d' }],
