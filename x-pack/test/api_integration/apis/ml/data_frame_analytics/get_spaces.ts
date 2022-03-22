@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     requestStats: boolean,
     jobId?: string
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(
         `/s/${space}/api/ml/data_frame/analytics${jobId ? `/${jobId}` : ''}${
           requestStats ? '/_stats' : ''
@@ -39,21 +39,21 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
 
   async function runMapRequest(space: string, expectedStatusCode: number, jobId: string) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/s/${space}/api/ml/data_frame/analytics/map/${jobId}`)
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

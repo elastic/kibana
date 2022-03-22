@@ -10,22 +10,33 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OptedInNoticeBanner } from './opted_in_notice_banner';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServiceMock } from '../../../../core/public/http/http_service.mock';
+import { httpServiceMock } from '../../../../core/public/mocks';
+import { mockTelemetryConstants } from '../mocks';
 
 const mockHttp = httpServiceMock.createStartContract();
+const telemetryConstants = mockTelemetryConstants();
 
 describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
     expect(
-      shallowWithIntl(<OptedInNoticeBanner onSeenBanner={() => {}} http={mockHttp} />)
+      shallowWithIntl(
+        <OptedInNoticeBanner
+          onSeenBanner={() => {}}
+          http={mockHttp}
+          telemetryConstants={telemetryConstants}
+        />
+      )
     ).toMatchSnapshot();
   });
 
   it('fires the "onSeenBanner" prop when a link is clicked', () => {
     const onLinkClick = jest.fn();
     const component = shallowWithIntl(
-      <OptedInNoticeBanner onSeenBanner={onLinkClick} http={mockHttp} />
+      <OptedInNoticeBanner
+        onSeenBanner={onLinkClick}
+        http={mockHttp}
+        telemetryConstants={telemetryConstants}
+      />
     );
 
     const button = component.findWhere((n) => n.type() === EuiButton);

@@ -8,12 +8,8 @@
 import sinon from 'sinon';
 import _ from 'lodash';
 import { FeatureCollection } from 'geojson';
-import { ESTermSourceDescriptor } from '../../../../../common/descriptor_types';
-import {
-  AGG_TYPE,
-  FEATURE_VISIBLE_PROPERTY_NAME,
-  SOURCE_TYPES,
-} from '../../../../../common/constants';
+import { TableSourceDescriptor } from '../../../../../common/descriptor_types';
+import { FEATURE_VISIBLE_PROPERTY_NAME, SOURCE_TYPES } from '../../../../../common/constants';
 import { performInnerJoins } from './perform_inner_joins';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorSource } from '../../../sources/vector_source';
@@ -53,18 +49,21 @@ const featureCollection = {
 const joinDescriptor = {
   leftField: LEFT_FIELD,
   right: {
-    applyGlobalQuery: true,
-    applyGlobalTime: true,
     id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
-    indexPatternId: 'myIndexPattern',
-    metrics: [
+    __rows: [],
+    __columns: [
       {
-        type: AGG_TYPE.COUNT,
+        name: 'rightKey',
+        type: 'string',
+      },
+      {
+        name: COUNT_PROPERTY_NAME,
+        type: 'number',
       },
     ],
     term: 'rightKey',
-    type: SOURCE_TYPES.ES_TERM_SOURCE,
-  } as ESTermSourceDescriptor,
+    type: SOURCE_TYPES.TABLE_SOURCE,
+  } as TableSourceDescriptor,
 };
 const mockVectorSource = {
   getInspectorAdapters: () => {
@@ -75,18 +74,21 @@ const mockVectorSource = {
       getName: () => {
         return LEFT_FIELD;
       },
-    } as IField;
+      getLabel: () => {
+        return LEFT_FIELD;
+      },
+    } as unknown as IField;
   },
 } as unknown as IVectorSource;
 const innerJoin = new InnerJoin(joinDescriptor, mockVectorSource);
 const propertiesMap = new Map<string, Record<string | number, unknown>>();
 propertiesMap.set('alpha', { [COUNT_PROPERTY_NAME]: 1 });
 
-test('should skip join when no state has changed', () => {
+test('should skip join when no state has changed', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: false,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -105,11 +107,11 @@ test('should skip join when no state has changed', () => {
   expect(onJoinError.notCalled);
 });
 
-test('should perform join when features change', () => {
+test('should perform join when features change', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: true,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -128,11 +130,11 @@ test('should perform join when features change', () => {
   expect(onJoinError.notCalled);
 });
 
-test('should perform join when join state changes', () => {
+test('should perform join when join state changes', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: false,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -151,11 +153,11 @@ test('should perform join when join state changes', () => {
   expect(onJoinError.notCalled);
 });
 
-test('should call updateSourceData with feature collection with updated feature visibility and join properties', () => {
+test('should call updateSourceData with feature collection with updated feature visibility and join properties', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: true,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -204,11 +206,11 @@ test('should call updateSourceData with feature collection with updated feature 
   expect(onJoinError.notCalled);
 });
 
-test('should call updateSourceData when no results returned from terms aggregation', () => {
+test('should call updateSourceData when no results returned from terms aggregation', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: false,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,
@@ -256,7 +258,7 @@ test('should call updateSourceData when no results returned from terms aggregati
   expect(onJoinError.notCalled);
 });
 
-test('should call onJoinError when there are no matching features', () => {
+test('should call onJoinError when there are no matching features', async () => {
   const updateSourceData = sinon.spy();
   const onJoinError = sinon.spy();
 
@@ -264,7 +266,7 @@ test('should call onJoinError when there are no matching features', () => {
   const propertiesMapFromMismatchedKey = new Map<string, Record<string | number, unknown>>();
   propertiesMapFromMismatchedKey.set('1', { [COUNT_PROPERTY_NAME]: 1 });
 
-  performInnerJoins(
+  await performInnerJoins(
     {
       refreshed: false,
       featureCollection: _.cloneDeep(featureCollection) as FeatureCollection,

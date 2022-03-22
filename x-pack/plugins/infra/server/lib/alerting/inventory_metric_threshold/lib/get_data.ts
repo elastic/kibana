@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import type { Logger } from '@kbn/logging';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import {
@@ -44,6 +45,7 @@ export const getData = async (
   logQueryFields: LogQueryFields | undefined,
   compositeSize: number,
   condition: InventoryMetricConditions,
+  logger: Logger,
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput,
   afterKey?: BucketKey,
@@ -70,6 +72,7 @@ export const getData = async (
         logQueryFields,
         compositeSize,
         condition,
+        logger,
         filterQuery,
         customMetric,
         nextAfterKey,
@@ -94,7 +97,9 @@ export const getData = async (
     filterQuery,
     customMetric
   );
+  logger.trace(`Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);
+  logger.trace(`Response: ${JSON.stringify(body)}`);
   if (body.aggregations) {
     return handleResponse(body.aggregations, previousNodes);
   }

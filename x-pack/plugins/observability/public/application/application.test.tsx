@@ -64,7 +64,7 @@ describe('renderApp', () => {
         alertingExperience: { enabled: true },
         cases: { enabled: true },
         overviewNext: { enabled: false },
-        rules: { enabled: false },
+        rules: { enabled: true },
       },
     };
 

@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { httpServiceMock, themeServiceMock } from '../../../../../core/public/mocks';
-import { docLinksServiceMock } from '../../../../../core/public/mocks';
+import {
+  notificationServiceMock,
+  httpServiceMock,
+  themeServiceMock,
+  docLinksServiceMock,
+} from '../../../../../core/public/mocks';
 
 import type { ObjectStorageClient } from '../../../common/types';
 import { HistoryMock } from '../../services/history.mock';
