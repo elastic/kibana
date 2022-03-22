@@ -4,4 +4,4 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo 'TODO'
+node .buildkite/scripts/lifecycle/ci_stats_ready.js
