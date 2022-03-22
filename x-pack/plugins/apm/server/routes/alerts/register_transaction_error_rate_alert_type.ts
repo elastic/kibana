@@ -12,11 +12,13 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
+import { join } from 'path';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
+import { getAlertUrlTransactionErrorRate } from '../../../common/utils/formatters/alertUrl';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   AlertType,
@@ -60,6 +62,7 @@ export function registerTransactionErrorRateAlertType({
   ruleDataClient,
   logger,
   config$,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -208,6 +211,18 @@ export function registerTransactionErrorRateAlertType({
             windowSize: ruleParams.windowSize,
             windowUnit: ruleParams.windowUnit,
           });
+          const relativeViewInAppUrl = getAlertUrlTransactionErrorRate(
+            [serviceName],
+            [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]],
+            [transactionType]
+          );
+
+          const viewInAppUrl = basePath.publicBaseUrl
+            ? new URL(
+                join(basePath.serverBasePath, relativeViewInAppUrl),
+                basePath.publicBaseUrl
+              ).toString()
+            : relativeViewInAppUrl;
           services
             .alertWithLifecycle({
               id: [
@@ -236,7 +251,7 @@ export function registerTransactionErrorRateAlertType({
               triggerValue: asDecimalOrInteger(errorRate),
               interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
               reason: reasonMessage,
-              viewInAppUrl: 'viewInAppUrl',
+              viewInAppUrl,
             });
         });
 
