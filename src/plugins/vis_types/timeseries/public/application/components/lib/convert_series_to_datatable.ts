@@ -26,6 +26,7 @@ interface FilterParams {
 interface TSVBColumns {
   id: number;
   name: string;
+  fields?: string[];
   isMetric: boolean;
   type: string;
   params?: FilterParams[];
@@ -42,7 +43,13 @@ export const addMetaToColumns = (
     let params: unknown = {
       field: field?.spec.name,
     };
-    if (column.type === BUCKET_TYPES.FILTERS && column.params) {
+    if (column.type === BUCKET_TYPES.TERMS && column.fields?.length) {
+      params = {
+        type: 'multi_terms',
+        fields: column.fields,
+        otherBucket: true,
+      };
+    } else if (column.type === BUCKET_TYPES.FILTERS && column.params) {
       const filters = column.params.map((col) => ({
         input: col.filter,
         label: col.label,
@@ -129,10 +136,12 @@ export const convertSeriesToDataTable = async (
 
       // Adds an extra column, if the layer is split by terms or filters aggregation
       if (isGroupedByTerms) {
+        const fieldsForTerms = getFieldsForTerms(layer.terms_field);
         id++;
         columns.push({
           id,
-          name: getMultiFieldLabel(getFieldsForTerms(layer.terms_field)),
+          name: getMultiFieldLabel(fieldsForTerms),
+          fields: fieldsForTerms,
           isMetric: false,
           type: BUCKET_TYPES.TERMS,
         });

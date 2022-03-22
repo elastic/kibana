@@ -12,11 +12,15 @@ import { BUCKET_TYPES } from '../../../../common/enums';
 import { TimeseriesVisParams } from '../../../types';
 import type { TSVBTables } from './types';
 import { SERIES_SEPARATOR } from '../../../../common/constants';
+import { getFieldFormats } from '../../../services';
+
+const DEFAULT_MAPPING = { id: undefined, params: undefined };
 
 export const getClickFilterData = (
   points: Array<[GeometryValue, XYChartSeriesIdentifier]>,
   tables: TSVBTables,
-  model: TimeseriesVisParams
+  model: TimeseriesVisParams,
+  fieldFormatMap?: Record<string, any>
 ) => {
   const data: ValueClickContext['data']['data'] = [];
   points.forEach((point) => {
@@ -34,6 +38,30 @@ export const getClickFilterData = (
       const filter = layer[0]?.split_filters?.filter(({ id }) => id === splitLabel);
       label = filter?.[0].label || (filter?.[0].filter?.query as string);
     }
+
+    const termsField = layer[0].terms_field;
+    if (splitLabel && layer[0].split_mode === BUCKET_TYPES.TERMS && termsField) {
+      let value;
+      let mapping;
+      if (typeof termsField === 'string') {
+        mapping = fieldFormatMap?.[termsField];
+      } else {
+        const paramsPerField = termsField
+          .map((field) => (field && fieldFormatMap?.[field]) || DEFAULT_MAPPING)
+          ?.filter((fieldParams) => fieldParams);
+        mapping = {
+          id: 'multi_terms',
+          params: {
+            paramsPerField,
+          },
+        };
+        value = { keys: splitLabel.split(',') };
+      }
+
+      const fieldFormat = getFieldFormats().deserialize(mapping);
+      label = fieldFormat.convert(value ?? splitLabel);
+    }
+
     const index = table.rows.findIndex((row) => {
       const condition =
         geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
