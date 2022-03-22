@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { TelemetryLogic } from '../../../shared/telemetry';
@@ -69,10 +68,9 @@ export const ElasticsearchCloudId: React.FC = () => {
             <EuiFlexItem>
               <EuiTitle size={'xs'}>
                 <h2>
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.overview.elasticsearchCloudId.heading"
-                    defaultMessage="My Deployment"
-                  />
+                  {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCloudId.heading', {
+                    defaultMessage: 'My Deployment',
+                  })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -80,10 +78,9 @@ export const ElasticsearchCloudId: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink href="http://www.elastic.co" target="_blank">
-            <FormattedMessage
-              id="xpack.enterpriseSearch.overview.elasticsearchCloudId.manageLink"
-              defaultMessage="Manage"
-            />
+            {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCloudId.manageLink', {
+              defaultMessage: 'Manage',
+            })}
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -128,10 +125,9 @@ export const ElasticsearchCloudId: React.FC = () => {
 
         <EuiFlexItem>
           <EuiButton>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.overview.elasticsearchCloudId.manageLink"
-              defaultMessage="Manage API Keys"
-            />
+            {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCloudId.manageLink', {
+              defaultMessage: 'Manage API Keys',
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
