@@ -183,6 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);
     });
 
+    // This fails and should be investigated or removed if it no longer applies
     it.skip('deletes the underlying migration task', async () => {
       await waitFor(
         async () => {

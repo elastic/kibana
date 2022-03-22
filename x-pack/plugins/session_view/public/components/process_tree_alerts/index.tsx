@@ -5,91 +5,87 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useEffect, useRef, MouseEvent, useCallback } from 'react';
 import { useStyles } from './styles';
-import { ProcessEvent } from '../../../common/types/process_tree';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { CoreStart } from '../../../../../../src/core/public';
+import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
+import { ProcessTreeAlert } from '../process_tree_alert';
+import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 
 interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
+  jumpToAlertID?: string;
+  isProcessSelected?: boolean;
+  onAlertSelected: (e: MouseEvent) => void;
 }
 
-const getRuleUrl = (alert: ProcessEvent, http: CoreStart['http']) => {
-  return http.basePath.prepend(`/app/security/rules/id/${alert.kibana?.alert.rule.uuid}`);
-};
-
-const ProcessTreeAlert = ({ alert }: { alert: ProcessEvent }) => {
-  const { http } = useKibana<CoreStart>().services;
-
-  if (!alert.kibana) {
-    return null;
-  }
-
-  const { uuid, rule, original_event: event, workflow_status: status } = alert.kibana.alert;
-  const { name, query, severity } = rule;
-
-  return (
-    <EuiText key={uuid} size="s" data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <h6>
-            <FormattedMessage id="xpack.sessionView.rule" defaultMessage="Rule" />
-          </h6>
-          {name}
-          <h6>
-            <FormattedMessage id="xpack.sessionView.query" defaultMessage="Query" />
-          </h6>
-          {query}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <h6>
-            <FormattedMessage id="xpack.sessionView.severity" defaultMessage="Severity" />
-          </h6>
-          {severity}
-          <h6>
-            <FormattedMessage
-              id="xpack.sessionView.workflowStatus"
-              defaultMessage="Workflow status"
-            />
-          </h6>
-          {status}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <h6>
-            <FormattedMessage id="xpack.sessionView.action" defaultMessage="Action" />
-          </h6>
-          {event.action}
-          <EuiSpacer />
-          <div>
-            <EuiButton
-              size="s"
-              href={getRuleUrl(alert, http)}
-              data-test-subj={`sessionView:sessionViewAlertDetailViewRule-${uuid}`}
-            >
-              <FormattedMessage id="xpack.sessionView.viewRule" defaultMessage="View rule" />
-            </EuiButton>
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiText>
-  );
-};
-
-export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
+export function ProcessTreeAlerts({
+  alerts,
+  jumpToAlertID,
+  isProcessSelected = false,
+  onAlertSelected,
+}: ProcessTreeAlertsDeps) {
+  const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
   const styles = useStyles();
+
+  useEffect(() => {
+    const jumpToAlert = alerts.find((alert) => alert.kibana?.alert.uuid === jumpToAlertID);
+    if (jumpToAlertID && jumpToAlert) {
+      setSelectedAlert(jumpToAlert.kibana?.alert!);
+    }
+  }, [jumpToAlertID, alerts]);
+
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const selectAlert = useCallback((alertUuid: string) => {
+    if (!scrollerRef?.current) {
+      return;
+    }
+
+    const alertEl = scrollerRef.current.querySelector<HTMLElement>(`[data-id="${alertUuid}"]`);
+
+    if (alertEl) {
+      const cTop = scrollerRef.current.scrollTop;
+      const cBottom = cTop + scrollerRef.current.clientHeight;
+
+      const eTop = alertEl.offsetTop;
+      const eBottom = eTop + alertEl.clientHeight;
+      const isVisible = eTop >= cTop && eBottom <= cBottom;
+
+      if (!isVisible) {
+        alertEl.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, []);
 
   if (alerts.length === 0) {
     return null;
   }
 
+  const handleAlertClick = (alert: ProcessEventAlert | null) => {
+    onAlertSelected(MOUSE_EVENT_PLACEHOLDER);
+    setSelectedAlert(alert);
+  };
+
   return (
-    <div css={styles.container} data-test-subj="sessionView:sessionViewAlertDetails">
-      {alerts.map((alert: ProcessEvent) => (
-        <ProcessTreeAlert alert={alert} />
-      ))}
+    <div
+      ref={scrollerRef}
+      css={styles.container}
+      data-test-subj="sessionView:sessionViewAlertDetails"
+    >
+      {alerts.map((alert: ProcessEvent, idx: number) => {
+        const alertUuid = alert.kibana?.alert.uuid || null;
+
+        return (
+          <ProcessTreeAlert
+            key={`${alertUuid}-${idx}`}
+            alert={alert}
+            isInvestigated={jumpToAlertID === alertUuid}
+            isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}
+            onClick={handleAlertClick}
+            selectAlert={selectAlert}
+          />
+        );
+      })}
     </div>
   );
 }

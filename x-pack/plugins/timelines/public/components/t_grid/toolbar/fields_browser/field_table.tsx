@@ -16,7 +16,7 @@ import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { tGridActions } from '../../../../store/t_grid';
 import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
 
-interface FieldTableProps {
+export interface FieldTableProps {
   timelineId: string;
   columnHeaders: ColumnHeaderOptions[];
   /**
@@ -36,6 +36,10 @@ interface FieldTableProps {
   /** The text displayed in the search input */
   /** Invoked when a user chooses to view a new set of columns in the timeline */
   searchInput: string;
+  /**
+   * Hides the field browser when invoked
+   */
+  onHide: () => void;
 }
 
 const TableContainer = styled.div<{ height: number }>`
@@ -58,6 +62,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   searchInput,
   selectedCategoryIds,
   timelineId,
+  onHide,
 }) => {
   const dispatch = useDispatch();
 
@@ -94,8 +99,8 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   );
 
   const columns = useMemo(
-    () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns }),
-    [onToggleColumn, searchInput, getFieldTableColumns]
+    () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns, onHide }),
+    [onToggleColumn, searchInput, getFieldTableColumns, onHide]
   );
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 

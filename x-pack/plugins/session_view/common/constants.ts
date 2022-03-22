@@ -10,6 +10,7 @@ export const SESSION_ENTRY_LEADERS_ROUTE = '/internal/session_view/session_entry
 export const PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-default';
 export const ALERTS_INDEX = '.siem-signals-default';
 export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
+export const KIBANA_DATE_FORMAT = 'MMM DD, YYYY @ hh:mm:ss.SSS';
 
 // We fetch a large number of events per page to mitigate a few design caveats in session viewer
 // 1. Due to the hierarchical nature of the data (e.g we are rendering a time ordered pid tree) there are common scenarios where there
@@ -25,3 +26,6 @@ export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id'
 //    search functionality will instead use a separate ES backend search to avoid this.
 // 3. Fewer round trips to the backend!
 export const PROCESS_EVENTS_PER_PAGE = 1000;
+export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
+
+export const DEBOUNCE_TIMEOUT = 500;

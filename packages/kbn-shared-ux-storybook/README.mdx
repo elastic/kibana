@@ -1,0 +1,34 @@
+---
+id: kibSharedUXStorybook
+slug: /kibana-dev-docs/shared-ux/packages/kbn-shared-ux-storybook
+title: Shared UX Storybook
+summary: The `@kbn/shared-ux-storybook` package provides Storybook assets for Shared UX and other teams.
+date: 2022-03-11
+tags: ['kibana', 'dev', 'sharedUX']
+---
+
+## About Shared UX Storybook
+
+This package provides the Storybook implementation of `@kbn/shared-ux-services` as well as the configuration for the Shared UX Storybook site.
+
+- `/src/services` The `@kbn/shared-ux-services` implementation.
+- `src/config` The Storybook site configuration.
+
+## Storybook site
+
+Run `yarn storybook shared_ux` from `/kibana` to view the site.  It pulls in `*.stories.tsx` from all Shared UX packages and plugins and combines them into a single configuration.
+
+## Decorator
+
+If you're writing stories for your own components that compose Shared UX components, you can use a pre-configured [Storybook Decorator](https://storybook.js.org/docs/react/writing-stories/decorators) in your Storybook configuration:
+
+```ts
+// preview.ts
+
+import { addDecorator } from '@storybook/react';
+import { servicesDecorator } from '@kbn/shared-ux-storybook';
+
+addDecorator(servicesDecorator);
+```
+
+This will not only expose parameters, but also wrap your story in a pre-wired `SharedUxServicesProvider`.

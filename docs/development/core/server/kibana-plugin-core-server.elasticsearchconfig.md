@@ -28,6 +28,7 @@ export declare class ElasticsearchConfig
 |  [healthCheckDelay](./kibana-plugin-core-server.elasticsearchconfig.healthcheckdelay.md) |  | Duration | The interval between health check requests Kibana sends to the Elasticsearch. |
 |  [hosts](./kibana-plugin-core-server.elasticsearchconfig.hosts.md) |  | string\[\] | Hosts that the client will connect to. If sniffing is enabled, this list will be used as seeds to discover the rest of your cluster. |
 |  [ignoreVersionMismatch](./kibana-plugin-core-server.elasticsearchconfig.ignoreversionmismatch.md) |  | boolean | Whether to allow kibana to connect to a non-compatible elasticsearch node. |
+|  [maxSockets](./kibana-plugin-core-server.elasticsearchconfig.maxsockets.md) |  | number | The maximum number of sockets that can be used for communications with elasticsearch. |
 |  [password?](./kibana-plugin-core-server.elasticsearchconfig.password.md) |  | string | <i>(Optional)</i> If Elasticsearch is protected with basic authentication, this setting provides the password that the Kibana server uses to perform its administrative functions. |
 |  [pingTimeout](./kibana-plugin-core-server.elasticsearchconfig.pingtimeout.md) |  | Duration | Timeout after which PING HTTP request will be aborted and retried. |
 |  [requestHeadersWhitelist](./kibana-plugin-core-server.elasticsearchconfig.requestheaderswhitelist.md) |  | string\[\] | List of Kibana client-side headers to send to Elasticsearch when request scoped cluster client is used. If this is an empty array then \*no\* client-side will be sent. |

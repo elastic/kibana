@@ -133,6 +133,7 @@ export async function getSavedWorkspace(
   const sharingSavedObjectProps = {
     outcome: resolveResult.outcome,
     aliasTargetId: resolveResult.alias_target_id,
+    aliasPurpose: resolveResult.alias_purpose,
   };
 
   return {

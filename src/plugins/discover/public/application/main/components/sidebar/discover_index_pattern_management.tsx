@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DataView } from '../../../../../../data/common';
+import type { DataView } from '../../../../../../data_views/public';
 
 export interface DiscoverIndexPatternManagementProps {
   /**

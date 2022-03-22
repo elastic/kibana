@@ -11,6 +11,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
+
 import { ConfiguredSourcesList } from './configured_sources_list';
 
 describe('ConfiguredSourcesList', () => {
@@ -25,6 +27,30 @@ describe('ConfiguredSourcesList', () => {
     expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(16);
     expect(wrapper.find('[data-test-subj="AccountOnlyTooltip"]')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(19);
+  });
+
+  it('does not show connect button for a connected external source', () => {
+    const wrapper = shallow(
+      <ConfiguredSourcesList
+        {...{
+          sources: [{ ...mergedConfiguredSources[0], connected: true, serviceType: 'external' }],
+          isOrganization: true,
+        }}
+      />
+    );
+    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(0);
+  });
+
+  it('does show connect button for an unconnected external source', () => {
+    const wrapper = shallow(
+      <ConfiguredSourcesList
+        {...{
+          sources: [{ ...mergedConfiguredSources[0], connected: false, serviceType: 'external' }],
+          isOrganization: true,
+        }}
+      />
+    );
+    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(1);
   });
 
   it('handles empty state', () => {

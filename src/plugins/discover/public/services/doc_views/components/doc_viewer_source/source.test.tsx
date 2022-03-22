@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { DataView } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DocViewerSource } from './source';
 import * as hooks from '../../../../utils/use_es_doc_search';

@@ -67,12 +67,12 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     space?: string
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`${space ? `/s/${space}` : ''}/api/ml/results/category_examples`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ jobId, categoryIds, maxExamples })
-      .expect(expectedStatusCode);
+      .send({ jobId, categoryIds, maxExamples });
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

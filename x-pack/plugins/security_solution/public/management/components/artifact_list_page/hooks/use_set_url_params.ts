@@ -8,9 +8,9 @@
 import { useHistory, useLocation } from 'react-router-dom';
 import { useCallback } from 'react';
 import { pickBy } from 'lodash';
-import { useUrlParams } from './use_url_params';
+import { useUrlParams } from '../../hooks/use_url_params';
 
-// FIXME:PT delete/change once we get the common hook from @parkiino PR
+// FIXME:PT Refactor into a more generic hooks for managing url params
 export const useSetUrlParams = (): ((
   /** Any param whose value is `undefined` will be removed from the URl when in append mode */
   params: Record<string, string | number | null | undefined>,
