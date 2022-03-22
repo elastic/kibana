@@ -44,7 +44,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                 <EuiIconTip
                   color="subdued"
                   content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                    defaultMessage: `By default, Lens hides the gaps in the data. To fill the gap, make a selection.`,
+                    defaultMessage: `By default, area and line charts hide the gaps in the data. To fill the gap, make a selection.`,
                   })}
                   iconProps={{
                     className: 'eui-alignTop',
