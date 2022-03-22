@@ -32,7 +32,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
-import { AbortError } from '../../../../src/plugins/kibana_utils/common';
 import {
   SQL_SEARCH_STRATEGY,
   SqlSearchStrategyRequest,
