@@ -109,7 +109,7 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
       $el.find(NOTES_TAB_BUTTON).trigger('click');
       return $el.find(NOTES_TEXT_AREA);
     })
-    .should('be.visible');
+    .should('exist');
   return cy.root().find(NOTES_TAB_BUTTON);
 };
 
