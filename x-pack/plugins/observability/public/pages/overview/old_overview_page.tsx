@@ -33,6 +33,7 @@ import { ObservabilityAppServices } from '../../application/types';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { paths } from '../../config';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
+import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -125,6 +126,7 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
+          <ObservabilityStatusProgress />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <SectionContainer
