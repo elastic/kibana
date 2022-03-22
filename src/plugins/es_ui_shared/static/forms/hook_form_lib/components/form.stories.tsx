@@ -16,7 +16,7 @@ import { FormHook, FieldConfig } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form, Props as FormProps } from './form';
 import { UseField } from './use_field';
-import { formStories } from './storybook';
+import { formStories } from './__stories__';
 
 export default {
   component: Form,

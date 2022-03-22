@@ -10,8 +10,7 @@ import { ComponentMeta } from '@storybook/react';
 
 import { STORYBOOK_SECTION } from '../constants';
 import { UseArray } from './use_array';
-
-import { useArrayStories } from './storybook';
+import { useArrayStories } from './__stories__';
 
 const { UseArrayBasic, UseArrayComplex } = useArrayStories;
 
