@@ -286,6 +286,7 @@ describe('Data Streams tab', () => {
     describe('detail panel', () => {
       test('opens when the data stream name in the table is clicked', async () => {
         const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+        httpRequestsMockHelpers.setLoadDataStreamResponse('dataStream1');
         await actions.clickNameAt(0);
         expect(findDetailPanel().length).toBe(1);
         expect(findDetailPanelTitle()).toBe('dataStream1');
@@ -349,7 +350,7 @@ describe('Data Streams tab', () => {
 
       const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
       setLoadDataStreamsResponse([dataStreamPercentSign]);
-      setLoadDataStreamResponse('%dataStream', dataStreamPercentSign);
+      setLoadDataStreamResponse(dataStreamPercentSign.name, dataStreamPercentSign);
 
       testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
@@ -361,21 +362,19 @@ describe('Data Streams tab', () => {
       testBed.component.update();
     });
 
-    describe('detail panel', () => {
-      test('opens when the data stream name in the table is clicked', async () => {
-        const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
-        await actions.clickNameAt(0);
-        expect(findDetailPanel().length).toBe(1);
-        expect(findDetailPanelTitle()).toBe('%dataStream');
-      });
+    test('opens when the data stream name in the table is clicked', async () => {
+      const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+      await actions.clickNameAt(0);
+      expect(findDetailPanel().length).toBe(1);
+      expect(findDetailPanelTitle()).toBe('%dataStream');
+    });
 
-      test('clicking the indices count navigates to the backing indices', async () => {
-        const { table, actions } = testBed;
-        await actions.clickIndicesAt(0);
-        expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-          ['', '', '', '', '', '', '', '%dataStream'],
-        ]);
-      });
+    test('clicking the indices count navigates to the backing indices', async () => {
+      const { table, actions } = testBed;
+      await actions.clickIndicesAt(0);
+      expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
+        ['', '', '', '', '', '', '', '%dataStream'],
+      ]);
     });
   });
 

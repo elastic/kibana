@@ -71,7 +71,13 @@ const registerHttpRequestMockHelpers = (
     dataStreamId: string,
     response?: HttpResponse,
     error?: ResponseError
-  ) => mockResponse('GET', `${API_BASE_PATH}/data_streams/${dataStreamId}`, response, error);
+  ) =>
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/data_streams/${encodeURIComponent(dataStreamId)}`,
+      response,
+      error
+    );
 
   const setDeleteDataStreamResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/delete_data_streams`, response, error);
