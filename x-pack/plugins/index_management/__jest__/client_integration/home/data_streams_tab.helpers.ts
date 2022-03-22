@@ -47,7 +47,10 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findDetailPanelIndexTemplateLink: () => ReactWrapper;
 }
 
-export const setup = async (httpSetup: HttpSetup, overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
+export const setup = async (
+  httpSetup: HttpSetup,
+  overridingDependencies: any = {}
+): Promise<DataStreamsTabTestBed> => {
   const testBedConfig: AsyncTestBedConfig = {
     store: () => indexManagementStore(services as any),
     memoryRouter: {

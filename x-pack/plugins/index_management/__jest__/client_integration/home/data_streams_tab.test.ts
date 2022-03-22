@@ -49,7 +49,7 @@ describe('Data Streams tab', () => {
     });
 
     test('displays an empty prompt', async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         url: urlServiceMock,
       });
 
@@ -65,7 +65,7 @@ describe('Data Streams tab', () => {
     });
 
     test('when Ingest Manager is disabled, goes to index templates tab when "Get started" link is clicked', async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         plugins: {},
         url: urlServiceMock,
       });
@@ -85,7 +85,7 @@ describe('Data Streams tab', () => {
     });
 
     test('when Fleet is enabled, links to Fleet', async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         plugins: { isFleetEnabled: true },
         url: urlServiceMock,
       });
@@ -108,7 +108,7 @@ describe('Data Streams tab', () => {
       });
       httpRequestsMockHelpers.setLoadDataStreamsResponse([hiddenDataStream]);
 
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         plugins: {},
         url: urlServiceMock,
       });
@@ -152,13 +152,13 @@ describe('Data Streams tab', () => {
         }),
       ]);
 
-      setLoadDataStreamResponse(dataStreamForDetailPanel);
+      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
 
       const indexTemplate = fixtures.getTemplate({ name: 'indexTemplate' });
       setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
-      setLoadTemplateResponse(indexTemplate);
+      setLoadTemplateResponse(indexTemplate.name, indexTemplate);
 
-      testBed = await setup({ history: createMemoryHistory() });
+      testBed = await setup(httpSetup, { history: createMemoryHistory() });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
       });
@@ -311,7 +311,7 @@ describe('Data Streams tab', () => {
 
         expect(httpSetup.post).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/delete_data_streams`,
-          expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) }),
+          expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
         );
       });
 
@@ -337,8 +337,7 @@ describe('Data Streams tab', () => {
     });
   });
 
-  // IN PROG
-  describe.only('when there are special characters', () => {
+  describe('when there are special characters', () => {
     beforeEach(async () => {
       const { setLoadIndicesResponse, setLoadDataStreamsResponse, setLoadDataStreamResponse } =
         httpRequestsMockHelpers;
@@ -350,7 +349,7 @@ describe('Data Streams tab', () => {
 
       const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
       setLoadDataStreamsResponse([dataStreamPercentSign]);
-      setLoadDataStreamResponse(dataStreamPercentSign.name, dataStreamPercentSign);
+      setLoadDataStreamResponse('%dataStream', dataStreamPercentSign);
 
       testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
@@ -380,7 +379,6 @@ describe('Data Streams tab', () => {
     });
   });
 
-  // DONE
   describe('url locators', () => {
     test('with an ILM url locator and an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
@@ -461,7 +459,6 @@ describe('Data Streams tab', () => {
     });
   });
 
-  // DONE
   describe('managed data streams', () => {
     beforeEach(async () => {
       const managedDataStream = createDataStreamPayload({
@@ -512,7 +509,6 @@ describe('Data Streams tab', () => {
     });
   });
 
-  // DONE
   describe('hidden data streams', () => {
     beforeEach(async () => {
       const hiddenDataStream = createDataStreamPayload({
@@ -545,7 +541,6 @@ describe('Data Streams tab', () => {
     });
   });
 
-  // DONE
   describe('data stream privileges', () => {
     describe('delete', () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;

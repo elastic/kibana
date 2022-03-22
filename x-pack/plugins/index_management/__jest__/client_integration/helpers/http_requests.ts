@@ -18,7 +18,9 @@ export interface ResponseError {
 }
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (httpSetup: ReturnType<typeof httpServiceMock.createStartContract>) => {
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
   const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
     ['GET', 'PUT', 'DELETE', 'POST'].map(
       (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
@@ -65,8 +67,11 @@ const registerHttpRequestMockHelpers = (httpSetup: ReturnType<typeof httpService
   const setLoadDataStreamsResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/data_streams`, response, error);
 
-  const setLoadDataStreamResponse = (dataStreamId: string, response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/data_streams/${dataStreamId}`, response, error);
+  const setLoadDataStreamResponse = (
+    dataStreamId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/data_streams/${dataStreamId}`, response, error);
 
   const setDeleteDataStreamResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/delete_data_streams`, response, error);
@@ -74,8 +79,11 @@ const registerHttpRequestMockHelpers = (httpSetup: ReturnType<typeof httpService
   const setDeleteTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/delete_index_templates`, response, error);
 
-  const setLoadTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/index_templates/:id`, response, error);
+  const setLoadTemplateResponse = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/index_templates/${templateId}`, response, error);
 
   const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates`, response, error);
@@ -83,8 +91,11 @@ const registerHttpRequestMockHelpers = (httpSetup: ReturnType<typeof httpService
   const setUpdateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${API_BASE_PATH}/index_templates/:name`, response, error);
 
-  const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('PUT', `${API_BASE_PATH}/settings/:name`, response, error);
+  const setUpdateIndexSettingsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}/settings/${indexName}`, response, error);
 
   const setSimulateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates/simulate`, response, error);
