@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useStore } from 'react-redux';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
@@ -29,9 +30,6 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
-  selectAutoApplyEnabled,
-  disableAutoApply,
-  enableAutoApply,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
 import {
@@ -39,8 +37,6 @@ import {
   getLayerMetaInfo,
   getShowUnderlyingDataLabel,
 } from './show_underlying_data';
-import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
-import { writeToStorage } from '../settings_storage';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -238,19 +234,6 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
 
-  const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
-
-  const toggleAutoApply = useCallback(() => {
-    trackUiEvent('toggle_autoapply');
-
-    writeToStorage(
-      new Storage(localStorage),
-      AUTO_APPLY_DISABLED_STORAGE_KEY,
-      String(autoApplyEnabled)
-    );
-    dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
-  }, [dispatch, autoApplyEnabled]);
-
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
@@ -369,6 +352,8 @@ export const LensTopNavMenu = ({
     discover,
     application.capabilities,
   ]);
+
+  const lensStore = useStore();
 
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
@@ -499,7 +484,11 @@ export const LensTopNavMenu = ({
           });
         },
         openSettings: (anchorElement: HTMLElement) =>
-          toggleSettingsMenuOpen({ autoApplyEnabled, toggleAutoApply, anchorElement, theme$ }),
+          toggleSettingsMenuOpen({
+            lensStore,
+            anchorElement,
+            theme$,
+          }),
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -532,8 +521,7 @@ export const LensTopNavMenu = ({
     filters,
     indexPatterns,
     data.query.timefilter.timefilter,
-    autoApplyEnabled,
-    toggleAutoApply,
+    lensStore,
     theme$,
   ]);
 

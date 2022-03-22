@@ -5,29 +5,54 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreTheme } from 'kibana/public';
 import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { Store } from 'redux';
+import { Provider } from 'react-redux';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  disableAutoApply,
+  enableAutoApply,
+  LensAppState,
+  selectAutoApplyEnabled,
+  useLensDispatch,
+  useLensSelector,
+} from '../state_management';
+import { trackUiEvent } from '../lens_ui_telemetry';
+import { writeToStorage } from '../settings_storage';
+import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
 
 const container = document.createElement('div');
 let isOpen = false;
 
 function SettingsMenu({
-  autoApplyEnabled,
-  toggleAutoApply,
   anchorElement,
   onClose,
 }: {
-  autoApplyEnabled: boolean;
-  toggleAutoApply: () => void;
   anchorElement: HTMLElement;
   onClose: () => void;
 }) {
+  const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+
+  const dispatch = useLensDispatch();
+
+  const toggleAutoApply = useCallback(() => {
+    trackUiEvent('toggle_autoapply');
+
+    writeToStorage(
+      new Storage(localStorage),
+      AUTO_APPLY_DISABLED_STORAGE_KEY,
+      String(autoApplyEnabled)
+    );
+    dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
+  }, [dispatch, autoApplyEnabled]);
+
   return (
     <EuiWrappingPopover ownFocus button={anchorElement} closePopover={onClose} isOpen>
       <EuiPopoverTitle>
@@ -51,8 +76,7 @@ function closeSettingsMenu() {
 }
 
 export function toggleSettingsMenuOpen(props: {
-  autoApplyEnabled: boolean;
-  toggleAutoApply: () => void;
+  lensStore: Store<LensAppState>;
   anchorElement: HTMLElement;
   theme$: Observable<CoreTheme>;
 }) {
@@ -65,11 +89,13 @@ export function toggleSettingsMenuOpen(props: {
   document.body.appendChild(container);
 
   const element = (
-    <KibanaThemeProvider theme$={props.theme$}>
-      <I18nProvider>
-        <SettingsMenu {...props} onClose={closeSettingsMenu} />
-      </I18nProvider>
-    </KibanaThemeProvider>
+    <Provider store={props.lensStore}>
+      <KibanaThemeProvider theme$={props.theme$}>
+        <I18nProvider>
+          <SettingsMenu {...props} onClose={closeSettingsMenu} />
+        </I18nProvider>
+      </KibanaThemeProvider>
+    </Provider>
   );
   ReactDOM.render(element, container);
 }
