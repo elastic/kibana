@@ -69,9 +69,10 @@ export function ServiceGroupTemplate({
   const serviceGroupsPageTitle = (
     <EuiFlexGroup
       direction="row"
-      gutterSize="s"
+      gutterSize="m"
       alignItems="center"
       justifyContent="flexStart"
+      responsive={false}
     >
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
