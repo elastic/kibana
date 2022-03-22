@@ -93,7 +93,7 @@ export const KibanaPageTemplateSolutionNav = ({
   );
   const mobileTitleText = (
     <FormattedMessage
-      id="sharedUX.solutionNav.mobileTitleText"
+      id="sharedUXComponents.solutionNav.mobileTitleText"
       defaultMessage="{solutionName} Menu"
       values={{ solutionName: name || 'Navigation' }}
     />
