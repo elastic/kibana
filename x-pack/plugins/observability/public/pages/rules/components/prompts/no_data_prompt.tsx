@@ -39,7 +39,7 @@ export function NoDataPrompt({
         body={
           <p>
             <FormattedMessage
-              id="xpack.triggersActionsUI.components.emptyPrompt.emptyDesc"
+              id="xpack.observability.rules.noDataPrompt.noDataDesc"
               defaultMessage="Rules allow you to receive alerts and automate custom actions when specific conditions are met."
             />
           </p>
