@@ -16,8 +16,7 @@ export interface IQueryPayload {
 export type PackSavedObject = SavedObject<{
   name: string;
   description: string | undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  queries: Array<Record<string, any>>;
+  queries: Array<Record<string, unknown>>;
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;
