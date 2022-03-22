@@ -7,20 +7,20 @@
 
 import fetch from 'node-fetch';
 import { ToolingLog } from '@kbn/dev-utils';
-import ReaddPackage from 'read-pkg';
+import ReadPackage from 'read-pkg';
 
 const REGISTRY_URL = 'https://epr-snapshot.elastic.co';
 const KIBANA_URL = 'http://localhost:5601';
 const KIBANA_USERNAME = 'elastic';
 const KIBANA_PASSWORD = 'changeme';
 
-const KIBANA_VERSION = ReaddPackage.sync().version;
+const KIBANA_VERSION = ReadPackage.sync().version;
 
 const SKIP_PACKAGES: string[] = [];
 
 async function installPackage(name: string, version: string) {
   const start = Date.now();
-  const res = await fetch(`${KIBANA_URL}/api/fleet/epm/packages/${name}-${version}`, {
+  const res = await fetch(`${KIBANA_URL}/api/fleet/epm/packages/${name}/${version}`, {
     headers: {
       accept: '*/*',
       'content-type': 'application/json',
@@ -60,8 +60,7 @@ async function getAllPackages() {
     `${REGISTRY_URL}/search?experimental=true&kibana.version=${KIBANA_VERSION}`,
     {
       headers: {
-        accept:
-          'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        accept: '*/*',
       },
       method: 'GET',
     }
