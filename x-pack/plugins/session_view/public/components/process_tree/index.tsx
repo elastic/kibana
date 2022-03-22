@@ -10,13 +10,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ProcessTreeNode } from '../process_tree_node';
 import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
-import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
+import {
+  AlertStatusEventEntityIdMap,
+  Process,
+  ProcessEventsPage,
+  ProcessEvent,
+} from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
 type FetchFunction = () => void;
 
-interface ProcessTreeDeps {
+export interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
 
@@ -37,6 +42,11 @@ interface ProcessTreeDeps {
   selectedProcess?: Process | null;
   onProcessSelected: (process: Process | null) => void;
   setSearchResults?: (results: Process[]) => void;
+
+  // a map for alerts with updated status and process.entity_id
+  updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
+  handleOnAlertDetailsClosed: (alertUuid: string) => void;
   timeStampOn?: boolean;
   verboseModeOn?: boolean;
 }
@@ -55,6 +65,9 @@ export const ProcessTree = ({
   selectedProcess,
   onProcessSelected,
   setSearchResults,
+  updatedAlertsStatus,
+  loadAlertDetails,
+  handleOnAlertDetailsClosed,
   timeStampOn,
   verboseModeOn,
 }: ProcessTreeDeps) => {
@@ -67,6 +80,7 @@ export const ProcessTree = ({
     data,
     alerts,
     searchQuery,
+    updatedAlertsStatus,
   });
 
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -192,6 +206,8 @@ export const ProcessTree = ({
             selectedProcessId={selectedProcess?.id}
             scrollerRef={scrollerRef}
             onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
+            loadAlertDetails={loadAlertDetails}
+            handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
             timeStampOn={timeStampOn}
             verboseModeOn={verboseModeOn}
           />

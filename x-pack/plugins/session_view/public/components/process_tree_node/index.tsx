@@ -44,6 +44,8 @@ export interface ProcessDeps {
   verboseModeOn?: boolean;
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
+  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
+  handleOnAlertDetailsClosed: (alertUuid: string) => void;
 }
 
 /**
@@ -61,6 +63,8 @@ export function ProcessTreeNode({
   verboseModeOn = true,
   scrollerRef,
   onChangeJumpToEventVisibility,
+  loadAlertDetails,
+  handleOnAlertDetailsClosed,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -124,18 +128,21 @@ export function ProcessTreeNode({
     setAlertsExpanded(!alertsExpanded);
   }, [alertsExpanded]);
 
-  const onProcessClicked = (e: MouseEvent) => {
-    e.stopPropagation();
+  const onProcessClicked = useCallback(
+    (e: MouseEvent) => {
+      e.stopPropagation();
 
-    const selection = window.getSelection();
+      const selection = window.getSelection();
 
-    // do not select the command if the user was just selecting text for copy.
-    if (selection && selection.type === 'Range') {
-      return;
-    }
+      // do not select the command if the user was just selecting text for copy.
+      if (selection && selection.type === 'Range') {
+        return;
+      }
 
-    onProcessSelected?.(process);
-  };
+      onProcessSelected?.(process);
+    },
+    [onProcessSelected, process]
+  );
 
   const processDetails = process.getDetails();
   const hasExec = process.hasExec();
@@ -276,6 +283,8 @@ export function ProcessTreeNode({
           jumpToAlertID={jumpToAlertID}
           isProcessSelected={selectedProcessId === process.id}
           onAlertSelected={onProcessClicked}
+          loadAlertDetails={loadAlertDetails}
+          handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
         />
       )}
 
@@ -295,6 +304,8 @@ export function ProcessTreeNode({
                 verboseModeOn={verboseModeOn}
                 scrollerRef={scrollerRef}
                 onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
+                loadAlertDetails={loadAlertDetails}
+                handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
               />
             );
           })}

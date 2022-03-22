@@ -5,15 +5,19 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import { useInfiniteQuery, useQuery } from 'react-query';
+import { useQuery, useInfiniteQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { ProcessEvent, ProcessEventResults } from '../../../common/types/process_tree';
+import {
+  AlertStatusEventEntityIdMap,
+  ProcessEvent,
+  ProcessEventResults,
+} from '../../../common/types/process_tree';
 import {
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
-  ALERTS_ROUTE,
+  ALERT_STATUS_ROUTE,
   QUERY_KEY_PROCESS_EVENTS,
   QUERY_KEY_ALERTS,
 } from '../../../common/constants';
@@ -97,6 +101,46 @@ export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
       const events = res.events.map((event: any) => event._source as ProcessEvent);
 
       return events;
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    }
+  );
+  
+  return query;
+}
+
+export const useFetchAlertStatus = (
+  updatedAlertsStatus: AlertStatusEventEntityIdMap,
+  alertUuid: string
+) => {
+  const { http } = useKibana<CoreStart>().services;
+  const cachingKeys = [QUERY_KEY_ALERTS, alertUuid];
+  const query = useQuery<AlertStatusEventEntityIdMap, Error>(
+    cachingKeys,
+    async () => {
+      if (!alertUuid) {
+        return updatedAlertsStatus;
+      }
+
+      const res = await http.get<ProcessEventResults>(ALERT_STATUS_ROUTE, {
+        query: {
+          alertUuid,
+        },
+      });
+
+      // TODO: add error handling
+      const events = res.events.map((event: any) => event._source as ProcessEvent);
+
+      return {
+        ...updatedAlertsStatus,
+        [alertUuid]: {
+          status: events[0]?.kibana?.alert.workflow_status ?? '',
+          processEntityId: events[0]?.process?.entity_id ?? '',
+        },
+      };
     },
     {
       refetchOnWindowFocus: false,

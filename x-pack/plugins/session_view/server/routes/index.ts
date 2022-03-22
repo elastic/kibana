@@ -7,11 +7,13 @@
 import { IRouter } from '../../../../../src/core/server';
 import { registerProcessEventsRoute } from './process_events_route';
 import { registerAlertsRoute } from './alerts_route';
+import { registerAlertStatusRoute } from './alert_status_route';
 import { sessionEntryLeadersRoute } from './session_entry_leaders_route';
 import { RuleRegistryPluginStartContract } from '../../../rule_registry/server';
 
 export const registerRoutes = (router: IRouter, ruleRegistry: RuleRegistryPluginStartContract) => {
   registerProcessEventsRoute(router);
+  registerAlertStatusRoute(router);
   sessionEntryLeadersRoute(router);
   registerAlertsRoute(router, ruleRegistry);
 };

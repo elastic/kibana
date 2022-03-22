@@ -8,6 +8,7 @@ import _ from 'lodash';
 import memoizeOne from 'memoize-one';
 import { useState, useEffect } from 'react';
 import {
+  AlertStatusEventEntityIdMap,
   EventAction,
   EventKind,
   Process,
@@ -16,6 +17,7 @@ import {
   ProcessEventsPage,
 } from '../../../common/types/process_tree';
 import {
+  updateAlertEventStatus,
   processNewEvents,
   searchProcessTree,
   autoExpandProcessTree,
@@ -28,6 +30,7 @@ interface UseProcessTreeDeps {
   data: ProcessEventsPage[];
   alerts: ProcessEvent[];
   searchQuery?: string;
+  updatedAlertsStatus: AlertStatusEventEntityIdMap;
 }
 
 export class ProcessImpl implements Process {
@@ -109,6 +112,10 @@ export class ProcessImpl implements Process {
     return this.filterEventsByKind(this.events, EventKind.signal);
   }
 
+  updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap) {
+    this.events = updateAlertEventStatus(this.events, updatedAlertsStatus);
+  }
+
   hasExec() {
     return !!this.findEventByAction(this.events, EventAction.exec);
   }
@@ -135,6 +142,7 @@ export class ProcessImpl implements Process {
   // only used to auto expand parts of the tree that could be of interest.
   isUserEntered() {
     const event = this.getDetails();
+
     const {
       pid,
       tty,
@@ -191,7 +199,7 @@ export const useProcessTree = ({
   sessionEntityId,
   data,
   alerts,
-  searchQuery,
+  updatedAlertsStatus,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
@@ -270,6 +278,14 @@ export const useProcessTree = ({
   const sessionLeader = processMap[sessionEntityId];
 
   sessionLeader.orphans = orphans;
+
+  // update alert status in processMap for alerts in updatedAlertsStatus
+  Object.keys(updatedAlertsStatus).forEach((alertUuid) => {
+    const process = processMap[updatedAlertsStatus[alertUuid].processEntityId];
+    if (process) {
+      process.updateAlertsStatus(updatedAlertsStatus);
+    }
+  });
 
   return { sessionLeader: processMap[sessionEntityId], processMap, searchResults };
 };
