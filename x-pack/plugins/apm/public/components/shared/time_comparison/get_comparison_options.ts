@@ -9,7 +9,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
-enum TimeRangeComparisonEnum {
+export enum TimeRangeComparisonEnum {
   WeekBefore = 'week',
   DayBefore = 'day',
   PeriodBefore = 'period',
@@ -36,7 +36,7 @@ function formatDate({
   )} - ${previousPeriodEnd.format(dateFormat)}`;
 }
 
-function getSelectOptions({
+export function getSelectOptions({
   comparisonTypes,
   start,
   end,
