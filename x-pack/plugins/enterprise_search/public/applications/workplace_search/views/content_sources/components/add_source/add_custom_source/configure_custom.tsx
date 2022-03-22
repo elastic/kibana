@@ -73,7 +73,7 @@ export const ConfigureCustom: React.FC = () => {
           <EuiTitle size="l">
             <h2>
               <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom"
+                id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.title"
                 defaultMessage="How to add {name}"
                 values={{ name }}
               />
@@ -127,7 +127,6 @@ export const ConfigureCustom: React.FC = () => {
                               <FormattedMessage
                                 id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.linkLabel"
                                 defaultMessage="documentation"
-                                values={{ name }}
                               />
                             </EuiLink>
                           ),
