@@ -32,6 +32,8 @@ import { ExecutionStatus } from './components/execution_status';
 import { LastRun } from './components/last_run';
 import { EditRuleFlyout } from './components/edit_rule_flyout';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
+import { NoDataPrompt } from './components/prompts/noData_prompt';
+import { NoPermissionPrompt } from './components/prompts/noPermission_prompt';
 import {
   deleteRules,
   RuleTableItem,
@@ -78,6 +80,7 @@ export function RulesPage() {
     application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
+  const documentationLink = docLinks.links.alerting.guide;
   const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
@@ -243,6 +246,105 @@ export function RulesPage() {
     []
   );
 
+  const getRulesTable = () => {
+    if (totalItemCount === 0 && !rulesState.isLoading) {
+      return authorizedToCreateAnyRules ? (
+        <NoDataPrompt
+          documentationLink={documentationLink}
+          onCTAClicked={() => setCreateRuleFlyoutVisibility(true)}
+        />
+      ) : (
+        <NoPermissionPrompt />
+      );
+    }
+    return (
+      <>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              fullWidth
+              isClearable
+              data-test-subj="ruleSearchField"
+              onChange={(e) => {
+                setInputText(e.target.value);
+                if (e.target.value === '') {
+                  setSearchText(e.target.value);
+                }
+              }}
+              onKeyUp={(e) => {
+                if (e.keyCode === ENTER_KEY) {
+                  setSearchText(inputText);
+                }
+              }}
+              placeholder={SEARCH_PLACEHOLDER}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LastResponseFilter
+              key="rule-lastResponse-filter"
+              selectedStatuses={ruleLastResponseFilter}
+              onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="refreshRulesButton"
+              iconType="refresh"
+              onClick={reload}
+              name="refresh"
+              color="primary"
+            >
+              <FormattedMessage
+                id="xpack.observability.rules.refreshRulesButtonLabel"
+                defaultMessage="Refresh"
+              />
+            </EuiButton>
+            ,
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
+              <FormattedMessage
+                id="xpack.observability.rules.totalItemsCountDescription"
+                defaultMessage="Showing: {pageSize} of {totalItemCount} Rules"
+                values={{
+                  totalItemCount,
+                  pageSize: rules.length,
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiAutoRefreshButton
+              isPaused={isPaused}
+              refreshInterval={refreshInterval}
+              onRefreshChange={onRefreshChange}
+              shortHand
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="xs" />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <RulesTable
+              columns={getRulesTableColumns()}
+              rules={convertRulesToTableItems(rules, ruleTypeIndex, canExecuteActions)}
+              isLoading={rulesState.isLoading}
+              page={page}
+              totalItemCount={totalItemCount}
+              onPageChange={(index) => setPage(index)}
+              sort={sort}
+              onSortChange={(changedSort) => {
+                setSort(changedSort);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  };
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -267,7 +369,7 @@ export function RulesPage() {
             </EuiButton>
           ),
           <EuiButtonEmpty
-            href={docLinks.links.alerting.guide}
+            href={documentationLink}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"
@@ -303,88 +405,7 @@ export function RulesPage() {
           setRulesState({ ...rulesState, isLoading });
         }}
       />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            isClearable
-            data-test-subj="ruleSearchField"
-            onChange={(e) => {
-              setInputText(e.target.value);
-              if (e.target.value === '') {
-                setSearchText(e.target.value);
-              }
-            }}
-            onKeyUp={(e) => {
-              if (e.keyCode === ENTER_KEY) {
-                setSearchText(inputText);
-              }
-            }}
-            placeholder={SEARCH_PLACEHOLDER}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LastResponseFilter
-            key="rule-lastResponse-filter"
-            selectedStatuses={ruleLastResponseFilter}
-            onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="refreshRulesButton"
-            iconType="refresh"
-            onClick={reload}
-            name="refresh"
-            color="primary"
-          >
-            <FormattedMessage
-              id="xpack.observability.rules.refreshRulesButtonLabel"
-              defaultMessage="Refresh"
-            />
-          </EuiButton>
-          ,
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
-            <FormattedMessage
-              id="xpack.observability.rules.totalItemsCountDescription"
-              defaultMessage="Showing: {pageSize} of {totalItemCount} Rules"
-              values={{
-                totalItemCount,
-                pageSize: rules.length,
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiAutoRefreshButton
-            isPaused={isPaused}
-            refreshInterval={refreshInterval}
-            onRefreshChange={onRefreshChange}
-            shortHand
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <RulesTable
-            columns={getRulesTableColumns()}
-            rules={convertRulesToTableItems(rules, ruleTypeIndex, canExecuteActions)}
-            isLoading={rulesState.isLoading}
-            page={page}
-            totalItemCount={totalItemCount}
-            onPageChange={(index) => setPage(index)}
-            sort={sort}
-            onSortChange={(changedSort) => {
-              setSort(changedSort);
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {getRulesTable()}
       {error &&
         toasts.addDanger({
           title: error,
