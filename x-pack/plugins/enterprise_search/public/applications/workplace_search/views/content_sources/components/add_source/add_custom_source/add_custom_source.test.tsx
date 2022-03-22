@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import '../../../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues } from '../../../../../__mocks__/kea_logic';
-import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
+import '../../../../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues } from '../../../../../../__mocks__/kea_logic';
+import { sourceConfigData } from '../../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
@@ -16,8 +16,8 @@ import { shallow } from 'enzyme';
 import {
   WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
-} from '../../../../components/layout';
-import { staticSourceData } from '../../source_data';
+} from '../../../../../components/layout';
+import { staticSourceData } from '../../../source_data';
 
 import { AddCustomSource } from './add_custom_source';
 import { AddCustomSourceSteps } from './add_custom_source_logic';

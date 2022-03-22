@@ -9,20 +9,18 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { AppLogic } from '../../../../app_logic';
+import { AppLogic } from '../../../../../app_logic';
 import {
   WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
-} from '../../../../components/layout';
-import { NAV } from '../../../../constants';
+} from '../../../../../components/layout';
+import { NAV } from '../../../../../constants';
 
-import { SourceDataItem } from '../../../../types';
+import { SourceDataItem } from '../../../../../types';
 
 import { AddCustomSourceLogic, AddCustomSourceSteps } from './add_custom_source_logic';
 import { ConfigureCustom } from './configure_custom';
 import { SaveCustom } from './save_custom';
-
-import './add_source.scss';
 
 interface Props {
   sourceData: SourceDataItem;
