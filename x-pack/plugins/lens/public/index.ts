@@ -11,7 +11,7 @@ export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
-export type { XYState, XYLayerConfig } from './xy_visualization/types';
+export type { XYState, XYLayerConfig, ValidLayer } from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -73,7 +73,6 @@ export type {
   YScaleType,
   XScaleType,
   AxisConfig,
-  ValidLayer,
   XYCurveType,
   XYChartProps,
   LegendConfig,

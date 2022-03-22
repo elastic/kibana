@@ -8,14 +8,10 @@
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import type { State, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
+import type { State, XYDataLayerConfig, XYReferenceLineLayerConfig, ValidLayer } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type {
-  ReferenceLineLayerConfigResult,
-  ValidLayer,
-  YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { YConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -326,7 +322,7 @@ export const buildExpression = (
 };
 
 const referenceLineLayerToExpression = (
-  layer: ReferenceLineLayerConfigResult,
+  layer: XYReferenceLineLayerConfig,
   datasourceLayer: DatasourcePublicAPI
 ): Ast => {
   return {
@@ -336,7 +332,6 @@ const referenceLineLayerToExpression = (
         type: 'function',
         function: 'referenceLineLayer',
         arguments: {
-          layerId: [layer.layerId],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
                 yConfigToExpression(yConfig, defaultReferenceLineColor)
@@ -374,7 +369,6 @@ const dataLayerToExpression = (
         type: 'function',
         function: 'dataLayer',
         arguments: {
-          layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
           yScaleType: [

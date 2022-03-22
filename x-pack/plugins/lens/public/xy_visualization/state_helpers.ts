@@ -10,13 +10,13 @@ import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
 import type {
   SeriesType,
   YConfig,
-  ValidLayer,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   visualizationTypes,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
+  ValidLayer,
 } from './types';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 

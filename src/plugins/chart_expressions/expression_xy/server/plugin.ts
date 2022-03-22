@@ -14,12 +14,15 @@ import {
   yAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
-  dataLayerConfigFunction,
+  dataLayerFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
   labelsOrientationConfigFunction,
-  referenceLineLayerConfigFunction,
+  referenceLineLayerFunction,
   axisTitlesVisibilityConfigFunction,
+  extendedDataLayerFunction,
+  extendedReferenceLineLayerFunction,
+  layeredXyVisFunction,
 } from '../common';
 import { SetupDeps } from './types';
 
@@ -30,13 +33,16 @@ export class ExpressionXyPlugin
     expressions.registerFunction(yAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
-    expressions.registerFunction(dataLayerConfigFunction);
+    expressions.registerFunction(dataLayerFunction);
+    expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
-    expressions.registerFunction(referenceLineLayerConfigFunction);
+    expressions.registerFunction(referenceLineLayerFunction);
+    expressions.registerFunction(extendedReferenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
+    expressions.registerFunction(layeredXyVisFunction);
   }
 
   public start(core: CoreStart) {}

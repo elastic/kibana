@@ -99,10 +99,6 @@ export interface XYExtendedDataLayerConfig {
   palette?: PaletteOutput;
 }
 
-export interface ValidLayer extends DataLayerConfigResult {
-  xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
-}
-
 export type DataLayerArgs = XYDataLayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;

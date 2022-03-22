@@ -16,10 +16,7 @@ import type {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
 } from './types';
-import type {
-  DataLayerConfigResult,
-  SeriesType,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
@@ -115,7 +112,7 @@ describe('xy_visualization', () => {
       return {
         ...state,
         layers: types.map((t, i) => ({
-          ...(state.layers[0] as DataLayerConfigResult),
+          ...(state.layers[0] as XYDataLayerConfig),
           layerId: `layer_${i}`,
           seriesType: t,
         })),

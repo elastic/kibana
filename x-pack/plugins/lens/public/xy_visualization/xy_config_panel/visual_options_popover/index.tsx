@@ -11,9 +11,8 @@ import { ToolbarPopover, TooltipWrapper, ValueLabelsSettings } from '../../../sh
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
-import { XYState } from '../../types';
+import { XYState, ValidLayer } from '../../types';
 import { hasHistogramSeries } from '../../state_helpers';
-import { ValidLayer } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import type { FramePublicAPI } from '../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 

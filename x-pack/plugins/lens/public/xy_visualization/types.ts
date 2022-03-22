@@ -44,6 +44,7 @@ export interface XYDataLayerConfig
   yScaleType?: YScaleType;
   xScaleType?: XScaleType;
   isHistogram?: boolean;
+  layerId: string;
 }
 
 export interface XYReferenceLineLayerConfig
@@ -51,9 +52,15 @@ export interface XYReferenceLineLayerConfig
   layerType: LayerType;
   yConfig?: YConfig[];
   palette?: PaletteOutput;
+  layerId: string;
 }
 
 export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
+
+export interface ValidLayer extends XYDataLayerConfig {
+  xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
+  layerId: string;
+}
 
 // Persisted parts of the state
 export interface XYState {

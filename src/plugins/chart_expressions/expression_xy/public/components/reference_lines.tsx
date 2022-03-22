@@ -14,13 +14,7 @@ import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '../../../../field_formats/common';
-import type {
-  CommonXYReferenceLineLayerConfigResult,
-  ReferenceLineLayerConfigResult,
-  IconPosition,
-  YAxisMode,
-} from '../../common';
-import type { LensMultiTable } from '../../common/types';
+import type { CommonXYReferenceLineLayerConfigResult, IconPosition, YAxisMode } from '../../common';
 import { hasIcon } from '../helpers';
 
 export const REFERENCE_LINE_MARKER_SIZE = 20;

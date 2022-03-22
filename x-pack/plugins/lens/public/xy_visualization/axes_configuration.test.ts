@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataLayerConfigResult } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
+import { XYDataLayerConfig } from './types';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {
@@ -219,8 +219,7 @@ describe('axes_configuration', () => {
     },
   };
 
-  const sampleLayer: DataLayerConfigResult = {
-    type: 'dataLayer',
+  const sampleLayer: XYDataLayerConfig = {
     layerId: 'first',
     layerType: layerTypes.DATA,
     seriesType: 'line',

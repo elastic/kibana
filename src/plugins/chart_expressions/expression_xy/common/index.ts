@@ -37,7 +37,6 @@ export type {
   YScaleType,
   XScaleType,
   AxisConfig,
-  ValidLayer,
   XYCurveType,
   XYChartProps,
   LegendConfig,
