@@ -63,9 +63,9 @@ export async function runDockerGenerator(
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
-  const imageArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'amd64';
+  const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
-    `kibana${imageFlavor}-${version}-docker-image-${imageArchitecture}.tar.gz`
+    `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
   const dependencies = [
     resolve(artifactsDir, artifactTarball),
@@ -103,6 +103,16 @@ export async function runDockerGenerator(
     revision: config.getBuildSha(),
     publicArtifactSubdomain,
   };
+
+  type HostArchitectureToDocker = Record<string, string>;
+  const hostTarget: HostArchitectureToDocker = {
+    x64: 'x64',
+    arm64: 'aarch64',
+  };
+  const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
+  if (flags.architecture && !buildArchitectureSupported) {
+    return;
+  }
 
   // Create the docker build target folder
   await mkdirp(dockerBuildDir);
