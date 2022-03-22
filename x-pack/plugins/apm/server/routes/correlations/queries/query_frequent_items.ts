@@ -14,12 +14,19 @@ import { fetchSpikeAnalysisFrequentItems } from './index';
 export const fetchFrequentItems = async (
   esClient: ElasticsearchClient,
   paramsWithIndex: CorrelationsParams,
-  fieldCandidates: string[]
+  fieldCandidates: Array<{ fieldName: string; fieldValue: string | number }>,
+  windowParameters: {
+    baselineMin: number;
+    baselineMax: number;
+    deviationMin: number;
+    deviationMax: number;
+  }
 ) => {
   const frequentItems = await fetchSpikeAnalysisFrequentItems(
     esClient,
     paramsWithIndex,
-    fieldCandidates
+    fieldCandidates,
+    windowParameters
   );
 
   // const ccsWarning =

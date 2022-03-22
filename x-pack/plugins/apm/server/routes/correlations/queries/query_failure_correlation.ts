@@ -27,7 +27,7 @@ export const getFailureCorrelationRequest = (
     bool: {
       ...query.bool,
       filter: [
-        ...query.bool.filter,
+        ...(Array.isArray(query.bool.filter) ? query.bool.filter : []),
         ...[
           getTermsQuery({
             fieldName: EVENT_OUTCOME,
