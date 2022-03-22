@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const aceEditor = getService('aceEditor');
   const a11y = getService('a11y');
-  const flyout = getService('flyout');
   const esArchiver = getService('esArchiver');
 
   describe('Accessibility Search Profiler Editor', () => {
@@ -26,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await flyout.ensureAllClosed();
     });
 
     it('input the JSON in the aceeditor', async () => {
@@ -84,12 +82,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on the Aggregation Profile link', async () => {
       await testSubjects.click('aggregationProfileTab');
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on the view details link', async () => {
-      const viewShardDetailslink = await testSubjects.findAll('viewShardDetails');
-      await viewShardDetailslink[0].click();
       await a11y.testAppSnapshot();
     });
   });
