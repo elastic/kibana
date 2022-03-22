@@ -49,12 +49,6 @@ export interface EncryptedSavedObjectsClient {
     options?: SavedObjectsBaseOptions
   ) => Promise<SavedObject<T>>;
 
-  bulkGetDecryptedAsInternalUser: <T = unknown>(
-    type: string,
-    ids: string[],
-    options?: SavedObjectsBaseOptions
-  ) => Promise<Array<SavedObject<T>>>;
-
   createPointInTimeFinderAsInternalUser<T = unknown, A = unknown>(
     options: { type: string; namespace?: string },
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
@@ -112,32 +106,6 @@ export function setupSavedObjects({
             savedObject.attributes as Record<string, unknown>
           )) as T,
         };
-      },
-
-      bulkGetDecryptedAsInternalUser: async <T = unknown>(
-        type: string,
-        ids: string[],
-        options?: SavedObjectsBaseOptions
-      ): Promise<Array<SavedObject<T>>> => {
-        const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
-        const { saved_objects: savedObjectsList } = await internalRepository.bulkGet(
-          ids.map((id) => ({ id, type })),
-          options
-        );
-
-        const saved = pMap(savedObjectsList, async (savedObject) => ({
-          ...savedObject,
-          attributes: (await service.decryptAttributes(
-            {
-              type,
-              id: savedObject.id,
-              namespace: getDescriptorNamespace(typeRegistry, type, options?.namespace),
-            },
-            savedObject.attributes as Record<string, unknown>
-          )) as T,
-        }));
-
-        return saved;
       },
 
       createPointInTimeFinderAsInternalUser: async <T = unknown, A = unknown>(
