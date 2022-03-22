@@ -8,7 +8,6 @@
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from 'kibana/server';
-import { join } from 'path';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../common/runtime_types';
 
 export type UpdateUptimeAlertState = (
@@ -64,8 +63,5 @@ export const generateAlertMessage = (messageTemplate: string, fields: Record<str
 };
 export const getViewInAppUrl = (relativeViewInAppUrl: string, basePath: IBasePath) =>
   basePath.publicBaseUrl
-    ? new URL(
-        join(basePath.serverBasePath, relativeViewInAppUrl),
-        basePath.publicBaseUrl
-      ).toString()
+    ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
     : relativeViewInAppUrl;
