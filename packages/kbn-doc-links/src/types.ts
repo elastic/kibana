@@ -34,6 +34,7 @@ export interface DocLinks {
     readonly overview: string;
     readonly tailSamplingPolicies: string;
     readonly elasticAgent: string;
+    readonly customLinks: string;
   };
   readonly canvas: {
     readonly guide: string;

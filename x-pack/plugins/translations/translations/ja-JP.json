@@ -7475,7 +7475,6 @@
     "xpack.apm.settings.customLink.delete": "削除",
     "xpack.apm.settings.customLink.delete.failed": "カスタムリンクを削除できませんでした",
     "xpack.apm.settings.customLink.delete.successed": "カスタムリンクを削除しました。",
-    "xpack.apm.settings.customLink.emptyPromptText": "変更しましょう。サービスごとのトランザクションの詳細でアクションコンテキストメニューにカスタムリンクを追加できます。自社のサポートポータルへの役立つリンクを作成するか、新しい不具合レポートを発行します。詳細はドキュメントをご覧ください。",
     "xpack.apm.settings.customLink.emptyPromptTitle": "リンクが見つかりません。",
     "xpack.apm.settings.customLink.flyout.action.title": "リンク",
     "xpack.apm.settings.customLink.flyout.close": "閉じる",
