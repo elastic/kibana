@@ -6,8 +6,10 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import { omit } from 'lodash';
 import {
+  EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -19,9 +21,8 @@ import {
 } from '@elastic/eui';
 import { BrowserFields } from '../../../../../common';
 import * as i18n from './translations';
-import { CountBadge, getFieldCount, CategoryName, CategorySelectableContainer } from './helpers';
+import { getFieldCount } from './helpers';
 import { isEscape } from '../../../../../common/utils/accessibility';
-
 interface CategoriesSelectorProps {
   /**
    * A map of categoryId -> metadata about the fields in that category,
@@ -43,6 +44,22 @@ interface CategoryOption {
   count: number;
   checked?: FilterChecked;
 }
+
+const CountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+` as unknown as typeof EuiBadge;
+
+CountBadge.displayName = 'CountBadge';
+
+const CategoryName = styled.span<{ bold: boolean }>`
+  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+`;
+CategoryName.displayName = 'CategoryName';
+
+const CategorySelectableContainer = styled.div`
+  width: 300px;
+`;
+CategorySelectableContainer.displayName = 'CategorySelectableContainer';
 
 const renderOption = (option: CategoryOption, searchValue: string) => {
   const { label, count, checked } = option;

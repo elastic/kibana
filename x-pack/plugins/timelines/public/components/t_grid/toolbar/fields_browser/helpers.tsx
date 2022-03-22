@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useReducer } from 'react';
-import { filter, get, omit, pickBy } from 'lodash/fp';
+import { filter, get, pickBy } from 'lodash/fp';
 
 import { TimelineId } from '../../../../../public/types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
@@ -145,42 +145,45 @@ export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
     (state: SelectionState, action: SelectionAction) => {
       switch (action.type) {
         case 'ADD': {
-          return action.names.reduce(
+          return action.names.reduce<SelectionState>(
             (newState, name) => {
               if (newState.toRemove[name] != null) {
-                newState.toRemove = omit(name, newState.toRemove);
+                delete newState.toRemove[name];
               } else {
-                newState.toAdd = { ...newState.toAdd, [name]: true };
+                newState.toAdd[name] = true;
               }
               return newState;
             },
-            { ...state }
+            // new objects to allow mutations inside the reducer
+            { toAdd: { ...state.toAdd }, toRemove: { ...state.toRemove } }
           );
         }
         case 'REMOVE': {
-          return action.names.reduce(
+          return action.names.reduce<SelectionState>(
             (newState, name) => {
               if (newState.toAdd[name] != null) {
-                newState.toAdd = omit(name, newState.toAdd);
+                delete newState.toAdd[name];
               } else {
-                newState.toRemove = { ...newState.toRemove, [name]: true };
+                newState.toRemove[name] = true;
               }
               return newState;
             },
-            { ...state }
+            // new objects to allow mutations inside the reducer
+            { toAdd: { ...state.toAdd }, toRemove: { ...state.toRemove } }
           );
         }
         case 'SET': {
-          return action.add.reduce(
+          return action.add.reduce<SelectionState>(
             (newState, name) => {
               // if a field is present in both `add` and `remove`, it will remain unchanged
               if (newState.toRemove[name] != null) {
-                newState.toRemove = omit(name, newState.toRemove);
+                delete newState.toRemove[name];
               } else {
-                newState.toAdd = { ...newState.toAdd, [name]: true };
+                newState.toAdd[name] = true;
               }
               return newState;
             },
+            // new objects to allow mutations inside the reducer
             {
               toAdd: {},
               toRemove: Object.fromEntries(
@@ -210,7 +213,7 @@ export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
   const setSelected = useCallback(
     (fieldNames: string[]) => {
       // To set the selected fields we need to put all current fields to remove and the new ones to add
-      // The reducer will take care of any duplicity between `add` and `remove` arrays
+      // The reducer will take care of any duplicity between `add` and `remove` fields
       dispatchSelection({ type: 'SET', add: fieldNames, remove: currentColumnNames });
     },
     [currentColumnNames]
