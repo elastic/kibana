@@ -32,7 +32,7 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { createScopedLogger } from '../common/utils';
+import { createScopedLogger, getViewInAppUrl } from '../common/utils';
 import { evaluateCondition } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
@@ -90,6 +90,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           group: '*',
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
+          viewInAppUrl: getViewInAppUrl(libs.basePath),
           timestamp: moment().toISOString(),
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -204,6 +205,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             group,
             alertState: stateToAlertMessage[nextState],
             reason,
+            viewInAppUrl: getViewInAppUrl(libs.basePath),
             timestamp: moment().toISOString(),
             value: mapToConditionsLookup(results, (result) =>
               formatMetric(result[group].metric, result[group].currentValue)
