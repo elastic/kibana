@@ -61,9 +61,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('submit-comment');
 
       // validate user action
-      await find.byCssSelector(
+      const newComment = await find.byCssSelector(
         '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
       );
+      expect(await newComment.getVisibleText()).equal('Test comment from automation');
     });
 
     it('adds a tag to a case', async () => {
@@ -79,12 +80,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await find.byCssSelector('[data-test-subj*="tags-add-action"]');
     });
 
+    it('deletes a tag from a case', async () => {
+      await testSubjects.click('tag-list-edit-button');
+      // find the tag button and click the close button
+      const button = await find.byCssSelector('[data-test-subj="comboBoxInput"] button');
+      await button.click();
+      await testSubjects.click('edit-tags-submit');
+
+      // validate user action
+      await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
+    });
+
     it('changes a case status to in-progress via dropdown menu', async () => {
       await cases.common.markCaseInProgressViaDropdown();
       // validate user action
       await find.byCssSelector(
         '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-in-progress"]'
       );
+      // validates dropdown tag
+      await testSubjects.existOrFail('case-view-status-dropdown > status-badge-in-progress');
     });
 
     it('changes a case status to closed via dropdown-menu', async () => {
@@ -94,6 +108,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await find.byCssSelector(
         '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-closed"]'
       );
+      // validates dropdown tag
+      await testSubjects.existOrFail('case-view-status-dropdown > status-badge-closed');
     });
 
     it("reopens a case from the 'reopen case' button", async () => {
@@ -110,6 +126,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await find.byCssSelector(
         '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-open"]'
       );
+      // validates dropdown tag
+      await testSubjects.existOrFail('case-view-status-dropdown > status-badge-open');
     });
 
     it("marks in progress a case from the 'mark in progress' button", async () => {
@@ -126,6 +144,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await find.byCssSelector(
         '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-in-progress"]'
       );
+      // validates dropdown tag
+      await testSubjects.existOrFail('case-view-status-dropdown > status-badge-in-progress');
     });
 
     it("closes a case from the 'close case' button", async () => {
@@ -142,6 +162,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await find.byCssSelector(
         '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-closed"]'
       );
+      // validates dropdown tag
+      await testSubjects.existOrFail('case-view-status-dropdown > status-badge-closed');
     });
   });
 };

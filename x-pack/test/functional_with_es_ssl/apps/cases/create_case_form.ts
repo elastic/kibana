@@ -42,6 +42,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       // validate tag exists
       await testSubjects.existOrFail('tag-tagme');
+
+      // validate no connector added
+      const button = await find.byCssSelector('[data-test-subj*="case-callout"] button');
+      expect(await button.getVisibleText()).equal('Add connector');
     });
   });
 };
