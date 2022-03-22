@@ -136,6 +136,7 @@ export function useChangePointDetection(
   // const fetchParams = useFetchParams();
 
   const { title: dataViewTitle } = dataView;
+  const timestampField = dataView.getTimeField()?.name;
 
   // ?kuery=&rangeFrom=now-1y%2Fd&rangeTo=now&environment=ENVIRONMENT_ALL&transactionName=PUT%20%2Fapi%2Fsecurity%2Frole%2F%3F&transactionType=request&comparisonEnabled=true&comparisonType=period&latencyAggregationType=avg&transactionId=54c7151a517c62fa&traceId=6ee0f571e2d75cf83ca1767f748cb2dc
   const fetchParams = useMemo(
@@ -233,6 +234,7 @@ export function useChangePointDetection(
           signal: abortCtrl.current.signal,
           body: JSON.stringify({
             ...fetchParams,
+            timestampField,
             fieldCandidates: fieldCandidatesChunk,
             ...searchStrategyParams,
           }),
@@ -382,6 +384,7 @@ export function useChangePointDetection(
         signal: abortCtrl.current.signal,
         body: JSON.stringify({
           ...fetchParams,
+          timestampField,
           fieldCandidates: frequentItemsFieldCandidates,
           ...searchStrategyParams,
         }),
@@ -417,7 +420,15 @@ export function useChangePointDetection(
         setResponse.flush();
       }
     }
-  }, [dataViewTitle, discoverQuery, http, fetchParams, setResponse, searchStrategyParams]);
+  }, [
+    dataViewTitle,
+    discoverQuery,
+    http,
+    fetchParams,
+    setResponse,
+    searchStrategyParams,
+    timestampField,
+  ]);
 
   const cancelFetch = useCallback(() => {
     abortCtrl.current.abort();

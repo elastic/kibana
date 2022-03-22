@@ -21,13 +21,14 @@ export function getCorrelationsFilters({
   environment,
   kuery,
   serviceName,
+  timestampField,
   transactionType,
   transactionName,
   start,
   end,
 }: CorrelationsClientParams) {
   const correlationsFilters: ESFilter[] = [
-    ...(start && end ? rangeQuery(start, end) : []),
+    ...(start && end ? rangeQuery(start, end, timestampField) : []),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];

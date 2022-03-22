@@ -30,6 +30,8 @@ export const getChangePointRequest = (
     params,
   });
 
+  const timestampField = params.timestampField ?? '@timestamp';
+
   let filter: estypes.QueryDslQueryContainer[] = [];
 
   if (Array.isArray(query.bool.filter)) {
@@ -39,7 +41,7 @@ export const getChangePointRequest = (
       ...filter,
       {
         range: {
-          '@timestamp': {
+          [timestampField]: {
             gte: windowParameters.deviationMin,
             lt: windowParameters.deviationMax,
             format: 'epoch_millis',
@@ -62,7 +64,7 @@ export const getChangePointRequest = (
                 ...filter,
                 {
                   range: {
-                    '@timestamp': {
+                    [timestampField]: {
                       gte: windowParameters.baselineMin,
                       lt: windowParameters.baselineMax,
                       format: 'epoch_millis',

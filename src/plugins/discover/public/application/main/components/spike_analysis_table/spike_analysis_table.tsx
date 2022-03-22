@@ -56,10 +56,7 @@ interface SpikeAnalysisTableProps extends BaseSpikeAnalysisTableProps {
   spikeSelection: WindowParameters;
 }
 
-export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
-  indexPattern,
-  spikeSelection,
-}) => {
+export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spikeSelection }) => {
   const { theme } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
@@ -216,7 +213,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     }, []);
 
   const { progress, response, startFetch, cancelFetch } = useChangePointDetection(
-    indexPattern,
+    dataView,
     spikeSelection
   );
   const status = progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS;

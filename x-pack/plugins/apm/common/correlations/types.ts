@@ -31,6 +31,7 @@ export interface CorrelationsClientParams {
   environment: string;
   kuery: string;
   serviceName?: string;
+  timestampField?: string;
   transactionName?: string;
   transactionType?: string;
   start: number;

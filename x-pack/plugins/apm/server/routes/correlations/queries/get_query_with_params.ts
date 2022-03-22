@@ -30,6 +30,7 @@ export const getQueryWithParams = ({
     serviceName,
     start,
     end,
+    timestampField,
     transactionType,
     transactionName,
   } = params;
@@ -38,6 +39,7 @@ export const getQueryWithParams = ({
     environment,
     kuery,
     serviceName,
+    timestampField,
     transactionType,
     transactionName,
     start,

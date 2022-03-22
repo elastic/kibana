@@ -49,7 +49,7 @@ export interface BaseSpikeAnalysisTableProps {
   /**
    * The used index pattern
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Saved search description
    */
@@ -92,7 +92,7 @@ export interface BaseSpikeAnalysisTableProps {
 export const SpikeAnalysisTable = (props: BaseSpikeAnalysisTableProps) => {
   const {
     availableFields$,
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     columns,
@@ -147,7 +147,7 @@ export const SpikeAnalysisTable = (props: BaseSpikeAnalysisTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
-        indexPattern,
+        indexPattern: dataView,
         savedSearch,
         query,
         filters,
@@ -160,7 +160,7 @@ export const SpikeAnalysisTable = (props: BaseSpikeAnalysisTableProps) => {
     }
   }, [
     embeddable,
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     columns,
@@ -193,7 +193,7 @@ export const SpikeAnalysisTable = (props: BaseSpikeAnalysisTableProps) => {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
-            indexPattern,
+            indexPattern: dataView,
             savedSearch,
             query,
             showPreviewByDefault,

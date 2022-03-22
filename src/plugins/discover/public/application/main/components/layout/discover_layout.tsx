@@ -370,7 +370,7 @@ export function DiscoverLayout({
                       spikeSelection={spikeSelection}
                       availableFields$={savedSearchData$.availableFields$}
                       savedSearch={savedSearch}
-                      indexPattern={indexPattern}
+                      dataView={indexPattern}
                       query={state.query}
                       filters={state.filters}
                       columns={columns}

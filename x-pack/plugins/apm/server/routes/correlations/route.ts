@@ -372,6 +372,7 @@ const changePointPValuesRoute = createApmServerRoute({
       t.partial({
         indexPatternTitle: t.string,
         serviceName: t.string,
+        timestampField: t.string,
         transactionName: t.string,
         transactionType: t.string,
       }),
@@ -438,6 +439,7 @@ const changePointFrequentItemsRoute = createApmServerRoute({
       t.partial({
         indexPatternTitle: t.string,
         serviceName: t.string,
+        timestampField: t.string,
         transactionName: t.string,
         transactionType: t.string,
       }),

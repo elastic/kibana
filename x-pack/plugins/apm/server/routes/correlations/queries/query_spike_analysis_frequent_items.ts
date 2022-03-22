@@ -29,6 +29,8 @@ export const getSpikeAnalysisFrequentItemsRequest = (
     params,
   });
 
+  const timestampField = params.timestampField ?? '@timestamp';
+
   if (Array.isArray(query.bool.filter)) {
     const filters = query.bool.filter.filter(
       (d) => Object.keys(d)[0] !== 'range'
@@ -38,7 +40,7 @@ export const getSpikeAnalysisFrequentItemsRequest = (
       ...filters,
       {
         range: {
-          '@timestamp': {
+          [timestampField]: {
             gte: windowParameters.deviationMin,
             lt: windowParameters.deviationMax,
             format: 'epoch_millis',
