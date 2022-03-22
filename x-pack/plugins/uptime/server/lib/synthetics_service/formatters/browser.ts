@@ -12,6 +12,8 @@ export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.METADATA]: (fields) => objectFormatter(fields[ConfigKey.METADATA]),
+  [ConfigKey.URLS]: null,
+  [ConfigKey.PORT]: null,
   [ConfigKey.ZIP_URL_TLS_VERSION]: (fields) =>
     arrayFormatter(fields[ConfigKey.ZIP_URL_TLS_VERSION]),
   [ConfigKey.SOURCE_ZIP_URL]: null,
