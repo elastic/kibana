@@ -354,6 +354,33 @@ export function ItemSetTreeFactory(
     root.sortByQuality();
   }
 
+  // function dfDepthFirstSearch() {}
+
+  // Create simple tree consisting or non-overlapping sets of data.
+  // By default (fields==None), the field search order is dependent on the highest count itemsets.
+  // function getSimpleHierarchicalTree(
+  //   df,
+  //   collapseRedundant: boolean,
+  //   displayOther: boolean,
+  //   fields = []
+  // ) {
+  //     if fields is None:
+  //     fields = list()
+  // for index, row in df.drop(['max_p_value', 'size', 'doc_count', 'total_doc_count'], axis=1).iterrows():
+  //     candidates = list(row[row.notna()].index)
+  //     for candidate in candidates:
+  //         if candidate not in fields:
+  //             fields.append(candidate)
+  // field = fields[0]
+  // total_doc_count = df['total_doc_count'].max()
+  // root = ipytree.Tree()
+  // for value in df[field].value_counts().index:
+  //     ItemSetTree.df_depth_first_search(fields, root, total_doc_count+1, '', field, value, df,
+  //                                       collapse_redundant,
+  //                                       display_other)
+  // return fields, root
+  // }
+
   buildTree();
 
   return {
