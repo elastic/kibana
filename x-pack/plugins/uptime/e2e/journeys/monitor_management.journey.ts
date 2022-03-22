@@ -123,6 +123,7 @@ const createMonitorJourney = ({
       });
 
       step(`create ${monitorType} monitor`, async () => {
+        await uptime.enableMonitorManagement();
         await uptime.clickAddMonitor();
         await uptime.createMonitor({ monitorConfig, monitorType });
         const isSuccessful = await uptime.confirmAndSave();

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Page } from '@elastic/synthetics';
 import { DataStream } from '../../common/runtime_types/monitor_management';
 import { getQuerystring } from '../journeys/utils';
@@ -39,6 +38,15 @@ export function monitorManagementPageProvider({
       await page.goto(monitorManagement, {
         waitUntil: 'networkidle',
       });
+    },
+
+    async enableMonitorManagement() {
+      const toggle = await this.findByTestSubj('syntheticsEnableSwitch');
+      const isChecked = await toggle.getAttribute('aria-checked');
+      const isEnabled = isChecked === 'true' ? true : false;
+      if (!isEnabled) {
+        await toggle.click();
+      }
     },
 
     async navigateToAddMonitor() {

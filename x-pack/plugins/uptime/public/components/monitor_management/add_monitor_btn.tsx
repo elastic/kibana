@@ -55,6 +55,7 @@ export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
               label={SYNTHETICS_ENABLE_LABEL}
               disabled={loading}
               onChange={() => handleSwitch()}
+              data-test-subj="syntheticsEnableSwitch"
             />
           </EuiToolTip>
         )}

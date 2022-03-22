@@ -39,6 +39,7 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
   });
 
   step(`shows error if name already exists`, async () => {
+    await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
     await uptime.createBasicMonitorDetails({
       name: 'Test monitor',
