@@ -22,23 +22,29 @@ describe('validateFilePathInput', () => {
 
     it('does not warn on valid filenames', () => {
       expect(
-        validateFilePathInput({ os, value: 'C:\\Windows\\*\\FILENAME.EXE-1231205124.gz' })
-      ).not.toEqual(FILENAME_WILDCARD_WARNING);
+        validateFilePathInput({
+          os,
+          value: 'C:\\Windows\\*\\FILENAME.EXE-1231205124.gz',
+        })
+      ).not.toBeDefined();
       expect(
         validateFilePathInput({
           os,
-          value: 'C:\\Windows\\*\\file-name.path华语-1234 --su..ffix.txt',
+          value: "C:\\Windows\\*\\test$  as2@13---12!@#A,DS.#$^&$!#~ 'as'd.华语.txt",
         })
-      ).not.toEqual(FILENAME_WILDCARD_WARNING);
+      ).toEqual(undefined);
     });
 
     it('warns on wildcard in file name at the end of the path', () => {
       expect(validateFilePathInput({ os, value: 'c:\\path*.exe' })).toEqual(
         FILENAME_WILDCARD_WARNING
       );
-      expect(validateFilePathInput({ os, value: 'C:\\Windows\\*\\FILENAME.EXE-*.gz' })).toEqual(
-        FILENAME_WILDCARD_WARNING
-      );
+      expect(
+        validateFilePathInput({
+          os,
+          value: 'C:\\Windows\\*\\FILENAME.EXE-*.gz',
+        })
+      ).toEqual(FILENAME_WILDCARD_WARNING);
     });
 
     it('warns on unix paths or non-windows paths', () => {
@@ -62,7 +68,10 @@ describe('validateFilePathInput', () => {
         FILENAME_WILDCARD_WARNING
       );
       expect(
-        validateFilePathInput({ os, value: '/opt/*/file-name.path华语-1234 --su..ffix.txt' })
+        validateFilePathInput({
+          os,
+          value: "/opt/*/test$  as2@13---12!@#A,DS.#$^&$!#~ 'as'd.华语.txt",
+        })
       ).not.toEqual(FILENAME_WILDCARD_WARNING);
     });
     it('warns on wildcard in file name at the end of the path', () => {
@@ -603,29 +612,56 @@ describe('Unacceptable Mac/Linux exact paths', () => {
   });
 });
 
-describe('Executable filenames with wildcard PATHS', () => {
+describe('hasSimpleExecutableName', () => {
   it('should return TRUE when MAC/LINUX wildcard paths have an executable name', () => {
+    const os =
+      parseInt((Math.random() * 2).toString(), 10) === 1
+        ? OperatingSystem.MAC
+        : OperatingSystem.LINUX;
+
     expect(
       hasSimpleExecutableName({
-        os: OperatingSystem.LINUX,
+        os,
         type: 'wildcard',
         value: '/opt/*/app',
       })
     ).toEqual(true);
     expect(
       hasSimpleExecutableName({
-        os: OperatingSystem.MAC,
+        os,
         type: 'wildcard',
         value: '/op*/**/app.dmg',
       })
     ).toEqual(true);
     expect(
       hasSimpleExecutableName({
-        os: OperatingSystem.MAC,
+        os,
         type: 'wildcard',
-        value: '/sy*/file-name.dot..dot...dot-华语',
+        value: "/sy*/test$  as2@13---12!@#A,DS.#$^&$!#~ 'as'd.华语.txt",
       })
     ).toEqual(true);
+  });
+
+  it('should return FALSE when MAC/LINUX wildcard paths have a wildcard in executable name', () => {
+    const os =
+      parseInt((Math.random() * 2).toString(), 10) === 1
+        ? OperatingSystem.MAC
+        : OperatingSystem.LINUX;
+
+    expect(
+      hasSimpleExecutableName({
+        os,
+        type: 'wildcard',
+        value: '/op/*/*pp',
+      })
+    ).toEqual(false);
+    expect(
+      hasSimpleExecutableName({
+        os,
+        type: 'wildcard',
+        value: '/op*/b**/ap.m**',
+      })
+    ).toEqual(false);
   });
 
   it('should return TRUE when WINDOWS wildcards paths have a executable name', () => {
@@ -643,24 +679,15 @@ describe('Executable filenames with wildcard PATHS', () => {
         value: 'C:\\*\\file-name.path华语 1234.txt',
       })
     ).toEqual(true);
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.WINDOWS,
+        type: 'wildcard',
+        value: "C:\\*\\test$  as2@13---12!@#A,DS.#$^&$!#~ 'as'd.华语.txt",
+      })
+    ).toEqual(true);
   });
 
-  it('should return FALSE when MAC/LINUX wildcard paths have a wildcard in executable name', () => {
-    expect(
-      hasSimpleExecutableName({
-        os: OperatingSystem.LINUX,
-        type: 'wildcard',
-        value: '/op/*/*pp',
-      })
-    ).toEqual(false);
-    expect(
-      hasSimpleExecutableName({
-        os: OperatingSystem.MAC,
-        type: 'wildcard',
-        value: '/op*/b**/ap.m**',
-      })
-    ).toEqual(false);
-  });
   it('should return FALSE when WINDOWS wildcards paths have a wildcard in executable name', () => {
     expect(
       hasSimpleExecutableName({

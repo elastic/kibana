@@ -48,8 +48,10 @@ export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
  * /home/lib/my-binary-app+-\ some\  x\ dmp.and-a10.dmp
  * /home/lib/my-binary-app+-\ some\ 大阪 x\ dmp..and-a10.dmp
  */
-export const WIN_EXEC_PATH = /(\\[-\.\w \p{L}]+)$/iu;
-export const UNIX_EXEC_PATH = /(\/[-\.\w \p{L}]+)$/iu;
+export const WIN_EXEC_PATH =
+  /(\\[\-\.\w,'!#@& \p{C}\p{L}\p{M}\p{N}\p{Pe}\p{Pi}\p{Ps}\p{S}\p{Z}]+)$/iu;
+export const UNIX_EXEC_PATH =
+  /(\/[\-\.\w,'!#@& \p{C}\p{L}\p{M}\p{N}\p{Pe}\p{Pi}\p{Ps}\p{S}\p{Z}]+)$/iu;
 
 export const validateFilePathInput = ({
   os,
