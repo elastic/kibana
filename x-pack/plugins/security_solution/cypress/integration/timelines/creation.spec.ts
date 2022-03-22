@@ -41,7 +41,6 @@ import {
 } from '../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
-import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 describe('Timelines', (): void => {
   before(() => {
@@ -117,11 +116,10 @@ describe('Timelines', (): void => {
 describe('Create a timeline from a template', () => {
   before(() => {
     cy.intercept('/api/timeline*').as('timeline');
+    login();
     deleteTimelines();
     createTimelineTemplate(getTimeline());
-    login();
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
-    waitForTimelinesPanelToBeLoaded();
   });
   it('Should have the same query and open the timeline modal', () => {
     selectCustomTemplates();
