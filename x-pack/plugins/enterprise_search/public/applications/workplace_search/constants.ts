@@ -363,8 +363,6 @@ export const GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE = 'github_enterprise_
 export const CUSTOM_SERVICE_TYPE = 'custom';
 export const EXTERNAL_SERVICE_TYPE = 'external';
 
-export const WORKPLACE_SEARCH_URL_PREFIX = '/app/enterprise_search/workplace_search';
-
 export const DOCUMENTATION_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.documentation',
   {
@@ -478,6 +476,20 @@ export const BASE_URL_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.baseUrl.label',
   {
     defaultMessage: 'Base URL',
+  }
+);
+
+export const EXTERNAL_CONNECTOR_URL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.externalConnectorUrl.label',
+  {
+    defaultMessage: 'Connector URL',
+  }
+);
+
+export const EXTERNAL_CONNECTOR_API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.externalConnectorApiKey.label',
+  {
+    defaultMessage: 'Connector API key',
   }
 );
 

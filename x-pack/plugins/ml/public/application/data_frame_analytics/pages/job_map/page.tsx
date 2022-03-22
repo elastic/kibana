@@ -112,7 +112,7 @@ export const Page: FC = () => {
       <NodeAvailableWarning />
 
       <SavedObjectsWarning
-        jobType="data-frame-analytics"
+        mlSavedObjectType="data-frame-analytics"
         onCloseFlyout={refresh}
         forceRefresh={isLoading}
       />
