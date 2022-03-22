@@ -13,7 +13,7 @@ import type {
   FieldValuePair,
   CorrelationsParams,
 } from '../../../../common/correlations/types';
-import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
 import {
   computeExpectationsAndRanges,
@@ -25,6 +25,7 @@ import {
   fetchTransactionDurationFractions,
   fetchTransactionDurationHistogramRangeSteps,
   fetchTransactionDurationPercentiles,
+  fetchTransactionDurationRanges,
 } from './index';
 
 export const fetchSignificantCorrelations = async (
@@ -76,12 +77,54 @@ export const fetchSignificantCorrelations = async (
     )
   );
 
-  const latencyCorrelations: LatencyCorrelation[] = fulfilled.filter(
-    (d): d is LatencyCorrelation => d !== undefined
-  );
+  const latencyCorrelations = fulfilled.filter(
+    (d) => d && 'histogram' in d
+  ) as LatencyCorrelation[];
+  let fallbackResult: LatencyCorrelation | undefined =
+    latencyCorrelations.length > 0
+      ? undefined
+      : fulfilled
+          .filter((d) => !(d as LatencyCorrelation)?.histogram)
+          .reduce((d, result) => {
+            if (d?.correlation !== undefined) {
+              if (!result) {
+                result = d?.correlation > 0 ? d : undefined;
+              } else {
+                if (
+                  d.correlation > 0 &&
+                  d.ksTest > result.ksTest &&
+                  d.correlation > result.correlation
+                ) {
+                  result = d;
+                }
+              }
+            }
+            return result;
+          }, undefined);
+  if (latencyCorrelations.length === 0 && fallbackResult) {
+    const { fieldName, fieldValue } = fallbackResult;
+    const logHistogram = await fetchTransactionDurationRanges(
+      esClient,
+      paramsWithIndex,
+      histogramRangeSteps,
+      [{ fieldName, fieldValue }]
+    );
+
+    if (fallbackResult) {
+      fallbackResult = {
+        ...fallbackResult,
+        histogram: logHistogram,
+      };
+    }
+  }
 
   const ccsWarning =
     rejected.length > 0 && paramsWithIndex?.index.includes(':');
 
-  return { latencyCorrelations, ccsWarning, totalDocCount };
+  return {
+    latencyCorrelations,
+    ccsWarning,
+    totalDocCount,
+    fallbackResult,
+  };
 };

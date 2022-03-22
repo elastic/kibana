@@ -56,7 +56,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     dataOutputOptions,
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
-  } = useOutputOptions();
+  } = useOutputOptions(agentPolicy);
 
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();

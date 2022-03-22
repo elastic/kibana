@@ -87,6 +87,7 @@ describe('test fetchCharts', () => {
           "id": "2",
           "params": Object {
             "drop_partials": false,
+            "extendToTimeRange": false,
             "extended_bounds": Object {},
             "field": "timestamp",
             "interval": "auto",
