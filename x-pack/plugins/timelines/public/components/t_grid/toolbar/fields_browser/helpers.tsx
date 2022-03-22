@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
-import { filter, get, pickBy } from 'lodash/fp';
-import styled from 'styled-components';
+import { useCallback, useMemo, useReducer } from 'react';
+import { filter, get, omit, pickBy } from 'lodash/fp';
 
 import { TimelineId } from '../../../../../public/types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
-import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
+import {
+  DEFAULT_CATEGORY_NAME,
+  defaultColumnHeaderType,
+} from '../../body/column_headers/default_headers';
+import { ColumnHeaderOptions } from '../../../../../common';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
 
-export const LoadingSpinner = styled(EuiLoadingSpinner)`
-  cursor: pointer;
-  position: relative;
-  top: 3px;
-`;
-
-LoadingSpinner.displayName = 'LoadingSpinner';
+export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
+export const CLOSE_BUTTON_CLASS_NAME = 'close-button';
+export const APPLY_BUTTON_CLASS_NAME = 'apply-button';
+export const RESET_FIELDS_CLASS_NAME = 'reset-fields';
 
 export const FIELD_BROWSER_WIDTH = 925;
 export const TABLE_HEIGHT = 260;
@@ -119,22 +120,130 @@ export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
     ? defaultHeaders.find((c) => c.id === fieldId) ?? {}
     : {};
 
-export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
-export const CLOSE_BUTTON_CLASS_NAME = 'close-button';
-export const RESET_FIELDS_CLASS_NAME = 'reset-fields';
+/**
+ * Returns the column header for a field
+ */
+export const getColumnHeader = (timelineId: string, fieldName: string): ColumnHeaderOptions => ({
+  columnHeaderType: defaultColumnHeaderType,
+  id: fieldName,
+  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+  ...getAlertColumnHeader(timelineId, fieldName),
+});
 
-export const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-` as unknown as typeof EuiBadge;
+interface SelectionState {
+  toAdd: Record<string, true>;
+  toRemove: Record<string, true>;
+}
 
-CountBadge.displayName = 'CountBadge';
+type SelectionAction =
+  | { type: 'ADD'; names: string[] }
+  | { type: 'REMOVE'; names: string[] }
+  | { type: 'SET'; add: string[]; remove: string[] };
 
-export const CategoryName = styled.span<{ bold: boolean }>`
-  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
-`;
-CategoryName.displayName = 'CategoryName';
+export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
+  const [selectionState, dispatchSelection] = useReducer(
+    (state: SelectionState, action: SelectionAction) => {
+      switch (action.type) {
+        case 'ADD': {
+          return action.names.reduce(
+            (newState, name) => {
+              if (newState.toRemove[name] != null) {
+                newState.toRemove = omit(name, newState.toRemove);
+              } else {
+                newState.toAdd = { ...newState.toAdd, [name]: true };
+              }
+              return newState;
+            },
+            { ...state }
+          );
+        }
+        case 'REMOVE': {
+          return action.names.reduce(
+            (newState, name) => {
+              if (newState.toAdd[name] != null) {
+                newState.toAdd = omit(name, newState.toAdd);
+              } else {
+                newState.toRemove = { ...newState.toRemove, [name]: true };
+              }
+              return newState;
+            },
+            { ...state }
+          );
+        }
+        case 'SET': {
+          return action.add.reduce(
+            (newState, name) => {
+              // if a field is present in both `add` and `remove`, it will remain unchanged
+              if (newState.toRemove[name] != null) {
+                newState.toRemove = omit(name, newState.toRemove);
+              } else {
+                newState.toAdd = { ...newState.toAdd, [name]: true };
+              }
+              return newState;
+            },
+            {
+              toAdd: {},
+              toRemove: Object.fromEntries(
+                action.remove.map<[string, true]>((name) => [name, true])
+              ),
+            }
+          );
+        }
+        default:
+          return state;
+      }
+    },
+    { toAdd: {}, toRemove: {} }
+  );
 
-export const CategorySelectableContainer = styled.div`
-  width: 300px;
-`;
-CategorySelectableContainer.displayName = 'CategorySelectableContainer';
+  const currentColumnNames = useMemo(() => columnHeaders.map(({ id }) => id), [columnHeaders]);
+  const currentSelected = useMemo(() => new Set(currentColumnNames), [currentColumnNames]);
+
+  const addSelected = useCallback((...names: string[]) => {
+    dispatchSelection({ type: 'ADD', names });
+  }, []);
+
+  const removeSelected = useCallback((...names: string[]) => {
+    dispatchSelection({ type: 'REMOVE', names });
+  }, []);
+
+  const setSelected = useCallback(
+    (fieldNames: string[]) => {
+      // To set the selected fields we need to put all current fields to remove and the new ones to add
+      // The reducer will take care of any duplicity between `add` and `remove` arrays
+      dispatchSelection({ type: 'SET', add: fieldNames, remove: currentColumnNames });
+    },
+    [currentColumnNames]
+  );
+
+  const hasChanges: boolean = useMemo(
+    () =>
+      Object.keys(selectionState.toAdd).length > 0 ||
+      Object.keys(selectionState.toRemove).length > 0,
+    [selectionState]
+  );
+
+  const isSelected = useCallback(
+    (fieldName: string): boolean =>
+      selectionState.toAdd[fieldName] != null ||
+      (currentSelected.has(fieldName) && selectionState.toRemove[fieldName] == null),
+    [selectionState, currentSelected]
+  );
+
+  const getSelectedColumnHeaders = useCallback(
+    (timelineId: string): ColumnHeaderOptions[] => [
+      ...Object.keys(selectionState.toAdd).map((id) => getColumnHeader(timelineId, id)),
+      ...columnHeaders.filter(({ id }) => selectionState.toRemove[id] == null),
+    ],
+    [selectionState, columnHeaders]
+  );
+
+  return {
+    hasChanges,
+    addSelected,
+    removeSelected,
+    setSelected,
+    isSelected,
+    getSelectedColumnHeaders,
+  };
+};

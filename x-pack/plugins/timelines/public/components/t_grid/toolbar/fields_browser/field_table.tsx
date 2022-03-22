@@ -8,17 +8,15 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiInMemoryTable, EuiText } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
-import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
+// import { useDispatch } from 'react-redux';
+import { BrowserFields } from '../../../../../common';
 import * as i18n from './translations';
-import { getColumnHeader, getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
+import { getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
-import { tGridActions } from '../../../../store/t_grid';
+// import { tGridActions } from '../../../../store/t_grid';
 import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
 
 export interface FieldTableProps {
-  timelineId: string;
-  columnHeaders: ColumnHeaderOptions[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -36,6 +34,18 @@ export interface FieldTableProps {
   /** The text displayed in the search input */
   /** Invoked when a user chooses to view a new set of columns in the timeline */
   searchInput: string;
+  /**
+   * Function to check if a field is selected
+   */
+  isSelected: (fieldName: string) => boolean;
+  /**
+   * Adds a field to the selection
+   */
+  addSelected: (fieldName: string) => void;
+  /**
+   * Removes a field from the selection
+   */
+  removeSelected: (fieldName: string) => void;
   /**
    * Hides the field browser when invoked
    */
@@ -56,51 +66,40 @@ const Count = styled.span`
 Count.displayName = 'Count';
 
 const FieldTableComponent: React.FC<FieldTableProps> = ({
-  columnHeaders,
+  addSelected,
   filteredBrowserFields,
   getFieldTableColumns,
+  isSelected,
   searchInput,
   selectedCategoryIds,
-  timelineId,
+  removeSelected,
   onHide,
 }) => {
-  const dispatch = useDispatch();
-
   const fieldItems = useMemo(
     () =>
       getFieldItems({
         browserFields: filteredBrowserFields,
         selectedCategoryIds,
-        columnHeaders,
+        isSelected,
       }),
-    [columnHeaders, filteredBrowserFields, selectedCategoryIds]
+    [filteredBrowserFields, selectedCategoryIds, isSelected]
   );
 
-  const onToggleColumn = useCallback(
-    (fieldId: string) => {
-      if (columnHeaders.some(({ id }) => id === fieldId)) {
-        dispatch(
-          tGridActions.removeColumn({
-            columnId: fieldId,
-            id: timelineId,
-          })
-        );
+  const setFieldSelected = useCallback(
+    (name: string, checked: boolean) => {
+      if (checked) {
+        addSelected(name);
       } else {
-        dispatch(
-          tGridActions.upsertColumn({
-            column: getColumnHeader(timelineId, fieldId),
-            id: timelineId,
-            index: 1,
-          })
-        );
+        removeSelected(name);
       }
     },
-    [columnHeaders, dispatch, timelineId]
+    [addSelected, removeSelected]
   );
 
   const columns = useMemo(
-    () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns, onHide }),
-    [onToggleColumn, searchInput, getFieldTableColumns, onHide]
+    () =>
+      getFieldColumns({ highlight: searchInput, getFieldTableColumns, setFieldSelected, onHide }),
+    [searchInput, getFieldTableColumns, setFieldSelected, onHide]
   );
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 

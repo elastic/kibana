@@ -25,6 +25,10 @@ export const CLOSE = i18n.translate('xpack.timelines.fieldBrowser.closeButton', 
   defaultMessage: 'Close',
 });
 
+export const APPLY = i18n.translate('xpack.timelines.fieldBrowser.applyButton', {
+  defaultMessage: 'Apply',
+});
+
 export const FIELDS_BROWSER = i18n.translate('xpack.timelines.fieldBrowser.fieldBrowserTitle', {
   defaultMessage: 'Fields',
 });

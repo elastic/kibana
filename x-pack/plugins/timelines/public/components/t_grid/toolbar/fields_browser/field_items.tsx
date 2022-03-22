@@ -24,17 +24,13 @@ import { getEmptyValue } from '../../../empty_value';
 import { getExampleText, getIconFromType } from '../../../utils/helpers';
 import type { BrowserFields } from '../../../../../common/search_strategy';
 import type {
-  ColumnHeaderOptions,
   BrowserFieldItem,
   FieldTableColumns,
   GetFieldTableColumns,
 } from '../../../../../common/types';
-import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
 import { TruncatableText } from '../../../truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
-import { getAlertColumnHeader } from './helpers';
 
 const TypeIcon = styled(EuiIcon)`
   margin: 0 4px;
@@ -55,15 +51,14 @@ Description.displayName = 'Description';
 export const getFieldItems = ({
   browserFields,
   selectedCategoryIds,
-  columnHeaders,
+  isSelected,
 }: {
   browserFields: BrowserFields;
   selectedCategoryIds: string[];
-  columnHeaders: ColumnHeaderOptions[];
+  isSelected: (name: string) => boolean;
 }): BrowserFieldItem[] => {
   const categoryIds =
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
-  const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
 
   return uniqBy(
     'name',
@@ -77,7 +72,7 @@ export const getFieldItems = ({
             description: field.description ?? '',
             example: field.example?.toString(),
             category: categoryId,
-            selected: selectedFieldIds.has(name),
+            selected: isSelected(name),
             isRuntime: !!field.runtimeField,
           }))
         );
@@ -86,16 +81,6 @@ export const getFieldItems = ({
     }, [])
   );
 };
-
-/**
- * Returns the column header for a field
- */
-export const getColumnHeader = (timelineId: string, fieldName: string): ColumnHeaderOptions => ({
-  columnHeaderType: defaultColumnHeaderType,
-  id: fieldName,
-  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-  ...getAlertColumnHeader(timelineId, fieldName),
-});
 
 const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
@@ -158,30 +143,30 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
  * `columns` prop
  */
 export const getFieldColumns = ({
-  onToggleColumn,
   highlight = '',
   getFieldTableColumns,
+  setFieldSelected,
   onHide,
 }: {
-  onToggleColumn: (id: string) => void;
   highlight?: string;
   getFieldTableColumns?: GetFieldTableColumns;
+  setFieldSelected: (id: string, checked: boolean) => void;
   onHide: () => void;
 }): FieldTableColumns => [
   {
     field: 'selected',
     name: '',
     render: (selected: boolean, { name }) => (
-      <EuiToolTip content={i18n.VIEW_COLUMN(name)}>
-        <EuiCheckbox
-          aria-label={i18n.VIEW_COLUMN(name)}
-          checked={selected}
-          data-test-subj={`field-${name}-checkbox`}
-          data-colindex={1}
-          id={name}
-          onChange={() => onToggleColumn(name)}
-        />
-      </EuiToolTip>
+      <EuiCheckbox
+        aria-label={i18n.VIEW_COLUMN(name)}
+        checked={selected}
+        data-test-subj={`field-${name}-checkbox`}
+        data-colindex={1}
+        id={name}
+        onChange={() => {
+          setFieldSelected(name, !selected);
+        }}
+      />
     ),
     sortable: false,
     width: '25px',

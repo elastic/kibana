@@ -24,7 +24,13 @@ import type { BrowserFields } from '../../../../../common/search_strategy';
 import type { FieldBrowserProps, ColumnHeaderOptions } from '../../../../../common/types';
 import { Search } from './search';
 
-import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';
+import {
+  APPLY_BUTTON_CLASS_NAME,
+  CLOSE_BUTTON_CLASS_NAME,
+  FIELD_BROWSER_WIDTH,
+  RESET_FIELDS_CLASS_NAME,
+  useFieldSelection,
+} from './helpers';
 import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 
 import * as i18n from './translations';
@@ -100,11 +106,19 @@ const FieldsBrowserComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const onUpdateColumns = useCallback(
-    (columns: ColumnHeaderOptions[]) =>
-      dispatch(tGridActions.updateColumns({ id: timelineId, columns })),
-    [dispatch, timelineId]
+  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+  const { dataViewId, defaultColumns } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId)
   );
+
+  const {
+    hasChanges,
+    isSelected,
+    addSelected,
+    removeSelected,
+    setSelected,
+    getSelectedColumnHeaders,
+  } = useFieldSelection(columnHeaders);
 
   const closeAndRestoreFocus = useCallback(() => {
     onHide();
@@ -114,15 +128,19 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     }, 0);
   }, [onHide, restoreFocusTo]);
 
-  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { dataViewId, defaultColumns } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId)
-  );
+  const applySelection = useCallback(() => {
+    dispatch(
+      tGridActions.updateColumns({
+        id: timelineId,
+        columns: getSelectedColumnHeaders(timelineId),
+      })
+    );
+    closeAndRestoreFocus();
+  }, [dispatch, getSelectedColumnHeaders, timelineId, closeAndRestoreFocus]);
 
   const onResetColumns = useCallback(() => {
-    onUpdateColumns(defaultColumns);
-    closeAndRestoreFocus();
-  }, [onUpdateColumns, closeAndRestoreFocus, defaultColumns]);
+    setSelected(defaultColumns.map(({ id }) => id));
+  }, [setSelected, defaultColumns]);
 
   /** Invoked when the user types in the input to filter the field browser */
   const onInputChange = useCallback(
@@ -179,37 +197,56 @@ const FieldsBrowserComponent: React.FC<Props> = ({
           <EuiSpacer size="l" />
 
           <FieldTable
-            timelineId={timelineId}
-            columnHeaders={columnHeaders}
             filteredBrowserFields={filteredBrowserFields}
             searchInput={appliedFilterInput}
             selectedCategoryIds={selectedCategoryIds}
             getFieldTableColumns={getFieldTableColumns}
+            isSelected={isSelected}
+            addSelected={addSelected}
+            removeSelected={removeSelected}
             onHide={onHide}
           />
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              className={RESET_FIELDS_CLASS_NAME}
-              data-test-subj="reset-fields"
-              onClick={onResetColumns}
-            >
-              {i18n.RESET_FIELDS}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                className={RESET_FIELDS_CLASS_NAME}
+                data-test-subj="reset-fields"
+                onClick={onResetColumns}
+              >
+                {i18n.RESET_FIELDS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={closeAndRestoreFocus}
-              aria-label={i18n.CLOSE}
-              className={CLOSE_BUTTON_CLASS_NAME}
-              data-test-subj="close"
-            >
-              {i18n.CLOSE}
-            </EuiButton>
-          </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={closeAndRestoreFocus}
+                aria-label={i18n.CLOSE}
+                className={CLOSE_BUTTON_CLASS_NAME}
+                data-test-subj="close"
+              >
+                {i18n.CLOSE}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={applySelection}
+                disabled={!hasChanges}
+                aria-label={i18n.APPLY}
+                className={APPLY_BUTTON_CLASS_NAME}
+                data-test-subj="apply"
+                fill
+              >
+                {i18n.APPLY}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalFooter>
       </div>
     </EuiModal>
