@@ -32,8 +32,8 @@ import { ExecutionStatus } from './components/execution_status';
 import { LastRun } from './components/last_run';
 import { EditRuleFlyout } from './components/edit_rule_flyout';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
-import { NoDataPrompt } from './components/prompts/noData_prompt';
-import { NoPermissionPrompt } from './components/prompts/noPermission_prompt';
+import { NoDataPrompt } from './components/prompts/no_data_prompt';
+import { NoPermissionPrompt } from './components/prompts/no_permission_prompt';
 import {
   deleteRules,
   RuleTableItem,
