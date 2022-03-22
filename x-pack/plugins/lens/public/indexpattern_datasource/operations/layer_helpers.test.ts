@@ -2162,6 +2162,7 @@ describe('state_helpers', () => {
                 id: 'number',
                 params: { decimals: 2 },
               },
+              emptyAsNull: true,
             },
           })
         );
