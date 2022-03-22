@@ -93,7 +93,7 @@ describe('<TemplateCreate />', () => {
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
   });
 
-  describe('composable index template', () => {
+  describe.skip('composable index template', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -126,7 +126,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe('legacy index template', () => {
+  describe.skip('legacy index template', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup, true);
@@ -160,29 +160,31 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
       });
 
-      it('should set the correct page title', async () => {
+      it.skip('should set the correct page title', async () => {
         const { exists, find } = testBed;
 
         expect(exists('stepComponents')).toBe(true);
         expect(find('stepTitle').text()).toEqual('Component templates (optional)');
       });
 
-      it(`doesn't render the deprecated legacy index template warning`, () => {
+      it.skip(`doesn't render the deprecated legacy index template warning`, () => {
         const { exists } = testBed;
         expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(false);
       });
 
-      it('should list the available component templates', () => {
+      // TODO: WASAAA
+      it.only('should list the available component templates', () => {
         const {
           actions: {
             componentTemplates: { getComponentTemplatesInList },
           },
         } = testBed;
+        console.log(testBed.component.html());
         const componentsFound = getComponentTemplatesInList();
         expect(componentsFound).toEqual(componentTemplates.map((c) => c.name));
       });
 
-      it('should allow to search for a component', async () => {
+      it.skip('should allow to search for a component', async () => {
         const {
           component,
           form: { setInputValue },
@@ -200,7 +202,7 @@ describe('<TemplateCreate />', () => {
         expect(componentsFound).toEqual(['test_component_template_2']);
       });
 
-      it('should allow to filter component by Index settings, mappings and aliases', async () => {
+      it.skip('should allow to filter component by Index settings, mappings and aliases', async () => {
         const {
           find,
           exists,
@@ -240,7 +242,7 @@ describe('<TemplateCreate />', () => {
         expect(exists('componentTemplatesList')).toBe(false); // no component has aliases defined.
       });
 
-      it('should allow to select and unselect a component template', async () => {
+      it.skip('should allow to select and unselect a component template', async () => {
         const {
           find,
           exists,
@@ -270,7 +272,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    describe('index settings (step 3)', () => {
+    describe.skip('index settings (step 3)', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         // Logistics
@@ -295,7 +297,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    describe('mappings (step 4)', () => {
+    describe.skip('mappings (step 4)', () => {
       const navigateToMappingsStep = async () => {
         const { actions } = testBed;
         // Logistics
@@ -380,7 +382,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    describe('aliases (step 5)', () => {
+    describe.skip('aliases (step 5)', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         // Logistics
@@ -411,7 +413,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe('review (step 6)', () => {
+  describe.skip('review (step 6)', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -440,7 +442,7 @@ describe('<TemplateCreate />', () => {
       expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
     });
 
-    describe('tabs', () => {
+    describe.skip('tabs', () => {
       test('should have 3 tabs', () => {
         const { find } = testBed;
 
@@ -499,7 +501,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe('form payload & api errors', () => {
+  describe.skip('form payload & api errors', () => {
     beforeEach(async () => {
       const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 
