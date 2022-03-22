@@ -23,10 +23,10 @@ import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
 import { useStyles } from './styles';
-import { 
+import {
   useFetchAlertStatus,
   useFetchSessionViewProcessEvents,
-  useFetchSessionViewAlerts
+  useFetchSessionViewAlerts,
 } from './hooks';
 
 /**
@@ -90,6 +90,15 @@ export const SessionView = ({
   const toggleDetailPanel = useCallback(() => {
     setIsDetailOpen(!isDetailOpen);
   }, [isDetailOpen]);
+
+  const onShowAlertDetails = useCallback(
+    (alertUuid: string) => {
+      if (loadAlertDetails) {
+        loadAlertDetails(alertUuid, () => handleOnAlertDetailsClosed(alertUuid));
+      }
+    },
+    [loadAlertDetails, handleOnAlertDetailsClosed]
+  );
 
   const handleOptionChange = useCallback((checkedOptions: DisplayOptionsState) => {
     setDisplayOptions(checkedOptions);
@@ -213,8 +222,7 @@ export const SessionView = ({
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
                     updatedAlertsStatus={updatedAlertsStatus}
-                    loadAlertDetails={loadAlertDetails}
-                    handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
+                    onShowAlertDetails={onShowAlertDetails}
                     timeStampOn={displayOptions.timestamp}
                     verboseModeOn={displayOptions.verboseMode}
                   />
@@ -237,7 +245,7 @@ export const SessionView = ({
                     investigatedAlert={jumpToEvent}
                     selectedProcess={selectedProcess}
                     onProcessSelected={onProcessSelected}
-                    onShowAlertDetails={loadAlertDetails}
+                    onShowAlertDetails={onShowAlertDetails}
                   />
                 </EuiResizablePanel>
               </>

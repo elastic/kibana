@@ -29,7 +29,7 @@ describe('ProcessTree component', () => {
     hasPreviousPage: false,
     onProcessSelected: jest.fn(),
     updatedAlertsStatus: {},
-    handleOnAlertDetailsClosed: jest.fn(),
+    onShowAlertDetails: jest.fn(),
   };
 
   beforeEach(() => {

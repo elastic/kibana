@@ -45,8 +45,7 @@ export interface ProcessTreeDeps {
 
   // a map for alerts with updated status and process.entity_id
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
-  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
-  handleOnAlertDetailsClosed: (alertUuid: string) => void;
+  onShowAlertDetails: (alertUuid: string) => void;
   timeStampOn?: boolean;
   verboseModeOn?: boolean;
 }
@@ -66,8 +65,7 @@ export const ProcessTree = ({
   onProcessSelected,
   setSearchResults,
   updatedAlertsStatus,
-  loadAlertDetails,
-  handleOnAlertDetailsClosed,
+  onShowAlertDetails,
   timeStampOn,
   verboseModeOn,
 }: ProcessTreeDeps) => {
@@ -206,8 +204,7 @@ export const ProcessTree = ({
             selectedProcessId={selectedProcess?.id}
             scrollerRef={scrollerRef}
             onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
-            loadAlertDetails={loadAlertDetails}
-            handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
+            onShowAlertDetails={onShowAlertDetails}
             timeStampOn={timeStampOn}
             verboseModeOn={verboseModeOn}
           />

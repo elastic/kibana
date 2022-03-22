@@ -15,6 +15,7 @@ import {
   ProcessEventResults,
 } from '../../../common/types/process_tree';
 import {
+  ALERTS_ROUTE,
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
   ALERT_STATUS_ROUTE,
@@ -108,9 +109,9 @@ export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
       refetchOnReconnect: false,
     }
   );
-  
+
   return query;
-}
+};
 
 export const useFetchAlertStatus = (
   updatedAlertsStatus: AlertStatusEventEntityIdMap,

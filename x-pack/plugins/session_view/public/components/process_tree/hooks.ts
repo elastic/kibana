@@ -199,6 +199,7 @@ export const useProcessTree = ({
   sessionEntityId,
   data,
   alerts,
+  searchQuery,
   updatedAlertsStatus,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
