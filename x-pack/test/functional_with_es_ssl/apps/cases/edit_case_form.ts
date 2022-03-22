@@ -47,6 +47,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
         expect(await title.getVisibleText()).equal(newTitle);
       });
+
+      // validate user action
+      await find.byCssSelector('[data-test-subj*="title-update-action"]');
     });
 
     it('adds a comment to a case', async () => {

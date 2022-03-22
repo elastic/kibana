@@ -14,6 +14,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     const common = getPageObject('common');
     const find = getService('find');
     const cases = getService('cases');
+    const testSubjects = getService('testSubjects');
 
     before(async () => {
       await common.navigateToApp('cases');
@@ -25,9 +26,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('creates a case from the stack managament page', async () => {
       const caseTitle = 'test-' + uuid.v4();
-      await cases.common.createCaseFromCreateCasePage(caseTitle);
+      await cases.common.createCaseFromCreateCasePage({
+        title: caseTitle,
+        description: 'test description',
+        tag: 'tagme',
+      });
+
+      // validate title
       const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
       expect(await title.getVisibleText()).equal(caseTitle);
+
+      // validate description
+      const description = await testSubjects.find('user-action-markdown');
+      expect(await description.getVisibleText()).equal('test description');
+
+      // validate tag exists
+      await testSubjects.existOrFail('tag-tagme');
     });
   });
 };
