@@ -31,10 +31,7 @@ import {
 } from '../constants/field_names/synthetics';
 import { buildExistsFilter } from '../utils';
 
-export function getSyntheticsDistributionConfig({
-  series,
-  indexPattern,
-}: ConfigProps): SeriesConfig {
+export function getSyntheticsDistributionConfig({ series, dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: series?.seriesType || 'line',
@@ -61,7 +58,7 @@ export function getSyntheticsDistributionConfig({
     baseFilters: [],
     definitionFields: [
       { field: 'monitor.name', nested: 'synthetics.step.name.keyword', singleSelection: true },
-      { field: 'url.full', filters: buildExistsFilter('summary.up', indexPattern) },
+      { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
     ],
     metricOptions: [
       {

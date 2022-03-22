@@ -8,8 +8,7 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALERT_RULE_TYPE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
-import { AlertType } from '../../../../../common/alert_types';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -57,11 +56,11 @@ export function FailedTransactionRateChart({
   kuery,
 }: Props) {
   const {
-    urlParams: { transactionName, comparisonEnabled, comparisonType },
+    urlParams: { transactionName },
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -72,9 +71,9 @@ export function FailedTransactionRateChart({
     ApmMlDetectorType.txFailureRate
   );
 
-  const { serviceName, transactionType, alerts } = useApmServiceContext();
+  const { serviceName, transactionType } = useApmServiceContext();
 
-  const comparisonChartThem = getComparisonChartTheme();
+  const comparisonChartTheme = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -150,13 +149,28 @@ export function FailedTransactionRateChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.apm.errorRate', {
-            defaultMessage: 'Failed transaction rate',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.apm.errorRate', {
+                defaultMessage: 'Failed transaction rate',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate('xpack.apm.errorRate.tip', {
+              defaultMessage:
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+            })}
+            position="right"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <TimeseriesChart
         id="errorRate"
         height={height}
@@ -165,12 +179,8 @@ export function FailedTransactionRateChart({
         timeseries={timeseries}
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
-        customTheme={comparisonChartThem}
+        customTheme={comparisonChartTheme}
         anomalyTimeseries={preferredAnomalyTimeseries}
-        alerts={alerts.filter(
-          (alert) =>
-            alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionErrorRate
-        )}
       />
     </EuiPanel>
   );

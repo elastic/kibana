@@ -84,6 +84,7 @@ function sampleArgs() {
     ],
     sortingColumnId: '',
     sortingDirection: 'none',
+    rowHeightLines: 1,
   };
 
   return { data, args };
@@ -299,6 +300,7 @@ describe('DatatableComponent', () => {
       ],
       sortingColumnId: '',
       sortingDirection: 'none',
+      rowHeightLines: 1,
     };
 
     const wrapper = mountWithIntl(

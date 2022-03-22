@@ -847,10 +847,10 @@ describe('error codes', () => {
     );
 
     const { error_code: errorCode, warnings } = await generateCsv.generateData();
-    expect(errorCode).toBe('authentication_expired');
+    expect(errorCode).toBe('authentication_expired_error');
     expect(warnings).toMatchInlineSnapshot(`
       Array [
-        "This report contains partial CSV results because authentication expired before it could finish. Try exporting a smaller amount of data or increase your authentication timeout.",
+        "This report contains partial CSV results because the authentication token expired. Export a smaller amount of data or increase the timeout of the authentication token.",
       ]
     `);
   });

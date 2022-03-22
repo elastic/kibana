@@ -155,7 +155,13 @@ export function DimensionContainer({
             <div className="lnsDimensionContainer__content">{panel}</div>
 
             <EuiFlyoutFooter className="lnsDimensionContainer__footer">
-              <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
+              <EuiButtonEmpty
+                flush="left"
+                size="s"
+                iconType="cross"
+                onClick={closeFlyout}
+                data-test-subj="lns-indexPattern-dimensionContainerClose"
+              >
                 {i18n.translate('xpack.lens.dimensionContainer.close', {
                   defaultMessage: 'Close',
                 })}

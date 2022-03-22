@@ -7,6 +7,7 @@
 
 import type { History } from 'history';
 import type { OnSaveProps } from 'src/plugins/saved_objects/public';
+import { DiscoverStart } from 'src/plugins/discover/public';
 import { SpacesApi } from '../../../spaces/public';
 import type {
   ApplicationStart,
@@ -20,6 +21,7 @@ import type {
   SavedObjectsStart,
 } from '../../../../../src/core/public';
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import type { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
 import type { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
@@ -120,6 +122,7 @@ export interface LensAppServices {
   overlays: OverlayStart;
   storage: IStorageWrapper;
   dashboard: DashboardStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
   inspector: LensInspector;
@@ -135,6 +138,7 @@ export interface LensAppServices {
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;
   spaces: SpacesApi;
+  discover?: DiscoverStart;
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
@@ -142,6 +146,7 @@ export interface LensAppServices {
 
 export interface LensTopNavTooltips {
   showExportWarning: () => string | undefined;
+  showUnderlyingDataWarning: () => string | undefined;
 }
 
 export interface LensTopNavActions {
@@ -151,4 +156,5 @@ export interface LensTopNavActions {
   goBack: () => void;
   cancel: () => void;
   exportToCSV: () => void;
+  getUnderlyingDataUrl: () => string | undefined;
 }

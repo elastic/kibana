@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { Direction } from '../../../common/search_strategy';
 import {
-  Direction,
-  HostRiskSeverity,
-  HostRiskScoreSortField,
-} from '../../../common/search_strategy';
-import { HostsFields } from '../../../common/search_strategy/security_solution';
+  HostsFields,
+  RiskScoreSortField,
+  RiskSeverity,
+} from '../../../common/search_strategy/security_solution';
 
 export enum HostsType {
   page = 'page',
@@ -38,8 +38,8 @@ export interface HostsQuery extends BasicQueryPaginated {
 }
 
 export interface HostRiskScoreQuery extends BasicQueryPaginated {
-  sort: HostRiskScoreSortField;
-  severitySelection: HostRiskSeverity[];
+  sort: RiskScoreSortField;
+  severitySelection: RiskSeverity[];
 }
 
 export interface Queries {

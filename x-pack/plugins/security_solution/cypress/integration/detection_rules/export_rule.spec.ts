@@ -6,15 +6,17 @@
  */
 
 import { expectedExportedRule, getNewRule } from '../../objects/rule';
-import { exportFirstRule, getRulesImportExportToast } from '../../tasks/alerts_detection_rules';
+
+import { TOASTER } from '../../screens/alerts_detection_rules';
+
+import { exportFirstRule } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-// Flaky https://github.com/elastic/kibana/issues/69849
-describe.skip('Export rules', () => {
+describe('Export rules', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept(
@@ -29,9 +31,10 @@ describe.skip('Export rules', () => {
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
-      getRulesImportExportToast([
-        'Successfully exported 1 of 1 rule. Prebuilt rules were excluded from the resulting file.',
-      ]);
+      cy.get(TOASTER).should(
+        'have.text',
+        'Successfully exported 1 of 1 rule. Prebuilt rules were excluded from the resulting file.'
+      );
     });
   });
 });

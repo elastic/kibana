@@ -246,3 +246,14 @@ export type VisState716 =
   | {
       palette?: PaletteOutput<CustomPaletteParams>;
     };
+
+// Datatable only
+export interface VisState810 {
+  fitRowToContent?: boolean;
+}
+
+// Datatable only
+export interface VisState820 {
+  rowHeight: 'auto' | 'single' | 'custom';
+  rowHeightLines: number;
+}

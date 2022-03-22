@@ -136,7 +136,15 @@ export interface CreateTestEsClusterOptions {
    * }
    */
   port?: number;
+  /**
+   * Should this ES cluster use SSL?
+   */
   ssl?: boolean;
+  /**
+   * Explicit transport port for a single node to run on, or a string port range to use eg. '9300-9400'
+   * defaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`
+   */
+  transportPort?: number | string;
 }
 
 export function createTestEsCluster<
@@ -155,13 +163,14 @@ export function createTestEsCluster<
     esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
+    transportPort,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
 
   const defaultEsArgs = [
     `cluster.name=${clusterName}`,
-    `transport.port=${esTestConfig.getTransportPort()}`,
+    `transport.port=${transportPort ?? esTestConfig.getTransportPort()}`,
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
       ? ['discovery.type=zen', `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]

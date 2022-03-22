@@ -6,13 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { createLogger, LogLevel } from '../../lib/utils/create_logger';
+import { Client, ClientOptions } from '@elastic/elasticsearch';
+import { createLogger } from '../../lib/utils/create_logger';
+import { RunOptions } from './parse_run_cli_flags';
 
-export function getCommonServices({ target, logLevel }: { target: string; logLevel: LogLevel }) {
-  const client = new Client({
-    node: target,
-  });
+export function getCommonServices({ target, cloudId, username, password, logLevel }: RunOptions) {
+  if (!target && !cloudId) {
+    throw Error('target or cloudId needs to be specified');
+  }
+  const options: ClientOptions = !!target ? { node: target } : { cloud: { id: cloudId! } };
+  options.auth = {
+    username,
+    password,
+  };
+
+  const client = new Client(options);
 
   const logger = createLogger(logLevel);
 

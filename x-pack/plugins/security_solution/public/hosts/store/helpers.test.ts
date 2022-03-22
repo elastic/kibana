@@ -8,7 +8,7 @@
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 import { HostsModel, HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
-import { Direction, HostsFields, HostRiskScoreFields } from '../../../common/search_strategy';
+import { Direction, HostsFields, RiskScoreFields } from '../../../common/search_strategy';
 
 export const mockHostsState: HostsModel = {
   page: {
@@ -40,7 +40,7 @@ export const mockHostsState: HostsModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: HostRiskScoreFields.riskScore,
+          field: RiskScoreFields.riskScore,
           direction: Direction.desc,
         },
         severitySelection: [],
@@ -76,7 +76,7 @@ export const mockHostsState: HostsModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: HostRiskScoreFields.riskScore,
+          field: RiskScoreFields.riskScore,
           direction: Direction.desc,
         },
         severitySelection: [],

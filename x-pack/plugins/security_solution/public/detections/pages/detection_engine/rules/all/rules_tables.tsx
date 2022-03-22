@@ -390,7 +390,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onChange={tableOnChangeCallback}
               pagination={paginationMemo}
               ref={tableRef}
-              selection={euiBasicTableSelectionProps}
+              selection={hasPermissions ? euiBasicTableSelectionProps : undefined}
               sorting={{
                 sort: {
                   // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation

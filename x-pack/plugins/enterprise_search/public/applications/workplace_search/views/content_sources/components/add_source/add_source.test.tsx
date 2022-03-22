@@ -27,6 +27,7 @@ import { staticSourceData } from '../../source_data';
 import { AddSource } from './add_source';
 import { AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
+import { ConfigurationChoice } from './configuration_choice';
 import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
@@ -71,6 +72,39 @@ describe('AddSourceList', () => {
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
   });
 
+  it('renders default state correctly when there are multiple connector options', () => {
+    const wrapper = shallow(
+      <AddSource
+        sourceData={{
+          ...staticSourceData[0],
+          externalConnectorAvailable: true,
+          customConnectorAvailable: true,
+          internalConnectorAvailable: true,
+        }}
+      />
+    );
+    wrapper.find(ConfigurationIntro).prop('advanceStep')();
+
+    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ChoiceStep);
+  });
+
+  it('renders default state correctly when there are multiple connector options but external connector is configured', () => {
+    setMockValues({ ...mockValues, externalConfigured: true });
+    const wrapper = shallow(
+      <AddSource
+        sourceData={{
+          ...staticSourceData[0],
+          externalConnectorAvailable: true,
+          customConnectorAvailable: true,
+          internalConnectorAvailable: true,
+        }}
+      />
+    );
+    wrapper.find(ConfigurationIntro).prop('advanceStep')();
+
+    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
+  });
+
   describe('layout', () => {
     it('renders the default workplace search layout when on an organization view', () => {
       setMockValues({ ...mockValues, isOrganization: true });
@@ -100,7 +134,23 @@ describe('AddSourceList', () => {
       addSourceCurrentStep: AddSourceSteps.ConfigCompletedStep,
     });
     const wrapper = shallow(<AddSource sourceData={staticSourceData[1]} />);
+    expect(wrapper.find(ConfigCompleted).prop('showFeedbackLink')).toEqual(false);
     wrapper.find(ConfigCompleted).prop('advanceStep')();
+
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
+    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
+  });
+
+  it('renders Config Completed step with feedback for external connectors', () => {
+    setMockValues({
+      ...mockValues,
+      sourceConfigData: { ...sourceConfigData, serviceType: 'external' },
+      addSourceCurrentStep: AddSourceSteps.ConfigCompletedStep,
+    });
+    const wrapper = shallow(
+      <AddSource sourceData={{ ...staticSourceData[1], serviceType: 'external' }} />
+    );
+    expect(wrapper.find(ConfigCompleted).prop('showFeedbackLink')).toEqual(true);
 
     expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
@@ -152,5 +202,20 @@ describe('AddSourceList', () => {
     const wrapper = shallow(<AddSource sourceData={staticSourceData[1]} />);
 
     expect(wrapper.find(Reauthenticate)).toHaveLength(1);
+  });
+
+  it('renders Config Choice step', () => {
+    setMockValues({
+      ...mockValues,
+      addSourceCurrentStep: AddSourceSteps.ChoiceStep,
+    });
+    const wrapper = shallow(<AddSource sourceData={staticSourceData[1]} />);
+    const advance = wrapper.find(ConfigurationChoice).prop('goToInternalStep');
+    expect(advance).toBeDefined();
+    if (advance) {
+      advance();
+    }
+
+    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
   });
 });

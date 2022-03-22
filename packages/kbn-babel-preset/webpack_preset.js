@@ -18,7 +18,7 @@ module.exports = () => {
           modules: false,
           // Please read the explanation for this
           // in node_preset.js
-          corejs: '3.2.1',
+          corejs: '3.21.1',
           bugfixes: true,
         },
       ],
@@ -55,7 +55,7 @@ module.exports = () => {
           [
             require.resolve('@emotion/babel-preset-css-prop'),
             {
-              labelFormat: '[local]',
+              labelFormat: '[filename]--[local]',
             },
           ],
         ],

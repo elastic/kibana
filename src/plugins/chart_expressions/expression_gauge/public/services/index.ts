@@ -7,4 +7,5 @@
  */
 
 export { getFormatService, setFormatService } from './format_service';
-export { setThemeService, getThemeService } from './theme_service';
+export { getThemeService, setThemeService } from './theme_service';
+export { getPaletteService, setPaletteService } from './palette_service';

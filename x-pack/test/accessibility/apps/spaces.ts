@@ -52,7 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // EUI issue - https://github.com/elastic/eui/issues/3999
     it('a11y test for color picker', async () => {
       await PageObjects.spaceSelector.clickColorPicker();
       await a11y.testAppSnapshot();

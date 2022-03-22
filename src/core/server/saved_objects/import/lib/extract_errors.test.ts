@@ -51,45 +51,42 @@ describe('extractErrors()', () => {
     ];
     const result = extractErrors(savedObjects, savedObjects);
     expect(result).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "error": Object {
-      "type": "conflict",
-    },
-    "id": "2",
-    "meta": Object {
-      "title": "My Dashboard 2",
-    },
-    "title": "My Dashboard 2",
-    "type": "dashboard",
-  },
-  Object {
-    "error": Object {
-      "error": "Bad Request",
-      "message": "Bad Request",
-      "statusCode": 400,
-      "type": "unknown",
-    },
-    "id": "3",
-    "meta": Object {
-      "title": "My Dashboard 3",
-    },
-    "title": "My Dashboard 3",
-    "type": "dashboard",
-  },
-  Object {
-    "error": Object {
-      "destinationId": "foo",
-      "type": "conflict",
-    },
-    "id": "4",
-    "meta": Object {
-      "title": "My Dashboard 4",
-    },
-    "title": "My Dashboard 4",
-    "type": "dashboard",
-  },
-]
-`);
+      Array [
+        Object {
+          "error": Object {
+            "type": "conflict",
+          },
+          "id": "2",
+          "meta": Object {
+            "title": "My Dashboard 2",
+          },
+          "type": "dashboard",
+        },
+        Object {
+          "error": Object {
+            "error": "Bad Request",
+            "message": "Bad Request",
+            "statusCode": 400,
+            "type": "unknown",
+          },
+          "id": "3",
+          "meta": Object {
+            "title": "My Dashboard 3",
+          },
+          "type": "dashboard",
+        },
+        Object {
+          "error": Object {
+            "destinationId": "foo",
+            "type": "conflict",
+          },
+          "id": "4",
+          "meta": Object {
+            "title": "My Dashboard 4",
+          },
+          "type": "dashboard",
+        },
+      ]
+    `);
   });
 });

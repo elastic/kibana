@@ -108,10 +108,10 @@ export async function runTests(options: RunTestsParams) {
       await withProcRunner(log, async (procs) => {
         const config = await readConfigFile(log, options.esVersion, configPath);
 
-        let es;
+        let shutdownEs;
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            es = await runElasticsearch({ config, options: { ...options, log } });
+            shutdownEs = await runElasticsearch({ ...options, log, config });
           }
           await runKibanaServer({ procs, config, options });
           await runFtr({ configPath, options: { ...options, log } });
@@ -125,8 +125,8 @@ export async function runTests(options: RunTestsParams) {
 
             await procs.stop('kibana');
           } finally {
-            if (es) {
-              await es.cleanup();
+            if (shutdownEs) {
+              await shutdownEs();
             }
           }
         }
@@ -166,7 +166,7 @@ export async function startServers({ ...options }: StartServerOptions) {
   await withProcRunner(log, async (procs) => {
     const config = await readConfigFile(log, options.esVersion, options.config);
 
-    const es = await runElasticsearch({ config, options: opts });
+    const shutdownEs = await runElasticsearch({ ...opts, config });
     await runKibanaServer({
       procs,
       config,
@@ -190,7 +190,7 @@ export async function startServers({ ...options }: StartServerOptions) {
     log.success(makeSuccessMessage(options));
 
     await procs.waitForAllToStop();
-    await es.cleanup();
+    await shutdownEs();
   });
 }
 

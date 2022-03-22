@@ -28,6 +28,9 @@ export interface DatatableArgs {
   sortingColumnId: SortingState['columnId'];
   sortingDirection: SortingState['direction'];
   fitRowToContent?: boolean;
+  rowHeightLines?: number;
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
 }
 
@@ -66,6 +69,18 @@ export const getDatatable = (
     },
     fitRowToContent: {
       types: ['boolean'],
+      help: '',
+    },
+    rowHeightLines: {
+      types: ['number'],
+      help: '',
+    },
+    headerRowHeight: {
+      types: ['string'],
+      help: '',
+    },
+    headerRowHeightLines: {
+      types: ['number'],
       help: '',
     },
     pageSize: {

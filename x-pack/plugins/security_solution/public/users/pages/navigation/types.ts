@@ -10,7 +10,10 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { DocValueFields } from '../../../../../timelines/common';
 import { NavTab } from '../../../common/components/navigation/types';
 
-type KeyUsersNavTab = UsersTableType.allUsers | UsersTableType.anomalies;
+type KeyUsersNavTabWithoutMlPermission = UsersTableType.allUsers & UsersTableType.risk;
+type KeyUsersNavTabWithMlPermission = KeyUsersNavTabWithoutMlPermission & UsersTableType.anomalies;
+
+type KeyUsersNavTab = KeyUsersNavTabWithoutMlPermission | KeyUsersNavTabWithMlPermission;
 
 export type UsersNavTab = Record<KeyUsersNavTab, NavTab>;
 export interface QueryTabBodyProps {
@@ -20,7 +23,7 @@ export interface QueryTabBodyProps {
   filterQuery?: string | ESTermQuery;
 }
 
-export type AllUsersQueryProps = QueryTabBodyProps & {
+export type UsersComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   docValueFields?: DocValueFields[];
   indexNames: string[];

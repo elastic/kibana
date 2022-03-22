@@ -69,8 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('create_threat_matching', () => {
+  describe('create_threat_matching', () => {
     describe('creating threat match rule', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -795,11 +794,12 @@ export default ({ getService }: FtrProviderContext) => {
             type: 'threat_match',
             risk_score: 55,
             language: 'kuery',
+            threat_language: 'kuery',
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: '*:*', // narrow our query to a single record that matches two indicators
             threat_indicator_path: 'threat.indicator',
-            threat_query: '',
+            threat_query: '*:*',
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
               {

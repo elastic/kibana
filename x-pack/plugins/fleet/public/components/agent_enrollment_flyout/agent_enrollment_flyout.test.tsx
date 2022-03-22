@@ -22,7 +22,12 @@ import {
   sendGetOneAgentPolicy,
   useGetAgents,
 } from '../../hooks/use_request';
-import { FleetStatusProvider, ConfigContext, useAgentEnrollmentFlyoutData } from '../../hooks';
+import {
+  FleetStatusProvider,
+  ConfigContext,
+  useAgentEnrollmentFlyoutData,
+  KibanaVersionContext,
+} from '../../hooks';
 
 import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 
@@ -34,9 +39,11 @@ import { AgentEnrollmentFlyout } from '.';
 const TestComponent = (props: Props) => (
   <KibanaContextProvider services={coreMock.createStart()}>
     <ConfigContext.Provider value={{ agents: { enabled: true, elasticsearch: {} }, enabled: true }}>
-      <FleetStatusProvider>
-        <AgentEnrollmentFlyout {...props} />
-      </FleetStatusProvider>
+      <KibanaVersionContext.Provider value={'8.1.0'}>
+        <FleetStatusProvider>
+          <AgentEnrollmentFlyout {...props} />
+        </FleetStatusProvider>
+      </KibanaVersionContext.Provider>
     </ConfigContext.Provider>
   </KibanaContextProvider>
 );

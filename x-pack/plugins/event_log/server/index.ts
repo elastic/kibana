@@ -17,6 +17,7 @@ export type {
   IValidatedEvent,
   IEventLogClient,
   QueryEventsBySavedObjectResult,
+  AggregateEventsBySavedObjectResult,
 } from './types';
 export { SAVED_OBJECT_REL_PRIMARY } from './types';
 

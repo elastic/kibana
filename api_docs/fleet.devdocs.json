@@ -6133,7 +6133,7 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
+              " | undefined; force?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6246,6 +6246,19 @@
                         "text": "AuthenticatedUser"
                       },
                       " | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyServiceInterface.update.$5.force",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
                     "deprecated": false
@@ -10411,6 +10424,19 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.DataStream.size_in_bytes_formatted",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size_in_bytes_formatted",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/data_stream.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.DataStream.dashboards",
             "type": "Array",
             "tags": [],
@@ -10918,6 +10944,52 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.ESAssetMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESAssetMetadata",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.ESAssetMetadata.package",
+            "type": "Object",
+            "tags": [],
+            "label": "package",
+            "description": [],
+            "signature": [
+              "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.ESAssetMetadata.managed_by",
+            "type": "string",
+            "tags": [],
+            "label": "managed_by",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.ESAssetMetadata.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.FleetAuthz",
         "type": "Interface",
         "tags": [],
@@ -11095,7 +11167,7 @@
             "label": "developer",
             "description": [],
             "signature": [
-              "{ disableRegistryVersionCheck?: boolean | undefined; allowAgentUpgradeSourceUri?: boolean | undefined; } | undefined"
+              "{ disableRegistryVersionCheck?: boolean | undefined; allowAgentUpgradeSourceUri?: boolean | undefined; bundledPackageLocation?: string | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/index.ts",
             "deprecated": false
@@ -13833,7 +13905,7 @@
             "label": "install_source",
             "description": [],
             "signature": [
-              "\"registry\" | \"upload\""
+              "\"registry\" | \"upload\" | \"bundled\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -13919,6 +13991,27 @@
                 "text": "AssetReference"
               },
               "[]"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.InstallPackageResponse._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "{ install_source: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallSource",
+                "text": "InstallSource"
+              },
+              "; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false
@@ -14011,6 +14104,19 @@
             "description": [],
             "signature": [
               "\"update\" | \"unknown\" | \"reinstall\" | \"reupdate\" | \"rollback\" | \"install\""
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.InstallResult.installSource",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "installSource",
+            "description": [],
+            "signature": [
+              "\"registry\" | \"upload\" | \"bundled\""
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false
@@ -14542,12 +14648,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewAgentPolicy.data_output_id",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "data_output_id",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false
@@ -14555,12 +14661,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewAgentPolicy.monitoring_output_id",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "monitoring_output_id",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false
@@ -14600,6 +14706,19 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewOutput.is_preconfigured",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_preconfigured",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewOutput.name",
             "type": "string",
             "tags": [],
@@ -14611,12 +14730,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewOutput.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"elasticsearch\""
+              "\"logstash\" | \"elasticsearch\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false
@@ -14675,13 +14794,13 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.is_preconfigured",
-            "type": "CompoundType",
+            "id": "def-common.NewOutput.ssl",
+            "type": "Object",
             "tags": [],
-            "label": "is_preconfigured",
+            "label": "ssl",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "{ certificate_authorities?: string[] | undefined; certificate?: string | undefined; key?: string | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false
@@ -15774,6 +15893,19 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackageSpecScreenshot.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -16205,7 +16337,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ id?: string | undefined; type: \"elasticsearch\"; name: string; hosts?: string[] | undefined; ca_sha256?: string | undefined; ca_trusted_fingerprint?: string | undefined; is_default?: boolean | undefined; is_default_monitoring?: boolean | undefined; config_yaml?: string | undefined; }"
+              "{ id?: string | undefined; type: \"logstash\" | \"elasticsearch\"; name: string; hosts?: string[] | undefined; ca_sha256?: string | undefined; ca_trusted_fingerprint?: string | undefined; is_default?: boolean | undefined; is_default_monitoring?: boolean | undefined; config_yaml?: string | undefined; ssl?: { certificate_authorities?: string[] | undefined; certificate?: string | undefined; key?: string | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/output.ts",
             "deprecated": false
@@ -16485,7 +16617,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ type?: \"elasticsearch\" | undefined; name?: string | undefined; hosts?: string[] | undefined; ca_sha256?: string | undefined; ca_trusted_fingerprint?: string | undefined; config_yaml?: string | undefined; is_default?: boolean | undefined; is_default_monitoring?: boolean | undefined; }"
+              "{ type?: \"logstash\" | \"elasticsearch\" | undefined; name?: string | undefined; hosts?: string[] | undefined; ca_sha256?: string | undefined; ca_trusted_fingerprint?: string | undefined; config_yaml?: string | undefined; is_default?: boolean | undefined; is_default_monitoring?: boolean | undefined; ssl?: { certificate_authorities?: string[] | undefined; certificate?: string | undefined; key?: string | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/output.ts",
             "deprecated": false
@@ -16594,6 +16726,19 @@
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryDataStream.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "fleet",
             "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.type",
@@ -16842,6 +16987,19 @@
             "signature": [
               "MappingTypeMapping",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.ingest_pipeline.name",
+            "type": "string",
+            "tags": [],
+            "label": "'ingest_pipeline.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -17469,6 +17627,55 @@
         "path": "x-pack/plugins/fleet/common/types/models/settings.ts",
         "deprecated": false,
         "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.TemplateMapEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "TemplateMapEntry",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.TemplateMapEntry._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ESAssetMetadata",
+                "text": "ESAssetMetadata"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.TemplateMapEntry.template",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "{ mappings: ",
+              "MappingTypeMapping",
+              "; } | { settings: object | ",
+              "IndicesIndexSettings",
+              "; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -18298,7 +18505,7 @@
             "section": "def-common.ValueOf",
             "text": "ValueOf"
           },
-          "<{ readonly Active: \"active\"; readonly Inactive: \"inactive\"; }>; description?: string | undefined; name: string; updated_at: string; updated_by: string; namespace: string; is_default?: boolean | undefined; is_default_fleet_server?: boolean | undefined; has_fleet_server?: boolean | undefined; is_managed: boolean; monitoring_enabled?: (\"metrics\" | \"logs\")[] | undefined; unenroll_timeout?: number | undefined; is_preconfigured?: boolean | undefined; data_output_id?: string | undefined; monitoring_output_id?: string | undefined; package_policies: string[] | ",
+          "<{ readonly Active: \"active\"; readonly Inactive: \"inactive\"; }>; description?: string | undefined; name: string; updated_at: string; updated_by: string; namespace: string; is_default?: boolean | undefined; is_default_fleet_server?: boolean | undefined; has_fleet_server?: boolean | undefined; is_managed: boolean; monitoring_enabled?: (\"metrics\" | \"logs\")[] | undefined; unenroll_timeout?: number | undefined; is_preconfigured?: boolean | undefined; data_output_id?: string | null | undefined; monitoring_output_id?: string | null | undefined; package_policies: string[] | ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -19550,7 +19757,7 @@
         "label": "InstallSource",
         "description": [],
         "signature": [
-          "\"registry\" | \"upload\""
+          "\"registry\" | \"upload\" | \"bundled\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -19767,6 +19974,20 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.LICENCE_FOR_PER_POLICY_OUTPUT",
+        "type": "string",
+        "tags": [],
+        "label": "LICENCE_FOR_PER_POLICY_OUTPUT",
+        "description": [],
+        "signature": [
+          "\"platinum\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/output.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.LIMITED_CONCURRENCY_ROUTE_TAG",
         "type": "string",
         "tags": [],
@@ -19899,7 +20120,7 @@
         "label": "OutputType",
         "description": [],
         "signature": [
-          "{ readonly Elasticsearch: \"elasticsearch\"; }"
+          "{ readonly Elasticsearch: \"elasticsearch\"; readonly Logstash: \"logstash\"; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/output.ts",
         "deprecated": false,
@@ -20676,6 +20897,28 @@
           "\".\\\\elastic-agent.exe install\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.TemplateMap",
+        "type": "Type",
+        "tags": [],
+        "label": "TemplateMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.TemplateMapEntry",
+            "text": "TemplateMapEntry"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22778,6 +23021,21 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.outputRoutesService.getCreateLogstashApiKeyPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreateLogstashApiKeyPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -22790,7 +23048,7 @@
         "label": "outputType",
         "description": [],
         "signature": [
-          "{ readonly Elasticsearch: \"elasticsearch\"; }"
+          "{ readonly Elasticsearch: \"elasticsearch\"; readonly Logstash: \"logstash\"; }"
         ],
         "path": "x-pack/plugins/fleet/common/constants/output.ts",
         "deprecated": false,

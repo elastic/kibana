@@ -36,6 +36,7 @@ Example.args = {
     kuery: '',
     rangeFrom: 'now-15m',
     rangeTo: 'now',
+    serviceGroup: '',
   },
   serviceName: 'opbeans-java',
 };

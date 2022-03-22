@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-
 import * as ts from 'typescript';
 import { SourceNode, SourceMapConsumer, BasicSourceMapConsumer } from 'source-map';
-import normalizePath from 'normalize-path';
 
 import { Logger } from './log';
 import { tryReadFile } from './helpers/fs';
 import { parseJson } from './helpers/json';
 import { isNodeModule } from './is_node_module';
+import * as Path from './path';
+
+type SourceMapConsumerEntry = [ts.SourceFile, BasicSourceMapConsumer | undefined];
 
 export class SourceMapper {
   static async forSourceFiles(
@@ -24,10 +24,8 @@ export class SourceMapper {
     repoRelativePackageDir: string,
     sourceFiles: readonly ts.SourceFile[]
   ) {
-    const consumers = new Map<ts.SourceFile, BasicSourceMapConsumer | undefined>();
-
-    await Promise.all(
-      sourceFiles.map(async (sourceFile) => {
+    const entries = await Promise.all(
+      sourceFiles.map(async (sourceFile): Promise<undefined | SourceMapConsumerEntry> => {
         if (isNodeModule(dtsDir, sourceFile.fileName)) {
           return;
         }
@@ -35,13 +33,12 @@ export class SourceMapper {
         const text = sourceFile.getText();
         const match = text.match(/^\/\/#\s*sourceMappingURL=(.*)/im);
         if (!match) {
-          consumers.set(sourceFile, undefined);
-          return;
+          return [sourceFile, undefined];
         }
 
-        const relSourceFile = Path.relative(process.cwd(), sourceFile.fileName);
-        const sourceMapPath = Path.resolve(Path.dirname(sourceFile.fileName), match[1]);
-        const relSourceMapPath = Path.relative(process.cwd(), sourceMapPath);
+        const relSourceFile = Path.cwdRelative(sourceFile.fileName);
+        const sourceMapPath = Path.join(Path.dirname(sourceFile.fileName), match[1]);
+        const relSourceMapPath = Path.cwdRelative(sourceMapPath);
         const sourceJson = await tryReadFile(sourceMapPath, 'utf8');
         if (!sourceJson) {
           throw new Error(
@@ -50,9 +47,14 @@ export class SourceMapper {
         }
 
         const json = parseJson(sourceJson, `source map at [${relSourceMapPath}]`);
-        consumers.set(sourceFile, await new SourceMapConsumer(json));
-        log.debug('loaded sourcemap for', relSourceFile);
+        return [sourceFile, await new SourceMapConsumer(json)];
       })
+    );
+
+    const consumers = new Map(entries.filter((e): e is SourceMapConsumerEntry => !!e));
+    log.debug(
+      'loaded sourcemaps for',
+      Array.from(consumers.keys()).map((s) => Path.relative(process.cwd(), s.fileName))
     );
 
     return new SourceMapper(consumers, repoRelativePackageDir);
@@ -77,7 +79,7 @@ export class SourceMapper {
    * us the path to the source, relative to the `repoRelativePackageDir`.
    */
   fixSourcePath(source: string) {
-    return normalizePath(Path.relative(this.sourceFixDir, Path.join('/', source)));
+    return Path.relative(this.sourceFixDir, Path.join('/', source));
   }
 
   getSourceNode(generatedNode: ts.Node, code: string) {

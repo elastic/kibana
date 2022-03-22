@@ -19,7 +19,7 @@ steps:
     label: 'Default CI Group'
     parallelism: 27
     agents:
-      queue: n2-4-spot
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 250
     key: default-cigroup
@@ -31,7 +31,7 @@ steps:
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
-      queue: n2-4-spot
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
@@ -44,7 +44,7 @@ steps:
     label: 'OSS CI Group'
     parallelism: 11
     agents:
-      queue: n2-4-spot
+      queue: ci-group-4d
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
@@ -56,49 +56,29 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_accessibility.sh
     label: 'OSS Accessibility Tests'
     agents:
-      queue: n2-4-spot
+      queue: ci-group-4d
     depends_on: build
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '1'
+        - exit_status: '*'
           limit: 1
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '130'
-          limit: 3
-        - exit_status: '137'
-          limit: 3
-        - exit_status: '143'
-          limit: 3
-        - exit_status: '255'
-          limit: 3
 
   - command: .buildkite/scripts/steps/functional/xpack_accessibility.sh
     label: 'Default Accessibility Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '1'
+        - exit_status: '*'
           limit: 1
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '130'
-          limit: 3
-        - exit_status: '137'
-          limit: 3
-        - exit_status: '143'
-          limit: 3
-        - exit_status: '255'
-          limit: 3
 
   - command: .buildkite/scripts/steps/functional/oss_firefox.sh
     label: 'OSS Firefox Tests'
     agents:
-      queue: n2-4-spot
+      queue: ci-group-4d
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -109,28 +89,18 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_firefox.sh
     label: 'Default Firefox Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '1'
+        - exit_status: '*'
           limit: 1
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '130'
-          limit: 3
-        - exit_status: '137'
-          limit: 3
-        - exit_status: '143'
-          limit: 3
-        - exit_status: '255'
-          limit: 3
 
   - command: .buildkite/scripts/steps/functional/oss_misc.sh
     label: 'OSS Misc Functional Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -141,23 +111,13 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_saved_object_field_metrics.sh
     label: 'Saved Object Field Metrics'
     agents:
-      queue: n2-4-spot
+      queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '1'
+        - exit_status: '*'
           limit: 1
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '130'
-          limit: 3
-        - exit_status: '137'
-          limit: 3
-        - exit_status: '143'
-          limit: 3
-        - exit_status: '255'
-          limit: 3
 
   - command: .buildkite/scripts/steps/test/jest.sh
     label: 'Jest Tests'
@@ -169,32 +129,18 @@ steps:
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
-    parallelism: 2
+    parallelism: 3
     agents:
       queue: n2-4
-    timeout_in_minutes: 90
+    timeout_in_minutes: 120
     key: jest-integration
 
   - command: .buildkite/scripts/steps/test/api_integration.sh
     label: 'API Integration Tests'
     agents:
-      queue: n2-4-spot
+      queue: n2-2
     timeout_in_minutes: 120
     key: api-integration
-    retry:
-      automatic:
-        - exit_status: '1'
-          limit: 1
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '130'
-          limit: 3
-        - exit_status: '137'
-          limit: 3
-        - exit_status: '143'
-          limit: 3
-        - exit_status: '255'
-          limit: 3
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'

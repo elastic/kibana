@@ -15,6 +15,7 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { XYDataLayerConfig } from '../../common/expressions';
 
 jest.mock('../id_generator');
 
@@ -89,12 +90,14 @@ describe('xy_suggestions', () => {
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
   function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
-    return suggestion.state.layers.map(({ seriesType, splitAccessor, xAccessor, accessors }) => ({
-      seriesType,
-      splitAccessor,
-      x: xAccessor,
-      y: accessors,
-    }));
+    return (suggestion.state.layers as XYDataLayerConfig[]).map(
+      ({ seriesType, splitAccessor, xAccessor, accessors }) => ({
+        seriesType,
+        splitAccessor,
+        x: xAccessor,
+        y: accessors,
+      })
+    );
   }
 
   beforeEach(() => {
@@ -543,7 +546,7 @@ describe('xy_suggestions', () => {
       mainPalette,
     });
 
-    expect(suggestion.state.layers[0].palette).toEqual(mainPalette);
+    expect((suggestion.state.layers as XYDataLayerConfig[])[0].palette).toEqual(mainPalette);
   });
 
   test('ignores passed in palette for non splitted charts', () => {
@@ -559,7 +562,7 @@ describe('xy_suggestions', () => {
       mainPalette,
     });
 
-    expect(suggestion.state.layers[0].palette).toEqual(undefined);
+    expect((suggestion.state.layers as XYDataLayerConfig[])[0].palette).toEqual(undefined);
   });
 
   test('hides reduced suggestions if there is a current state', () => {
@@ -655,7 +658,7 @@ describe('xy_suggestions', () => {
 
     expect(suggestions[0].hide).toEqual(false);
     expect(suggestions[0].state.preferredSeriesType).toEqual('line');
-    expect(suggestions[0].state.layers[0].seriesType).toEqual('line');
+    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
   });
 
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
@@ -779,7 +782,11 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(visualizationTypes.length - 1);
     expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
-    expect(suggestion.state.layers.every((l) => l.seriesType === 'bar_horizontal')).toBeTruthy();
+    expect(
+      (suggestion.state.layers as XYDataLayerConfig[]).every(
+        (l) => l.seriesType === 'bar_horizontal'
+      )
+    ).toBeTruthy();
     expect(suggestion.title).toEqual('Flip');
   });
 

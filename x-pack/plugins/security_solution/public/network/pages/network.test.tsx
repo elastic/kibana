@@ -24,6 +24,7 @@ import { inputsActions } from '../../common/store/inputs';
 
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
+import { mockCasesContract } from '../../../../cases/public/mocks';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -34,6 +35,9 @@ jest.mock('../../common/components/search_bar', () => ({
 }));
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
+}));
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
@@ -89,6 +93,9 @@ jest.mock('../../common/lib/kibana', () => {
         },
         storage: {
           get: () => true,
+        },
+        cases: {
+          ...mockCasesContract(),
         },
       },
     }),

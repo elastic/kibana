@@ -32,6 +32,7 @@ import {
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
+  ENABLE_CCS_READ_WARNING_SETTING,
 } from '../common/constants';
 import { transformConfigSchema } from '../common/transforms/types';
 import { ExperimentalFeatures } from '../common/experimental_features';
@@ -217,6 +218,19 @@ export const initUiSettings = (
           url_template: schema.string(),
         })
       ),
+    },
+    [ENABLE_CCS_READ_WARNING_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
+        defaultMessage: 'CCS Rule Privileges Warning',
+      }),
+      value: true,
+      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
+        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
+      }),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: false,
+      schema: schema.boolean(),
     },
     // TODO: Remove this check once the experimental flag is removed
     ...(experimentalFeatures.metricsEntitiesEnabled

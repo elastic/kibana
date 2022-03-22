@@ -39,6 +39,7 @@ import { useUserData } from '../../../../../components/user_info';
 import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
 import { ExceptionsTableItem } from './types';
+import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
 
 export type Func = () => Promise<void>;
 
@@ -349,6 +350,7 @@ export const ExceptionListsTable = React.memo(() => {
 
   return (
     <>
+      <MissingPrivilegesCallOut />
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
         description={

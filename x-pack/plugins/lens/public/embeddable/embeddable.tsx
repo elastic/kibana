@@ -15,7 +15,6 @@ import {
   Query,
   TimefilterContract,
   TimeRange,
-  IndexPattern,
   FilterManager,
 } from 'src/plugins/data/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
@@ -58,7 +57,7 @@ import {
   Visualization,
 } from '../types';
 
-import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import type { DataViewsContract, DataView } from '../../../../../src/plugins/data_views/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
 import type {
   IBasePath,
@@ -105,7 +104,7 @@ export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddab
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
 }
 
 export interface LensEmbeddableDeps {
@@ -115,7 +114,7 @@ export interface LensEmbeddableDeps {
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
-  indexPatternService: IndexPatternsContract;
+  indexPatternService: DataViewsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
   basePath: IBasePath;
@@ -308,7 +307,7 @@ export class Embeddable
   private maybeAddTimeRangeError(
     errors: ErrorMessage[] | undefined,
     input: LensEmbeddableInput,
-    indexPatterns: IndexPattern[]
+    indexPatterns: DataView[]
   ) {
     // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
     if (
@@ -610,8 +609,7 @@ export class Embeddable
     );
     const indexPatterns = responses
       .filter(
-        (response): response is PromiseFulfilledResult<IndexPattern> =>
-          response.status === 'fulfilled'
+        (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
       )
       .map(({ value }) => value);
 

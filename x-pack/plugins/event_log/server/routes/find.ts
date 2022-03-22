@@ -14,7 +14,7 @@ import type {
 } from 'src/core/server';
 import type { EventLogRouter, EventLogRequestHandlerContext } from '../types';
 import { BASE_EVENT_LOG_API_PATH } from '../../common';
-import { findOptionsSchema, FindOptionsType } from '../event_log_client';
+import { queryOptionsSchema, FindOptionsType } from '../event_log_client';
 
 const paramSchema = schema.object({
   type: schema.string(),
@@ -27,7 +27,7 @@ export const findRoute = (router: EventLogRouter, systemLogger: Logger) => {
       path: `${BASE_EVENT_LOG_API_PATH}/{type}/{id}/_find`,
       validate: {
         params: paramSchema,
-        query: findOptionsSchema,
+        query: queryOptionsSchema,
       },
     },
     router.handleLegacyErrors(async function (

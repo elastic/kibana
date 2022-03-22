@@ -20,7 +20,7 @@ import {
   roundCoordinates,
 } from '../../../../../common/elasticsearch_util';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../';
+import { DrawControl } from '../draw_control';
 import { DrawCircleProperties } from '../draw_circle';
 
 export interface Props {

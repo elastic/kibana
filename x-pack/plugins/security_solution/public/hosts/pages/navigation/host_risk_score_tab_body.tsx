@@ -7,15 +7,17 @@
 
 import React, { useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { useHostRiskScore } from '../../containers/host_risk_score';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../components/host_risk_score_table';
-import { useRiskScoreKpi } from '../../containers/kpi_hosts/risky_hosts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import { State } from '../../../common/store';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+import {
+  HostRiskScoreQueryId,
+  useHostRiskScore,
+  useHostRiskScoreKpi,
+} from '../../../risk_score/containers';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -48,10 +50,8 @@ export const HostRiskScoreQueryTabBody = ({
     sort,
   });
 
-  const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
+  const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
     filterQuery,
-    from: startDate,
-    to: endDate,
   });
 
   return (

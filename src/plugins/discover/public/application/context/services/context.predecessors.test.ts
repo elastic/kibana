@@ -8,7 +8,8 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import { DataView, SortDirection } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
+import { SortDirection } from 'src/plugins/data/public';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { DataPublicPluginStart, Query } from '../../../../../data/public';

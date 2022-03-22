@@ -168,7 +168,6 @@ describe('ServiceNowSIRParamsFields renders', () => {
   test('If short_description has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
     const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);

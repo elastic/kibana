@@ -10,15 +10,15 @@ import { UsersDetailsNavTab } from './types';
 import { UsersTableType } from '../../store/model';
 import { USERS_PATH } from '../../../../common/constants';
 
-const getTabsOnUsersDetailsUrl = (hostName: string, tabName: UsersTableType) =>
-  `${USERS_PATH}/${hostName}/${tabName}`;
+const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
+  `${USERS_PATH}/${userName}/${tabName}`;
 
-export const navTabsUsersDetails = (hostName: string): UsersDetailsNavTab => {
+export const navTabsUsersDetails = (userName: string): UsersDetailsNavTab => {
   return {
-    [UsersTableType.allUsers]: {
-      id: UsersTableType.allUsers,
-      name: i18n.NAVIGATION_ALL_USERS_TITLE,
-      href: getTabsOnUsersDetailsUrl(hostName, UsersTableType.allUsers),
+    [UsersTableType.anomalies]: {
+      id: UsersTableType.anomalies,
+      name: i18n.NAVIGATION_ANOMALIES_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.anomalies),
       disabled: false,
     },
   };

@@ -8,7 +8,7 @@
 // TODO: this needs to be defined in a versioned schema
 export interface CspFinding {
   '@timestamp': string;
-  run_id: string;
+  cycle_id: string;
   result: CspFindingResult;
   resource: CspFindingResource;
   rule: CspRule;

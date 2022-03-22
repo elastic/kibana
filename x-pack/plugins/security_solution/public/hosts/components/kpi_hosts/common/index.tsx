@@ -11,7 +11,10 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { HostsKpiStrategyResponse } from '../../../../../common/search_strategy';
+import {
+  HostsKpiStrategyResponse,
+  NetworkKpiStrategyResponse,
+} from '../../../../../common/search_strategy';
 import {
   StatItemsComponent,
   StatItemsProps,
@@ -19,6 +22,9 @@ import {
   StatItems,
 } from '../../../../common/components/stat_items';
 import { UpdateDateRange } from '../../../../common/components/charts/common';
+import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../common/constants';
+import { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
 
 const kpiWidgetHeight = 247;
 
@@ -28,9 +34,9 @@ export const FlexGroup = styled(EuiFlexGroup)`
 
 FlexGroup.displayName = 'FlexGroup';
 
-interface HostsKpiBaseComponentProps {
+interface KpiBaseComponentProps {
   fieldsMapping: Readonly<StatItems[]>;
-  data: HostsKpiStrategyResponse;
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse;
   loading?: boolean;
   id: string;
   from: string;
@@ -38,8 +44,13 @@ interface HostsKpiBaseComponentProps {
   narrowDateRange: UpdateDateRange;
 }
 
-export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
+export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
   ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
+    const { cases } = useKibana().services;
+    const CasesContext = cases.ui.getCasesContext();
+    const userPermissions = useGetUserCasesPermissions();
+    const userCanCrud = userPermissions?.crud ?? false;
+
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
       fieldsMapping,
       data,
@@ -50,14 +61,16 @@ export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
     );
 
     if (loading) {
-      return <HostsKpiBaseComponentLoader />;
+      return <KpiBaseComponentLoader />;
     }
 
     return (
       <EuiFlexGroup wrap>
-        {statItemsProps.map((mappedStatItemProps) => (
-          <StatItemsComponent {...mappedStatItemProps} />
-        ))}
+        <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
+          {statItemsProps.map((mappedStatItemProps) => (
+            <StatItemsComponent {...mappedStatItemProps} showInspectButton={false} />
+          ))}
+        </CasesContext>
       </EuiFlexGroup>
     );
   },
@@ -71,12 +84,12 @@ export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
     deepEqual(prevProps.data, nextProps.data)
 );
 
-HostsKpiBaseComponent.displayName = 'HostsKpiBaseComponent';
+KpiBaseComponent.displayName = 'KpiBaseComponent';
 
-export const HostsKpiBaseComponentManage = manageQuery(HostsKpiBaseComponent);
+export const KpiBaseComponentManage = manageQuery(KpiBaseComponent);
 
-export const HostsKpiBaseComponentLoader: React.FC = () => (
-  <FlexGroup justifyContent="center" alignItems="center" data-test-subj="hostsKpiLoader">
+export const KpiBaseComponentLoader: React.FC = () => (
+  <FlexGroup justifyContent="center" alignItems="center" data-test-subj="KpiLoader">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />
     </EuiFlexItem>

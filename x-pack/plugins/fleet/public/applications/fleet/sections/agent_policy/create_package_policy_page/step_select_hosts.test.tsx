@@ -20,6 +20,13 @@ jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
     useGetAgentPolicies: jest.fn(),
+    useGetOutputs: jest.fn().mockResolvedValue({
+      data: [],
+      isLoading: false,
+    }),
+    sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
+      data: { item: { id: 'policy-1', name: 'Agent policy 1' } },
+    }),
   };
 });
 
@@ -110,7 +117,7 @@ describe('StepSelectHosts', () => {
     );
   });
 
-  it('should display dropdown with agent policy selected when Existing hosts selected', () => {
+  it('should display dropdown with agent policy selected when Existing hosts selected', async () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' }],
@@ -126,8 +133,9 @@ describe('StepSelectHosts', () => {
       fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
     });
 
-    expect(renderResult.getAllByRole('option').length).toEqual(1);
-    expect(renderResult.getByText('Agent policy 1').closest('select')).toBeInTheDocument();
+    expect(
+      renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]')?.textContent
+    ).toEqual('Agent policy 1');
   });
 
   it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', () => {
@@ -149,7 +157,6 @@ describe('StepSelectHosts', () => {
       fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
     });
 
-    expect(renderResult.getAllByRole('option').length).toEqual(2);
     waitFor(() => {
       expect(renderResult.getByText('An agent policy is required.')).toBeInTheDocument();
     });
