@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
+import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
@@ -57,12 +58,12 @@ import {
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
 import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
-import { AlertingConfig, PublicAlertingConfig } from './config';
+import { AlertingConfig, AlertingRulesConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
-import { getRulesConfig } from './lib/get_rules_config';
+import { getExecutionConfigForRuleType } from './lib/get_rules_config';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -99,7 +100,7 @@ export interface PluginSetupContract {
     >
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
-  getConfig: () => PublicAlertingConfig;
+  getConfig: () => AlertingRulesConfig;
 }
 
 export interface PluginStartContract {
@@ -198,11 +199,12 @@ export class AlertingPlugin {
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
     const ruleTypeRegistry = new RuleTypeRegistry({
+      logger: this.logger,
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,
       licensing: plugins.licensing,
-      minimumScheduleInterval: this.config.minimumScheduleInterval,
+      minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -288,7 +290,7 @@ export class AlertingPlugin {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
-        ruleType.config = getRulesConfig({
+        ruleType.config = getExecutionConfigForRuleType({
           config: alertingConfig.rules,
           ruleTypeId: ruleType.id,
         });
@@ -310,9 +312,7 @@ export class AlertingPlugin {
         );
       },
       getConfig: () => {
-        return {
-          minimumScheduleInterval: alertingConfig.minimumScheduleInterval,
-        };
+        return pick(alertingConfig.rules, 'minimumScheduleInterval');
       },
     };
   }
@@ -370,7 +370,7 @@ export class AlertingPlugin {
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
-      minimumScheduleInterval: this.config.minimumScheduleInterval,
+      minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {

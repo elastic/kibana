@@ -32,7 +32,7 @@ enum keys {
   OBJECT_TYPE = 'objectTypes',
   STATUS_BY_APP = 'statusByApp',
   STATUS = 'statusTypes',
-  OUTPUT_SIZE = 'sizes',
+  OUTPUT_SIZE = 'output_size',
   IS_DEPRECATED = 'meta.isDeprecated',
   CSV_ROWS = 'csv_rows',
   PDF_CPU = 'pdf_cpu',
@@ -96,7 +96,14 @@ function getAggStats(
 ): Partial<RangeStats> {
   const { buckets: jobBuckets } = aggs[keys.JOB_TYPE] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
-    const { key, doc_count: count, isDeprecated, sizes, layoutTypes, objectTypes } = bucket;
+    const {
+      key,
+      doc_count: count,
+      isDeprecated,
+      output_size: outputSizes,
+      layoutTypes,
+      objectTypes,
+    } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
 
     // format the search results into the telemetry schema
@@ -105,7 +112,7 @@ function getAggStats(
       deprecated: deprecatedCount,
       app: getKeyCount(get(objectTypes, 'buckets', [])),
       metrics: (metrics && metrics[key]) || undefined,
-      sizes: get(sizes, 'values', {} as SizePercentiles),
+      output_size: get(outputSizes, 'values', {} as SizePercentiles),
       layout: getKeyCount(get(layoutTypes, 'buckets', [])),
     };
     return { ...accum, [key]: jobType };

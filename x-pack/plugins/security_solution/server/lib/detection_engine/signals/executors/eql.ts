@@ -13,7 +13,7 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { buildEqlSearchRequest } from '../../../../../common/detection_engine/get_query_filter';
+import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../../routes/index/get_index_version';
