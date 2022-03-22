@@ -33,7 +33,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   authorization: authorization as unknown as AlertingAuthorization,
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',

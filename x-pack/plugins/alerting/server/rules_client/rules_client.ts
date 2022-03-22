@@ -84,6 +84,7 @@ import {
   getModifiedSearch,
   modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
+import { AlertingRulesConfig } from '../config';
 import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
@@ -140,7 +141,7 @@ export interface ConstructorOptions {
   authorization: AlertingAuthorization;
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
-  minimumScheduleInterval: string;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
@@ -277,7 +278,7 @@ export class RulesClient {
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertingAuthorization;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private readonly minimumScheduleInterval: string;
+  private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly minimumScheduleIntervalInMs: number;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
@@ -319,7 +320,7 @@ export class RulesClient {
     this.taskManager = taskManager;
     this.ruleTypeRegistry = ruleTypeRegistry;
     this.minimumScheduleInterval = minimumScheduleInterval;
-    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval);
+    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval.value);
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
@@ -378,9 +379,16 @@ export class RulesClient {
     // Validate that schedule interval is not less than configured minimum
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      throw Boom.badRequest(
-        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-      );
+      if (this.minimumScheduleInterval.enforce) {
+        throw Boom.badRequest(
+          `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be created
+        this.logger.warn(
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+        );
+      }
     }
 
     // Extract saved object references for this rule
@@ -1132,9 +1140,16 @@ export class RulesClient {
     // Validate that schedule interval is not less than configured minimum
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      throw Boom.badRequest(
-        `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-      );
+      if (this.minimumScheduleInterval.enforce) {
+        throw Boom.badRequest(
+          `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be updated
+        this.logger.warn(
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+        );
+      }
     }
 
     // Extract saved object references for this rule
