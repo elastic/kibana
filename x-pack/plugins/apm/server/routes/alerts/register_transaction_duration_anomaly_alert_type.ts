@@ -15,6 +15,7 @@ import {
   ALERT_SEVERITY,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
+import { join } from 'path';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';
@@ -22,7 +23,9 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
+import { getAlertUrlTransactionDurationAnomaly } from '../../../common/utils/formatters/alertUrl';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { KibanaRequest } from '../../../../../../src/core/server';
@@ -63,6 +66,7 @@ export function registerTransactionDurationAnomalyAlertType({
   ruleDataClient,
   alerting,
   ml,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     logger,
@@ -219,6 +223,18 @@ export function registerTransactionDurationAnomalyAlertType({
             windowSize: params.windowSize,
             windowUnit: params.windowUnit,
           });
+          const relativeViewInAppUrl = getAlertUrlTransactionDurationAnomaly(
+            [serviceName],
+            [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]],
+            [ruleParams.transactionType]
+          );
+
+          const viewInAppUrl = basePath.publicBaseUrl
+            ? new URL(
+                join(basePath.serverBasePath, relativeViewInAppUrl),
+                basePath.publicBaseUrl
+              ).toString()
+            : relativeViewInAppUrl;
           services
             .alertWithLifecycle({
               id: [
@@ -247,7 +263,7 @@ export function registerTransactionDurationAnomalyAlertType({
               threshold: selectedOption?.label,
               triggerValue: severityLevel,
               reason: reasonMessage,
-              viewInAppUrl: 'viewInAppUrl',
+              viewInAppUrl,
             });
         });
 
