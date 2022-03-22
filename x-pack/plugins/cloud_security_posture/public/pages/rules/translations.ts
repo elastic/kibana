@@ -31,19 +31,20 @@ export const BULK_ACTIONS = i18n.translate('xpack.csp.rules.bulkActionsButtonLab
   defaultMessage: 'Bulk Actions',
 });
 
-export const RULE_NAME = i18n.translate('xpack.csp.rules.ruleNameColumnHeaderLabel', {
+export const RULE_NAME = i18n.translate('xpack.csp.rules.rulesTable.rulesTableColumn.nameLabel', {
   defaultMessage: 'Rule Name',
 });
 
-export const SECTION = i18n.translate('xpack.csp.rules.sectionColumnHeaderLabel', {
+export const SECTION = i18n.translate('xpack.csp.rules.rulesTable.rulesTableColumn.sectionLabel', {
   defaultMessage: 'Section',
 });
 
-export const UPDATED_AT = i18n.translate('xpack.csp.rules.updatedAtColumnHeaderLabel', {
-  defaultMessage: 'Updated at',
-});
+export const LAST_MODIFIED = i18n.translate(
+  'xpack.csp.rules.rulesTable.rulesTableColumn.lastModifiedLabel',
+  { defaultMessage: 'Last modified' }
+);
 
-export const ENABLED = i18n.translate('xpack.csp.rules.enabledColumnHeaderLabel', {
+export const ENABLED = i18n.translate('xpack.csp.rules.rulesTable.rulesTableColumn.enabledLabel', {
   defaultMessage: 'Enabled',
 });
 
