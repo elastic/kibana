@@ -72,6 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Alerts',
           'Rules',
           'Uptime',
+          'Cloud Security',
           'Stack Management',
         ]);
       });
