@@ -38,6 +38,8 @@ const throttlingFormatter: Formatter = (fields) => {
 
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.METADATA]: (fields) => objectToJsonFormatter(fields[ConfigKey.METADATA]),
+  [ConfigKey.URLS]: null,
+  [ConfigKey.PORT]: null,
   [ConfigKey.SOURCE_ZIP_URL]: null,
   [ConfigKey.SOURCE_ZIP_USERNAME]: null,
   [ConfigKey.SOURCE_ZIP_PASSWORD]: null,
