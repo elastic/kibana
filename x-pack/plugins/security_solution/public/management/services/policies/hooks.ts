@@ -11,7 +11,7 @@ import {
   GetAgentPoliciesResponse,
   GetPackagesResponse,
 } from '../../../../../fleet/common';
-import { useHttp } from '../../../common/lib/kibana/hooks';
+import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import {
   sendGetAgentPolicyList,
