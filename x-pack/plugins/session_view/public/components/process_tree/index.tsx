@@ -10,8 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ProcessTreeNode } from '../process_tree_node';
 import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
-import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
-import { UpdateAlertStatus } from '../../types';
+import {
+  AlertStatusEventEntityIdMap,
+  Process,
+  ProcessEventsPage,
+  ProcessEvent,
+} from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
@@ -39,7 +43,7 @@ export interface ProcessTreeDeps {
   setSearchResults?: (results: Process[]) => void;
 
   // a map for alerts with updated status and process.entity_id
-  updatedAlertsStatus: UpdateAlertStatus;
+  updatedAlertsStatus: AlertStatusEventEntityIdMap;
   loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
   handleOnAlertDetailsClosed: (alertUuid: string) => void;
   timeStampOn?: boolean;

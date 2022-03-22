@@ -9,8 +9,11 @@ import { useQuery, useInfiniteQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { ProcessEvent, ProcessEventResults } from '../../../common/types/process_tree';
-import { UpdateAlertStatus } from '../../types';
+import {
+  AlertStatusEventEntityIdMap,
+  ProcessEvent,
+  ProcessEventResults,
+} from '../../../common/types/process_tree';
 import {
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
@@ -81,10 +84,13 @@ export const useFetchSessionViewProcessEvents = (
   return query;
 };
 
-export const useFetchAlertStatus = (updatedAlertsStatus: UpdateAlertStatus, alertUuid: string) => {
+export const useFetchAlertStatus = (
+  updatedAlertsStatus: AlertStatusEventEntityIdMap,
+  alertUuid: string
+) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = [QUERY_KEY_ALERTS, alertUuid];
-  const query = useQuery<UpdateAlertStatus, Error>(
+  const query = useQuery<AlertStatusEventEntityIdMap, Error>(
     cachingKeys,
     async () => {
       if (!alertUuid) {
@@ -97,13 +103,14 @@ export const useFetchAlertStatus = (updatedAlertsStatus: UpdateAlertStatus, aler
         },
       });
 
+      // TODO: add error handling
       const events = res.events.map((event: any) => event._source as ProcessEvent);
 
       return {
         ...updatedAlertsStatus,
         [alertUuid]: {
-          status: events[0].kibana?.alert.workflow_status ?? '',
-          processEntityId: events[0].process.entity_id,
+          status: events[0]?.kibana?.alert.workflow_status ?? '',
+          processEntityId: events[0]?.process?.entity_id ?? '',
         },
       };
     },

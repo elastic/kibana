@@ -28,13 +28,6 @@ export interface SessionViewDeps {
   ) => void;
 }
 
-export interface UpdateAlertStatus {
-  [key: string]: {
-    status: string;
-    processEntityId: string;
-  };
-}
-
 export interface EuiTabProps {
   id: string;
   name: string;

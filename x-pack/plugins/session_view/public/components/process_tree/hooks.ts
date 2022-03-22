@@ -8,6 +8,7 @@ import _ from 'lodash';
 import memoizeOne from 'memoize-one';
 import { useState, useEffect } from 'react';
 import {
+  AlertStatusEventEntityIdMap,
   EventAction,
   EventKind,
   Process,
@@ -22,13 +23,12 @@ import {
   autoExpandProcessTree,
 } from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
-import { UpdateAlertStatus } from '../../types';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
   searchQuery?: string;
-  updatedAlertsStatus: UpdateAlertStatus;
+  updatedAlertsStatus: AlertStatusEventEntityIdMap;
 }
 
 export class ProcessImpl implements Process {
@@ -108,6 +108,10 @@ export class ProcessImpl implements Process {
 
   getAlerts() {
     return this.filterEventsByKind(this.events, EventKind.signal);
+  }
+
+  updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap) {
+    this.events = updateAlertEventStatus(this.events, updatedAlertsStatus);
   }
 
   hasExec() {
@@ -267,7 +271,7 @@ export const useProcessTree = ({
   Object.keys(updatedAlertsStatus).forEach((alertUuid) => {
     const process = processMap[updatedAlertsStatus[alertUuid].processEntityId];
     if (process) {
-      updateAlertEventStatus(process.getAlerts(), updatedAlertsStatus);
+      process.updateAlertsStatus(updatedAlertsStatus);
     }
   });
 

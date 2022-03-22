@@ -16,9 +16,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import { Process } from '../../../common/types/process_tree';
+import { AlertStatusEventEntityIdMap, Process } from '../../../common/types/process_tree';
 import { DisplayOptionsState } from '../../../common/types/session_view';
-import { SessionViewDeps, UpdateAlertStatus } from '../../types';
+import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
@@ -43,7 +43,7 @@ export const SessionView = ({
     verboseMode: true,
   });
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
-  const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<UpdateAlertStatus>({});
+  const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
 
   const styles = useStyles({ height });
 

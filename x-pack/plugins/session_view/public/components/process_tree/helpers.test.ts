@@ -4,14 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { cloneDeep } from 'lodash';
 import {
   mockEvents,
   mockAlerts,
   mockProcessMap,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import { Process, ProcessMap, ProcessEvent } from '../../../common/types/process_tree';
+import {
+  AlertStatusEventEntityIdMap,
+  Process,
+  ProcessMap,
+  ProcessEvent,
+} from '../../../common/types/process_tree';
 import { ALERT_STATUS } from '../../../common/constants';
-import { UpdateAlertStatus } from '../../types';
 import {
   updateAlertEventStatus,
   updateProcessMap,
@@ -77,15 +82,11 @@ describe('process tree hook helpers tests', () => {
   });
 
   it('updateAlertEventStatus works', () => {
-    const events: ProcessEvent[] = JSON.parse(JSON.stringify([...mockEvents, ...mockAlerts]));
-    const updatedAlertsStatus: UpdateAlertStatus = {
+    let events: ProcessEvent[] = cloneDeep([...mockEvents, ...mockAlerts]);
+    const updatedAlertsStatus: AlertStatusEventEntityIdMap = {
       [mockAlerts[0].kibana?.alert.uuid!]: {
         status: ALERT_STATUS.CLOSED,
         processEntityId: mockAlerts[0].process.entity_id,
-      },
-      [mockAlerts[1].kibana?.alert.uuid!]: {
-        status: ALERT_STATUS.ACKNOWLEDGED,
-        processEntityId: mockAlerts[1].process.entity_id,
       },
     };
 
@@ -102,7 +103,7 @@ describe('process tree hook helpers tests', () => {
       )?.kibana?.alert.workflow_status
     ).toEqual(ALERT_STATUS.OPEN);
 
-    updateAlertEventStatus(events, updatedAlertsStatus);
+    events = updateAlertEventStatus(events, updatedAlertsStatus);
 
     expect(
       events.find(
@@ -115,6 +116,6 @@ describe('process tree hook helpers tests', () => {
         (event) =>
           event.kibana?.alert.uuid && event.kibana?.alert.uuid === mockAlerts[1].kibana?.alert.uuid
       )?.kibana?.alert.workflow_status
-    ).toEqual(ALERT_STATUS.ACKNOWLEDGED);
+    ).toEqual(ALERT_STATUS.OPEN);
   });
 });
