@@ -27,7 +27,7 @@ import {
   saveSourcerer,
   waitForAlertsIndexToExist,
 } from '../../tasks/sourcerer';
-import { cleanKibana, postDataView } from '../../tasks/common';
+import { postDataView } from '../../tasks/common';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { createUsersAndRoles, secReadCasesAll, secReadCasesAllUser } from '../../tasks/privileges';
 import { TOASTER } from '../../screens/configure_cases';
@@ -36,6 +36,7 @@ import { SOURCERER } from '../../screens/sourcerer';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../tasks/timeline';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const usersToCreate = [secReadCasesAllUser];
 const rolesToCreate = [secReadCasesAll];
@@ -44,7 +45,7 @@ const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kib
 
 describe('Sourcerer', () => {
   before(() => {
-    cleanKibana();
+    esArchiverResetKibana();
     deleteAlertsIndex();
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
