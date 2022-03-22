@@ -32,8 +32,9 @@ describe('deleteLegacyUrlAliases', () => {
     };
   }
 
-  const type = 'obj-type';
-  const id = 'id-1:'; // include a colon (special character) in the object ID to implicitly assert that the kuery node builder handles it gracefully
+  // Include KQL special characters in the object type/ID to implicitly assert that the kuery node builder handles it gracefully
+  const type = 'obj-type:"';
+  const id = 'id-1:"';
 
   it('throws an error if namespaces includes the "all namespaces" string', async () => {
     const namespaces = [ALL_NAMESPACES_STRING];
