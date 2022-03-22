@@ -102,7 +102,7 @@ export function WorkspacePanelWrapper({
   });
   return (
     <>
-      {!(isFullscreen && autoApplyEnabled) && (
+      {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
         <div>
           <EuiFlexGroup
             alignItems="center"
@@ -149,7 +149,7 @@ export function WorkspacePanelWrapper({
                 responsive={false}
               >
                 <EuiFlexItem grow={false}>
-                  {warningMessages && warningMessages.length ? (
+                  {warningMessages?.length ? (
                     <WarningsPopover>{warningMessages}</WarningsPopover>
                   ) : null}
                 </EuiFlexItem>
@@ -167,7 +167,7 @@ export function WorkspacePanelWrapper({
                       >
                         <FormattedMessage
                           id="xpack.lens.editorFrame.applyChangesLabel"
-                          defaultMessage="Apply Changes"
+                          defaultMessage="Apply changes"
                         />
                       </EuiButton>
                     </div>

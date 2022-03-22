@@ -31,6 +31,9 @@
 
   &.lnsWorkspacePanelWrapper--fullscreen {
     margin-bottom: 0;
+    .lnsWorkspacePanelWrapper__pageContentBody {
+      box-shadow: none;
+    }
   }
 
 }
@@ -88,6 +91,7 @@
 
   &.lnsWorkspacePanelWrapper__toolbar--fullscreen {
     padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+    background-color: #FFF;
   }
 
   & > .euiFlexItem {
