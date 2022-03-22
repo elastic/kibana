@@ -134,10 +134,17 @@ export const CspPageTemplate: React.FC<
 
   const getNoDataConfig = (): KibanaPageTemplateProps['noDataConfig'] => {
     // TODO: add 'installed_failed' configurations
-    if (cisKubernetesPackageInfo?.status === 'not_installed')
+    if (cisKubernetesPackageInfo?.status === 'not_installed') {
       return getPackageNotInstalledConfig(cisIntegrationLink);
-    if (query && query.isSuccess && !query.data)
+    }
+
+    // when query was successful, but data is undefined
+    if (query && query.isSuccess && !query.data) {
       return kibanaPageTemplateProps.noDataConfig || DEFAULT_NO_DATA_CONFIG;
+    }
+
+    // when the consumer didn't pass a query, most likely to handle the render on his own
+    if (!query) return kibanaPageTemplateProps.noDataConfig;
   };
 
   const getTemplate = (): KibanaPageTemplateProps['template'] => {

@@ -14,7 +14,7 @@ import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 const CIS_KUBERNETES_INTEGRATION_VERSION = '0.0.1';
 
 /**
- * This hook will find our cis intergation and return it's PackageInfo
+ * This hook will find our cis integration and return its PackageInfo
  * */
 export const useCisKubernetesIntegration = () => {
   const { http } = useKibana<CoreStart>().services;
