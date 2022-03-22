@@ -13,7 +13,7 @@ import {
   EuiTitle,
   EuiTitleSize,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
@@ -85,77 +85,84 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   toggleQuery,
   toggleStatus = true,
   tooltip,
-}) => (
-  <Header data-test-subj="header-section" border={border} height={height}>
-    <EuiFlexGroup
-      alignItems={stackHeader ? undefined : 'center'}
-      direction={stackHeader ? 'column' : 'row'}
-      gutterSize="s"
-    >
-      <EuiFlexItem grow={growLeftSplit}>
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize={'none'}>
-              {toggleQuery && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj="query-toggle-header"
-                    aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
-                    color="text"
-                    display="empty"
-                    iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
-                    onClick={() => toggleQuery(!toggleStatus)}
-                    size="s"
-                    title={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
-                  />
+}) => {
+  const toggle = useCallback(() => {
+    if (toggleQuery) {
+      toggleQuery(!toggleStatus);
+    }
+  }, [toggleQuery, toggleStatus]);
+  return (
+    <Header data-test-subj="header-section" border={border} height={height}>
+      <EuiFlexGroup
+        alignItems={stackHeader ? undefined : 'center'}
+        direction={stackHeader ? 'column' : 'row'}
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={growLeftSplit}>
+          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize={'none'}>
+                {toggleQuery && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      data-test-subj="query-toggle-header"
+                      aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+                      color="text"
+                      display="empty"
+                      iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
+                      onClick={toggle}
+                      size="s"
+                      title={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <EuiTitle size={titleSize}>
+                    <h4 data-test-subj="header-section-title">
+                      <span className="eui-textBreakNormal">{title}</span>
+                      {tooltip && (
+                        <>
+                          {' '}
+                          <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                        </>
+                      )}
+                    </h4>
+                  </EuiTitle>
                 </EuiFlexItem>
+              </EuiFlexGroup>
+
+              {!hideSubtitle && toggleStatus && (
+                <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
               )}
-              <EuiFlexItem>
-                <EuiTitle size={titleSize}>
-                  <h4 data-test-subj="header-section-title">
-                    <span className="eui-textBreakNormal">{title}</span>
-                    {tooltip && (
-                      <>
-                        {' '}
-                        <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
-                      </>
-                    )}
-                  </h4>
-                </EuiTitle>
+            </EuiFlexItem>
+
+            {id && showInspectButton && toggleStatus && (
+              <EuiFlexItem grow={false}>
+                <InspectButton
+                  isDisabled={isInspectDisabled}
+                  queryId={id}
+                  multiple={inspectMultiple}
+                  title={title}
+                />
               </EuiFlexItem>
-            </EuiFlexGroup>
-
-            {!hideSubtitle && toggleStatus && (
-              <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
             )}
-          </EuiFlexItem>
 
-          {id && showInspectButton && toggleStatus && (
-            <EuiFlexItem grow={false}>
-              <InspectButton
-                isDisabled={isInspectDisabled}
-                queryId={id}
-                multiple={inspectMultiple}
-                title={title}
-              />
-            </EuiFlexItem>
-          )}
-
-          {headerFilters && toggleStatus && (
-            <EuiFlexItem data-test-subj="header-section-filters" grow={false}>
-              {headerFilters}
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      {children && toggleStatus && (
-        <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
-          {children}
+            {headerFilters && toggleStatus && (
+              <EuiFlexItem data-test-subj="header-section-filters" grow={false}>
+                {headerFilters}
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  </Header>
-);
+
+        {children && toggleStatus && (
+          <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
+            {children}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </Header>
+  );
+};
 
 export const HeaderSection = React.memo(HeaderSectionComponent);

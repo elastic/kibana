@@ -251,6 +251,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       },
       [setQuerySkip, setToggleStatus]
     );
+    const toggle = useCallback(() => toggleQuery(!toggleStatus), [toggleQuery, toggleStatus]);
 
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
@@ -265,7 +266,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                     color="text"
                     display="empty"
                     iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
-                    onClick={() => toggleQuery(!toggleStatus)}
+                    onClick={toggle}
                     size="xs"
                     title={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
                   />
