@@ -1,6 +1,16 @@
 .timeSlider_anchor {
   text-decoration: none;
   width: 100%;
+  background-color: $euiFormBackgroundColor;
+
+  &:enabled:focus {
+    background-color: $euiFormBackgroundColor;
+  }
+
+  .euiText {
+    background-color: $euiFormBackgroundColor;
+  }
+
   .euiButtonContent,
   .euiButtonEmpty__text {
     width: 100%;

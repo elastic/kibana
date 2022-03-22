@@ -153,7 +153,9 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
             {epochToKbnDateFormat(lower)}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}> → </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText> → </EuiText>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiText
             className={
@@ -169,7 +171,7 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
   }
 
   const button = (
-    <EuiButtonEmpty
+    <EuiFilterButton
       className="timeSlider_anchor"
       color="text"
       iconType={'empty'}
@@ -179,29 +181,29 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
       isSelected={true}
     >
       {valueText}
-    </EuiButtonEmpty>
+    </EuiFilterButton>
   );
 
   return (
-    <EuiFilterGroup style={{ width: '100%', height: '100%' }}>
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        className="optionsList__popoverOverride"
-        anchorClassName="optionsList__anchorOverride"
-        closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="s"
-        anchorPosition="downCenter"
-        ownFocus
-        repositionOnScroll
-      >
-        {isValidRange(range) ? (
-          <TimeSliderComponentPopover range={range} value={value} onChange={props.onChange} />
-        ) : (
-          <TimeSliderComponentPopoverNoDocuments />
-        )}
-      </EuiPopover>
-    </EuiFilterGroup>
+    //<EuiFilterGroup style={{ width: '100%', height: '100%' }}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      className="optionsList__popoverOverride"
+      anchorClassName="optionsList__anchorOverride"
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="s"
+      anchorPosition="downCenter"
+      ownFocus
+      repositionOnScroll
+    >
+      {isValidRange(range) ? (
+        <TimeSliderComponentPopover range={range} value={value} onChange={props.onChange} />
+      ) : (
+        <TimeSliderComponentPopoverNoDocuments />
+      )}
+    </EuiPopover>
+    //</EuiFilterGroup>
   );
 };
 
