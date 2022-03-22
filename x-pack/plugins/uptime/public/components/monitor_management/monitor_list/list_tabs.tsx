@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment, useEffect } from 'react';
@@ -93,21 +94,24 @@ export const MonitorListTabs = ({
         <EuiTabs>{renderTabs()}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
+        <EuiButton
+          size="s"
           iconType="refresh"
           aria-label={REFRESH_LABEL}
           onClick={() => {
             onUpdate();
             refreshApp();
           }}
-        />
+        >
+          {REFRESH_LABEL}
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 export const REFRESH_LABEL = i18n.translate('xpack.uptime.monitorList.refresh', {
-  defaultMessage: 'Refresh list',
+  defaultMessage: 'Refresh',
 });
 
 export const INVALID_MONITORS_LABEL = i18n.translate('xpack.uptime.monitorList.invalidMonitors', {
