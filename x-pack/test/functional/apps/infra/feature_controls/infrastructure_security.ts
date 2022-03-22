@@ -71,6 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Cloud Security',
           'Stack Management',
         ]);
+      });
 
       describe('infrastructure landing page without data', () => {
         it('shows no data page', async () => {
