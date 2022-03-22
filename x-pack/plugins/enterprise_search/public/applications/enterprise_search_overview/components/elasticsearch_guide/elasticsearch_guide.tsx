@@ -24,6 +24,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { ElasticsearchCloudId } from '../elasticsearch_cloud_id';
 import { ElasticsearchResources } from '../elasticsearch_resources';
 
 import { LanguageInstructions } from './language_instructions';
@@ -57,6 +58,7 @@ export const ElasticsearchGuide: React.FC = () => {
 
   return (
     <EuiPageTemplate pageHeader={{ pageTitle: 'Elasticsearch' }}>
+      <ElasticsearchCloudId />
       <EuiTitle>
         <h2>
           {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchTitle', {
