@@ -10,6 +10,8 @@ import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResultCodec,
   MonitorManagementListResult,
+  MonitorManagementEnablementResultCodec,
+  MonitorManagementEnablementResult,
   ServiceLocations,
   SyntheticsMonitor,
   ServiceLocationsApiResponseCodec,
@@ -77,4 +79,20 @@ export interface TestNowResponse {
 
 export const testNowMonitor = async (configId: string): Promise<TestNowResponse | undefined> => {
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
+};
+
+export const fetchCanEnableSynthetics = async (): Promise<MonitorManagementEnablementResult> => {
+  return await apiService.get(
+    API_URLS.SYNTHETICS_ENABLEMENT,
+    undefined,
+    MonitorManagementEnablementResultCodec
+  );
+};
+
+export const fetchDisableSynthetics = async (): Promise<void> => {
+  return await apiService.delete(API_URLS.SYNTHETICS_ENABLEMENT);
+};
+
+export const fetchEnableSynthetics = async (): Promise<void> => {
+  return await apiService.post(API_URLS.SYNTHETICS_ENABLEMENT);
 };

@@ -37,7 +37,7 @@ import { SyntheticsMonitorSavedObject } from '../../../common/types';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
-const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
+const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '1m';
 
 export class SyntheticsService {
   private logger: Logger;
@@ -180,17 +180,15 @@ export class SyntheticsService {
   }
 
   async getOutput(request?: KibanaRequest) {
-    if (!this.apiKey) {
-      try {
-        this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
-      } catch (err) {
-        this.logger.error(err);
-        throw err;
-      }
+    try {
+      this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
     }
 
     if (!this.apiKey) {
-      const error = new APIKeyMissingError();
+      const error = new SyntheticsDisabledError();
       this.logger.error(error);
       throw error;
     }
@@ -199,7 +197,7 @@ export class SyntheticsService {
 
     return {
       hosts: this.esHosts,
-      api_key: `${this.apiKey.id}:${this.apiKey.apiKey}`,
+      api_key: `${this.apiKey?.id}:${this.apiKey?.apiKey}`,
     };
   }
 
@@ -328,11 +326,12 @@ export class SyntheticsService {
   }
 }
 
-class APIKeyMissingError extends Error {
+class SyntheticsDisabledError extends Error {
   constructor() {
     super();
-    this.message = 'API key is needed for synthetics service.';
-    this.name = 'APIKeyMissingError';
+    this.message =
+      'Synthetics is currently disabled. API key is needed for the Synthetics service. Please contact an administrator to enable Synthetics.';
+    this.name = 'SyntheticsDisabledError';
   }
 }
 
