@@ -59,6 +59,8 @@ interface Props {
   query?: Query;
   savedQuery?: SavedQuery;
   onClearSavedQuery?: () => void;
+  showSavedQueryManagement?: boolean;
+  showFilterSetManagement?: boolean;
 }
 
 export function QueryBarMenu({
@@ -81,6 +83,8 @@ export function QueryBarMenu({
   query,
   savedQuery,
   onClearSavedQuery,
+  showSavedQueryManagement,
+  showFilterSetManagement,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [hasFiltersOrQuery, setHasFiltersOrQuery] = useState(false);

@@ -71,6 +71,7 @@ export interface QueryBarTopRowProps {
   refreshInterval?: number;
   screenTitle?: string;
   showQueryInput?: boolean;
+  showAddFilter?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
@@ -355,39 +356,41 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderQueryInput() {
-      if (!shouldRenderQueryInput()) return;
-
       return (
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
-          <EuiFlexItem>
-            <QueryStringInput
-              disableAutoFocus={props.disableAutoFocus}
-              indexPatterns={props.indexPatterns!}
-              query={props.query!}
-              screenTitle={props.screenTitle}
-              onChange={onQueryChange}
-              onChangeQueryInputFocus={onChangeQueryInputFocus}
-              onSubmit={onInputSubmit}
-              persistedLog={persistedLog}
-              dataTestSubj={props.dataTestSubj}
-              placeholder={props.placeholder}
-              isClearable={props.isClearable}
-              iconType={props.iconType}
-              nonKqlMode={props.nonKqlMode}
-              nonKqlModeHelpText={props.nonKqlModeHelpText}
-              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-              disableLanguageSwitcher={true}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddFilterPopover
-              indexPatterns={props.indexPatterns}
-              filters={props.filters}
-              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-              onFiltersUpdated={props.onFiltersUpdated}
-            />
-          </EuiFlexItem>
+          {shouldRenderQueryInput() && (
+            <EuiFlexItem>
+              <QueryStringInput
+                disableAutoFocus={props.disableAutoFocus}
+                indexPatterns={props.indexPatterns!}
+                query={props.query!}
+                screenTitle={props.screenTitle}
+                onChange={onQueryChange}
+                onChangeQueryInputFocus={onChangeQueryInputFocus}
+                onSubmit={onInputSubmit}
+                persistedLog={persistedLog}
+                dataTestSubj={props.dataTestSubj}
+                placeholder={props.placeholder}
+                isClearable={props.isClearable}
+                iconType={props.iconType}
+                nonKqlMode={props.nonKqlMode}
+                nonKqlModeHelpText={props.nonKqlModeHelpText}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                disableLanguageSwitcher={true}
+              />
+            </EuiFlexItem>
+          )}
+          {Boolean(props.showAddFilter) && (
+            <EuiFlexItem grow={false}>
+              <AddFilterPopover
+                indexPatterns={props.indexPatterns}
+                filters={props.filters}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                onFiltersUpdated={props.onFiltersUpdated}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       );
     }

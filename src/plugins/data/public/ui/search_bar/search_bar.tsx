@@ -382,6 +382,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         query={this.state.query}
         savedQuery={this.props.savedQuery}
         onClearSavedQuery={this.props.onClearSavedQuery}
+        showSavedQueryManagement={this.props.showQueryInput}
+        showFilterSetManagement={this.props.showFilterBar}
         manageFilterSetComponent={
           this.props.showFilterBar && this.state.query
             ? this.renderSavedQueryManagement(
@@ -413,6 +415,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           refreshInterval={this.props.refreshInterval}
           showAutoRefreshOnly={this.props.showAutoRefreshOnly}
           showQueryInput={this.props.showQueryInput}
+          showAddFilter={this.props.showFilterBar}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onChange={this.onQueryBarChange}
