@@ -6,14 +6,16 @@
  */
 
 import readline from 'readline';
-import {createReadStream} from 'fs';
-import {fromEvent} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import { createReadStream } from 'fs';
+import { fromEvent } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { resolve } from 'path';
+import { KIBANA_ROOT } from '@kbn/test';
 import expect from '@kbn/expect';
-import {VisualizeConstants} from '../../../../../../src/plugins/visualize/public/application/visualize_constants';
-import {FtrProviderContext} from '../../../ftr_provider_context';
+import { VisualizeConstants } from '../../../../../../src/plugins/visualize/public/application/visualize_constants';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({getPageObjects, getService}: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
@@ -23,11 +25,11 @@ export default function ({getPageObjects, getService}: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   const showFile = (x: any) => {
-    const rl = readline.createInterface({input: createReadStream(x)});
+    const rl = readline.createInterface({ input: createReadStream(x) });
     const line$ = fromEvent(rl, 'line').pipe(takeUntil(fromEvent(rl, 'close')));
     line$.subscribe(
       (line: any) => process.stderr.write(`${line}\n`),
-      (err) => process.stderr.write(err),
+      (err) => process.stderr.write(`### Error while trying to show: ${x}.  Err: ${err}`),
       () => process.stderr.write(`### showed file: ${x}\n`)
     );
   };
@@ -43,25 +45,24 @@ export default function ({getPageObjects, getService}: FtrProviderContext) {
         // a space deletes all of the associated saved objects
         await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
 
-        await kibanaServer.importExport.save(
-          'x-pack/test/functional/fixtures/kbn_archiver/visualize/default',
-          {
-            types: [
-              'search',
-              'index-pattern',
-              'visualization',
-              'dashboard',
-              'lens',
-              'map',
-              'graph-workspace',
-              'query',
-              'tag',
-              'url',
-              'canvas-workpad',
-            ],
-          }
-        );
-        showFile('x-pack/test/functional/fixtures/kbn_archiver/visualize/default.json');
+        const kbnArchiveName = 'x-pack/test/functional/fixtures/kbn_archiver/visualize/default';
+        await kibanaServer.importExport.save(kbnArchiveName, {
+          types: [
+            'search',
+            'index-pattern',
+            'visualization',
+            'dashboard',
+            'lens',
+            'map',
+            'graph-workspace',
+            'query',
+            'tag',
+            'url',
+            'canvas-workpad',
+          ],
+        });
+        const kbnArchivePath = resolve(KIBANA_ROOT, `${kbnArchiveName}.json`);
+        showFile(kbnArchivePath);
 
         // await kibanaServer.savedObjects.cleanStandardList();
         // await spacesService.create({
