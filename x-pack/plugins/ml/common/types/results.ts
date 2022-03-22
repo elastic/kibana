@@ -117,7 +117,7 @@ export interface ChartRecord extends RecordForInfluencer {
 }
 
 export interface ExplorerChartSeriesErrorMessages {
-  [key: string]: Set<JobId>;
+  [key: string]: JobId[];
 }
 export interface ExplorerChartsData {
   chartsPerRow: number;

@@ -895,17 +895,17 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     };
   }
 
-  function initErrorHandler(data: ExplorerChartsData) {
+  function initErrorHandler(errorMessages: Record<string, Set<string>> | undefined) {
     handleError = (errorMsg: string, jobId: string) => {
       // Group the jobIds by the type of error message
-      if (!data.errorMessages) {
-        data.errorMessages = {};
+      if (!errorMessages) {
+        errorMessages = {};
       }
 
-      if (data.errorMessages[errorMsg]) {
-        data.errorMessages[errorMsg].add(jobId);
+      if (errorMessages[errorMsg]) {
+        errorMessages[errorMsg].add(jobId);
       } else {
-        data.errorMessages[errorMsg] = new Set([jobId]);
+        errorMessages[errorMsg] = new Set([jobId]);
       }
     };
   }
@@ -922,8 +922,6 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   ) {
     const data = getDefaultChartsData();
 
-    initErrorHandler(data);
-
     const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= severity;
     });
@@ -932,7 +930,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       filteredRecords
     );
 
-    data.errorMessages = errorMessages;
+    initErrorHandler(errorMessages);
 
     if (!Array.isArray(allSeriesRecords)) return;
 
@@ -1040,7 +1038,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       if (metricData !== undefined) {
         if (records.length > 0) {
           const filterField = records[0].by_field_value || records[0].over_field_value;
-          if (eventDistribution.length > 0) {
+          if (eventDistribution && eventDistribution.length > 0) {
             chartData = eventDistribution.filter((d: { entity: any }) => d.entity !== filterField);
           }
           map(metricData, (value, time) => {
@@ -1178,6 +1176,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     data.seriesToPlot = seriesToPlot;
+
+    data.errorMessages = Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
+      acc[errorMessage] = Array.from(jobs);
+      return acc;
+    }, {} as Record<string, string[]>);
 
     return data;
   }
@@ -1492,9 +1495,6 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         },
       },
       size: 0,
-      // _source: {
-      //   excludes: [],
-      // },
       aggs: {
         sample: {
           sampler: {
@@ -1549,7 +1549,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       body.aggs.sample.aggs.byTime.aggs.entities.aggs.metric = metricAgg;
     }
 
-    const resp = client?.asCurrentUser.search(body);
+    const resp = await client!.asCurrentUser.search(body);
 
     // Because of the sampling, results of metricFunctions which use sum or count
     // can be significantly skewed. Taking into account totalHits we calculate a
