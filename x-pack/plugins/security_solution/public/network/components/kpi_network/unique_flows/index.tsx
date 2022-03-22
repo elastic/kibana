@@ -9,8 +9,8 @@ import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueFlowIdsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_flow_ids';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import { useNetworkKpiUniqueFlows } from '../../../containers/kpi_network/unique_flows';
-import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
@@ -46,7 +46,7 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
   });
 
   return (
-    <NetworkKpiBaseComponentManage
+    <KpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}
