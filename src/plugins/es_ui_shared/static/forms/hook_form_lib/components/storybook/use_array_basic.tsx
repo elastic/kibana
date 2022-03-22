@@ -10,60 +10,77 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty, EuiSpacer } f
 
 import { TextField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
+import { FormConfig } from '../../types';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
+import { FormWrapper } from './form_utils';
 
 const { emptyField } = fieldValidators;
 
+const defaultValue = {
+  employees: [
+    {
+      name: 'John',
+      lastName: 'Snow',
+    },
+  ],
+};
+
+const formConfig: FormConfig = {
+  defaultValue,
+};
+
 export function Basic() {
   return (
-    <UseArray path="employees">
-      {({ items, addItem, removeItem }) => {
-        return (
-          <>
-            {items.map(({ id, path }) => {
-              return (
-                <EuiFlexGroup key={id} alignItems="center">
-                  <EuiFlexItem>
-                    <UseField
-                      path={`${path}.name`}
-                      config={{
-                        label: 'Name',
-                        validations: [{ validator: emptyField('A name is required.') }],
-                      }}
-                      component={TextField}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <UseField
-                      path={`${path}.lastName`}
-                      config={{
-                        label: 'Last name',
-                        validations: [{ validator: emptyField('A last name is required.') }],
-                      }}
-                      component={TextField}
-                    />
-                  </EuiFlexItem>
-                  {items.length > 1 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="minusInCircle"
-                        onClick={() => removeItem(id)}
-                        aria-label="Remove item"
+    <FormWrapper formConfig={formConfig}>
+      <UseArray path="employees">
+        {({ items, addItem, removeItem }) => {
+          return (
+            <>
+              {items.map(({ id, path }) => {
+                return (
+                  <EuiFlexGroup key={id} alignItems="center">
+                    <EuiFlexItem>
+                      <UseField
+                        path={`${path}.name`}
+                        config={{
+                          label: 'Name',
+                          validations: [{ validator: emptyField('A name is required.') }],
+                        }}
+                        component={TextField}
                       />
                     </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              );
-            })}
-            <EuiSpacer size="m" />
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiButtonEmpty onClick={addItem}>Add employee</EuiButtonEmpty>
-            </EuiFlexGroup>
-          </>
-        );
-      }}
-    </UseArray>
+                    <EuiFlexItem>
+                      <UseField
+                        path={`${path}.lastName`}
+                        config={{
+                          label: 'Last name',
+                          validations: [{ validator: emptyField('A last name is required.') }],
+                        }}
+                        component={TextField}
+                      />
+                    </EuiFlexItem>
+                    {items.length > 1 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="minusInCircle"
+                          onClick={() => removeItem(id)}
+                          aria-label="Remove item"
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                );
+              })}
+              <EuiSpacer size="m" />
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiButtonEmpty onClick={addItem}>Add employee</EuiButtonEmpty>
+              </EuiFlexGroup>
+            </>
+          );
+        }}
+      </UseArray>
+    </FormWrapper>
   );
 }
 

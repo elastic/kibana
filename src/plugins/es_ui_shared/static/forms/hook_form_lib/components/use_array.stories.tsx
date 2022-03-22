@@ -7,42 +7,22 @@
  */
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { STORYBOOK_SECTION } from '../constants';
-import { useForm } from '../hooks/use_form';
-import { Form } from './form';
 import { UseArray } from './use_array';
 
-import { useArrayStories, helpers } from './storybook';
+import { useArrayStories } from './storybook';
 
 const { UseArrayBasic, UseArrayComplex } = useArrayStories;
-const { submitForm } = helpers;
-
-const defaultValue = {
-  employees: [
-    {
-      name: 'John',
-      lastName: 'Snow',
-    },
-  ],
-};
 
 export default {
   component: UseArray,
   title: `${STORYBOOK_SECTION}/UseArray`,
   decorators: [
     (Story) => {
-      const { form } = useForm({ defaultValue });
       return (
         <div style={{ maxWidth: '600px' }}>
-          <Form form={form}>
-            <>
-              <Story />
-              <EuiSpacer />
-              <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
-            </>
-          </Form>
+          <Story />
         </div>
       );
     },

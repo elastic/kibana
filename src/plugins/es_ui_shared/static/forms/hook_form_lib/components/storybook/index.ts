@@ -10,7 +10,8 @@ import { Validation } from './form_validation';
 import { DeSerializer } from './form_de_serializer';
 import { DefaultValue } from './form_default_value';
 import { IsModified } from './form_is_modified';
-import { submitForm } from './form_utils';
+
+import { submitForm, FormWrapper } from './form_utils';
 
 import { Basic as UseArrayBasic } from './use_array_basic';
 import { Complex as UseArrayComplex } from './use_array_complex';
@@ -30,3 +31,5 @@ export const useArrayStories = {
 export const helpers = {
   submitForm,
 };
+
+export { FormWrapper };
