@@ -27,6 +27,8 @@ import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';
+import { CachedPluginsStatusService } from './cached_plugins_status';
+import { ServiceStatusLevels } from '..';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
@@ -67,7 +69,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   }: SetupDeps) {
     const statusConfig = await this.config$.pipe(take(1)).toPromise();
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
-    this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
+    this.pluginsStatus = new CachedPluginsStatusService({ core$, pluginDependencies });
 
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
