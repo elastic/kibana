@@ -6,3 +6,6 @@ set -euo pipefail
 
 echo "--- Build Kibana Distribution"
 node scripts/build --all-platforms --debug --skip-docker-cloud
+
+echo "--- Build dependencies report"
+node scripts/licenses_csv_report --csv=target/dependencies_report.csv
