@@ -15,7 +15,6 @@ import {
   ALERT_SEVERITY,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { join } from 'path';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';
@@ -233,7 +232,7 @@ export function registerTransactionDurationAnomalyAlertType({
 
           const viewInAppUrl = basePath.publicBaseUrl
             ? new URL(
-                join(basePath.serverBasePath, relativeViewInAppUrl),
+                basePath.prepend(relativeViewInAppUrl),
                 basePath.publicBaseUrl
               ).toString()
             : relativeViewInAppUrl;

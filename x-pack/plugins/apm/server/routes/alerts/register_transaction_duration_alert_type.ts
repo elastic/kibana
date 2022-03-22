@@ -13,7 +13,6 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { take } from 'rxjs/operators';
-import { join } from 'path';
 import { getAlertUrlTransactionDuration } from '../../../common/utils/formatters';
 import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
@@ -207,7 +206,7 @@ export function registerTransactionDurationAlertType({
 
         const viewInAppUrl = basePath.publicBaseUrl
           ? new URL(
-              join(basePath.serverBasePath, relativeViewInAppUrl),
+              basePath.prepend(relativeViewInAppUrl),
               basePath.publicBaseUrl
             ).toString()
           : relativeViewInAppUrl;

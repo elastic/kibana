@@ -12,7 +12,6 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { join } from 'path';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -218,10 +217,9 @@ export function registerTransactionErrorRateAlertType({
             [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]],
             [transactionType]
           );
-
           const viewInAppUrl = basePath.publicBaseUrl
             ? new URL(
-                join(basePath.serverBasePath, relativeViewInAppUrl),
+                basePath.prepend(relativeViewInAppUrl),
                 basePath.publicBaseUrl
               ).toString()
             : relativeViewInAppUrl;

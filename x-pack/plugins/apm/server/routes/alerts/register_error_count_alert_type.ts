@@ -12,7 +12,6 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { join } from 'path';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -160,7 +159,7 @@ export function registerErrorCountAlertType({
 
             const viewInAppUrl = basePath.publicBaseUrl
               ? new URL(
-                  join(basePath.serverBasePath, relativeViewInAppUrl),
+                  basePath.prepend(relativeViewInAppUrl),
                   basePath.publicBaseUrl
                 ).toString()
               : relativeViewInAppUrl;
