@@ -84,6 +84,12 @@ import {
   getModifiedSearch,
   modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
+import { AlertingRulesConfig } from '../config';
+import {
+  formatExecutionLogResult,
+  getExecutionLogAggregation,
+  IExecutionLogResult,
+} from '../lib/get_execution_log_aggregation';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 
@@ -128,7 +134,7 @@ export interface ConstructorOptions {
   authorization: AlertingAuthorization;
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
-  minimumScheduleInterval: string;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
@@ -235,6 +241,16 @@ export interface GetAlertSummaryParams {
   numberOfExecutions?: number;
 }
 
+export interface GetExecutionLogByIdParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
+}
+
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
@@ -254,7 +270,7 @@ export class RulesClient {
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertingAuthorization;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private readonly minimumScheduleInterval: string;
+  private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly minimumScheduleIntervalInMs: number;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
@@ -296,7 +312,7 @@ export class RulesClient {
     this.taskManager = taskManager;
     this.ruleTypeRegistry = ruleTypeRegistry;
     this.minimumScheduleInterval = minimumScheduleInterval;
-    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval);
+    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval.value);
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
@@ -355,9 +371,16 @@ export class RulesClient {
     // Validate that schedule interval is not less than configured minimum
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      throw Boom.badRequest(
-        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-      );
+      if (this.minimumScheduleInterval.enforce) {
+        throw Boom.badRequest(
+          `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be created
+        this.logger.warn(
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+        );
+      }
     }
 
     // Extract saved object references for this rule
@@ -637,6 +660,70 @@ export class RulesClient {
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
+  }
+
+  public async getExecutionLogForRule({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetExecutionLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_EXECUTION_LOG,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_EXECUTION_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
+      'alert',
+      [id],
+      {
+        start: parsedDateStart.toISOString(),
+        end: parsedDateEnd.toISOString(),
+        filter,
+        aggs: getExecutionLogAggregation({
+          page,
+          perPage,
+          sort,
+        }),
+      },
+      rule.legacyId !== null ? [rule.legacyId] : undefined
+    );
+
+    return formatExecutionLogResult(results);
   }
 
   public async find<Params extends RuleTypeParams = never>({
@@ -1033,9 +1120,16 @@ export class RulesClient {
     // Validate that schedule interval is not less than configured minimum
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      throw Boom.badRequest(
-        `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-      );
+      if (this.minimumScheduleInterval.enforce) {
+        throw Boom.badRequest(
+          `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be updated
+        this.logger.warn(
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+        );
+      }
     }
 
     // Extract saved object references for this rule
@@ -1516,7 +1610,7 @@ export class RulesClient {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
-        operation: WriteOperations.MuteAll,
+        operation: WriteOperations.Snooze,
         entity: AlertingAuthorizationEntity.Rule,
       });
 
@@ -1614,6 +1708,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1676,6 +1771,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
