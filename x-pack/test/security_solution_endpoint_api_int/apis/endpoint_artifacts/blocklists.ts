@@ -95,14 +95,14 @@ export default function ({ getService }: FtrProviderContext) {
           method: 'post',
           path: EXCEPTION_LIST_ITEM_URL,
           getBody: () => {
-            return exceptionsGenerator.generateTrustedAppForCreate({ tags: [GLOBAL_ARTIFACT_TAG] });
+            return exceptionsGenerator.generateBlocklistForCreate({ tags: [GLOBAL_ARTIFACT_TAG] });
           },
         },
         {
           method: 'put',
           path: EXCEPTION_LIST_ITEM_URL,
           getBody: () =>
-            exceptionsGenerator.generateTrustedAppForUpdate({
+            exceptionsGenerator.generateBlocklistForUpdate({
               id: blocklistData.artifact.id,
               item_id: blocklistData.artifact.item_id,
               tags: [GLOBAL_ARTIFACT_TAG],
@@ -116,7 +116,6 @@ export default function ({ getService }: FtrProviderContext) {
             const body = blocklistApiCall.getBody();
 
             body.entries[0].field = 'some.invalid.field';
-
             await supertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
@@ -125,17 +124,33 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/types that failed validation:/));
           });
 
-          it(`should error on [${blocklistApiCall.method}] if a condition entry field is used more than once`, async () => {
+          it(`should error on [${blocklistApiCall.method}] if the same hash type is present twice`, async () => {
             const body = blocklistApiCall.getBody();
 
-            body.entries.push({ ...body.entries[0] });
+            body.entries = [
+              {
+                field: 'process.hash.sha256',
+                value: ['a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'],
+                type: 'match_any',
+                operator: 'included',
+              },
+              {
+                field: 'process.hash.sha256',
+                value: [
+                  '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
+                  'FCDE2B2EDBA56BF408601FB721FE9B5C338D10EE429EA04FAE5511B68FBF8FB9',
+                ],
+                type: 'match_any',
+                operator: 'included',
+              },
+            ];
 
             await supertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
               .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/Duplicate/));
+              .expect(anErrorMessageWith(/duplicated/));
           });
 
           it(`should error on [${blocklistApiCall.method}] if an invalid hash is used`, async () => {
@@ -145,8 +160,8 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 field: 'process.hash.md5',
                 operator: 'included',
-                type: 'match',
-                value: '1',
+                type: 'match_any',
+                value: ['1'],
               },
             ];
 
@@ -189,6 +204,45 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(400)
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/^.*(?!process\.Ext\.code_signature)/));
+          });
+
+          it(`should error on [${blocklistApiCall.method}] if more than one entry and not a hash`, async () => {
+            const body = blocklistApiCall.getBody();
+
+            body.os_types = ['windows'];
+            body.entries = [
+              {
+                field: 'process.executable.caseless',
+                value: ['C:\\some\\path', 'C:\\some\\other\\path', 'C:\\yet\\another\\path'],
+                type: 'match_any',
+                operator: 'included',
+              },
+              {
+                field: 'process.Ext.code_signature',
+                entries: [
+                  {
+                    field: 'trusted',
+                    value: 'true',
+                    type: 'match',
+                    operator: 'included',
+                  },
+                  {
+                    field: 'subject_name',
+                    value: ['notsus.exe', 'verynotsus.exe', 'superlegit.exe'],
+                    type: 'match_any',
+                    operator: 'included',
+                  },
+                ],
+                type: 'nested',
+              },
+            ];
+
+            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/one entry is allowed/));
           });
 
           it(`should error on [${blocklistApiCall.method}] if more than one OS is set`, async () => {

@@ -94,8 +94,8 @@ const WindowsSignerEntrySchema = schema.object({
       }),
       schema.object({
         field: schema.literal('subject_name'),
-        value: schema.string({ minLength: 1 }),
-        type: schema.literal('match'),
+        value: schema.arrayOf(schema.string({ minLength: 1 })),
+        type: schema.literal('match_any'),
         operator: schema.literal('included'),
       }),
     ]),
@@ -140,7 +140,7 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[], allowedHashes
     }
   });
 
-  if (duplicatedHashes) {
+  if (duplicatedHashes.length) {
     return `There are some duplicated hashes: ${duplicatedHashes.join(',')}`;
   }
   if (invalidHash.length) {
