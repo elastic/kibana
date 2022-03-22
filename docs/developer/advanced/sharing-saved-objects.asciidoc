@@ -1,8 +1,8 @@
 [[sharing-saved-objects]]
-== Sharing Saved Objects
+== Sharing saved objects
 
-This guide describes the Sharing Saved Objects effort, and the breaking changes that plugin developers need to be aware of for the planned
-8.0 release of {kib}.
+This guide describes the "Sharing saved objects" effort, and the breaking changes that plugin developers need to be aware of for the planned
+8.0 release of {kib}. It also describes how developers can take advantage of this feature.
 
 [[sharing-saved-objects-overview]]
 === Overview
@@ -56,7 +56,7 @@ TIP: External plugins can also convert their objects, but <<sharing-saved-object
 8.0 release>>.
 
 [[sharing-saved-objects-phase-1]]
-=== Phase 1 Developer Flowchart
+=== Phase 1 developer flowchart
 
 If you're still reading this page, you're probably developing a {kib} plugin that registers an object type, and you want to know what steps
 you need to take to prepare for the 8.0 release and mitigate any breaking changes! Depending on how you are using saved objects, you may
@@ -252,8 +252,8 @@ if (spacesApi && resolveResult.outcome === 'aliasMatch') {
 ```
 <1> The `aliasPurpose` field is required as of 8.2, because the API response now includes the reason the alias was created to inform the
     client whether a toast should be shown or not.
-<2> The `objectNoun` field is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say
-    "dashboard" or "data view" instead!
+<2> The `objectNoun` field is optional. It just changes "object" in the toast to whatever you specify -- you may want the toast to say
+    "dashboard" or "data view" instead.
 
 5. And finally, in your deep link page, add a function that will create a callout in the case of a `'conflict'` outcome:
 +
@@ -347,7 +347,7 @@ image::images/sharing-saved-objects-step-5.png["Sharing Saved Objects ESO migrat
 NOTE: Reminder, don't forget to add unit tests and integration tests!
 
 [[sharing-saved-objects-phase-2]]
-=== Phase 2 Developer Flowchart
+=== Phase 2 developer flowchart
 
 This section covers switching a share-capable object type into a shareable one _or_ creating a new shareable saved object type. Refer to
 this flowchart:
@@ -459,13 +459,14 @@ return (
   </>
 );
 ```
-<1> The `icon` field is optional, it specifies an https://elastic.github.io/eui/#/display/icons[EUI icon] type that will be displayed in the
+<1> The `icon` field is optional. It specifies an https://elastic.github.io/eui/#/display/icons[EUI icon] type that will be displayed in the
     flyout header.
-<2> The `title` field is optional, it specifies a human-readable identifier for your object that will be displayed in the flyout header.
-<3> The `noun` field is optional, it just changes "object" in the flyout to whatever you specify -- you may want the flyout to say
-    "dashboard" or "data view" instead!
-<4> The `behaviorContext` field is optional, it controls how the space list is displayed. When using an `"outside-space"` behavior context,
-    the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a `"within-space"` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
+<2> The `title` field is optional. It specifies a human-readable identifier for your object that will be displayed in the flyout header.
+<3> The `noun` field is optional. It just changes "object" in the flyout to whatever you specify -- you may want the flyout to say
+    "dashboard" or "data view" instead.
+<4> The `behaviorContext` field is optional. It controls how the space list is displayed. When using an `"outside-space"` behavior context,
+    the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a
+    `"within-space"` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
 
 2. Allow users to access your objects in the <<managing-saved-objects,Saved Objects Management page>> in <<management>>. You can do this by
    ensuring that your objects are marked as
