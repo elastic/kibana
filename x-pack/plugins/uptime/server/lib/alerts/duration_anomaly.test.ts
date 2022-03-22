@@ -159,7 +159,6 @@ describe('duration anomaly alert', () => {
       const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
       expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(2);
       const reasonMessages: string[] = [];
-      const viewInAppUrl: string[] = [];
       mockAnomaliesResult.anomalies.forEach((anomaly, index) => {
         const slowestResponse = Math.round(anomaly.actualSort / 1000);
         const typicalResponse = Math.round(anomaly.typicalSort / 1000);
@@ -220,7 +219,7 @@ Response times as high as ${slowestResponse} ms have been detected from location
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
             "${ALERT_REASON_MSG}": "${reasonMessages[0]}",
-            "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
+            "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
           },
         ]
       `);
@@ -229,7 +228,7 @@ Response times as high as ${slowestResponse} ms have been detected from location
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
             "${ALERT_REASON_MSG}": "${reasonMessages[1]}",
-            "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
+            "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
           },
         ]
       `);
