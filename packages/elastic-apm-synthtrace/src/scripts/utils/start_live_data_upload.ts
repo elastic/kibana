@@ -35,7 +35,7 @@ export async function startLiveDataUpload(
       const bucketTo = new Date(requestedUntil.getTime() + runOptions.bucketSizeInMs);
       // TODO this materializes into an array, assumption is that the live buffer will fit in memory
       const nextEvents = logger.perf('execute_scenario', () =>
-        generate({ from: bucketFrom, to: bucketTo }, { isLiveMode: true }).toArray()
+        generate({ from: bucketFrom, to: bucketTo }).toArray()
       );
 
       logger.debug(

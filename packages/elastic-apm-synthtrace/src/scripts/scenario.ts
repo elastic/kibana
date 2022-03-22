@@ -9,10 +9,7 @@
 import { RunOptions } from './utils/parse_run_cli_flags';
 import { SpanIterable } from '../lib/span_iterable';
 
-type Generate = (
-  range: { from: Date; to: Date },
-  options?: { isLiveMode?: boolean }
-) => SpanIterable;
+type Generate = (range: { from: Date; to: Date }) => SpanIterable;
 export type Scenario = (options: RunOptions) => Promise<{
   generate: Generate;
   mapToIndex?: (data: Record<string, any>) => string;
