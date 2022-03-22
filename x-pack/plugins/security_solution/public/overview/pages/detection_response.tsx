@@ -9,7 +9,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-// import { useGlobalTime } from '../../common/containers/use_global_time';
+import { useGlobalTime } from '../../common/containers/use_global_time';
 
 import { OverviewEmpty } from '../components/overview_empty';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -21,12 +21,14 @@ import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
 
+import { useStatusSeverityAlertCounters } from '../containers/detection_response/alerts_counters';
+
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   // TODO: link queries with global time queries
-  // const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
+  const { to, from } = useGlobalTime();
 
   const queriesLoading: boolean = useShallowEqualSelector(
     (state) => !!getGlobalQuery(state).find((query) => query.loading)
@@ -44,6 +46,13 @@ const DetectionResponseComponent = () => {
   );
 
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
+  const [loading, data] = useStatusSeverityAlertCounters({
+    from,
+    to,
+    indexName: '*',
+  });
+
+  console.log({ loading, data });
 
   return (
     <>

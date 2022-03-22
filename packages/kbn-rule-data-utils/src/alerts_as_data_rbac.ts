@@ -25,7 +25,7 @@ export const AlertConsumers = {
 } as const;
 export type AlertConsumers = typeof AlertConsumers[keyof typeof AlertConsumers];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'
-
+// can import from here? should the in progress be removed?
 export type ValidFeatureId = AlertConsumers;
 
 export const validFeatureIds = Object.values(AlertConsumers).map((v) => v as string);

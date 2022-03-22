@@ -76,6 +76,8 @@ export const useQueryAlerts = <Hit, Aggs>({
           });
         }
       } catch (error) {
+        // should there be some additional error handling here, or do we infer null as error
+        // and use that to show error message to user
         if (isSubscribed) {
           setAlerts({
             data: null,
