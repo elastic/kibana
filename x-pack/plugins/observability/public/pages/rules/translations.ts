@@ -53,6 +53,27 @@ export const RULE_STATUS_WARNING = i18n.translate(
   }
 );
 
+export const RULE_STATUS_ENABLED = i18n.translate(
+  'xpack.observability.rules.rulesTable.ruleStatusEnabled',
+  {
+    defaultMessage: 'Enabled',
+  }
+);
+
+export const RULE_STATUS_DISABLED = i18n.translate(
+  'xpack.observability.rules.rulesTable.ruleStatusDisabled',
+  {
+    defaultMessage: 'Disabled',
+  }
+);
+
+export const RULE_STATUS_SNOOZED_PERMANENTLY = i18n.translate(
+  'xpack.observability.rules.rulesTable.ruleStatusSnoozedPermanently',
+  {
+    defaultMessage: 'Snoozed permanently',
+  }
+);
+
 export const LAST_RESPONSE_COLUMN_TITLE = i18n.translate(
   'xpack.observability.rules.rulesTable.columns.lastResponseTitle',
   {

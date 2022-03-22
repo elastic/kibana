@@ -13,6 +13,9 @@ import {
   RULE_STATUS_PENDING,
   RULE_STATUS_UNKNOWN,
   RULE_STATUS_WARNING,
+  RULE_STATUS_ENABLED,
+  RULE_STATUS_DISABLED,
+  RULE_STATUS_SNOOZED_PERMANENTLY,
 } from './translations';
 import { AlertExecutionStatuses } from '../../../../alerting/common';
 import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/public';
@@ -20,15 +23,15 @@ import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/p
 export const statusMap: Status = {
   [RuleStatus.enabled]: {
     color: 'primary',
-    label: 'Enabled',
+    label: RULE_STATUS_ENABLED,
   },
   [RuleStatus.disabled]: {
     color: 'default',
-    label: 'Disabled',
+    label: RULE_STATUS_DISABLED,
   },
   [RuleStatus.snoozed]: {
     color: 'warning',
-    label: 'Snoozed permanently',
+    label: RULE_STATUS_SNOOZED_PERMANENTLY,
   },
 };
 
