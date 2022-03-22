@@ -26,12 +26,14 @@ import {
   EuiSpacer,
   EuiLink,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { parseInterval } from '../../../../../common';
 
 import { RuleTableItem } from '../../../../types';
 
 type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
+const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
 export interface ComponentOpts {
   item: RuleTableItem;
@@ -61,7 +63,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   const onClickBadge = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), [setIsPopoverOpen]);
   const onClosePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
-  const onChangeStatus = useCallback(
+  const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
       setIsUpdating(true);
       if (enable) {
@@ -93,9 +95,11 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   const remainingSnoozeTime =
     isEnabled && isSnoozed ? (
-      <EuiText color="subdued" size="xs">
-        {moment(item.snoozeEndTime).fromNow(true)}
-      </EuiText>
+      <EuiToolTip content={moment(item.snoozeEndTime).format(SNOOZE_END_TIME_FORMAT)}>
+        <EuiText color="subdued" size="xs">
+          {moment(item.snoozeEndTime).fromNow(true)}
+        </EuiText>
+      </EuiToolTip>
     ) : null;
 
   const badge = (
@@ -117,8 +121,8 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>
+    <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+      <EuiFlexItem grow={false}>
         <EuiPopover
           button={badge}
           isOpen={isPopoverOpen}
@@ -128,7 +132,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
         >
           <RuleStatusMenu
             onClosePopover={onClosePopover}
-            onChangeStatus={onChangeStatus}
+            onChangeEnabledStatus={onChangeEnabledStatus}
             onChangeSnooze={onChangeSnooze}
             isEnabled={isEnabled}
             isSnoozed={isSnoozed}
@@ -136,13 +140,15 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
           />
         </EuiPopover>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj="remainingSnoozeTime">{remainingSnoozeTime}</EuiFlexItem>
+      <EuiFlexItem data-test-subj="remainingSnoozeTime" grow={false}>
+        {remainingSnoozeTime}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 interface RuleStatusMenuProps {
-  onChangeStatus: (enabled: boolean) => void;
+  onChangeEnabledStatus: (enabled: boolean) => void;
   onChangeSnooze: (value: number, unit: SnoozeUnit) => void;
   onClosePopover: () => void;
   isEnabled: boolean;
@@ -151,7 +157,7 @@ interface RuleStatusMenuProps {
 }
 
 const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
-  onChangeStatus,
+  onChangeEnabledStatus,
   onChangeSnooze,
   onClosePopover,
   isEnabled,
@@ -159,13 +165,18 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
   snoozeEndTime,
 }) => {
   const enableRule = useCallback(() => {
-    onChangeStatus(true);
+    if (isSnoozed) {
+      // Unsnooze if the rule is snoozed and the user clicks Enabled
+      onChangeSnooze(0, 'm');
+    } else {
+      onChangeEnabledStatus(true);
+    }
     onClosePopover();
-  }, [onChangeStatus, onClosePopover]);
+  }, [onChangeEnabledStatus, onClosePopover, onChangeSnooze, isSnoozed]);
   const disableRule = useCallback(() => {
-    onChangeStatus(false);
+    onChangeEnabledStatus(false);
     onClosePopover();
-  }, [onChangeStatus, onClosePopover]);
+  }, [onChangeEnabledStatus, onClosePopover]);
 
   const onApplySnooze = useCallback(
     (value: number, unit: SnoozeUnit) => {
@@ -181,7 +192,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
       <>
         <EuiText size="s">{SNOOZE}</EuiText>{' '}
         <EuiText size="xs" color="subdued">
-          {moment(snoozeEndTime).format('LL @ LT')}
+          {moment(snoozeEndTime).format(SNOOZE_END_TIME_FORMAT)}
         </EuiText>
       </>
     );
