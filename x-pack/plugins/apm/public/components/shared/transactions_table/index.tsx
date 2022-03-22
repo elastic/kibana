@@ -81,13 +81,13 @@ export function TransactionsTable({
   end,
 }: Props) {
   const [tableOptions, setTableOptions] = useState<{
-    pageIndex: number;
+    page: { index: number; size: number };
     sort: {
       direction?: SortDirection;
       field?: SortField;
     };
   }>({
-    pageIndex: 0,
+    page: { index: 0, size: numberOfTransactionsPerPage },
     sort: DEFAULT_SORT,
   });
 
@@ -95,8 +95,9 @@ export function TransactionsTable({
   const { isXl } = useBreakpoints();
   const shouldShowSparkPlots = isSingleColumn || !isXl;
 
-  const { pageIndex, sort } = tableOptions;
+  const { page, sort } = tableOptions;
   const { direction, field } = sort;
+  const { index: pageIndex, size: pageSize } = page;
 
   const { transactionType, serviceName } = useApmServiceContext();
   const {
@@ -149,10 +150,7 @@ export function TransactionsTable({
             // transactionGroups: currentPageTransactionGroups,
             transactionGroupsTotalItems: response.transactionGroups.length,
             transactionNames: currentPageTransactionGroups
-              .slice(
-                pageIndex * numberOfTransactionsPerPage,
-                (pageIndex + 1) * numberOfTransactionsPerPage
-              )
+              .slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
               .map(({ name }) => name)
               .sort(),
           },
@@ -169,6 +167,7 @@ export function TransactionsTable({
       transactionType,
       latencyAggregationType,
       pageIndex,
+      pageSize,
       direction,
       field,
       // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
@@ -337,7 +336,7 @@ export function TransactionsTable({
               showPerPageOptions={showPerPageOptions}
               onNavigate={(options) => {
                 setTableOptions({
-                  pageIndex: options.page.index,
+                  page: options.page,
                   sort: {
                     field: options.sort?.field as SortField,
                     direction: options.sort?.direction,
