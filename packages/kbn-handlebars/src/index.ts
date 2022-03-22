@@ -306,13 +306,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   private processSimpleNode(node: ProcessableNodeWithPathParts) {
     const path = node.path;
+    const result = this.resolveNodes(path)[0];
+    const lambdaResult = this.container.lambda(result, this.scopes[0]);
 
     if (isBlock(node)) {
-      const result = this.resolveNodes(path)[0];
-      const lambdaResult = this.container.lambda(result, this.scopes[0]);
       this.blockValue(node, lambdaResult);
     } else {
-      this.accept(path);
+      this.output.push(lambdaResult);
     }
   }
 
@@ -359,13 +359,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private invokeHelper(node: ProcessableNodeWithPathParts) {
     const path = node.path;
     const name = path.original;
+    const isSimple = AST.helpers.simpleId(path);
     const helper = this.setupHelper(node, name);
+
+    helper.fn = (isSimple && helper.fn) || this.resolveNodes(path)[0];
 
     if (!helper.fn) {
       if (this.compileOptions.strict) {
         helper.fn = this.container.strict(helper.context, name, node.loc);
       } else {
-        helper.fn = this.resolveNodes(path)[0] || this.container.hooks.helperMissing;
+        helper.fn = this.container.hooks.helperMissing;
       }
     }
 

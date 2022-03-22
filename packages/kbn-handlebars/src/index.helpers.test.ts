@@ -265,6 +265,21 @@ describe('helpers', () => {
       .toCompileTo('<p>Nobody&#x27;s here</p>');
   });
 
+  it('pathed lambas with parameters', () => {
+    const hash = {
+      helper: () => 'winning',
+    };
+    // @ts-expect-error
+    hash.hash = hash;
+
+    const helpers = {
+      './helper': () => 'fail',
+    };
+
+    expectTemplate('{{./helper 1}}').withInput(hash).withHelpers(helpers).toCompileTo('winning');
+    expectTemplate('{{hash/helper 1}}').withInput(hash).withHelpers(helpers).toCompileTo('winning');
+  });
+
   describe('helpers hash', () => {
     it('providing a helpers hash', () => {
       expectTemplate('Goodbye {{cruel}} {{world}}!')
@@ -643,6 +658,20 @@ describe('helpers', () => {
           knownHelpersOnly: true,
         })
         .withInput({ foo: false })
+        .toCompileTo('bar');
+    });
+
+    it('Functions are bound to the context in knownHelpers only mode', () => {
+      expectTemplate('{{foo}}')
+        .withCompileOptions({
+          knownHelpersOnly: true,
+        })
+        .withInput({
+          foo() {
+            return this.bar;
+          },
+          bar: 'bar',
+        })
         .toCompileTo('bar');
     });
 
