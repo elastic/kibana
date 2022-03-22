@@ -20,26 +20,38 @@ import { reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasData } from '../../../hooks/use_has_data';
 
+const LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY = 'HIDE_GUIDED_SETUP_KEY';
 export function ObservabilityStatusProgress() {
   const { hasDataMap, isAllRequestsComplete } = useHasData();
+  const hideGuidedSetupLocalStorageKey = window.localStorage.getItem(
+    LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY
+  );
+  const [isGuidedSetupHidden, setIsGuidedSetupHidden] = useState(
+    JSON.parse(hideGuidedSetupLocalStorageKey || 'false')
+  );
 
+  const hideGuidedSetup = () => {
+    window.localStorage.setItem(LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY, 'true');
+    setIsGuidedSetupHidden(true);
+  };
   useEffect(() => {
     const totalCounts = Object.keys(hasDataMap);
     if (isAllRequestsComplete) {
       const hasDataCount = reduce(
         hasDataMap,
-        (result, value, key) => {
+        (result, value) => {
           return value?.hasData ? result + 1 : result;
         },
         0
       );
 
-      setProgress((hasDataCount / totalCounts.length) * 100 || 0);
+      const percentage = (hasDataCount / totalCounts.length) * 100;
+      setProgress(isFinite(percentage) ? percentage : 0);
     }
   }, [isAllRequestsComplete, hasDataMap]);
 
   const [progress, setProgress] = useState(0);
-  return (
+  return !isGuidedSetupHidden ? (
     <EuiPanel paddingSize="l" hasBorder>
       <EuiPanel color="primary">
         <EuiProgress color="primary" value={progress} max={100} size="m" />
@@ -66,7 +78,7 @@ export function ObservabilityStatusProgress() {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} direction="row" alignItems="center">
               <EuiFlexItem>
-                <EuiButtonEmpty size="s">
+                <EuiButtonEmpty size="s" onClick={hideGuidedSetup}>
                   <FormattedMessage
                     id="xpack.observability.status.progressBarDismiss"
                     defaultMessage="Dismiss"
@@ -86,5 +98,5 @@ export function ObservabilityStatusProgress() {
         </EuiFlexGroup>
       </EuiPanel>
     </EuiPanel>
-  );
+  ) : null;
 }
