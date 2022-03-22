@@ -17,15 +17,57 @@ const format = ({
   return `${pathname}?${stringify(query)}`;
 };
 
-export const getAlertUrl = (
-  serviceNameField: string,
-  serviceEnvField: string[]
+export const getAlertUrlErrorCount = (serviceName: any[], serviceEnv: any[]) =>
+  format({
+    pathname: `/app/apm/services/${String(serviceName[0])}/errors`,
+    query: {
+      ...(serviceEnv?.[0]
+        ? { environment: String(serviceEnv[0]) }
+        : { environment: ENVIRONMENT_ALL.value }),
+    },
+  });
+
+export const getAlertUrlTransactionDuration = (
+  serviceName: any[],
+  serviceEnv: any[],
+  transactionType: any[]
 ) =>
   format({
-    pathname: `/app/apm/services/${String(serviceNameField)}/errors`,
+    pathname: `/app/apm/services/${serviceName[0]!}`,
     query: {
-      ...(serviceNameField?.[0]
-        ? { environment: String(serviceEnvField[0]) }
+      transactionType: transactionType[0]!,
+      ...(serviceEnv?.[0]
+        ? { environment: String(serviceEnv[0]) }
+        : { environment: ENVIRONMENT_ALL.value }),
+    },
+  });
+
+export const getAlertUrlTransactionErrorRate = (
+  serviceName: any[],
+  serviceEnv: any[],
+  transactionType: any[]
+) =>
+  format({
+    pathname: `/app/apm/services/${String(serviceName[0]!)}`,
+    query: {
+      transactionType: String(transactionType[0]!),
+      ...(serviceEnv?.[0]
+        ? { environment: String(serviceEnv[0]) }
+        : { environment: ENVIRONMENT_ALL.value }),
+    },
+  });
+
+export const getAlertUrlTransactionDurationAnomaly = (
+  serviceName: any[],
+  serviceEnv: any[],
+  transactionType: any[]
+) =>
+  format({
+    pathname: `/app/apm/services/${String(serviceName[0])}`,
+    query: {
+      transactionType: String(transactionType[0]),
+      ...(serviceEnv?.[0]
+        ? { environment: String(serviceEnv[0]) }
         : { environment: ENVIRONMENT_ALL.value }),
     },
   });

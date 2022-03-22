@@ -83,19 +83,25 @@ export function registerApmAlerts(
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ fields, formatters: { asDuration } }) => ({
-      reason: fields[ALERT_REASON]!,
+    format: ({ fields, formatters: { asDuration } }) => {
+      const query = {
+        transactionType: fields[TRANSACTION_TYPE][0]!,
+        ...(fields[SERVICE_ENVIRONMENT]?.[0]
+          ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
+          : { environment: ENVIRONMENT_ALL.value }),
+      };
+      console.log(fields[SERVICE_NAME]);
+      console.log(fields[SERVICE_ENVIRONMENT]);
 
-      link: format({
-        pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
-        query: {
-          transactionType: fields[TRANSACTION_TYPE][0]!,
-          ...(fields[SERVICE_ENVIRONMENT]?.[0]
-            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
-    }),
+      return {
+        reason: fields[ALERT_REASON]!,
+
+        link: format({
+          pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
+          query,
+        }),
+      };
+    },
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;

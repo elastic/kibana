@@ -14,7 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { take } from 'rxjs/operators';
 import { join } from 'path';
-import { getAlertUrl } from '../../../common/utils/formatters/alertUrl';
+import { getAlertUrlTransactionDuration } from '../../../common/utils/formatters/alertUrl';
 import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
@@ -28,6 +28,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import {
   getEnvironmentEsField,
@@ -193,9 +194,15 @@ export function registerTransactionDurationAlertType({
           windowUnit: ruleParams.windowUnit,
         });
 
-        const relativeViewInAppUrl = getAlertUrl(ruleParams.serviceName, [
-          getEnvironmentLabel(ruleParams.environment),
-        ]);
+        const relativeViewInAppUrl = getAlertUrlTransactionDuration(
+          [ruleParams.serviceName],
+          [
+            getEnvironmentEsField(ruleParams.environment)?.[
+              SERVICE_ENVIRONMENT
+            ],
+          ],
+          [ruleParams.transactionType]
+        );
 
         const viewInAppUrl = basePath.publicBaseUrl
           ? new URL(

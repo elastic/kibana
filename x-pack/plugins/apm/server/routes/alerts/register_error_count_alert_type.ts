@@ -19,7 +19,7 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
-import { getAlertUrl } from '../../../common/utils/formatters/alertUrl';
+import { getAlertUrlErrorCount } from '../../../common/utils/formatters/alertUrl';
 import {
   AlertType,
   APM_SERVER_FEATURE_ID,
@@ -152,9 +152,11 @@ export function registerErrorCountAlertType({
               windowUnit: ruleParams.windowUnit,
             });
 
-            const relativeViewInAppUrl = getAlertUrl(serviceName, [
-              getEnvironmentLabel(environment),
-            ]);
+            const relativeViewInAppUrl = getAlertUrlErrorCount(
+              [serviceName],
+              [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]]
+            );
+
             const viewInAppUrl = basePath.publicBaseUrl
               ? new URL(
                   join(basePath.serverBasePath, relativeViewInAppUrl),
