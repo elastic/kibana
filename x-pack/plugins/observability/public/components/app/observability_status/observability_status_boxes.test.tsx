@@ -8,31 +8,42 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('ObservabilityStatusBoxes', () => {
   it('should render all boxes passed as prop', () => {
     const boxes = [
       {
         id: 'logs',
-        dataSourceName: 'Logs',
+        title: 'Logs',
         hasData: true,
         description: 'This is the description for logs',
         modules: [],
-        integrationLink: 'http://example.com',
+        addTitle: 'logs add title',
+        addLink: 'http://example.com',
         learnMoreLink: 'http://example.com',
+        goToAppTitle: 'go to app title',
+        goToAppLink: 'go to app link',
       },
       {
         id: 'metrics',
-        dataSourceName: 'Metrics',
+        title: 'Metrics',
         hasData: true,
         description: 'This is the description for metrics',
         modules: [],
-        integrationLink: 'http://example.com',
+        addTitle: 'metrics add title',
+        addLink: 'http://example.com',
         learnMoreLink: 'http://example.com',
+        goToAppTitle: 'go to app title',
+        goToAppLink: 'go to app link',
       },
     ];
 
-    render(<ObservabilityStatusBoxes boxes={boxes} />);
+    render(
+      <I18nProvider>
+        <ObservabilityStatusBoxes boxes={boxes} />
+      </I18nProvider>
+    );
 
     expect(screen.getByText('Logs')).toBeInTheDocument();
     expect(screen.getByText('Metrics')).toBeInTheDocument();
