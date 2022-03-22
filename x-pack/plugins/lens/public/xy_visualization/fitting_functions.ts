@@ -6,15 +6,25 @@
  */
 
 import { Fit } from '@elastic/charts';
-import { FittingFunction } from '../../common/expressions';
+import { EndValue, FittingFunction } from '../../common/expressions';
 
-export function getFitEnum(fittingFunction?: FittingFunction) {
+export function getFitEnum(fittingFunction?: FittingFunction | EndValue) {
   if (fittingFunction) {
     return Fit[fittingFunction];
   }
   return Fit.None;
 }
 
-export function getFitOptions(fittingFunction?: FittingFunction) {
-  return { type: getFitEnum(fittingFunction) };
+export function getEndValue(endValue?: EndValue) {
+  if (endValue === 'Nearest') {
+    return Fit[endValue];
+  }
+  if (endValue === 'Zero') {
+    return 0;
+  }
+  return undefined;
+}
+
+export function getFitOptions(fittingFunction?: FittingFunction, endValue?: EndValue) {
+  return { type: getFitEnum(fittingFunction), endValue: getEndValue(endValue) };
 }

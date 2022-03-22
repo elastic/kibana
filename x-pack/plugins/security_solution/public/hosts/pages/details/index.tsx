@@ -198,11 +198,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
-                navTabs={navTabsHostDetails(
-                  detailName,
-                  hasMlUserPermissions(capabilities),
-                  riskyHostsFeatureEnabled
-                )}
+                navTabs={navTabsHostDetails({
+                  hasMlUserPermissions: hasMlUserPermissions(capabilities),
+                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  hostName: detailName,
+                })}
               />
 
               <EuiSpacer />
