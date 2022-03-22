@@ -60,6 +60,26 @@ export const annotationsIconSet = [
     }),
   },
   {
+    value: 'heart',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.heartLabel', { defaultMessage: 'Heart' }),
+  },
+  {
+    value: 'mapMarker',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.mapMarkerLabel', {
+      defaultMessage: 'Map Marker',
+    }),
+  },
+  {
+    value: 'pinFilled',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.mapPinLabel', {
+      defaultMessage: 'Map Pin',
+    }),
+  },
+  {
+    value: 'starEmpty',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.starLabel', { defaultMessage: 'Star' }),
+  },
+  {
     value: 'tag',
     label: i18n.translate('xpack.lens.xyChart.iconSelect.tagIconLabel', {
       defaultMessage: 'Tag',
