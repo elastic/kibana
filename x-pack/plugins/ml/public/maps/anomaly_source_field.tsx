@@ -219,7 +219,7 @@ export class AnomalySourceField implements IField {
   }
 
   canValueBeFormatted(): boolean {
-    return true;
+    return false;
   }
 
   async getExtendedStatsFieldMetaRequest(): Promise<unknown> {
