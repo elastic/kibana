@@ -23,6 +23,7 @@ describe('EngineCreation', () => {
     name: '',
     rawName: '',
     language: 'Universal',
+    isSubmitDisabled: false,
   };
 
   const MOCK_ACTIONS = {
@@ -85,7 +86,7 @@ describe('EngineCreation', () => {
 
   describe('NewEngineSubmitButton', () => {
     it('is disabled when name is empty', () => {
-      setMockValues({ ...DEFAULT_VALUES, name: '', rawName: '' });
+      setMockValues({ ...DEFAULT_VALUES, name: '', rawName: '', isSubmitDisabled: true });
       const wrapper = shallow(<EngineCreation />);
 
       expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]').prop('disabled')).toEqual(
