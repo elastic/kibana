@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
+import { exportTimeline } from '../../tasks/timelines';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { TIMELINES_URL } from '../../urls/navigation';
@@ -30,7 +30,6 @@ describe('Export timelines', () => {
 
   it('Exports a custom timeline', function () {
     visitWithoutDateRange(TIMELINES_URL);
-    waitForTimelinesPanelToBeLoaded();
     exportTimeline(this.timelineId);
 
     cy.wait('@export').then(({ response }) => {

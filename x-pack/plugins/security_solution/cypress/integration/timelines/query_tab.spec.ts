@@ -28,7 +28,6 @@ import {
   pinFirstEvent,
   refreshTimelinesUntilTimeLinePresent,
 } from '../../tasks/timeline';
-import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
@@ -37,8 +36,6 @@ describe('Timeline query tab', () => {
     cleanKibana();
     login();
     visitWithoutDateRange(TIMELINES_URL);
-    waitForTimelinesPanelToBeLoaded();
-
     createTimeline(getTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {
