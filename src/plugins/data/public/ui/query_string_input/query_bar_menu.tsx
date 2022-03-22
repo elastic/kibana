@@ -360,6 +360,7 @@ export function QueryBarMenu({
           icon: 'save',
           disabled: !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
           panel: 1,
+          'data-test-subj': 'saved-query-management-save-button',
         },
         { isSeparator: true },
         {
@@ -499,6 +500,7 @@ export function QueryBarMenu({
         panelPaddingSize="none"
         anchorPosition="rightUp"
         repositionOnScroll
+        data-test-subj="queryBarMenuPopover"
       >
         {renderComponent()}
       </EuiPopover>

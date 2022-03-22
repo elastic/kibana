@@ -308,7 +308,7 @@ export function SavedQueryManagementList({
               data-test-subj="saved-query-management-apply-changes-button"
             >
               {hasFiltersOrQuery
-                ? i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
+                ? i18n.translate('data.search.searchBar.savedQueryPopoverReplaceFilterSetLabel', {
                     defaultMessage: 'Replace with selected filter set',
                   })
                 : i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
