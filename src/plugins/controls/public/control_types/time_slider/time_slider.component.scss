@@ -1,0 +1,16 @@
+.timeSlider_anchor {
+  text-decoration: none;
+  width: 100%;
+  .euiButtonContent,
+  .euiButtonEmpty__text {
+    width: 100%;
+  }
+
+  .timeSlider_anchorText {
+    font-weight: $euiFontWeightBold;
+  }
+
+  .timeSlider_anchorText__default {
+    color: $euiColorMediumShade;
+  }
+}
