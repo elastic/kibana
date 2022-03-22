@@ -191,7 +191,7 @@ describe('validates saved object types when a schema is provided', () => {
         { migrationVersion: { foo: '7.16.0' } }
       );
     }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Migration function for version 8.1.1 threw an error"`
+      `"Migration function for version 8.1.2 threw an error"`
     );
   });
 
