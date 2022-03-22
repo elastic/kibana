@@ -27934,7 +27934,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editAriaLabel": "编辑",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editButtonTooltip": "编辑",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle": "上次执行的开始时间。",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.mutedBadge": "已静音",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.nameTitle": "名称",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.scheduleTitle": "时间间隔",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.statusTitle": "状态",

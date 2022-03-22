@@ -40,7 +40,7 @@ export interface ComponentOpts {
   onRuleChanged: () => void;
   enableRule: () => Promise<void>;
   disableRule: () => Promise<void>;
-  snoozeRule: (snoozeEndTime: string) => Promise<void>;
+  snoozeRule: (snoozeEndTime: string | -1) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
 }
 
@@ -78,12 +78,15 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     [setIsUpdating, isEnabled, setIsEnabled, onRuleChanged, enableRule, disableRule]
   );
   const onChangeSnooze = useCallback(
-    async (value: number, unit: SnoozeUnit) => {
+    async (value: number, unit?: SnoozeUnit) => {
       setIsUpdating(true);
-      const snoozeEndTime = moment().add(value, unit).toISOString();
-      if (value > 0) await snoozeRule(snoozeEndTime);
-      else await unsnoozeRule();
-      setIsSnoozed(value > 0);
+      if (value === -1) {
+        await snoozeRule(-1);
+      } else if (value !== 0) {
+        const snoozeEndTime = moment().add(value, unit).toISOString();
+        await snoozeRule(snoozeEndTime);
+      } else await unsnoozeRule();
+      setIsSnoozed(value !== 0);
       onRuleChanged();
       setIsUpdating(false);
     },
@@ -97,7 +100,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     isEnabled && isSnoozed ? (
       <EuiToolTip content={moment(item.snoozeEndTime).format(SNOOZE_END_TIME_FORMAT)}>
         <EuiText color="subdued" size="xs">
-          {moment(item.snoozeEndTime).fromNow(true)}
+          {item.muteAll ? INDEFINITELY : moment(item.snoozeEndTime).fromNow(true)}
         </EuiText>
       </EuiToolTip>
     ) : null;
@@ -149,7 +152,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
 interface RuleStatusMenuProps {
   onChangeEnabledStatus: (enabled: boolean) => void;
-  onChangeSnooze: (value: number, unit: SnoozeUnit) => void;
+  onChangeSnooze: (value: number | -1, unit?: SnoozeUnit) => void;
   onClosePopover: () => void;
   isEnabled: boolean;
   isSnoozed: boolean;
@@ -179,7 +182,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
   }, [onChangeEnabledStatus, onClosePopover]);
 
   const onApplySnooze = useCallback(
-    (value: number, unit: SnoozeUnit) => {
+    (value: number, unit?: SnoozeUnit) => {
       onChangeSnooze(value, unit);
       onClosePopover();
     },
@@ -187,7 +190,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
   );
 
   let snoozeButtonTitle = <EuiText size="s">{SNOOZE}</EuiText>;
-  if (isSnoozed) {
+  if (isSnoozed && snoozeEndTime) {
     snoozeButtonTitle = (
       <>
         <EuiText size="s">{SNOOZE}</EuiText>{' '}
@@ -240,7 +243,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
 
 interface SnoozePanelProps {
   interval?: string;
-  applySnooze: (value: number, unit: SnoozeUnit) => void;
+  applySnooze: (value: number | -1, unit?: SnoozeUnit) => void;
   showCancel: boolean;
 }
 
@@ -265,6 +268,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   const onApply3h = useCallback(() => applySnooze(3, 'h'), [applySnooze]);
   const onApply8h = useCallback(() => applySnooze(8, 'h'), [applySnooze]);
   const onApply1d = useCallback(() => applySnooze(1, 'd'), [applySnooze]);
+  const onApplyIndefinite = useCallback(() => applySnooze(-1), [applySnooze]);
   const onClickApplyButton = useCallback(
     () => applySnooze(intervalValue, intervalUnit as SnoozeUnit),
     [applySnooze, intervalValue, intervalUnit]
@@ -352,6 +356,16 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGrid>
+      <EuiHorizontalRule margin="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiLink onClick={onApplyIndefinite}>
+            {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeIndefinitely', {
+              defaultMessage: 'Snooze indefinitely',
+            })}
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {showCancel && (
         <>
           <EuiHorizontalRule margin="s" />
@@ -369,8 +383,9 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   );
 };
 
-const isItemSnoozed = (item: { snoozeEndTime?: Date | null }) => {
-  const { snoozeEndTime } = item;
+const isItemSnoozed = (item: { snoozeEndTime?: Date | null; muteAll: boolean }) => {
+  const { snoozeEndTime, muteAll } = item;
+  if (muteAll) return true;
   if (!snoozeEndTime) {
     return false;
   }
@@ -449,3 +464,8 @@ const WEEKS = i18n.translate('xpack.triggersActionsUI.sections.rulesList.weeksLa
 const MONTHS = i18n.translate('xpack.triggersActionsUI.sections.rulesList.monthsLabel', {
   defaultMessage: 'months',
 });
+
+const INDEFINITELY = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.remainingSnoozeIndefinite',
+  { defaultMessage: 'Indefinitely' }
+);

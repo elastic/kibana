@@ -333,7 +333,7 @@ export const RulesList: React.FunctionComponent = () => {
       <RuleStatusDropdown
         disableRule={async () => await disableRule({ http, id: item.id })}
         enableRule={async () => await enableRule({ http, id: item.id })}
-        snoozeRule={async (snoozeEndTime: string) =>
+        snoozeRule={async (snoozeEndTime: string | -1) =>
           await snoozeRule({ http, id: item.id, snoozeEndTime })
         }
         unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
@@ -496,19 +496,7 @@ export const RulesList: React.FunctionComponent = () => {
               </EuiFlexGroup>
             </>
           );
-          return (
-            <>
-              {link}
-              {rule.enabled && rule.muteAll && (
-                <EuiBadge data-test-subj="mutedActionsBadge" color="hollow">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.mutedBadge"
-                    defaultMessage="Muted"
-                  />
-                </EuiBadge>
-              )}
-            </>
-          );
+          return <>{link}</>;
         },
       },
       {

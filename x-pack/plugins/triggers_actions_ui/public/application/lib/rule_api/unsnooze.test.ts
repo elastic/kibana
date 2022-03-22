@@ -18,7 +18,7 @@ describe('muteRule', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/internal/alerting/rule/1%2F/_mute_all",
+          "/internal/alerting/rule/1%2F/_unsnooze",
         ],
       ]
     `);

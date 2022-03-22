@@ -19,6 +19,9 @@ describe('snoozeRule', () => {
       Array [
         Array [
           "/internal/alerting/rule/1%2F/_snooze",
+          Object {
+            "body": "{\\"snooze_end_time\\":\\"9999-01-01T00:00:00.000Z\\"}",
+          },
         ],
       ]
     `);

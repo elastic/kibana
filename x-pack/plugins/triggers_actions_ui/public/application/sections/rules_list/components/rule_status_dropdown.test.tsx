@@ -96,6 +96,20 @@ describe('RuleStatusDropdown', () => {
     expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe('3 days');
   });
 
+  test('renders status control as snoozed when rule has muteAll set to true', () => {
+    jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
+
+    const wrapper = mountWithIntl(
+      <RuleStatusDropdown {...{ ...props, item: { ...props.item, muteAll: true } }} />
+    );
+    expect(
+      wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton').first().props().title
+    ).toBe('Snoozed');
+    expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe(
+      'Indefinitely'
+    );
+  });
+
   test('renders status control as disabled when rule is snoozed but also disabled', () => {
     const wrapper = mountWithIntl(
       <RuleStatusDropdown
