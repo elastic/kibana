@@ -80,7 +80,7 @@ export const AddCustomSourceLogic = kea<
     ],
     sourceData: [props.sourceData],
   }),
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     createContentSource: async () => {
       clearFlashMessages();
       const { isOrganization } = AppLogic.values;
@@ -90,14 +90,18 @@ export const AddCustomSourceLogic = kea<
 
       const { customSourceNameValue } = values;
 
-      const params = {
+      const params: Record<string, string> = {
         service_type: 'custom',
         name: customSourceNameValue,
       };
 
+      if (props.sourceData.serviceType !== 'custom') {
+        params.base_service_type = props.sourceData.serviceType;
+      }
+
       try {
         const response = await HttpLogic.values.http.post<CustomSource>(route, {
-          body: JSON.stringify({ ...params }),
+          body: JSON.stringify(params),
         });
         actions.setNewCustomSource(response);
       } catch (e) {
