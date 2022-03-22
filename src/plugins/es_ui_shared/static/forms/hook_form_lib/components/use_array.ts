@@ -8,6 +8,7 @@
 
 import uuid from 'uuid';
 import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { get } from 'lodash';
 
 import { FormHook, FieldConfig } from '../types';
 import { getFieldValidityAndErrorMessage } from '../helpers';
@@ -63,7 +64,7 @@ export const UseArray = ({
   const uniqueId = useRef(0);
 
   const form = useFormContext();
-  const { getFieldDefaultValue } = form;
+  const { __getFormDefaultValue } = form;
 
   const getNewItemAtIndex = useCallback(
     (index: number): ArrayItem => ({
@@ -76,7 +77,7 @@ export const UseArray = ({
 
   const fieldDefaultValue = useMemo<ArrayItem[]>(() => {
     const defaultValues = readDefaultValueOnForm
-      ? getFieldDefaultValue<unknown[]>(path)
+      ? (get(__getFormDefaultValue() ?? {}, path) as unknown[])
       : undefined;
 
     if (defaultValues) {
@@ -88,7 +89,13 @@ export const UseArray = ({
     }
 
     return new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
-  }, [path, initialNumberOfItems, readDefaultValueOnForm, getFieldDefaultValue, getNewItemAtIndex]);
+  }, [
+    path,
+    initialNumberOfItems,
+    readDefaultValueOnForm,
+    __getFormDefaultValue,
+    getNewItemAtIndex,
+  ]);
 
   // Create an internal hook field which behaves like any other form field except that it is not
   // outputed in the form data (when calling form.submit() or form.getFormData())
