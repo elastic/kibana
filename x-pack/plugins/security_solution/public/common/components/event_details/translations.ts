@@ -46,7 +46,7 @@ export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
 export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
   {
-    defaultMessage: 'Alert Prevalence',
+    defaultMessage: 'Alert prevalence',
   }
 );
 

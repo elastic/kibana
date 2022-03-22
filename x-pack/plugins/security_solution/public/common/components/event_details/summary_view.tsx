@@ -43,11 +43,11 @@ const summaryColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
     render: PrevalenceCellRenderer,
     name: (
       <>
-        {i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE}{' '}
+        {i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE}
         <EuiIconTip
           type="iInCircle"
           color="subdued"
-          title="Alert Prevalence"
+          title={i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE}
           content={<span>{i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP}</span>}
         />
       </>
