@@ -87,6 +87,8 @@ export async function getLensServices(
     notifications: coreStart.notifications,
     savedObjectsClient: coreStart.savedObjects.client,
     presentationUtil: startDependencies.presentationUtil,
+    dataViewEditor: startDependencies.dataViewEditor,
+    dataViewFieldEditor: startDependencies.dataViewFieldEditor,
     dashboard: startDependencies.dashboard,
     getOriginatingAppName: () => {
       return embeddableEditorIncomingState?.originatingApp

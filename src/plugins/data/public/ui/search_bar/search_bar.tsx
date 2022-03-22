@@ -26,6 +26,7 @@ import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
+import type { DataViewPickerProps } from '../dataview_picker';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -82,6 +83,7 @@ export interface SearchBarOwnProps {
   displayStyle?: 'inPage' | 'detached';
   // super update button background fill control
   fillSubmitButton?: boolean;
+  dataViewPickerComponentProps?: DataViewPickerProps;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -428,6 +430,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
+          dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
         />
       );
     }
@@ -435,7 +438,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let filterBar;
     if (this.shouldRenderFilterBar()) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
 

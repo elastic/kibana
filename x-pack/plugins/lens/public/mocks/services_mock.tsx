@@ -12,6 +12,8 @@ import { navigationPluginMock } from '../../../../../src/plugins/navigation/publ
 import { LensAppServices } from '../app_plugin/types';
 import { DOC_TYPE } from '../../common';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/data_view_field_editor/public/mocks';
+import { indexPatternEditorPluginMock } from '../../../../../src/plugins/data_view_editor/public/mocks';
 import { inspectorPluginMock } from '../../../../../src/plugins/inspector/public/mocks';
 import { spacesPluginMock } from '../../../spaces/public/mocks';
 import { dashboardPluginMock } from '../../../../../src/plugins/dashboard/public/mocks';
@@ -155,5 +157,7 @@ export function makeDefaultServices(
       clear: jest.fn(),
     },
     spaces: spacesPluginMock.createStartContract(),
+    dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+    dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
   };
 }

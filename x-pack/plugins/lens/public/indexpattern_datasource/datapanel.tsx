@@ -20,7 +20,6 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiScreenReaderOnly,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
@@ -61,7 +60,6 @@ export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'co
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
 };
 import { LensFieldIcon } from './lens_field_icon';
-import { ChangeIndexPattern } from './change_indexpattern';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { FieldGroups, FieldList } from './field_list';
 
@@ -571,11 +569,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [currentIndexPattern.id, dataViews, editPermission, indexPatternFieldEditor, refreshFieldList]
   );
 
-  const addField = useMemo(
-    () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, editPermission]
-  );
-
   const fieldProps = useMemo(
     () => ({
       core,
@@ -601,8 +594,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ]
   );
 
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
@@ -611,91 +602,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         direction="column"
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            className="lnsInnerIndexPatternDataPanel__header"
-            responsive={false}
-          >
-            <EuiFlexItem grow={true} className="lnsInnerIndexPatternDataPanel__switcher">
-              <ChangeIndexPattern
-                data-test-subj="indexPattern-switcher"
-                trigger={{
-                  label: currentIndexPattern.title,
-                  title: currentIndexPattern.title,
-                  'data-test-subj': 'indexPattern-switch-link',
-                  fontWeight: 'bold',
-                }}
-                indexPatternId={currentIndexPatternId}
-                indexPatternRefs={indexPatternRefs}
-                onChangeIndexPattern={(newId: string) => {
-                  onChangeIndexPattern(newId);
-                  clearLocalState();
-                }}
-              />
-            </EuiFlexItem>
-            {addField && (
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelPaddingSize="s"
-                  isOpen={popoverOpen}
-                  closePopover={() => {
-                    setPopoverOpen(false);
-                  }}
-                  ownFocus
-                  data-test-subj="lnsIndexPatternActions-popover"
-                  button={
-                    <EuiButtonIcon
-                      color="text"
-                      iconType="boxesHorizontal"
-                      data-test-subj="lnsIndexPatternActions"
-                      aria-label={i18n.translate('xpack.lens.indexPatterns.actionsPopoverLabel', {
-                        defaultMessage: 'Data view settings',
-                      })}
-                      onClick={() => {
-                        setPopoverOpen(!popoverOpen);
-                      }}
-                    />
-                  }
-                >
-                  <EuiContextMenuPanel
-                    size="s"
-                    items={[
-                      <EuiContextMenuItem
-                        key="add"
-                        icon="indexOpen"
-                        data-test-subj="indexPattern-add-field"
-                        onClick={() => {
-                          setPopoverOpen(false);
-                          addField();
-                        }}
-                      >
-                        {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
-                          defaultMessage: 'Add field to data view',
-                        })}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        key="manage"
-                        icon="indexSettings"
-                        onClick={() => {
-                          setPopoverOpen(false);
-                          core.application.navigateToApp('management', {
-                            path: `/kibana/indexPatterns/patterns/${currentIndexPattern.id}`,
-                          });
-                        }}
-                      >
-                        {i18n.translate('xpack.lens.indexPatterns.manageFieldButton', {
-                          defaultMessage: 'Manage data view fields',
-                        })}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormControlLayout
             icon="search"

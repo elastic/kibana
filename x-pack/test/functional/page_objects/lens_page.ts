@@ -28,6 +28,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'visualize',
     'dashboard',
     'timeToVisualize',
+    'unifiedSearch',
   ]);
 
   return logWrapper('lensPage', log, {
@@ -96,6 +97,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return retry.try(async () => {
         await testSubjects.click(`visListingTitleLink-${title}`);
         await this.isLensPageOrFail();
+        await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       });
     },
 
@@ -809,7 +811,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Changes the index pattern in the data panel
      */
     async switchDataPanelIndexPattern(name: string) {
-      await testSubjects.click('indexPattern-switch-link');
+      await testSubjects.click('lns-dataView-switch-link');
       await find.clickByCssSelector(`[title="${name}"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -827,7 +829,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Returns the current index pattern of the data panel
      */
     async getDataPanelIndexPattern() {
-      return await (await testSubjects.find('indexPattern-switch-link')).getAttribute('title');
+      return await (await testSubjects.find('lns-dataView-switch-link')).getAttribute('title');
     },
 
     /**
@@ -1099,6 +1101,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
+      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -1171,7 +1174,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async clickAddField() {
-      await testSubjects.click('lnsIndexPatternActions');
+      await testSubjects.click('lns-dataView-switch-link');
       await testSubjects.existOrFail('indexPattern-add-field');
       await testSubjects.click('indexPattern-add-field');
     },

@@ -35,6 +35,7 @@ import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter';
+import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -76,6 +77,7 @@ export interface QueryBarTopRowProps {
   timeRangeForSuggestionsOverride?: boolean;
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
+  dataViewPickerComponentProps?: DataViewPickerProps;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -342,6 +344,16 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    function renderDataViewsPicker() {
+      if (!props.dataViewPickerComponentProps) return;
+
+      return (
+        <EuiFlexItem grow={false}>
+          <DataViewPicker showNewMenuTour {...props.dataViewPickerComponentProps} />
+        </EuiFlexItem>
+      );
+    }
+
     function renderQueryInput() {
       if (!shouldRenderQueryInput()) return;
 
@@ -381,7 +393,8 @@ export const QueryBarTopRow = React.memo(
     }
 
     const classes = classNames('kbnQueryBar', {
-      'kbnQueryBar--withDatePicker': showDatePicker,
+      'kbnQueryBar--withDatePicker': showDatePicker && !props.dataViewPickerComponentProps,
+      'kbnQueryBar-withDataViewPicker': showDatePicker && props.dataViewPickerComponentProps,
     });
 
     return (
@@ -391,6 +404,7 @@ export const QueryBarTopRow = React.memo(
         responsive={false}
         gutterSize="s"
       >
+        {renderDataViewsPicker()}
         <EuiFlexItem style={{ minWidth: '50%' }}>{renderQueryInput()}</EuiFlexItem>
         <SharingMetaFields
           from={currentDateRange.from}

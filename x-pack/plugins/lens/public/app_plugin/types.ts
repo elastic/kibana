@@ -30,6 +30,8 @@ import type { LensAttributeService } from '../lens_attribute_service';
 import type { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import type { DashboardFeatureFlagConfig } from '../../../../../src/plugins/dashboard/public';
 import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
+import type { DataViewEditorStart } from '../../../../../src/plugins/data_view_editor/public';
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
@@ -142,6 +144,8 @@ export interface LensAppServices {
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
+  dataViewEditor: DataViewEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export interface LensTopNavTooltips {

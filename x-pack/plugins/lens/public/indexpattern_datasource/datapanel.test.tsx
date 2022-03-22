@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import ReactDOM from 'react-dom';
 import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
@@ -19,7 +18,6 @@ import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -326,14 +324,6 @@ describe('IndexPattern Data Panel', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="indexPattern-no-indexpatterns"]')).toHaveLength(1);
-  });
-
-  it('should call setState when the index pattern is switched', async () => {
-    const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
-
-    wrapper.find(ChangeIndexPattern).prop('onChangeIndexPattern')('2');
-
-    expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('2');
   });
 
   describe('loading existence data', () => {
@@ -852,91 +842,6 @@ describe('IndexPattern Data Panel', () => {
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'memory',
       ]);
-    });
-    describe('edit field list', () => {
-      beforeEach(() => {
-        props.indexPatternFieldEditor.userPermissions.editIndexPattern = () => true;
-      });
-      it('should call field editor plugin on clicking add button', async () => {
-        const mockIndexPattern = {};
-        (props.dataViews.get as jest.Mock).mockImplementation(() =>
-          Promise.resolve(mockIndexPattern)
-        );
-        const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
-        act(() => {
-          const popoverTrigger = wrapper.find(
-            '[data-test-subj="lnsIndexPatternActions-popover"] button'
-          );
-          popoverTrigger.simulate('click');
-        });
-
-        wrapper.update();
-        act(() => {
-          wrapper.find('[data-test-subj="indexPattern-add-field"]').first().simulate('click');
-        });
-        // wait for indx pattern to be loaded
-        await waitFor(() => {
-          expect(props.indexPatternFieldEditor.openEditor).toHaveBeenCalledWith(
-            expect.objectContaining({
-              ctx: expect.objectContaining({
-                dataView: mockIndexPattern,
-              }),
-            })
-          );
-        });
-      });
-
-      it('should reload index pattern if callback gets called', async () => {
-        const mockIndexPattern = {
-          id: '1',
-          fields: [
-            {
-              name: 'fieldOne',
-              aggregatable: true,
-            },
-          ],
-          metaFields: [],
-        };
-        (props.dataViews.get as jest.Mock).mockImplementation(() =>
-          Promise.resolve(mockIndexPattern)
-        );
-        const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
-
-        act(() => {
-          const popoverTrigger = wrapper.find(
-            '[data-test-subj="lnsIndexPatternActions-popover"] button'
-          );
-          popoverTrigger.simulate('click');
-        });
-
-        wrapper.update();
-        act(() => {
-          wrapper.find('[data-test-subj="indexPattern-add-field"]').first().simulate('click');
-        });
-
-        // wait for indx pattern to be loaded
-        await act(async () => await new Promise((r) => setTimeout(r, 0)));
-
-        await (props.indexPatternFieldEditor.openEditor as jest.Mock).mock.calls[0][0].onSave();
-        // wait for indx pattern to be loaded
-        await act(async () => await new Promise((r) => setTimeout(r, 0)));
-        expect(props.onUpdateIndexPattern).toHaveBeenCalledWith(
-          expect.objectContaining({
-            fields: [
-              expect.objectContaining({
-                name: 'fieldOne',
-              }),
-              expect.anything(),
-            ],
-          })
-        );
-      });
-
-      it('should not render add button without permissions', () => {
-        props.indexPatternFieldEditor.userPermissions.editIndexPattern = () => false;
-        const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
-        expect(wrapper.find('[data-test-subj="indexPattern-add-field"]').exists()).toBe(false);
-      });
     });
   });
 });
