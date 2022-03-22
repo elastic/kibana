@@ -366,7 +366,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       <QueryBarMenu
         nonKqlMode={this.props.nonKqlMode}
         nonKqlModeHelpText={this.props.nonKqlModeHelpText}
-        language={this.state.query!.language}
+        language={this.state?.query?.language ?? 'kuery'}
         services={this.services}
         onQueryChange={this.onQueryBarChange}
         onQueryBarSubmit={this.onQueryBarSubmit}
