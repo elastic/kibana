@@ -64,6 +64,23 @@ export const LazyNoDataViews = React.lazy(() =>
 export const NoDataViews = withSuspense(LazyNoDataViews);
 
 /**
+ * A pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const LazyNoDataViewsComponent = React.lazy(() =>
+  import('./empty_state/no_data_views').then(({ NoDataViewsComponent }) => ({
+    default: NoDataViewsComponent,
+  }))
+);
+
+/**
+ * A pure `NoDataViews` component, with no services hooks. The component is wrapped by the `withSuspense` HOC.
+ * This component can be used directly by consumers and will load the `LazyNoDataViewsComponent` lazily with
+ * a predefined fallback and error boundary.
+ */
+export const NoDataViewsComponent = withSuspense(LazyNoDataViewsComponent);
+
+/**
  * The Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspennse` or the
  * `withSuspense` HOC to load this component.
  */
