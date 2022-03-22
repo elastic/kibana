@@ -9,7 +9,6 @@ import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { IBasePath } from 'kibana/server';
-import { join } from 'path';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { AlertExecutionDetails } from '../../../../common/alerting/metrics/types';
 
@@ -81,8 +80,5 @@ export const createScopedLogger = (
 
 export const getViewInAppUrl = (basePath: IBasePath) =>
   basePath.publicBaseUrl
-    ? new URL(
-        join(basePath.serverBasePath, LINK_TO_METRICS_EXPLORER),
-        basePath.publicBaseUrl
-      ).toString()
+    ? new URL(basePath.prepend(LINK_TO_METRICS_EXPLORER), basePath.publicBaseUrl).toString()
     : LINK_TO_METRICS_EXPLORER;
