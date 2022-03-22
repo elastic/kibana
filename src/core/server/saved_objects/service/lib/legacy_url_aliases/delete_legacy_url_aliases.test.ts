@@ -33,7 +33,7 @@ describe('deleteLegacyUrlAliases', () => {
   }
 
   const type = 'obj-type';
-  const id = 'obj-id';
+  const id = 'id-1:'; // include a colon (special character) in the object ID to implicitly assert that the kuery node builder handles it gracefully
 
   it('throws an error if namespaces includes the "all namespaces" string', async () => {
     const namespaces = [ALL_NAMESPACES_STRING];

@@ -63,8 +63,8 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
   }
 
   const { buildNode } = esKuery.nodeTypes.function;
-  const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.targetType`, type);
-  const match2 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.targetId`, id);
+  const match1 = buildNode('is', getKueryKey('targetType'), type);
+  const match2 = buildNode('is', getKueryKey('targetId'), `"${id}"`); // Enclose in quotes to escape any special characters like ':' and prevent parsing errors (Technically an object ID can contain a colon)
   const kueryNode = buildNode('and', [match1, match2]);
 
   try {
@@ -106,4 +106,9 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
 
 function throwError(type: string, id: string, message: string) {
   throw new Error(`Failed to delete legacy URL aliases for ${type}/${id}: ${message}`);
+}
+
+function getKueryKey(attribute: string) {
+  // Note: these node keys do NOT include '.attributes' for type-level fields because we are using the query in the ES client (instead of the SO client)
+  return `${LEGACY_URL_ALIAS_TYPE}.${attribute}`;
 }
