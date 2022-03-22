@@ -208,7 +208,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
 
       setSelected({
         model_id: isDFA ? undefined : item.model_id,
-        job_id: isDFA ? item.id : undefined,
+        job_id: isDFA ? item.id : item.metadata?.analytics_config.id,
         analysis_type: analysisType,
       });
     },
