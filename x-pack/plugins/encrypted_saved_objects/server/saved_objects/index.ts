@@ -115,10 +115,10 @@ export function setupSavedObjects({
       ): Promise<ISavedObjectsPointInTimeFinder<T, A>> => {
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
         const finder = internalRepository.createPointInTimeFinder<T, A>(findOptions, dependencies);
-        const x = finder.find();
+        const finderAsyncGenerator = finder.find();
 
         async function* encryptedFinder() {
-          for await (const res of x) {
+          for await (const res of finderAsyncGenerator) {
             const encryptedSavedObjects = pMap(res.saved_objects, async (savedObject) => ({
               ...savedObject,
               attributes: (await service.decryptAttributes(

@@ -84,6 +84,12 @@ const termsSchema = s.object({
 
 const multiTermsSchema = s.object({
   terms: s.arrayOf(termsSchema),
+  size: s.maybe(s.number()),
+  shard_size: s.maybe(s.number()),
+  show_term_doc_count_error: s.maybe(s.boolean()),
+  min_doc_count: s.maybe(s.number()),
+  shard_min_doc_count: s.maybe(s.number()),
+  collect_mode: s.maybe(s.oneOf([s.literal('depth_first'), s.literal('breadth_first')])),
 });
 
 export const bucketAggsSchemas: Record<string, ObjectType> = {

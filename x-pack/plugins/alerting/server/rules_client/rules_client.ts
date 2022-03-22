@@ -1231,7 +1231,10 @@ export class RulesClient {
       aggs: {
         alertTypeId: {
           multi_terms: {
-            terms: [{ field: 'alert.alertTypeId' }, { field: 'alert.consumer' }],
+            terms: [
+              { field: 'alert.attributes.alertTypeId' },
+              { field: 'alert.attributes.consumer' },
+            ],
           },
         },
       },
@@ -1242,7 +1245,7 @@ export class RulesClient {
     }
     const buckets = aggregations?.alertTypeId.buckets;
 
-    if (buckets === undefined) {
+    if (buckets === undefined || buckets.length === 0) {
       throw Error('Aggregation by alertTypeId|consumer is empty');
     }
 
