@@ -119,8 +119,10 @@ const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
+// Hash entries validator method.
 const hashEntriesValidation = (entries: BlocklistConditionEntry[], allowedHashes: string[]) => {
   const currentHashes = entries.map((entry) => entry.field);
+  // If there are more hashes than allowed (three) then return an error
   if (currentHashes.length > allowedHashes.length) {
     const allowedHashesMessage = allowedHashes
       .map((hash) => hash.replace('process.hash.', ''))
@@ -131,6 +133,8 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[], allowedHashes
   const hashesCount: { [key: string]: boolean } = {};
   const duplicatedHashes: string[] = [];
   const invalidHash: string[] = [];
+
+  // Check hash entries individually
   currentHashes.forEach((hash) => {
     if (!allowedHashes.includes(hash)) invalidHash.push(hash);
     if (hashesCount[hash]) {
@@ -140,9 +144,12 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[], allowedHashes
     }
   });
 
+  // There is more than one entry with the same hash type
   if (duplicatedHashes.length) {
     return `There are some duplicated hashes: ${duplicatedHashes.join(',')}`;
   }
+
+  // There is an entry with an invalid hash type
   if (invalidHash.length) {
     return `There are some invalid fields for hash type: ${invalidHash.join(',')}`;
   }
