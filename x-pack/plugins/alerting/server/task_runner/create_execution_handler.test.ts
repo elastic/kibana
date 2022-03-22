@@ -517,4 +517,66 @@ describe('Create Execution Handler', () => {
     expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });
+
+  test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions for the specific action type', async () => {
+    const executionHandler = createExecutionHandler({
+      ...createExecutionHandlerParams,
+      ruleType: {
+        ...ruleType,
+        config: {
+          execution: {
+            actions: {
+              max: 2,
+              connectorTypeOverrides: [
+                {
+                  id: 'test-action-type-id',
+                  max: 1,
+                },
+              ],
+            },
+          },
+        },
+      },
+      actions: [
+        ...createExecutionHandlerParams.actions,
+        {
+          id: '2',
+          group: 'default',
+          actionTypeId: 'test-action-type-id',
+          params: {
+            foo: true,
+            contextVal: 'My other {{context.value}} goes here',
+            stateVal: 'My other {{state.value}} goes here',
+          },
+        },
+        {
+          id: '3',
+          group: 'default',
+          actionTypeId: 'test-action-type-id',
+          params: {
+            foo: true,
+            contextVal: '{{context.value}} goes here',
+            stateVal: '{{state.value}} goes here',
+          },
+        },
+      ],
+    });
+
+    alertExecutionStore = {
+      numberOfTriggeredActions: 0,
+      triggeredActionsStatus: ActionsCompletion.COMPLETE,
+    };
+
+    await executionHandler({
+      actionGroup: 'default',
+      context: {},
+      state: { value: 'state-val' },
+      alertId: '2',
+      alertExecutionStore,
+    });
+
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
+    expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  });
 });

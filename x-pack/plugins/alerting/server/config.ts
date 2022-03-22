@@ -13,6 +13,11 @@ const ruleTypeSchema = schema.object({
   timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
 });
 
+const connectorTypeSchema = schema.object({
+  id: schema.string(),
+  max: schema.maybe(schema.number({ defaultValue: 100000 })),
+});
+
 const rulesSchema = schema.object({
   minimumScheduleInterval: schema.object({
     value: schema.string({
@@ -25,6 +30,7 @@ const rulesSchema = schema.object({
     timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
     actions: schema.object({
       max: schema.number({ defaultValue: 100000 }),
+      connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
     }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
@@ -51,3 +57,5 @@ export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type RuleTypeConfig = Omit<RulesConfig, 'ruleTypeOverrides' | 'minimumScheduleInterval'>;
 export type AlertingRulesConfig = Pick<AlertingConfig['rules'], 'minimumScheduleInterval'>;
+export type ActionsConfig = RulesConfig['execution']['actions'];
+export type ActionTypeConfig = Omit<ActionsConfig, 'connectorTypeOverrides'>;

@@ -20,6 +20,7 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
+import { getActionsConfig } from '../lib/get_actions_config';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
@@ -117,7 +118,12 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
+      const actionsConfig = getActionsConfig({
+        actionsConfig: ruleType.config!.execution.actions,
+        connectorTypeId: action.actionTypeId,
+      });
+
+      if (alertExecutionStore.numberOfTriggeredActions >= actionsConfig.max) {
         alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
         break;
       }
