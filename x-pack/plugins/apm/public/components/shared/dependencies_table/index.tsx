@@ -9,6 +9,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiToolTip,
+  EuiIcon,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -131,9 +133,30 @@ export function DependenciesTable(props: Props) {
     },
     {
       field: 'errorRateValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-        defaultMessage: 'Failed transaction rate',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.dependenciesTable.columnErrorRateTip',
+            {
+              defaultMessage:
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+            }
+          )}
+        >
+          <>
+            {i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
+              defaultMessage: 'Failed transaction rate',
+            })}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      ),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
@@ -156,9 +179,30 @@ export function DependenciesTable(props: Props) {
     },
     {
       field: 'impactValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
-        defaultMessage: 'Impact',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.dependenciesTable.columnImpactTip',
+            {
+              defaultMessage:
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
+              defaultMessage: 'Impact',
+            })}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      ),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         return (
