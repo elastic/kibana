@@ -6,13 +6,13 @@
  */
 
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
-import { filter, get, pickBy } from 'lodash/fp';
+import { pickBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { TimelineId } from '../../../../../public/types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
-import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
+import { ColumnHeaderOptions } from '../../../../../common';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`
   cursor: pointer;
@@ -45,6 +45,9 @@ export const filterBrowserFieldsByFieldName = ({
   substring: string;
 }): BrowserFields => {
   const trimmedSubstring = substring.trim();
+  if (trimmedSubstring === '') {
+    return browserFields;
+  }
 
   // filter each category such that it only contains fields with field names
   // that contain the specified substring:
@@ -53,11 +56,10 @@ export const filterBrowserFieldsByFieldName = ({
       ...filteredCategories,
       [categoryId]: {
         ...browserFields[categoryId],
-        fields: filter(
-          (f) => f.name != null && f.name.includes(trimmedSubstring),
+        fields: pickBy(
+          ({ name }) => name != null && name.includes(trimmedSubstring),
           browserFields[categoryId].fields
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ).reduce((filtered, field) => ({ ...filtered, [field.name!]: field }), {}),
+        ),
       },
     }),
     {}
@@ -73,46 +75,40 @@ export const filterBrowserFieldsByFieldName = ({
 };
 
 /**
- * Returns a "virtual" category (e.g. default ECS) from the specified fieldIds
+ * Filters the selected `BrowserFields` to return a new collection where every
+ * category contains at least one field that is present in the `columnHeaders`.
  */
-export const createVirtualCategory = ({
+export const filterSelectedBrowserFields = ({
   browserFields,
-  fieldIds,
+  columnHeaders,
 }: {
   browserFields: BrowserFields;
-  fieldIds: string[];
-}): Partial<BrowserField> => ({
-  fields: fieldIds.reduce<Readonly<BrowserFields>>((fields, fieldId) => {
-    const splitId = fieldId.split('.'); // source.geo.city_name -> [source, geo, city_name]
-    const browserField = get(
-      [splitId.length > 1 ? splitId[0] : 'base', 'fields', fieldId],
-      browserFields
-    );
+  columnHeaders: ColumnHeaderOptions[];
+}): BrowserFields => {
+  const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
 
-    return {
-      ...fields,
-      ...(browserField
-        ? {
-            [fieldId]: {
-              ...browserField,
-              name: fieldId,
-            },
-          }
-        : {}),
-    };
-  }, {}),
-});
+  const filteredBrowserFields: BrowserFields = Object.keys(browserFields).reduce(
+    (filteredCategories, categoryId) => ({
+      ...filteredCategories,
+      [categoryId]: {
+        ...browserFields[categoryId],
+        fields: pickBy(
+          ({ name }) => name != null && selectedFieldIds.has(name),
+          browserFields[categoryId].fields
+        ),
+      },
+    }),
+    {}
+  );
 
-/** Merges the specified browser fields with the default category (i.e. `default ECS`) */
-export const mergeBrowserFieldsWithDefaultCategory = (
-  browserFields: BrowserFields
-): BrowserFields => ({
-  ...browserFields,
-  [DEFAULT_CATEGORY_NAME]: createVirtualCategory({
-    browserFields,
-    fieldIds: defaultHeaders.map((header) => header.id),
-  }),
-});
+  // only pick non-empty categories from the filtered browser fields
+  const nonEmptyCategories: BrowserFields = pickBy(
+    (category) => categoryHasFields(category),
+    filteredBrowserFields
+  );
+
+  return nonEmptyCategories;
+};
 
 export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
   timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
