@@ -69,7 +69,7 @@ export const AnnotationsPanel = (
   return (
     <>
       <DimensionEditorSection>
-        <EuiTitle size="xs" className="lnsXyConfigHeading">
+        <EuiTitle size="xxs" className="lnsXyConfigHeading">
           <h3>
             {i18n.translate('xpack.lens.xyChart.placement', {
               defaultMessage: 'Placement',
@@ -94,7 +94,7 @@ export const AnnotationsPanel = (
         />
       </DimensionEditorSection>
       <DimensionEditorSection hasBorder>
-        <EuiTitle size="xs" className="lnsXyConfigHeading">
+        <EuiTitle size="xxs" className="lnsXyConfigHeading">
           <h3>
             {i18n.translate('xpack.lens.xyChart.appearance', {
               defaultMessage: 'Appearance',

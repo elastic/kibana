@@ -28,6 +28,7 @@ exports[`xy_expression XYChart component annotations should render basic annotat
       hasReducedPadding={false}
       isHorizontal={true}
       label="Annotation"
+      strokeWidth={1}
     />
   }
   markerBody={
@@ -85,7 +86,8 @@ exports[`xy_expression XYChart component annotations should render grouped annot
       hasReducedPadding={true}
       isHorizontal={true}
       label=""
-      rotationClass="lnsXyAnnotationIcon_rotate180"
+      rotationClassName="lnsXyAnnotationIcon_rotate180"
+      strokeWidth={3}
     />
   }
   markerBody={
@@ -146,7 +148,8 @@ exports[`xy_expression XYChart component annotations should render grouped annot
       hasReducedPadding={true}
       isHorizontal={true}
       label=""
-      rotationClass="lnsXyAnnotationIcon_rotate180"
+      rotationClassName="lnsXyAnnotationIcon_rotate180"
+      strokeWidth={1}
     />
   }
   markerBody={
@@ -196,6 +199,7 @@ exports[`xy_expression XYChart component annotations should render simplified an
       hasReducedPadding={false}
       isHorizontal={true}
       label="Annotation"
+      strokeWidth={1}
     />
   }
   markerBody={
