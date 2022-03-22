@@ -47,6 +47,7 @@ export interface AggParamsHistogram extends BaseAggParams {
   min_doc_count?: boolean;
   has_extended_bounds?: boolean;
   extended_bounds?: ExtendedBounds;
+  autoExtendBounds?: boolean;
 }
 
 export const getHistogramBucketAgg = ({
@@ -95,6 +96,14 @@ export const getHistogramBucketAgg = ({
          */
         name: 'intervalBase',
         default: null,
+        write: () => {},
+      },
+      {
+        /*
+         * Set to true to extend bounds to the domain of the data. This makes sure each interval bucket within these bounds will create a separate table row
+         */
+        name: 'autoExtendBounds',
+        default: false,
         write: () => {},
       },
       {
@@ -202,6 +211,8 @@ export const getHistogramBucketAgg = ({
 
           if (aggConfig.params.has_extended_bounds && (min || min === 0) && (max || max === 0)) {
             output.params.extended_bounds = { min, max };
+          } else if (aggConfig.params.autoExtendBounds && aggConfig.getAutoBounds()) {
+            output.params.extended_bounds = aggConfig.getAutoBounds();
           }
         },
         shouldShow: (aggConfig: IBucketAggConfig) => aggConfig.params.has_extended_bounds,

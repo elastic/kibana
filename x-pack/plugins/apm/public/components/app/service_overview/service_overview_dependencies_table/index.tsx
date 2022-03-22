@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
@@ -23,14 +24,14 @@ interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
   isSingleColumn?: boolean;
   link?: ReactNode;
-  hidePerPageOptions?: boolean;
+  showPerPageOptions?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
   isSingleColumn = true,
   link,
-  hidePerPageOptions = false,
+  showPerPageOptions = true,
 }: ServiceOverviewDependenciesTableProps) {
   const {
     query: {
@@ -134,12 +135,33 @@ export function ServiceOverviewDependenciesTable({
       dependencies={dependencies}
       fixedHeight={fixedHeight}
       isSingleColumn={isSingleColumn}
-      title={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableTitle',
-        {
-          defaultMessage: 'Dependencies',
-        }
-      )}
+      title={
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.dependenciesTableTitleTip',
+            {
+              defaultMessage:
+                'Uninstrumented downstream services or external connections derived from the exit spans of instrumented services.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.dependenciesTableTitle',
+              {
+                defaultMessage: 'Dependencies',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      }
       nameColumnTitle={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumn',
         {
@@ -148,7 +170,7 @@ export function ServiceOverviewDependenciesTable({
       )}
       status={status}
       link={link}
-      hidePerPageOptions={hidePerPageOptions}
+      showPerPageOptions={showPerPageOptions}
     />
   );
 }

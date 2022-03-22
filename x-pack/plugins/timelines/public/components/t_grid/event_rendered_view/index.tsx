@@ -228,7 +228,7 @@ const EventRenderedViewComponent = ({
       pageSize,
       totalItemCount,
       pageSizeOptions,
-      hidePerPageOptions: false,
+      showPerPageOptions: true,
     }),
     [pageIndex, pageSize, pageSizeOptions, totalItemCount]
   );

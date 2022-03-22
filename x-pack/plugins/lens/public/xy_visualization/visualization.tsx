@@ -53,6 +53,7 @@ import {
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import { XYState } from '..';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
 
 export const getXyVisualization = ({
   paletteService,
@@ -94,7 +95,11 @@ export const getXyVisualization = ({
       ...state,
       layers: [
         ...state.layers,
-        newLayerState(firstUsedSeriesType || state.preferredSeriesType, layerId, layerType),
+        newLayerState({
+          seriesType: firstUsedSeriesType || state.preferredSeriesType,
+          layerId,
+          layerType,
+        }),
       ],
     };
   },
@@ -103,7 +108,9 @@ export const getXyVisualization = ({
     return {
       ...state,
       layers: state.layers.map((l) =>
-        l.layerId !== layerId ? l : newLayerState(state.preferredSeriesType, layerId)
+        l.layerId !== layerId
+          ? l
+          : newLayerState({ seriesType: state.preferredSeriesType, layerId })
       ),
     };
   },
@@ -435,15 +442,20 @@ export const getXyVisualization = ({
   },
 
   renderDimensionEditor(domElement, props) {
+    const allProps = {
+      ...props,
+      formatFactory: fieldFormats.deserialize,
+      paletteService,
+    };
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    const dimensionEditor = isReferenceLayer(layer) ? (
+      <ReferenceLinePanel {...allProps} />
+    ) : (
+      <DimensionEditor {...allProps} />
+    );
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <DimensionEditor
-            {...props}
-            formatFactory={fieldFormats.deserialize}
-            paletteService={paletteService}
-          />
-        </I18nProvider>
+        <I18nProvider>{dimensionEditor}</I18nProvider>
       </KibanaThemeProvider>,
       domElement
     );

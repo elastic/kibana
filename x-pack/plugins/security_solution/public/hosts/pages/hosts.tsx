@@ -40,7 +40,6 @@ import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
-import { filterHostData } from './navigation';
 import { hostsModel, hostsSelectors } from '../store';
 import { generateSeverityFilter } from '../store/helpers';
 import { HostsTableType } from '../store/model';
@@ -56,6 +55,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { filterHostExternalAlertData } from '../../common/components/visualization_actions/utils';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -100,13 +100,15 @@ const HostsComponent = () => {
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters = React.useMemo(() => {
     if (tabName === HostsTableType.alerts) {
-      return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
+      return filters.length > 0
+        ? [...filters, ...filterHostExternalAlertData]
+        : filterHostExternalAlertData;
     }
 
     if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection);
 
-      return [...severityFilter, ...filterHostData, ...filters];
+      return [...severityFilter, ...filterHostExternalAlertData, ...filters];
     }
     return filters;
   }, [severitySelection, tabName, filters]);
@@ -149,6 +151,7 @@ const HostsComponent = () => {
   );
 
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
@@ -212,7 +215,11 @@ const HostsComponent = () => {
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
-                navTabs={navTabsHosts(hasMlUserPermissions(capabilities), riskyHostsFeatureEnabled)}
+                navTabs={navTabsHosts({
+                  hasMlUserPermissions: hasMlUserPermissions(capabilities),
+                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isUsersEnabled: usersEnabled,
+                })}
               />
 
               <EuiSpacer />

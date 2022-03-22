@@ -109,7 +109,7 @@ describe('benchmarks API', () => {
 
   it('should not throw when sort_field is a string', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'field1' });
+      benchmarksInputSchema.validate({ sort_field: 'name' });
     }).not.toThrow();
   });
 
@@ -131,15 +131,9 @@ describe('benchmarks API', () => {
     }).not.toThrow();
   });
 
-  it('should throw when fields is not string', async () => {
+  it('should not throw when fields is a known string literal', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ fields: ['field1', 'field2'] });
-    }).toThrow();
-  });
-
-  it('should not throw when fields is a string', async () => {
-    expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'field1, field2' });
+      benchmarksInputSchema.validate({ sort_field: 'name' });
     }).not.toThrow();
   });
 

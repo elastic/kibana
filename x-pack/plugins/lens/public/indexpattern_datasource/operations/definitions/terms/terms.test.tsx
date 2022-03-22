@@ -25,6 +25,7 @@ import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../..
 import { FrameDatasourceAPI } from '../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
+import { FieldSelect } from '../../../dimension_panel/field_select';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -990,7 +991,7 @@ describe('terms', () => {
       incompleteParams: {},
       dimensionGroups: [],
       groupId: 'any',
-      operationDefinitionMap: { terms: termsOperation } as unknown as Record<
+      operationDefinitionMap: { terms: termsOperation, date_histogram: {} } as unknown as Record<
         string,
         GenericOperationDefinition
       >,
@@ -1207,6 +1208,40 @@ describe('terms', () => {
       ).toBeTruthy();
 
       expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).toBe(0);
+    });
+
+    it('should switch to the first supported operation when in single term mode and the picked field is not supported', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      // pick a date field
+      act(() => {
+        instance.find(FieldSelect).prop('onChoose')!({
+          type: 'field',
+          field: 'timestamp',
+          operationType: 'date_histogram',
+        });
+      });
+
+      expect(updateLayerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col1: expect.objectContaining({ operationType: 'date_histogram' }),
+          }),
+        })
+      );
     });
 
     it('should render the multi terms specific UI', () => {

@@ -17,7 +17,7 @@ import {
   SavedObjectAttribute,
   SavedObjectReference,
 } from '../../../../../src/core/server';
-import { RawRule, RawAlertAction } from '../types';
+import { RawRule, RawAlertAction, RawRuleExecutionStatus } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
@@ -280,7 +280,7 @@ function initializeExecutionStatus(
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
-      },
+      } as RawRuleExecutionStatus,
     },
   };
 }

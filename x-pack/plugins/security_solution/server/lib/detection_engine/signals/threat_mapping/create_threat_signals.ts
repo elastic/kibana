@@ -64,9 +64,9 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
-  const { eventMappingFilters, indicatorMappingFilters } = getMappingFilters(threatMapping);
-  const allEventFilters = [...filters, ...eventMappingFilters];
-  const allThreatFilters = [...threatFilters, ...indicatorMappingFilters];
+  const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
+  const allEventFilters = [...filters, eventMappingFilter];
+  const allThreatFilters = [...threatFilters, indicatorMappingFilter];
 
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
