@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/100968
   describe('Kibana spaces page meets a11y validations', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
