@@ -477,7 +477,7 @@ describe('rules_list component with items', () => {
     ).toEqual(mockedRulesData.length);
 
     // Schedule interval tooltip
-    wrapper.find('[data-test-subj="ruleInterval-config-tooltip"]').first().simulate('mouseOver');
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
     jest.runAllTimers();
@@ -487,7 +487,7 @@ describe('rules_list component with items', () => {
       'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
     );
 
-    wrapper.find('[data-test-subj="ruleInterval-config-tooltip"]').first().simulate('mouseOut');
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOut');
 
     // Duration column
     expect(

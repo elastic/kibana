@@ -628,7 +628,7 @@ export const RulesList: React.FunctionComponent = () => {
                 <EuiFlexItem grow={false}>
                   {item.showIntervalWarning && (
                     <EuiToolTip
-                      data-test-subj="ruleInterval-config-tooltip"
+                      data-test-subj={`ruleInterval-config-tooltip-${item.index}`}
                       title={i18n.translate(
                         'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipTitle',
                         {
@@ -653,7 +653,7 @@ export const RulesList: React.FunctionComponent = () => {
                     >
                       <EuiButtonIcon
                         color="text"
-                        data-test-subj="ruleInterval-config-icon"
+                        data-test-subj={`ruleInterval-config-icon-${item.index}`}
                         onClick={() => {
                           if (item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)) {
                             onRuleEdit(item);

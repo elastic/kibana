@@ -165,6 +165,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
       ) {
         const configurationToast = toasts.addInfo({
+          'data-test-subj': 'intervalConfigToast',
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastTitle',
             {

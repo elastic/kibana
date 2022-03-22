@@ -79,6 +79,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const connectors = await createConnectors(testRunUuid);
     return await createAlwaysFiringRule({
       name: `test-rule-${testRunUuid}`,
+      schedule: {
+        interval: '1s',
+      },
       actions: connectors.map((connector) => ({
         id: connector.id,
         group: 'default',
@@ -143,6 +146,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const { connectorType } = await pageObjects.ruleDetailsUI.getActionsLabels();
         expect(connectorType).to.be(`Slack`);
+      });
+
+      it('renders toast when schedule is less than configured minimum', async () => {
+        await testSubjects.existOrFail('intervalConfigToast');
+
+        const editButton = await testSubjects.find('ruleIntervalToastEditButton');
+        await editButton.click();
+
+        await testSubjects.click('cancelSaveEditedRuleButton');
       });
 
       it('should disable the rule', async () => {
