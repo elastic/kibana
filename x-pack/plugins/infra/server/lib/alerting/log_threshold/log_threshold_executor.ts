@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { join } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import {
@@ -115,10 +114,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
     const viewInAppUrl = basePath.publicBaseUrl
-      ? new URL(
-          join(basePath.serverBasePath, relativeViewInAppUrl),
-          basePath.publicBaseUrl
-        ).toString()
+      ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
       : relativeViewInAppUrl;
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
