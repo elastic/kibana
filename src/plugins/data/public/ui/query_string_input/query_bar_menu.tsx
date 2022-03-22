@@ -354,7 +354,7 @@ export function QueryBarMenu({
             ? i18n.translate('data.filter.options.saveAsNewFilterSetLabel', {
                 defaultMessage: 'Save as new',
               })
-            : i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
+            : i18n.translate('data.filter.options.saveFilterSetLabel', {
                 defaultMessage: 'Save filter set',
               }),
           icon: 'save',

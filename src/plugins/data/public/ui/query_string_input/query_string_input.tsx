@@ -688,7 +688,6 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       'euiFormControlLayout kbnQueryBar__wrap',
       this.props.className
     );
-    /* eslint-disable @typescript-eslint/naming-convention */
     const inputClassName = classNames('kbnQueryBar__textarea', {
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
