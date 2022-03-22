@@ -27,6 +27,6 @@ export const PureComponent = (params: Params) => {
 PureComponent.argTypes = {
   collapsed: {
     control: 'boolean',
-    defaultValue: true,
+    defaultValue: false,
   },
 };
