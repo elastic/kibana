@@ -22,7 +22,7 @@ import {
   BUTTON_CLASS as INPECT_BUTTON_CLASS,
 } from '../../../../common/components/inspect';
 
-import { HostsKpiBaseComponentLoader } from '../common';
+import { KpiBaseComponentLoader } from '../common';
 import * as i18n from './translations';
 
 import { useInspectQuery } from '../../../../common/hooks/use_inspect_query';
@@ -66,7 +66,7 @@ const RiskyHostsComponent: React.FC<{
   useErrorToast(i18n.ERROR_TITLE, error);
 
   if (loading) {
-    return <HostsKpiBaseComponentLoader />;
+    return <KpiBaseComponentLoader />;
   }
 
   const criticalRiskCount = data?.kpiRiskScore.Critical ?? 0;

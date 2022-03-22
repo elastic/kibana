@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { TotalUsersKpiStrategyResponse } from './kpi/total_users';
+import { Maybe } from '../../../..';
 
-export enum UsersQueries {
-  details = 'userDetails',
-  kpiTotalUsers = 'usersKpiTotalUsers',
+export interface KpiHistogramData {
+  x?: Maybe<number>;
+  y?: Maybe<number>;
 }
-
-export type UserskKpiStrategyResponse = Omit<TotalUsersKpiStrategyResponse, 'rawResponse'>;
