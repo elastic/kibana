@@ -36,10 +36,14 @@ export function useAnomalyChartsInputResolver(
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
   chartWidth: number,
   severity: number
-): { chartsData: ExplorerChartsData; isLoading: boolean; error: Error | null | undefined } {
+): {
+  chartsData: ExplorerChartsData | undefined;
+  isLoading: boolean;
+  error: Error | null | undefined;
+} {
   const [, , { anomalyDetectorService, anomalyExplorerService }] = services;
 
-  const [chartsData, setChartsData] = useState<any>();
+  const [chartsData, setChartsData] = useState<ExplorerChartsData>();
   const [error, setError] = useState<Error | null>();
   const [isLoading, setIsLoading] = useState(false);
 
