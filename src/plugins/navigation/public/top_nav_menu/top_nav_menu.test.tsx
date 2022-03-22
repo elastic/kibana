@@ -153,7 +153,6 @@ describe('TopNavMenu', () => {
 
       await refresh();
 
-      expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
       expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
 
       // menu is rendered outside of the component
