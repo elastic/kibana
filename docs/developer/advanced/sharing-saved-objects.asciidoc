@@ -46,9 +46,9 @@ Existing, isolated object types will need to go through a special _conversion pr
 version 8.0. Once objects are converted, they can easily be switched to become fully shareable in any future release. This conversion will
 change the IDs of any existing objects that are not in the Default space. Changing object IDs itself has several knock-on effects:
 
-* Nonstandard links to other objects can break - _mitigated by <<sharing-saved-objects-step-1.1>>_
-* "Deep link" pages (URLs) to objects can break - _mitigated by <<sharing-saved-objects-step-1.2>> and <<sharing-saved-objects-step-1.3>>_
-* Encrypted objects may not be able to be decrypted - _mitigated by <<sharing-saved-objects-step-1.5>>_
+* Nonstandard links to other objects can break - _mitigated by <<sharing-saved-objects-step-1>>_
+* "Deep link" pages (URLs) to objects can break - _mitigated by <<sharing-saved-objects-step-2>> and <<sharing-saved-objects-step-3>>_
+* Encrypted objects may not be able to be decrypted - _mitigated by <<sharing-saved-objects-step-5>>_
 
 *To be perfectly clear: these effects will all be mitigated _if and only if_ you follow the steps below!*
 
@@ -76,8 +76,8 @@ you read this guide, you can https://github.com/elastic/kibana/pull/107256[follo
 If your objects store _any_ links to other objects (with an object type/ID), you need to take specific steps to ensure that these links
 continue functioning after the 8.0 upgrade.
 
-[[sharing-saved-objects-step-1.1]]
-==== Step 1.1
+[[sharing-saved-objects-step-1]]
+==== Step 1
 
 ⚠️ This step *must* be completed no later than the 7.16 release. ⚠️
 
@@ -89,7 +89,7 @@ If you answered "Yes" to <<sharing-saved-objects-q1>>, you need to make sure tha
 The image below shows two different examples of object links from a "case" object to an "action" object. The top shows the incorrect way to
 link to another object, and the bottom shows the correct way.
 
-image::images/sharing-saved-objects-step-1.1.png["Sharing Saved Objects step 1"]
+image::images/sharing-saved-objects-step-1.png["Sharing Saved Objects step 1"]
 
 If your objects _do not_ use the root-level `references` field, you'll need to <<saved-objects-service-writing-migrations,add a migration>>
 _before the 8.0 release_ to fix that. Here's a migration function for the example above:
@@ -135,8 +135,8 @@ image::images/sharing-saved-objects-q2.png["Sharing Saved Objects deep link exam
 Note that some URLs may contain <<sharing-saved-objects-faq-multiple-deep-link-objects,deep links to multiple objects>>, for example, a
 Dashboard _and_ a filter for an Index Pattern.
 
-[[sharing-saved-objects-step-1.2]]
-==== Step 1.2
+[[sharing-saved-objects-step-2]]
+==== Step 2
 
 ⚠️ This step will preferably be completed in the 7.16 release; it *must* be completed no later than the 8.0 release. ⚠️
 
@@ -179,8 +179,8 @@ passed to your client-side code, and you should update your UI accordingly in th
 NOTE: You don't need to use `resolve()` everywhere, <<sharing-saved-objects-faq-resolve-instead-of-get,you should only use it for deep
 links>>!
 
-[[sharing-saved-objects-step-1.3]]
-==== Step 1.3
+[[sharing-saved-objects-step-3]]
+==== Step 3
 
 ⚠️ This step will preferably be completed in the 7.16 release; it *must* be completed no later than the 8.0 release. ⚠️
 
@@ -191,7 +191,7 @@ Your UI will need to use the Core HTTP service and the Spaces plugin API to do t
 
 Your page should change <<sharing-saved-objects-faq-resolve-outcomes,according to the outcome>>:
 
-image::images/sharing-saved-objects-step-1.3.png["Sharing Saved Objects resolve outcomes overview"]
+image::images/sharing-saved-objects-step-3.png["Sharing Saved Objects resolve outcomes overview"]
 
 TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 3 of the POC]!
 
@@ -297,14 +297,14 @@ different outcomes.]
 
 NOTE: Reminder, don't forget to add unit tests and functional tests!
 
-[[sharing-saved-objects-step-1.4]]
-==== Step 1.4
+[[sharing-saved-objects-step-4]]
+==== Step 4
 
 ⚠️ This step *must* be completed in the 8.0 release (no earlier and no later). ⚠️
 
 > *Update your _server-side code_ to convert these objects to become "share-capable"*
 
-After <<sharing-saved-objects-step-1.3>> is complete, you can add the code to convert your objects.
+After <<sharing-saved-objects-step-3>> is complete, you can add the code to convert your objects.
 
 WARNING: The previous steps can be backported to the 7.x branch, but this step -- the conversion itself -- can only take place in 8.0!
 You should use a separate pull request for this.
@@ -313,7 +313,7 @@ When you register your object, you need to change the `namespaceType` and also a
 special field will trigger the actual conversion that will take place during the Core migration upgrade process when a user installs the
 Kibana 8.0 release:
 
-image::images/sharing-saved-objects-step-1.4.png["Sharing Saved Objects conversion code"]
+image::images/sharing-saved-objects-step-4.png["Sharing Saved Objects conversion code"]
 
 TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 4 of the POC]!
 
@@ -327,8 +327,8 @@ NOTE: Reminder, don't forget to add integration tests!
 Saved objects can optionally be <<xpack-security-secure-saved-objects,encrypted>> by using the Encrypted Saved Objects plugin. Very few
 object types are encrypted, so most plugin developers will not be affected.
 
-[[sharing-saved-objects-step-1.5]]
-==== Step 1.5
+[[sharing-saved-objects-step-5]]
+==== Step 5
 
 ⚠️ This step *must* be completed in the 8.0 release (no earlier and no later). ⚠️
 
@@ -342,7 +342,7 @@ changed, the object will not be able to be decrypted with the standard process.
 To mitigate this, you need to add a "no-op" ESO migration that will be applied immediately after the object is converted during the 8.0
 upgrade process. This will decrypt the object using its old ID and then re-encrypt it using its new ID:
 
-image::images/sharing-saved-objects-step-1.5.png["Sharing Saved Objects ESO migration"]
+image::images/sharing-saved-objects-step-5.png["Sharing Saved Objects ESO migration"]
 
 NOTE: Reminder, don't forget to add unit tests and integration tests!
 
@@ -354,18 +354,18 @@ this flowchart:
 
 image::images/sharing-saved-objects-phase-2-dev-flowchart.png["Sharing Saved Objects phase 2 - developer flowchart"]
 
-[[sharing-saved-objects-step-2.1]]
-==== Step 2.1
+[[sharing-saved-objects-step-6]]
+==== Step 6
 
 > *Update your _server-side code_ to mark these objects as "shareable"*
 
 When you register your object, you need to set the proper `namespaceType`. If you have an existing object type that is "share-capable", you
 can simply change it:
 
-image::images/sharing-saved-objects-step-2.1.png["Sharing Saved Objects registration (shareable)"]
+image::images/sharing-saved-objects-step-6.png["Sharing Saved Objects registration (shareable)"]
 
-[[sharing-saved-objects-step-2.2]]
-==== Step 2.2
+[[sharing-saved-objects-step-7]]
+==== Step 7
 
 > *Update saved object delete API usage to handle multiple spaces*
 
@@ -390,10 +390,10 @@ The <<data-views,Data Views page>> in <<management>> uses a
 https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx[similar
 approach] to show a warning in its delete confirmation modal:
 
-image::images/sharing-saved-objects-step-2.2.png["Sharing Saved Objects deletion warning"]
+image::images/sharing-saved-objects-step-7.png["Sharing Saved Objects deletion warning"]
 
-[[sharing-saved-objects-step-2.3]]
-==== Step 2.3
+[[sharing-saved-objects-step-8]]
+==== Step 8
 
 > *Allow users to view and change assigned spaces for your objects*
 
@@ -524,7 +524,7 @@ image::images/sharing-saved-objects-faq-changing-object-ids-2.png["Sharing Saved
 As mentioned in <<sharing-saved-objects-q2>>, some URLs may contain multiple object IDs, effectively deep linking to multiple objects.
 These should be handled on a case-by-case basis at the plugin owner's discretion. A good rule of thumb is:
 
-* The "primary" object on the page should always handle the three `resolve()` outcomes as described in <<sharing-saved-objects-step-1.3>>.
+* The "primary" object on the page should always handle the three `resolve()` outcomes as described in <<sharing-saved-objects-step-3>>.
 * Any "secondary" objects on the page may handle the outcomes differently. If the secondary object ID is not important (for example, it just
   functions as a page anchor), it may make more sense to ignore the different outcomes. If the secondary object _is_ important but it is not
   directly represented in the UI, it may make more sense to throw a descriptive error when a `'conflict'` outcome is encountered.
