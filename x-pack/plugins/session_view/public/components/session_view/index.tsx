@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
@@ -16,34 +16,40 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import { Process } from '../../../common/types/process_tree';
+import { AlertStatusEventEntityIdMap, Process } from '../../../common/types/process_tree';
 import { DisplayOptionsState } from '../../../common/types/session_view';
 import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
 import { useStyles } from './styles';
-import { useFetchSessionViewProcessEvents } from './hooks';
+import { useFetchAlertStatus, useFetchSessionViewProcessEvents } from './hooks';
 
 /**
  * The main wrapper component for the session view.
  */
-export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionViewDeps) => {
+export const SessionView = ({
+  sessionEntityId,
+  height,
+  jumpToEvent,
+  loadAlertDetails,
+}: SessionViewDeps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
-
-  const styles = useStyles({ height });
-
-  const onProcessSelected = useCallback((process: Process | null) => {
-    setSelectedProcess(process);
-  }, []);
-
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
   const [displayOptions, setDisplayOptions] = useState<DisplayOptionsState>({
     timestamp: true,
     verboseMode: true,
   });
+  const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
+  const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
+
+  const styles = useStyles({ height });
+
+  const onProcessSelected = useCallback((process: Process | null) => {
+    setSelectedProcess(process);
+  }, []);
 
   const {
     data,
@@ -58,10 +64,25 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   const hasData = data && data.pages.length > 0 && data.pages[0].events.length > 0;
   const renderIsLoading = isFetching && !data;
   const renderDetails = isDetailOpen && selectedProcess;
+  const { data: newUpdatedAlertsStatus } = useFetchAlertStatus(
+    updatedAlertsStatus,
+    fetchAlertStatus[0] ?? ''
+  );
+
+  useEffect(() => {
+    if (fetchAlertStatus) {
+      setUpdatedAlertsStatus({ ...newUpdatedAlertsStatus });
+    }
+  }, [fetchAlertStatus, newUpdatedAlertsStatus]);
+
+  const handleOnAlertDetailsClosed = useCallback((alertUuid: string) => {
+    setFetchAlertStatus([alertUuid]);
+  }, []);
 
   const toggleDetailPanel = useCallback(() => {
     setIsDetailOpen(!isDetailOpen);
   }, [isDetailOpen]);
+
   const handleOptionChange = useCallback((checkedOptions: DisplayOptionsState) => {
     setDisplayOptions(checkedOptions);
   }, []);
@@ -182,6 +203,9 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                     fetchNextPage={fetchNextPage}
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
+                    updatedAlertsStatus={updatedAlertsStatus}
+                    loadAlertDetails={loadAlertDetails}
+                    handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
                     timeStampOn={displayOptions.timestamp}
                     verboseModeOn={displayOptions.verboseMode}
                   />

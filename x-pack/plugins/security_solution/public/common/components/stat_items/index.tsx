@@ -34,6 +34,7 @@ import { InspectButton } from '../inspect';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
+import { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -125,12 +126,12 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
 
 export const addValueToFields = (
   fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
 ): StatItem[] => fields.map((field) => ({ ...field, value: get(field.key, data) }));
 
 export const addValueToAreaChart = (
   fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
 ): ChartSeriesData[] =>
   fields
     .filter((field) => get(`${field.key}Histogram`, data) != null)
@@ -142,7 +143,7 @@ export const addValueToAreaChart = (
 
 export const addValueToBarChart = (
   fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
 ): ChartSeriesData[] => {
   if (fields.length === 0) return [];
   return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
@@ -171,7 +172,7 @@ export const addValueToBarChart = (
 
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse,
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse,
   id: string,
   from: string,
   to: string,

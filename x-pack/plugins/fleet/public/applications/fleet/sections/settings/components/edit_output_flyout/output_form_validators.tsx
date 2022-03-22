@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
 export function validateESHosts(value: string[]) {
-  const res: Array<{ message: string; index: number }> = [];
+  const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
   value.forEach((val, idx) => {
     try {
@@ -46,13 +46,21 @@ export function validateESHosts(value: string[]) {
       );
     });
 
+  if (value.length === 0) {
+    res.push({
+      message: i18n.translate('xpack.fleet.settings.outputForm.elasticUrlRequiredError', {
+        defaultMessage: 'URL is required',
+      }),
+    });
+  }
+
   if (res.length) {
     return res;
   }
 }
 
 export function validateLogstashHosts(value: string[]) {
-  const res: Array<{ message: string; index: number }> = [];
+  const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
   value.forEach((val, idx) => {
     try {
@@ -89,13 +97,20 @@ export function validateLogstashHosts(value: string[]) {
     .forEach((indexes) => {
       indexes.forEach((index) =>
         res.push({
-          message: i18n.translate('xpack.fleet.settings.outputForm.elasticHostDuplicateError', {
-            defaultMessage: 'Duplicate URL',
+          message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostDuplicateError', {
+            defaultMessage: 'Duplicate Host',
           }),
           index,
         })
       );
     });
+  if (value.length === 0) {
+    res.push({
+      message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostRequiredError', {
+        defaultMessage: 'Host is required',
+      }),
+    });
+  }
 
   if (res.length) {
     return res;
