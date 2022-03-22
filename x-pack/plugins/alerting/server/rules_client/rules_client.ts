@@ -1707,6 +1707,7 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       snoozeEndTime: null,
+      muteAll: false,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
