@@ -18,6 +18,7 @@ import {
   alertComment,
   getAlertUserAction,
   basicCaseMetrics,
+  connectorsMock,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { SpacesApi } from '../../../../spaces/public';
@@ -27,7 +28,6 @@ import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { ConnectorTypes } from '../../../common/api';
 import { Case } from '../../../common/ui';
