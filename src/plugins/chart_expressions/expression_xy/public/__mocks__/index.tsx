@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
+import { Datatable } from '../../../../expressions';
+import { chartPluginMock } from '../../../../charts/public/mocks';
 import { DataLayerConfigResult, LensMultiTable } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { XYProps } from '../../common/types';
@@ -183,10 +184,23 @@ export const dateHistogramLayer: DataLayerConfigResult = {
 };
 
 export function sampleArgsWithReferenceLine(value: number = 150) {
-  const { args: sArgs, data } = sampleArgs();
+  const { args: sArgs } = sampleArgs();
+  const data: Datatable = {
+    type: 'datatable',
+    columns: [
+      {
+        id: 'referenceLine-a',
+        meta: { params: { id: 'number' }, type: 'number' },
+        name: 'Static value',
+      },
+    ],
+    rows: [{ 'referenceLine-a': value }],
+  };
+
   const args: XYProps = {
     ...sArgs,
     layers: [
+      ...sArgs.layers,
       {
         type: 'referenceLineLayer',
         layerType: LayerTypes.REFERENCELINE,
@@ -197,18 +211,5 @@ export function sampleArgsWithReferenceLine(value: number = 150) {
     ],
   };
 
-  return {
-    data: {
-      type: 'datatable',
-      columns: [
-        {
-          id: 'referenceLine-a',
-          meta: { params: { id: 'number' }, type: 'number' },
-          name: 'Static value',
-        },
-      ],
-      rows: [{ 'referenceLine-a': value }],
-    },
-    args,
-  };
+  return { data, args };
 }

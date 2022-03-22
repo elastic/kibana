@@ -7,11 +7,12 @@
  */
 
 import { partition } from 'lodash';
-import type { CommonXYDataLayerConfigResult } from '../../common';
+import type { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common';
 import { isStackedChart } from './state';
+import { isDataLayer } from './visualization';
 
 export function computeOverallDataDomain(
-  dataLayers: CommonXYDataLayerConfigResult[],
+  layers: CommonXYLayerConfigResult[],
   accessorIds: string[],
   allowStacking: boolean = true
 ) {
@@ -19,9 +20,10 @@ export function computeOverallDataDomain(
   let min: number | undefined;
   let max: number | undefined;
   const [stacked, unstacked] = partition(
-    dataLayers,
-    ({ seriesType }) => isStackedChart(seriesType) && allowStacking
+    layers,
+    (layer) => isDataLayer(layer) && isStackedChart(layer.seriesType) && allowStacking
   );
+
   for (const { accessors, table } of unstacked) {
     if (table) {
       for (const accessor of accessors) {
@@ -40,7 +42,7 @@ export function computeOverallDataDomain(
   }
   // stacked can span multiple layers, so compute an overall max/min by bucket
   const stackedResults: Record<string, number> = {};
-  for (const { accessors, xAccessor, table } of stacked) {
+  for (const { accessors, xAccessor, table } of stacked as CommonXYDataLayerConfigResult[]) {
     if (table) {
       for (const accessor of accessors) {
         if (accessorMap.has(accessor)) {

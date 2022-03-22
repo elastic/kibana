@@ -10,7 +10,7 @@ import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
-import { CommonXYDataLayerConfigResult } from '../../common';
+import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -30,7 +30,7 @@ export type ColorAssignments = Record<
 >;
 
 export function getColorAssignments(
-  layers: CommonXYDataLayerConfigResult[],
+  layers: CommonXYLayerConfigResult[],
   formatFactory: FormatFactory
 ): ColorAssignments {
   const layersPerPalette: Record<

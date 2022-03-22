@@ -71,7 +71,7 @@ import {
   ReferenceLineAnnotations,
 } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
-import { CommonXYDataLayerConfigResult } from '../../common/types';
+import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common/types';
 
 import './xy_chart.scss';
 
@@ -160,7 +160,7 @@ export function XYChart({
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers);
-  const layersById = filteredLayers.reduce<Record<string, CommonXYDataLayerConfigResult>>(
+  const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfigResult>>(
     (hashMap, layer, index) => {
       hashMap[index] = layer;
       return hashMap;
@@ -179,9 +179,11 @@ export function XYChart({
     return <EmptyPlaceholder icon={icon} />;
   }
 
+  const dataLayers = filteredLayers.filter(isDataLayer);
+
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn = filteredLayers[0].table.columns.find(
-    ({ id }) => isDataLayer(filteredLayers[0]) && id === filteredLayers[0].xAccessor
+  const xAxisColumn = dataLayers[0]?.table.columns.find(
+    ({ id }) => isDataLayer(dataLayers[0]) && id === dataLayers[0].xAccessor
   );
 
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
@@ -197,7 +199,7 @@ export function XYChart({
     filteredLayers.length > 1 ||
     filteredLayers.some((layer) => layer.accessors.length > 1) ||
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
-  const shouldRotate = isHorizontalChart(filteredLayers);
+  const shouldRotate = isHorizontalChart(dataLayers);
 
   const yAxesConfiguration = getAxesConfiguration(filteredLayers, shouldRotate, formatFactory);
 
@@ -219,18 +221,18 @@ export function XYChart({
     yRight: 0,
   };
 
-  const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
+  const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
 
   const chartHasMoreThanOneBarSeries =
     filteredBarLayers.length > 1 ||
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredBarLayers.some((layer) => layer.splitAccessor);
+    filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
 
-  const isTimeViz = Boolean(filteredLayers.every((l) => l.xScaleType === 'time'));
-  const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
+  const isTimeViz = Boolean(filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time'));
+  const isHistogramViz = filteredLayers.every((l) => isDataLayer(l) && l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
-    filteredLayers,
+    dataLayers,
     minInterval,
     isTimeViz,
     isHistogramViz
@@ -323,7 +325,7 @@ export function XYChart({
       if (!fit && axisHasReferenceLine) {
         // Remove this once the chart will support automatic annotation fit for other type of charts
         const { min: computedMin, max: computedMax } = computeOverallDataDomain(
-          filteredLayers,
+          layers,
           axis.series.map(({ accessor }) => accessor)
         );
 
@@ -355,7 +357,7 @@ export function XYChart({
 
   const shouldShowValueLabels =
     // No stacked bar charts
-    filteredLayers.every((layer) => !layer.seriesType.includes('stacked')) &&
+    dataLayers.every((layer) => !layer.seriesType.includes('stacked')) &&
     // No histogram charts
     !isHistogramViz;
 
@@ -369,7 +371,7 @@ export function XYChart({
     const xySeries = series as XYChartSeriesIdentifier;
     const xyGeometry = geometry as GeometryValue;
 
-    const layer = filteredLayers.find((l) =>
+    const layer = dataLayers.find((l) =>
       xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
     );
     if (!layer) {
@@ -441,9 +443,9 @@ export function XYChart({
       return;
     }
 
-    const { table } = filteredLayers[0];
+    const { table } = dataLayers[0];
 
-    const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);
+    const xAxisColumnIndex = table.columns.findIndex((el) => el.id === dataLayers[0].xAccessor);
 
     const context: BrushEvent['data'] = {
       range: [min, max],
@@ -461,7 +463,7 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   } as LegendPositionConfig;
 
-  const isHistogramModeEnabled = filteredLayers.some(
+  const isHistogramModeEnabled = dataLayers.some(
     ({ isHistogram, seriesType }) =>
       isHistogram &&
       (seriesType.includes('stacked') ||
@@ -557,7 +559,7 @@ export function XYChart({
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={
           interactive
-            ? getLegendAction(filteredLayers, onClickValue, formatFactory, layersAlreadyFormatted)
+            ? getLegendAction(dataLayers, onClickValue, formatFactory, layersAlreadyFormatted)
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
@@ -570,7 +572,7 @@ export function XYChart({
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
         gridLine={gridLineStyle}
-        hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
+        hide={dataLayers[0]?.hide || !dataLayers[0]?.xAccessor}
         tickFormat={(d) => safeXAccessorLabelRenderer(d)}
         style={xAxisStyle}
         timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
@@ -590,7 +592,7 @@ export function XYChart({
                   ? gridlinesVisibilitySettings?.yRight
                   : gridlinesVisibilitySettings?.yLeft,
             }}
-            hide={filteredLayers[0].hide}
+            hide={dataLayers[0]?.hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
             style={getYAxesStyle(axis.groupId as 'left' | 'right')}
             domain={getYAxisDomain(axis)}
@@ -604,7 +606,7 @@ export function XYChart({
           baseDomain={rawXDomain}
           extendedDomain={xDomain}
           darkMode={darkMode}
-          histogramMode={filteredLayers.every(
+          histogramMode={dataLayers.every(
             (layer) =>
               layer.isHistogram &&
               (layer.seriesType.includes('stacked') || !layer.splitAccessor) &&
@@ -615,7 +617,7 @@ export function XYChart({
         />
       )}
 
-      {filteredLayers.flatMap((layer, layerIndex) =>
+      {dataLayers.flatMap((layer, layerIndex) =>
         layer.accessors.map((accessor, accessorIndex) => {
           const {
             splitAccessor,

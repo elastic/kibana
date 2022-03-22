@@ -7,27 +7,21 @@
  */
 
 import { CommonXYLayerConfigResult, CommonXYDataLayerConfigResult } from '../../common';
-import { isDataLayer } from './visualization';
 
 export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
-  return layers.filter<CommonXYDataLayerConfigResult>(
-    (layer): layer is CommonXYDataLayerConfigResult => {
-      if (!isDataLayer(layer)) {
-        return false;
-      }
+  return layers.filter<CommonXYLayerConfigResult>((layer): layer is CommonXYLayerConfigResult => {
+    const { accessors, table } = layer;
+    const { xAccessor, splitAccessor } = layer as CommonXYDataLayerConfigResult;
 
-      const { accessors, xAccessor, splitAccessor, table } = layer;
-
-      return !(
-        !accessors.length ||
-        !table ||
-        table.rows.length === 0 ||
-        (xAccessor && table.rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-        // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-        (!xAccessor &&
-          splitAccessor &&
-          table.rows.every((row) => typeof row[splitAccessor] === 'undefined'))
-      );
-    }
-  );
+    return !(
+      !accessors.length ||
+      !table ||
+      table.rows.length === 0 ||
+      (xAccessor && table.rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+      (!xAccessor &&
+        splitAccessor &&
+        table.rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+    );
+  });
 }

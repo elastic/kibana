@@ -7,11 +7,12 @@
  */
 
 import { FormatFactory } from '../types';
-import { AxisExtentConfig, CommonXYDataLayerConfigResult } from '../../common';
+import { AxisExtentConfig, CommonXYLayerConfigResult } from '../../common';
 import type {
   IFieldFormat,
   SerializedFieldFormat,
 } from '../../../../../plugins/field_formats/common';
+import { isDataLayer } from './visualization';
 
 export interface Series {
   layer: number;
@@ -36,7 +37,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(layers: CommonXYDataLayerConfigResult[]) {
+export function groupAxesByType(layers: CommonXYLayerConfigResult[]) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -57,7 +58,11 @@ export function groupAxesByType(layers: CommonXYDataLayerConfigResult[]) {
         'auto';
       let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
         ?.meta?.params || { id: 'number' };
-      if (layer.seriesType.includes('percentage') && formatter.id !== 'percent') {
+      if (
+        isDataLayer(layer) &&
+        layer.seriesType.includes('percentage') &&
+        formatter.id !== 'percent'
+      ) {
         formatter = {
           id: 'percent',
           params: {
@@ -102,7 +107,7 @@ export function groupAxesByType(layers: CommonXYDataLayerConfigResult[]) {
 }
 
 export function getAxesConfiguration(
-  layers: CommonXYDataLayerConfigResult[],
+  layers: CommonXYLayerConfigResult[],
   shouldRotate: boolean,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {

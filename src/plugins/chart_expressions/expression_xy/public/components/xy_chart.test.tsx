@@ -2163,7 +2163,7 @@ describe('XYChart component', () => {
   });
 
   test('it should remove invalid rows', () => {
-    const data: Datatable = {
+    const data1: Datatable = {
       type: 'datatable',
       columns: [
         { id: 'a', name: 'a', meta: { type: 'number' } },
@@ -2173,6 +2173,19 @@ describe('XYChart component', () => {
       rows: [
         { a: undefined, b: 2, c: 'I', d: 'Row 1' },
         { a: 1, b: 5, c: 'J', d: 'Row 2' },
+      ],
+    };
+
+    const data2: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'a', name: 'a', meta: { type: 'number' } },
+        { id: 'b', name: 'b', meta: { type: 'number' } },
+        { id: 'c', name: 'c', meta: { type: 'string' } },
+      ],
+      rows: [
+        { a: undefined, b: undefined, c: undefined },
+        { a: undefined, b: undefined, c: undefined },
       ],
     };
 
@@ -2221,7 +2234,7 @@ describe('XYChart component', () => {
           yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
-          table: data,
+          table: data1,
         },
         {
           type: 'dataLayer',
@@ -2235,7 +2248,7 @@ describe('XYChart component', () => {
           yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
-          table: data,
+          table: data2,
         },
       ],
     };
@@ -2243,6 +2256,7 @@ describe('XYChart component', () => {
     const component = shallow(<XYChart {...defaultProps} args={args} />);
 
     const series = component.find(LineSeries);
+
     // Only one series should be rendered, even though 2 are configured
     // This one series should only have one row, even though 2 are sent
     expect(series.prop('data')).toEqual([{ a: 1, b: 5, c: 'J', d: 'Row 2' }]);
@@ -2489,11 +2503,16 @@ describe('XYChart component', () => {
   });
 
   test('it should apply the fitting function to all non-bar series', () => {
+    const data: Datatable = createSampleDatatableWithRows([
+      { a: 1, b: 2, c: 'I', d: 'Foo' },
+      { a: 1, b: 5, c: 'J', d: 'Bar' },
+    ]);
+
     const args: XYProps = createArgsWithLayers([
-      { ...sampleLayer, accessors: ['a'] },
-      { ...sampleLayer, seriesType: 'bar', accessors: ['a'] },
-      { ...sampleLayer, seriesType: 'area', accessors: ['a'] },
-      { ...sampleLayer, seriesType: 'area_stacked', accessors: ['a'] },
+      { ...sampleLayer, accessors: ['a'], table: data },
+      { ...sampleLayer, seriesType: 'bar', accessors: ['a'], table: data },
+      { ...sampleLayer, seriesType: 'area', accessors: ['a'], table: data },
+      { ...sampleLayer, seriesType: 'area_stacked', accessors: ['a'], table: data },
     ]);
 
     const component = shallow(
