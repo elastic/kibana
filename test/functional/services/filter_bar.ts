@@ -64,8 +64,8 @@ export class FilterBarService extends FtrService {
    * Removes all filters
    */
   public async removeAllFilters(): Promise<void> {
-    await this.testSubjects.click('showFilterActions');
-    await this.testSubjects.click('removeAllFilters');
+    await this.testSubjects.click('showQueryBarMenu');
+    await this.testSubjects.click('saved-query-management-removeAllFilters');
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitUntilUrlIncludes('filters:!()');
   }

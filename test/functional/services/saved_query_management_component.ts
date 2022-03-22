@@ -163,13 +163,13 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async openSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('saved-query-management-popover');
+    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPopover');
     if (isOpenAlready) return;
 
-    await this.testSubjects.click('saved-query-management-popover-button');
+    await this.testSubjects.click('showQueryBarMenu');
 
     await this.retry.waitFor('saved query management popover to have any text', async () => {
-      const queryText = await this.testSubjects.getVisibleText('saved-query-management-popover');
+      const queryText = await this.testSubjects.getVisibleText('queryBarMenuPopover');
       return queryText.length > 0;
     });
   }

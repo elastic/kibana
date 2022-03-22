@@ -325,6 +325,7 @@ export function QueryBarMenu({
           }),
           disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
           icon: 'crossInACircleFilled',
+          'data-test-subj': 'saved-query-management-removeAllFilters',
           onClick: () => {
             closePopover();
             onQueryBarSubmit({
