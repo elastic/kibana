@@ -32,7 +32,7 @@ import {
   AlertType,
   ALERT_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
-  formatTransactionDurationAnomalyReason,
+  formatAnomalyReason,
 } from '../../../common/alert_types';
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
@@ -57,10 +57,9 @@ const paramsSchema = schema.object({
   ]),
 });
 
-const alertTypeConfig =
-  ALERT_TYPES_CONFIG[AlertType.TransactionDurationAnomaly];
+const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.Anomaly];
 
-export function registerTransactionDurationAnomalyAlertType({
+export function registerAnomalyAlertType({
   logger,
   ruleDataClient,
   alerting,
@@ -74,7 +73,7 @@ export function registerTransactionDurationAnomalyAlertType({
 
   alerting.registerType(
     createLifecycleRuleType({
-      id: AlertType.TransactionDurationAnomaly,
+      id: AlertType.Anomaly,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,
       defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
@@ -215,7 +214,7 @@ export function registerTransactionDurationAnomalyAlertType({
         compact(anomalies).forEach((anomaly) => {
           const { serviceName, environment, transactionType, score } = anomaly;
           const severityLevel = getSeverity(score);
-          const reasonMessage = formatTransactionDurationAnomalyReason({
+          const reasonMessage = formatAnomalyReason({
             measured: score,
             serviceName,
             severityLevel,
@@ -237,12 +236,7 @@ export function registerTransactionDurationAnomalyAlertType({
             : relativeViewInAppUrl;
           services
             .alertWithLifecycle({
-              id: [
-                AlertType.TransactionDurationAnomaly,
-                serviceName,
-                environment,
-                transactionType,
-              ]
+              id: [AlertType.Anomaly, serviceName, environment, transactionType]
                 .filter((name) => name)
                 .join('_'),
               fields: {

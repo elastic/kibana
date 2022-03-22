@@ -41,7 +41,7 @@ const createAnomalyAlertAlertLabel = i18n.translate(
   { defaultMessage: 'Create anomaly rule' }
 );
 
-const CREATE_THRESHOLD_PANEL_ID = 'create_error_count_panel';
+const CREATE_THRESHOLD_PANEL_ID = 'create_threshold_panel';
 
 interface Props {
   basePath: IBasePath;
@@ -90,7 +90,7 @@ export function AlertingPopoverAndFlyout({
                     {
                       name: createAnomalyAlertAlertLabel,
                       onClick: () => {
-                        setAlertType(AlertType.TransactionDurationAnomaly);
+                        setAlertType(AlertType.Anomaly);
                         setPopoverOpen(false);
                       },
                     },
