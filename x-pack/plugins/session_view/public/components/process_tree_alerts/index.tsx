@@ -11,11 +11,13 @@ import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_t
 import { ProcessTreeAlert } from '../process_tree_alert';
 import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 
-interface ProcessTreeAlertsDeps {
+export interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
   jumpToAlertID?: string;
   isProcessSelected?: boolean;
   onAlertSelected: (e: MouseEvent) => void;
+  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
+  handleOnAlertDetailsClosed: (alertUuid: string) => void;
 }
 
 export function ProcessTreeAlerts({
@@ -23,6 +25,8 @@ export function ProcessTreeAlerts({
   jumpToAlertID,
   isProcessSelected = false,
   onAlertSelected,
+  loadAlertDetails,
+  handleOnAlertDetailsClosed,
 }: ProcessTreeAlertsDeps) {
   const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
   const styles = useStyles();
@@ -57,14 +61,17 @@ export function ProcessTreeAlerts({
     }
   }, []);
 
+  const handleAlertClick = useCallback(
+    (alert: ProcessEventAlert | null) => {
+      onAlertSelected(MOUSE_EVENT_PLACEHOLDER);
+      setSelectedAlert(alert);
+    },
+    [onAlertSelected]
+  );
+
   if (alerts.length === 0) {
     return null;
   }
-
-  const handleAlertClick = (alert: ProcessEventAlert | null) => {
-    onAlertSelected(MOUSE_EVENT_PLACEHOLDER);
-    setSelectedAlert(alert);
-  };
 
   return (
     <div
@@ -83,6 +90,8 @@ export function ProcessTreeAlerts({
             isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}
             onClick={handleAlertClick}
             selectAlert={selectAlert}
+            loadAlertDetails={loadAlertDetails}
+            handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
           />
         );
       })}

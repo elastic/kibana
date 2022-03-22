@@ -5,6 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { ToolbarButton } from './buttons/primary/primary';
-export { IconButtonGroup } from './buttons/icon_button_group/icon_button_group';
-export { AddFromLibraryButton } from './buttons/add_from_library/add_from_library';
+
+import { mount as enzymeMount } from 'enzyme';
+import React from 'react';
+import { AddFromLibraryButton } from './add_from_library';
+
+describe('<ToolbarButton />', () => {
+  test('is rendered', () => {
+    const component = enzymeMount(<AddFromLibraryButton />);
+
+    expect(component).toMatchSnapshot();
+  });
+});
