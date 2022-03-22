@@ -16,6 +16,8 @@ import {
 } from './explorer_charts/explorer_charts_container_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { getSelectionInfluencers } from './explorer_utils';
+import type { PageUrlStateService } from '../util/url_state';
+import type { TableSeverity } from '../components/controls/select_severity/select_severity';
 
 export class AnomalyChartsStateService extends StateService {
   private _isChartsDataLoading$ = new BehaviorSubject<boolean>(false);
@@ -24,7 +26,8 @@ export class AnomalyChartsStateService extends StateService {
   constructor(
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private anomalyTimelineStateServices: AnomalyTimelineStateService,
-    private anomalyExplorerChartsService: AnomalyExplorerChartsService
+    private anomalyExplorerChartsService: AnomalyExplorerChartsService,
+    private tableSeverityState$: PageUrlStateService<TableSeverity>
   ) {
     super();
     this._init();
@@ -37,6 +40,7 @@ export class AnomalyChartsStateService extends StateService {
       this.anomalyTimelineStateServices.getContainerWidth$().pipe(skipWhile((v) => v === 0)),
       this.anomalyTimelineStateServices.getSelectedCells$(),
       this.anomalyTimelineStateServices.getViewBySwimlaneFieldName$(),
+      this.tableSeverityState$.getPageUrlState$(),
     ])
       .pipe(
         switchMap(
@@ -46,6 +50,7 @@ export class AnomalyChartsStateService extends StateService {
             containerWidth,
             selectedCells,
             viewBySwimlaneFieldName,
+            severityState,
           ]) => {
             if (!selectedCells) return of(getDefaultChartsData());
             const jobIds = selectedJobs.map((v) => v.id);
@@ -63,7 +68,7 @@ export class AnomalyChartsStateService extends StateService {
               selectedCells?.times[1] * 1000,
               influencerFilterQuery,
               selectionInfluencers,
-              0,
+              severityState.val,
               6
             );
           }

@@ -14,6 +14,7 @@ import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 import { AnomalyChartsStateService } from './anomaly_charts_state_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
+import { useTableSeverity } from '../components/controls/select_severity';
 
 export type AnomalyExplorerContextValue =
   | {
@@ -58,6 +59,8 @@ export function useAnomalyExplorerContextValue(
     },
   } = useMlKibana();
 
+  const [, , tableSeverityState] = useTableSeverity();
+
   const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), []);
 
   const anomalyTimelineService = useMemo(() => {
@@ -84,7 +87,8 @@ export function useAnomalyExplorerContextValue(
     const chartsStateService = new AnomalyChartsStateService(
       anomalyExplorerCommonStateService,
       anomalyTimelineStateService,
-      anomalyExplorerChartsService
+      anomalyExplorerChartsService,
+      tableSeverityState
     );
 
     return {
