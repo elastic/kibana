@@ -20,6 +20,7 @@ import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
 import { AnalyticsIdSelector, AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
+import { useUrlState } from '../../../util/url_state';
 
 export const Page: FC<{
   jobId: string;
@@ -37,6 +38,8 @@ export const Page: FC<{
   const jobIdToUse = jobId ?? analyticsId?.job_id;
   const analysisTypeToUse = analysisType || analyticsId?.analysis_type;
 
+  const [ , setGlobalState] = useUrlState('_g');
+
   const checkJobsExist = async () => {
     try {
       const { count } = await getDataFrameAnalytics(undefined, undefined, 0);
@@ -50,6 +53,17 @@ export const Page: FC<{
   useEffect(function checkJobs() {
     checkJobsExist();
   }, []);
+
+  useEffect(function updateUrl() {
+    if (analyticsId !== undefined) {
+      setGlobalState({
+        ml: {
+          ...(analyticsId.analysis_type ? { analysisType: analyticsId. analysis_type } : {}),
+          ...(analyticsId.job_id ? { jobId: analyticsId.job_id } : {}),
+        },
+      });
+    }
+  }, [analyticsId?.job_id, analyticsId?.model_id]);
 
   const getEmptyState = () => {
     if (jobsExist === false) {
