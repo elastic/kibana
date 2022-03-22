@@ -15765,7 +15765,6 @@
     "xpack.ingestPipelines.processors.label.urldecode": "URL 解码",
     "xpack.ingestPipelines.processors.label.userAgent": "用户代理",
     "xpack.ingestPipelines.processors.uriPartsDescription": "解析统一资源标识符 (URI) 字符串并提取其组件作为对象。",
-    "xpack.ingestPipelines.requestFlyout.closeButtonLabel": "关闭",
     "xpack.ingestPipelines.requestFlyout.descriptionText": "此 Elasticsearch 请求将创建或更新管道。",
     "xpack.ingestPipelines.requestFlyout.namedTitle": "对“{name}”的请求",
     "xpack.ingestPipelines.requestFlyout.unnamedTitle": "请求",
