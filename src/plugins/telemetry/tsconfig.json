@@ -23,6 +23,7 @@
     { "path": "../../plugins/screenshot_mode/tsconfig.json" },
     { "path": "../../plugins/telemetry_collection_manager/tsconfig.json" },
     { "path": "../../plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/cloud/tsconfig.json" },
     { "path": "../../../x-pack/plugins/security/tsconfig.json" }
   ]
 }

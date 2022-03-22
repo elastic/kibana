@@ -33,6 +33,7 @@ import {
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
 import { HomePublicPluginSetup } from '../../home/public';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
+import type { CloudSetup } from './services/cloud';
 
 /**
  * Publicly exposed APIs from the Telemetry Service
@@ -87,6 +88,7 @@ export interface TelemetryPluginStart {
 interface TelemetryPluginSetupDependencies {
   screenshotMode: ScreenshotModePluginSetup;
   home?: HomePublicPluginSetup;
+  cloud?: CloudSetup;
 }
 
 /**
@@ -133,7 +135,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   public setup(
     { http, notifications, getStartServices }: CoreSetup,
-    { screenshotMode, home }: TelemetryPluginSetupDependencies
+    { screenshotMode, home, cloud }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
     const config = this.config;
     const currentKibanaVersion = this.currentKibanaVersion;
@@ -162,13 +164,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         }
       });
 
-      home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
-        renderWelcomeTelemetryNotice(
-          this.telemetryService!,
-          http.basePath.prepend,
-          telemetryConstants
-        )
-      );
+      const isCloud = cloud?.isCloudEnabled ?? false;
+      if (!isCloud) {
+        home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
+          renderWelcomeTelemetryNotice(
+            this.telemetryService!,
+            http.basePath.prepend,
+            telemetryConstants
+          )
+        );
+      }
     }
 
     return {

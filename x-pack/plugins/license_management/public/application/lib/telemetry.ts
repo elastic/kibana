@@ -10,6 +10,11 @@ import type { TelemetryPluginStart } from '../../../../../../src/plugins/telemet
 export type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
 export { shouldShowTelemetryOptIn };
 
+/**
+ * Indicates whether we should show the telemetry opt in checkbox + popover tooltip
+ * @param {TelemetryPluginStart|undefined} telemetry The telemetry plugin start API
+ * @returns {boolean} true iif the opt in should be shown
+ */
 function shouldShowTelemetryOptIn(
   telemetry?: TelemetryPluginStart
 ): telemetry is TelemetryPluginStart {
