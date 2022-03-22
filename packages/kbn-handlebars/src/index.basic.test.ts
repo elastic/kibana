@@ -161,6 +161,10 @@ describe('basic context', () => {
   });
 
   it('escaping expressions', () => {
+    expectTemplate('{{{awesome}}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
+
+    expectTemplate('{{&awesome}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
+
     expectTemplate('{{awesome}}')
       .withInput({ awesome: '&"\'`\\<>' })
       .toCompileTo('&amp;&quot;&#x27;&#x60;\\&lt;&gt;');

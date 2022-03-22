@@ -386,7 +386,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         this.output.push(result);
       }
     } else {
-      if (this.compileOptions.noEscape === true || typeof invokeResult !== 'string') {
+      if (
+        // @ts-expect-error: The `escaped` property is only on MustacheStatement nodes
+        node.escaped === false ||
+        this.compileOptions.noEscape === true ||
+        typeof invokeResult !== 'string'
+      ) {
         this.output.push(invokeResult);
       } else {
         this.output.push(Handlebars.escapeExpression(invokeResult));
