@@ -81,9 +81,9 @@ describe('FieldTableHeader', () => {
         </TestProviders>
       );
 
-      expect(result.queryByTestId('viewSelectorMenu')).toBeNull();
-      expect(result.queryByTestId('viewSelectorOption-all')).toBeNull();
-      expect(result.queryByTestId('viewSelectorOption-selected')).toBeNull();
+      expect(result.queryByTestId('viewSelectorMenu')).not.toBeInTheDocument();
+      expect(result.queryByTestId('viewSelectorOption-all')).not.toBeInTheDocument();
+      expect(result.queryByTestId('viewSelectorOption-selected')).not.toBeInTheDocument();
 
       result.getByTestId('viewSelectorButton').click();
 
