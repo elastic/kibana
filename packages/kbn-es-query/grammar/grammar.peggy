@@ -197,8 +197,8 @@ Value "value"
     if (
       !allowLeadingWildcards
       && value.type === 'wildcard'
-      && value.indexOf(wildcardSymbol) === 0
-      && value.length > wildcardSymbol.length
+      && value.value.indexOf(wildcardSymbol) === 0
+      && value.value.length > wildcardSymbol.length
     ) {
       error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
     }
