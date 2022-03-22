@@ -138,7 +138,14 @@ export function useFieldStatsSearchStrategy(
       ?.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
       .filter((d) => d.existsInDocs === true);
 
-    if (!pageOfConfigs) return;
+    if (!pageOfConfigs || pageOfConfigs.length === 0) {
+      setFetchState({
+        loaded: 100,
+        isRunning: false,
+      });
+
+      return;
+    }
 
     const filterCriteria = buildBaseFilterCriteria(
       searchStrategyParams.timeFieldName,

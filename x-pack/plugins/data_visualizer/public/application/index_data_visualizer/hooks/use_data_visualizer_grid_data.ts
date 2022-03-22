@@ -324,7 +324,7 @@ export const useDataVisualizerGridData = (
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
         type: JOB_FIELD_TYPES.NUMBER,
-        loading: true,
+        loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
       };
@@ -462,7 +462,6 @@ export const useDataVisualizerGridData = (
             : c;
         });
       }
-
       return combinedConfigs;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
