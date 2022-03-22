@@ -6,10 +6,11 @@
  */
 
 import React, { lazy, useEffect } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Route, RouteComponentProps, Switch, Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
+import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 import { Section, routeToConnectors, routeToRules, routeToInternalAlerts } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
@@ -39,9 +40,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   const {
     chrome,
     application: { capabilities },
+
     setBreadcrumbs,
     docLinks,
   } = useKibana().services;
+  const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{
@@ -135,11 +138,15 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               path={routeToRules}
               component={suspendedComponentWithProps(RulesList, 'xl')}
             />
-            <Route
-              exact
-              path={routeToInternalAlerts}
-              component={suspendedComponentWithProps(AlertsPage, 'xl')}
-            />
+            {isInternalAlertsTableEnabled ? (
+              <Route
+                exact
+                path={routeToInternalAlerts}
+                component={suspendedComponentWithProps(AlertsPage, 'xl')}
+              />
+            ) : (
+              <Redirect to={routeToRules} />
+            )}
           </Switch>
         </HealthCheck>
       </HealthContextProvider>

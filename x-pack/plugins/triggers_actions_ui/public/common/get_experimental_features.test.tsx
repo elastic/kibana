@@ -14,6 +14,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
       experimentalFeatures: {
         rulesListDatagrid: true,
         rulesDetailLogs: false,
+        internalAlertsTable: true,
       },
     });
 
@@ -24,6 +25,10 @@ describe('getIsExperimentalFeatureEnabled', () => {
     result = getIsExperimentalFeatureEnabled('rulesDetailLogs');
 
     expect(result).toEqual(false);
+
+    result = getIsExperimentalFeatureEnabled('internalAlertsTable');
+
+    expect(result).toEqual(true);
 
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
       'Invalid enable value doesNotExist. Allowed values are: rulesListDatagrid, rulesDetailLogs'
