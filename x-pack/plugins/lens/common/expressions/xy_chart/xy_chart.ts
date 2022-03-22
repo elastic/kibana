@@ -10,12 +10,31 @@ import type { ExpressionValueSearchContext } from '../../../../../../src/plugins
 import type { LensMultiTable } from '../../types';
 import type { XYArgs } from './xy_args';
 import { fittingFunctionDefinitions } from './fitting_function';
-import { logDataTable } from '../expressions_utils';
+import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
 
 export interface XYChartProps {
   data: LensMultiTable;
   args: XYArgs;
 }
+
+const strings = {
+  getMetricHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.metric', {
+      defaultMessage: 'Vertical axis',
+    }),
+  getXAxisHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.x', {
+      defaultMessage: 'Horizontal axis',
+    }),
+  getBreakdownHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
+  getReferenceLineHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
+};
 
 export interface XYRender {
   type: 'render';
@@ -159,7 +178,22 @@ export const xyChart: ExpressionFunctionDefinition<
   },
   fn(data: LensMultiTable, args: XYArgs, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
-      logDataTable(handlers.inspectorAdapters.tables, data.tables);
+      args.layers.forEach(({ layerId, accessors, xAccessor, splitAccessor, layerType }) => {
+        const logTable = prepareLogTable(
+          data.tables[layerId],
+          [
+            [
+              accessors ? accessors : undefined,
+              layerType === 'data' ? strings.getMetricHelp() : strings.getReferenceLineHelp(),
+            ],
+            [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
+            [splitAccessor ? [splitAccessor] : undefined, strings.getBreakdownHelp()],
+          ],
+          true
+        );
+
+        handlers.inspectorAdapters.tables.logDatatable(layerId, logTable);
+      });
     }
     return {
       type: 'render',
