@@ -31,7 +31,6 @@ export function useErrorGroupDistributionFetcher({
     comparisonType,
     comparisonEnabled,
   });
-
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {

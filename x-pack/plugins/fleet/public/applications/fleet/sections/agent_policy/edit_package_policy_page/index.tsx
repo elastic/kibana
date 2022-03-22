@@ -63,7 +63,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
+import { pkgKeyFromPackageInfo } from '../../../services';
 import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
 
 import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
@@ -784,11 +784,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
             </EuiFlyoutHeader>
             <FlyoutBody>
               <EuiCodeBlock isCopyable fontSize="m" whiteSpace="pre">
-                {JSON.stringify(
-                  storedPackagePoliciesToAgentInputs([currentPackagePolicy]),
-                  null,
-                  2
-                )}
+                {JSON.stringify(dryRunData[0].agent_diff?.[0] || [], null, 2)}
               </EuiCodeBlock>
             </FlyoutBody>
           </EuiFlyout>

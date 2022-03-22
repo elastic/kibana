@@ -26,7 +26,7 @@ const SavedObjectsEditionPage = ({
 }) => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const capabilities = coreStart.application.capabilities;
-  const dockLinks = coreStart.docLinks.links;
+  const docLinks = coreStart.docLinks.links;
 
   const { search } = useLocation();
   const query = parse(search);
@@ -64,7 +64,7 @@ const SavedObjectsEditionPage = ({
         notFoundType={query.notFound as string}
         uiSettings={coreStart.uiSettings}
         history={history}
-        docLinks={dockLinks}
+        docLinks={docLinks}
       />
     </RedirectAppLinks>
   );

@@ -31,7 +31,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('update_filters', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/127678
+  describe.skip('update_filters', function () {
     const updateFilterRequestBody = {
       description: 'Updated filter #1',
       removeItems: items,
@@ -54,12 +55,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should update filter by id`, async () => {
       const { filterId } = validFilters[0];
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/filters/${filterId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateFilterRequestBody)
-        .expect(200);
+        .send(updateFilterRequestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.filter_id).to.eql(filterId);
       expect(body.description).to.eql(updateFilterRequestBody.description);
@@ -68,12 +69,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should not allow to update filter for user without required permission`, async () => {
       const { filterId, requestBody: oldFilterRequest } = validFilters[1];
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/filters/${filterId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateFilterRequestBody)
-        .expect(403);
+        .send(updateFilterRequestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       // response should return not found
       expect(body.error).to.eql('Forbidden');
@@ -88,12 +89,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should not allow to update filter for unauthorized user`, async () => {
       const { filterId, requestBody: oldFilterRequest } = validFilters[2];
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/filters/${filterId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateFilterRequestBody)
-        .expect(403);
+        .send(updateFilterRequestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
 
@@ -105,12 +106,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it(`should return appropriate error if invalid filterId`, async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/filters/filter_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateFilterRequestBody)
-        .expect(400);
+        .send(updateFilterRequestBody);
+      ml.api.assertResponseStatusCode(400, status, body);
 
       expect(body.message).to.contain('resource_not_found_exception');
     });

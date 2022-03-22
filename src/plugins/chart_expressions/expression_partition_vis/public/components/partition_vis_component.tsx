@@ -387,6 +387,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
                 }
                 legendPosition={legendPosition}
+                legendSize={visParams.legendSize}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}

@@ -176,7 +176,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/gzip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(29);
+      expect(res.body.items.length).to.be(32);
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {
@@ -86,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(29);
+      expect(res.body.items.length).to.be(32);
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {

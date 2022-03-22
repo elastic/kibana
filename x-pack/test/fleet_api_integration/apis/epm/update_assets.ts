@@ -81,32 +81,8 @@ export default function (providerContext: FtrProviderContext) {
         { meta: true }
       );
       expect(resLogsTemplate.statusCode).equal(200);
-      expect(
-        resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
-      ).eql({
-        '@timestamp': {
-          type: 'date',
-        },
-        logs_test_name: {
-          type: 'text',
-        },
-        new_field_name: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-        data_stream: {
-          properties: {
-            dataset: {
-              type: 'constant_keyword',
-            },
-            namespace: {
-              type: 'constant_keyword',
-            },
-            type: {
-              type: 'constant_keyword',
-            },
-          },
-        },
+      expect(resLogsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: { package: { name: 'all_assets' }, managed_by: 'fleet', managed: true },
       });
       const resMetricsTemplate = await es.transport.request<any>(
         {
@@ -116,27 +92,12 @@ export default function (providerContext: FtrProviderContext) {
         { meta: true }
       );
       expect(resMetricsTemplate.statusCode).equal(200);
-      expect(
-        resMetricsTemplate.body.index_templates[0].index_template.template.mappings.properties
-      ).eql({
-        '@timestamp': {
-          type: 'date',
-        },
-        metrics_test_name2: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-        data_stream: {
-          properties: {
-            dataset: {
-              type: 'constant_keyword',
-            },
-            namespace: {
-              type: 'constant_keyword',
-            },
-            type: {
-              type: 'constant_keyword',
-            },
+      expect(resMetricsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
           },
         },
       });
@@ -150,8 +111,27 @@ export default function (providerContext: FtrProviderContext) {
         { meta: true }
       );
       expect(resLogsTemplate.statusCode).equal(200);
+      expect(resLogsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
+          },
+        },
+      });
+    });
+    it('should have populated the new component template with the correct mapping', async () => {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName2}@mappings`,
+        },
+        { meta: true }
+      );
+      expect(resMappings.statusCode).equal(200);
       expect(
-        resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
+        resMappings.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
           type: 'date',
@@ -223,7 +203,7 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(resPipeline2.statusCode).equal(404);
     });
-    it('should have updated the component templates', async function () {
+    it('should have updated the logs component templates', async function () {
       const resMappings = await es.transport.request<any>(
         {
           method: 'GET',
@@ -232,8 +212,42 @@ export default function (providerContext: FtrProviderContext) {
         { meta: true }
       );
       expect(resMappings.statusCode).equal(200);
+      expect(resMappings.body.component_templates[0].component_template.template.settings).eql({
+        index: {
+          mapping: {
+            total_fields: {
+              limit: '10000',
+            },
+          },
+        },
+      });
       expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
         dynamic: true,
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          data_stream: {
+            properties: {
+              dataset: {
+                type: 'constant_keyword',
+              },
+              namespace: {
+                type: 'constant_keyword',
+              },
+              type: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+          logs_test_name: {
+            type: 'text',
+          },
+          new_field_name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
       });
       const resSettings = await es.transport.request<any>(
         {
@@ -247,11 +261,6 @@ export default function (providerContext: FtrProviderContext) {
         index: {
           lifecycle: { name: 'reference2' },
           codec: 'best_compression',
-          mapping: {
-            total_fields: {
-              limit: '10000',
-            },
-          },
           query: {
             default_field: ['logs_test_name', 'new_field_name'],
           },
@@ -283,6 +292,40 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         ],
+      });
+    });
+    it('should have updated the metrics mapping component template', async function () {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${metricsTemplateName}@mappings`,
+        },
+        { meta: true }
+      );
+      expect(resMappings.statusCode).equal(200);
+      expect(
+        resMappings.body.component_templates[0].component_template.template.mappings.properties
+      ).eql({
+        '@timestamp': {
+          type: 'date',
+        },
+        metrics_test_name2: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+        data_stream: {
+          properties: {
+            dataset: {
+              type: 'constant_keyword',
+            },
+            namespace: {
+              type: 'constant_keyword',
+            },
+            type: {
+              type: 'constant_keyword',
+            },
+          },
+        },
       });
     });
     it('should have updated the kibana assets', async function () {
@@ -397,6 +440,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs2@mappings',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs2@settings',
             type: 'component_template',
           },
@@ -407,6 +454,10 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'metrics-all_assets.test_metrics',
             type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@mappings',
+            type: 'component_template',
           },
           {
             id: 'metrics-all_assets.test_metrics@settings',

@@ -7,7 +7,6 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { asTransactionRate } from '../../../../common/utils/formatters';
-import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
@@ -17,15 +16,33 @@ import {
   ChartType,
   getTimeSeriesColor,
 } from '../../shared/charts/helper/get_timeseries_color';
+import {
+  getComparisonChartTheme,
+  getTimeRangeComparison,
+} from '../../shared/time_comparison/get_time_range_comparison';
 
 export function BackendThroughputChart({ height }: { height: number }) {
   const {
-    query: { backendName, rangeFrom, rangeTo, kuery, environment },
+    query: {
+      backendName,
+      rangeFrom,
+      rangeTo,
+      kuery,
+      environment,
+      comparisonEnabled,
+      comparisonType,
+    },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset, comparisonChartTheme } = useComparison();
+  const comparisonChartTheme = getComparisonChartTheme();
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {

@@ -324,7 +324,7 @@
             "label": "obj",
             "description": [],
             "signature": [
-              "{ type: string; title?: string | undefined; id: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
+              "{ type: string; id: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false

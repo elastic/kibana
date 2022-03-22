@@ -12,6 +12,8 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import styled from 'styled-components';
+import { EuiButton } from '@elastic/eui';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
@@ -32,7 +34,6 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
-import { LinkButton } from '../../../common/components/links';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const DEFAULT_STACK_BY = 'event.dataset';
@@ -60,6 +61,10 @@ const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
   text: fieldName,
   value: fieldName,
 });
+
+const StyledLinkButton = styled(EuiButton)`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.l};
+`;
 
 const EventsByDatasetComponent: React.FC<Props> = ({
   combinedQueries,
@@ -110,12 +115,12 @@ const EventsByDatasetComponent: React.FC<Props> = ({
 
   const eventsCountViewEventsButton = useMemo(
     () => (
-      <LinkButton
+      <StyledLinkButton
         onClick={goToHostEvents}
         href={formatUrl(getTabsOnHostsUrl(HostsTableType.events))}
       >
         {i18n.VIEW_EVENTS}
-      </LinkButton>
+      </StyledLinkButton>
     ),
     [goToHostEvents, formatUrl]
   );

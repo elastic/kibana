@@ -32,6 +32,9 @@ jest.mock('../../../containers/index', () => ({
 jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
+}));
 jest.mock('../body/events/index', () => ({
   Events: () => <></>,
 }));

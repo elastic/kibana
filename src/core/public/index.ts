@@ -227,6 +227,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * use *only* to retrieve config values. There is no way to set injected values
    * in the new platform.
    * @deprecated
+   * @removeBy 8.8.0
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
@@ -290,6 +291,7 @@ export interface CoreStart {
    * use *only* to retrieve config values. There is no way to set injected values
    * in the new platform.
    * @deprecated
+   * @removeBy 8.8.0
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;

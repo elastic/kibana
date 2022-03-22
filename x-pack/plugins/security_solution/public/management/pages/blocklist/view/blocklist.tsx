@@ -7,32 +7,11 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { BlocklistsApiClient } from '../services';
-
-// FIXME:PT delete this when real component is implemented
-const TempDevFormComponent: ArtifactListPageProps['ArtifactFormComponent'] = (props) => {
-  // For Dev. Delete once we implement this component
-  // @ts-ignore
-  if (!window._dev_artifact_form_props) {
-    // @ts-ignore
-    window._dev_artifact_form_props = [];
-    // @ts-ignore
-    window.console.log(window._dev_artifact_form_props);
-  }
-  // @ts-ignore
-  window._dev_artifact_form_props.push(props);
-
-  return (
-    <div>
-      <div style={{ margin: '3em 0' }}>
-        {props.error ? props.error?.body?.message || props.error : ''}
-      </div>
-      {`TODO: ${props.mode} Form here`}
-    </div>
-  );
-};
+import { BlockListForm } from './components/blocklist_form';
 
 const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.blocklist.pageTitle', {
@@ -123,9 +102,10 @@ export const Blocklist = memo(() => {
   return (
     <ArtifactListPage
       apiClient={blocklistsApiClient}
-      ArtifactFormComponent={TempDevFormComponent} // FIXME: Implement create/edit form
+      ArtifactFormComponent={BlockListForm}
       labels={BLOCKLIST_PAGE_LABELS}
       data-test-subj="blocklistPage"
+      flyoutSize="l"
     />
   );
 });

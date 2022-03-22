@@ -37,6 +37,7 @@ export const ComplianceDashboard = () => {
       pageHeader={{
         pageTitle: TEXT.CLOUD_POSTURE,
       }}
+      restrictWidth={1600}
     >
       <CompliancePage />
     </CspPageTemplate>

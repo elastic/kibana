@@ -28,7 +28,7 @@ import {
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '../../../../../data/public';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
@@ -315,7 +315,7 @@ export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newS
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
+export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {

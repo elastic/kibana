@@ -26,7 +26,7 @@ import {
   updateCurrentWriteIndices,
 } from './template';
 
-const FLEET_COMPONENT_TEMPLATE = '.fleet_component_template-1';
+const FLEET_COMPONENT_TEMPLATES = ['.fleet_globals-1', '.fleet_agent_id_verification-1'];
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -48,11 +48,8 @@ describe('EPM template', () => {
     const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
     const template = getTemplate({
-      type: 'logs',
       templateIndexPattern,
       packageName: 'nginx',
-      fields: [],
-      mappings: { properties: {} },
       composedOfTemplates: [],
       templatePriority: 200,
     });
@@ -63,41 +60,35 @@ describe('EPM template', () => {
     const composedOfTemplates = ['component1', 'component2'];
 
     const template = getTemplate({
-      type: 'logs',
       templateIndexPattern: 'name-*',
       packageName: 'nginx',
-      fields: [],
-      mappings: { properties: {} },
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual([...composedOfTemplates, FLEET_COMPONENT_TEMPLATE]);
+    expect(template.composed_of).toStrictEqual([
+      ...composedOfTemplates,
+      ...FLEET_COMPONENT_TEMPLATES,
+    ]);
   });
 
   it('adds empty composed_of correctly', () => {
     const composedOfTemplates: string[] = [];
 
     const template = getTemplate({
-      type: 'logs',
       templateIndexPattern: 'name-*',
       packageName: 'nginx',
-      fields: [],
-      mappings: { properties: {} },
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual([FLEET_COMPONENT_TEMPLATE]);
+    expect(template.composed_of).toStrictEqual(FLEET_COMPONENT_TEMPLATES);
   });
 
   it('adds hidden field correctly', () => {
     const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
     const templateWithHidden = getTemplate({
-      type: 'logs',
       templateIndexPattern,
       packageName: 'nginx',
-      fields: [],
-      mappings: { properties: {} },
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: true,
@@ -105,11 +96,8 @@ describe('EPM template', () => {
     expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
     const templateWithoutHidden = getTemplate({
-      type: 'logs',
       templateIndexPattern,
       packageName: 'nginx',
-      fields: [],
-      mappings: { properties: {} },
       composedOfTemplates: [],
       templatePriority: 200,
     });
@@ -123,17 +111,8 @@ describe('EPM template', () => {
 
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
-    const template = getTemplate({
-      type: 'logs',
-      templateIndexPattern: 'foo-*',
-      packageName: 'nginx',
-      fields: processedFields,
-      mappings,
-      composedOfTemplates: [],
-      templatePriority: 200,
-    });
 
-    expect(template).toMatchSnapshot(path.basename(ymlPath));
+    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
   });
 
   it('tests loading coredns.logs.yml', () => {
@@ -143,37 +122,19 @@ describe('EPM template', () => {
 
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
-    const template = getTemplate({
-      type: 'logs',
-      templateIndexPattern: 'foo-*',
-      packageName: 'coredns',
-      fields: processedFields,
-      mappings,
-      composedOfTemplates: [],
-      templatePriority: 200,
-    });
 
-    expect(template).toMatchSnapshot(path.basename(ymlPath));
+    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
   });
 
   it('tests loading system.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/system.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
     const fields: Field[] = safeLoad(fieldsYML);
-
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    const template = getTemplate({
-      type: 'metrics',
-      templateIndexPattern: 'whatsthis-*',
-      packageName: 'system',
-      fields: processedFields,
-      mappings,
-      composedOfTemplates: [],
-      templatePriority: 200,
-    });
 
-    expect(template).toMatchSnapshot(path.basename(ymlPath));
+    const mappings = generateMappings(processedFields);
+
+    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
   });
 
   it('tests processing long field with index false', () => {
@@ -874,6 +835,12 @@ describe('EPM template', () => {
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
         {
@@ -902,6 +869,14 @@ describe('EPM template', () => {
           { name: 'test-replicated', replicated: true },
         ],
       } as any);
+
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
+
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
         {

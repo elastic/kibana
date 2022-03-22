@@ -584,7 +584,9 @@
             "label": "queryEventsBySavedObjects",
             "description": [],
             "signature": [
-              "(queryOptions: QueryOptionsEventsBySavedObjectFilter) => Promise<",
+              "(queryOptions: ",
+              "FindEventsOptionsBySavedObjectFilter",
+              ") => Promise<",
               {
                 "pluginId": "eventLog",
                 "scope": "server",
@@ -600,12 +602,52 @@
               {
                 "parentPluginId": "eventLog",
                 "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "queryOptions",
                 "description": [],
                 "signature": [
-                  "QueryOptionsEventsBySavedObjectFilter"
+                  "FindEventsOptionsBySavedObjectFilter"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.aggregateEventsBySavedObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "aggregateEventsBySavedObjects",
+            "description": [],
+            "signature": [
+              "(queryOptions: ",
+              "AggregateEventsOptionsBySavedObjectFilter",
+              ") => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.AggregateEventsBySavedObjectResult",
+                "text": "AggregateEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.aggregateEventsBySavedObjects.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "queryOptions",
+                "description": [],
+                "signature": [
+                  "AggregateEventsOptionsBySavedObjectFilter"
                 ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
@@ -639,6 +681,34 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.AggregateEventsBySavedObjectResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggregateEventsBySavedObjectResult",
+        "description": [],
+        "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.AggregateEventsBySavedObjectResult.aggregations",
+            "type": "Object",
+            "tags": [],
+            "label": "aggregations",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "AggregationsAggregate",
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "eventLog",
         "id": "def-server.IEventLogClient",
@@ -719,6 +789,90 @@
               {
                 "parentPluginId": "eventLog",
                 "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "legacyIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds",
+            "type": "Function",
+            "tags": [],
+            "label": "aggregateEventsBySavedObjectIds",
+            "description": [],
+            "signature": [
+              "(type: string, ids: string[], options?: Partial<",
+              "AggregateOptionsType",
+              "> | undefined, legacyIds?: string[] | undefined) => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.AggregateEventsBySavedObjectResult",
+                "text": "AggregateEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  "AggregateOptionsType",
+                  "> | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$4",
                 "type": "Array",
                 "tags": [],
                 "label": "legacyIds",
@@ -1291,7 +1445,7 @@
         "label": "BASE_EVENT_LOG_API_PATH",
         "description": [],
         "signature": [
-          "\"/api/event_log\""
+          "\"/internal/event_log\""
         ],
         "path": "x-pack/plugins/event_log/common/index.ts",
         "deprecated": false,

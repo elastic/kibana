@@ -150,9 +150,6 @@ export const OVERVIEW_REVENT_TIMELINES = '[data-test-subj="overview-recent-timel
 
 export const OVERVIEW_CTI_LINKS = '[data-test-subj="cti-dashboard-links"]';
 export const OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL = '[data-test-subj="cti-inner-panel-danger"]';
-export const OVERVIEW_CTI_LINKS_INFO_INNER_PANEL = '[data-test-subj="cti-inner-panel-info"]';
-export const OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON =
-  '[data-test-subj="cti-enable-integrations-button"]';
 export const OVERVIEW_CTI_TOTAL_EVENT_COUNT = `${OVERVIEW_CTI_LINKS} [data-test-subj="header-panel-subtitle"]`;
 export const OVERVIEW_CTI_ENABLE_MODULE_BUTTON = '[data-test-subj="cti-enable-module-button"]';
 

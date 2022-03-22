@@ -25,7 +25,7 @@ const nodeModules = {
   `,
 };
 
-it('output type links to named import from node modules', async () => {
+it('output links to named import from node modules', async () => {
   const output = await run(
     `
       import { Foo } from 'foo'
@@ -36,13 +36,14 @@ it('output type links to named import from node modules', async () => {
 
   expect(output.code).toMatchInlineSnapshot(`
     "import { Foo } from 'foo';
+
     export type ValidName = string | Foo
     //# sourceMappingURL=index.d.ts.map"
   `);
   expect(output.map).toMatchInlineSnapshot(`
     Object {
       "file": "index.d.ts",
-      "mappings": ";YACY,S",
+      "mappings": ";;YACY,S",
       "names": Array [],
       "sourceRoot": "../../../src",
       "sources": Array [
@@ -57,7 +58,40 @@ it('output type links to named import from node modules', async () => {
   `);
 });
 
-it('output type links to default import from node modules', async () => {
+it('output links to type exports from node modules', async () => {
+  const output = await run(
+    `
+      export type { Foo } from 'foo'
+    `,
+    {
+      otherFiles: nodeModules,
+    }
+  );
+
+  expect(output.code).toMatchInlineSnapshot(`
+    "import type { Foo } from 'foo';
+
+    export type { Foo };
+
+    //# sourceMappingURL=index.d.ts.map"
+  `);
+  expect(output.map).toMatchInlineSnapshot(`
+    Object {
+      "file": "index.d.ts",
+      "mappings": "",
+      "names": Array [],
+      "sourceRoot": "../../../src",
+      "sources": Array [],
+      "version": 3,
+    }
+  `);
+  expect(output.logs).toMatchInlineSnapshot(`
+    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
+    "
+  `);
+});
+
+it('output links to default import from node modules', async () => {
   const output = await run(
     `
       import Bar from 'bar'
@@ -67,14 +101,15 @@ it('output type links to default import from node modules', async () => {
   );
 
   expect(output.code).toMatchInlineSnapshot(`
-    "import { Bar } from 'bar';
+    "import Bar from 'bar';
+
     export type ValidName = string | Bar
     //# sourceMappingURL=index.d.ts.map"
   `);
   expect(output.map).toMatchInlineSnapshot(`
     Object {
       "file": "index.d.ts",
-      "mappings": ";YACY,S",
+      "mappings": ";;YACY,S",
       "names": Array [],
       "sourceRoot": "../../../src",
       "sources": Array [

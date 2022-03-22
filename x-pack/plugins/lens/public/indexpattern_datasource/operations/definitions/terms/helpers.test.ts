@@ -452,23 +452,87 @@ describe('isSortableByColumn()', () => {
     ).toBeFalsy();
   });
 
-  it('should not be sortable by a last_value function', () => {
-    expect(
-      isSortableByColumn(
-        getLayer(getStringBasedOperationColumn(), [
-          {
-            label: 'Last Value',
-            dataType: 'number',
-            isBucketed: false,
-            sourceField: 'bytes',
-            operationType: 'last_value',
-            params: {
-              sortField: 'time',
-            },
-          } as GenericIndexPatternColumn,
-        ]),
-        'col2'
-      )
-    ).toBeFalsy();
+  describe('last_value operation', () => {
+    it('should NOT be sortable when using top-hit agg', () => {
+      expect(
+        isSortableByColumn(
+          getLayer(getStringBasedOperationColumn(), [
+            {
+              label: 'Last Value',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'bytes',
+              operationType: 'last_value',
+              params: {
+                sortField: 'time',
+                showArrayValues: true,
+              },
+            } as GenericIndexPatternColumn,
+          ]),
+          'col2'
+        )
+      ).toBeFalsy();
+    });
+
+    it('should NOT be sortable when NOT using date or number source field', () => {
+      expect(
+        isSortableByColumn(
+          getLayer(getStringBasedOperationColumn(), [
+            {
+              label: 'Last Value',
+              dataType: 'string',
+              isBucketed: false,
+              sourceField: 'some_string_field',
+              operationType: 'last_value',
+              params: {
+                sortField: 'time',
+                showArrayValues: false,
+              },
+            } as GenericIndexPatternColumn,
+          ]),
+          'col2'
+        )
+      ).toBeFalsy();
+    });
+
+    it('SHOULD be sortable when NOT using top-hit agg and source field is date or number', () => {
+      expect(
+        isSortableByColumn(
+          getLayer(getStringBasedOperationColumn(), [
+            {
+              label: 'Last Value',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'bytes',
+              operationType: 'last_value',
+              params: {
+                sortField: 'time',
+                showArrayValues: false,
+              },
+            } as GenericIndexPatternColumn,
+          ]),
+          'col2'
+        )
+      ).toBeTruthy();
+
+      expect(
+        isSortableByColumn(
+          getLayer(getStringBasedOperationColumn(), [
+            {
+              label: 'Last Value',
+              dataType: 'date',
+              isBucketed: false,
+              sourceField: 'order_date',
+              operationType: 'last_value',
+              params: {
+                sortField: 'time',
+                showArrayValues: false,
+              },
+            } as GenericIndexPatternColumn,
+          ]),
+          'col2'
+        )
+      ).toBeTruthy();
+    });
   });
 });
