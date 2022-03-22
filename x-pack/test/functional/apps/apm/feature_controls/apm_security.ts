@@ -64,6 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((link) => link.text)).to.eql([
           'Overview',
           'Alerts',
+          'Rules',
           'APM',
           'User Experience',
           'Stack Management',
@@ -119,6 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql([
           'Overview',
           'Alerts',
+          'Rules',
           'APM',
           'User Experience',
           'Stack Management',
@@ -137,7 +139,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no apm privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/122001
+    describe.skip('no apm privileges', () => {
       before(async () => {
         await security.role.create('no_apm_privileges_role', {
           elasticsearch: {

@@ -6,13 +6,13 @@
  */
 
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import { ConditionEntry, NewTrustedApp } from '../../../../../common/endpoint/types';
+import { TrustedAppConditionEntry, NewTrustedApp } from '../../../../../common/endpoint/types';
 
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 
 import { TrustedAppsListPageState } from '../state';
 
-export const defaultConditionEntry = (): ConditionEntry<ConditionEntryField.HASH> => ({
+export const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.HASH> => ({
   field: ConditionEntryField.HASH,
   operator: 'included',
   type: 'match',

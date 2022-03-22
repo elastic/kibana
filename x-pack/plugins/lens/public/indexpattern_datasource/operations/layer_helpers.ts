@@ -1183,7 +1183,10 @@ export function updateColumnParam<C extends GenericIndexPatternColumn>({
   };
 }
 
-function adjustColumnReferencesForChangedColumn(layer: IndexPatternLayer, changedColumnId: string) {
+export function adjustColumnReferencesForChangedColumn(
+  layer: IndexPatternLayer,
+  changedColumnId: string
+) {
   const newColumns = { ...layer.columns };
   Object.keys(newColumns).forEach((currentColumnId) => {
     if (currentColumnId !== changedColumnId) {

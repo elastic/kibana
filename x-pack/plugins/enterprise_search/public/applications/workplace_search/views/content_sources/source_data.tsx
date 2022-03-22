@@ -511,7 +511,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchSharePoint,
+      documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
       applicationPortalUrl: 'https://portal.azure.com/',
     },
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],

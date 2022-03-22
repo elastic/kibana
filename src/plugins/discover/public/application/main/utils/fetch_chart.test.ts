@@ -12,7 +12,7 @@ import { fetchChart, updateSearchSource } from './fetch_chart';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/common';
+import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FetchDeps } from './fetch_all';
 

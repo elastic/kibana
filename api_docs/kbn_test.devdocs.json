@@ -724,6 +724,36 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.FunctionalTestRunner.simulateMochaDryRun",
+            "type": "Function",
+            "tags": [],
+            "label": "simulateMochaDryRun",
+            "description": [],
+            "signature": [
+              "(mocha: any) => number"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.FunctionalTestRunner.simulateMochaDryRun.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "mocha",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1563,6 +1593,65 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-server.createAsyncInstance",
+        "type": "Function",
+        "tags": [],
+        "label": "createAsyncInstance",
+        "description": [],
+        "signature": [
+          "<T>(type: string, name: string, promiseForValue: Promise<T>) => AsyncInstance<T>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.createAsyncInstance.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.createAsyncInstance.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.createAsyncInstance.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "promiseForValue",
+            "description": [],
+            "signature": [
+              "Promise<T>"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/providers/async_instance.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-server.createEsClientForFtrConfig",
         "type": "Function",
         "tags": [],
@@ -1678,6 +1767,82 @@
             "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
             "deprecated": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.createRemoteEsClientForFtrConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "createRemoteEsClientForFtrConfig",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.Config",
+            "text": "Config"
+          },
+          ", overrides: Omit<",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.EsClientForTestingOptions",
+            "text": "EsClientForTestingOptions"
+          },
+          ", \"esUrl\"> | undefined) => ",
+          "default"
+        ],
+        "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.createRemoteEsClientForFtrConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.Config",
+                "text": "Config"
+              }
+            ],
+            "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.createRemoteEsClientForFtrConfig.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.EsClientForTestingOptions",
+                "text": "EsClientForTestingOptions"
+              },
+              ", \"esUrl\"> | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2375,9 +2540,26 @@
             "type": "CompoundType",
             "tags": [],
             "label": "ssl",
-            "description": [],
+            "description": [
+              "\nShould this ES cluster use SSL?"
+            ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.CreateTestEsClusterOptions.transportPort",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "transportPort",
+            "description": [
+              "\nExplicit transport port for a single node to run on, or a string port range to use eg. '9300-9400'\ndefaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`"
+            ],
+            "signature": [
+              "string | number | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false
@@ -3954,6 +4136,19 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.Test.pending",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pending",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

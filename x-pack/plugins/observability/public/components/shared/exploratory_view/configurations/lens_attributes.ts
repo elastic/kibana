@@ -280,6 +280,7 @@ export class LensAttributes {
       filter: columnFilter,
       params: {
         sortField: '@timestamp',
+        showArrayValues: false,
       },
     };
   }
