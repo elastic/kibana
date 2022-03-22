@@ -70,6 +70,17 @@ export const searchAfterAndBulkCreate = async ({
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
+            // time out after 2 signals created
+            aggregations:
+              signalsCreatedCount > 0
+                ? {
+                    delay: {
+                      shard_delay: {
+                        value: '30s',
+                      },
+                    },
+                  }
+                : {},
             searchAfterSortIds: sortIds,
             index: inputIndexPattern,
             from: tuple.from.toISOString(),
@@ -78,7 +89,8 @@ export const searchAfterAndBulkCreate = async ({
             logger,
             // @ts-expect-error please, declare a type explicitly instead of unknown
             filter,
-            pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
+            // pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
+            pageSize: 2,
             timestampOverride: ruleParams.timestampOverride,
             trackTotalHits,
             sortOrder,
