@@ -48,6 +48,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.titleInputTitle', {
         defaultMessage: 'Title',
       }),
+    getControlTypeTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.controlTypesTitle', {
+        defaultMessage: 'Control type',
+      }),
     getWidthInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
         defaultMessage: 'Control size',
