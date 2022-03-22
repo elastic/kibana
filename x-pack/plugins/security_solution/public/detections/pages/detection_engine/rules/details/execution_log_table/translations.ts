@@ -79,7 +79,7 @@ export const COLUMN_DURATION = i18n.translate(
 export const COLUMN_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.durationColumnTooltip',
   {
-    defaultMessage: 'The length of time it took for the rule to run (mm:ss:SSS).',
+    defaultMessage: 'The length of time it took for the rule to run (hh:mm:ss:SSS).',
   }
 );
 
@@ -121,7 +121,7 @@ export const COLUMN_INDEX_DURATION = i18n.translate(
 export const COLUMN_INDEX_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.indexDurationColumnTooltip',
   {
-    defaultMessage: 'The length of time it took to index detected alerts (mm:ss:SSS).',
+    defaultMessage: 'The length of time it took to index detected alerts (hh:mm:ss:SSS).',
   }
 );
 
@@ -135,7 +135,7 @@ export const COLUMN_SEARCH_DURATION = i18n.translate(
 export const COLUMN_SEARCH_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.searchDurationColumnTooltip',
   {
-    defaultMessage: 'The length of time it took to search for alerts (mm:ss:SSS).',
+    defaultMessage: 'The length of time it took to search for alerts (hh:mm:ss:SSS).',
   }
 );
 
@@ -149,7 +149,7 @@ export const COLUMN_SCHEDULING_DELAY = i18n.translate(
 export const COLUMN_SCHEDULING_DELAY_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.schedulingDelayColumnTooltip',
   {
-    defaultMessage: 'The length of time from rule scheduled till rule executed (mm:ss:SSS).',
+    defaultMessage: 'The length of time from rule scheduled till rule executed (hh:mm:ss:SSS).',
   }
 );
 

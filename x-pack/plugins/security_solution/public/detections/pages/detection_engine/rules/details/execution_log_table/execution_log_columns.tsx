@@ -96,10 +96,10 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
         customTooltip={
           <div style={{ maxWidth: '20px' }}>
             <PopoverTooltip columnName={i18n.COLUMN_GAP_DURATION}>
-              <EuiText size={'s'} style={{ width: 300 }}>
+              <EuiText size={'s'} style={{ width: 350 }}>
                 <p>
                   <FormattedMessage
-                    defaultMessage="Duration of gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
+                    defaultMessage="Duration of gap in Rule execution (hh:mm:ss:SSS). Adjust Rule look-back or {seeDocs} for mitigating gaps."
                     id="xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumnTooltip"
                     values={{
                       seeDocs: (
@@ -117,7 +117,7 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
       />
     ),
     render: (value: number) => (
-      <>{value ? <RuleDurationFormat duration={value} /> : getEmptyValue()}</>
+      <>{value ? <RuleDurationFormat duration={value} isMillis={true} /> : getEmptyValue()}</>
     ),
     sortable: true,
     truncateText: false,

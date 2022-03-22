@@ -137,7 +137,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
           "field": "duration_ms",
           "name": <Memo(TableHeaderTooltipCell)
             title="Duration"
-            tooltipContent="The length of time it took for the rule to run (mm:ss:SSS)."
+            tooltipContent="The length of time it took for the rule to run (hh:mm:ss:SSS)."
           />,
           "render": [Function],
           "sortable": true,

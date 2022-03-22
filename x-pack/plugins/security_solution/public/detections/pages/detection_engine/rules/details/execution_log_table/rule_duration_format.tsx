@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 
 interface Props {
   duration: number;
+  isMillis?: boolean;
   allowZero?: boolean;
 }
 
@@ -19,10 +20,11 @@ export function getFormattedDuration(value: number) {
     return '00:00';
   }
   const duration = moment.duration(value);
+  const hours = Math.floor(duration.asHours()).toString().padStart(2, '0');
   const minutes = Math.floor(duration.asMinutes()).toString().padStart(2, '0');
   const seconds = duration.seconds().toString().padStart(2, '0');
   const ms = duration.milliseconds().toString().padStart(3, '0');
-  return `${minutes}:${seconds}:${ms}`;
+  return `${hours}:${minutes}:${seconds}:${ms}`;
 }
 
 export function getFormattedMilliseconds(value: number) {
@@ -30,16 +32,21 @@ export function getFormattedMilliseconds(value: number) {
   return `${formatted} ms`;
 }
 
+/**
+ * Formats duration as (hh:mm:ss:SSS)
+ * @param props duration default as nanos, set isMillis:true to pass in ms
+ * @constructor
+ */
 const RuleDurationFormatComponent = (props: Props) => {
-  const { duration, allowZero = true } = props;
+  const { duration, isMillis = false, allowZero = true } = props;
 
   const formattedDuration = useMemo(() => {
     // Durations can be buggy and return negative
     if (allowZero && duration >= 0) {
-      return getFormattedDuration(duration);
+      return getFormattedDuration(isMillis ? duration * 1000 : duration);
     }
     return 'N/A';
-  }, [duration, allowZero]);
+  }, [allowZero, duration, isMillis]);
 
   return <span data-test-subj="rule-duration-format-value">{formattedDuration}</span>;
 };
