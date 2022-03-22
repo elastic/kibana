@@ -385,6 +385,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'container.cpu.usage': {
+    type: 'scaled_float',
+    array: false,
+    required: false,
+    scaling_factor: 1000,
+  },
+  'container.disk.read.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'container.disk.write.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'container.id': {
     type: 'keyword',
     array: false,
@@ -405,8 +421,24 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'container.memory.usage': {
+    type: 'scaled_float',
+    array: false,
+    required: false,
+    scaling_factor: 1000,
+  },
   'container.name': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'container.network.egress.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'container.network.ingress.bytes': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -650,12 +682,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'dll.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'dll.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'dll.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -696,6 +738,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'dll.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.pe.pehash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -799,6 +846,136 @@ export const ecsFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  'email.attachments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'email.attachments.file.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.mime_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'email.bcc.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.cc.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.content_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.delivery_timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'email.direction': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.from.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.local_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.message_id': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'email.origination_timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'email.reply_to.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.sender.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.subject': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.to.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.x_mailer': {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   'error.code': {
     type: 'keyword',
@@ -965,6 +1142,16 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'faas.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'faas.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'faas.trigger': {
     type: 'nested',
     array: false,
@@ -976,6 +1163,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'faas.trigger.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'faas.version': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1240,12 +1432,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1311,6 +1513,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'file.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.pe.pehash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1480,6 +1687,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'host.boot.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'host.cpu.usage': {
     type: 'scaled_float',
     array: false,
@@ -1636,6 +1848,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'host.pid_ns_ino': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'host.type': {
     type: 'keyword',
     array: false,
@@ -1751,6 +1968,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'log.syslog.appname': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'log.syslog.facility.code': {
     type: 'long',
     array: false,
@@ -1761,8 +1983,23 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'log.syslog.hostname': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'log.syslog.msgid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'log.syslog.priority': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'log.syslog.procid': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1772,6 +2009,16 @@ export const ecsFieldMap = {
     required: false,
   },
   'log.syslog.severity.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'log.syslog.structured_data': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'log.syslog.version': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2401,6 +2648,2286 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.entry_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.parent.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
   'process.executable': {
     type: 'keyword',
     array: false,
@@ -2408,6 +4935,736 @@ export const ecsFieldMap = {
   },
   'process.exit_code': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.working_directory': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2426,6 +5683,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.hash.sha512': {
     type: 'keyword',
     array: false,
@@ -2433,6 +5695,16 @@ export const ecsFieldMap = {
   },
   'process.hash.ssdeep': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.interactive': {
+    type: 'boolean',
     array: false,
     required: false,
   },
@@ -2656,6 +5928,141 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
   'process.parent.executable': {
     type: 'keyword',
     array: false,
@@ -2663,6 +6070,736 @@ export const ecsFieldMap = {
   },
   'process.parent.exit_code': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.parent.group_leader.working_directory': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2681,6 +6818,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.hash.sha512': {
     type: 'keyword',
     array: false,
@@ -2688,6 +6830,16 @@ export const ecsFieldMap = {
   },
   'process.parent.hash.ssdeep': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.interactive': {
+    type: 'boolean',
     array: false,
     required: false,
   },
@@ -2726,6 +6878,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.pe.product': {
     type: 'keyword',
     array: false,
@@ -2741,8 +6898,158 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.parent.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'process.parent.start': {
     type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.parent.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.supplemental_groups.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2761,9 +7068,74 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.parent.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'process.parent.uptime': {
     type: 'long',
     array: false,
+    required: false,
+  },
+  'process.parent.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.roles': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'process.parent.working_directory': {
@@ -2801,6 +7173,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.pe.product': {
     type: 'keyword',
     array: false,
@@ -2816,8 +7193,3018 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.previous.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.previous.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.previous.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.previous.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.previous.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.previous.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.previous.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.previous.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.previous.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.previous.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.previous.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.previous.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.previous.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.previous.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.previous.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.previous.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.previous.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.previous.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.byte_order': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.cpu_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.creation_date': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.exports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.header.abi_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.header.class': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.header.data': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.header.entrypoint': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.header.object_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.header.os_abi': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.header.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.header.version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.chi2': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.flags': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.physical_offset': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.virtual_address': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.segments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.segments.sections': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.segments.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.shared_libraries': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.elf.telfhash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.city_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.continent_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.continent_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.country_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.country_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.location': {
+    type: 'geo_point',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.postal_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.region_iso_code': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.region_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.geo.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.mac': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.nat.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.nat.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.packets': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.source.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.env_vars': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.exit_code': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.parent.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pe.architecture': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pe.company': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pe.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pe.file_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pe.imphash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pe.product': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pgid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.thread.id': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.thread.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.start': {
     type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.supplemental_groups.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.supplemental_groups.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2836,9 +10223,74 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'process.uptime': {
     type: 'long',
     array: false,
+    required: false,
+  },
+  'process.user.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.email': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.full_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.group.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.roles': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'process.working_directory': {
@@ -3741,12 +11193,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.indicator.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.indicator.file.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'threat.enrichments.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -3812,6 +11274,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.enrichments.indicator.file.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.pehash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4316,6 +11783,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.matched.occurred': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.matched.type': {
     type: 'keyword',
     array: false,
@@ -4631,12 +12103,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.indicator.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.indicator.file.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'threat.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4702,6 +12184,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.indicator.file.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.pehash': {
     type: 'keyword',
     array: false,
     required: false,
