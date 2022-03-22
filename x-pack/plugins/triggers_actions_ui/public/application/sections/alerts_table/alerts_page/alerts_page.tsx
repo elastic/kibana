@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
+  EuiProgress,
 } from '@elastic/eui';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -93,6 +94,7 @@ const AlertsPage: React.FunctionComponent = () => {
             ? (res.rawResponse.hits.total as number)
             : (res.rawResponse.hits.total as estypes.SearchTotalHits).value ?? 0;
           setAlertsCount(total);
+          setIsLoading(false);
         },
         error: (e) => {
           if (e instanceof AbortError) {
@@ -105,9 +107,9 @@ const AlertsPage: React.FunctionComponent = () => {
               text: e.message,
             });
           }
+          setIsLoading(false);
         },
       });
-    setIsLoading(false);
     setIsInitializing(false);
   }, [data.search, notifications.toasts, sort, pagination]);
 
@@ -180,6 +182,9 @@ const AlertsPage: React.FunctionComponent = () => {
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
+          {isLoading && (
+            <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
+          )}
           <AlertsTable {...tableProps} />
         </EuiFlexItem>
       </EuiFlexGroup>
