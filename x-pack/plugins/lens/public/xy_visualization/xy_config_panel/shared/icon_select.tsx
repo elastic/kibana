@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiIcon, IconType } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
@@ -75,10 +75,12 @@ export const euiIconsSet = [
 const IconView = (props: { value?: string; label: string; icon?: IconType }) => {
   if (!props.value) return null;
   return (
-    <span>
-      <EuiIcon type={props.icon ?? props.value} />
-      {` ${props.label}`}
-    </span>
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={props.icon ?? props.value} />
+      </EuiFlexItem>
+      <EuiFlexItem>{props.label}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

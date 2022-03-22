@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import classNames from 'classnames';
 import './dimension_section.scss';
 
 export const DimensionEditorSection = ({
@@ -15,14 +14,8 @@ export const DimensionEditorSection = ({
   children?: React.ReactNode | React.ReactNode[];
   hasBorder?: boolean;
 }) => {
-  return (
-    <div
-      className={classNames(
-        { 'lnsDimensionEditorSection--hasBorder': hasBorder },
-        'lnsDimensionEditorSection'
-      )}
-    >
-      {children}
-    </div>
-  );
+  const classNames = hasBorder
+    ? 'lnsDimensionEditorSection--hasBorder lnsDimensionEditorSection'
+    : 'lnsDimensionEditorSection';
+  return <div className={classNames}>{children}</div>;
 };
