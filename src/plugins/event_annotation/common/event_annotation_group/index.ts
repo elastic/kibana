@@ -7,6 +7,7 @@
  */
 
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { i18n } from '@kbn/i18n';
 import type { EventAnnotationOutput } from '../manual_event_annotation/types';
 
 export interface EventAnnotationGroupOutput {
@@ -29,11 +30,15 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     aliases: [],
     type: 'event_annotation_group',
     inputTypes: ['null'],
-    help: '',
+    help: i18n.translate('event_annotation.event_annotation_group.description', {
+      defaultMessage: 'Event annotation group',
+    }),
     args: {
       annotations: {
         types: ['manual_event_annotation'],
-        help: 'Annotation configs',
+        help: i18n.translate('event_annotation.event_annotation_group.args.annotationConfigs', {
+          defaultMessage: 'Annotation configs',
+        }),
         multi: true,
       },
     },

@@ -522,7 +522,8 @@ function buildSuggestion({
     ? currentState.layers
         // Remove layers that aren't being suggested
         .filter(
-          (layer) => keptLayerIds.includes(layer.layerId) || layer.layerType === 'annotations'
+          (layer) =>
+            keptLayerIds.includes(layer.layerId) || layer.layerType === layerTypes.ANNOTATIONS
         )
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))

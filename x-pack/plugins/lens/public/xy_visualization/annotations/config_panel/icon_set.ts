@@ -5,12 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  IconSquare,
-  IconTriangle,
-  IconHexagon,
-  IconCircle,
-} from '../../../assets/annotation_icons';
+import { IconTriangle, IconCircle } from '../../../assets/annotation_icons';
 
 export const annotationsIconSet = [
   {
@@ -68,20 +63,6 @@ export const annotationsIconSet = [
     label: i18n.translate('xpack.lens.xyChart.iconSelect.flagIconLabel', {
       defaultMessage: 'Flag',
     }),
-  },
-  {
-    value: 'hexagon',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.hexagonIconLabel', {
-      defaultMessage: 'Hexagon',
-    }),
-    icon: IconHexagon,
-  },
-  {
-    value: 'square',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.squareIconLabel', {
-      defaultMessage: 'Square',
-    }),
-    icon: IconSquare,
   },
   {
     value: 'tag',

@@ -1,8 +1,7 @@
 .lnsDimensionEditorSection {
-    padding: $euiSize;
-  }
+  padding: $euiSize;
+}
 
-  .lnsDimensionEditorSection--hasBorder {
-    border-top: 1px solid #D3DAE6;
-  }
-  
+.lnsDimensionEditorSection--hasBorder {
+  border-top: 1px solid $euiColorLightShade;
+}

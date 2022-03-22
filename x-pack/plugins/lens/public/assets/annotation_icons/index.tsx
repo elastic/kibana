@@ -6,6 +6,4 @@
  */
 
 export { IconCircle } from './circle';
-export { IconHexagon } from './hexagon';
-export { IconSquare } from './square';
 export { IconTriangle } from './triangle';

@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText, IconType } from '@elastic
 import { Position } from '@elastic/charts';
 import type { IconPosition, YAxisMode, YConfig } from '../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
-import { IconCircle, IconHexagon, IconSquare, IconTriangle } from '../assets/annotation_icons';
+import { IconCircle, IconTriangle } from '../assets/annotation_icons';
 
 export const LINES_MARKER_SIZE = 20;
 
@@ -167,14 +167,12 @@ export function MarkerBody({
 
 const isNumericalString = (value: string) => !isNaN(Number(value));
 
-const shapes = ['circle', 'hexagon', 'triangle', 'square'] as const;
+const shapes = ['circle', 'triangle'] as const;
 type Shape = typeof shapes[number];
 
 const shapesIconMap: Record<Shape, { icon: IconType; shouldRotate?: boolean }> = {
   triangle: { icon: IconTriangle, shouldRotate: true },
   circle: { icon: IconCircle },
-  hexagon: { icon: IconHexagon, shouldRotate: true },
-  square: { icon: IconSquare },
 };
 
 const isCustomAnnotationShape = (value: string): value is Shape => shapes.includes(value as Shape);
