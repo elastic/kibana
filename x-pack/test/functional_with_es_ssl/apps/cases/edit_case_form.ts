@@ -21,7 +21,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   describe('Edit case', () => {
     // create the case to test on
     before(async () => {
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
       await casesApp.api.createNthRandomCases(1);
     });
 
@@ -30,7 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
       await casesApp.common.goToFirstListedCase();
       await header.waitUntilLoadingHasFinished();
     });

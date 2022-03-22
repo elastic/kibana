@@ -18,7 +18,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('cases list', () => {
     before(async () => {
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
       await casesApp.api.deleteAllCases();
     });
 
@@ -27,7 +27,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
     });
 
     it('displays an empty list with an add button correctly', async () => {
@@ -37,13 +37,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     it('lists cases correctly', async () => {
       const NUMBER_CASES = 2;
       await casesApp.api.createNthRandomCases(NUMBER_CASES);
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
       await casesApp.common.validateCasesTableHasNthRows(NUMBER_CASES);
     });
 
     it('deletes a case correctly from the list', async () => {
       await casesApp.api.createNthRandomCases(1);
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
       await testSubjects.click('action-delete');
       await testSubjects.click('confirmModalConfirmButton');
       await testSubjects.existOrFail('euiToastHeader');
@@ -54,7 +54,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const id = uuid.v4();
       const caseTitle = 'test-' + id;
       await casesApp.api.createCaseWithData({ title: caseTitle });
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
 
       // search
       const input = await testSubjects.find('search-cases');
@@ -69,7 +69,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     it('paginates cases correctly', async () => {
       await casesApp.api.deleteAllCases();
       await casesApp.api.createNthRandomCases(8);
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
       await testSubjects.click('tablePaginationPopoverButton');
       await testSubjects.click('tablePagination-5-rows');
       await testSubjects.isEnabled('pagination-button-1');
@@ -81,18 +81,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       // deletes them from the API
       await casesApp.api.deleteAllCases();
       await casesApp.api.createNthRandomCases(8);
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
       // deletes them from the UI
-      await casesApp.common.deleteAllCasesFromListUi();
+      await casesApp.common.selectAndDeleteAllCases();
       await casesApp.common.validateCasesTableHasNthRows(0);
     });
 
     describe('changes status from the list', () => {
       before(async () => {
-        await common.navigateToApp('casesStackManagement');
+        await common.navigateToApp('cases');
         await casesApp.api.deleteAllCases();
         await casesApp.api.createNthRandomCases(1);
-        await common.navigateToApp('casesStackManagement');
+        await common.navigateToApp('cases');
       });
 
       it('to in progress', async () => {

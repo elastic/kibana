@@ -119,7 +119,7 @@ export default async function ({ readConfigFile }) {
       logstashPipelines: {
         pathname: '/app/management/ingest/pipelines',
       },
-      casesStackManagement: {
+      cases: {
         pathname: '/app/management/insightsAndAlerting/cases/',
       },
       maps: {

@@ -16,7 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     const casesApp = getService('casesApp');
 
     before(async () => {
-      await common.navigateToApp('casesStackManagement');
+      await common.navigateToApp('cases');
     });
 
     after(async () => {

@@ -109,7 +109,7 @@ export function CasesAppCommonServiceProvider({ getService, getPageObject }: Ftr
       });
     },
 
-    async deleteAllBulkListAction() {
+    async bulkDeleteAllCases() {
       await testSubjects.setCheckbox('checkboxSelectAll', 'check');
       const button = await find.byCssSelector('[aria-label="Bulk actions"]');
       await button.click();
@@ -117,7 +117,7 @@ export function CasesAppCommonServiceProvider({ getService, getPageObject }: Ftr
       await testSubjects.click('confirmModalConfirmButton');
     },
 
-    async deleteAllCasesFromListUi() {
+    async selectAndDeleteAllCases() {
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
       let rows: WebElementWrapper[];
@@ -126,7 +126,7 @@ export function CasesAppCommonServiceProvider({ getService, getPageObject }: Ftr
         await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
         rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         if (rows.length > 0) {
-          await this.deleteAllBulkListAction();
+          await this.bulkDeleteAllCases();
           // wait for a second
           await new Promise((r) => setTimeout(r, 1000));
           await header.waitUntilLoadingHasFinished();
