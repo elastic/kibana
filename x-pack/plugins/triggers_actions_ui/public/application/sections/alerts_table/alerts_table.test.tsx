@@ -45,6 +45,7 @@ describe('AlertsTable', () => {
   const fetchAlertsData = {
     activePage: 0,
     alerts,
+    alertsCount: alerts.length,
     isInitializing: false,
     isLoading: false,
     getInspectQuery: jest.fn().mockImplementation(() => ({ request: {}, response: {} })),
