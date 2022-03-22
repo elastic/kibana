@@ -142,26 +142,26 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
       (!isValidRange(range) || (value[1] <= range[1] && value[1] >= range[0]));
 
     valueText = (
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiText
+            size="s"
             className={
               hasLowerValueInRange ? 'timeSlider_anchorText' : 'timeSlider_anchorText__default'
             }
-            textAlign="right"
           >
             {epochToKbnDateFormat(lower)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText> → </EuiText>
+          <EuiText className="timeSlider_anchorArrow"> → </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText
+            size="s"
             className={
               hasUpperValueInRange ? 'timeSlider_anchorText' : 'timeSlider_anchorText__default'
             }
-            textAlign="left"
           >
             {epochToKbnDateFormat(upper)}
           </EuiText>

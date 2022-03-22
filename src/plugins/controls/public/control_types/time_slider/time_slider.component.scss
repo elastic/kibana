@@ -1,7 +1,18 @@
+.optionsList__anchorOverride {
+  display:block;
+}
+
+.optionsList__popoverOverride {
+  width: 100%;
+  height: 100%;
+}
+
 .timeSlider_anchor {
   text-decoration: none;
   width: 100%;
   background-color: $euiFormBackgroundColor;
+  box-shadow: none;
+  @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
 
   &:enabled:focus {
     background-color: $euiFormBackgroundColor;
@@ -9,6 +20,14 @@
 
   .euiText {
     background-color: $euiFormBackgroundColor;
+  }
+
+  .timeSlider_anchorArrow {
+    padding: $euiSizeM 0;
+  }
+
+  .euiButtonContent {
+    padding: 0;
   }
 
   .euiButtonContent,
