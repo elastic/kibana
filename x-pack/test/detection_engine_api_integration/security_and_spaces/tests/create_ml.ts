@@ -229,7 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
+    it.skip('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
       const rule: MachineLearningCreateSchema = {
         ...testRule,
         anomaly_threshold: 20,
@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
-      it('generates no signals when an exception is added for an ML rule', async () => {
+      it.skip('generates no signals when an exception is added for an ML rule', async () => {
         const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
           [
             {
@@ -269,7 +269,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllExceptions(supertest, log);
       });
 
-      it('generates no signals when a value list exception is added for an ML rule', async () => {
+      it.skip('generates no signals when a value list exception is added for an ML rule', async () => {
         const valueListId = 'value-list-id';
         await importFile(supertest, log, 'keyword', ['mothra'], valueListId);
         const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
