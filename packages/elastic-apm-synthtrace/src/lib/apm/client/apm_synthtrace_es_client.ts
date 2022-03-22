@@ -151,7 +151,7 @@ export class ApmSynthtraceEsClient {
       await this.logger.perf('enumerate_scenario', async () => {
         // @ts-ignore
         // We just want to enumerate
-        for await (item of sp.streamToDocumentAsync(StreamProcessor.toDocument, dataStream)) {
+        for await (item of sp.streamToDocumentAsync(this.toDocument, dataStream)) {
           if (yielded === 0) {
             options.itemStartStopCallback?.apply(this, [item, false]);
             yielded++;
@@ -171,7 +171,7 @@ export class ApmSynthtraceEsClient {
       flushBytes: 500000,
       // TODO https://github.com/elastic/elasticsearch-js/issues/1610
       // having to map here is awkward, it'd be better to map just before serialization.
-      datasource: sp.streamToDocumentAsync(StreamProcessor.toDocument, dataStream),
+      datasource: sp.streamToDocumentAsync(this.toDocument, dataStream),
       onDrop: (doc) => {
         this.logger.info(JSON.stringify(doc, null, 2));
       },

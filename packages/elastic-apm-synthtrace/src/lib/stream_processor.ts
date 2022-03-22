@@ -173,8 +173,11 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     return document;
   }
 
-  static toDocument(document: ApmFields): Record<string, any> {
+  toDocument(document: ApmFields): Record<string, any> {
     const newDoc: Record<string, any> = {};
+    if (!document.observer) {
+      document = StreamProcessor.enrich(document, this.version, this.versionMajor);
+    }
     dedot(document, newDoc);
     if (typeof newDoc['@timestamp'] === 'number') {
       const timestamp = newDoc['@timestamp'];
