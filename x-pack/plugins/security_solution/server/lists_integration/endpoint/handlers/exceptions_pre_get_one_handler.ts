@@ -12,6 +12,7 @@ import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
   EventFilterValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreGetOneItemServerExtension['callback'];
@@ -54,6 +55,12 @@ export const getExceptionsPreGetOneHandler = (
     // Event Filters Exception
     if (EventFilterValidator.isEventFilter({ listId })) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreGetOneItem();
+      return data;
+    }
+
+    // Validate Trusted Applications
+    if (BlocklistValidator.isBlocklist({ listId })) {
+      await new BlocklistValidator(endpointAppContextService, request).validatePreGetOneItem();
       return data;
     }
 
