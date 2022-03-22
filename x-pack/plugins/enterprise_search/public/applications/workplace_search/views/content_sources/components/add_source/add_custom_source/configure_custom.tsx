@@ -119,17 +119,18 @@ export const ConfigureCustom: React.FC = () => {
                     <p>
                       <FormattedMessage
                         id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.description"
-                        defaultMessage="To be prepared for configuration, review our {deploymentGuideLink} for all prerequisites needed to quickly deploy the connector package. Finalize your configuration in Enterprise Search with a descriptive name for the SharePoint Server content source, and update the connector config file with the source ID provided in the next step."
+                        defaultMessage="To be prepared for configuration, review our {deploymentGuideLink} for all prerequisites needed to quickly deploy the connector package. Finalize your configuration in Enterprise Search with a descriptive name for the {name} content source, and update the connector config file with the source ID provided in the next step."
                         values={{
+                          name,
                           deploymentGuideLink: (
                             <EuiLink target="_blank" href={documentationUrl}>
                               <FormattedMessage
                                 id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.linkLabel"
-                                defaultMessage="deployment guide"
+                                defaultMessage="documentation"
+                                values={{ name }}
                               />
                             </EuiLink>
                           ),
-                          name,
                         }}
                       />
                     </p>
