@@ -37,7 +37,7 @@ const flexGroupStyle = { overflow: 'hidden' };
 
 export function SparkPlot({
   color,
-  seriesLoading,
+  isLoading,
   series,
   comparisonSeries = [],
   valueLabel,
@@ -45,7 +45,7 @@ export function SparkPlot({
   comparisonSeriesColor,
 }: {
   color: string;
-  seriesLoading: boolean;
+  isLoading: boolean;
   series?: Coordinate[] | null;
   valueLabel: React.ReactNode;
   compact?: boolean;
@@ -66,7 +66,7 @@ export function SparkPlot({
       <EuiFlexItem grow={false}>
         <SparkPlotItem
           color={color}
-          seriesLoading={seriesLoading}
+          isLoading={isLoading}
           series={series}
           comparisonSeries={comparisonSeries}
           comparisonSeriesColor={comparisonSeriesColor}
@@ -79,14 +79,14 @@ export function SparkPlot({
 
 function SparkPlotItem({
   color,
-  seriesLoading,
+  isLoading,
   series,
   comparisonSeries,
   comparisonSeriesColor,
   compact,
 }: {
   color: string;
-  seriesLoading: boolean;
+  isLoading: boolean;
   series?: Coordinate[] | null;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
@@ -115,7 +115,7 @@ function SparkPlotItem({
 
   const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;
 
-  if (seriesLoading) {
+  if (isLoading) {
     return (
       <div
         style={{

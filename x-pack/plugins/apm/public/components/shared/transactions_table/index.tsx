@@ -229,7 +229,8 @@ export function TransactionsTable({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     transactionGroupDetailedStatisticsLoading:
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING,
+      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
+      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,

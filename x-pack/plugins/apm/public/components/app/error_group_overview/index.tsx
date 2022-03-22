@@ -191,7 +191,8 @@ export function ErrorGroupOverview() {
             mainStatistics={errorGroupMainStatistics}
             serviceName={serviceName}
             detailedStatisticsLoading={
-              errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING
+              errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
+              FETCH_STATUS.NOT_INITIATED
             }
             detailedStatistics={errorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}

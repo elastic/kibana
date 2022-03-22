@@ -235,7 +235,10 @@ export function ServiceOverviewInstancesChartAndTable({
             mainStatsItems={currentPeriodOrderedItems}
             mainStatsStatus={mainStatsStatus}
             mainStatsItemCount={currentPeriodItemsCount}
-            detailedStatsLoading={detailedStatsStatus === FETCH_STATUS.LOADING}
+            detailedStatsLoading={
+              detailedStatsStatus === FETCH_STATUS.LOADING ||
+              detailedStatsStatus === FETCH_STATUS.NOT_INITIATED
+            }
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}

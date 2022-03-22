@@ -95,7 +95,10 @@ export function DependenciesTable(props: Props) {
             compact
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={status === FETCH_STATUS.LOADING}
+            seriesLoading={
+              status === FETCH_STATUS.LOADING ||
+              status === FETCH_STATUS.NOT_INITIATED
+            }
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
             valueLabel={asMillisecondDuration(currentStats.latency.value)}
@@ -121,7 +124,10 @@ export function DependenciesTable(props: Props) {
             compact
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={status === FETCH_STATUS.LOADING}
+            seriesLoading={
+              status === FETCH_STATUS.LOADING ||
+              status === FETCH_STATUS.NOT_INITIATED
+            }
             series={currentStats.throughput.timeseries}
             comparisonSeries={previousStats?.throughput.timeseries}
             valueLabel={asTransactionRate(currentStats.throughput.value)}
@@ -147,7 +153,10 @@ export function DependenciesTable(props: Props) {
             compact
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={status === FETCH_STATUS.LOADING}
+            seriesLoading={
+              status === FETCH_STATUS.LOADING ||
+              status === FETCH_STATUS.NOT_INITIATED
+            }
             series={currentStats.errorRate.timeseries}
             comparisonSeries={previousStats?.errorRate.timeseries}
             valueLabel={asPercent(currentStats.errorRate.value, 1)}
