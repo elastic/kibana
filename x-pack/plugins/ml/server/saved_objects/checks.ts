@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from 'kibana/server';
 import type {
-  JobSavedObjectService,
+  MLSavedObjectService,
   TrainedModelJob,
   JobObject,
   TrainedModelObject,
@@ -17,7 +17,7 @@ import type {
 import type {
   JobType,
   DeleteMLSpaceAwareItemsCheckResponse,
-  TrainedModelType,
+  MlSavedObjectType,
 } from '../../common/types/saved_objects';
 
 import type { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
@@ -76,7 +76,7 @@ export interface StatusResponse {
 
 export function checksFactory(
   client: IScopedClusterClient,
-  jobSavedObjectService: JobSavedObjectService
+  mlSavedObjectService: MLSavedObjectService
 ) {
   async function checkStatus(): Promise<StatusResponse> {
     const [
@@ -89,10 +89,10 @@ export function checksFactory(
       dfaJobs,
       models,
     ] = await Promise.all([
-      jobSavedObjectService.getAllJobObjects(undefined, false),
-      jobSavedObjectService.getAllJobObjectsForAllSpaces(),
-      jobSavedObjectService.getAllTrainedModelObjects(false),
-      jobSavedObjectService.getAllTrainedModelObjectsForAllSpaces(),
+      mlSavedObjectService.getAllJobObjects(undefined, false),
+      mlSavedObjectService.getAllJobObjectsForAllSpaces(),
+      mlSavedObjectService.getAllTrainedModelObjects(false),
+      mlSavedObjectService.getAllTrainedModelObjectsForAllSpaces(),
       client.asInternalUser.ml.getJobs(),
       client.asInternalUser.ml.getDatafeeds(),
       client.asInternalUser.ml.getDataFrameAnalytics() as unknown as {
@@ -274,12 +274,15 @@ export function checksFactory(
 
   async function canDeleteMLSpaceAwareItems(
     request: KibanaRequest,
-    jobType: JobType | TrainedModelType,
+    mlSavedObjectType: MlSavedObjectType,
     ids: string[],
     spacesEnabled: boolean,
     resolveMlCapabilities: ResolveMlCapabilities
   ): Promise<DeleteMLSpaceAwareItemsCheckResponse> {
-    if (['anomaly-detector', 'data-frame-analytics', 'trained-model'].includes(jobType) === false) {
+    if (
+      ['anomaly-detector', 'data-frame-analytics', 'trained-model'].includes(mlSavedObjectType) ===
+      false
+    ) {
       throw Boom.badRequest(
         'Saved object type must be "anomaly-detector", "data-frame-analytics" or "trained-model'
       );
@@ -291,8 +294,9 @@ export function checksFactory(
     }
 
     if (
-      (jobType === 'anomaly-detector' && mlCapabilities.canDeleteJob === false) ||
-      (jobType === 'data-frame-analytics' && mlCapabilities.canDeleteDataFrameAnalytics === false)
+      (mlSavedObjectType === 'anomaly-detector' && mlCapabilities.canDeleteJob === false) ||
+      (mlSavedObjectType === 'data-frame-analytics' &&
+        mlCapabilities.canDeleteDataFrameAnalytics === false)
     ) {
       // user does not have access to delete jobs.
       return ids.reduce((results, id) => {
@@ -302,7 +306,10 @@ export function checksFactory(
         };
         return results;
       }, {} as DeleteMLSpaceAwareItemsCheckResponse);
-    } else if (jobType === 'trained-model' && mlCapabilities.canDeleteTrainedModels === false) {
+    } else if (
+      mlSavedObjectType === 'trained-model' &&
+      mlCapabilities.canDeleteTrainedModels === false
+    ) {
       // user does not have access to delete trained models.
       return ids.reduce((results, id) => {
         results[id] = {
@@ -323,19 +330,21 @@ export function checksFactory(
         return results;
       }, {} as DeleteMLSpaceAwareItemsCheckResponse);
     }
-    const canCreateGlobalMlSavedObjects = await jobSavedObjectService.canCreateGlobalMlSavedObjects(
-      jobType,
+    const canCreateGlobalMlSavedObjects = await mlSavedObjectService.canCreateGlobalMlSavedObjects(
+      mlSavedObjectType,
       request
     );
 
     const savedObjects =
-      jobType === 'trained-model'
-        ? await Promise.all(ids.map((id) => jobSavedObjectService.getTrainedModelObject(id)))
-        : await Promise.all(ids.map((id) => jobSavedObjectService.getJobObject(jobType, id)));
+      mlSavedObjectType === 'trained-model'
+        ? await Promise.all(ids.map((id) => mlSavedObjectService.getTrainedModelObject(id)))
+        : await Promise.all(
+            ids.map((id) => mlSavedObjectService.getJobObject(mlSavedObjectType, id))
+          );
 
     return ids.reduce((results, id) => {
       const savedObject =
-        jobType === 'trained-model'
+        mlSavedObjectType === 'trained-model'
           ? (savedObjects as Array<SavedObjectsFindResult<TrainedModelObject> | undefined>).find(
               (j) => j?.attributes.model_id === id
             )
