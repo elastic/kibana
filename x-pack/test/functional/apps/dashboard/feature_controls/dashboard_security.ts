@@ -297,7 +297,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboard']);
+        expect(navLinks).to.eql(['Dashboard', 'Cloud Security']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {

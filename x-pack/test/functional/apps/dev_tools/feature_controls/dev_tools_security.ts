@@ -147,7 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows 'Dev Tools' navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dev Tools']);
+        expect(navLinks).to.eql(['Cloud Security', 'Dev Tools']);
       });
 
       describe('console', () => {
