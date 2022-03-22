@@ -52,6 +52,7 @@ exports[`Should render join editor 1`] = `
     size="m"
   />
   <Join
+    editModeActiveForLayer={false}
     join={
       Object {
         "leftField": "iso2",
