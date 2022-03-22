@@ -33,6 +33,7 @@ export interface DocLinks {
     readonly metaData: string;
     readonly overview: string;
     readonly tailSamplingPolicies: string;
+    readonly elasticAgent: string;
   };
   readonly canvas: {
     readonly guide: string;
