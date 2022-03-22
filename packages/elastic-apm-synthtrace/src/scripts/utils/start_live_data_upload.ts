@@ -59,19 +59,23 @@ export async function startLiveDataUpload(
 
     queuedEvents = eventsToRemainInQueue;
     const streamProcessor = new StreamProcessor({
-      version: version,
-      logger: logger,
+      version,
+      logger,
       processors: StreamProcessor.apmProcessors,
       maxSourceEvents: runOptions.maxDocs,
       name: `Live index`,
     });
     await logger.perf('index_live_scenario', () =>
-      esClient.index(new EntityArrayIterable(eventsToUpload), {
-        concurrency: runOptions.workers,
-        maxDocs: runOptions.maxDocs,
-        mapToIndex,
-        dryRun: false
-      }, streamProcessor)
+      esClient.index(
+        new EntityArrayIterable(eventsToUpload),
+        {
+          concurrency: runOptions.workers,
+          maxDocs: runOptions.maxDocs,
+          mapToIndex,
+          dryRun: false,
+        },
+        streamProcessor
+      )
     );
   }
 
