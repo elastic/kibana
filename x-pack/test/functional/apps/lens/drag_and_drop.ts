@@ -129,7 +129,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Unique count of @message.raw [1]',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
-          'Top 3 values of @message.raw',
+          'Top 5 values of @message.raw',
         ]);
       });
 
