@@ -28,7 +28,7 @@ export const statusMap: Status = {
   },
   [RuleStatus.snoozed]: {
     color: 'warning',
-    label: 'Snoozed',
+    label: 'Snoozed permanently',
   },
 };
 
