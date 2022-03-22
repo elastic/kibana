@@ -65,7 +65,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       it('should move the column to compatible dimension group', async () => {
         await PageObjects.lens.switchToVisualization('bar');
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
-          'Top values of @message.raw',
+          'Top 3 values of @message.raw',
         ]);
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
