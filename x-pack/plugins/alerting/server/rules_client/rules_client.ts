@@ -1677,7 +1677,7 @@ export class RulesClient {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
-        operation: WriteOperations.MuteAll,
+        operation: WriteOperations.Unsnooze,
         entity: AlertingAuthorizationEntity.Rule,
       });
 
