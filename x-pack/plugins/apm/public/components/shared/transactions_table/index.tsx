@@ -15,7 +15,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
@@ -24,6 +23,8 @@ import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ManagedTable } from '../managed_table';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -56,7 +57,7 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
-  hidePerPageOptions?: boolean;
+  showPerPageOptions?: boolean;
   showAggregationAccurateCallout?: boolean;
   environment: string;
   fixedHeight?: boolean;
@@ -70,7 +71,7 @@ export function TransactionsTable({
   hideViewTransactionsLink = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
-  hidePerPageOptions = false,
+  showPerPageOptions = true,
   showAggregationAccurateCallout = false,
   environment,
   kuery,
@@ -97,8 +98,11 @@ export function TransactionsTable({
 
   const { transactionType, serviceName } = useApmServiceContext();
   const {
-    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useLegacyUrlParams();
+    query: { comparisonEnabled, comparisonType, latencyAggregationType },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions',
+    '/services/{serviceName}/overview'
+  );
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -123,7 +127,8 @@ export function TransactionsTable({
               start,
               end,
               transactionType,
-              latencyAggregationType,
+              latencyAggregationType:
+                latencyAggregationType as LatencyAggregationType,
             },
           },
         }
@@ -198,7 +203,8 @@ export function TransactionsTable({
                 end,
                 numBuckets: 20,
                 transactionType,
-                latencyAggregationType,
+                latencyAggregationType:
+                  latencyAggregationType as LatencyAggregationType,
                 transactionNames: JSON.stringify(
                   transactionGroups.map(({ name }) => name).sort()
                 ),
@@ -218,7 +224,7 @@ export function TransactionsTable({
 
   const columns = getColumns({
     serviceName,
-    latencyAggregationType,
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,
@@ -323,7 +329,7 @@ export function TransactionsTable({
                       defaultMessage: 'No transaction groups found',
                     })
               }
-              hidePerPageOptions={hidePerPageOptions}
+              showPerPageOptions={showPerPageOptions}
             />
           </OverviewTableContainer>
         </EuiFlexItem>

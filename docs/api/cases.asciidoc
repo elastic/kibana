@@ -1,0 +1,31 @@
+[[cases-api]]
+== Cases APIs
+
+You can create, manage, configure, and send cases to external systems with
+these APIs:
+
+* {security-guide}/cases-api-add-comment.html[Add comment]
+* <<cases-api-create>>
+* {security-guide}/cases-api-delete-case.html[Delete case]
+* {security-guide}/cases-api-delete-all-comments.html[Delete all comments]
+* {security-guide}/cases-api-delete-comment.html[Delete comment]
+* {security-guide}/cases-api-find-alert.html[Find all alerts attached to a case]
+* {security-guide}/cases-api-find-cases.html[Find cases]
+* {security-guide}/cases-api-find-cases-by-alert.html[Find cases by alert]
+* {security-guide}/cases-api-find-connectors.html[Find connectors]
+* {security-guide}/cases-api-get-case-activity.html[Get all case activity]
+* {security-guide}/cases-api-get-all-case-comments.html[Get all case comments]
+* {security-guide}/cases-api-get-case.html[Get case]
+* {security-guide}/cases-api-get-comment.html[Get comment]
+* {security-guide}/cases-get-connector.html[Get current connector]
+* {security-guide}/cases-api-get-reporters.html[Get reporters]
+* {security-guide}/cases-api-get-status.html[Get status]
+* {security-guide}/cases-api-get-tag.html[Get tags]
+* {security-guide}/cases-api-push.html[Push case]
+* {security-guide}/assign-connector.html[Set default Elastic Security UI connector]
+* {security-guide}/case-api-update-connector.html[Update case configurations]
+* <<cases-api-update>>
+* {security-guide}/cases-api-update-comment.html[Update comment]
+
+include::cases/cases-api-create.asciidoc[leveloffset=+1]
+include::cases/cases-api-update.asciidoc[leveloffset=+1]

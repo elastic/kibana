@@ -306,7 +306,75 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(data.search.searchAsInternalUser.search).not.toHaveBeenCalled();
+    expect(data.search.searchAsInternalUser.search as jest.Mock).not.toHaveBeenCalled();
     expect(searchStrategySearch).toHaveBeenCalled();
+  });
+
+  it('should support pagination', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      pagination: {
+        pageSize: 10,
+        pageIndex: 0,
+      },
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls.length).toBe(1);
+    expect(
+      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.size
+    ).toBe(10);
+    expect(
+      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.from
+    ).toBe(0);
+  });
+
+  it('should support sorting', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      sort: [
+        {
+          test: {
+            order: 'desc',
+          },
+        },
+      ],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls.length).toBe(1);
+    expect(
+      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.sort
+    ).toStrictEqual([{ test: { order: 'desc' } }]);
   });
 });

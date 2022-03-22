@@ -29,12 +29,13 @@ export const expressionsServiceFactory: CanvasExpressionsServiceFactory = (
   const placeholder = {} as any;
   const expressionsPlugin = plugin(placeholder);
   const setup = expressionsPlugin.setup(placeholder);
-  const expressionsService = setup.fork();
+  const fork = setup.fork('canvas');
+  const expressionsService = fork.setup();
 
   functionDefinitions.forEach((fn) => expressionsService.registerFunction(fn));
   renderFunctions.forEach((fn) => {
-    expressionsService.registerRenderer(fn as unknown as AnyExpressionRenderDefinition);
+    setup.registerRenderer(fn as unknown as AnyExpressionRenderDefinition);
   });
 
-  return new ExpressionsService(expressionsService, requiredServices);
+  return new ExpressionsService(fork.start(), requiredServices);
 };

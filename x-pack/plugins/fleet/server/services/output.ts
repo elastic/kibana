@@ -9,10 +9,16 @@ import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import uuid from 'uuid/v5';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
-import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  DEFAULT_OUTPUT,
+  DEFAULT_OUTPUT_ID,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../constants';
 import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
-import { OutputUnauthorizedError } from '../errors';
+import { OutputUnauthorizedError, OutputInvalidError } from '../errors';
 
+import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
@@ -42,6 +48,39 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
     id: outputId ?? so.id,
     ...atributes,
   };
+}
+
+async function validateLogstashOutputNotUsedInAPMPolicy(
+  soClient: SavedObjectsClientContract,
+  outputId?: string,
+  isDefault?: boolean
+) {
+  // Validate no policy with APM use that policy
+  let kuery: string;
+  if (outputId) {
+    if (isDefault) {
+      kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+    } else {
+      kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+    }
+  } else {
+    if (isDefault) {
+      kuery = `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+    } else {
+      return;
+    }
+  }
+
+  const agentPolicySO = await agentPolicyService.list(soClient, {
+    kuery,
+    perPage: SO_SEARCH_LIMIT,
+    withPackagePolicies: true,
+  });
+  for (const agentPolicy of agentPolicySO.items) {
+    if (agentPolicyService.hasAPMIntegration(agentPolicy)) {
+      throw new OutputInvalidError('Logstash output cannot be used with APM integration.');
+    }
+  }
 }
 
 class OutputService {
@@ -124,6 +163,10 @@ class OutputService {
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...output };
+
+    if (output.type === outputType.Logstash) {
+      await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
+    }
 
     // ensure only default output exists
     if (data.is_default) {
@@ -241,6 +284,12 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
+    await agentPolicyService.removeOutputFromAll(
+      soClient,
+      appContextService.getInternalUserESClient(),
+      id
+    );
+
     return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
@@ -260,7 +309,13 @@ class OutputService {
       );
     }
 
-    const updateData = { type: originalOutput.type, ...data };
+    const updateData = { ...data };
+    const mergedType = data.type ?? originalOutput.type;
+    const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+
+    if (mergedType === outputType.Logstash) {
+      await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
+    }
 
     // ensure only default output exists
     if (data.is_default) {
@@ -287,7 +342,7 @@ class OutputService {
       }
     }
 
-    if (updateData.type === outputType.Elasticsearch && updateData.hosts) {
+    if (mergedType === outputType.Elasticsearch && updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
     const outputSO = await soClient.update<OutputSOAttributes>(

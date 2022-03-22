@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('results view content and total feature importance', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/126422
+  describe.skip('results view content and total feature importance', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;

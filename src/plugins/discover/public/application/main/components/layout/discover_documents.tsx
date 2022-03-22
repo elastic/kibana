@@ -25,7 +25,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
-import { DataView } from '../../../../../../data/common';
+import { DataView } from '../../../../../../data_views/public';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';

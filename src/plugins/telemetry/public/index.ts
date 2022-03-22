@@ -10,6 +10,7 @@ import type { PluginInitializerContext } from 'src/core/public';
 import type { TelemetryPluginConfig } from './plugin';
 import { TelemetryPlugin } from './plugin';
 export type {
+  TelemetryConstants,
   TelemetryPluginStart,
   TelemetryPluginSetup,
   TelemetryPluginConfig,

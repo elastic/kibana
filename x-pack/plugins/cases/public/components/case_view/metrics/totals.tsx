@@ -24,8 +24,8 @@ export const CaseViewMetricItems: React.FC<Pick<CaseViewMetricsProps, 'metrics' 
 
     return (
       <>
-        {metricItems.map(({ title, value }) => (
-          <EuiFlexItem key={title}>
+        {metricItems.map(({ id, title, value }) => (
+          <EuiFlexItem key={title} data-test-subj={`case-metrics-totals-${id}`}>
             <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <EuiFlexItem>{title}</EuiFlexItem>
               <MetricValue>{value}</MetricValue>
@@ -43,6 +43,7 @@ const MetricValue = euiStyled(EuiFlexItem)`
 `;
 
 interface MetricItem {
+  id: string;
   title: string;
   value: number;
 }
@@ -60,7 +61,7 @@ const useGetTitleValueMetricItems = (
   const totalIsolatedHosts = calculateTotalIsolatedHosts(actions);
 
   const metricItems = useMemo<MetricItems>(() => {
-    const items: Array<[CaseMetricsFeature, MetricItem]> = [
+    const items: Array<[CaseMetricsFeature, Omit<MetricItem, 'id'>]> = [
       ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
       ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
       ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
@@ -71,7 +72,7 @@ const useGetTitleValueMetricItems = (
     return items.reduce(
       (result: MetricItems, [feature, item]) => [
         ...result,
-        ...(features.includes(feature) ? [item] : []),
+        ...(features.includes(feature) ? [{ id: feature, ...item }] : []),
       ],
       []
     );

@@ -10,7 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHideFor, EuiSpacer } from '@el
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { ConditionEntry } from '../../../../../../../common/endpoint/types';
+import { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 import { AndOrBadge } from '../../../../../../common/components/and_or_badge';
 import { ConditionEntryInput, ConditionEntryInputProps } from '../condition_entry_input';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
@@ -45,7 +45,7 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
 
 export interface ConditionGroupProps {
   os: OperatingSystem;
-  entries: ConditionEntry[];
+  entries: TrustedAppConditionEntry[];
   onEntryRemove: ConditionEntryInputProps['onRemove'];
   onEntryChange: ConditionEntryInputProps['onChange'];
   onAndClicked: () => void;
@@ -82,7 +82,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
         )}
         <EuiFlexItem grow={1}>
           <div data-test-subj={getTestId('entries')} className="group-entries">
-            {(entries as ConditionEntry[]).map((entry, index) => (
+            {(entries as TrustedAppConditionEntry[]).map((entry, index) => (
               <ConditionEntryInput
                 key={index}
                 os={os}

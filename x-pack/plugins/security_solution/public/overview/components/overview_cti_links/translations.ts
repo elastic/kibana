@@ -72,13 +72,6 @@ export const VIEW_DASHBOARD = i18n.translate('xpack.securitySolution.overview.ct
   defaultMessage: 'View dashboard',
 });
 
-export const SOME_MODULES_DISABLE_TITLE = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardSomeModulesDisabledTItle',
-  {
-    defaultMessage: 'Some threat intel sources are disabled',
-  }
-);
-
 export const OTHER_DATA_SOURCE_TITLE = i18n.translate(
   'xpack.securitySolution.overview.ctiDashboardOtherDatasourceTitle',
   {

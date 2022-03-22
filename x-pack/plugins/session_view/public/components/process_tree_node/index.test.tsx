@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { RefObject } from 'react';
 import userEvent from '@testing-library/user-event';
 import {
   processMock,
@@ -13,12 +13,31 @@ import {
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessTreeNode } from './index';
+import { ProcessDeps, ProcessTreeNode } from './index';
+import { Cancelable } from 'lodash';
+import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
+
+jest.useFakeTimers('modern');
 
 describe('ProcessTreeNode component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+  const props: ProcessDeps = {
+    process: processMock,
+    scrollerRef: {
+      current: {
+        getBoundingClientRect: () => ({
+          y: 0,
+        }),
+        clientHeight: 500,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      },
+    } as unknown as RefObject<HTMLDivElement>,
+    onChangeJumpToEventVisibility: jest.fn(),
+    handleOnAlertDetailsClosed: (_alertUuid: string) => {},
+  };
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
@@ -26,15 +45,13 @@ describe('ProcessTreeNode component', () => {
 
   describe('When ProcessTreeNode is mounted', () => {
     it('should render given a valid process', async () => {
-      renderResult = mockedContext.render(<ProcessTreeNode process={processMock} />);
+      renderResult = mockedContext.render(<ProcessTreeNode {...props} />);
 
       expect(renderResult.queryByTestId('sessionView:processTreeNode')).toBeTruthy();
     });
 
     it('should have an alternate rendering for a session leader', async () => {
-      renderResult = mockedContext.render(
-        <ProcessTreeNode isSessionLeader process={processMock} />
-      );
+      renderResult = mockedContext.render(<ProcessTreeNode {...props} isSessionLeader />);
 
       expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
     });
@@ -51,7 +68,9 @@ describe('ProcessTreeNode component', () => {
         hasExec: () => true,
       };
 
-      renderResult = mockedContext.render(<ProcessTreeNode process={executedProcessMock} />);
+      renderResult = mockedContext.render(
+        <ProcessTreeNode {...props} process={executedProcessMock} />
+      );
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeExecIcon')).toBeTruthy();
       expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeTruthy();
@@ -70,8 +89,36 @@ describe('ProcessTreeNode component', () => {
         }),
       };
 
-      renderResult = mockedContext.render(<ProcessTreeNode process={processWithoutExitCode} />);
+      renderResult = mockedContext.render(
+        <ProcessTreeNode {...props} process={processWithoutExitCode} />
+      );
       expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeFalsy();
+    });
+
+    it('calls onChangeJumpToEventVisibility with isVisible false if jumpToEvent is not visible', async () => {
+      const onChangeJumpToEventVisibility = jest.fn();
+      const scrollerRef = {
+        current: {
+          ...props.scrollerRef.current,
+          clientHeight: -500,
+          addEventListener: (_event: string, scrollFn: (() => void) & Cancelable) => {
+            scrollFn();
+          },
+          removeEventListener: (_event: string, _fn: (() => void) & Cancelable) => {},
+        },
+      } as RefObject<HTMLDivElement>;
+
+      renderResult = mockedContext.render(
+        <ProcessTreeNode
+          {...props}
+          jumpToEventID={processMock.id}
+          scrollerRef={scrollerRef}
+          onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
+        />
+      );
+
+      jest.advanceTimersByTime(DEBOUNCE_TIMEOUT);
+      expect(onChangeJumpToEventVisibility).toHaveBeenCalled();
     });
 
     it('renders Root Escalation flag properly', async () => {
@@ -96,7 +143,9 @@ describe('ProcessTreeNode component', () => {
         }),
       };
 
-      renderResult = mockedContext.render(<ProcessTreeNode process={rootEscalationProcessMock} />);
+      renderResult = mockedContext.render(
+        <ProcessTreeNode {...props} process={rootEscalationProcessMock} />
+      );
 
       expect(
         renderResult.queryByTestId('sessionView:processTreeNodeRootEscalationFlag')
@@ -107,7 +156,7 @@ describe('ProcessTreeNode component', () => {
       const onProcessSelected = jest.fn();
 
       renderResult = mockedContext.render(
-        <ProcessTreeNode process={processMock} onProcessSelected={onProcessSelected} />
+        <ProcessTreeNode {...props} process={processMock} onProcessSelected={onProcessSelected} />
       );
 
       userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
@@ -120,7 +169,7 @@ describe('ProcessTreeNode component', () => {
       const onProcessSelected = jest.fn();
 
       renderResult = mockedContext.render(
-        <ProcessTreeNode process={processMock} onProcessSelected={onProcessSelected} />
+        <ProcessTreeNode {...props} process={processMock} onProcessSelected={onProcessSelected} />
       );
 
       // @ts-ignore
@@ -132,17 +181,72 @@ describe('ProcessTreeNode component', () => {
       // cleanup
       windowGetSelectionSpy.mockRestore();
     });
+
+    it('When Timestamp is ON, it shows Timestamp', async () => {
+      // set a mock where Timestamp is turned ON
+      renderResult = mockedContext.render(
+        <ProcessTreeNode {...props} timeStampOn={true} process={processMock} />
+      );
+
+      expect(renderResult.getByTestId('sessionView:processTreeNodeTimestamp')).toBeTruthy();
+    });
+
+    it('When Timestamp is OFF, it doesnt show Timestamp', async () => {
+      // set a mock where Timestamp is turned OFF
+      renderResult = mockedContext.render(
+        <ProcessTreeNode {...props} timeStampOn={false} process={processMock} />
+      );
+
+      expect(renderResult.queryByTestId('sessionView:processTreeNodeTimestamp')).toBeFalsy();
+    });
     describe('Alerts', () => {
-      it('renders Alert button when process has alerts', async () => {
+      it('renders Alert button when process has one alert', async () => {
+        const processMockWithOneAlert = {
+          ...sessionViewAlertProcessMock,
+          events: sessionViewAlertProcessMock.events.slice(
+            0,
+            sessionViewAlertProcessMock.events.length - 1
+          ),
+          getAlerts: () => [sessionViewAlertProcessMock.getAlerts()[0]],
+        };
         renderResult = mockedContext.render(
-          <ProcessTreeNode process={sessionViewAlertProcessMock} />
+          <ProcessTreeNode {...props} process={processMockWithOneAlert} />
         );
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe('Alert');
+      });
+      it('renders Alerts button when process has more than one alerts', async () => {
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={sessionViewAlertProcessMock} />
+        );
+
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
+          `Alerts(${sessionViewAlertProcessMock.getAlerts().length})`
+        );
+      });
+      it('renders Alerts button with 99+ when process has more than 99 alerts', async () => {
+        const processMockWithOneAlert = {
+          ...sessionViewAlertProcessMock,
+          getAlerts: () =>
+            Array.from(
+              new Array(100),
+              (item) => (item = sessionViewAlertProcessMock.getAlerts()[0])
+            ),
+        };
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={processMockWithOneAlert} />
+        );
+
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
+          'Alerts(99+)'
+        );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
         renderResult = mockedContext.render(
-          <ProcessTreeNode process={sessionViewAlertProcessMock} />
+          <ProcessTreeNode {...props} process={sessionViewAlertProcessMock} />
         );
         userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
@@ -157,7 +261,9 @@ describe('ProcessTreeNode component', () => {
           getChildren: () => [childProcessMock],
         };
 
-        renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithChildren} />);
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={processMockWithChildren} />
+        );
 
         expect(
           renderResult.queryByTestId('sessionView:processTreeNodeChildProcessesButton')
@@ -169,7 +275,9 @@ describe('ProcessTreeNode component', () => {
           getChildren: () => [childProcessMock],
         };
 
-        renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithChildren} />);
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={processMockWithChildren} />
+        );
 
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);
 
@@ -189,7 +297,7 @@ describe('ProcessTreeNode component', () => {
         // set a mock search matched indicator for the process (typically done by ProcessTree/helpers.ts)
         processMock.searchMatched = '/vagrant';
 
-        renderResult = mockedContext.render(<ProcessTreeNode process={processMock} />);
+        renderResult = mockedContext.render(<ProcessTreeNode {...props} />);
 
         expect(
           renderResult.getByTestId('sessionView:processNodeSearchHighlight').textContent

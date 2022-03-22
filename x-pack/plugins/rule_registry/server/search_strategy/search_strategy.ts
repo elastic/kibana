@@ -107,17 +107,22 @@ export const ruleRegistrySearchStrategyProvider = (
             filter.push(getSpacesFilter(space.id) as estypes.QueryDslQueryContainer);
           }
 
+          const sort = request.sort ?? [];
+
           const query = {
             bool: {
               filter,
             },
           };
+          const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           const params = {
             index: indices,
             body: {
               _source: false,
               fields: ['*'],
-              size: MAX_ALERT_SEARCH_SIZE,
+              sort,
+              size,
+              from: request.pagination ? request.pagination.pageIndex * size : 0,
               query,
             },
           };

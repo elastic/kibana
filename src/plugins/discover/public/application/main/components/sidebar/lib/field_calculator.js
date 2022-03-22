@@ -8,7 +8,7 @@
 
 import { map, sortBy, without, each, defaults, isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { flattenHit } from '../../../../../../../data/common';
+import { flattenHit } from '../../../../../../../data/public';
 
 function getFieldValues(hits, field, indexPattern) {
   const name = field.name;

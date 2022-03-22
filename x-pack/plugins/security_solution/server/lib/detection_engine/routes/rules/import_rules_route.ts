@@ -45,6 +45,7 @@ import {
 } from './utils/import_rules_utils';
 import { getReferencedExceptionLists } from './utils/gather_referenced_exceptions';
 import { importRuleExceptions } from './utils/import_rule_exceptions';
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -138,22 +139,33 @@ export const importRulesRoute = (
           actionSOClient
         );
 
-        const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
-          migratedParsedObjectsWithoutDuplicateErrors,
-          actionsClient
+        let parsedRules;
+        let actionErrors: BulkError[] = [];
+        const actualRules = rules.filter(
+          (rule): rule is ImportRulesSchemaDecoded => !(rule instanceof Error)
         );
 
+        if (actualRules.some((rule) => rule.actions.length > 0)) {
+          const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
+            migratedParsedObjectsWithoutDuplicateErrors,
+            actionsClient
+          );
+          parsedRules = uniqueParsedObjects;
+          actionErrors = nonExistentActionErrors;
+        } else {
+          parsedRules = migratedParsedObjectsWithoutDuplicateErrors;
+        }
         // gather all exception lists that the imported rules reference
         const foundReferencedExceptionLists = await getReferencedExceptionLists({
-          rules: uniqueParsedObjects,
+          rules: parsedRules,
           savedObjectsClient,
         });
 
-        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
+        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
         const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
           ruleChunks: chunkParseObjects,
-          rulesResponseAcc: [...nonExistentActionErrors, ...duplicateIdErrors],
+          rulesResponseAcc: [...actionErrors, ...duplicateIdErrors],
           mlAuthz,
           overwriteRules: request.query.overwrite,
           rulesClient,

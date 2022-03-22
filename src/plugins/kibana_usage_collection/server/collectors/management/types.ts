@@ -41,6 +41,7 @@ export interface UsageStats {
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableInfrastructureView': boolean;
+  'observability:enableServiceGroups': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -72,7 +73,6 @@ export interface UsageStats {
   'notifications:lifetime:error': number;
   'doc_table:highlight': boolean;
   'discover:searchOnPageLoad': boolean;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
   defaultColumns: string[];

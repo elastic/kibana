@@ -44,6 +44,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
     maxBars: typeof AUTO_BARS | number;
     ranges: RangeTypeLens[];
     format?: { id: string; params?: { decimals: number } };
+    includeEmptyRows?: boolean;
     parentFormat?: {
       id: string;
       params?: { id?: string; template?: string; replaceInfinity?: boolean };
@@ -112,6 +113,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       isBucketed: true,
       scale: 'interval', // ordinal for Range
       params: {
+        includeEmptyRows: true,
         type: MODES.Histogram,
         ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
         maxBars: AUTO_BARS,
@@ -175,7 +177,8 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       maxBars: params.maxBars === AUTO_BARS ? maxBarsDefaultValue : params.maxBars,
       interval: 'auto',
       has_extended_bounds: false,
-      min_doc_count: false,
+      min_doc_count: Boolean(params.includeEmptyRows),
+      autoExtendBounds: Boolean(params.includeEmptyRows),
       extended_bounds: extendedBoundsToAst({}),
     }).toAst();
   },

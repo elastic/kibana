@@ -28,6 +28,7 @@ import { ServiceProfiling } from '../../app/service_profiling';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 function page({
   title,
@@ -76,6 +77,7 @@ export const serviceDetail = {
             rangeFrom: t.string,
             rangeTo: t.string,
             kuery: t.string,
+            serviceGroup: t.string,
           }),
           t.partial({
             comparisonEnabled: toBooleanRt,
@@ -92,6 +94,8 @@ export const serviceDetail = {
       query: {
         kuery: '',
         environment: ENVIRONMENT_ALL.value,
+        serviceGroup: '',
+        latencyAggregationType: LatencyAggregationType.avg,
       },
     },
     children: {

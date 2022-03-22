@@ -8,7 +8,6 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
-import { RumDashboard } from './rum_dashboard';
 import { CsmSharedContextProvider } from './csm_shared_context';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
@@ -19,6 +18,7 @@ import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { UxEnvironmentFilter } from './environment_filter';
+import { RumOverview } from './index';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
   defaultMessage: 'Dashboard',
@@ -67,7 +67,7 @@ export function RumHome() {
         >
           {isLoading && <EmptyStateLoading />}
           <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
-            <RumDashboard />
+            <RumOverview />
           </div>
         </PageTemplateComponent>
       </CsmSharedContextProvider>

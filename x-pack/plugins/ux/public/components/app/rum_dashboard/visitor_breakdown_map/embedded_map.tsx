@@ -45,7 +45,7 @@ const EmbeddedPanel = styled.div`
 `;
 
 export function EmbeddedMapComponent() {
-  const { urlParams } = useLegacyUrlParams();
+  const { rangeId, urlParams } = useLegacyUrlParams();
 
   const { start, end, serviceName } = urlParams;
 
@@ -124,7 +124,7 @@ export function EmbeddedMapComponent() {
       embeddable.reload();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start, end]);
+  }, [start, end, rangeId]);
 
   useEffect(() => {
     async function setupEmbeddable() {

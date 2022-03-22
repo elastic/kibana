@@ -229,7 +229,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
     const kibana = useKibana();
     const casesPermissions = useGetUserCasesPermissions();
-    const CasesContext = kibana.services.cases.getCasesContext();
+    const CasesContext = kibana.services.cases.ui.getCasesContext();
 
     return (
       <>

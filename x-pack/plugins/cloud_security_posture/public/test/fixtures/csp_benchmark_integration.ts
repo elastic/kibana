@@ -8,41 +8,35 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import Chance from 'chance';
-import type { CspBenchmarkIntegration } from '../../pages/benchmarks/types';
+import type { Benchmark } from '../../../common/types';
 
 type CreateCspBenchmarkIntegrationFixtureInput = {
   chance?: Chance.Chance;
-} & Partial<CspBenchmarkIntegration>;
+} & Partial<Benchmark>;
 
 export const createCspBenchmarkIntegrationFixture = ({
   chance = new Chance(),
-  integration_name = chance.sentence(),
-  benchmark = chance.sentence(),
-  rules = undefined,
+  package_policy = {
+    id: chance.guid(),
+    name: chance.string(),
+    policy_id: chance.guid(),
+    namespace: chance.string(),
+    updated_at: chance.date().toISOString(),
+    updated_by: chance.word(),
+    created_at: chance.date().toISOString(),
+    created_by: chance.word(),
+    package: {
+      name: chance.string(),
+      title: chance.string(),
+      version: chance.string(),
+    },
+  },
   agent_policy = {
     id: chance.guid(),
     name: chance.sentence(),
-    number_of_agents: chance.integer({ min: 1 }),
+    agents: chance.integer({ min: 0 }),
   },
-  created_by = chance.sentence(),
-  created_at = chance.date({ year: 2021 }) as Date,
-}: CreateCspBenchmarkIntegrationFixtureInput = {}): CspBenchmarkIntegration => {
-  let outputRules: CspBenchmarkIntegration['rules'] | undefined = rules;
-  if (!outputRules) {
-    const activeRules = chance.integer({ min: 1 });
-    const totalRules = chance.integer({ min: activeRules });
-    outputRules = {
-      active: activeRules,
-      total: totalRules,
-    };
-  }
-
-  return {
-    integration_name,
-    benchmark,
-    rules: outputRules,
-    agent_policy,
-    created_by,
-    created_at,
-  };
-};
+}: CreateCspBenchmarkIntegrationFixtureInput = {}): Benchmark => ({
+  package_policy,
+  agent_policy,
+});

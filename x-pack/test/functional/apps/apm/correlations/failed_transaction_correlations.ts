@@ -25,7 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('failed transactions correlations', () => {
-    describe('space with no features disabled', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/127416
+    describe.skip('space with no features disabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
         await spacesService.create({
