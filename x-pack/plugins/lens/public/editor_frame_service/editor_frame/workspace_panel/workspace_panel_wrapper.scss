@@ -77,6 +77,10 @@
   justify-content: center;
   align-items: center;
   transition: background-color $euiAnimSpeedFast ease-in-out;
+
+  .lnsWorkspacePanel__subtext {
+    margin-bottom: $euiSizeL;
+  }
 }
 
 .lnsWorkspacePanelWrapper__toolbar {
@@ -97,8 +101,8 @@
 
 .lnsWorkspacePanel__dropIllustration {
   overflow: visible; // Shows arrow animation when it gets out of bounds
-  margin-top: $euiSizeL;
-  margin-bottom: $euiSizeXXL;
+  margin-top: 0;
+  margin-bottom: -$euiSize;
   // Drop shadow values is a dupe of @euiBottomShadowMedium but used as a filter
   // Hard-coded px values OK (@cchaos)
   // sass-lint:disable-block indentation

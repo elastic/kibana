@@ -20,6 +20,7 @@ import {
   EuiPageContentBody,
   EuiButton,
   EuiSpacer,
+  EuiTextColor,
 } from '@elastic/eui';
 import type { CoreStart, ApplicationStart } from 'kibana/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
@@ -337,10 +338,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
         textAlign="center"
-        color="subdued"
         data-test-subj="empty-workspace"
         size="s"
       >
+        <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
         <h2>
           <strong>
             {!expressionExists
@@ -352,26 +353,25 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
                 })}
           </strong>
         </h2>
-        <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
         {!expressionExists && (
           <>
+            <EuiTextColor className="lnsWorkspacePanel__subtext" color="subdued" component="div">
+              <p>
+                {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
+                  defaultMessage: 'Lens is the recommended editor for creating visualizations',
+                })}
+              </p>
+            </EuiTextColor>
             <p>
-              {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
-                defaultMessage: 'Lens is the recommended editor for creating visualizations',
-              })}
-            </p>
-            <p>
-              <small>
-                <EuiLink
-                  href="https://www.elastic.co/products/kibana/feedback"
-                  target="_blank"
-                  external
-                >
-                  {i18n.translate('xpack.lens.editorFrame.goToForums', {
-                    defaultMessage: 'Make requests and give feedback',
-                  })}
-                </EuiLink>
-              </small>
+              <EuiLink
+                href="https://www.elastic.co/products/kibana/feedback"
+                target="_blank"
+                external
+              >
+                {i18n.translate('xpack.lens.editorFrame.goToForums', {
+                  defaultMessage: 'Make requests and give feedback',
+                })}
+              </EuiLink>
             </p>
           </>
         )}
