@@ -10,9 +10,9 @@ We decided to build a new drag-and-drop (DnD) tree component that supports:
 1. Really long nested lists (i.e, lists of lists) who's items can be reordered
 2. Click-to-pick-up then click-to-drop UX over drag-hold-then-drop UX
 
-The motivation for (2) was that we felt this would ease working with extremely long
-pipelines (100s of nodes) are generally a single list with at most 1-level nesting for
-on-failure handlers - typically we don't have on-failure on-failure handlers.
+The motivation for (2) is that we believe this eases working with extremely long
+pipelines (100s of nodes). Pipelines are generally a single list with at most 1-level
+nesting for on-failure handlers - typically we don't have on-failure on-failure handlers.
 
 At the time, no library supported what we were looking for. We tried using:
 
