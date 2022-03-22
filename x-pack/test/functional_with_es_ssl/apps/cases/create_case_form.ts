@@ -24,7 +24,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await cases.api.deleteAllCases();
     });
 
-    it('creates a case from the stack managament page', async () => {
+    it('creates a case from the stack management page', async () => {
       const caseTitle = 'test-' + uuid.v4();
       await cases.common.createCaseFromCreateCasePage({
         title: caseTitle,
