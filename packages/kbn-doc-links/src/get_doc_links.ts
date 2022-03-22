@@ -139,7 +139,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
       serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
       sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
-      sharePointServer: `${WORKPLACE_SEARCH_DOCS}sharepoint-server`,
+      sharePointServer: `${WORKPLACE_SEARCH_DOCS}sharepoint-server.html`,
       slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
       synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
       zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
