@@ -90,10 +90,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       await kibanaServer.uiSettings.update({
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
-      //running the rest of the tests with limited roles
-      await security.testUser.setRoles(['global_maps_all', 'kibana_sample_read'], {
-        skipBrowserRefresh: true,
-      });
     });
 
     after(async () => {
