@@ -94,7 +94,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   return (
     <>
       <div css={styles.sessionViewerComponent}>
-        <EuiPanel css={styles.toolBar}>
+        <EuiPanel css={styles.toolBar} hasShadow={false}>
           <EuiFlexGroup>
             <EuiFlexItem
               data-test-subj="sessionView:sessionViewProcessEventsSearch"
@@ -120,6 +120,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                 onClick={toggleDetailPanel}
                 iconType="list"
                 data-test-subj="sessionView:sessionViewDetailPanelToggle"
+                fill={isDetailOpen}
               >
                 <FormattedMessage
                   id="xpack.sessionView.buttonOpenDetailPanel"

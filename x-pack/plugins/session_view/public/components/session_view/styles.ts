@@ -24,6 +24,8 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
 
     const detailPanel: CSSObject = {
       height: `${height}px`,
+      borderLeft: `${euiTheme.border.thin} !important`,
+      boxShadow: '0px 0px 0px #D3DAE6 inset !important',
     };
 
     const searchBar: CSSObject = {
