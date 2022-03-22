@@ -40,7 +40,7 @@ export const LineStyleSettings = ({
           defaultMessage: 'Line',
         })}
       >
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={true}>
             <LineThicknessSlider
               value={currentConfig?.lineWidth || 1}

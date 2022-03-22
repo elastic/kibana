@@ -72,6 +72,7 @@ export type {
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
 export { layerTypes } from '../common';
+export { DimensionEditorSection } from './shared_components';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

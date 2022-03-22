@@ -396,7 +396,6 @@ export const getXyVisualization = ({
     return suggestion;
   },
 
-  // todo: annotation layer types diff
   removeDimension({ prevState, layerId, columnId, frame }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {

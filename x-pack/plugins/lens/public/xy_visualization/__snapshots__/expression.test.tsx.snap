@@ -7,7 +7,7 @@ exports[`xy_expression XYChart component annotations should render basic annotat
       Object {
         "dataValue": 1647591917125,
         "details": "Annotation",
-        "header": 1647591917100,
+        "header": "2022-03-18T08:25:17.140Z",
       },
     ]
   }
@@ -175,7 +175,7 @@ exports[`xy_expression XYChart component annotations should render simplified an
       Object {
         "dataValue": 1647591917125,
         "details": "Annotation",
-        "header": 1647591917100,
+        "header": "2022-03-18T08:25:17.140Z",
       },
     ]
   }

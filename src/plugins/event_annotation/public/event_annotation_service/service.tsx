@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import chroma from 'chroma-js';
-
 import { EventAnnotationServiceType } from './types';
 import { defaultAnnotationColor } from '..';
 

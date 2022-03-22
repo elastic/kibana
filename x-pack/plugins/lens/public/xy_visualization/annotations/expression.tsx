@@ -17,6 +17,7 @@ import {
 import type { FieldFormat } from 'src/plugins/field_formats/common';
 import type { EventAnnotationArgs } from 'src/plugins/event_annotation/common';
 import moment from 'moment';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 import type { AnnotationLayerArgs, IconPosition } from '../../../common/expressions';
 import { hasIcon } from '../xy_config_panel/shared/icon_select';
@@ -34,9 +35,7 @@ const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInte
   if (!firstTimestamp || !minInterval) {
     return timestamp;
   }
-  const roundedTimestamp = timestamp - ((timestamp - firstTimestamp) % minInterval);
-  // todo: postprocess if it's bar
-  return roundedTimestamp;
+  return timestamp - ((timestamp - firstTimestamp) % minInterval);
 };
 
 export interface AnnotationsProps {
@@ -85,10 +84,14 @@ const createCustomTooltipDetails =
       <div key={config[0].time}>
         {config.map(({ icon, label, time, color }) => (
           <div className="echTooltip__item--container" key={snakeCase(label)}>
-            <span className="echTooltip__label">
-              {hasIcon(icon) ? <AnnotationIcon type={icon} color={color} /> : null}
-              {label}
-            </span>
+            <EuiFlexGroup className="echTooltip__label" gutterSize="xs">
+              {hasIcon(icon) && (
+                <EuiFlexItem grow={false}>
+                  <AnnotationIcon type={icon} color={color} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem> {label}</EuiFlexItem>
+            </EuiFlexGroup>
             <span className="echTooltip__value"> {formatter?.convert(time) || String(time)}</span>
           </div>
         ))}
@@ -168,8 +171,11 @@ export const Annotations = ({
           : markerPositionVertical;
         const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
         const id = snakeCase(annotation.label);
-        const { roundedTimestamp } = annotation;
-
+        const { roundedTimestamp, time: exactTimestamp } = annotation;
+        const isGrouped = Boolean(annotation.customTooltipDetails);
+        const header =
+          formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
+          moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
         return (
           <LineAnnotation
             id={id}
@@ -204,8 +210,7 @@ export const Annotations = ({
                 dataValue: moment(
                   isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
                 ).valueOf(),
-                header:
-                  formatter?.convert(roundedTimestamp) || moment(roundedTimestamp).toISOString(),
+                header,
                 details: annotation.label,
               },
             ]}

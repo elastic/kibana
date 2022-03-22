@@ -22,8 +22,13 @@ import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
-import { PalettePicker } from '../shared_components';
+import {
+  ToolbarPopover,
+  LegendSettingsPopover,
+  useDebouncedValue,
+  DimensionEditorSection,
+  PalettePicker,
+} from '../shared_components';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 
@@ -298,7 +303,7 @@ export function DimensionEditor(
   }
 ) {
   return (
-    <>
+    <DimensionEditorSection>
       <PalettePicker
         palettes={props.paletteService}
         activePalette={props.state.palette}
@@ -306,6 +311,6 @@ export function DimensionEditor(
           props.setState({ ...props.state, palette: newPalette });
         }}
       />
-    </>
+    </DimensionEditorSection>
   );
 }

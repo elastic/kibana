@@ -11,6 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import type { FileLayer } from '@elastic/ems-client';
 import { ChoroplethChartState } from './types';
 import { EMSFileSelect } from '../../components/ems_file_select';
+import { DimensionEditorSection } from '../../../../lens/public';
 
 interface Props {
   emsFileLayers: FileLayer[];
@@ -66,14 +67,14 @@ export function RegionKeyEditor(props: Props) {
     );
   }
   return (
-    <>
+    <DimensionEditorSection>
       <EMSFileSelect
         isColumnCompressed
         value={props.state.emsLayerId ? props.state.emsLayerId : null}
         onChange={onEmsLayerSelect}
       />
       {emsFieldSelect}
-    </>
+    </DimensionEditorSection>
   );
 }
 

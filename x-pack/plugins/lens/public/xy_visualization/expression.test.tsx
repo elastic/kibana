@@ -3039,7 +3039,7 @@ describe('xy_expression', () => {
         // checking tooltip
         const renderLinks = mount(<div>{groupedAnnotation.prop('customTooltipDetails')!()}</div>);
         expect(renderLinks.text()).toEqual(
-          'Event 1 2022-03-18T08:25:00.000ZEvent 2 2022-03-18T08:25:00.020ZEvent 3 2022-03-18T08:25:00.001Z'
+          ' Event 1 2022-03-18T08:25:00.000Z Event 2 2022-03-18T08:25:00.020Z Event 3 2022-03-18T08:25:00.001Z'
         );
       });
       test('should render grouped annotations with default styles', () => {

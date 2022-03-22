@@ -81,6 +81,7 @@ export function LayerPanel(
     updateDatasourceAsync,
     visualizationState,
   } = props;
+
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
@@ -193,7 +194,7 @@ export function LayerPanel(
             groupId,
             dropType,
           })
-        : true;
+        : false;
       if (dropResult) {
         let previousColumn =
           typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
@@ -345,43 +346,45 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
             {layerDatasource && (
-              <NativeRenderer
-                render={layerDatasource.renderLayerPanel}
-                nativeProps={{
-                  layerId,
-                  state: layerDatasourceState,
-                  activeData: props.framePublicAPI.activeData,
-                  setState: (updater: unknown) => {
-                    const newState =
-                      typeof updater === 'function' ? updater(layerDatasourceState) : updater;
-                    // Look for removed columns
-                    const nextPublicAPI = layerDatasource.getPublicAPI({
-                      state: newState,
-                      layerId,
-                    });
-                    const nextTable = new Set(
-                      nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
-                    );
-                    const removed = datasourcePublicAPI
-                      .getTableSpec()
-                      .map(({ columnId }) => columnId)
-                      .filter((columnId) => !nextTable.has(columnId));
-                    let nextVisState = props.visualizationState;
-                    removed.forEach((columnId) => {
-                      nextVisState = activeVisualization.removeDimension({
+              <>
+                <EuiSpacer size="s" />
+                <NativeRenderer
+                  render={layerDatasource.renderLayerPanel}
+                  nativeProps={{
+                    layerId,
+                    state: layerDatasourceState,
+                    activeData: props.framePublicAPI.activeData,
+                    setState: (updater: unknown) => {
+                      const newState =
+                        typeof updater === 'function' ? updater(layerDatasourceState) : updater;
+                      // Look for removed columns
+                      const nextPublicAPI = layerDatasource.getPublicAPI({
+                        state: newState,
                         layerId,
-                        columnId,
-                        prevState: nextVisState,
-                        frame: framePublicAPI,
                       });
-                    });
+                      const nextTable = new Set(
+                        nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+                      );
+                      const removed = datasourcePublicAPI
+                        .getTableSpec()
+                        .map(({ columnId }) => columnId)
+                        .filter((columnId) => !nextTable.has(columnId));
+                      let nextVisState = props.visualizationState;
+                      removed.forEach((columnId) => {
+                        nextVisState = activeVisualization.removeDimension({
+                          layerId,
+                          columnId,
+                          prevState: nextVisState,
+                          frame: framePublicAPI,
+                        });
+                      });
 
-                    props.updateAll(datasourceId, newState, nextVisState);
-                  },
-                }}
-              />
+                      props.updateAll(datasourceId, newState, nextVisState);
+                    },
+                  }}
+                />
+              </>
             )}
           </header>
 
@@ -636,18 +639,16 @@ export function LayerPanel(
               !activeDimension.isNew &&
               activeVisualization.renderDimensionEditor &&
               activeGroup?.enableDimensionEditor && (
-                <div className="lnsLayerPanel__styleEditor">
-                  <NativeRenderer
-                    render={activeVisualization.renderDimensionEditor}
-                    nativeProps={{
-                      ...layerVisualizationConfigProps,
-                      groupId: activeGroup.groupId,
-                      accessor: activeId,
-                      setState: props.updateVisualization,
-                      panelRef,
-                    }}
-                  />
-                </div>
+                <NativeRenderer
+                  render={activeVisualization.renderDimensionEditor}
+                  nativeProps={{
+                    ...layerVisualizationConfigProps,
+                    groupId: activeGroup.groupId,
+                    accessor: activeId,
+                    setState: props.updateVisualization,
+                    panelRef,
+                  }}
+                />
               )}
           </div>
         }

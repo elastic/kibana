@@ -48,14 +48,18 @@ const defaultButtonLabels = {
   ),
 };
 
+// todo: come back to it to make the name flexible
 const noDndButtonLabels = {
   ariaLabel: (group: VisualizationDimensionGroupConfig) =>
     i18n.translate('xpack.lens.indexPattern.addColumnAriaLabelClick', {
-      defaultMessage: 'Click to add to {groupLabel}',
+      defaultMessage: 'Add an annotation to {groupLabel}',
       values: { groupLabel: group.groupLabel },
     }),
   label: (
-    <FormattedMessage id="xpack.lens.configure.emptyConfigClick" defaultMessage="Click to add" />
+    <FormattedMessage
+      id="xpack.lens.configure.emptyConfigClick"
+      defaultMessage="Add an annotation"
+    />
   ),
 };
 

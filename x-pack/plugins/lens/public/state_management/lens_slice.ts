@@ -753,9 +753,7 @@ function addInitialValueIfAvailable({
           }),
           activeVisualizationState,
         };
-      }
-
-      if (noDatasource) {
+      } else {
         return {
           activeDatasourceState: datasourceState,
           activeVisualizationState,

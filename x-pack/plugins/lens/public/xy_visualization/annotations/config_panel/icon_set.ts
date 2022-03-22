@@ -11,15 +11,70 @@ import {
   IconHexagon,
   IconCircle,
 } from '../../../assets/annotation_icons';
-import { euiIconsSet } from '../../xy_config_panel/shared/icon_select';
 
 export const annotationsIconSet = [
   {
-    value: 'triangle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.triangleIconLabel', {
-      defaultMessage: 'Triangle',
+    value: 'empty',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.noIconLabel', {
+      defaultMessage: 'None',
     }),
-    icon: IconTriangle,
+  },
+  {
+    value: 'asterisk',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.asteriskIconLabel', {
+      defaultMessage: 'Asterisk',
+    }),
+  },
+  {
+    value: 'alert',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.alertIconLabel', {
+      defaultMessage: 'Alert',
+    }),
+  },
+  {
+    value: 'bell',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.bellIconLabel', {
+      defaultMessage: 'Bell',
+    }),
+  },
+  {
+    value: 'bolt',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.boltIconLabel', {
+      defaultMessage: 'Bolt',
+    }),
+  },
+  {
+    value: 'bug',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.bugIconLabel', {
+      defaultMessage: 'Bug',
+    }),
+  },
+  {
+    value: 'circle',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.circleIconLabel', {
+      defaultMessage: 'Circle',
+    }),
+    icon: IconCircle,
+  },
+
+  {
+    value: 'editorComment',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.commentIconLabel', {
+      defaultMessage: 'Comment',
+    }),
+  },
+  {
+    value: 'flag',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.flagIconLabel', {
+      defaultMessage: 'Flag',
+    }),
+  },
+  {
+    value: 'hexagon',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.hexagonIconLabel', {
+      defaultMessage: 'Hexagon',
+    }),
+    icon: IconHexagon,
   },
   {
     value: 'square',
@@ -29,18 +84,16 @@ export const annotationsIconSet = [
     icon: IconSquare,
   },
   {
-    value: 'circle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.circleIconLabel', {
-      defaultMessage: 'Circle',
+    value: 'tag',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.tagIconLabel', {
+      defaultMessage: 'Tag',
     }),
-    icon: IconCircle,
   },
   {
-    value: 'hexagon',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.hexagonIconLabel', {
-      defaultMessage: 'Hexagon',
+    value: 'triangle',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.triangleIconLabel', {
+      defaultMessage: 'Triangle',
     }),
-    icon: IconHexagon,
+    icon: IconTriangle,
   },
-  ...euiIconsSet,
 ];

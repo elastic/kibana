@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
+import './index.scss';
 import { i18n } from '@kbn/i18n';
-import { EuiDatePicker, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiDatePicker, EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiTitle } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import moment from 'moment';
 import { EventAnnotationConfig } from 'src/plugins/event_annotation/common/types';
@@ -16,7 +17,7 @@ import { State, XYState } from '../../types';
 import { FormatFactory } from '../../../../common';
 import { XYAnnotationLayerConfig } from '../../../../common/expressions';
 import { ColorPicker } from '../../xy_config_panel/color_picker';
-import { NameInput, useDebouncedValue } from '../../../shared_components';
+import { DimensionEditorSection, NameInput, useDebouncedValue } from '../../../shared_components';
 import { isHorizontalChart } from '../../state_helpers';
 import { MarkerDecorationSettings } from '../../xy_config_panel/shared/marker_decoration_settings';
 import { LineStyleSettings } from '../../xy_config_panel/shared/line_style_settings';
@@ -67,55 +68,73 @@ export const AnnotationsPanel = (
 
   return (
     <>
-      <ConfigPanelDatePicker
-        value={moment(currentAnnotations?.key.timestamp)}
-        onChange={(date) => {
-          if (date) {
-            setAnnotations({
-              key: {
-                ...(currentAnnotations?.key || { type: 'point_in_time' }),
-                timestamp: date.toISOString(),
-              },
-            });
-          }
-        }}
-        label={i18n.translate('xpack.lens.xyChart.annotationDate', {
-          defaultMessage: 'Annotation date',
-        })}
-      />
-      <NameInput
-        value={currentAnnotations?.label || defaultAnnotationLabel}
-        defaultValue={defaultAnnotationLabel}
-        onChange={(value) => {
-          setAnnotations({ label: value });
-        }}
-      />
-      <MarkerDecorationSettings
-        isHorizontal={isHorizontal}
-        setConfig={setAnnotations}
-        currentConfig={{
-          axisMode: 'bottom',
-          ...currentAnnotations,
-        }}
-        customIconSet={annotationsIconSet}
-      />
-      <LineStyleSettings
-        isHorizontal={isHorizontal}
-        setConfig={setAnnotations}
-        currentConfig={currentAnnotations}
-      />
-      <ColorPicker
-        {...props}
-        setConfig={setAnnotations}
-        disableHelpTooltip
-        label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
-          defaultMessage: 'Color',
-        })}
-      />
-      <ConfigPanelHideSwitch
-        value={Boolean(currentAnnotations?.isHidden)}
-        onChange={(ev) => setAnnotations({ isHidden: ev.target.checked })}
-      />
+      <DimensionEditorSection>
+        <EuiTitle size="xs" className="lnsXyConfigHeading">
+          <h3>
+            {i18n.translate('xpack.lens.xyChart.placement', {
+              defaultMessage: 'Placement',
+            })}
+          </h3>
+        </EuiTitle>
+        <ConfigPanelDatePicker
+          value={moment(currentAnnotations?.key.timestamp)}
+          onChange={(date) => {
+            if (date) {
+              setAnnotations({
+                key: {
+                  ...(currentAnnotations?.key || { type: 'point_in_time' }),
+                  timestamp: date.toISOString(),
+                },
+              });
+            }
+          }}
+          label={i18n.translate('xpack.lens.xyChart.annotationDate', {
+            defaultMessage: 'Annotation date',
+          })}
+        />
+      </DimensionEditorSection>
+      <DimensionEditorSection hasBorder>
+        <EuiTitle size="xs" className="lnsXyConfigHeading">
+          <h3>
+            {i18n.translate('xpack.lens.xyChart.appearance', {
+              defaultMessage: 'Appearance',
+            })}
+          </h3>
+        </EuiTitle>
+        <NameInput
+          value={currentAnnotations?.label || defaultAnnotationLabel}
+          defaultValue={defaultAnnotationLabel}
+          onChange={(value) => {
+            setAnnotations({ label: value });
+          }}
+        />
+        <MarkerDecorationSettings
+          isHorizontal={isHorizontal}
+          setConfig={setAnnotations}
+          currentConfig={{
+            axisMode: 'bottom',
+            ...currentAnnotations,
+          }}
+          customIconSet={annotationsIconSet}
+        />
+        <LineStyleSettings
+          isHorizontal={isHorizontal}
+          setConfig={setAnnotations}
+          currentConfig={currentAnnotations}
+        />
+        <ColorPicker
+          {...props}
+          setConfig={setAnnotations}
+          disableHelpTooltip
+          label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
+            defaultMessage: 'Color',
+          })}
+        />
+        <ConfigPanelHideSwitch
+          value={Boolean(currentAnnotations?.isHidden)}
+          onChange={(ev) => setAnnotations({ isHidden: ev.target.checked })}
+        />
+      </DimensionEditorSection>
     </>
   );
 };
@@ -132,6 +151,7 @@ const ConfigPanelDatePicker = ({
   return (
     <EuiFormRow display="rowCompressed" fullWidth label={label}>
       <EuiDatePicker
+        fullWidth
         showTimeSelect
         selected={value}
         onChange={onChange}
@@ -155,6 +175,7 @@ const ConfigPanelHideSwitch = ({
         defaultMessage: 'Hide annotation',
       })}
       display="columnCompressedSwitch"
+      fullWidth
     >
       <EuiSwitch
         compressed
