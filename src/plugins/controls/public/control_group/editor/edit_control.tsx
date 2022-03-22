@@ -84,15 +84,12 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       });
     };
 
-    const editableFactory = factory as IEditableControlFactory;
-
     const flyoutInstance = openFlyout(
       forwardAllContext(
         <ControlEditor
           isCreate={false}
           width={panel.width}
           embeddable={embeddable}
-          factory={editableFactory}
           title={embeddable.getTitle()}
           onCancel={() => onCancel(flyoutInstance)}
           updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
@@ -101,6 +98,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
             (inputToReturn = { ...inputToReturn, ...partialInput })
           }
           onSave={() => {
+            const editableFactory = factory as IEditableControlFactory;
             if (editableFactory.presaveTransformFunction) {
               inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
             }
