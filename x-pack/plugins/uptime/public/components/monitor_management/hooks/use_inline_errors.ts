@@ -66,8 +66,8 @@ export function useInlineErrors({
   sortOrder = 'desc',
 }: {
   onlyInvalidMonitors?: boolean;
-  sortField: string;
-  sortOrder: 'asc' | 'desc';
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }) {
   const monitorList = useSelector(monitorManagementListSelector);
 
