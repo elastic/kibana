@@ -86,17 +86,18 @@ export interface BooleanFieldStats {
 
 export type FieldStats = NumericFieldStats | KeywordFieldStats | BooleanFieldStats;
 
+export interface ChangePointsResponseTree {
+  root: ItemSetTreeNode;
+  minQualityRatio: number;
+  parentQualityWeight: number;
+  parentSimilarityWeight: number;
+}
 export interface ChangePointsResponse {
   ccsWarning: boolean;
   changePoints?: ChangePoint[];
   fieldStats?: FieldStats[];
   overallTimeSeries?: HistogramItem[];
-  tree?: {
-    root: ItemSetTreeNode;
-    minQualityRatio: number;
-    parentQualityWeight: number;
-    parentSimilarityWeight: number;
-  };
+  tree?: ChangePointsResponseTree;
 }
 
 type HistogramResponse = Array<{

@@ -18,8 +18,6 @@ import {
   EuiSplitPanel,
   EuiStat,
   EuiTabbedContent,
-  EuiIcon,
-  EuiTreeView,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,8 +28,8 @@ import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { ImpactBar } from './impact_bar';
 import { useChangePointDetection, ChangePoint } from './use_change_point_detection';
 import type { BaseSpikeAnalysisTableProps } from './spike_analysis_table_embeddable';
-import type { ItemSetTreeNode } from './itemset_tree';
 import { ProgressControls } from './progress_controls';
+import { TreeView } from './tree_view';
 
 const loadingText = i18n.translate('xpack.apm.correlations.correlationsTable.loadingText', {
   defaultMessage: 'Loading...',
@@ -53,10 +51,6 @@ enum FETCH_STATUS {
   FAILURE = 'failure',
   NOT_INITIATED = 'not_initiated',
 }
-
-type EuiTreeViewProps = React.ComponentProps<typeof EuiTreeView>;
-type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never;
-type EuiTreeViewNode = ArrayElement<EuiTreeViewProps['items']>;
 
 interface SpikeAnalysisTableProps extends BaseSpikeAnalysisTableProps {
   spikeSelection: WindowParameters;
@@ -289,27 +283,27 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     [response.changePoints, response.overallTimeSeries]
   );
 
-  const treeItems = useMemo(() => {
-    let id = 1;
-    const mapL = (d: ItemSetTreeNode): EuiTreeViewNode => {
-      id = id + 1;
-      return {
-        label:
-          `(q:${Math.round(d.quality() * 10000) / 10000})` +
-          `(s:${d.selectedCluster()})` +
-          Object.entries(d.itemSet.items)
-            .map(([key, value]) => `${key}:${value.join('/')}`)
-            .join(),
-        id: `item_${id}`,
-        icon: <EuiIcon size="s" type="folderClosed" />,
-        iconWhenExpanded: <EuiIcon size="s" type="folderOpen" />,
-        isExpanded: true,
-        children: d.children().map(mapL),
-      };
-    };
+  // const treeItems = useMemo(() => {
+  //   let id = 1;
+  //   const mapL = (d: ItemSetTreeNode): EuiTreeViewNode => {
+  //     id = id + 1;
+  //     return {
+  //       label:
+  //         `(q:${Math.round(d.quality() * 10000) / 10000})` +
+  //         `(s:${d.selectedCluster()})` +
+  //         Object.entries(d.itemSet.items)
+  //           .map(([key, value]) => `${key}:${value.join('/')}`)
+  //           .join(),
+  //       id: `item_${id}`,
+  //       icon: <EuiIcon size="s" type="folderClosed" />,
+  //       iconWhenExpanded: <EuiIcon size="s" type="folderOpen" />,
+  //       isExpanded: true,
+  //       children: d.children().map(mapL),
+  //     };
+  //   };
 
-    return (response?.tree && response?.tree.root.children().map(mapL)) ?? [];
-  }, [response?.tree]);
+  //   return (response?.tree && response?.tree.root.children().map(mapL)) ?? [];
+  // }, [response?.tree]);
 
   const tabs = [
     {
@@ -414,7 +408,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: 'Tree',
       content: (
         <div style={{ width: '100%' }}>
-          <EuiTreeView items={treeItems} aria-label="Sample Folder Tree" display="compressed" />
+          {response?.tree && <TreeView tree={response?.tree.root.children()} />}
         </div>
       ),
     },
