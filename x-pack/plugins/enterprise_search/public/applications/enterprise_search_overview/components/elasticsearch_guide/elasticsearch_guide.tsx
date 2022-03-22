@@ -22,9 +22,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { ElasticsearchResources } from '../elasticsearch_resources';
 
 import { LanguageInstructions } from './language_instructions';
+
+// Replace FormattedMessage with i18n strings
 
 export const ElasticsearchGuide: React.FC = () => {
   const languages = [
@@ -54,16 +58,24 @@ export const ElasticsearchGuide: React.FC = () => {
   return (
     <EuiPageTemplate pageHeader={{ pageTitle: 'Elasticsearch' }}>
       <EuiTitle>
-        <h2>Getting started with Elasticsearch</h2>
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchTitle', {
+            defaultMessage: 'Getting started with Elasticsearch',
+          })}
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem grow={4}>
           <EuiText>
             <p>
-              Whether you are building a search-powered application, or designing a large-scale
-              search implementation, Elasticsearch provides the low-level tools to create the most
-              relevant and performant search experience.
+              {i18n.translate(
+                'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchDescription',
+                {
+                  defaultMessage:
+                    'Whether you are building a search-powered application, or designing a large-scale search implementation, Elasticsearch provides the low-level tools to create the most relevant and performant search experience.',
+                }
+              )}
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -76,31 +88,46 @@ export const ElasticsearchGuide: React.FC = () => {
             headingElement="h2"
             steps={[
               {
-                title: 'Connect to Elasticsearch',
+                title: i18n.translate(
+                  'xpack.enterpriseSearch.overview.elasticsearchGuide.connectToElasticsearchTitle',
+                  { defaultMessage: 'Connect to Elasticsearch' }
+                ),
                 children: (
                   <>
                     <EuiText>
                       <p>
-                        Elastic builds and maintains clients in several popular languages and our
-                        community has contributed many more. They're easy to work with, feel natural
-                        to use, and, just like Elasticsearch, don't limit what you might want to do
-                        with them.
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.overview.elasticsearchGuide.connectToElasticsearchDescription',
+                          {
+                            defaultMessage:
+                              "Elastic builds and maintains clients in several popular languages and our community has contributed many more. They're easy to work with, feel natural to use, and, just like Elasticsearch, don't limit what you might want to do with them.",
+                          }
+                        )}
                       </p>
                     </EuiText>
                     <EuiSpacer size="m" />
                     <EuiSpacer size="xs" />
                     <EuiLink href="#" external>
-                      Learn more about Elasticsearch clients
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsLink',
+                        { defaultMessage: 'Learn more about Elasticsearch clients' }
+                      )}
                     </EuiLink>
                     <EuiSpacer size="l" />
                     <EuiSpacer size="xs" />
                     <EuiSelect
-                      prepend="Select a client"
+                      prepend={i18n.translate(
+                        'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsSelectLabel',
+                        { defaultMessage: 'Select a client' }
+                      )}
                       id={basicSelectId}
                       options={languages}
                       value={selectedLanguage}
                       onChange={(e) => onChange(e)}
-                      aria-label="Use aria labels when no actual label is in use"
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsSelectAriaLabel',
+                        { defaultMessage: 'Language client' }
+                      )}
                     />
                     <EuiSpacer size="m" />
                     <LanguageInstructions language={selectedLanguage} />
@@ -108,26 +135,39 @@ export const ElasticsearchGuide: React.FC = () => {
                 ),
               },
               {
-                title: 'Build a search experience with Elasticsearch',
+                title: i18n.translate(
+                  'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchExperienceTitle',
+                  { defaultMessage: 'Build a search experience with Elasticsearch' }
+                ),
                 children: (
                   <>
                     <EuiText>
                       <p>
-                        Ready to add an engaging, modern search experience to your application or
-                        website? Search UI, Elastic’s JavaScript search framework for building
-                        world-class search experiences, was made for the task.
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchExperienceDescription',
+                          {
+                            defaultMessage:
+                              'Ready to add an engaging, modern search experience to your application or website? Search UI, Elastic’s JavaScript search framework for building world-class search experiences, was made for the task.',
+                          }
+                        )}
                       </p>
                     </EuiText>
                     <EuiSpacer size="l" />
                     <EuiFlexGroup gutterSize="l" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiLink href="#" external>
-                          Learn more about Search UI
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIMarketingLink',
+                            { defaultMessage: 'Learn more about Search UI' }
+                          )}
                         </EuiLink>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiLink href="#" external>
-                          Search UI on Github
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIGitHubLink',
+                            { defaultMessage: 'Search UI on GitHub' }
+                          )}
                         </EuiLink>
                       </EuiFlexItem>
                     </EuiFlexGroup>

@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { EuiCodeBlock, EuiTitle, EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 // prettier-ignore
 const javascript1 = 
@@ -40,21 +41,35 @@ export const LanguageInstructions: React.FC<{ language: string }> = ({ language 
     return (
       <>
         <EuiTitle size="xxs">
-          <h4>Create a sample application</h4>
+          <h4>
+            {i18n.translate(
+              'xpack.enterpriseSearch.overview.elasticsearchGuide.createSampleApplicationTitle',
+              { defaultMessage: 'Create a sample application' }
+            )}
+          </h4>
         </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiCodeBlock fontSize="m" isCopyable>
           {javascript1}
         </EuiCodeBlock>
         <EuiSpacer size="m" />
         <EuiTitle size="xxs">
-          <h4>Ingest data</h4>
+          <h4>
+            {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchGuide.ingestDataTitle', {
+              defaultMessage: 'Ingest data',
+            })}
+          </h4>
         </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiCodeBlock fontSize="m" isCopyable overflowHeight={300}>
           {javascript2}
         </EuiCodeBlock>
         <EuiSpacer size="l" />
         <EuiLink href="#" external>
-          Learn more about the Elasticsearch JavaScript client
+          {i18n.translate(
+            'xpack.enterpriseSearch.overview.elasticsearchGuide.javascriptClientLink',
+            { defaultMessage: 'Learn more about the Elasticsearch JavaScript client' }
+          )}
         </EuiLink>
       </>
     );

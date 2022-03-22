@@ -8,31 +8,45 @@
 import React from 'react';
 
 import { EuiSpacer, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const ElasticsearchResources: React.FC = () => (
   <EuiPanel hasShadow={false} color="subdued">
     <EuiTitle size="xs">
-      <h4>Resources</h4>
+      <h4>
+        {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.title', {
+          defaultMessage: 'Resources',
+        })}
+      </h4>
     </EuiTitle>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
     <EuiLink href="#" external>
-      Getting started with Elasticsearch
+      {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.gettingStarted', {
+        defaultMessage: 'Getting started with Elasticsearch',
+      })}
     </EuiLink>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
     <EuiLink href="#" external>
-      Create a new index
+      {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.createIndex', {
+        defaultMessage: 'Create a new index',
+      })}
     </EuiLink>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
     <EuiLink href="#" external>
-      Elasticsearch clients
+      {i18n.translate(
+        'xpack.enterpriseSearch.overview.elasticsearchResources.elasticsearchClients',
+        { defaultMessage: 'Elasticsearch clients' }
+      )}
     </EuiLink>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
     <EuiLink href="#" external>
-      Search UI for Elasticsearch
+      {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.searchUi', {
+        defaultMessage: 'Search UI for Elasticsearch',
+      })}
     </EuiLink>
   </EuiPanel>
 );
