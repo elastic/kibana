@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -147,9 +153,32 @@ export function getColumns({
     {
       field: 'errorRate',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        { defaultMessage: 'Failed transaction rate' }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
+            {
+              defaultMessage:
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
+              {
+                defaultMessage: 'Failed transaction rate',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { errorRate, name }) => {
@@ -180,9 +209,32 @@ export function getColumns({
     {
       field: 'impact',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnImpact',
-        { defaultMessage: 'Impact' }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.transactionsTableColumnImpactTip',
+            {
+              defaultMessage:
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnImpact',
+              {
+                defaultMessage: 'Impact',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {

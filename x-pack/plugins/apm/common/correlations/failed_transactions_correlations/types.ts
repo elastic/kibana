@@ -7,7 +7,7 @@
 
 import { FieldValuePair, HistogramItem } from '../types';
 
-import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
+import { CORRELATIONS_IMPACT_THRESHOLD } from './constants';
 import { FieldStats } from '../field_stats_types';
 
 export interface FailedTransactionsCorrelation extends FieldValuePair {
@@ -22,7 +22,7 @@ export interface FailedTransactionsCorrelation extends FieldValuePair {
 }
 
 export type FailedTransactionsCorrelationsImpactThreshold =
-  typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
+  typeof CORRELATIONS_IMPACT_THRESHOLD[keyof typeof CORRELATIONS_IMPACT_THRESHOLD];
 
 export interface FailedTransactionsCorrelationsResponse {
   ccsWarning: boolean;
@@ -31,4 +31,5 @@ export interface FailedTransactionsCorrelationsResponse {
   overallHistogram?: HistogramItem[];
   errorHistogram?: HistogramItem[];
   fieldStats?: FieldStats[];
+  fallbackResult?: FailedTransactionsCorrelation;
 }
