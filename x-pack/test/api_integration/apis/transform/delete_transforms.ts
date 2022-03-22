@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
-        expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+        expect(body[transformId].destDataViewDeleted.success).to.eql(false);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
       });
@@ -244,7 +244,7 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
           deleteDestIndex: false,
-          deleteDestIndexPattern: true,
+          deleteDestDataView: true,
         };
         const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
@@ -284,7 +284,7 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
           deleteDestIndex: true,
-          deleteDestIndexPattern: true,
+          deleteDestDataView: true,
         };
         const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
