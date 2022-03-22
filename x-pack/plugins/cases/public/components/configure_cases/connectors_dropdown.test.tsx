@@ -13,11 +13,6 @@ import { render, screen } from '@testing-library/react';
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
-import { useKibana } from '../../common/lib/kibana';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
-
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -29,10 +24,7 @@ describe('ConnectorsDropdown', () => {
     selectedConnector: 'none',
   };
 
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
   beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
