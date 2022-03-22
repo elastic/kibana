@@ -29,7 +29,7 @@ import {
   KibanaVersionContext,
 } from '../../hooks';
 
-import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
+import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
 
 import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep } from './steps';
 
@@ -95,13 +95,24 @@ describe('<AgentEnrollmentFlyout />', () => {
       data: { item: { package_policies: [] } },
     });
 
-    (useFleetServerInstructions as jest.Mock).mockReturnValue({
+    (useAdvancedForm as jest.Mock).mockReturnValue({
+      eligibleFleetServerPolicies: [{ name: 'test', id: 'test' }],
+      refreshEligibleFleetServerPolicies: jest.fn(),
+      fleetServerPolicyId: 'test',
+      setFleetServerPolicyId: jest.fn(),
+      isFleetServerReady: true,
       serviceToken: 'test',
-      getServiceToken: jest.fn(),
       isLoadingServiceToken: false,
-      installCommand: jest.fn(),
-      platform: 'test',
-      setPlatform: jest.fn(),
+      generateServiceToken: jest.fn(),
+      fleetServerHostForm: {
+        saveFleetServerHost: jest.fn(),
+        fleetServerHost: 'https://test.server:8220',
+        setFleetServerHost: jest.fn(),
+        error: '',
+        validateFleetServerHost: jest.fn(),
+      },
+      deploymentMode: 'quickstart',
+      setDeploymentMode: jest.fn(),
     });
 
     (useGetAgents as jest.Mock).mockReturnValue({

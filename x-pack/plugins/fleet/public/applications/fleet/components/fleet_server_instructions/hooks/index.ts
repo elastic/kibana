@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export * from './use_quick_start_create_form';
+// These hooks are tightly coupled to each tab of the Fleet server instructions component, and provide
+// all necessary data to drive those UI's
+export * from './use_advanced_form';
+export * from './use_quick_start_form';
+
+// These are individual hooks for one-off consumption. These are typically composed in the hooks above,
+// but exported here to support individual usage.
 export * from './use_wait_for_fleet_server';
 export * from './use_select_fleet_server_policy';
 export * from './use_service_token';

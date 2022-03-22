@@ -5,16 +5,10 @@
  * 2.0.
  */
 import { EuiSteps } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 
-import {
-  useWaitForFleetServer,
-  useSelectFleetServerPolicy,
-  useServiceToken,
-  useFleetServerHost,
-} from './hooks';
+import { useAdvancedForm } from './hooks';
 
-import type { DeploymentMode } from './steps';
 import {
   getAddFleetServerHostStep,
   getSelectAgentPolicyStep,
@@ -25,19 +19,19 @@ import {
 } from './steps';
 
 export const AdvancedTab: React.FunctionComponent = () => {
-  // The Advanced tab runs its operations in sequence unlike the Quick Start tab which combines operations. This is
-  // why we pull everything from separate hooks here instead of a single unified hook like we do in the Quick Start tab.
   const {
     eligibleFleetServerPolicies,
     refreshEligibleFleetServerPolicies,
     fleetServerPolicyId,
     setFleetServerPolicyId,
-  } = useSelectFleetServerPolicy();
-  const { isFleetServerReady } = useWaitForFleetServer();
-  const { serviceToken, isLoadingServiceToken, generateServiceToken } = useServiceToken();
-  const fleetServerHostForm = useFleetServerHost();
-
-  const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('quickstart');
+    isFleetServerReady,
+    serviceToken,
+    isLoadingServiceToken,
+    generateServiceToken,
+    fleetServerHostForm,
+    deploymentMode,
+    setDeploymentMode,
+  } = useAdvancedForm();
 
   const steps = [
     getSelectAgentPolicyStep({

@@ -10,8 +10,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useGetAgentPolicies } from '../../../hooks';
 import { policyHasFleetServer } from '../../../services';
 
-export const useSelectFleetServerPolicy = () => {
-  const [fleetServerPolicyId, setFleetServerPolicyId] = useState<string | undefined>();
+export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
+  const [fleetServerPolicyId, setFleetServerPolicyId] = useState<string | undefined>(
+    defaultAgentPolicyId
+  );
   const { data: agentPoliciesData, resendRequest } = useGetAgentPolicies({
     full: true,
   });

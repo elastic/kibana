@@ -14,18 +14,20 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetOneEnrollmentAPIKey, useLink, useFleetStatus, useGetAgents } from '../../hooks';
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
-import {
-  deploymentModeStep,
-  ServiceTokenStep,
-  FleetServerCommandStep,
-  useFleetServerInstructions,
-  addFleetServerHostStep,
-} from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { policyHasFleetServer } from '../../services';
+
+import {
+  getAddFleetServerHostStep,
+  getGenerateServiceTokenStep,
+  getInstallFleetServerStep,
+  getSetDeploymentModeStep,
+} from '../../applications/fleet/components/fleet_server_instructions/steps';
+
+import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
 
 import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { InstructionProps } from './types';
@@ -73,7 +75,7 @@ export const ManagedInstructions = React.memo<InstructionProps>(
     const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
 
     const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
-    const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
+    const fleetServerInstructions = useAdvancedForm(apiKey?.data?.item?.policy_id);
 
     const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
       page: 1,
@@ -93,21 +95,19 @@ export const ManagedInstructions = React.memo<InstructionProps>(
     const fleetServerSteps = useMemo(() => {
       const {
         serviceToken,
-        getServiceToken,
+        generateServiceToken,
         isLoadingServiceToken,
-        installCommand,
-        platform,
-        setPlatform,
         deploymentMode,
         setDeploymentMode,
-        addFleetServerHost,
+        fleetServerHostForm,
+        isFleetServerReady,
       } = fleetServerInstructions;
 
       return [
-        addFleetServerHostStep({ addFleetServerHost, disabled: false }),
-        deploymentModeStep({ deploymentMode, setDeploymentMode, disabled: false }),
-        ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
-        FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
+        getAddFleetServerHostStep({ fleetServerHostForm, disabled: false }),
+        getSetDeploymentModeStep({ deploymentMode, setDeploymentMode, disabled: false }),
+        getGenerateServiceTokenStep({ serviceToken, generateServiceToken, isLoadingServiceToken }),
+        getInstallFleetServerStep({ serviceToken, isFleetServerReady, disabled: false }),
       ];
     }, [fleetServerInstructions]);
 
