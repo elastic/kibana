@@ -14,6 +14,7 @@ import { sortNodes } from './sort_nodes';
 import { paginate } from '../../../pagination/paginate';
 import { getMetrics } from '../../../details/get_metrics';
 import { LegacyRequest } from '../../../../types';
+import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 
 /**
  * This function performs an optimization around the node listing tables in the UI. To avoid
@@ -52,13 +53,7 @@ export async function getPaginatedNodes(
   }: {
     clusterStats: {
       cluster_state?: { nodes: Record<string, Node> };
-      elasticsearch?: {
-        cluster: {
-          stats: {
-            state: { nodes: Record<string, Node> };
-          };
-        };
-      };
+      elasticsearch?: ElasticsearchModifiedSource['elasticsearch'];
     };
     nodesShardCount: { nodes: Record<string, { shardCount: number }> };
   }
@@ -69,9 +64,9 @@ export async function getPaginatedNodes(
 
   // Add `isOnline` and shards from the cluster state and shard stats
   const clusterState = clusterStats?.cluster_state ??
-    clusterStats?.elasticsearch?.cluster.stats.state ?? { nodes: {} };
+    clusterStats?.elasticsearch?.cluster?.stats?.state ?? { nodes: {} };
   for (const node of nodes) {
-    node.isOnline = !isUndefined(clusterState?.nodes[node.uuid]);
+    node.isOnline = !isUndefined(clusterState?.nodes && clusterState?.nodes[node.uuid]);
     node.shardCount = nodesShardCount?.nodes[node.uuid]?.shardCount ?? 0;
   }
 
