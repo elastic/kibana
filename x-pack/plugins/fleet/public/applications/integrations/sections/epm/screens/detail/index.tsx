@@ -146,11 +146,11 @@ export function Detail() {
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
 
   useEffect(() => {
-    if (oldPackageInstallStatus === packageInstallStatus) {
-      return;
+    if (packageInstallStatus === 'not_installed') {
+      setOldPackageStatus(packageInstallStatus);
     }
-    setOldPackageStatus(packageInstallStatus);
     if (packageInstallStatus === 'installed') {
+      setOldPackageStatus(packageInstallStatus);
       refreshPackageInfo();
     }
   }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
