@@ -43,7 +43,7 @@ export const hydrateSavedObjects = async ({
         missingInfoIds
       );
 
-      const updatedObjects: SyntheticsMonitor[] = [];
+      const updatedObjects: SyntheticsMonitorSavedObject[] = [];
       monitors
         .filter((monitor) => missingInfoIds.includes(monitor.id))
         .forEach((monitor) => {
@@ -70,7 +70,10 @@ export const hydrateSavedObjects = async ({
             }
           });
           if (isUpdated) {
-            updatedObjects.push({ ...monitor, attributes: resultAttributes });
+            updatedObjects.push({
+              ...monitor,
+              attributes: resultAttributes,
+            } as SyntheticsMonitorSavedObject);
           }
         });
 
