@@ -11,7 +11,7 @@ import { createCase, deleteAllCaseItems } from '../../../cases_api_integration/c
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
 
-export function CasesAppAPIServiceProvider({ getService }: FtrProviderContext) {
+export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
   const es = getService('es');
 
