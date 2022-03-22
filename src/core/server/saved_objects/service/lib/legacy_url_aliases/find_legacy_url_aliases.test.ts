@@ -51,7 +51,7 @@ describe('findLegacyUrlAliases', () => {
     });
   }
 
-  const obj1 = { type: 'obj-type', id: 'id-1' };
+  const obj1 = { type: 'obj-type', id: 'id-1:' }; // include a colon (special character) in the object ID to implicitly assert that the kuery node builder handles it gracefully
   const obj2 = { type: 'obj-type', id: 'id-2' };
   const obj3 = { type: 'obj-type', id: 'id-3' };
 
