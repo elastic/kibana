@@ -23,7 +23,6 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
-
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         rule_enabled_status: {
@@ -99,12 +98,11 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       // calls are successful, the call to aggregate may return stale totals if called
       // too early.
       await delay(1000);
-      const reponse = await supertest.get(
+      const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
-
-      expect(reponse.status).to.eql(200);
-      expect(reponse.body).to.eql({
+      expect(response.status).to.eql(200);
+      expect(response.body).to.eql({
         rule_enabled_status: {
           disabled: 0,
           enabled: 7,

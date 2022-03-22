@@ -866,6 +866,7 @@ export class RulesClient {
       );
       throw error;
     }
+
     const { filter: authorizationFilter } = authorizationTuple;
     const resp = await this.unsecuredSavedObjectsClient.find<RawRule, RuleAggregation>({
       ...options,
@@ -889,6 +890,7 @@ export class RulesClient {
         snoozed: {
           date_range: {
             field: 'alert.attributes.snoozeEndTime',
+            format: 'strict_date_time',
             ranges: [{ from: 'now' }],
           },
         },
