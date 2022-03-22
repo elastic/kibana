@@ -64,8 +64,8 @@ describe('Index Templates tab', () => {
 
   describe('when there are index templates', () => {
     // Add a default loadIndexTemplate response
-    const template = fixtures.getTemplate();
-    httpRequestsMockHelpers.setLoadTemplateResponse(template.name, template);
+    const templateMock = fixtures.getTemplate();
+    httpRequestsMockHelpers.setLoadTemplateResponse(templateMock.name, templateMock);
 
     const template1 = fixtures.getTemplate({
       name: `a${getRandomString()}`,
@@ -231,6 +231,7 @@ describe('Index Templates tab', () => {
       const { find, exists, actions, component } = testBed;
 
       // Composable templates
+      httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, templates[0]);
       await actions.clickTemplateAt(0);
       expect(exists('templateList')).toBe(true);
       expect(exists('templateDetails')).toBe(true);
@@ -242,6 +243,7 @@ describe('Index Templates tab', () => {
       });
       component.update();
 
+      httpRequestsMockHelpers.setLoadTemplateResponse(legacyTemplates[0].name, legacyTemplates[0]);
       await actions.clickTemplateAt(0, true);
 
       expect(exists('templateList')).toBe(true);
@@ -378,9 +380,11 @@ describe('Index Templates tab', () => {
 
         expect(httpSetup.post).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/delete_index_templates`,
-          expect.objectContaining({ body: JSON.stringify({
-            templates: [{ name: templates[0].name, isLegacy }],
-          })})
+          expect.objectContaining({
+            body: JSON.stringify({
+              templates: [{ name: templates[0].name, isLegacy }],
+            }),
+          })
         );
       });
     });
@@ -452,7 +456,7 @@ describe('Index Templates tab', () => {
           isLegacy: true,
         });
 
-        httpRequestsMockHelpers.setLoadTemplateResponse(template);
+        httpRequestsMockHelpers.setLoadTemplateResponse(template.name, template);
       });
 
       test('should show details when clicking on a template', async () => {
@@ -460,6 +464,7 @@ describe('Index Templates tab', () => {
 
         expect(exists('templateDetails')).toBe(false);
 
+        httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, templates[0]);
         await actions.clickTemplateAt(0);
 
         expect(exists('templateDetails')).toBe(true);
@@ -469,6 +474,7 @@ describe('Index Templates tab', () => {
         beforeEach(async () => {
           const { actions } = testBed;
 
+          httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, templates[0]);
           await actions.clickTemplateAt(0);
         });
 
@@ -533,7 +539,7 @@ describe('Index Templates tab', () => {
 
           const { find, actions, exists } = testBed;
 
-          httpRequestsMockHelpers.setLoadTemplateResponse(template.name, template);
+          httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, template);
           httpRequestsMockHelpers.setSimulateTemplateResponse({ simulateTemplate: 'response' });
 
           await actions.clickTemplateAt(0);
@@ -587,8 +593,10 @@ describe('Index Templates tab', () => {
 
           const { actions, find, exists } = testBed;
 
-          httpRequestsMockHelpers.setLoadTemplateResponse(templateWithNoOptionalFields.name, templateWithNoOptionalFields);
-
+          httpRequestsMockHelpers.setLoadTemplateResponse(
+            templates[0].name,
+            templateWithNoOptionalFields
+          );
           await actions.clickTemplateAt(0);
 
           expect(find('templateDetails.tab').length).toBe(5);
@@ -610,13 +618,12 @@ describe('Index Templates tab', () => {
         it('should render an error message if error fetching template details', async () => {
           const { actions, exists } = testBed;
           const error = {
-            status: 404,
+            statusCode: 404,
             error: 'Not found',
             message: 'Template not found',
           };
 
-          httpRequestsMockHelpers.setLoadTemplateResponse('test', undefined, { body: error });
-
+          httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, undefined, error);
           await actions.clickTemplateAt(0);
 
           expect(exists('sectionError')).toBe(true);
