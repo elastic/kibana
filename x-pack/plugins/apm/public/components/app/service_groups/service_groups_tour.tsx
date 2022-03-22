@@ -34,7 +34,7 @@ export function ServiceGroupsTour({
           <EuiText size="s">{content}</EuiText>
           <EuiSpacer />
           <div style={{ display: 'flex' }}>
-            <EuiText size="s" color="subdued">
+            <EuiText size="s">
               {i18n.translate('xpack.apm.serviceGroups.tour.content.link', {
                 defaultMessage: 'Learn more in the',
               })}{' '}
