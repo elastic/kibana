@@ -152,7 +152,7 @@ export function registerErrorCountAlertType({
               windowUnit: ruleParams.windowUnit,
             });
 
-            //The function args wrapped with arrays because this function is shared with the frontend and the vars there are parsed by parseTechnicalFields()
+            // The function args wrapped with arrays because this function is shared with the frontend and the vars there are parsed by parseTechnicalFields()
             const relativeViewInAppUrl = getAlertUrlErrorCount(
               [serviceName],
               [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]]
