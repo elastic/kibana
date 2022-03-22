@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { getRulesConfig } from './get_rules_config';
+import { getExecutionConfigForRuleType } from './get_rules_config';
 import { RulesConfig } from '../config';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 
 const ruleTypeId = 'test-rule-type-id';
 const config = {
+  minimumScheduleInterval: {
+    value: '2m',
+    enforce: false,
+  },
   execution: {
     timeout: '1m',
     actions: { max: 1000 },
@@ -18,6 +22,7 @@ const config = {
 } as RulesConfig;
 
 const configWithRuleType = {
+  ...config,
   execution: {
     ...config.execution,
     ruleTypeOverrides: [
@@ -32,7 +37,7 @@ const configWithRuleType = {
 describe('get rules config', () => {
   test('returns the rule type specific config and keeps the default values that are not overwritten', () => {
     expect(
-      getRulesConfig({
+      getExecutionConfigForRuleType({
         config: configWithRuleType,
         ruleTypeId,
         logger: loggingSystemMock.create().get(),
@@ -47,7 +52,7 @@ describe('get rules config', () => {
 
   test('applies the config params passed from the origin plugin', () => {
     expect(
-      getRulesConfig({
+      getExecutionConfigForRuleType({
         config,
         configFromOriginPlugin: { execution: { timeout: '23m' } },
         ruleTypeId,
@@ -63,7 +68,7 @@ describe('get rules config', () => {
 
   test('applies the existing timeout value and logs an error if the timeout param passed from the origin plugin is invalid', () => {
     expect(
-      getRulesConfig({
+      getExecutionConfigForRuleType({
         config,
         configFromOriginPlugin: { execution: { timeout: 'invalid' } },
         ruleTypeId,
@@ -79,7 +84,7 @@ describe('get rules config', () => {
 
   test("applies the default timeout value if the timeout param passed from the origin plugin is invalid and there isn't timeout from config", () => {
     expect(
-      getRulesConfig({
+      getExecutionConfigForRuleType({
         config: {
           ...config,
           execution: {
@@ -100,7 +105,11 @@ describe('get rules config', () => {
 
   test('returns the default config when there is neither rule type specific config not config from plugin', () => {
     expect(
-      getRulesConfig({ config, ruleTypeId, logger: loggingSystemMock.create().get() })
+      getExecutionConfigForRuleType({
+        config,
+        ruleTypeId,
+        logger: loggingSystemMock.create().get(),
+      })
     ).toEqual(config);
   });
 });

@@ -12,6 +12,9 @@ import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '../../licensing/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
+
+const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let ruleTypeRegistryParams: ConstructorOptions;
 
@@ -21,11 +24,12 @@ beforeEach(() => {
   jest.resetAllMocks();
   mockedLicenseState = licenseStateMock.create();
   ruleTypeRegistryParams = {
+    logger,
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
-    minimumScheduleInterval: '1m',
+    minimumScheduleInterval: { value: '1m', enforce: false },
   };
 });
 
@@ -161,7 +165,32 @@ describe('Create Lifecycle', () => {
       );
     });
 
-    test('throws if defaultScheduleInterval is less than configured minimumScheduleInterval', () => {
+    test('logs warning if defaultScheduleInterval is less than configured minimumScheduleInterval and enforce = false', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+        id: '123',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        producer: 'alerts',
+        defaultScheduleInterval: '10s',
+      };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(ruleType);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Rule type "123" has a default interval of "10s", which is less than the configured minimum of "1m".`
+      );
+    });
+
+    test('logs warning and updates default if defaultScheduleInterval is less than configured minimumScheduleInterval and enforce = true', () => {
       const ruleType: RuleType<never, never, never, never, never, 'default'> = {
         id: '123',
         name: 'Test',
@@ -178,17 +207,17 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         defaultScheduleInterval: '10s',
-        config: {
-          execution: {
-            actions: { max: 1000 },
-          },
-        },
       };
-      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      const registry = new RuleTypeRegistry({
+        ...ruleTypeRegistryParams,
+        minimumScheduleInterval: { value: '1m', enforce: true },
+      });
+      registry.register(ruleType);
 
-      expect(() => registry.register(ruleType)).toThrowError(
-        new Error(`Rule type \"123\" cannot specify a default interval less than 1m.`)
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Rule type "123" cannot specify a default interval less than the configured minimum of "1m". "1m" will be used.`
       );
+      expect(registry.get('123').defaultScheduleInterval).toEqual('1m');
     });
 
     test('throws if RuleType action groups contains reserved group id', () => {

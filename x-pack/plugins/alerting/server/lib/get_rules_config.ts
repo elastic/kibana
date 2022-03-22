@@ -13,7 +13,7 @@ import { translations } from '../constants/translations';
 
 const DEFAULT_EXECUTION_TIMEOUT = '5m';
 
-export const getRulesConfig = ({
+export const getExecutionConfigForRuleType = ({
   config,
   configFromOriginPlugin,
   ruleTypeId,

@@ -22,6 +22,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   action_variables: actionVariables,
   authorized_consumers: authorizedConsumers,
   does_set_recovery_context: doesSetRecoveryContext,
+  default_schedule_interval: defaultScheduleInterval,
   ...rest
 }: AsApiContract<RuleType>) => ({
   enabledInLicense,
@@ -32,6 +33,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   actionVariables,
   authorizedConsumers,
   doesSetRecoveryContext,
+  defaultScheduleInterval,
   ...rest,
 });
 
