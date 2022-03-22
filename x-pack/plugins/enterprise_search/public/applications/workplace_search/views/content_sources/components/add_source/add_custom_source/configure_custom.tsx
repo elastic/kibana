@@ -55,7 +55,7 @@ export const ConfigureCustom: React.FC = () => {
   return (
     <>
       <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
-      <EuiSpacer />
+      <EuiSpacer size="xxl" />
       <EuiFlexGroup
         justifyContent="flexStart"
         alignItems="stretch"
@@ -80,123 +80,121 @@ export const ConfigureCustom: React.FC = () => {
             </h2>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <form onSubmit={handleFormSubmit}>
-            <EuiForm>
-              <EuiText grow={false}>
-                {serviceType === 'custom' ? (
-                  <>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom"
-                        defaultMessage="To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces."
-                      />
-                    </p>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.docs.link.description"
-                        defaultMessage="{link} to learn more about Custom API Sources."
-                        values={{
-                          link: (
-                            <EuiLink href={docLinks.workplaceSearchCustomSources} target="_blank">
-                              {CONFIG_CUSTOM_LINK_TEXT}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.heading"
-                        defaultMessage="The {name} connector is fully customizable, and will be self-managed on the infrastructure of your choice."
-                        values={{
-                          name,
-                        }}
-                      />
-                    </p>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.description"
-                        defaultMessage="To be prepared for configuration, review our {deploymentGuideLink} for all prerequisites needed to quickly deploy the connector package. Finalize your configuration in Enterprise Search with a descriptive name for the {name} content source, and update the connector config file with the source ID provided in the next step."
-                        values={{
-                          name,
-                          deploymentGuideLink: (
-                            <EuiLink target="_blank" href={documentationUrl}>
-                              <FormattedMessage
-                                id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.linkLabel"
-                                defaultMessage="documentation"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
-                    <p>
-                      <EuiLink target="_blank" href={`https://github.com/${githubRepository}`}>
-                        <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.githubRepoLinkLabel"
-                          defaultMessage="Customize the connector here."
-                        />
-                      </EuiLink>
-                    </p>
-                    <p>
-                      <EuiLink
-                        target="_blank"
-                        href={'https://discuss.elastic.co/c/enterprise-search/84'}
-                      >
-                        <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.discussLinkLabel"
-                          defaultMessage="Questions? Discuss here."
-                        />
-                      </EuiLink>
-                    </p>
-                    <p>
-                      <EuiLink target="_blank" href={'https://www.elastic.co/kibana/feedback'}>
-                        <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.feedbackLinkLabel"
-                          defaultMessage="We're always looking to improve. Share your feedback  "
-                        />
-                      </EuiLink>
-                    </p>
-                  </>
-                )}
-              </EuiText>
-              <EuiSpacer size="xxl" />
-              <EuiFormRow label={SOURCE_NAME_LABEL}>
-                <EuiFieldText
-                  name="source-name"
-                  required
-                  data-test-subj="CustomSourceNameInput"
-                  value={customSourceNameValue}
-                  onChange={handleNameChange}
-                />
-              </EuiFormRow>
-              <EuiSpacer />
-              <EuiFormRow>
-                <EuiButton
-                  color="primary"
-                  fill
-                  type="submit"
-                  isLoading={buttonLoading}
-                  data-test-subj="CreateCustomButton"
-                >
-                  {serviceType === 'custom' ? (
-                    CONFIG_CUSTOM_BUTTON
-                  ) : (
+          <EuiForm component="form" onSubmit={handleFormSubmit}>
+            <EuiText grow={false}>
+              {serviceType === 'custom' ? (
+                <>
+                  <p>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.createNamedSourceButtonLabel"
-                      defaultMessage="Configure {name}"
+                      id="xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom"
+                      defaultMessage="To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces."
+                    />
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.docs.link.description"
+                      defaultMessage="{link} to learn more about Custom API Sources."
+                      values={{
+                        link: (
+                          <EuiLink href={docLinks.workplaceSearchCustomSources} target="_blank">
+                            {CONFIG_CUSTOM_LINK_TEXT}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.heading"
+                      defaultMessage="The {name} connector is fully customizable, and will be self-managed on the infrastructure of your choice."
                       values={{
                         name,
                       }}
                     />
-                  )}
-                </EuiButton>
-              </EuiFormRow>
-            </EuiForm>
-          </form>
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.description"
+                      defaultMessage="To be prepared for configuration, review our {deploymentGuideLink} for all prerequisites needed to quickly deploy the connector package. Finalize your configuration in Enterprise Search with a descriptive name for the {name} content source, and update the connector config file with the source ID provided in the next step."
+                      values={{
+                        name,
+                        deploymentGuideLink: (
+                          <EuiLink target="_blank" href={documentationUrl}>
+                            <FormattedMessage
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.linkLabel"
+                              defaultMessage="documentation"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </p>
+                  <p>
+                    <EuiLink target="_blank" href={`https://github.com/${githubRepository}`}>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.githubRepoLinkLabel"
+                        defaultMessage="Customize the connector here."
+                      />
+                    </EuiLink>
+                  </p>
+                  <p>
+                    <EuiLink
+                      target="_blank"
+                      href={'https://discuss.elastic.co/c/enterprise-search/84'}
+                    >
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.discussLinkLabel"
+                        defaultMessage="Questions? Discuss here."
+                      />
+                    </EuiLink>
+                  </p>
+                  <p>
+                    <EuiLink target="_blank" href={'https://www.elastic.co/kibana/feedback'}>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.feedbackLinkLabel"
+                        defaultMessage="We're always looking to improve. Share your feedback  "
+                      />
+                    </EuiLink>
+                  </p>
+                </>
+              )}
+            </EuiText>
+            <EuiSpacer size="xxl" />
+            <EuiFormRow label={SOURCE_NAME_LABEL}>
+              <EuiFieldText
+                name="source-name"
+                required
+                data-test-subj="CustomSourceNameInput"
+                value={customSourceNameValue}
+                onChange={handleNameChange}
+              />
+            </EuiFormRow>
+            <EuiSpacer />
+            <EuiFormRow>
+              <EuiButton
+                color="primary"
+                fill
+                type="submit"
+                isLoading={buttonLoading}
+                data-test-subj="CreateCustomButton"
+              >
+                {serviceType === 'custom' ? (
+                  CONFIG_CUSTOM_BUTTON
+                ) : (
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.createNamedSourceButtonLabel"
+                    defaultMessage="Configure {name}"
+                    values={{
+                      name,
+                    }}
+                  />
+                )}
+              </EuiButton>
+            </EuiFormRow>
+          </EuiForm>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

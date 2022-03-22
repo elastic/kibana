@@ -50,7 +50,7 @@ export const SaveCustom: React.FC = () => {
   return (
     <>
       <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
-      <EuiSpacer />
+      <EuiSpacer size="xxl" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
@@ -60,7 +60,7 @@ export const SaveCustom: React.FC = () => {
               style={{ marginTop: 'auto', marginBottom: 'auto' }}
             >
               <EuiFlexItem>
-                <EuiIcon type="checkInCircleFilled" color="#42CC89" size="xxl" />
+                <EuiIcon type="checkInCircleFilled" color="success" size="xxl" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="l">

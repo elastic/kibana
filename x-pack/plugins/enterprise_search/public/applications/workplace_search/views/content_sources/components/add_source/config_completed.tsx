@@ -59,7 +59,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
             <EuiFlexItem>
-              <EuiIcon type="checkInCircleFilled" color="#42CC89" size="xxl" />
+              <EuiIcon type="checkInCircleFilled" color="success" size="xxl" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
