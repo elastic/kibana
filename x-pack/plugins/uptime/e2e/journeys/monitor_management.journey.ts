@@ -107,7 +107,9 @@ const createMonitorJourney = ({
       });
 
       after(async () => {
+        await uptime.navigateToMonitorManagement();
         await deleteMonitor();
+        await uptime.enableMonitorManagement(false);
       });
 
       step('Go to monitor-management', async () => {
@@ -168,6 +170,10 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
     await uptime.waitForLoadingToFinish();
   });
 
+  after(async () => {
+    await uptime.enableMonitorManagement(false);
+  });
+
   step('Go to monitor-management', async () => {
     await uptime.navigateToMonitorManagement();
   });
@@ -182,6 +188,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
   });
 
   step('check breadcrumbs', async () => {
+    await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
     const breadcrumbs = await page.$$('[data-test-subj="breadcrumb"]');
     expect(await breadcrumbs[1].textContent()).toEqual('Monitor management');

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Page } from '@elastic/synthetics';
+import { Page, expect } from '@elastic/synthetics';
 import { DataStream } from '../../common/runtime_types/monitor_management';
 import { getQuerystring } from '../journeys/utils';
 import { loginPageProvider } from './login';
@@ -40,13 +40,27 @@ export function monitorManagementPageProvider({
       });
     },
 
-    async enableMonitorManagement() {
-      const toggle = await this.findByTestSubj('syntheticsEnableSwitch');
-      const isChecked = await toggle.getAttribute('aria-checked');
-      const isEnabled = isChecked === 'true' ? true : false;
-      if (!isEnabled) {
+    async enableMonitorManagement(shouldEnable: boolean = true) {
+      const toggle = await this.getEnableToggle();
+      const isEnabled = await this.checkIsEnabled();
+      if (isEnabled !== shouldEnable) {
         await toggle.click();
       }
+      if (shouldEnable) {
+        await this.findByText('Monitor Management enabled successfully.');
+      } else {
+        await this.findByText('Monitor Management disabled successfully.');
+      }
+    },
+
+    async getEnableToggle() {
+      return await this.findByTestSubj('syntheticsEnableSwitch');
+    },
+
+    async checkIsEnabled() {
+      const toggle = await this.getEnableToggle();
+      const isChecked = await toggle.getAttribute('aria-checked');
+      return isChecked === 'true' ? true : false;
     },
 
     async navigateToAddMonitor() {

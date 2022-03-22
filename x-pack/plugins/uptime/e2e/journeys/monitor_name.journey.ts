@@ -26,6 +26,7 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
   after(async () => {
     await uptime.navigateToMonitorManagement();
     await uptime.deleteMonitor();
+    await uptime.enableMonitorManagement(false);
   });
 
   step('Go to monitor-management', async () => {
