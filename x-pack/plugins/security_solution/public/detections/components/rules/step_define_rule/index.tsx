@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import { EuiButtonEmpty, EuiComboBox, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
@@ -47,6 +47,7 @@ import {
   UseMultiFields,
   useForm,
   useFormData,
+  FIELD_TYPES,
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
@@ -62,6 +63,13 @@ import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import {
+  sourcererActions,
+  sourcererModel,
+  sourcererSelectors,
+} from '../../../../common/store/sourcerer';
+import { usePickIndexPatterns } from '../../../../common/components/sourcerer/use_pick_index_patterns';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -149,13 +157,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     // docValueFields,
     indexPattern,
     runtimeMappings,
-    selectedPatterns,
-    dataViewId: selectedDataViewId,
+    // selectedPatterns,
+    dataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(getScopeFromPath(pathname));
+  // console.log('SELECTED PATTERNS', selectedPatterns);
   console.log('INDEX PATTERN', indexPattern);
   console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
-  console.log('DATA VIEW ID', selectedDataViewId);
+  // console.log('DATA VIEW ID', selectedDataViewId);
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const {
+    defaultDataView,
+    kibanaDataViews,
+    signalIndexName,
+    sourcererScope: {
+      selectedDataViewId,
+      selectedPatterns,
+      missingPatterns: sourcererMissingPatterns,
+    },
+  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, getScopeFromPath(pathname)));
+
+  console.log('ALL OPTIONS', kibanaDataViews);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -405,7 +427,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
-              <CommonUseField path="dataViewId" />
+              <CommonUseField
+                path="dataViewId"
+                field={{
+                  type: FIELD_TYPES.COMBO_BOX,
+                }}
+                singleSelection={{ asPlainText: true }}
+                onChange={() => console.log('something happened')}
+                options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
+                placeholder={'hello world'}
+                selectedOptions={() => console.log('SELECTED')}
+              />
+              {/* <EuiComboBox
+                path="dataViewId"
+                fullWidth
+                singleSelection={{ asPlainText: true }}
+                onChange={onChangeIndexPatterns}
+                options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
+                placeholder={i18n.PICK_INDEX_PATTERNS}
+                renderOption={renderOption}
+                selectedOptions={selectedOptions}
+              /> */}
               <CommonUseField
                 path="index"
                 config={{

@@ -91,6 +91,7 @@ export const singleSearchAfter = async ({
         searchErrors,
       };
     } catch (exc) {
+      logger.error(JSON.stringify(exc, null, 2));
       logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
       if (
         exc.message.includes('No mapping found for [@timestamp] in order to sort on') ||
