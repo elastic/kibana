@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { extent, max, min } from 'd3';
 import { CHART_TYPE, ChartType } from '../constants/charts';
 import type { SeriesConfigWithMetadata } from '../types/results';
-import type { ChartPoint } from '../types/results';
 
 /**
  * TODO check if these flags are still needed
@@ -63,51 +61,4 @@ export function getChartType(config: SeriesConfigWithMetadata): ChartType {
   }
 
   return chartType;
-}
-
-export function chartLimits(data: ChartPoint[] = []) {
-  const domain = extent(data, (d) => {
-    let metricValue = d.value as number;
-    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
-      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
-      metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
-    }
-    return metricValue;
-  });
-  const limits = { max: domain[1], min: domain[0] };
-
-  if (limits.max === limits.min) {
-    // @ts-ignore
-    limits.max = max(data, (d) => {
-      if (d.typical) {
-        return Math.max(d.value as number, ...d.typical);
-      } else {
-        // If analysis with by and over field, and more than one cause,
-        // there will be no actual and typical value.
-        // TODO - produce a better visual for population analyses.
-        return d.value;
-      }
-    });
-    // @ts-ignore
-    limits.min = min(data, (d) => {
-      if (d.typical) {
-        return Math.min(d.value as number, ...d.typical);
-      } else {
-        // If analysis with by and over field, and more than one cause,
-        // there will be no actual and typical value.
-        // TODO - produce a better visual for population analyses.
-        return d.value;
-      }
-    });
-  }
-
-  // add padding of 5% of the difference between max and min
-  // if we ended up with the same value for both of them
-  if (limits.max === limits.min) {
-    const padding = limits.max * 0.05;
-    limits.max += padding;
-    limits.min -= padding;
-  }
-
-  return limits;
 }

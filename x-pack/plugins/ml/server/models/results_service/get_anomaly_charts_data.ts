@@ -9,6 +9,7 @@ import type { IScopedClusterClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { extent, max, min } from 'd3';
 import type { MlClient } from '../../lib/ml_client';
 import { isPopulatedObject, isRuntimeMappings } from '../../../common';
 import type {
@@ -46,8 +47,55 @@ import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
 import { CHART_TYPE, ChartType } from '../../../common/constants/charts';
-import { getChartType, chartLimits } from '../../../common/util/chart_utils';
+import { getChartType } from '../../../common/util/chart_utils';
 import { MlJob } from '../../index';
+
+export function chartLimits(data: ChartPoint[] = []) {
+  const domain = extent(data, (d) => {
+    let metricValue = d.value as number;
+    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+      metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+    }
+    return metricValue;
+  });
+  const limits = { max: domain[1], min: domain[0] };
+
+  if (limits.max === limits.min) {
+    // @ts-ignore
+    limits.max = max(data, (d) => {
+      if (d.typical) {
+        return Math.max(d.value as number, ...d.typical);
+      } else {
+        // If analysis with by and over field, and more than one cause,
+        // there will be no actual and typical value.
+        // TODO - produce a better visual for population analyses.
+        return d.value;
+      }
+    });
+    // @ts-ignore
+    limits.min = min(data, (d) => {
+      if (d.typical) {
+        return Math.min(d.value as number, ...d.typical);
+      } else {
+        // If analysis with by and over field, and more than one cause,
+        // there will be no actual and typical value.
+        // TODO - produce a better visual for population analyses.
+        return d.value;
+      }
+    });
+  }
+
+  // add padding of 5% of the difference between max and min
+  // if we ended up with the same value for both of them
+  if (limits.max === limits.min) {
+    const padding = limits.max * 0.05;
+    limits.max += padding;
+    limits.min -= padding;
+  }
+
+  return limits;
+}
 
 const CHART_MAX_POINTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
