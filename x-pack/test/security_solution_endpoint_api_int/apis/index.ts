@@ -27,14 +27,14 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     before(async () => {
       await ingestManager.setup();
     });
-    // loadTestFile(require.resolve('./resolver/index'));
-    // loadTestFile(require.resolve('./metadata'));
-    // loadTestFile(require.resolve('./policy'));
-    // loadTestFile(require.resolve('./package'));
-    // loadTestFile(require.resolve('./endpoint_authz'));
-    // loadTestFile(require.resolve('./endpoint_artifacts/trusted_apps'));
-    // loadTestFile(require.resolve('./endpoint_artifacts/event_filters'));
-    // loadTestFile(require.resolve('./endpoint_artifacts/host_isolation_exceptions'));
+    loadTestFile(require.resolve('./resolver/index'));
+    loadTestFile(require.resolve('./metadata'));
+    loadTestFile(require.resolve('./policy'));
+    loadTestFile(require.resolve('./package'));
+    loadTestFile(require.resolve('./endpoint_authz'));
+    loadTestFile(require.resolve('./endpoint_artifacts/trusted_apps'));
+    loadTestFile(require.resolve('./endpoint_artifacts/event_filters'));
+    loadTestFile(require.resolve('./endpoint_artifacts/host_isolation_exceptions'));
     loadTestFile(require.resolve('./endpoint_artifacts/blocklists'));
   });
 }
