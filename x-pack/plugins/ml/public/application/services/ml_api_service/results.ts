@@ -12,7 +12,6 @@ import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anom
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
-  SeriesConfigWithMetadata,
 } from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
@@ -24,6 +23,7 @@ import type {
 import type { MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import type { ExplorerChartsData } from '../../../../common/types/results';
 
 export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
 
@@ -190,7 +190,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       numberOfPoints,
       timeBounds,
     });
-    return httpService.http$<SeriesConfigWithMetadata[]>({
+    return httpService.http$<ExplorerChartsData>({
       path: `${basePath()}/results/anomaly_charts`,
       method: 'POST',
       body,

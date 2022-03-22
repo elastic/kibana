@@ -20,6 +20,7 @@ import type {
   ChartRecord,
   ChartPoint,
   SeriesConfig,
+  ExplorerChartsData,
 } from '../../../common/types/results';
 import {
   isMappableJob,
@@ -60,6 +61,17 @@ const ML_TIME_FIELD_NAME = 'timestamp';
 export interface ChartRange {
   min: number;
   max: number;
+}
+
+export function getDefaultChartsData(): ExplorerChartsData {
+  return {
+    chartsPerRow: 1,
+    errorMessages: undefined,
+    seriesToPlot: [],
+    // default values, will update on every re-render
+    tooManyBuckets: false,
+    timeFieldName: 'timestamp',
+  };
 }
 
 export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClusterClient) {
@@ -591,7 +603,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           : mlFunctionToESAggregation(detector.function),
       timeField: job.data_description.time_field!,
       interval: job.analysis_config.bucket_span,
-      datafeedConfig: job.datafeed_config,
+      datafeedConfig: job.datafeed_config!,
       summaryCountFieldName: job.analysis_config.summary_count_field_name,
       metricFieldName: undefined,
     };
@@ -843,6 +855,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     severity = 0,
     maxSeries = 6
   ) {
+    const data = getDefaultChartsData();
+
     const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= severity;
     });
@@ -850,6 +864,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       combinedJobRecords,
       filteredRecords
     );
+
+    data.errorMessages = errorMessages;
 
     if (!Array.isArray(allSeriesRecords)) return;
 
@@ -907,6 +923,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       numberOfPoints,
       timeBounds
     );
+
+    data.tooManyBuckets = tooManyBuckets;
 
     // first load and wait for required data,
     // only after that trigger data processing and page render.
@@ -1092,7 +1110,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       seriesToPlot.push(...mapData);
     }
 
-    return seriesToPlot;
+    data.seriesToPlot = seriesToPlot;
+
+    return data;
   }
 
   async function getMetricData(
@@ -1105,6 +1125,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     // If the job uses aggregation or scripted fields, and if it's a config we don't support
     // use model plot data if model plot is enabled
     // else if source data can be plotted, use that, otherwise model plot will be available.
+    // @ts-ignore
     const useSourceData = isSourceDataChartableForDetector(job, detectorIndex);
 
     if (useSourceData) {

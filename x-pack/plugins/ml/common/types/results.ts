@@ -115,3 +115,14 @@ export interface InfoTooltip {
 export interface ChartRecord extends RecordForInfluencer {
   function: string;
 }
+
+export interface ExplorerChartSeriesErrorMessages {
+  [key: string]: Set<JobId>;
+}
+export interface ExplorerChartsData {
+  chartsPerRow: number;
+  seriesToPlot: SeriesConfigWithMetadata[];
+  tooManyBuckets: boolean;
+  timeFieldName: string;
+  errorMessages: ExplorerChartSeriesErrorMessages | undefined;
+}

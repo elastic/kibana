@@ -11,6 +11,7 @@ import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
 import { createTimefilterMock } from '../contexts/kibana/__mocks__/use_timefilter';
 import moment from 'moment';
+import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 
 export const mlResultsServiceMock = {};
 
@@ -40,7 +41,7 @@ describe('AnomalyExplorerChartsService', () => {
 
     mlApiServicesMock.jobs.jobForCloning.mockImplementation(() => Promise.resolve({}));
 
-    mlApiServicesMock.results.getAnomalyCharts$.mockReturnValue(of([]));
+    mlApiServicesMock.results.getAnomalyCharts$.mockReturnValue(of(getDefaultChartsData()));
 
     timefilterMock = createTimefilterMock();
     timefilterMock.getActiveBounds.mockReturnValue({
@@ -81,9 +82,11 @@ describe('AnomalyExplorerChartsService', () => {
     );
     expect(result).toEqual({
       chartsPerRow: 1,
+      errorMessages: undefined,
       seriesToPlot: [],
-      timeFieldName: 'timestamp',
+      // default values, will update on every re-render
       tooManyBuckets: false,
+      timeFieldName: 'timestamp',
     });
   });
 });

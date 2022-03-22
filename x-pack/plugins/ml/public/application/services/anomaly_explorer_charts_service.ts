@@ -14,10 +14,7 @@ import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
 import type { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
 import { isPopulatedObject } from '../../../common/util/object_utils';
-import {
-  ExplorerChartsData,
-  getDefaultChartsData,
-} from '../explorer/explorer_charts/explorer_charts_container_service';
+import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { TimeRangeBounds } from '../util/time_buckets';
 import { isDefined } from '../../../common/types/guards';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
@@ -137,16 +134,12 @@ export class AnomalyExplorerChartsService {
         influencerFilterQuery
       )
       .pipe(
-        mapObservable((v) => {
-          const data = getDefaultChartsData();
-
+        mapObservable((data) => {
           // Calculate the number of charts per row, depending on the width available, to a max of 4.
           const chartsPerRow = Math.min(
             Math.max(Math.floor(chartsContainerWidth / 550), 1),
             MAX_CHARTS_PER_ROW
           );
-
-          data.seriesToPlot = v;
 
           data.chartsPerRow = chartsPerRow;
 
