@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
   LensAppServices,
@@ -21,12 +22,16 @@ import { tableHasFormulas } from '../../../../../src/plugins/data/common';
 import { exporters } from '../../../../../src/plugins/data/public';
 import type { DataView } from '../../../../../src/plugins/data_views/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  selectAutoApplyEnabled,
+  disableAutoApply,
+  enableAutoApply,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
 import {
@@ -34,6 +39,8 @@ import {
   getLayerMetaInfo,
   getShowUnderlyingDataLabel,
 } from './show_underlying_data';
+import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
+import { writeToStorage } from '../settings_storage';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -140,6 +147,17 @@ function getLensTopNavConfig(options: {
     tooltip: tooltips.showExportWarning,
   });
 
+  topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.settings', {
+      defaultMessage: 'Settings',
+    }),
+    run: actions.openSettings,
+    testId: 'lnsApp_settingsButton',
+    description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
+      defaultMessage: 'Open the Lens settings menu',
+    }),
+  });
+
   if (showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
@@ -200,6 +218,7 @@ export const LensTopNavMenu = ({
   initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
+  theme$,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -219,6 +238,19 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
 
+  const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+
+  const toggleAutoApply = useCallback(() => {
+    trackUiEvent('toggle_autoapply');
+
+    writeToStorage(
+      new Storage(localStorage),
+      AUTO_APPLY_DISABLED_STORAGE_KEY,
+      String(autoApplyEnabled)
+    );
+    dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
+  }, [dispatch, autoApplyEnabled]);
+
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
@@ -233,6 +265,7 @@ export const LensTopNavMenu = ({
     visualization,
     filters,
   } = useLensSelector((state) => state.lens);
+
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
@@ -465,6 +498,8 @@ export const LensTopNavMenu = ({
             columns: meta.columns,
           });
         },
+        openSettings: (anchorElement: HTMLElement) =>
+          toggleSettingsMenuOpen({ autoApplyEnabled, toggleAutoApply, anchorElement, theme$ }),
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -497,6 +532,9 @@ export const LensTopNavMenu = ({
     filters,
     indexPatterns,
     data.query.timefilter.timefilter,
+    autoApplyEnabled,
+    toggleAutoApply,
+    theme$,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
