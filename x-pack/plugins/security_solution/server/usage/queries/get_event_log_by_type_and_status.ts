@@ -59,7 +59,7 @@ export const getEventLogByTypeAndStatus = async ({
     return typeAndStatus;
   } catch (error) {
     logger.debug(
-      `Error trying to get event log by type and status. Error message is: ${error.message}. Error is: ${error}. Returning empty initialized object.`
+      `Error trying to get event log by type and status. Error message is: "${error.message}". Error is: "${error}". Returning empty initialized object.`
     );
     return getInitialEventLogUsage();
   }
@@ -97,9 +97,7 @@ const _getEventLogByTypeAndStatus = async ({
 
   const elasticRuleIds = ruleResults
     .filter((ruleResult) => ruleResult.attributes.params.immutable)
-    .map((ruleResult) => {
-      return ruleResult.id;
-    });
+    .map((ruleResult) => ruleResult.id);
 
   const queryForTotal = getSearchForAllRules({ eventLogIndex, aggs });
   const queryForElasticRules = getSearchForElasticRules({ eventLogIndex, aggs, elasticRuleIds });

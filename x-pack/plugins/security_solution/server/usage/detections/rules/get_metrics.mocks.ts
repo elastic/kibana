@@ -515,6 +515,387 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
 });
 
 /**
+ * Returns empty event log all rules for testing when you get all the rules.
+ * See "getEventLogAllRulesResult" for the transform results for use in tests
+ * @see get_event_log_by_type_and_status
+ * @see getEventLogAllRulesResult
+ * @returns The Elasticsearch aggregation for all the rules
+ */
+export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusAggs> => ({
+  took: 495,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    max_score: null,
+    hits: [],
+  },
+  aggregations: {
+    eventActionExecutionMetrics: {
+      doc_count: 0,
+      'siem.queryRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.savedQueryRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.eqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.thresholdRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.mlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.indicatorRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+    },
+    eventActionStatusChange: {
+      doc_count: 0,
+      'partial failure': {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+      failed: {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+      succeeded: {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+    },
+  },
+});
+
+/**
  * Returns the event log total rules for testing when you get elastic rules specifically.
  * See "getEventLogElasticRulesResult" for the transform results for use in tests
  * @see get_event_log_by_type_and_status
@@ -918,7 +1299,388 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
 });
 
 /**
- * Returns the event log total rules for testing when you get custom rules specifically.
+ * Returns empty event log total rules for testing when you get elastic rules specifically.
+ * See "getEventLogElasticRulesResult" for the transform results for use in tests
+ * @see get_event_log_by_type_and_status
+ * @see getEventLogElasticRulesResult
+ * @returns The Elasticsearch aggregation for "elastic rules"/"immutable"/"pre-built rules"
+ */
+export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTypeStatusAggs> => ({
+  took: 488,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    max_score: null,
+    hits: [],
+  },
+  aggregations: {
+    eventActionExecutionMetrics: {
+      doc_count: 0,
+      'siem.queryRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.savedQueryRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.eqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.thresholdRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.mlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.indicatorRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+    },
+    eventActionStatusChange: {
+      doc_count: 0,
+      'partial failure': {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+      failed: {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+      succeeded: {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+    },
+  },
+});
+
+/**
+ * Returns the event log custom rules for testing when you get custom rules specifically.
  * See "getEventLogCustomRulesResult" for the transform results for use in tests
  * @see get_event_log_by_type_and_status
  * @see getEventLogCustomRulesResult
@@ -1275,6 +2037,387 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
           doc_count: 161,
           cardinality: {
             value: 1,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+    },
+  },
+});
+
+/**
+ * Returns the empty event log total rules for testing when you get custom rules specifically.
+ * See "getEventLogCustomRulesResult" for the transform results for use in tests
+ * @see get_event_log_by_type_and_status
+ * @see getEventLogCustomRulesResult
+ * @returns The Elasticsearch aggregation for "custom rules"
+ */
+export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogTypeStatusAggs> => ({
+  took: 487,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    max_score: null,
+    hits: [],
+  },
+  aggregations: {
+    eventActionExecutionMetrics: {
+      doc_count: 0,
+      'siem.queryRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.savedQueryRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.eqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.thresholdRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.mlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+      'siem.indicatorRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+      },
+    },
+    eventActionStatusChange: {
+      doc_count: 0,
+      'partial failure': {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+      failed: {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.savedQueryRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.thresholdRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.mlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.indicatorRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+      },
+      succeeded: {
+        doc_count: 0,
+        'siem.queryRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
           },
         },
         'siem.savedQueryRule': {
