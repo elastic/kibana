@@ -628,8 +628,7 @@ export const RulesList: React.FunctionComponent = () => {
                 <EuiFlexItem grow={false}>
                   {item.showIntervalWarning && (
                     <EuiToolTip
-                      data-test-subj="ruleInterval-warning-tooltip"
-                      position="top"
+                      data-test-subj="ruleInterval-config-tooltip"
                       title={i18n.translate(
                         'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipTitle',
                         {
@@ -650,8 +649,22 @@ export const RulesList: React.FunctionComponent = () => {
                           },
                         }
                       )}
+                      position="top"
                     >
-                      <EuiIcon size="m" color="warning" type="alert" className="eui-alignRight" />
+                      <EuiButtonIcon
+                        color="text"
+                        data-test-subj="ruleInterval-config-icon"
+                        onClick={() => {
+                          if (item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)) {
+                            onRuleEdit(item);
+                          }
+                        }}
+                        iconType="iInCircle"
+                        aria-label={i18n.translate(
+                          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalIconAriaLabel',
+                          { defaultMessage: 'Below configured minimum interval' }
+                        )}
+                      />
                     </EuiToolTip>
                   )}
                 </EuiFlexItem>
