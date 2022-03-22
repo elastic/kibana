@@ -194,6 +194,7 @@ export function registerTransactionDurationAlertType({
           windowUnit: ruleParams.windowUnit,
         });
 
+        // The function args wrapped with arrays because this function is shared with the frontend and the vars there are parsed by parseTechnicalFields()
         const relativeViewInAppUrl = getAlertUrlTransactionDuration(
           [ruleParams.serviceName],
           [
