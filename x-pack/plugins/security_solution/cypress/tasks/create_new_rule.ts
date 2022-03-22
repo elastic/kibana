@@ -373,18 +373,14 @@ export const fillIndicatorMatchRow = ({
     .eq(0)
     .type(indexField);
   if (computedValueRows === 'indexField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indexField}"]`)
-      .should('be.visible')
-      .then(([e]) => e.click());
+    cy.get(`button[title="${indexField}"]`).then(([e]) => e.click());
   }
   cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
     .eq(computedRowNumber * 2 - 1)
     .type(indicatorIndexField);
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indicatorIndexField}"]`)
-      .should('be.visible')
-      .then(([e]) => e.click());
+    cy.get(`button[title="${indicatorIndexField}"]`).then(([e]) => e.click());
   }
 };
 
@@ -443,7 +439,7 @@ export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_IN
 export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
-export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON).should('exist');
+export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
 /** Returns the indicator index pattern */
 export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
@@ -453,7 +449,7 @@ export const getIndicatorIndicatorIndex = () =>
   cy.get(THREAT_MATCH_INDICATOR_INDICATOR_INDEX).eq(0);
 
 /** Returns the index pattern's clear button  */
-export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN).should('exist').first();
+export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN).first();
 
 /** Returns the custom query input */
 export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT).eq(0);
