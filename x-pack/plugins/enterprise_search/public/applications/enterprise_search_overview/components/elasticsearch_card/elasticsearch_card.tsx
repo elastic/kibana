@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { ELASTICSEARCH_GUIDE_PATH } from '../../routes';
@@ -40,10 +39,6 @@ export const ElasticsearchCard: React.FC = () => {
           {/* div is needed to prevent button from stretching */}
           <div>
             <EuiButtonTo to={`${ELASTICSEARCH_GUIDE_PATH}`}>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.overview.elasticsearchCard.button"
-                defaultMessage="Get Started"
-              />
               {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCard.button', {
                 defaultMessage: 'Get Started',
               })}
