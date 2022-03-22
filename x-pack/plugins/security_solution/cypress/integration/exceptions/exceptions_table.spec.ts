@@ -18,7 +18,6 @@ import {
 } from '../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
 import {
   deleteExceptionListWithRuleReference,
   deleteExceptionListWithoutRuleReference,
@@ -177,7 +176,7 @@ describe('Exceptions Table', () => {
 describe('Exceptions Table - read only', () => {
   before(() => {
     // First we login as a privileged user to create exception list
-    cleanKibana();
+    esArchiverResetKibana();
     login(ROLES.platform_engineer);
     visitWithoutDateRange(EXCEPTIONS_URL, ROLES.platform_engineer);
     createExceptionList(getExceptionList(), getExceptionList().list_id);
