@@ -19,8 +19,11 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
 
   const testFiles = [require.resolve('./tests/playwright')];
 
-  const testJobId = process.env.TEST_JOB_ID ?? uuid();
-  log.info(`👷 JOB ID ${testJobId}👷`);
+  const testBuildId = process.env.BUILDKITE_BUILD_ID ?? `local-${uuid()}`;
+  const testJobId = process.env.BUILDKITE_JOB_ID ?? `local-${uuid()}`;
+  const executionId = uuid();
+
+  log.info(`👷 BUILD ID ${testBuildId}\nJOB ID ${testJobId}\nEXECUTION ID:${executionId}`);
 
   return {
     testFiles,
