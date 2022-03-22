@@ -11,7 +11,11 @@ import { navTabsHostDetails } from './nav_tabs';
 describe('navTabsHostDetails', () => {
   const mockHostName = 'mockHostName';
   test('it should skip anomalies tab if without mlUserPermission', () => {
-    const tabs = navTabsHostDetails(mockHostName, false, false);
+    const tabs = navTabsHostDetails({
+      hasMlUserPermissions: false,
+      isRiskyHostsEnabled: false,
+      hostName: mockHostName,
+    });
     expect(tabs).toHaveProperty(HostsTableType.authentications);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).not.toHaveProperty(HostsTableType.anomalies);
@@ -20,7 +24,12 @@ describe('navTabsHostDetails', () => {
   });
 
   test('it should display anomalies tab if with mlUserPermission', () => {
-    const tabs = navTabsHostDetails(mockHostName, true, false);
+    const tabs = navTabsHostDetails({
+      hasMlUserPermissions: true,
+      isRiskyHostsEnabled: false,
+      hostName: mockHostName,
+    });
+
     expect(tabs).toHaveProperty(HostsTableType.authentications);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).toHaveProperty(HostsTableType.anomalies);
@@ -29,7 +38,12 @@ describe('navTabsHostDetails', () => {
   });
 
   test('it should display risky hosts tab if when risky hosts is enabled', () => {
-    const tabs = navTabsHostDetails(mockHostName, false, true);
+    const tabs = navTabsHostDetails({
+      hasMlUserPermissions: false,
+      isRiskyHostsEnabled: true,
+      hostName: mockHostName,
+    });
+
     expect(tabs).toHaveProperty(HostsTableType.authentications);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).not.toHaveProperty(HostsTableType.anomalies);

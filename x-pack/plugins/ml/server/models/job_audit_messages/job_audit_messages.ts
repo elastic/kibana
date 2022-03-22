@@ -11,7 +11,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
-import type { JobSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 import type { JobMessage } from '../../../common/types/audit_message';
 import { AuditMessage } from '../../../common/types/anomaly_detection_jobs';
@@ -66,7 +66,7 @@ export function jobAuditMessagesProvider(
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
   async function getJobAuditMessages(
-    jobSavedObjectService: JobSavedObjectService,
+    mlSavedObjectService: MLSavedObjectService,
     {
       jobId,
       from,
@@ -174,7 +174,7 @@ export function jobAuditMessagesProvider(
         messages.push(hit._source!);
       });
     }
-    messages = await jobSavedObjectService.filterJobsForSpace<JobMessage>(
+    messages = await mlSavedObjectService.filterJobsForSpace<JobMessage>(
       'anomaly-detector',
       messages,
       'job_id'

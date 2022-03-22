@@ -11,7 +11,7 @@ import { StatItems } from '../../../../common/components/stat_items';
 import { kpiHostAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_area';
 import { kpiHostMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_metric';
 import { useHostsKpiHosts, ID } from '../../../containers/kpi_hosts/hosts';
-import { HostsKpiBaseComponentManage } from '../common';
+import { KpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -57,7 +57,7 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
   });
 
   return (
-    <HostsKpiBaseComponentManage
+    <KpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}

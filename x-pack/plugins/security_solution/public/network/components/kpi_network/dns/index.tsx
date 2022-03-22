@@ -10,7 +10,8 @@ import React, { useEffect, useState } from 'react';
 import { StatItems } from '../../../../common/components/stat_items';
 import { kpiDnsQueriesLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_dns_queries';
 import { useNetworkKpiDns, ID } from '../../../containers/kpi_network/dns';
-import { NetworkKpiBaseComponentManage } from '../common';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -52,7 +53,7 @@ const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
   });
 
   return (
-    <NetworkKpiBaseComponentManage
+    <KpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}

@@ -23,13 +23,6 @@ import {
   BUTTON_CLASS as INPECT_BUTTON_CLASS,
 } from '../../../../common/components/inspect';
 
-const HostsKpiBaseComponentLoader: React.FC = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="hostsKpiLoader">
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="xl" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 import * as i18n from './translations';
 
 import { useInspectQuery } from '../../../../common/hooks/use_inspect_query';
@@ -43,6 +36,13 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { KpiRiskScoreStrategyResponse, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../../common/components/severity/common';
 
+const KpiBaseComponentLoader: React.FC = () => (
+  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="hostsKpiLoader">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 const QUERY_ID = 'hostsKpiRiskyHostsQuery';
 
 const HostCount = styled(EuiText)`
@@ -73,7 +73,7 @@ const RiskyHostsComponent: React.FC<{
   useErrorToast(i18n.ERROR_TITLE, error);
 
   if (loading) {
-    return <HostsKpiBaseComponentLoader />;
+    return <KpiBaseComponentLoader />;
   }
 
   const criticalRiskCount = data?.kpiRiskScore.Critical ?? 0;

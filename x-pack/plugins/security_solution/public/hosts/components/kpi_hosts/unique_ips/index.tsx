@@ -13,7 +13,7 @@ import { kpiUniqueIpsBarLensAttributes } from '../../../../common/components/vis
 import { kpiUniqueIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_destination_metric';
 import { kpiUniqueIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_source_metric';
 import { useHostsKpiUniqueIps, ID } from '../../../containers/kpi_hosts/unique_ips';
-import { HostsKpiBaseComponentManage } from '../common';
+import { KpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -72,7 +72,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
   });
 
   return (
-    <HostsKpiBaseComponentManage
+    <KpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}
