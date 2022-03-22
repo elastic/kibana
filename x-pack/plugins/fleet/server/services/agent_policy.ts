@@ -38,6 +38,7 @@ import {
   packageToPackagePolicy,
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
+  FLEET_APM_PACKAGE,
 } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
@@ -85,26 +86,31 @@ class AgentPolicyService {
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentPolicy> {
-    const oldAgentPolicy = await this.get(soClient, id, false);
+    const existingAgentPolicy = await this.get(soClient, id, true);
 
-    if (!oldAgentPolicy) {
+    if (!existingAgentPolicy) {
       throw new Error('Agent policy not found');
     }
 
     if (
-      oldAgentPolicy.status === agentPolicyStatuses.Inactive &&
+      existingAgentPolicy.status === agentPolicyStatuses.Inactive &&
       agentPolicy.status !== agentPolicyStatuses.Active
     ) {
       throw new Error(
-        `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
+        `Agent policy ${id} cannot be updated because it is ${existingAgentPolicy.status}`
       );
     }
 
-    await validateOutputForPolicy(agentPolicy);
+    await validateOutputForPolicy(
+      soClient,
+      agentPolicy,
+      existingAgentPolicy,
+      this.hasAPMIntegration(existingAgentPolicy)
+    );
 
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
-      ...(options.bumpRevision ? { revision: oldAgentPolicy.revision + 1 } : {}),
+      ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
@@ -164,6 +170,12 @@ class AgentPolicyService {
     };
   }
 
+  public hasAPMIntegration(agentPolicy: AgentPolicy) {
+    return agentPolicy.package_policies.some(
+      (p) => typeof p !== 'string' && p.package?.name === FLEET_APM_PACKAGE
+    );
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -172,7 +184,7 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     await this.requireUniqueName(soClient, agentPolicy);
 
-    await validateOutputForPolicy(agentPolicy);
+    await validateOutputForPolicy(soClient, agentPolicy);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -297,8 +309,9 @@ class AgentPolicyService {
       }
     }
 
-    const agentPolicies = await Promise.all(
-      agentPoliciesSO.saved_objects.map(async (agentPolicySO) => {
+    const agentPolicies = await pMap(
+      agentPoliciesSO.saved_objects,
+      async (agentPolicySO) => {
         const agentPolicy = {
           id: agentPolicySO.id,
           ...agentPolicySO.attributes,
@@ -314,7 +327,8 @@ class AgentPolicyService {
           }
         }
         return agentPolicy;
-      })
+      },
+      { concurrency: 50 }
     );
 
     return {
