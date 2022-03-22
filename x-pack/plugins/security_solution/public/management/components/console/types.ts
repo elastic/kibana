@@ -56,6 +56,9 @@ export interface CommandServiceInterface {
    */
   getHelp?: () => Promise<{ result: ReactNode }>;
 
-  /** Get command usage help content */
+  /**
+   * If defined, then the output of this function will be used to display individual
+   * command help (`--help`)
+   */
   getCommandUsage?: (command: CommandDefinition) => Promise<{ result: ReactNode }>;
 }
