@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { IBasePath } from 'kibana/server';
 import { UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,
@@ -78,6 +79,13 @@ export function getTimestampRange({
 const getMonIdByLoc = (monitorId: string, location: string) => {
   return monitorId + '-' + location;
 };
+const getViewInAppUrl = (relativeViewInAppUrl: string, basePath: IBasePath) =>
+  basePath.publicBaseUrl
+    ? new URL(
+        join(basePath.serverBasePath, relativeViewInAppUrl),
+        basePath.publicBaseUrl
+      ).toString()
+    : relativeViewInAppUrl;
 
 const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
   items.reduce(
@@ -379,16 +387,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
             'observer.geo.name': [monitorSummary.observerLocation],
           },
         });
-        const viewInAppUrl = basePath.publicBaseUrl
-          ? new URL(
-              join(basePath.serverBasePath, relativeViewInAppUrl),
-              basePath.publicBaseUrl
-            ).toString()
-          : relativeViewInAppUrl;
 
         alert.scheduleActions(MONITOR_STATUS.id, {
           [ALERT_REASON_MSG]: monitorSummary.reason,
-          [VIEW_IN_APP_URL]: viewInAppUrl,
+          [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
         });
       }
       return updateState(state, downMonitorsByLocation.length > 0);
@@ -455,15 +457,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           'observer.geo.name': [monitorSummary.observerLocation],
         },
       });
-      const viewInAppUrl = basePath.publicBaseUrl
-        ? new URL(
-            join(basePath.serverBasePath, relativeViewInAppUrl),
-            basePath.publicBaseUrl
-          ).toString()
-        : relativeViewInAppUrl;
+
       alert.scheduleActions(MONITOR_STATUS.id, {
         [ALERT_REASON_MSG]: monitorSummary.reason,
-        [VIEW_IN_APP_URL]: viewInAppUrl,
+        [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
       });
     });
     return updateState(state, downMonitorsByLocation.length > 0);
