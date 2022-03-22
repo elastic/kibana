@@ -578,7 +578,7 @@ describe('artifacts lists', () => {
           type: 'simple',
           entries: [
             {
-              field: 'file.path.text',
+              field: 'file.path',
               operator: 'included',
               type: 'wildcard_cased',
               value: '/usr/bi*/doc.md',
@@ -727,7 +727,7 @@ describe('artifacts lists', () => {
           type: 'simple',
           entries: [
             {
-              field: 'file.path.text',
+              field: 'file.path',
               operator: 'included',
               type: 'wildcard_cased',
               value: '/usr/bin/*.md',
@@ -778,7 +778,7 @@ describe('artifacts lists', () => {
           type: 'simple',
           entries: [
             {
-              field: 'file.path.text',
+              field: 'file.path',
               operator: 'included',
               type: 'wildcard_cased',
               value: '/usr/b*/donotadd.md',
@@ -882,7 +882,7 @@ describe('artifacts lists', () => {
           type: 'simple',
           entries: [
             {
-              field: 'file.path.text',
+              field: 'file.path',
               operator: 'included',
               type: 'wildcard_caseless',
               value,
@@ -1036,7 +1036,7 @@ describe('artifacts lists', () => {
           type: 'simple',
           entries: [
             {
-              field: 'file.path.text',
+              field: 'file.path',
               operator: 'included',
               type: 'wildcard_caseless',
               value,
@@ -1089,7 +1089,7 @@ describe('artifacts lists', () => {
           type: 'simple',
           entries: [
             {
-              field: 'file.path.text',
+              field: 'file.path',
               operator: 'included',
               type: 'wildcard_caseless',
               value,

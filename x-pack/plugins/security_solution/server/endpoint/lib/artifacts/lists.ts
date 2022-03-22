@@ -218,7 +218,9 @@ function getMatcherWildcardFunction({
 }
 
 function normalizeFieldName(field: string): string {
-  return field.endsWith('.caseless') ? field.substring(0, field.lastIndexOf('.')) : field;
+  return field.endsWith('.caseless') || field.endsWith('.text')
+    ? field.substring(0, field.lastIndexOf('.'))
+    : field;
 }
 
 function translateItem(
