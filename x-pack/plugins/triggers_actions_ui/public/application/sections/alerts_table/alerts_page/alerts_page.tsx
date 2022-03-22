@@ -39,7 +39,7 @@ const defaultPagination = {
 
 const defaultSort: estypes.SortCombinations[] = [
   {
-    'kibana.alert.rule.name': {
+    'event.action': {
       order: 'asc',
     },
   },
@@ -137,12 +137,23 @@ const AlertsPage: React.FunctionComponent = () => {
     bulkActions: [],
     columns: [
       {
-        id: 'kibana.alert.rule.name',
-        displayAsText: 'Name',
+        id: 'event.action',
+        displayAsText: 'Alert status',
+        initialWidth: 150,
       },
       {
-        id: 'kibana.alert.rule.category',
-        displayAsText: 'Category',
+        id: '@timestamp',
+        displayAsText: 'Last updated',
+        initialWidth: 250,
+      },
+      {
+        id: 'kibana.alert.duration.us',
+        displayAsText: 'Duration',
+        initialWidth: 150,
+      },
+      {
+        id: 'kibana.alert.reason',
+        displayAsText: 'Reason',
       },
     ],
     deletedEventIds: [],
@@ -154,7 +165,8 @@ const AlertsPage: React.FunctionComponent = () => {
       const { columnId, visibleRowIndex } = rcvProps as EuiDataGridCellValueElementProps & {
         visibleRowIndex: number;
       };
-      return get(alerts[visibleRowIndex], columnId, 'N/A');
+      const value = (get(alerts[visibleRowIndex], columnId) ?? [])[0];
+      return value ?? 'N/A';
     },
     showCheckboxes,
     trailingControlColumns: [],
