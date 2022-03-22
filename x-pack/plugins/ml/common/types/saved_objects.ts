@@ -9,17 +9,18 @@ import type { ErrorType } from '../util/errors';
 
 export type JobType = 'anomaly-detector' | 'data-frame-analytics';
 export type TrainedModelType = 'trained-model';
+export type MlSavedObjectType = JobType | TrainedModelType;
 
 export const ML_JOB_SAVED_OBJECT_TYPE = 'ml-job';
 export const ML_TRAINED_MODEL_SAVED_OBJECT_TYPE = 'ml-trained-model';
 export const ML_MODULE_SAVED_OBJECT_TYPE = 'ml-module';
 
 export interface SavedObjectResult {
-  [id: string]: { success: boolean; type: JobType | TrainedModelType; error?: ErrorType };
+  [id: string]: { success: boolean; type: MlSavedObjectType; error?: ErrorType };
 }
 
 export type SyncResult = {
-  [jobType in JobType | TrainedModelType]?: {
+  [jobType in MlSavedObjectType]?: {
     [id: string]: { success: boolean; error?: ErrorType };
   };
 };

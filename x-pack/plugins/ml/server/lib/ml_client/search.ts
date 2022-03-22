@@ -15,17 +15,17 @@ import type {
   TransportRequestOptionsWithOutMeta,
 } from '@elastic/elasticsearch';
 
-import { JobSavedObjectService } from '../../saved_objects';
+import { MLSavedObjectService } from '../../saved_objects';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { JobType } from '../../../common/types/saved_objects';
 
 export function searchProvider(
   client: IScopedClusterClient,
-  jobSavedObjectService: JobSavedObjectService
+  mlSavedObjectService: MLSavedObjectService
 ) {
   async function jobIdsCheck(jobType: JobType, jobIds: string[]) {
     if (jobIds.length) {
-      const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
+      const filteredJobIds = await mlSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
       const missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
       if (missingIds.length) {
         throw Boom.notFound(`${missingIds.join(',')} missing`);
