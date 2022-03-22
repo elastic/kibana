@@ -13,7 +13,7 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { buildEqlSearchRequest } from '../../../../../common/detection_engine/get_query_filter';
+import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../../routes/index/get_index_version';
@@ -43,7 +43,6 @@ export const eqlExecutor = async ({
   services,
   version,
   logger,
-  searchAfterSize,
   bulkCreate,
   wrapHits,
   wrapSequences,
@@ -55,7 +54,6 @@ export const eqlExecutor = async ({
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
-  searchAfterSize: number;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
@@ -103,7 +101,7 @@ export const eqlExecutor = async ({
       inputIndex,
       tuple.from.toISOString(),
       tuple.to.toISOString(),
-      searchAfterSize,
+      completeRule.ruleParams.maxSignals,
       ruleParams.timestampOverride,
       exceptionItems,
       ruleParams.eventCategoryOverride

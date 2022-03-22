@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -33,6 +32,7 @@ import { SourceDataItem } from '../../../../types';
 import { AddSourceHeader } from './add_source_header';
 import { ConfigDocsLinks } from './config_docs_links';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
+import { ExternalConnectorFormFields } from './external_connector_form_fields';
 import { ExternalConnectorLogic } from './external_connector_logic';
 
 interface SaveConfigProps {
@@ -47,12 +47,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   onDeleteConfig,
 }) => {
   const serviceType = 'external';
-  const {
-    fetchExternalSource,
-    setExternalConnectorApiKey,
-    setExternalConnectorUrl,
-    saveExternalConnectorConfig,
-  } = useActions(ExternalConnectorLogic);
+  const { fetchExternalSource, saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
 
   const {
     formDisabled,
@@ -60,6 +55,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
     externalConnectorUrl,
     externalConnectorApiKey,
     sourceConfigData,
+    urlValid,
   } = useValues(ExternalConnectorLogic);
 
   useEffect(() => {
@@ -112,43 +108,8 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
         applicationLinkTitle={applicationLinkTitle}
       />
       <EuiSpacer />
-      <EuiForm>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.urlLabel',
-            {
-              defaultMessage: 'URL',
-            }
-          )}
-        >
-          <EuiFieldText
-            value={externalConnectorUrl}
-            disabled={formDisabled}
-            required
-            type="text"
-            autoComplete="off"
-            onChange={(e) => setExternalConnectorUrl(e.target.value)}
-            name="external-connector-url"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.apiKeyLabel',
-            {
-              defaultMessage: 'API key',
-            }
-          )}
-        >
-          <EuiFieldText
-            value={externalConnectorApiKey}
-            disabled={formDisabled}
-            required
-            type="text"
-            autoComplete="off"
-            onChange={(e) => setExternalConnectorApiKey(e.target.value)}
-            name="external-connector-api-key"
-          />
-        </EuiFormRow>
+      <EuiForm isInvalid={!urlValid}>
+        <ExternalConnectorFormFields />
         <EuiSpacer />
         {formActions}
       </EuiForm>
