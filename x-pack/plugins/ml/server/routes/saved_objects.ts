@@ -11,14 +11,14 @@ import { checksFactory, syncSavedObjectsFactory, JobSavedObjectStatus } from '..
 import {
   updateJobsSpaces,
   updateTrainedModelsSpaces,
-  jobsAndCurrentSpace,
+  itemsAndCurrentSpace,
   syncJobObjects,
   syncCheckSchema,
-  canDeleteJobSchema,
-  jobTypeSchema,
+  canDeleteMLSpaceAwareItemsSchema,
+  itemTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import type { JobType, TrainedModelType } from '../../common/types/saved_objects';
+import type { MlSavedObjectType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -28,11 +28,11 @@ export function savedObjectsRoutes(
   { getSpaces, resolveMlCapabilities }: SavedObjectsRouteDeps
 ) {
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/status Get job saved object status
+   * @api {get} /api/ml/saved_objects/status Get job and trained model saved object status
    * @apiName SavedObjectsStatus
-   * @apiDescription Lists all jobs and saved objects to view the relationship status between them
+   * @apiDescription Lists all jobs, trained models and saved objects to view the relationship status between them
    *
    */
   router.get(
@@ -43,9 +43,9 @@ export function savedObjectsRoutes(
         tags: ['access:ml:canGetJobs', 'access:ml:canGetTrainedModels'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, response, mlSavedObjectService }) => {
       try {
-        const { checkStatus } = checksFactory(client, jobSavedObjectService);
+        const { checkStatus } = checksFactory(client, mlSavedObjectService);
         const status = await checkStatus();
 
         return response.ok({
@@ -58,12 +58,12 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/sync Sync job saved objects
-   * @apiName SyncJobSavedObjects
-   * @apiDescription Synchronizes saved objects for jobs. Saved objects will be created for jobs which are missing them,
-   *                 and saved objects will be deleted for jobs which no longer exist.
+   * @api {get} /api/ml/saved_objects/sync Sync job and trained models saved objects
+   * @apiName SyncMLSavedObjects
+   * @apiDescription Synchronizes saved objects for jobs and trained models. Saved objects will be created for items which are missing them,
+   *                 and saved objects will be deleted for items which no longer exist.
    *                 Updates missing datafeed IDs in saved objects for datafeeds which exist, and
    *                 removes datafeed IDs for datafeeds which no longer exist.
    *
@@ -82,10 +82,10 @@ export function savedObjectsRoutes(
         ],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, mlSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { syncSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
+        const { syncSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
         const savedObjects = await syncSavedObjects(simulate);
 
         return response.ok({
@@ -98,11 +98,11 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/initialize Create job saved objects for all jobs
-   * @apiName InitializeJobSavedObjects
-   * @apiDescription Create saved objects for jobs which are missing them.
+   * @api {get} /api/ml/saved_objects/initialize Create saved objects for all job and trained models
+   * @apiName InitializeMLSavedObjects
+   * @apiDescription Create saved objects for jobs and trained models which are missing them.
    *
    */
   router.get(
@@ -119,10 +119,10 @@ export function savedObjectsRoutes(
         ],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, mlSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { initSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
+        const { initSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
         const savedObjects = await initSavedObjects(simulate);
 
         return response.ok({
@@ -135,11 +135,11 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/sync_needed Check whether job saved objects need synchronizing
+   * @api {get} /api/ml/saved_objects/sync_needed Check whether job and trained model saved objects need synchronizing
    * @apiName SyncCheck
-   * @apiDescription Check whether job saved objects need synchronizing.
+   * @apiDescription Check whether job and trained model saved objects need synchronizing.
    *
    */
   router.post(
@@ -156,11 +156,11 @@ export function savedObjectsRoutes(
         ],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, mlSavedObjectService }) => {
       try {
-        const { jobType } = request.body;
-        const { isSyncNeeded } = syncSavedObjectsFactory(client, jobSavedObjectService);
-        const result = await isSyncNeeded(jobType as JobType | TrainedModelType);
+        const { mlSavedObjectType } = request.body;
+        const { isSyncNeeded } = syncSavedObjectsFactory(client, mlSavedObjectService);
+        const result = await isSyncNeeded(mlSavedObjectType as MlSavedObjectType);
 
         return response.ok({
           body: { result },
@@ -172,7 +172,7 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {post} /api/ml/saved_objects/update_jobs_spaces Update what spaces jobs are assigned to
    * @apiName UpdateJobsSpaces
@@ -190,11 +190,11 @@ export function savedObjectsRoutes(
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
       try {
         const { jobType, jobIds, spacesToAdd, spacesToRemove } = request.body;
 
-        const body = await jobSavedObjectService.updateJobsSpaces(
+        const body = await mlSavedObjectService.updateJobsSpaces(
           jobType,
           jobIds,
           spacesToAdd,
@@ -211,7 +211,7 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {post} /api/ml/saved_objects/update_trained_models_spaces Update what spaces trained models are assigned to
    * @apiName UpdateTrainedModelsSpaces
@@ -229,11 +229,11 @@ export function savedObjectsRoutes(
         tags: ['access:ml:canCreateTrainedModels'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
       try {
         const { modelIds, spacesToAdd, spacesToRemove } = request.body;
 
-        const body = await jobSavedObjectService.updateTrainedModelsSpaces(
+        const body = await mlSavedObjectService.updateTrainedModelsSpaces(
           modelIds,
           spacesToAdd,
           spacesToRemove
@@ -249,33 +249,33 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {post} /api/ml/saved_objects/remove_job_from_current_space Remove jobs from the current space
-   * @apiName RemoveJobsFromCurrentSpace
-   * @apiDescription Remove a list of jobs from the current space.
+   * @api {post} /api/ml/saved_objects/remove_item_from_current_space Remove jobs or trained models from the current space
+   * @apiName RemoveMLSpaceAwareItemsFromCurrentSpace
+   * @apiDescription Remove a list of jobs or trained models from the current space.
    *
-   * @apiSchema (body) jobsAndCurrentSpace
+   * @apiSchema (body) itemsAndCurrentSpace
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/remove_job_from_current_space',
+      path: '/api/ml/saved_objects/remove_item_from_current_space',
       validate: {
-        body: jobsAndCurrentSpace,
+        body: itemsAndCurrentSpace,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
       try {
-        const { jobType, jobIds } = request.body;
+        const { mlSavedObjectType, ids } = request.body;
         const { getCurrentSpaceId } = spacesUtilsProvider(getSpaces, request);
 
         const currentSpaceId = await getCurrentSpaceId();
         if (currentSpaceId === null) {
           return response.ok({
-            body: jobIds.map((id) => ({
+            body: ids.map((id) => ({
               [id]: {
                 success: false,
                 error: 'Cannot remove current space. Spaces plugin is disabled.',
@@ -284,9 +284,21 @@ export function savedObjectsRoutes(
           });
         }
 
-        const body = await jobSavedObjectService.updateJobsSpaces(
-          jobType,
-          jobIds,
+        if (mlSavedObjectType === 'trained-model') {
+          const body = await mlSavedObjectService.updateTrainedModelsSpaces(
+            ids,
+            [], // spacesToAdd
+            [currentSpaceId] // spacesToRemove
+          );
+
+          return response.ok({
+            body,
+          });
+        }
+
+        const body = await mlSavedObjectService.updateJobsSpaces(
+          mlSavedObjectType,
+          ids,
           [], // spacesToAdd
           [currentSpaceId] // spacesToRemove
         );
@@ -301,7 +313,7 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {get} /api/ml/saved_objects/jobs_spaces Get all jobs and their spaces
    * @apiName JobsSpaces
@@ -316,9 +328,9 @@ export function savedObjectsRoutes(
         tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ response, mlSavedObjectService, client }) => {
       try {
-        const { checkStatus } = checksFactory(client, jobSavedObjectService);
+        const { checkStatus } = checksFactory(client, mlSavedObjectService);
         const savedObjects = (await checkStatus()).savedObjects;
         const jobStatus = (
           Object.entries(savedObjects)
@@ -346,7 +358,7 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
    * @api {get} /api/ml/saved_objects/trained_models_spaces Get all trained models and their spaces
    * @apiName TrainedModelsSpaces
@@ -361,9 +373,9 @@ export function savedObjectsRoutes(
         tags: ['access:ml:canGetTrainedModels'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ response, mlSavedObjectService, client }) => {
       try {
-        const { checkStatus } = checksFactory(client, jobSavedObjectService);
+        const { checkStatus } = checksFactory(client, mlSavedObjectService);
         const savedObjects = (await checkStatus()).savedObjects;
         const modelStatus = savedObjects['trained-model']
           .filter((s) => s.checks.trainedModelExists)
@@ -385,18 +397,18 @@ export function savedObjectsRoutes(
   );
 
   /**
-   * @apiGroup JobSavedObjects
+   * @apiGroup MLSavedObjects
    *
-   * @api {post} /api/ml/saved_objects/can_delete_job Check whether user can delete a job
-   * @apiName CanDeleteJob
-   * @apiDescription Check the user's ability to delete jobs. Returns whether they are able
-   *                 to fully delete the job and whether they are able to remove it from
+   * @api {post} /api/ml/saved_objects/can_delete_ml_space_aware_item Check whether user can delete a job or trained model
+   * @apiName CanDeleteMLSpaceAwareItems
+   * @apiDescription Check the user's ability to delete jobs or trained models. Returns whether they are able
+   *                 to fully delete the job or trained model and whether they are able to remove it from
    *                 the current space.
    *                 Note, this is only for enabling UI controls. A user calling endpoints
-   *                 directly will still be able to delete or remove the job from a space.
+   *                 directly will still be able to delete or remove the job or trained model from a space.
    *
-   * @apiSchema (params) jobTypeSchema
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (params) itemTypeSchema
+   * @apiSchema (body) canDeleteMLSpaceAwareItemsSchema
    * @apiSuccessExample {json} Error-Response:
    * {
    *   "my_job": {
@@ -408,25 +420,29 @@ export function savedObjectsRoutes(
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/can_delete_job/{jobType}',
+      path: '/api/ml/saved_objects/can_delete_ml_space_aware_item/{jobType}',
       validate: {
-        params: jobTypeSchema,
-        body: canDeleteJobSchema,
+        params: itemTypeSchema,
+        body: canDeleteMLSpaceAwareItemsSchema,
       },
       options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+        tags: [
+          'access:ml:canGetJobs',
+          'access:ml:canGetDataFrameAnalytics',
+          'access:ml:canGetTrainedModels',
+        ],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService, client }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService, client }) => {
       try {
         const { jobType } = request.params;
-        const { jobIds } = request.body;
+        const { ids } = request.body;
 
-        const { canDeleteJobs } = checksFactory(client, jobSavedObjectService);
-        const body = await canDeleteJobs(
+        const { canDeleteMLSpaceAwareItems } = checksFactory(client, mlSavedObjectService);
+        const body = await canDeleteMLSpaceAwareItems(
           request,
           jobType,
-          jobIds,
+          ids,
           getSpaces !== undefined,
           resolveMlCapabilities
         );

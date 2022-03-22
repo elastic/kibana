@@ -16,7 +16,7 @@ import { userPermissionsServiceFactory } from './permissions.mock';
 import { platformServiceFactory } from './platform.mock';
 
 export type { MockApplicationServiceFactory } from './application.mock';
-export type { MockDockLinksServiceFactory } from './doc_links.mock';
+export type { MockDocLinksServiceFactory } from './doc_links.mock';
 export type { MockEditorsServiceFactory } from './editors.mock';
 export type { MockHttpServiceFactory } from './http.mock';
 export type { MockUserPermissionsServiceFactory } from './permissions.mock';

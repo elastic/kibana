@@ -31,7 +31,6 @@ describe('eql_executor', () => {
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
-  const searchAfterSize = 7;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
@@ -55,7 +54,6 @@ describe('eql_executor', () => {
         services: alertServices,
         version,
         logger,
-        searchAfterSize,
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
