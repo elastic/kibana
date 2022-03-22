@@ -152,7 +152,7 @@ export function ServiceOverviewThroughputChart({
           <EuiIconTip
             content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
               defaultMessage:
-                'Throughput is measured in transactions per minute (tpm)',
+                'Throughput is measured in transactions per minute (tpm).',
             })}
             position="right"
           />

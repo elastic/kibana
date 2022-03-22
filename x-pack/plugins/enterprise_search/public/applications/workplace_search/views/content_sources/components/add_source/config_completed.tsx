@@ -9,6 +9,7 @@ import React from 'react';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -37,6 +38,7 @@ interface ConfigCompletedProps {
   accountContextOnly?: boolean;
   privateSourcesEnabled: boolean;
   advanceStep(): void;
+  showFeedbackLink?: boolean;
 }
 
 export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
@@ -45,6 +47,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
   accountContextOnly,
   header,
   privateSourcesEnabled,
+  showFeedbackLink,
 }) => (
   <>
     {header}
@@ -166,5 +169,31 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         )}
       </EuiFlexGroup>
     </EuiPanel>
+    {showFeedbackLink && (
+      <>
+        <EuiSpacer />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              size="s"
+              color="primary"
+              iconType="email"
+              title={
+                <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.configCompleted.feedbackCallOutText',
+                    {
+                      defaultMessage:
+                        'Have feedback about deploying a {name} Connector Package? Let us know.',
+                      values: { name },
+                    }
+                  )}
+                </EuiLink>
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    )}
   </>
 );

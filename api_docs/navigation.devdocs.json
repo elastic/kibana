@@ -611,6 +611,32 @@
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.target",
+            "type": "string",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

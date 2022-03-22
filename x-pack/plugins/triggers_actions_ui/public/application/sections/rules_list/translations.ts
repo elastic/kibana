@@ -49,12 +49,20 @@ export const ALERT_STATUS_UNKNOWN = i18n.translate(
   }
 );
 
+export const ALERT_STATUS_WARNING = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleStatusWarning',
+  {
+    defaultMessage: 'Warning',
+  }
+);
+
 export const rulesStatusesTranslationsMapping = {
   ok: ALERT_STATUS_OK,
   active: ALERT_STATUS_ACTIVE,
   error: ALERT_STATUS_ERROR,
   pending: ALERT_STATUS_PENDING,
   unknown: ALERT_STATUS_UNKNOWN,
+  warning: ALERT_STATUS_WARNING,
 };
 
 export const ALERT_ERROR_UNKNOWN_REASON = i18n.translate(
@@ -106,6 +114,20 @@ export const ALERT_ERROR_DISABLED_REASON = i18n.translate(
   }
 );
 
+export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxExecutableActions',
+  {
+    defaultMessage: 'Action limit exceeded',
+  }
+);
+
+export const ALERT_WARNING_UNKNOWN_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonUnknown',
+  {
+    defaultMessage: 'Unknown reason',
+  }
+);
+
 export const rulesErrorReasonTranslationsMapping = {
   read: ALERT_ERROR_READING_REASON,
   decrypt: ALERT_ERROR_DECRYPTING_REASON,
@@ -114,4 +136,9 @@ export const rulesErrorReasonTranslationsMapping = {
   license: ALERT_ERROR_LICENSE_REASON,
   timeout: ALERT_ERROR_TIMEOUT_REASON,
   disabled: ALERT_ERROR_DISABLED_REASON,
+};
+
+export const rulesWarningReasonTranslationsMapping = {
+  maxExecutableActions: ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON,
+  unknown: ALERT_WARNING_UNKNOWN_REASON,
 };

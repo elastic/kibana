@@ -35,7 +35,7 @@ const makeTestBundle = (id: string) => {
     cacheKey: 'abc',
     moduleCount: 1,
     optimizerCacheKey: 'abc',
-    files: [bundleEntryPath(bundle)],
+    referencedPaths: [bundleEntryPath(bundle)],
   });
 
   return bundle;
@@ -83,7 +83,7 @@ it('notifies of changes and completes once all bundles have changed', async () =
           return;
         }
 
-        // first we change foo and bar, and after 1 second get that change comes though
+        // first we change foo and bar, after 1 second that change comes though
         if (i === 1) {
           expect(event.bundles).toHaveLength(2);
           const [bar, foo] = event.bundles.sort(ascending((b) => b.id));

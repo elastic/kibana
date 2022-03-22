@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IErrorObject } from '../../../../../triggers_actions_ui/public';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 const dataStartMock = dataPluginMock.createStartContract();
@@ -37,7 +37,7 @@ test('should render EntityIndexExpression', async () => {
       setAlertParamsGeoField={() => {}}
       setRuleProperty={() => {}}
       setIndexPattern={() => {}}
-      indexPattern={'' as unknown as IIndexPattern}
+      indexPattern={'' as unknown as DataView}
       isInvalid={false}
       data={dataStartMock}
     />
@@ -56,7 +56,7 @@ test('should render EntityIndexExpression w/ invalid flag if invalid', async () 
       setAlertParamsGeoField={() => {}}
       setRuleProperty={() => {}}
       setIndexPattern={() => {}}
-      indexPattern={'' as unknown as IIndexPattern}
+      indexPattern={'' as unknown as DataView}
       isInvalid={true}
       data={dataStartMock}
     />
@@ -70,7 +70,7 @@ test('should render BoundaryIndexExpression', async () => {
     <BoundaryIndexExpression
       ruleParams={alertParams}
       errors={{} as IErrorObject}
-      boundaryIndexPattern={'' as unknown as IIndexPattern}
+      boundaryIndexPattern={'' as unknown as DataView}
       setBoundaryIndexPattern={() => {}}
       setBoundaryGeoField={() => {}}
       setBoundaryNameField={() => {}}

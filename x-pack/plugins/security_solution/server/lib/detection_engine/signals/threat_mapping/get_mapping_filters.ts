@@ -8,36 +8,39 @@
 import type { Filter } from '@kbn/es-query';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
-interface ShouldExist {
-  bool: { should: Array<{ exists: { field: string } }> };
+interface MustExist {
+  bool: { must: Array<{ exists: { field: string } }> };
 }
 
 export const getMappingFilters = (threatMapping: ThreatMapping) => {
-  const eventMappingFilters: Filter[] = [];
-  const indicatorMappingFilters: Filter[] = [];
+  const eventMappingFilter: Filter = {
+    meta: {},
+    query: { bool: { should: [] } },
+  };
+  const indicatorMappingFilter: Filter = {
+    meta: {},
+    query: { bool: { should: [] } },
+  };
 
   return threatMapping.reduce(
     (acc, threatMap) => {
-      const eventShouldClause: ShouldExist = {
-        bool: { should: [] },
+      const eventMustClause: MustExist = {
+        bool: { must: [] },
       };
-      const indicatorShouldClause: ShouldExist = {
-        bool: { should: [] },
+      const indicatorMustClause: MustExist = {
+        bool: { must: [] },
       };
       threatMap.entries.forEach((entry) => {
-        eventShouldClause.bool.should.push({ exists: { field: entry.field } });
-        indicatorShouldClause.bool.should.push({ exists: { field: entry.value } });
+        eventMustClause.bool.must.push({ exists: { field: entry.field } });
+        indicatorMustClause.bool.must.push({ exists: { field: entry.value } });
       });
-      acc.eventMappingFilters.push({ meta: {}, query: { bool: { filter: [eventShouldClause] } } });
-      acc.indicatorMappingFilters.push({
-        meta: {},
-        query: { bool: { filter: [indicatorShouldClause] } },
-      });
+      eventMappingFilter.query?.bool.should.push(eventMustClause);
+      indicatorMappingFilter.query?.bool.should.push(indicatorMustClause);
       return acc;
     },
     {
-      eventMappingFilters,
-      indicatorMappingFilters,
+      eventMappingFilter,
+      indicatorMappingFilter,
     }
   );
 };

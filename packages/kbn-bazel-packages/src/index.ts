@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export * from './bazel_package_dirs';
 export * from './discover_packages';
 export type { BazelPackage } from './bazel_package';

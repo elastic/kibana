@@ -166,6 +166,7 @@ export interface HomePublicPluginSetup {
    * The environment service is only available for a transition period and will
    * be replaced by display specific extension points.
    * @deprecated
+   * @removeBy 8.8.0
    */
   environment: EnvironmentSetup;
 }
