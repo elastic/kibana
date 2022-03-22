@@ -82,16 +82,7 @@ export const SqlSearchExampleApp = ({ notifications, data }: SearchExamplesAppDe
         },
         error: (e) => {
           setIsLoading(false);
-          if (e instanceof AbortError) {
-            notifications.toasts.addWarning({
-              title: e.message,
-            });
-          } else {
-            notifications.toasts.addDanger({
-              title: 'Failed to run search',
-              text: e.message,
-            });
-          }
+          data.search.showError(e);
         },
       });
   };

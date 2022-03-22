@@ -16,11 +16,8 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 export const SQL_SEARCH_STRATEGY = 'sql';
 
 export type SqlRequestParams =
-  | Omit<SqlQueryRequest, 'wait_for_completion_timeout' | 'keep_alive' | 'keep_on_completion'>
-  | Omit<
-      SqlGetAsyncRequest,
-      'id' | 'wait_for_completion_timeout' | 'keep_alive' | 'keep_on_completion'
-    >;
+  | Omit<SqlQueryRequest, 'keep_alive' | 'keep_on_completion'>
+  | Omit<SqlGetAsyncRequest, 'id' | 'keep_alive' | 'keep_on_completion'>;
 export type SqlSearchStrategyRequest = IKibanaSearchRequest<SqlRequestParams>;
 
 export type SqlSearchStrategyResponse = IKibanaSearchResponse<SqlQueryResponse>;

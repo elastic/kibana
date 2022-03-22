@@ -99,6 +99,7 @@ describe('SQL search strategy', () => {
       });
     });
 
+    // skip until full search session support https://github.com/elastic/kibana/issues/127880
     describe.skip('with sessionId', () => {
       it('makes a POST request with params (long keepalive)', async () => {
         mockSqlQuery.mockResolvedValueOnce(mockSqlResponse);
