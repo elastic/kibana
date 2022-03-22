@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 
 interface StylesDeps {
   height: number | undefined;
@@ -24,8 +25,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
 
     const detailPanel: CSSObject = {
       height: `${height}px`,
-      borderLeft: `${euiTheme.border.thin} !important`,
-      boxShadow: '0px 0px 0px #D3DAE6 inset !important',
+      borderRightWidth: '0px',
     };
 
     const searchBar: CSSObject = {
@@ -43,7 +43,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     };
 
     const toolBar: CSSObject = {
-      backgroundColor: `#EEF2F7 !important`,
+      backgroundColor: `${theme.euiFormBackgroundDisabledColor} !important`,
     };
 
     return {

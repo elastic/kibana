@@ -94,7 +94,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   return (
     <>
       <div css={styles.sessionViewerComponent}>
-        <EuiPanel css={styles.toolBar} hasShadow={false}>
+        <EuiPanel css={styles.toolBar} hasShadow={false} borderRadius="none">
           <EuiFlexGroup>
             <EuiFlexItem
               data-test-subj="sessionView:sessionViewProcessEventsSearch"
@@ -199,7 +199,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                   <EuiResizablePanel
                     id="session-detail-panel"
                     initialSize={30}
-                    minSize="200px"
+                    minSize="320px"
                     paddingSize="none"
                     css={styles.detailPanel}
                   >

@@ -7,6 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiSearchBar, EuiPagination } from '@elastic/eui';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 
@@ -52,9 +53,20 @@ export const SessionViewSearchBar = ({
 
   const showPagination = !!searchResults?.length;
 
+  const translatePlaceholder = i18n.translate(
+    'xpack.sessionView.searchBar.searchBarKeyPlaceholder',
+    {
+      defaultMessage: 'Find...',
+    }
+  );
+
   return (
     <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>
-      <EuiSearchBar query={searchQuery} onChange={onSearch} box={{ placeholder: 'Find...' }} />
+      <EuiSearchBar
+        query={searchQuery}
+        onChange={onSearch}
+        box={{ placeholder: translatePlaceholder }}
+      />
       {showPagination && (
         <EuiPagination
           data-test-subj="sessionView:searchPagination"

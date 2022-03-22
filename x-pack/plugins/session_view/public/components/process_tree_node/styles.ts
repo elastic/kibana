@@ -31,9 +31,9 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
     };
 
     const searchHighlight = `
-      background-color: ${colors.highlight};
+      background-color: ${transparentize(colors.warning, 0.32)};
       color: ${colors.fullShade};
-      border-radius: ${border.radius.medium};
+      border-radius: '0px';
     `;
 
     const children: CSSObject = {

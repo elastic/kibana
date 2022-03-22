@@ -11,6 +11,7 @@ import { Process } from '../../../common/types/process_tree';
 import { getDetailPanelProcess, getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';
 import { DetailPanelHostTab } from '../detail_panel_host_tab';
+import { useStyles } from './styles';
 
 interface SessionViewDetailPanelDeps {
   selectedProcess: Process;
@@ -60,8 +61,10 @@ export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPan
     [tabs, selectedTabId]
   );
 
+  const styles = useStyles();
+
   return (
-    <>
+    <div css={styles.detailsPanelLeftBorder}>
       <EuiTabs size="l" expand>
         {tabs.map((tab, index) => (
           <EuiTab
@@ -77,6 +80,6 @@ export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPan
         ))}
       </EuiTabs>
       {tabContent}
-    </>
+    </div>
   );
 };

@@ -11,31 +11,13 @@ import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
-
   const cached = useMemo(() => {
-    const tabSection: CSSObject = {
-      padding: euiTheme.size.base,
-    };
-
-    const accordion: CSSObject = {
-      borderTop: euiTheme.border.thin,
-      '&:last-child': {
-        borderBottom: euiTheme.border.thin,
-      },
-      dl: {
-        paddingTop: '0px',
-      },
-    };
-
-    const accordionButton: CSSObject = {
-      padding: euiTheme.size.base,
-      fontWeight: euiTheme.font.weight.bold,
+    const detailsPanelLeftBorder: CSSObject = {
+      borderLeft: euiTheme.border.thin,
     };
 
     return {
-      accordion,
-      accordionButton,
-      tabSection,
+      detailsPanelLeftBorder,
     };
   }, [euiTheme]);
 

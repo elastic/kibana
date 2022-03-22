@@ -212,7 +212,6 @@ export function ProcessTreeNode({
                     {timeStampsNormal}
                   </span>
                 )}
-                ;
               </span>
             </span>
           )}
