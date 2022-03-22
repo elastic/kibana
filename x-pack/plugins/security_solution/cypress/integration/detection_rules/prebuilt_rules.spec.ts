@@ -36,7 +36,7 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../../objects/rule';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana } from '../../tasks/common';
 
 describe('Prebuilt rules', () => {
   before(() => {
@@ -45,10 +45,6 @@ describe('Prebuilt rules', () => {
   });
 
   describe('Alerts rules, prebuilt rules', () => {
-    beforeEach(() => {
-      deleteAlertsAndRules();
-    });
-
     it('Loads prebuilt rules', () => {
       const rowsPerPage = 100;
       const expectedNumberOfRules = totalNumberOfPrebuiltRules;
@@ -66,19 +62,27 @@ describe('Prebuilt rules', () => {
       cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} rules`);
       cy.get(pageSelector(expectedNumberOfPages)).should('exist');
     });
+
+    context('Rule monitoring table', () => {
+      it('Allows to enable/disable all rules at once', () => {
+        cy.get(RULES_MONITORING_TABLE).click();
+
+        cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+        enableSelectedRules();
+        waitForRuleToChangeStatus();
+        cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
+
+        selectAllRules();
+        disableSelectedRules();
+        waitForRuleToChangeStatus();
+        cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
+      });
+    });
   });
 
   describe('Actions with prebuilt rules', () => {
     beforeEach(() => {
-      const expectedNumberOfRules = totalNumberOfPrebuiltRules;
-      const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
-
-      deleteAlertsAndRules();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      loadPrebuiltDetectionRules();
-      waitForPrebuiltDetectionRulesToBeLoaded();
-
-      cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
     });
 
     context('Rules table', () => {
@@ -92,13 +96,6 @@ describe('Prebuilt rules', () => {
         disableSelectedRules();
         waitForRuleToChangeStatus();
         cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
-      });
-
-      it('Allows to delete all rules at once', () => {
-        selectAllRules();
-        deleteSelectedRules();
-        confirmRulesDelete();
-        cy.get(RULES_EMPTY_PROMPT).should('be.visible');
       });
 
       it('Does not allow to delete one rule when more than one is selected', () => {
@@ -160,21 +157,12 @@ describe('Prebuilt rules', () => {
           `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
         );
       });
-    });
 
-    context('Rule monitoring table', () => {
-      it('Allows to enable/disable all rules at once', () => {
-        cy.get(RULES_MONITORING_TABLE).click();
-
-        cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-        enableSelectedRules();
-        waitForRuleToChangeStatus();
-        cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
-
+      it('Allows to delete all rules at once', () => {
         selectAllRules();
-        disableSelectedRules();
-        waitForRuleToChangeStatus();
-        cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
+        deleteSelectedRules();
+        confirmRulesDelete();
+        cy.get(RULES_EMPTY_PROMPT).should('be.visible');
       });
     });
   });

@@ -47,7 +47,7 @@ const getExceptionList2 = () => ({
 
 describe('Exceptions Table', () => {
   before(() => {
-    cleanKibana();
+    esArchiverResetKibana();
     login();
 
     // Create exception list associated with a rule
