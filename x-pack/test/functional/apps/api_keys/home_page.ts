@@ -10,17 +10,17 @@ import clearAllApiKeys from './api_keys_helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const es = getService('es');
   const pageObjects = getPageObjects(['common', 'apiKeys']);
   const log = getService('log');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const es = getService('es');
   const find = getService('find');
   const browser = getService('browser');
 
   describe('Home page', function () {
     before(async () => {
-      await clearAllApiKeys();
+      await clearAllApiKeys(es, log);
       await security.testUser.setRoles(['kibana_admin']);
       await pageObjects.common.navigateToApp('apiKeys');
     });
@@ -54,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await clearAllApiKeys();
+        await clearAllApiKeys(es, log);
       });
 
       it('when submitting form, close dialog and displays new api key', async () => {

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-export default async function clearAllApiKeys() {
-  const existingKeys = await es.security.queryApiKeys();
+import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/dev-utils';
+
+export default async function clearAllApiKeys(esClient: Client, logger: ToolingLog) {
+  const existingKeys = await esClient.security.queryApiKeys();
   if (existingKeys.count > 0) {
     await Promise.all(
       existingKeys.api_keys.map(async (key) => {
-        es.security.invalidateApiKey({ ids: [key.id] });
+        esClient.security.invalidateApiKey({ ids: [key.id] });
       })
     );
   } else {
-    log.debug('No API keys to delete.');
+    logger.debug('No API keys to delete.');
   }
 }
