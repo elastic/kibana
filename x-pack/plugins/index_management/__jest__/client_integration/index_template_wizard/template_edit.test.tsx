@@ -48,7 +48,7 @@ jest.mock('@elastic/eui', () => {
 describe('<TemplateEdit />', () => {
   let testBed: TemplateFormTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -56,7 +56,6 @@ describe('<TemplateEdit />', () => {
   });
 
   afterAll(() => {
-    server.restore();
     jest.useRealTimers();
   });
 
@@ -71,12 +70,12 @@ describe('<TemplateEdit />', () => {
     });
 
     beforeAll(() => {
-      httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
+      httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit.name, templateToEdit);
     });
 
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -153,7 +152,7 @@ describe('<TemplateEdit />', () => {
 
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
     });
@@ -282,7 +281,7 @@ describe('<TemplateEdit />', () => {
 
       beforeEach(async () => {
         await act(async () => {
-          testBed = await setup();
+          testBed = await setup(httpSetup);
         });
 
         testBed.component.update();

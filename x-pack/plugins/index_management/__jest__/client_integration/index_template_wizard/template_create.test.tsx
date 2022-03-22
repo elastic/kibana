@@ -76,7 +76,7 @@ const componentTemplates = [componentTemplate1, componentTemplate2];
 describe('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -89,7 +89,6 @@ describe('<TemplateCreate />', () => {
   });
 
   afterAll(() => {
-    server.restore();
     jest.useRealTimers();
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
   });
@@ -97,7 +96,7 @@ describe('<TemplateCreate />', () => {
   describe('composable index template', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
     });
 
@@ -130,7 +129,7 @@ describe('<TemplateCreate />', () => {
   describe('legacy index template', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup(true);
+        testBed = await setup(httpSetup, true);
       });
     });
 
@@ -150,7 +149,7 @@ describe('<TemplateCreate />', () => {
   describe('form validation', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
     });
@@ -415,7 +414,7 @@ describe('<TemplateCreate />', () => {
   describe('review (step 6)', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
 
@@ -472,7 +471,7 @@ describe('<TemplateCreate />', () => {
 
     it('should render a warning message if a wildcard is used as an index pattern', async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
 
@@ -505,7 +504,7 @@ describe('<TemplateCreate />', () => {
       const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
 

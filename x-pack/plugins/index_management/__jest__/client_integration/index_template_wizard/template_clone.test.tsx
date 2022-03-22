@@ -9,6 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import '../../../test/global_mocks';
+import { API_BASE_PATH } from '../../../common/constants';
 import { getComposableTemplate } from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 
@@ -44,23 +45,21 @@ const templateToClone = getComposableTemplate({
 
 describe('<TemplateClone />', () => {
   let testBed: TemplateFormTestBed;
-
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
-    httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone);
+    httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone.name, templateToClone);
   });
 
   afterAll(() => {
-    server.restore();
     jest.useRealTimers();
   });
 
   beforeEach(async () => {
     await act(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
     testBed.component.update();
   });
@@ -98,17 +97,7 @@ describe('<TemplateClone />', () => {
         actions.clickNextButton();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
-
-      const expected = {
-        ...templateToClone,
-        name: `${templateToClone.name}-copy`,
-        indexPatterns: DEFAULT_INDEX_PATTERNS,
-      };
-
-      delete expected.template; // As no settings, mappings or aliases have been defined, no "template" param is sent
-
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      expect(httpSetup.post).toHaveBeenLastCalledWith(`${API_BASE_PATH}/index_templates`, expect.anything());
     });
   });
 });
