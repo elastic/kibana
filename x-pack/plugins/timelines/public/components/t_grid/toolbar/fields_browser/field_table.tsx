@@ -27,7 +27,7 @@ export interface FieldTableProps {
   filteredBrowserFields: BrowserFields;
   /** when true, show only the the selected field */
   filterSelectedEnabled: boolean;
-  setFilterSelectedEnabled: (enabled: boolean) => void;
+  onFilterSelectedChange: (enabled: boolean) => void;
   /**
    * Optional function to customize field table columns
    */
@@ -65,7 +65,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   getFieldTableColumns,
   searchInput,
   selectedCategoryIds,
-  setFilterSelectedEnabled,
+  onFilterSelectedChange,
   timelineId,
   onHide,
 }) => {
@@ -114,7 +114,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
       <FieldTableHeader
         fieldCount={fieldItems.length}
         filterSelectedEnabled={filterSelectedEnabled}
-        setFilterSelectedEnabled={setFilterSelectedEnabled}
+        onFilterSelectedChange={onFilterSelectedChange}
       />
 
       <TableContainer height={TABLE_HEIGHT}>

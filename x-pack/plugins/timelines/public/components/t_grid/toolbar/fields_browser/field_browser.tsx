@@ -49,7 +49,7 @@ export type FieldsBrowserComponentProps = Pick<
   filteredBrowserFields: BrowserFields;
   /** when true, show only the the selected field */
   filterSelectedEnabled: boolean;
-  setFilterSelectedEnabled: (enabled: boolean) => void;
+  onFilterSelectedChange: (enabled: boolean) => void;
   /**
    * When true, a busy spinner will be shown to indicate the field browser
    * is searching for fields that match the specified `searchInput`
@@ -95,7 +95,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   filteredBrowserFields,
   filterSelectedEnabled,
   isSearching,
-  setFilterSelectedEnabled,
+  onFilterSelectedChange,
   setSelectedCategoryIds,
   onSearchInputChange,
   onHide,
@@ -193,7 +193,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
             filterSelectedEnabled={filterSelectedEnabled}
             searchInput={appliedFilterInput}
             selectedCategoryIds={selectedCategoryIds}
-            setFilterSelectedEnabled={setFilterSelectedEnabled}
+            onFilterSelectedChange={onFilterSelectedChange}
             getFieldTableColumns={getFieldTableColumns}
             onHide={onHide}
           />

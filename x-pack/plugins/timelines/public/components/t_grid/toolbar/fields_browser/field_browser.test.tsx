@@ -40,7 +40,7 @@ const testProps: FieldsBrowserComponentProps = {
   selectedCategoryIds: [],
   timelineId,
   filterSelectedEnabled: false,
-  setFilterSelectedEnabled: jest.fn(),
+  onFilterSelectedChange: jest.fn(),
 };
 const { storage } = createSecuritySolutionStorageMock();
 

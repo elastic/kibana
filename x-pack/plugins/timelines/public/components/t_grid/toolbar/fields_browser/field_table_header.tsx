@@ -22,7 +22,7 @@ import * as i18n from './translations';
 export interface FieldTableHeaderProps {
   fieldCount: number;
   filterSelectedEnabled: boolean;
-  setFilterSelectedEnabled: (enabled: boolean) => void;
+  onFilterSelectedChange: (enabled: boolean) => void;
 }
 
 const Count = styled.span`
@@ -33,7 +33,7 @@ Count.displayName = 'Count';
 const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
   fieldCount,
   filterSelectedEnabled,
-  setFilterSelectedEnabled,
+  onFilterSelectedChange,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -83,7 +83,7 @@ const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
                 key="viewAll"
                 icon={filterSelectedEnabled ? 'empty' : 'check'}
                 onClick={() => {
-                  setFilterSelectedEnabled(false);
+                  onFilterSelectedChange(false);
                   closePopover();
                 }}
               >
@@ -95,7 +95,7 @@ const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
                 key="viewSelected"
                 icon={filterSelectedEnabled ? 'check' : 'empty'}
                 onClick={() => {
-                  setFilterSelectedEnabled(true);
+                  onFilterSelectedChange(true);
                   closePopover();
                 }}
               >

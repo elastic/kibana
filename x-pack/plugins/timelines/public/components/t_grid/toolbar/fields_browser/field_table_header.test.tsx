@@ -10,11 +10,11 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../mock';
 import { FieldTableHeader, FieldTableHeaderProps } from './field_table_header';
 
-const mockSetFilterSelectedEnabled = jest.fn();
+const mockOnFilterSelectedChange = jest.fn();
 const defaultProps: FieldTableHeaderProps = {
   fieldCount: 0,
   filterSelectedEnabled: false,
-  setFilterSelectedEnabled: mockSetFilterSelectedEnabled,
+  onFilterSelectedChange: mockOnFilterSelectedChange,
 };
 
 describe('FieldTableHeader', () => {
@@ -51,7 +51,7 @@ describe('FieldTableHeader', () => {
 
   describe('View selected', () => {
     beforeEach(() => {
-      mockSetFilterSelectedEnabled.mockClear();
+      mockOnFilterSelectedChange.mockClear();
     });
 
     it('should render "view all" option when filterSelected is not enabled', () => {
@@ -101,7 +101,7 @@ describe('FieldTableHeader', () => {
 
       result.getByTestId('viewSelectorButton').click();
       result.getByTestId('viewSelectorOption-all').click();
-      expect(mockSetFilterSelectedEnabled).toHaveBeenCalledWith(false);
+      expect(mockOnFilterSelectedChange).toHaveBeenCalledWith(false);
     });
 
     it('should callback when "view selected" option is clicked', () => {
@@ -113,7 +113,7 @@ describe('FieldTableHeader', () => {
 
       result.getByTestId('viewSelectorButton').click();
       result.getByTestId('viewSelectorOption-selected').click();
-      expect(mockSetFilterSelectedEnabled).toHaveBeenCalledWith(true);
+      expect(mockOnFilterSelectedChange).toHaveBeenCalledWith(true);
     });
   });
 });

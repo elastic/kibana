@@ -113,6 +113,14 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     [debouncedApplyFilterInput]
   );
 
+  /** Invoked when the user changes the view all/selected value  */
+  const onFilterSelectedChange = useCallback(
+    (filterSelected: boolean) => {
+      setFilterSelectedEnabled(filterSelected);
+    },
+    [setFilterSelectedEnabled]
+  );
+
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
       <EuiToolTip content={i18n.FIELDS_BROWSER}>
@@ -139,7 +147,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           filterSelectedEnabled={filterSelectedEnabled}
           isSearching={isSearching}
           setSelectedCategoryIds={setSelectedCategoryIds}
-          setFilterSelectedEnabled={setFilterSelectedEnabled}
+          onFilterSelectedChange={onFilterSelectedChange}
           onHide={onHide}
           onSearchInputChange={updateFilter}
           options={options}

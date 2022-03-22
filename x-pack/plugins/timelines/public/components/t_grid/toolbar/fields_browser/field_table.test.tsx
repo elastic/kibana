@@ -47,7 +47,7 @@ const defaultProps: FieldTableProps = {
   searchInput: '',
   timelineId,
   filterSelectedEnabled: false,
-  setFilterSelectedEnabled: jest.fn(),
+  onFilterSelectedChange: jest.fn(),
   onHide: jest.fn(),
 };
 
