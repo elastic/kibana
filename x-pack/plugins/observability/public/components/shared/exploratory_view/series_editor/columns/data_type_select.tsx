@@ -57,9 +57,9 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       if (reportType === ReportTypes.CORE_WEB_VITAL) {
         return id === DataTypes.UX;
       }
-      // NOTE: Logs does not have a config for Performance Distribution
-      if (reportType === ReportTypes.DISTRIBUTION && id === DataTypes.LOGS) {
-        return false;
+      // NOTE: Logs only provides a config for KPI over time
+      if (id === DataTypes.LOGS) {
+        return reportType === ReportTypes.KPI;
       }
       return true;
     })
