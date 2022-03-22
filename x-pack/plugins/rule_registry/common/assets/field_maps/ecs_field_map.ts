@@ -2733,51 +2733,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'process.entry_leader.pe.architecture': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.pe.company': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.pe.description': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.pe.file_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.pe.imphash': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.pe.original_file_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.pe.pehash': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.pe.product': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.pgid': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
   'process.entry_leader.pid': {
     type: 'long',
     array: false,
@@ -2839,21 +2794,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.entry_leader.supplemental_groups.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.thread.id': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.thread.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.entry_leader.title': {
     type: 'keyword',
     array: false,
     required: false,
@@ -3305,11 +3245,6 @@ export const ecsFieldMap = {
   },
   'process.parent.entity_id': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.env_vars': {
-    type: 'object',
     array: false,
     required: false,
   },
