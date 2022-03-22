@@ -374,7 +374,7 @@ export default function (providerContext: FtrProviderContext) {
         installed_kibana_space_id: 'default',
         installed_kibana: [
           {
-            id: 'sample_csp_rule_template',
+            id: 'sample_csp_rule_template2',
             type: 'csp-rule-template',
           },
           {

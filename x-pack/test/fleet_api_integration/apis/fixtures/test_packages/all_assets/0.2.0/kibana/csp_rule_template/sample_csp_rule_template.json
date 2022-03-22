@@ -1,7 +1,7 @@
 {
   "attributes": {
     "benchmark": { "name": "CIS Kubernetes", "version": "1.4.1" },
-    "benchmark_rule_id": "1.1.1",
+    "benchmark_rule_id": "1.1.2",
     "default_value": "By default, anonymous access is enabled.",
     "description": "'Disable anonymous requests to the API server",
     "impact": "Anonymous requests will be rejected.",
@@ -12,6 +12,6 @@
     "severity": "low",
     "tags": ["Kubernetes", "Containers"]
   },
-  "id": "sample_cloud_security_posture_rule_template",
+  "id": "sample_csp_rule_template2",
   "type": "csp-rule-template"
 }
