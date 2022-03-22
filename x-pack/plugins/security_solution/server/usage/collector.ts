@@ -29,7 +29,6 @@ export const registerCollector: RegisterCollector = ({
     return;
   }
 
-  // TODO: Add event collector log information to this usage collector
   const collector = usageCollection.makeUsageCollector<UsageData>({
     type: 'security_solution',
     schema: {
@@ -307,6 +306,3368 @@ export const registerCollector: RegisterCollector = ({
               has_notification: {
                 type: 'boolean',
                 _meta: { description: 'True if this rule has a notification' },
+              },
+            },
+          },
+          detection_rule_status: {
+            all_rules: {
+              eql: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              indicator: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              mlRule: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              query: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              savedQuery: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threshold: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              total: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of succeeded rules' },
+                },
+              },
+            },
+            elastic_rules: {
+              eql: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              indicator: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              mlRule: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              query: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              savedQuery: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threshold: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              total: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of succeeded rules' },
+                },
+              },
+            },
+            custom_rules: {
+              eql: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              indicator: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              mlRule: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              query: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              savedQuery: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threshold: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failed: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 failed rule message' },
+                    },
+                  },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failure: {
+                  '1': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 1 partial failed rule message' },
+                    },
+                  },
+                  '2': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 2 partial failed rule message' },
+                    },
+                  },
+                  '3': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 3 partial failed rule message' },
+                    },
+                  },
+                  '4': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 4 partial failed rule message' },
+                    },
+                  },
+                  '5': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 5 partial failed rule message' },
+                    },
+                  },
+                  '6': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 6 partial failed rule message' },
+                    },
+                  },
+                  '7': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 7 partial failed rule message' },
+                    },
+                  },
+                  '8': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 8 partial failed rule message' },
+                    },
+                  },
+                  '9': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 9 partial failed rule message' },
+                    },
+                  },
+                  '10': {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Top 10 partial failed rule message' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              total: {
+                failed: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                partial_failure: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of succeeded rules' },
+                },
               },
             },
           },
