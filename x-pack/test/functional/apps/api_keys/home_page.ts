@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import clearAllApiKeys from './api_keys_helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -16,19 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const find = getService('find');
   const browser = getService('browser');
-
-  async function clearAllApiKeys() {
-    const existingKeys = await es.security.queryApiKeys();
-    if (existingKeys.count > 0) {
-      Promise.all(
-        await existingKeys.api_keys.map(async (key) => {
-          await es.security.invalidateApiKey({ ids: [key.id] });
-        })
-      );
-    } else {
-      log.debug('No API keys to delete.');
-    }
-  }
 
   describe('Home page', function () {
     before(async () => {
