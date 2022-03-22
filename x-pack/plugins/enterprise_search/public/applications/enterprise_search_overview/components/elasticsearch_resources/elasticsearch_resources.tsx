@@ -15,18 +15,22 @@ export const ElasticsearchResources: React.FC = () => (
       <h4>Resources</h4>
     </EuiTitle>
     <EuiSpacer size="s" />
+    <EuiSpacer size="xs" />
     <EuiLink href="#" external>
       Getting started with Elasticsearch
     </EuiLink>
     <EuiSpacer size="s" />
+    <EuiSpacer size="xs" />
     <EuiLink href="#" external>
       Create a new index
     </EuiLink>
     <EuiSpacer size="s" />
+    <EuiSpacer size="xs" />
     <EuiLink href="#" external>
       Elasticsearch clients
     </EuiLink>
     <EuiSpacer size="s" />
+    <EuiSpacer size="xs" />
     <EuiLink href="#" external>
       Search UI for Elasticsearch
     </EuiLink>

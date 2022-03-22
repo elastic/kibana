@@ -18,6 +18,7 @@ import {
   EuiSteps,
   EuiSelect,
   EuiLink,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -52,16 +53,23 @@ export const ElasticsearchGuide: React.FC = () => {
 
   return (
     <EuiPageTemplate pageHeader={{ pageTitle: 'Elasticsearch' }}>
-      Content goes here
-      <EuiText>
+      <EuiTitle>
         <h2>Getting started with Elasticsearch</h2>
-        <p>
-          Whether you are building a search-powered application, or designing a large-scale search
-          implementation, Elasticsearch provides the low-level tools to create the most relevant and
-          performant search experience.
-        </p>
-      </EuiText>
-      <EuiSpacer />
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={4}>
+          <EuiText>
+            <p>
+              Whether you are building a search-powered application, or designing a large-scale
+              search implementation, Elasticsearch provides the low-level tools to create the most
+              relevant and performant search experience.
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1} />
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={3}>
           <EuiSteps
@@ -79,10 +87,13 @@ export const ElasticsearchGuide: React.FC = () => {
                         with them.
                       </p>
                     </EuiText>
-                    <EuiSpacer />
+                    <EuiSpacer size="m" />
+                    <EuiSpacer size="xs" />
                     <EuiLink href="#" external>
                       Learn more about Elasticsearch clients
                     </EuiLink>
+                    <EuiSpacer size="l" />
+                    <EuiSpacer size="xs" />
                     <EuiSelect
                       prepend="Select a client"
                       id={basicSelectId}
@@ -91,6 +102,7 @@ export const ElasticsearchGuide: React.FC = () => {
                       onChange={(e) => onChange(e)}
                       aria-label="Use aria labels when no actual label is in use"
                     />
+                    <EuiSpacer size="m" />
                     <LanguageInstructions language={selectedLanguage} />
                   </>
                 ),
@@ -106,7 +118,7 @@ export const ElasticsearchGuide: React.FC = () => {
                         world-class search experiences, was made for the task.
                       </p>
                     </EuiText>
-                    <EuiSpacer />
+                    <EuiSpacer size="l" />
                     <EuiFlexGroup gutterSize="l" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiLink href="#" external>

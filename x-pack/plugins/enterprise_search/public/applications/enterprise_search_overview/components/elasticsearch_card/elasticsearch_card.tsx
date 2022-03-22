@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -20,26 +20,32 @@ export const ElasticsearchCard: React.FC = () => {
     <EuiPanel paddingSize="l">
       <EuiFlexGroup gutterSize="xl" alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiText>
+          <EuiTitle size="s">
             <h3>
               <FormattedMessage
                 id="xpack.enterpriseSearch.overview.elasticsearchCard.heading"
                 defaultMessage="Get started with Elasticsearch"
               />
             </h3>
-          </EuiText>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText size="s">
             <FormattedMessage
               id="xpack.enterpriseSearch.overview.elasticsearchCard.description"
               defaultMessage="Design and build performant, relevant search-powered application or large-scale search implementations directly in Elasticsearch"
             />
           </EuiText>
-          <EuiButtonTo to={`${ELASTICSEARCH_GUIDE_PATH}`}>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.overview.elasticsearchCard.button"
-              defaultMessage="Get Started"
-            />
-          </EuiButtonTo>
+          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
+          {/* div is needed to prevent button from stratching */}
+          <div>
+            <EuiButtonTo to={`${ELASTICSEARCH_GUIDE_PATH}`}>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.overview.elasticsearchCard.button"
+                defaultMessage="Get Started"
+              />
+            </EuiButtonTo>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem>
           <ElasticsearchResources />

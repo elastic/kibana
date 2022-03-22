@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCodeBlock, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiCodeBlock, EuiTitle, EuiLink, EuiSpacer } from '@elastic/eui';
 
 // prettier-ignore
 const javascript1 = 
@@ -39,16 +39,20 @@ export const LanguageInstructions: React.FC<{ language: string }> = ({ language 
   if (language === 'javascript') {
     return (
       <>
-        <EuiTitle>
+        <EuiTitle size="xxs">
           <h4>Create a sample application</h4>
         </EuiTitle>
-        <EuiCodeBlock isCopyable>{javascript1}</EuiCodeBlock>
-        <EuiTitle>
+        <EuiCodeBlock fontSize="m" isCopyable>
+          {javascript1}
+        </EuiCodeBlock>
+        <EuiSpacer size="m" />
+        <EuiTitle size="xxs">
           <h4>Ingest data</h4>
         </EuiTitle>
-        <EuiCodeBlock isCopyable overflowHeight={300}>
+        <EuiCodeBlock fontSize="m" isCopyable overflowHeight={300}>
           {javascript2}
         </EuiCodeBlock>
+        <EuiSpacer size="l" />
         <EuiLink href="#" external>
           Learn more about the Elasticsearch JavaScript client
         </EuiLink>
