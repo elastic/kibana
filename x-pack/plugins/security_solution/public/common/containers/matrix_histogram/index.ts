@@ -162,7 +162,7 @@ export const useMatrixHistogram = ({
           });
       };
       searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort(1);
+      abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
     },
@@ -225,7 +225,7 @@ export const useMatrixHistogram = ({
     }
     return () => {
       searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort(2);
+      abortCtrl.current.abort();
     };
   }, [matrixHistogramRequest, hostsSearch, skip]);
 
@@ -233,7 +233,7 @@ export const useMatrixHistogram = ({
     if (skip) {
       setLoading(false);
       searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort(3);
+      abortCtrl.current.abort();
     }
   }, [skip]);
 

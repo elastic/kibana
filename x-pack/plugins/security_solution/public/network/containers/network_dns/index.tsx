@@ -207,5 +207,13 @@ export const useNetworkDns = ({
     };
   }, [networkDnsRequest, networkDnsSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, networkDnsResponse];
 };

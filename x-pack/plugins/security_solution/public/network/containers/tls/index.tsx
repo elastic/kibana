@@ -196,5 +196,13 @@ export const useNetworkTls = ({
     };
   }, [networkTlsRequest, networkTlsSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, networkTlsResponse];
 };
