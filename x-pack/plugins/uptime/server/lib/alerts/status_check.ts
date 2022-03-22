@@ -5,14 +5,13 @@
  * 2.0.
  */
 import { min } from 'lodash';
-import { join } from 'path';
+
 import datemath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { IBasePath } from 'kibana/server';
 import { UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,
@@ -20,7 +19,7 @@ import {
   GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
 import { MONITOR_STATUS } from '../../../common/constants/alerts';
-import { updateState } from './common';
+import { updateState, getViewInAppUrl } from './common';
 import {
   commonMonitorStateI18,
   commonStateTranslations,
@@ -79,13 +78,6 @@ export function getTimestampRange({
 const getMonIdByLoc = (monitorId: string, location: string) => {
   return monitorId + '-' + location;
 };
-const getViewInAppUrl = (relativeViewInAppUrl: string, basePath: IBasePath) =>
-  basePath.publicBaseUrl
-    ? new URL(
-        join(basePath.serverBasePath, relativeViewInAppUrl),
-        basePath.publicBaseUrl
-      ).toString()
-    : relativeViewInAppUrl;
 
 const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
   items.reduce(
