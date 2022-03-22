@@ -11,7 +11,7 @@ import { RULE_STATUS } from '../../screens/create_new_rule';
 
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { openExceptionFlyoutFromRuleSettings, goToExceptionsTab } from '../../tasks/rule_details';
 import {
@@ -36,7 +36,7 @@ import {
 } from '../../screens/exceptions';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { cleanKibana, reload } from '../../tasks/common';
+import { reload } from '../../tasks/common';
 import {
   createExceptionList,
   createExceptionListItem,
@@ -52,7 +52,7 @@ import { getExceptionList } from '../../objects/exception';
 // ensure the most basic logic holds.
 describe('Exceptions flyout', () => {
   before(() => {
-    cleanKibana();
+    esArchiverResetKibana();
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions
