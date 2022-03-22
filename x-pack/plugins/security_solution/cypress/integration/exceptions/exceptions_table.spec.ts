@@ -33,6 +33,7 @@ import {
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../screens/exceptions';
 import { createExceptionList } from '../../tasks/api_calls/exceptions';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const getExceptionList1 = () => ({
   ...getExceptionList(),
