@@ -5,7 +5,7 @@ You can create, manage, configure, and send cases to external systems with
 these APIs:
 
 * {security-guide}/cases-api-add-comment.html[Add comment]
-* {security-guide}/cases-api-create.html[Create case]
+* <<cases-api-create>>
 * {security-guide}/cases-api-delete-case.html[Delete case]
 * {security-guide}/cases-api-delete-all-comments.html[Delete all comments]
 * {security-guide}/cases-api-delete-comment.html[Delete comment]
@@ -24,5 +24,8 @@ these APIs:
 * {security-guide}/cases-api-push.html[Push case]
 * {security-guide}/assign-connector.html[Set default Elastic Security UI connector]
 * {security-guide}/case-api-update-connector.html[Update case configurations]
-* {security-guide}/cases-api-update.html[Update case]
+* <<cases-api-update>>
 * {security-guide}/cases-api-update-comment.html[Update comment]
+
+include::cases/cases-api-create.asciidoc[leveloffset=+1]
+include::cases/cases-api-update.asciidoc[leveloffset=+1]
