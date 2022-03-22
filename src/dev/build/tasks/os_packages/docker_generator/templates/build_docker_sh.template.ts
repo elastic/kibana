@@ -23,7 +23,7 @@ function generator({
   const dockerTargetName = `${imageTag}${imageFlavor}:${version}${
     dockerTagQualifier ? '-' + dockerTagQualifier : ''
   }`;
-  const dockerArchitecutre = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
+  const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -60,7 +60,7 @@ function generator({
   retry_docker_pull ${baseOSImage}
 
   echo "Building: kibana${imageFlavor}-docker"; \\
-  docker buildx build --platform ${dockerArchitecutre} -t ${dockerTargetName} -f Dockerfile . || exit 1;
+  docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f Dockerfile . || exit 1;
 
   docker save ${dockerTargetName} | gzip -c > ${dockerTargetFilename}
 
