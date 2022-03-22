@@ -7,7 +7,7 @@
  */
 
 import { TabifyBuckets } from './buckets';
-import { AggGroupNames } from '../aggs';
+import { AggGroupNames, IAggConfig } from '../aggs';
 import moment from 'moment';
 
 interface Bucket {
@@ -58,20 +58,22 @@ describe('Buckets wrapper', () => {
         },
       };
 
-      const aggParams = {
-        filters: [
-          {
-            label: '',
-            input: { query: 'response:200' },
-          },
-          {
-            label: '',
-            input: { query: 'response:404' },
-          },
-        ],
-      };
+      const agg = {
+        params: {
+          filters: [
+            {
+              label: '',
+              input: { query: 'response:200' },
+            },
+            {
+              label: '',
+              input: { query: 'response:404' },
+            },
+          ],
+        },
+      } as IAggConfig;
 
-      const buckets = new TabifyBuckets(aggResp, aggParams);
+      const buckets = new TabifyBuckets(aggResp, agg);
 
       expect(buckets).toHaveLength(2);
 
@@ -88,20 +90,22 @@ describe('Buckets wrapper', () => {
         },
       };
 
-      const aggParams = {
-        filters: [
-          {
-            label: '',
-            input: { query: { query_string: { query: 'response:200' } } },
-          },
-          {
-            label: '',
-            input: { query: { query_string: { query: 'response:404' } } },
-          },
-        ],
-      };
+      const agg = {
+        params: {
+          filters: [
+            {
+              label: '',
+              input: { query: { query_string: { query: 'response:200' } } },
+            },
+            {
+              label: '',
+              input: { query: { query_string: { query: 'response:404' } } },
+            },
+          ],
+        },
+      } as IAggConfig;
 
-      const buckets = new TabifyBuckets(aggResp, aggParams);
+      const buckets = new TabifyBuckets(aggResp, agg);
 
       expect(buckets).toHaveLength(2);
 
@@ -117,16 +121,18 @@ describe('Buckets wrapper', () => {
         },
       };
 
-      const aggParams = {
-        filters: [
-          {
-            label: '',
-            input: { query: { match_all: {} } },
-          },
-        ],
-      };
+      const agg = {
+        params: {
+          filters: [
+            {
+              label: '',
+              input: { query: { match_all: {} } },
+            },
+          ],
+        },
+      } as IAggConfig;
 
-      const buckets = new TabifyBuckets(aggResp, aggParams);
+      const buckets = new TabifyBuckets(aggResp, agg);
 
       expect(buckets).toHaveLength(1);
 
@@ -174,103 +180,154 @@ describe('Buckets wrapper', () => {
     };
 
     test('drops partial buckets when enabled', () => {
-      const aggParams = {
-        drop_partials: true,
-        field: {
-          name: 'date',
+      const agg = {
+        params: {
+          drop_partials: true,
+          field: {
+            name: 'date',
+          },
         },
-      };
+      } as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
         timeFields: ['date'],
       };
-      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      const buckets = new TabifyBuckets(aggResp, agg, timeRange);
 
       expect(buckets).toHaveLength(1);
     });
 
-    test('keeps partial buckets when disabled', () => {
-      const aggParams = {
-        drop_partials: false,
-        field: {
-          name: 'date',
+    test('drops partial buckets with missing buckets based on used_interval if provided', () => {
+      const agg = {
+        params: {
+          drop_partials: true,
+          used_interval: 'auto',
+          field: {
+            name: 'date',
+          },
         },
+        // interval is 100ms, but the data has holes
+        serialize: () => ({
+          params: { used_interval: '100ms' },
+        }),
+      } as unknown as IAggConfig;
+      const timeRange = {
+        from: moment(1050),
+        to: moment(1700),
+        timeFields: ['date'],
       };
+      const buckets = new TabifyBuckets(
+        {
+          [AggGroupNames.Buckets]: [
+            { key: 0, value: {} },
+            { key: 1000, value: {} },
+            { key: 1100, value: {} },
+            { key: 1400, value: {} },
+            { key: 1500, value: {} },
+            { key: 1700, value: {} },
+            { key: 3000, value: {} },
+          ],
+        },
+        agg,
+        timeRange
+      );
+
+      // 1100, 1400 and 1500
+      expect(buckets).toHaveLength(3);
+    });
+
+    test('keeps partial buckets when disabled', () => {
+      const agg = {
+        params: {
+          drop_partials: false,
+          field: {
+            name: 'date',
+          },
+        },
+      } as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
         timeFields: ['date'],
       };
-      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      const buckets = new TabifyBuckets(aggResp, agg, timeRange);
 
       expect(buckets).toHaveLength(4);
     });
 
     test('keeps aligned buckets when enabled', () => {
-      const aggParams = {
-        drop_partials: true,
-        field: {
-          name: 'date',
+      const agg = {
+        params: {
+          drop_partials: true,
+          field: {
+            name: 'date',
+          },
         },
-      };
+      } as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(400),
         timeFields: ['date'],
       };
-      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      const buckets = new TabifyBuckets(aggResp, agg, timeRange);
 
       expect(buckets).toHaveLength(3);
     });
 
     test('does not drop buckets for non-timerange fields', () => {
-      const aggParams = {
-        drop_partials: true,
-        field: {
-          name: 'other_time',
+      const agg = {
+        params: {
+          drop_partials: true,
+          field: {
+            name: 'other_time',
+          },
         },
-      };
+      } as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
         timeFields: ['date'],
       };
-      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      const buckets = new TabifyBuckets(aggResp, agg, timeRange);
 
       expect(buckets).toHaveLength(4);
     });
 
     test('does drop bucket when multiple time fields specified', () => {
-      const aggParams = {
-        drop_partials: true,
-        field: {
-          name: 'date',
+      const agg = {
+        params: {
+          drop_partials: true,
+          field: {
+            name: 'date',
+          },
         },
-      };
+      } as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(350),
         timeFields: ['date', 'other_datefield'],
       };
-      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      const buckets = new TabifyBuckets(aggResp, agg, timeRange);
 
       expect(buckets.buckets.map((b: Bucket) => b.key)).toEqual([100, 200]);
     });
 
     test('does not drop bucket when no timeFields have been specified', () => {
-      const aggParams = {
-        drop_partials: true,
-        field: {
-          name: 'date',
+      const agg = {
+        params: {
+          drop_partials: true,
+          field: {
+            name: 'date',
+          },
         },
-      };
+      } as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(350),
         timeFields: [],
       };
-      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      const buckets = new TabifyBuckets(aggResp, agg, timeRange);
 
       expect(buckets.buckets.map((b: Bucket) => b.key)).toEqual([0, 100, 200, 300]);
     });
