@@ -3,6 +3,30 @@
 This component provides a way to visually build and manage an ingest
 pipeline.
 
+## Implementation notes
+
+We decided to build a new drag-and-drop (DnD) tree component that supports:
+
+1. Really long nested lists (i.e, lists of lists) who's items can be reordered
+2. Click-to-pick-up then click-to-drop UX over drag-hold-then-drop UX
+
+The motivation for (2) was that we felt this would ease working with extremely long
+pipelines (100s of nodes) are generally a single list with at most 1-level nesting for
+on-failure handlers - typically we don't have on-failure on-failure handlers.
+
+At the time, no library supported what we were looking for. We tried using:
+
+* `react-beautiful-dnd`: unfortunately does not perform well given large lists and does not support nesting
+* `react-dnd`: supports only the click-and-drag type DnD
+
+This decision was made at the cost of additional maintenance burden of the DnD-esque tree. Ideally, `<ProcessorsTree />` and
+some of the logic contained in the tree `reducer` can be handed over to a library like EUI for long-term
+maintenance and improvement.
+
+### Possible libraries to use for the tree component
+
+* if we are happy to let go of (2): https://github.com/brimdata/react-arborist
+
 # API
 
 ## Editor components
