@@ -120,7 +120,7 @@ In addition to `saved_object`, several fields can be returned:
   `alias_purpose` field. This indicates why the alias was created, and it can be used to change the client behavior accordingly. One of the
   following values: `"savedObjectConversion"`, `"savedObjectImport"`
 
-Client-side code uses these fields to behave differently depending on the `outcome` -- <<sharing-saved-objects-step-3,learn more>>.
+Client-side code uses these fields to behave differently depending on the `outcome` -- <<sharing-saved-objects-step-1.3,learn more>>.
 ====
 
 Retrieve a dashboard object in the `testspace` by ID:
