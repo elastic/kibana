@@ -10,22 +10,9 @@ import React, { FC, useState, useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  // EuiPage,
-  // EuiPageBody,
-  // EuiPageContent,
-  // EuiPageContentHeader,
-  // EuiPageContentHeaderSection,
-  EuiTitle,
-  // EuiPageContentBody,
-  // EuiHorizontalRule,
   EuiSpacer,
-  // EuiBadge,
   EuiTextArea,
   EuiButton,
-  // EuiToolTip,
-  // EuiFlexGroup,
-  // EuiFlexItem,
-  // EuiIcon,
   EuiTabs,
   EuiTab,
   EuiLoadingContent,
@@ -81,9 +68,6 @@ export const NerModel: FC<Props> = ({ model }) => {
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h4>{model.model_id}</h4>
-      </EuiTitle>
       <EuiTextArea
         placeholder="Input text"
         value={inputText}

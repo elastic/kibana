@@ -53,7 +53,7 @@ import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constan
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { TestTrainedModelFlyout } from './test';
+import { TestTrainedModelFlyout, isTestable } from './test';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -474,15 +474,15 @@ export const ModelsList: FC<Props> = ({
         },
         {
           name: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
-            defaultMessage: 'Test',
+            defaultMessage: 'Test model',
           }),
           description: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
-            defaultMessage: 'Test',
+            defaultMessage: 'Test model',
           }),
           icon: 'inputOutput',
           type: 'icon',
           isPrimary: true,
-          // available: (item) => !!item.metadata?.analytics_config?.id,
+          available: (item) => isTestable(item),
           onClick: (model) => {
             setShowTestFlyout(model);
           },
