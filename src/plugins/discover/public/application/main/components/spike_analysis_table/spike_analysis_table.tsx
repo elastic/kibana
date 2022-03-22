@@ -31,15 +31,15 @@ import type { BaseSpikeAnalysisTableProps } from './spike_analysis_table_embedda
 import { ProgressControls } from './progress_controls';
 import { TreeView } from './tree_view';
 
-const loadingText = i18n.translate('xpack.apm.correlations.correlationsTable.loadingText', {
+const loadingText = i18n.translate('xpack.discover.correlations.correlationsTable.loadingText', {
   defaultMessage: 'Loading...',
 });
 
-const noDataText = i18n.translate('xpack.apm.correlations.correlationsTable.noDataText', {
+const noDataText = i18n.translate('xpack.discover.correlations.correlationsTable.noDataText', {
   defaultMessage: 'No data',
 });
 
-// const errorMessage = i18n.translate('xpack.apm.correlations.correlationsTable.errorMessage', {
+// const errorMessage = i18n.translate('xpack.discover.correlations.correlationsTable.errorMessage', {
 //   defaultMessage: 'Failed to fetch',
 // });
 
@@ -81,7 +81,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
           name: (
             <>
               {i18n.translate(
-                'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+                'xpack.discover.correlations.failedTransactions.correlationsTable.pValueLabel',
                 {
                   defaultMessage: 'Score',
                 }
@@ -104,7 +104,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
           name: (
             <>
               {i18n.translate(
-                'xpack.apm.correlations.failedTransactions.correlationsTable.impactLabel',
+                'xpack.discover.correlations.failedTransactions.correlationsTable.impactLabel',
                 {
                   defaultMessage: 'Impact',
                 }
@@ -121,7 +121,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
         {
           field: 'fieldName',
           name: i18n.translate(
-            'xpack.apm.correlations.failedTransactions.correlationsTable.fieldNameLabel',
+            'xpack.discover.correlations.failedTransactions.correlationsTable.fieldNameLabel',
             { defaultMessage: 'Field name' }
           ),
           sortable: true,
@@ -129,7 +129,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
         {
           field: 'fieldValue',
           name: i18n.translate(
-            'xpack.apm.correlations.failedTransactions.correlationsTable.fieldValueLabel',
+            'xpack.discover.correlations.failedTransactions.correlationsTable.fieldValueLabel',
             { defaultMessage: 'Field value' }
           ),
           render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
@@ -140,11 +140,11 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
           width: '100px',
           actions: [
             {
-              name: i18n.translate('xpack.apm.correlations.correlationsTable.filterLabel', {
+              name: i18n.translate('xpack.discover.correlations.correlationsTable.filterLabel', {
                 defaultMessage: 'Filter',
               }),
               description: i18n.translate(
-                'xpack.apm.correlations.correlationsTable.filterDescription',
+                'xpack.discover.correlations.correlationsTable.filterDescription',
                 { defaultMessage: 'Filter by value' }
               ),
               icon: 'plusInCircle',
@@ -160,11 +160,11 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
               },
             },
             {
-              name: i18n.translate('xpack.apm.correlations.correlationsTable.excludeLabel', {
+              name: i18n.translate('xpack.discover.correlations.correlationsTable.excludeLabel', {
                 defaultMessage: 'Exclude',
               }),
               description: i18n.translate(
-                'xpack.apm.correlations.correlationsTable.excludeDescription',
+                'xpack.discover.correlations.correlationsTable.excludeDescription',
                 { defaultMessage: 'Filter out value' }
               ),
               icon: 'minusInCircle',
@@ -180,7 +180,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
               },
             },
           ],
-          name: i18n.translate('xpack.apm.correlations.correlationsTable.actionsLabel', {
+          name: i18n.translate('xpack.discover.correlations.correlationsTable.actionsLabel', {
             defaultMessage: 'Filter',
           }),
           render: (_, { fieldName, fieldValue }) => {
