@@ -29,7 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
       return res.body as SimpleSavedObject<MonitorFields>;
     };
 
-    before(() => {
+    before(async () => {
+      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+
       _monitors = [
         getFixtureJson('icmp_monitor'),
         getFixtureJson('tcp_monitor'),

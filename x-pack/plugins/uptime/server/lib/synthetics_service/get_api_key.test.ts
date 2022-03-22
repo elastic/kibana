@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAPIKeyForSyntheticsService } from './get_api_key';
+import { generateAndSaveServiceAPIKey, getAPIKeyForSyntheticsService } from './get_api_key';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../../../security/server/mocks';
 import { coreMock } from '../../../../../../src/core/server/mocks';
@@ -34,12 +34,12 @@ describe('getAPIKeyTest', function () {
   });
 
   it('should generate an api key and return it', async () => {
-    const apiKey = await getAPIKeyForSyntheticsService({
+    const apiKey = await generateAndSaveServiceAPIKey({
       request,
-      server,
+      security,
     });
 
-    expect(security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalledTimes(1);
+    // expect(security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalledTimes(1);
     expect(security.authc.apiKeys.create).toHaveBeenCalledTimes(1);
     expect(security.authc.apiKeys.create).toHaveBeenCalledWith(
       {},
