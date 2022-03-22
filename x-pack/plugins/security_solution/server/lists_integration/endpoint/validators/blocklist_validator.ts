@@ -18,21 +18,21 @@ import {
 import { isValidHash } from '../../../../common/endpoint/service/trusted_apps/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
-const ProcessHashField = schema.oneOf([
-  schema.literal('process.hash.md5'),
-  schema.literal('process.hash.sha1'),
-  schema.literal('process.hash.sha256'),
+const FileHashField = schema.oneOf([
+  schema.literal('file.hash.md5'),
+  schema.literal('file.hash.sha1'),
+  schema.literal('file.hash.sha256'),
 ]);
-const ProcessExecutablePath = schema.literal('process.executable.caseless');
-const ProcessCodeSigner = schema.literal('process.Ext.code_signature');
+const FileExecutablePath = schema.literal('file.executable.caseless');
+const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
 const ConditionEntryTypeSchema = schema.literal('match_any');
 const ConditionEntryOperatorSchema = schema.literal('included');
 
 type ConditionEntryFieldAllowedType =
-  | TypeOf<typeof ProcessHashField>
-  | TypeOf<typeof ProcessExecutablePath>
-  | TypeOf<typeof ProcessCodeSigner>;
+  | TypeOf<typeof FileHashField>
+  | TypeOf<typeof FileExecutablePath>
+  | TypeOf<typeof FileCodeSigner>;
 
 type BlocklistConditionEntry =
   | {
@@ -47,13 +47,13 @@ type BlocklistConditionEntry =
  * A generic Entry schema to be used for a specific entry schema depending on the OS
  */
 const CommonEntrySchema = {
-  field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
+  field: schema.oneOf([FileHashField, FileExecutablePath]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
   // If field === HASH then validate hash with custom method, else validate string with minLength = 1
   value: schema.conditional(
     schema.siblingRef('field'),
-    ProcessHashField,
+    FileHashField,
     schema.arrayOf(
       schema.string({
         validate: (hash: string) =>
@@ -62,7 +62,7 @@ const CommonEntrySchema = {
     ),
     schema.conditional(
       schema.siblingRef('field'),
-      ProcessExecutablePath,
+      FileExecutablePath,
       schema.arrayOf(
         schema.string({
           validate: (pathValue: string) =>
@@ -83,23 +83,14 @@ const CommonEntrySchema = {
 // that the certificate is trusted
 const WindowsSignerEntrySchema = schema.object({
   type: schema.literal('nested'),
-  field: ProcessCodeSigner,
+  field: FileCodeSigner,
   entries: schema.arrayOf(
-    schema.oneOf([
-      schema.object({
-        field: schema.literal('trusted'),
-        value: schema.literal('true'),
-        type: schema.literal('match'),
-        operator: schema.literal('included'),
-      }),
-      schema.object({
-        field: schema.literal('subject_name'),
-        value: schema.arrayOf(schema.string({ minLength: 1 })),
-        type: schema.literal('match_any'),
-        operator: schema.literal('included'),
-      }),
-    ]),
-    { minSize: 2, maxSize: 2 }
+    schema.object({
+      field: schema.literal('subject_name'),
+      value: schema.arrayOf(schema.string({ minLength: 1 })),
+      type: schema.literal('match_any'),
+      operator: schema.literal('included'),
+    })
   ),
 });
 
@@ -107,7 +98,7 @@ const WindowsEntrySchema = schema.oneOf([
   WindowsSignerEntrySchema,
   schema.object({
     ...CommonEntrySchema,
-    field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
+    field: schema.oneOf([FileHashField, FileExecutablePath]),
   }),
 ]);
 
@@ -125,7 +116,7 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[], allowedHashes
   // If there are more hashes than allowed (three) then return an error
   if (currentHashes.length > allowedHashes.length) {
     const allowedHashesMessage = allowedHashes
-      .map((hash) => hash.replace('process.hash.', ''))
+      .map((hash) => hash.replace('file.hash.', ''))
       .join(',');
     return `There are more hash types than allowed [${allowedHashesMessage}]`;
   }
@@ -159,7 +150,7 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[], allowedHashes
 const entriesSchemaOptions = {
   minSize: 1,
   validate(entries: BlocklistConditionEntry[]) {
-    const allowedHashes = ['process.hash.md5', 'process.hash.sha1', 'process.hash.sha256'];
+    const allowedHashes = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
     if (allowedHashes.includes(entries[0].field)) {
       return hashEntriesValidation(entries, allowedHashes);
     } else {

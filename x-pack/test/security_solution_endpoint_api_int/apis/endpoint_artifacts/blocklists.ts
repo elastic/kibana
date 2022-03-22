@@ -129,13 +129,13 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.entries = [
               {
-                field: 'process.hash.sha256',
+                field: 'file.hash.sha256',
                 value: ['a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'],
                 type: 'match_any',
                 operator: 'included',
               },
               {
-                field: 'process.hash.sha256',
+                field: 'file.hash.sha256',
                 value: [
                   '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
                   'FCDE2B2EDBA56BF408601FB721FE9B5C338D10EE429EA04FAE5511B68FBF8FB9',
@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.entries = [
               {
-                field: 'process.hash.md5',
+                field: 'file.hash.md5',
                 operator: 'included',
                 type: 'match_any',
                 value: ['1'],
@@ -179,14 +179,8 @@ export default function ({ getService }: FtrProviderContext) {
             body.os_types = ['linux'];
             body.entries = [
               {
-                field: 'process.Ext.code_signature',
+                field: 'file.Ext.code_signature',
                 entries: [
-                  {
-                    field: 'trusted',
-                    value: 'true',
-                    type: 'match',
-                    operator: 'included',
-                  },
                   {
                     field: 'subject_name',
                     value: 'foo',
@@ -203,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
               .send(body)
               .expect(400)
               .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/^.*(?!process\.Ext\.code_signature)/));
+              .expect(anErrorMessageWith(/^.*(?!file\.Ext\.code_signature)/));
           });
 
           it(`should error on [${blocklistApiCall.method}] if more than one entry and not a hash`, async () => {
@@ -212,20 +206,14 @@ export default function ({ getService }: FtrProviderContext) {
             body.os_types = ['windows'];
             body.entries = [
               {
-                field: 'process.executable.caseless',
+                field: 'file.executable.caseless',
                 value: ['C:\\some\\path', 'C:\\some\\other\\path', 'C:\\yet\\another\\path'],
                 type: 'match_any',
                 operator: 'included',
               },
               {
-                field: 'process.Ext.code_signature',
+                field: 'file.Ext.code_signature',
                 entries: [
-                  {
-                    field: 'trusted',
-                    value: 'true',
-                    type: 'match',
-                    operator: 'included',
-                  },
                   {
                     field: 'subject_name',
                     value: ['notsus.exe', 'verynotsus.exe', 'superlegit.exe'],

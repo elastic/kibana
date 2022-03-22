@@ -256,7 +256,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     const os = this.randomOSFamily() as ExceptionListItemSchema['os_types'][number];
     const entriesList: CreateExceptionListItemSchema['entries'] = [
       {
-        field: 'process.executable.caseless',
+        field: 'file.executable.caseless',
         value:
           os === 'windows'
             ? ['C:\\some\\path', 'C:\\some\\other\\path', 'C:\\yet\\another\\path']
@@ -265,7 +265,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
         operator: 'included',
       },
       {
-        field: 'process.hash.sha256',
+        field: 'file.hash.sha256',
         value: [
           'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
           '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
@@ -275,7 +275,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
         operator: 'included',
       },
       {
-        field: 'process.hash.md5',
+        field: 'file.hash.md5',
         value: [
           'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
           '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
@@ -285,7 +285,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
         operator: 'included',
       },
       {
-        field: 'process.hash.sha1',
+        field: 'file.hash.sha1',
         value: [
           'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
           '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
@@ -298,14 +298,8 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
     if (os === 'windows') {
       entriesList.push({
-        field: 'process.Ext.code_signature',
+        field: 'file.Ext.code_signature',
         entries: [
-          {
-            field: 'trusted',
-            value: 'true',
-            type: 'match',
-            operator: 'included',
-          },
           {
             field: 'subject_name',
             value: ['notsus.exe', 'verynotsus.exe', 'superlegit.exe'],

@@ -58,7 +58,7 @@ export const getExceptionsPreGetOneHandler = (
       return data;
     }
 
-    // Validate Trusted Applications
+    // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
       await new BlocklistValidator(endpointAppContextService, request).validatePreGetOneItem();
       return data;
