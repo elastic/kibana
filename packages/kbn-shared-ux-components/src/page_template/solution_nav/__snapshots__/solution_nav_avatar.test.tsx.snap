@@ -3,8 +3,6 @@
 exports[`KibanaPageTemplateSolutionNavAvatar renders 1`] = `
 <EuiAvatar
   className="kbnPageTemplateSolutionNavAvatar"
-  color="plain"
-  iconSize="original"
   iconType="logoElastic"
   name="Solution"
 />
