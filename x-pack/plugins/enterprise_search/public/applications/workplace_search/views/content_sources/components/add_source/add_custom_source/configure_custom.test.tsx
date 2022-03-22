@@ -50,7 +50,7 @@ describe('ConfigureCustom', () => {
     const wrapper = shallow(<ConfigureCustom />);
 
     const preventDefault = jest.fn();
-    wrapper.find('form').simulate('submit', { preventDefault });
+    wrapper.find('EuiForm').simulate('submit', { preventDefault });
 
     expect(preventDefault).toHaveBeenCalled();
     expect(createContentSource).toHaveBeenCalled();
