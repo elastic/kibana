@@ -12,7 +12,7 @@ export type {
   FormHook,
   FieldHook,
   FormData,
-  Props as UseFieldProps,
+  UseFieldProps,
   FieldConfig,
   OnFormUpdateArg,
   ValidationFunc,
