@@ -73,7 +73,7 @@ const getAnomalies = async (
 };
 
 export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
-  _server,
+  server,
   libs,
   plugins
 ) => ({
@@ -109,7 +109,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
       esClient: scopedClusterClient.asCurrentUser,
       savedObjectsClient,
     });
-    const { basePath } = _server;
+    const { basePath } = server;
 
     const { anomalies } =
       (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt as string)) ??
