@@ -21,9 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const existingKeys = await es.security.queryApiKeys();
     if (existingKeys.count > 0) {
       Promise.all(
-        await (
-          await existingKeys.queryApiKeys()
-        ).api_keys.map(async (key) => {
+        await existingKeys.api_keys.map(async (key) => {
           await es.security.invalidateApiKey({ ids: [key.id] });
         })
       );
