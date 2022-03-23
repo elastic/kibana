@@ -245,6 +245,79 @@ export function QueryBarMenu({
     defaultMessage: 'KQL',
   });
 
+  const filterSetRelatedPanels = [
+    {
+      name: i18n.translate('data.filter.options.applyAllFiltersButtonLabel', {
+        defaultMessage: 'Apply to all',
+      }),
+      icon: 'filter',
+      panel: 2,
+      disabled: !Boolean(filters && filters.length > 0),
+    },
+    {
+      name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
+        defaultMessage: 'Clear all',
+      }),
+      disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
+      icon: 'crossInACircleFilled',
+      'data-test-subj': 'saved-query-management-removeAllFilters',
+      onClick: () => {
+        closePopover();
+        onQueryBarSubmit({
+          query: { query: '', language },
+          dateRange: getDateRange(),
+        });
+        onRemoveAll();
+        onClearSavedQuery?.();
+      },
+    },
+    { isSeparator: true },
+  ];
+
+  const savedFilterSetRelatedPanels = [
+    {
+      name: savedQuery
+        ? i18n.translate('data.filter.options.loadOtherFilterSetLabel', {
+            defaultMessage: 'Load other filter set',
+          })
+        : i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
+            defaultMessage: 'Load filter set',
+          }),
+      panel: 4,
+      width: 350,
+      icon: 'filter',
+      disabled: !savedQueries.length,
+    },
+    {
+      name: savedQuery
+        ? i18n.translate('data.filter.options.saveAsNewFilterSetLabel', {
+            defaultMessage: 'Save as new',
+          })
+        : i18n.translate('data.filter.options.saveFilterSetLabel', {
+            defaultMessage: 'Save filter set',
+          }),
+      icon: 'save',
+      disabled: !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
+      panel: 1,
+      'data-test-subj': 'saved-query-management-save-button',
+    },
+    { isSeparator: true },
+  ];
+
+  const items = [];
+  if (showFilterSetManagement) {
+    items.push(...filterSetRelatedPanels);
+  }
+  if (showSavedQueryManagement) {
+    items.push(...savedFilterSetRelatedPanels);
+  }
+  if (showFilterSetManagement && showSavedQueryManagement) {
+    items.push({
+      name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
+      panel: 3,
+    });
+  }
+
   const panels = [
     {
       id: 0,
@@ -314,65 +387,7 @@ export function QueryBarMenu({
           </EuiFlexGroup>
         </>
       ),
-      items: [
-        {
-          name: i18n.translate('data.filter.options.applyAllFiltersButtonLabel', {
-            defaultMessage: 'Apply to all',
-          }),
-          icon: 'filter',
-          panel: 2,
-          disabled: !Boolean(filters && filters.length > 0),
-        },
-        {
-          name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
-            defaultMessage: 'Clear all',
-          }),
-          disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
-          icon: 'crossInACircleFilled',
-          'data-test-subj': 'saved-query-management-removeAllFilters',
-          onClick: () => {
-            closePopover();
-            onQueryBarSubmit({
-              query: { query: '', language },
-              dateRange: getDateRange(),
-            });
-            onRemoveAll();
-            onClearSavedQuery?.();
-          },
-        },
-        { isSeparator: true },
-        {
-          name: savedQuery
-            ? i18n.translate('data.filter.options.loadOtherFilterSetLabel', {
-                defaultMessage: 'Load other filter set',
-              })
-            : i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
-                defaultMessage: 'Load filter set',
-              }),
-          panel: 4,
-          width: 350,
-          icon: 'filter',
-          disabled: !savedQueries.length,
-        },
-        {
-          name: savedQuery
-            ? i18n.translate('data.filter.options.saveAsNewFilterSetLabel', {
-                defaultMessage: 'Save as new',
-              })
-            : i18n.translate('data.filter.options.saveFilterSetLabel', {
-                defaultMessage: 'Save filter set',
-              }),
-          icon: 'save',
-          disabled: !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
-          panel: 1,
-          'data-test-subj': 'saved-query-management-save-button',
-        },
-        { isSeparator: true },
-        {
-          name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
-          panel: 3,
-        },
-      ],
+      items,
     },
     {
       id: 1,

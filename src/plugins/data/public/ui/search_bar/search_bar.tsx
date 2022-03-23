@@ -197,7 +197,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryInput =
       this.props.showQueryInput && this.props.indexPatterns && this.state.query;
-    return this.props.showQueryBar && (showDatePicker || showQueryInput);
+    return (
+      this.props.showQueryBar && (showDatePicker || showQueryInput || this.props.showFilterBar)
+    );
   }
 
   private shouldRenderFilterBar() {

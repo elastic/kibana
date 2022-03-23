@@ -285,6 +285,10 @@ export const QueryBarTopRow = React.memo(
       return Boolean(showDatePicker || showAutoRefreshOnly);
     }
 
+    function shouldRenderUpdatebutton(): boolean {
+      return Boolean(showQueryInput);
+    }
+
     function renderDatePicker() {
       if (!shouldRenderDatePicker()) {
         return null;
@@ -316,6 +320,9 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderUpdateButton() {
+      if (!shouldRenderUpdatebutton()) {
+        return null;
+      }
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
