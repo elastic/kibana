@@ -684,6 +684,27 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
+    async assertDataViewTimeFieldInputExists() {
+      await testSubjects.existOrFail(`transformIndexPatternTimeFieldSelect`);
+    },
+
+    async assertDataViewTimeFieldValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        `transformIndexPatternTimeFieldSelect`,
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Data view time field should be ${expectedValue}, got ${actualValue}`
+      );
+    },
+
+    async setDataViewTimeField(fieldName: string) {
+      const selectControl = await testSubjects.find('transformIndexPatternTimeFieldSelect');
+      await selectControl.type(fieldName);
+      await this.assertDataViewTimeFieldValue(fieldName);
+    },
+
     async assertContinuousModeSwitchExists() {
       await testSubjects.existOrFail(`transformContinuousModeSwitch`, { allowHidden: true });
     },

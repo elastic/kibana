@@ -66,6 +66,7 @@ export interface BaseTransformTestData {
   transformDescription: string;
   expected: any;
   destinationIndex: string;
+  destinationDataViewTimeField?: string;
   discoverAdjustSuperDatePicker: boolean;
 }
 
