@@ -167,8 +167,17 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     value: true,
     description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'To use the new {documentExplorerDocs} instead of the classic view, turn off this option. ' +
         'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
+      values: {
+        documentExplorerDocs:
+          `<a href=${docLinks.links.discover.documentExplorer}
+            target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
+            defaultMessage: 'Document Explorer',
+          }) +
+          '</a>',
+      },
     }),
     category: ['discover'],
     schema: schema.boolean(),

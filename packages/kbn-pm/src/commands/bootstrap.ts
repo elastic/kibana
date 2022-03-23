@@ -71,7 +71,14 @@ export const BootstrapCommand: ICommand = {
 
     if (forceInstall) {
       const forceInstallStartTime = Date.now();
-      await runBazel(['run', '@nodejs//:yarn'], runOffline);
+      await runBazel(['run', '@nodejs//:yarn'], runOffline, {
+        env: {
+          SASS_BINARY_SITE:
+            'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
+          RE2_DOWNLOAD_MIRROR:
+            'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
+        },
+      });
       timings.push({
         id: 'force install dependencies',
         ms: Date.now() - forceInstallStartTime,

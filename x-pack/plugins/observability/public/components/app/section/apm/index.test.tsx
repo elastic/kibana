@@ -91,7 +91,7 @@ describe('APMSection', () => {
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
-    expect(getByText('Throughput 900.0 tpm')).toBeInTheDocument();
+    expect(getByText('900.0 tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
 
@@ -108,7 +108,7 @@ describe('APMSection', () => {
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
-    expect(getByText('Throughput 312.00k tpm')).toBeInTheDocument();
+    expect(getByText('312.00k tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
   it('shows loading state', () => {
@@ -125,6 +125,6 @@ describe('APMSection', () => {
     expect(getByTestId('loading')).toBeInTheDocument();
     expect(queryAllByText('View in app')).toEqual([]);
     expect(queryAllByText('Services 11')).toEqual([]);
-    expect(queryAllByText('Throughput 312.00k tpm')).toEqual([]);
+    expect(queryAllByText('312.00k tpm')).toEqual([]);
   });
 });

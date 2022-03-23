@@ -2540,6 +2540,9 @@
                       },
                       "diff": {
                         "$ref": "#/components/schemas/upgrade_diff"
+                      },
+                      "agent_diff": {
+                        "$ref": "#/components/schemas/upgrade_agent_diff"
                       }
                     },
                     "required": [
@@ -3981,9 +3984,12 @@
             "type": "string"
           },
           "last_activity_ms": {
-            "type": "string"
+            "type": "number"
           },
           "size_in_bytes": {
+            "type": "number"
+          },
+          "size_in_bytes_formatted": {
             "type": "string"
           },
           "dashboard": {
@@ -4102,6 +4108,118 @@
               ]
             }
           ]
+        }
+      },
+      "full_agent_policy_input_stream": {
+        "title": "Full agent policy input stream",
+        "allOf": [
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "data_stream": {
+                "type": "object",
+                "properties": {
+                  "dataset": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "dataset",
+                  "type"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "data_stream"
+            ]
+          }
+        ]
+      },
+      "full_agent_policy_input": {
+        "title": "Full agent policy input",
+        "allOf": [
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "type": {
+                "type": "string"
+              },
+              "data_stream": {
+                "type": "object",
+                "properties": {
+                  "namespace": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "namespace"
+                ]
+              },
+              "use_output": {
+                "type": "string"
+              },
+              "meta": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "package": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "version"
+                    ]
+                  }
+                }
+              },
+              "streams": {
+                "$ref": "#/components/schemas/full_agent_policy_input_stream"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "revision",
+              "type",
+              "data_stream",
+              "use_output"
+            ]
+          }
+        ]
+      },
+      "upgrade_agent_diff": {
+        "title": "Package policy Upgrade dryrun",
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/full_agent_policy_input"
+          }
         }
       },
       "update_package_policy": {

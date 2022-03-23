@@ -20,7 +20,7 @@ import {
   map,
   take,
 } from 'rxjs/operators';
-import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
+import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
   ControlGroupInput,
@@ -128,13 +128,12 @@ export class ControlGroupContainer extends Container<
         iconType="arrowDown"
         iconSide="right"
         panelPaddingSize="none"
-        data-test-subj="dashboardControlsMenuButton"
+        data-test-subj="dashboard-controls-menu-button"
       >
         {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
-              <EuiHorizontalRule margin="none" />,
               this.getEditControlGroupButton(closePopover),
             ]}
           />

@@ -4,10 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { PackagePolicy, PackagePolicyInput } from '../types';
+import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
+
+async function mockedGetPackageInfo({ pkgName }: { pkgName: string }) {
+  const packages: Record<string, any> = {
+    'mock-package': {
+      name: 'mock-package',
+      version: '0.0.0',
+      policy_templates: [
+        {
+          multiple: true,
+        },
+      ],
+    },
+    'limited-package': {
+      name: 'limited-package',
+      version: '0.0.0',
+      policy_templates: [
+        {
+          multiple: false,
+        },
+      ],
+    },
+  };
+  return Promise.resolve(packages[pkgName]);
+}
+
+jest.mock('../epm/packages', () => {
+  return {
+    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
+  };
+});
 
 describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
   const mockPackagePolicy: PackagePolicy = {
@@ -107,11 +138,13 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ],
   };
 
-  it('returns no inputs for package policy with no inputs, or only disabled inputs', () => {
-    expect(storedPackagePoliciesToAgentInputs([mockPackagePolicy])).toEqual([]);
+  it('returns no inputs for package policy with no inputs, or only disabled inputs', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [mockPackagePolicy])
+    ).toEqual([]);
 
     expect(
-      storedPackagePoliciesToAgentInputs([
+      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
         {
           ...mockPackagePolicy,
           package: {
@@ -124,7 +157,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([]);
 
     expect(
-      storedPackagePoliciesToAgentInputs([
+      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
         {
           ...mockPackagePolicy,
           inputs: [{ ...mockInput, enabled: false }],
@@ -133,9 +166,9 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([]);
   });
 
-  it('returns agent inputs with streams', () => {
+  it('returns agent inputs with streams', async () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
+      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
         {
           ...mockPackagePolicy,
           package: {
@@ -176,9 +209,9 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ]);
   });
 
-  it('returns unique agent inputs IDs, with policy template name if one exists', () => {
+  it('returns unique agent inputs IDs, with policy template name if one exists for non-limited packages', async () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
+      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
         {
           ...mockPackagePolicy,
           package: {
@@ -187,6 +220,15 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             version: '0.0.0',
           },
           inputs: [mockInput, mockInput2],
+        },
+        {
+          ...mockPackagePolicy,
+          package: {
+            name: 'limited-package',
+            title: 'Limited package',
+            version: '0.0.0',
+          },
+          inputs: [mockInput2],
         },
       ])
     ).toEqual([
@@ -238,12 +280,34 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           },
         ],
       },
+      {
+        id: 'some-uuid',
+        name: 'mock-package-policy',
+        revision: 1,
+        type: 'test-metrics',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'limited-package',
+            version: '0.0.0',
+          },
+        },
+        streams: [
+          {
+            id: 'test-metrics-foo',
+            data_stream: { dataset: 'foo', type: 'metrics' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+        ],
+      },
     ]);
   });
 
-  it('returns agent inputs without streams', () => {
+  it('returns agent inputs without streams', async () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
+      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
         {
           ...mockPackagePolicy,
           package: {
@@ -281,9 +345,9 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ]);
   });
 
-  it('returns agent inputs without disabled streams', () => {
+  it('returns agent inputs without disabled streams', async () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
+      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
         {
           ...mockPackagePolicy,
           inputs: [
@@ -314,9 +378,9 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ]);
   });
 
-  it('returns agent inputs with deeply merged config values', () => {
+  it('returns agent inputs with deeply merged config values', async () => {
     expect(
-      storedPackagePoliciesToAgentInputs([
+      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
         {
           ...mockPackagePolicy,
           inputs: [
