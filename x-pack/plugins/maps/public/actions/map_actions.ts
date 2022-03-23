@@ -14,9 +14,10 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { Filter } from '@kbn/es-query';
 import { Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
-import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
+import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { MapStoreState } from '../reducers/store';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import {
   getDataFilters,
   getFilters,
@@ -102,6 +103,42 @@ export function updateMapSetting(
 
     if (settingKey === 'autoFitToDataBounds' && settingValue === true) {
       dispatch(autoFitToBounds());
+    }
+  };
+}
+
+export function deleteCustomIcon(value: string) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layerList = getLayerList(getState());
+    const findCustomIcons = layerList
+      .filter((layer) => {
+        const style = layer.getCurrentStyle();
+        if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
+          return;
+        }
+        return (style as IVectorStyle).getCustomIconIdsInUse().includes(value);
+      })
+      .map(async (layer) => await layer.getDisplayName());
+
+    const layersContainingCustomIcon = await Promise.all(findCustomIcons);
+
+    if (layersContainingCustomIcon.length > 0) {
+      getToasts().addWarning(
+        i18n.translate('xpack.maps.mapActions.deleteCustomIconWarning', {
+          defaultMessage: `Unable to delete custom icon. This icon is in use by the following layer(s): {layers}`,
+          values: {
+            layers: layersContainingCustomIcon.join(', '),
+          },
+        })
+      );
+    } else {
+      const newIcons = getState().map.settings.customIcons.filter(
+        ({ symbolId }) => symbolId !== value
+      );
+      dispatch(updateMapSetting('customIcons', newIcons));
     }
   };
 }

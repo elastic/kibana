@@ -11,7 +11,12 @@ import { ThunkDispatch } from 'redux-thunk';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapStoreState } from '../../reducers/store';
 import { MapSettingsPanel } from './map_settings_panel';
-import { rollbackMapSettings, updateMapSetting, updateFlyout } from '../../actions';
+import {
+  deleteCustomIcon,
+  rollbackMapSettings,
+  updateMapSetting,
+  updateFlyout,
+} from '../../actions';
 import {
   getMapCenter,
   getMapSettings,
@@ -39,6 +44,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => {
       dispatch(updateMapSetting(settingKey, settingValue));
+    },
+    deleteCustomIcon: (symbolId: string) => {
+      dispatch(deleteCustomIcon(symbolId));
     },
   };
 }

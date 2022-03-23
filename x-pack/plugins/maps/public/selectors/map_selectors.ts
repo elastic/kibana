@@ -306,6 +306,7 @@ export const getSpatialFiltersLayer = createSelector(
         }),
       }),
       source: new GeoJsonFileSource(geoJsonSourceDescriptor),
+      customIcons: settings.customIcons,
     });
   }
 );

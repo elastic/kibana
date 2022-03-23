@@ -32,6 +32,7 @@ export interface Props {
   keepChanges: () => void;
   settings: MapSettings;
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
+  deleteCustomIcon: (symbolId: string) => void;
   zoom: number;
 }
 
@@ -42,6 +43,7 @@ export function MapSettingsPanel({
   keepChanges,
   settings,
   updateMapSetting,
+  deleteCustomIcon,
   zoom,
 }: Props) {
   // TODO move common text like Cancel and Close to common i18n translation
@@ -79,7 +81,11 @@ export function MapSettingsPanel({
           <EuiSpacer size="s" />
           <SpatialFiltersPanel settings={settings} updateMapSetting={updateMapSetting} />
           <EuiSpacer size="s" />
-          <CustomIconsPanel settings={settings} updateMapSetting={updateMapSetting} />
+          <CustomIconsPanel
+            settings={settings}
+            updateMapSetting={updateMapSetting}
+            deleteCustomIcon={deleteCustomIcon}
+          />
         </div>
       </div>
 

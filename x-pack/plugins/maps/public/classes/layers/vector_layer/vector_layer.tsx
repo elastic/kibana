@@ -73,6 +73,7 @@ export interface VectorLayerArguments {
   layerDescriptor: VectorLayerDescriptor;
   customIcons?: CustomIcon[],
   chartsPaletteServiceGetColor?: (value: string) => string | null;
+  customIcons: CustomIcon[],
 }
 
 export interface IVectorLayer extends ILayer {

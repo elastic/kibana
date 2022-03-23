@@ -29,6 +29,7 @@ import { CustomIcon } from '../../../common/descriptor_types';
 interface Props {
   settings: MapSettings;
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
+  deleteCustomIcon: (symbolId: string) => void;
 }
 
 interface State {
@@ -109,12 +110,7 @@ export class CustomIconsPanel extends Component<Props, State> {
   };
 
   private _handleDelete = (symbolId: string) => {
-    const icons = [
-      ...this.props.settings.customIcons.filter((i) => {
-        return i.symbolId !== symbolId;
-      }),
-    ];
-    this.props.updateMapSetting('customIcons', icons);
+    this.props.deleteCustomIcon(symbolId);
     this._hideModal();
   };
 

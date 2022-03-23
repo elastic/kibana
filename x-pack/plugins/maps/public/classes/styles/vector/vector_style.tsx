@@ -103,6 +103,7 @@ export interface IVectorStyle extends IStyle {
   isTimeAware(): boolean;
   getPrimaryColor(): string;
   getIcon(showIncompleteIndicator: boolean): ReactElement;
+  getCustomIconIdsInUse(): string[];
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -779,6 +780,19 @@ export class VectorStyle implements IVectorStyle {
         svg={this._getIconMeta(this._getSymbolId())?.svg}
       />
     );
+  }
+
+  getCustomIconIdsInUse() {
+    if (this._iconStyleProperty.isDynamic()) {
+      const { customIconStops } = this._iconStyleProperty.getOptions() as IconDynamicOptions;
+      return customIconStops
+        ? customIconStops
+            .map(({ value }) => value)
+            .filter((value) => value.startsWith(CUSTOM_ICON_PREFIX_SDF))
+        : [];
+    }
+    const { value } = this._iconStyleProperty.getOptions() as IconStaticOptions;
+    return value.startsWith(CUSTOM_ICON_PREFIX_SDF) ? [value] : [];
   }
 
   _getLegendDetailStyleProperties = () => {
