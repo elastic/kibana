@@ -64,6 +64,14 @@ export interface KeyCaptureProps {
  * displayed in a more UX friendly way
  */
 export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateChange }) => {
+  // We don't need the actual value that was last input in this component, because
+  // `setLastInput()` is used with a function that returns the typed character.
+  // This state is used like this:
+  //    1. user presses a keyboard key
+  //    2. `input` event is triggered - we store the letter typed
+  //    3. the next event to be triggered (after `input`) that we listen for is `keyup`,
+  //       and when that is triggered, we take the input letter (already stored) and
+  //       call `onCapture()` with it and then set the lastInput state back to an empty string
   const [, setLastInput] = useState('');
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
