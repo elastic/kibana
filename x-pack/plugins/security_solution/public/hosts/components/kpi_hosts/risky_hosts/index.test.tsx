@@ -36,7 +36,7 @@ describe('RiskyHosts', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('hostsKpiLoader')).toBeInTheDocument();
+    expect(getByTestId('KpiLoader')).toBeInTheDocument();
   });
 
   test('it displays 0 risky hosts when initializing', () => {
