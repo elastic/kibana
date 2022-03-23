@@ -110,12 +110,17 @@ export class AggsService {
     // initialize each agg type and store in memory
     types.getAll().buckets.forEach((type) => {
       const agg = type(aggTypesDependencies);
+      console.log('agg.name, agg', agg.name, agg);
+
       this.initializedAggTypes.set(agg.name, agg);
     });
+
     types.getAll().metrics.forEach((type) => {
       const agg = type(aggTypesDependencies);
       this.initializedAggTypes.set(agg.name, agg);
     });
+
+    // this.initializedAggTypes.set('random_sampler', agg);
 
     const typesRegistry = {
       get: (name: string) => {

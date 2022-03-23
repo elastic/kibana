@@ -32,6 +32,7 @@ export * from './lib/time_buckets/calc_auto_interval';
 export * from './migrate_include_exclude_format';
 export * from './range_fn';
 export * from './range';
+export * from './random_sampler';
 export * from './significant_terms_fn';
 export * from './significant_terms';
 export * from './significant_text_fn';

@@ -7,7 +7,7 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { IndexPattern } from '../..';
+import { AggParamsRandomSampler, IndexPattern } from '../..';
 import {
   aggAvg,
   aggBucketAvg,
@@ -165,6 +165,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
   [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
+  [BUCKET_TYPES.RANDOM_SAMPLER]: AggParamsRandomSampler;
   [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;

@@ -17,6 +17,49 @@ export function getChartAggConfigs(
   data: DataPublicPluginStart
 ) {
   const indexPattern = searchSource.getField('index')!;
+  // const visStateAggs = [
+  //   {
+  //     type: 'count',
+  //     schema: 'metric',
+  //   },
+  //   {
+  //     type: 'sampling',
+  //     schema: 'segment',
+  //     params: {
+  //       field: indexPattern.timeFieldName!,
+  //       interval: histogramInterval,
+  //       timeRange: data.query.timefilter.timefilter.getTime(),
+  //     },
+  //   },
+  // ];
+
+  const visStateAggs = [
+    {
+      type: 'count',
+      schema: 'metric',
+    },
+    {
+      type: 'random_sampler',
+      schema: 'bucket',
+      params: {
+        probability: 0.1,
+        field: indexPattern.timeFieldName!,
+        interval: histogramInterval,
+        timeRange: data.query.timefilter.timefilter.getTime(),
+      },
+    },
+  ];
+
+  console.log('createAggConfigs', data.search.aggs.createAggConfigs(indexPattern, visStateAggs));
+  return data.search.aggs.createAggConfigs(indexPattern, visStateAggs);
+}
+
+export function getChartAggWithRandomSamplerConfigs(
+  searchSource: ISearchSource,
+  histogramInterval: string,
+  data: DataPublicPluginStart
+) {
+  const indexPattern = searchSource.getField('index')!;
   const visStateAggs = [
     {
       type: 'count',
