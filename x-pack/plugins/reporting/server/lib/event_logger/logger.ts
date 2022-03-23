@@ -24,11 +24,11 @@ import {
   StartedExecution,
 } from './types';
 
-interface ExecutionClaimMetrics extends TaskRunMetrics {
+export interface ExecutionClaimMetrics extends TaskRunMetrics {
   queueDuration: number;
 }
 
-interface ExecutionCompleteMetrics extends TaskRunMetrics {
+export interface ExecutionCompleteMetrics extends TaskRunMetrics {
   byteSize: number;
 }
 
