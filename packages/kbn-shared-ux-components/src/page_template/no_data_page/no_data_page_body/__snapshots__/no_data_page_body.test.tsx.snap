@@ -5,7 +5,7 @@ exports[`NoDataPageBody render 1`] = `
   <EuiText
     textAlign="center"
   >
-    <KibanaPageTemplateSolutionNavAvatar
+    <KibanaSolutionAvatar
       iconType="elastic"
       name="Elastic"
       size="xxl"
@@ -20,7 +20,7 @@ exports[`NoDataPageBody render 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="Add your data to get started, or {link} about {solution}."
-          id="sharedUX.noDataPage.intro"
+          id="sharedUXComponents.noDataPage.intro"
           values={
             Object {
               "link": <EuiLink
@@ -28,7 +28,7 @@ exports[`NoDataPageBody render 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="learn more"
-                  id="sharedUX.noDataPage.intro.link"
+                  id="sharedUXComponents.noDataPage.intro.link"
                   values={Object {}}
                 />
               </EuiLink>,

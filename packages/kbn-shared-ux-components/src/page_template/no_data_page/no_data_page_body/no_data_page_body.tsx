@@ -10,8 +10,8 @@ import { EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import React, { ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPageProps } from '../types';
-import { KibanaPageTemplateSolutionNavAvatar } from '../../solution_nav';
 import { ElasticAgentCard, NoDataCard } from '../no_data_card';
+import { KibanaSolutionAvatar } from '../../../solution_avatar';
 
 export type NoDataPageBodyProps = {
   actionCard: ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard> | null;
@@ -23,11 +23,7 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
   return (
     <>
       <EuiText textAlign="center">
-        <KibanaPageTemplateSolutionNavAvatar
-          name={solution}
-          iconType={logo || `logo${solution}`}
-          size="xxl"
-        />
+        <KibanaSolutionAvatar name={solution} iconType={logo || `logo${solution}`} size="xxl" />
         <EuiSpacer size="l" />
         <h1>{pageTitle}</h1>
         <EuiTextColor color="subdued">

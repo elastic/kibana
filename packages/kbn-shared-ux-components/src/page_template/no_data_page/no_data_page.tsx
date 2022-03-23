@@ -13,13 +13,6 @@ import { ElasticAgentCard, NoDataCard } from './no_data_card';
 import { NoDataPageBody } from './no_data_page_body';
 import { NoDataPageProps } from './types';
 
-export const NO_DATA_RECOMMENDED = i18n.translate(
-  'sharedUXComponents.noDataPage.noDataPage.recommended',
-  {
-    defaultMessage: 'Recommended',
-  }
-);
-
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   solution,
   logo,
