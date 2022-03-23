@@ -97,7 +97,7 @@ describe('Use cases toast hook', () => {
         theCase: mockCase,
         attachments: [basicComment as SupportedCaseAttachment],
       });
-      validateTitle('A case has been updated: "Another horrible breach!!"');
+      validateTitle('Another horrible breach!! has been updated');
     });
   });
   describe('Toast content', () => {
