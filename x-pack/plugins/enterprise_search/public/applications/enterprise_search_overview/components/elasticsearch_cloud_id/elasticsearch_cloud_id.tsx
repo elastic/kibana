@@ -33,9 +33,17 @@ const onFocusHandler = (e: React.FocusEvent<HTMLInputElement>): void => {
   e.target.select();
 };
 
-const useCloudId = (): string | undefined => {
+interface CloudDetails {
+  cloudId: string | undefined;
+  deploymentUrl: string | undefined;
+}
+
+const useCloudDetails = (): CloudDetails => {
   const { cloud } = useValues(KibanaLogic);
-  return cloud?.cloudId;
+  return {
+    cloudId: cloud?.cloudId,
+    deploymentUrl: cloud?.deploymentUrl,
+  };
 };
 
 const copyCloudIdHandler = (
@@ -52,11 +60,11 @@ const copyCloudIdHandler = (
 };
 
 export const ElasticsearchCloudId: React.FC = () => {
-  const cloudId = useCloudId();
+  const cloud = useCloudDetails();
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
 
   // hide the panel when no cloud context is available
-  if (!cloudId) {
+  if (!cloud.cloudId) {
     return null;
   }
 
@@ -77,7 +85,7 @@ export const ElasticsearchCloudId: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href="http://www.elastic.co" target="_blank">
+          <EuiLink href={cloud.deploymentUrl} target="_blank" data-test-subj="cloudManageLink">
             {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCloudId.manageLink', {
               defaultMessage: 'Manage',
             })}
@@ -97,11 +105,11 @@ export const ElasticsearchCloudId: React.FC = () => {
             >
               <EuiFieldText
                 onFocus={onFocusHandler}
-                value={cloudId}
+                value={cloud.cloudId}
                 compressed
                 readOnly
                 append={
-                  <EuiCopy textToCopy={cloudId}>
+                  <EuiCopy textToCopy={cloud.cloudId}>
                     {(copy) => (
                       <EuiButtonIcon
                         iconType={'copyClipboard'}

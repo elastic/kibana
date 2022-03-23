@@ -22,7 +22,12 @@ describe('Elasticsearch Cloud Id', () => {
   let wrapper: ShallowWrapper;
 
   beforeEach(() => {
-    setMockValues({ cloud: { cloudId: 'example-cloud-id' } });
+    setMockValues({
+      cloud: {
+        cloudId: 'example-cloud-id',
+        deploymentUrl: 'https://cloud.elastic.co/deployments/fake-deployment-id',
+      },
+    });
     wrapper = shallow(<ElasticsearchCloudId />);
   });
 
@@ -81,6 +86,14 @@ describe('Elasticsearch Cloud Id', () => {
       expect(execCommandMock).toHaveBeenCalledWith('copy');
       expect(warn).toHaveBeenCalledWith('Unable to copy to clipboard.');
       expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalled();
+    });
+
+    it('should present a manage link to deployment screen', () => {
+      const manageLink = wrapper.find('[data-test-subj="cloudManageLink"]');
+      expect(manageLink).toHaveLength(1);
+      expect(manageLink.props().href).toEqual(
+        'https://cloud.elastic.co/deployments/fake-deployment-id'
+      );
     });
   });
 });
