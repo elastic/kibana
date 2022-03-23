@@ -139,7 +139,7 @@ for (const testSuite of testSuites) {
         steps.push({
           command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/xpack_cigroup.sh`,
           label: `Default CI Group ${CI_GROUP}`,
-          agents: { queue: 'n2-4' },
+          agents: { queue: 'n2-4-spot' },
           depends_on: 'build',
           parallelism: RUN_COUNT,
           concurrency: concurrency,
@@ -150,7 +150,7 @@ for (const testSuite of testSuites) {
         steps.push({
           command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/oss_cigroup.sh`,
           label: `OSS CI Group ${CI_GROUP}`,
-          agents: { queue: 'ci-group-4d' },
+          agents: { queue: 'n2-4-spot' },
           depends_on: 'build',
           parallelism: RUN_COUNT,
           concurrency: concurrency,
@@ -164,7 +164,7 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${IS_XPACK ? 'xpack' : 'oss'}_firefox.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Firefox`,
-        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        agents: { queue: 'n2-4-spot' },
         depends_on: 'build',
         parallelism: RUN_COUNT,
         concurrency: concurrency,
@@ -179,7 +179,7 @@ for (const testSuite of testSuites) {
           IS_XPACK ? 'xpack' : 'oss'
         }_accessibility.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
-        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        agents: { queue: 'n2-4-spot' },
         depends_on: 'build',
         parallelism: RUN_COUNT,
         concurrency: concurrency,
