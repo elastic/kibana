@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { asyncMap, asyncForEach } from '@kbn/std';
+import { last } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -27,12 +28,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
-
   const queryBar = getService('queryBar');
 
   const SOURCE_DATA_INDEX = 'search-source-alert';
   const OUTPUT_DATA_INDEX = 'search-source-alert-output';
   const ACTION_TYPE_ID = '.index';
+  const RULE_NAME = 'test-search-source-alert';
+  let sourceDataViewId: string;
+  let outputDataViewId: string;
+  let connectorId: string;
 
   const createSourceIndex = () =>
     es.index({
@@ -81,14 +85,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       },
     });
 
-  const deleteIndexes = () =>
-    asyncForEach([SOURCE_DATA_INDEX, OUTPUT_DATA_INDEX], async (indexName) => {
-      await es.transport.request({
-        path: `/${indexName}`,
-        method: 'DELETE',
-      });
-    });
-
   const deleteAlerts = (alertIds: string[]) =>
     asyncForEach(alertIds, async (alertId: string) => {
       await supertest
@@ -133,15 +129,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return createdAction.id;
   };
 
-  const deleteConnector = (connectorId: string) =>
-    supertest
-      .delete(`/api/actions/connector/${connectorId}`)
-      .set('kbn-xsrf', 'foo')
-      .expect(204, '');
+  const deleteConnector = (id: string) =>
+    supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo').expect(204, '');
 
-  const deleteDataViews = (alertIds: string[]) =>
+  const deleteDataViews = (dataViews: string[]) =>
     asyncForEach(
-      alertIds,
+      dataViews,
       async (dataView: string) =>
         await supertest
           .delete(`/api/data_views/data_view/${dataView}`)
@@ -169,21 +162,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getLastToast = async () => {
     const toastList = await testSubjects.find('globalToastList');
-    const titleElement = await toastList.findByCssSelector('.euiToastHeader');
-    const title: string = await titleElement.getVisibleText();
-    const messageElement = await toastList.findByCssSelector('.euiToastBody');
-    const message: string = await messageElement.getVisibleText();
+    const titles = await toastList.findAllByCssSelector('.euiToastHeader');
+    const lastTitleElement = last(titles)!;
+    const title = await lastTitleElement.getVisibleText();
+    const messages = await toastList.findAllByCssSelector('.euiToastBody');
+    const lastMessageElement = last(messages)!;
+    const message = await lastMessageElement.getVisibleText();
     return { message, title };
   };
 
-  describe('Search source Alert', () => {
-    const ruleName = 'test-search-source-alert';
-    let sourceDataViewId: string;
-    let outputDataViewId: string;
-    let connectorId: string;
+  const openOutputIndex = async () => {
+    await PageObjects.common.navigateToApp('discover');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_INDEX);
 
-    beforeEach(async () => {
-      // init test data
+    const [{ id: alertId }] = await getAlertsByName(RULE_NAME);
+    await queryBar.setQuery(`alert_id:${alertId}`);
+    await queryBar.submitQuery();
+    await PageObjects.discover.waitUntilSearchingHasFinished();
+  };
+
+  const getResultsLink = async () => {
+    // getting the link
+    await dataGrid.clickRowToggle();
+    await testSubjects.click('collapseBtn');
+    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_message-value');
+    const contextMessage = await contextMessageElement.getVisibleText();
+    const [, link] = contextMessage.split(`Link\: `);
+
+    return link;
+  };
+
+  const navigateToDiscover = async (link: string) => {
+    // following ling provided by alert to see documents triggered the alert
+    const baseUrl = deployment.getHostPort();
+    await browser.navigateTo(baseUrl + link);
+    await PageObjects.discover.waitUntilSearchingHasFinished();
+
+    await retry.waitFor('navigate to discover', async () => {
+      const currentUrl = await browser.getCurrentUrl();
+      return currentUrl.includes(sourceDataViewId);
+    });
+  };
+
+  const navigateToResults = async () => {
+    const link = await getResultsLink();
+    await navigateToDiscover(link);
+  };
+
+  const openAlertRule = async () => {
+    await PageObjects.common.navigateToApp('management');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    await testSubjects.click('triggersActions');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    const rulesList = await testSubjects.find('rulesList');
+    const alertRule = await rulesList.findByCssSelector('[title="test-search-source-alert"]');
+    await alertRule.click();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  describe('Search source Alert', () => {
+    before(async () => {
       await createSourceIndex();
       await generateNewDocs(5);
       await createOutputDataIndex();
@@ -193,61 +234,90 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       outputDataViewId = outputDataViewResponse.body.data_view.id;
     });
 
-    afterEach(async () => {
-      // clean up test data
-      await deleteIndexes();
+    after(async () => {
+      // delete only remaining output index
+      await es.transport.request({
+        path: `/${OUTPUT_DATA_INDEX}`,
+        method: 'DELETE',
+      });
       await deleteDataViews([sourceDataViewId, outputDataViewId]);
       await deleteConnector(connectorId);
-      const alertsToDelete = await getAlertsByName(ruleName);
+      const alertsToDelete = await getAlertsByName(RULE_NAME);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
-    it('should successfully trigger alert', async () => {
+    it('should navigate to discover via view in app link', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern(SOURCE_DATA_INDEX);
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
 
       // create an alert
-      await defineSearchSourceAlert(ruleName);
+      await defineSearchSourceAlert(RULE_NAME);
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // open output index
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_INDEX);
+      await openAlertRule();
 
-      const [{ id: alertId }] = await getAlertsByName(ruleName);
-      await queryBar.setQuery(`alert_id:${alertId}`);
-      await queryBar.submitQuery();
+      await testSubjects.click('ruleDetails-viewInApp');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // waiting for alert to be triggered
-      await retry.waitFor('doc count to be 1', async () => {
-        const docCount = await dataGrid.getDocCount();
-        return docCount >= 1;
+      await retry.waitFor('navigate to discover', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.includes(sourceDataViewId);
       });
 
-      // getting link
-      await dataGrid.clickRowToggle();
-      await testSubjects.click('collapseBtn');
-      const contextMessageElement = await testSubjects.find(
-        'tableDocViewRow-context_message-value'
-      );
-      const contextMessage = await contextMessageElement.getVisibleText();
-      const [, link] = contextMessage.split(`Link\: `);
-      const baseUrl = deployment.getHostPort();
+      expect(await dataGrid.getDocCount()).to.be(5);
+    });
 
-      // following ling provided by alert to see documents triggered the alert
-      await browser.navigateTo(baseUrl + link);
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+    it('should open documents triggered the alert', async () => {
+      await openOutputIndex();
+      await navigateToResults();
 
       const { message, title } = await getLastToast();
-      const docsNumber = await dataGrid.getDocCount();
-
-      expect(await browser.getCurrentUrl()).to.contain(sourceDataViewId);
-      expect(docsNumber).to.be(5);
+      expect(await dataGrid.getDocCount()).to.be(5);
       expect(title).to.be.equal('Displayed documents may vary');
       expect(message).to.be.equal(
         'The displayed documents might differ from the documents that triggered the alert. Some documents might have been added or deleted.'
+      );
+    });
+
+    it('should display warning about updated alert rule', async () => {
+      await openAlertRule();
+
+      // change rule configuration
+      await testSubjects.click('openEditRuleFlyoutButton');
+      await testSubjects.click('thresholdPopover');
+      await testSubjects.setValue('alertThresholdInput', '1');
+      await testSubjects.click('saveEditedRuleButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await openOutputIndex();
+      await navigateToResults();
+
+      const { message, title } = await getLastToast();
+      expect(await dataGrid.getDocCount()).to.be(5);
+      expect(title).to.be.equal('Alert rule has changed');
+      expect(message).to.be.equal(
+        'The displayed documents might not match the documents that triggered the alert because the rule configuration changed.'
+      );
+    });
+
+    it('should display not found index error', async () => {
+      await openOutputIndex();
+      const link = await getResultsLink();
+      await navigateToDiscover(link);
+
+      await es.transport.request({
+        path: `/${SOURCE_DATA_INDEX}`,
+        method: 'DELETE',
+      });
+      await browser.refresh();
+
+      await navigateToDiscover(link);
+
+      const { title } = await getLastToast();
+      expect(title).to.be.equal(
+        'No matching indices found: No indices match "search-source-alert"'
       );
     });
   });
