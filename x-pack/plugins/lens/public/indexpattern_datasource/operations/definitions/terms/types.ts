@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldBasedIndexPatternColumn, LensFormat } from '../column_types';
+import { FieldBasedIndexPatternColumn, LensFormatParams } from '../column_types';
 
 export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';
@@ -22,7 +22,7 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     missingBucket?: boolean;
     secondaryFields?: string[];
     // Terms on numeric fields can be formatted
-    format?: LensFormat;
+    format?: LensFormatParams;
     parentFormat?: {
       id: string;
     };

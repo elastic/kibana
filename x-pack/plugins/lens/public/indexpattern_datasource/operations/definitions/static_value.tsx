@@ -11,7 +11,7 @@ import { OperationDefinition } from './index';
 import {
   ReferenceBasedIndexPatternColumn,
   GenericIndexPatternColumn,
-  LensFormat,
+  LensFormatParams,
 } from './column_types';
 import type { IndexPattern } from '../../types';
 import { useDebouncedValue } from '../../../shared_components';
@@ -41,7 +41,7 @@ export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatter
   operationType: 'static_value';
   params: {
     value?: string;
-    format?: LensFormat;
+    format?: LensFormatParams;
   };
 }
 

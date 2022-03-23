@@ -19,7 +19,7 @@ export interface BaseIndexPatternColumn extends Operation {
   timeShift?: string;
 }
 
-export interface LensFormat {
+export interface LensFormatParams {
   id: string;
   params?: {
     decimals: number;
@@ -30,7 +30,7 @@ export interface LensFormat {
 // Formatting can optionally be added to any column
 export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
   params?: {
-    format?: LensFormat;
+    format?: LensFormatParams;
   };
 }
 

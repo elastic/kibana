@@ -18,7 +18,7 @@ import {
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { FieldBasedIndexPatternColumn, LensFormat } from './column_types';
+import { FieldBasedIndexPatternColumn, LensFormatParams } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { adjustColumnReferencesForChangedColumn, updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
@@ -108,7 +108,7 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
     sortField: string;
     showArrayValues: boolean;
     // last value on numeric fields can be formatted
-    format?: LensFormat;
+    format?: LensFormatParams;
   };
 }
 

@@ -7,7 +7,7 @@
 
 import type { TinymathAST } from '@kbn/tinymath';
 import { OperationDefinition } from '../index';
-import { LensFormat, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { LensFormatParams, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
@@ -15,7 +15,7 @@ export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn
   params: {
     tinymathAst: TinymathAST | string;
     // last value on numeric fields can be formatted
-    format?: LensFormat;
+    format?: LensFormatParams;
   };
 }
 
