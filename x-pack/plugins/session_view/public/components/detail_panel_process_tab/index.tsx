@@ -31,28 +31,30 @@ const leaderDescriptionListInfo = [
     id: 'processEntryLeader',
     title: 'Entry Leader',
     tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
-      defaultMessage: 'A entry leader placeholder description',
+      defaultMessage:
+        'Session leader process associated with initial terminal or remote access via SSH, SSM and other remote access protocols. Entry sessions are also used to represent a service directly started by the init process. In many cases this is the same as the session_leader.',
     }),
   },
   {
     id: 'processSessionLeader',
     title: 'Session Leader',
     tooltipContent: i18n.translate('xpack.sessionView.detailPanel.sessionLeaderTooltip', {
-      defaultMessage: 'A session leader placeholder description',
+      defaultMessage:
+        'Often the same as entry_leader. When it differs, this represents a session started within another session. Some tools like tmux and screen will start a new session to obtain a new tty and/or separate their lifecycle from the entry session.',
     }),
   },
   {
     id: 'processGroupLeader',
     title: 'Group Leader',
     tooltipContent: i18n.translate('xpack.sessionView.detailPanel.processGroupLeaderTooltip', {
-      defaultMessage: 'a group leader placeholder description',
+      defaultMessage: 'The process group leader to the current process.',
     }),
   },
   {
     id: 'processParent',
     title: 'Parent',
     tooltipContent: i18n.translate('xpack.sessionView.detailPanel.processParentTooltip', {
-      defaultMessage: 'a parent placeholder description',
+      defaultMessage: 'The direct parent to the current process.',
     }),
   },
 ];
