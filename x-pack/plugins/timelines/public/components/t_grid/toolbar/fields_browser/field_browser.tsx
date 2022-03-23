@@ -124,7 +124,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
     isSelected,
     addSelected,
     removeSelected,
-    setSelected,
+    setColumnHeaders,
     getSelectedColumnHeaders,
   } = useFieldSelection(columnHeaders);
 
@@ -147,8 +147,8 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   }, [dispatch, getSelectedColumnHeaders, timelineId, closeAndRestoreFocus]);
 
   const onResetColumns = useCallback(() => {
-    setSelected(defaultColumns.map(({ id }) => id));
-  }, [setSelected, defaultColumns]);
+    setColumnHeaders(defaultColumns);
+  }, [setColumnHeaders, defaultColumns]);
 
   /** Invoked when the user types in the input to filter the field browser */
   const onInputChange = useCallback(

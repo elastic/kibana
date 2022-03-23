@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useReducer } from 'react';
-import { pickBy } from 'lodash/fp';
+import { useCallback, useMemo, useReducer, useState } from 'react';
+import { isEqual, pickBy } from 'lodash/fp';
 
 import { TimelineId } from '../../../../../public/types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
@@ -131,7 +131,7 @@ interface SelectionState {
 type SelectionAction =
   | { type: 'ADD'; names: string[] }
   | { type: 'REMOVE'; names: string[] }
-  | { type: 'SET'; add: string[]; remove: string[] };
+  | { type: 'RESET' };
 
 export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
   const [selectionState, dispatchSelection] = useReducer(
@@ -165,25 +165,8 @@ export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
             { toAdd: { ...state.toAdd }, toRemove: { ...state.toRemove } }
           );
         }
-        case 'SET': {
-          return action.add.reduce<SelectionState>(
-            (newState, name) => {
-              // if a field is present in both `add` and `remove`, it will remain unchanged
-              if (newState.toRemove[name] != null) {
-                delete newState.toRemove[name];
-              } else {
-                newState.toAdd[name] = true;
-              }
-              return newState;
-            },
-            // new objects to allow mutations inside the reducer
-            {
-              toAdd: {},
-              toRemove: Object.fromEntries(
-                action.remove.map<[string, true]>((name) => [name, true])
-              ),
-            }
-          );
+        case 'RESET': {
+          return { toAdd: {}, toRemove: {} };
         }
         default:
           return state;
@@ -192,8 +175,12 @@ export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
     { toAdd: {}, toRemove: {} }
   );
 
-  const currentColumnNames = useMemo(() => columnHeaders.map(({ id }) => id), [columnHeaders]);
-  const currentSelected = useMemo(() => new Set(currentColumnNames), [currentColumnNames]);
+  const [currentColumnHeaders, setCurrentColumnHeaders] = useState(columnHeaders);
+
+  const currentSelected = useMemo(
+    () => new Set(currentColumnHeaders.map(({ id }) => id)),
+    [currentColumnHeaders]
+  );
 
   const addSelected = useCallback((...names: string[]) => {
     dispatchSelection({ type: 'ADD', names });
@@ -203,20 +190,24 @@ export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
     dispatchSelection({ type: 'REMOVE', names });
   }, []);
 
-  const setSelected = useCallback(
-    (fieldNames: string[]) => {
-      // To set the selected fields we need to put all current fields to remove and the new ones to add
-      // The reducer will take care of any duplicity between `add` and `remove` fields
-      dispatchSelection({ type: 'SET', add: fieldNames, remove: currentColumnNames });
-    },
-    [currentColumnNames]
-  );
+  const setColumnHeaders = useCallback((newColumnHeaders: ColumnHeaderOptions[]) => {
+    setCurrentColumnHeaders(newColumnHeaders);
+    dispatchSelection({ type: 'RESET' });
+  }, []);
 
   const hasChanges: boolean = useMemo(
     () =>
-      Object.keys(selectionState.toAdd).length > 0 ||
-      Object.keys(selectionState.toRemove).length > 0,
-    [selectionState]
+      // compare current selected ids with the original columnHeaders ids
+      !isEqual(
+        [
+          ...Object.keys(selectionState.toAdd),
+          ...currentColumnHeaders
+            .filter(({ id }) => selectionState.toRemove[id] == null)
+            .map(({ id }) => id),
+        ],
+        columnHeaders.map(({ id }) => id)
+      ),
+    [selectionState, currentColumnHeaders, columnHeaders]
   );
 
   const isSelected = useCallback(
@@ -229,16 +220,16 @@ export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
   const getSelectedColumnHeaders = useCallback(
     (timelineId: string): ColumnHeaderOptions[] => [
       ...Object.keys(selectionState.toAdd).map((id) => getColumnHeader(timelineId, id)),
-      ...columnHeaders.filter(({ id }) => selectionState.toRemove[id] == null),
+      ...currentColumnHeaders.filter(({ id }) => selectionState.toRemove[id] == null),
     ],
-    [selectionState, columnHeaders]
+    [selectionState, currentColumnHeaders]
   );
 
   return {
     hasChanges,
     addSelected,
     removeSelected,
-    setSelected,
+    setColumnHeaders,
     isSelected,
     getSelectedColumnHeaders,
   };
