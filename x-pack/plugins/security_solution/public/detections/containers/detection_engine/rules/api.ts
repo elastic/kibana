@@ -30,9 +30,6 @@ import {
 import {
   UpdateRulesProps,
   CreateRulesProps,
-  DeleteRulesProps,
-  DuplicateRulesProps,
-  EnableRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
   Rule,
@@ -42,7 +39,6 @@ import {
   ExportDocumentsProps,
   ImportDataResponse,
   PrePackagedRulesStatusResponse,
-  BulkRuleResponse,
   PatchRuleProps,
   BulkActionProps,
   BulkActionResponseMap,
@@ -195,60 +191,6 @@ export const pureFetchRuleById = async ({
     method: 'GET',
     query: { id },
     signal,
-  });
-
-/**
- * Enables/Disables provided Rule ID's
- *
- * @param ids array of Rule ID's (not rule_id) to enable/disable
- * @param enabled to enable or disable
- *
- * @throws An error if response is not OK
- */
-export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<BulkRuleResponse> =>
-  KibanaServices.get().http.fetch<BulkRuleResponse>(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`, {
-    method: 'PATCH',
-    body: JSON.stringify(ids.map((id) => ({ id, enabled }))),
-  });
-
-/**
- * Deletes provided Rule ID's
- *
- * @param ids array of Rule ID's (not rule_id) to delete
- *
- * @throws An error if response is not OK
- */
-export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
-  KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
-    method: 'POST',
-    body: JSON.stringify(ids.map((id) => ({ id }))),
-  });
-
-/**
- * Duplicates provided Rules
- *
- * @param rules to duplicate
- *
- * @throws An error if response is not OK
- */
-export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<BulkRuleResponse> =>
-  KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`, {
-    method: 'POST',
-    body: JSON.stringify(
-      rules.map((rule) => ({
-        ...rule,
-        name: `${rule.name} [${i18n.DUPLICATE}]`,
-        created_at: undefined,
-        created_by: undefined,
-        id: undefined,
-        rule_id: undefined,
-        updated_at: undefined,
-        updated_by: undefined,
-        enabled: false,
-        immutable: undefined,
-        execution_summary: undefined,
-      }))
-    ),
   });
 
 /**
