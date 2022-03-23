@@ -79,6 +79,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const connectors = await createConnectors(testRunUuid);
     return await createAlwaysFiringRule({
       name: `test-rule-${testRunUuid}`,
+      actions: connectors.map((connector) => ({
+        id: connector.id,
+        group: 'default',
+        params: {
+          message: 'from alert 1s',
+          level: 'warn',
+        },
+      })),
+      params,
+    });
+  }
+
+  async function createRuleWithSmallInterval(
+    testRunUuid: string,
+    params: Record<string, any> = {}
+  ) {
+    const connectors = await createConnectors(testRunUuid);
+    return await createAlwaysFiringRule({
+      name: `test-rule-${testRunUuid}`,
       schedule: {
         interval: '1s',
       },
@@ -119,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
-        const rule = await createRuleWithActionsAndParams(testRunUuid);
+        const rule = await createRuleWithSmallInterval(testRunUuid);
 
         // refresh to see rule
         await browser.refresh();
