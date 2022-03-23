@@ -28,6 +28,7 @@
     "sharedUX"
   ],
   "optionalPlugins": [
+    "cloud",
     "customIntegrations",
     "home",
     "savedObjectsTagging",

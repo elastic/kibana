@@ -12,95 +12,21 @@ import {
   mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
 
+import {
+  DEFAULT_VALUES,
+  mockElasticsearchIndices,
+  mockSearchIndexOptions,
+} from '../../__mocks__/engine_creation_logic.mock';
+
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { EngineCreationLogic } from './engine_creation_logic';
-import { SearchIndexSelectableOption } from './search_index_selectable';
 
 describe('EngineCreationLogic', () => {
   const { mount } = new LogicMounter(EngineCreationLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
   const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
-
-  const DEFAULT_VALUES = {
-    ingestionMethod: '',
-    isLoading: false,
-    name: '',
-    rawName: '',
-    language: 'Universal',
-    isLoadingIndices: false,
-    indices: [],
-    indicesFormatted: [],
-    selectedIndex: '',
-    engineType: 'appSearch',
-    isSubmitDisabled: true,
-  };
-
-  const mockElasticsearchIndices = [
-    {
-      health: 'yellow',
-      status: 'open',
-      name: 'search-my-index-1',
-      uuid: 'ydlR_QQJTeyZP66tzQSmMQ',
-      total: {
-        docs: {
-          count: 0,
-          deleted: 0,
-        },
-        store: {
-          size_in_bytes: '225b',
-        },
-      },
-    },
-    {
-      health: 'green',
-      status: 'open',
-      name: 'search-my-index-2',
-      uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
-      total: {
-        docs: {
-          count: 100,
-          deleted: 0,
-        },
-        store: {
-          size_in_bytes: '225b',
-        },
-      },
-      aliases: ['search-index-123'],
-    },
-  ];
-
-  const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
-    {
-      label: 'search-my-index-1',
-      health: 'yellow',
-      status: 'open',
-      total: {
-        docs: {
-          count: 0,
-          deleted: 0,
-        },
-        store: {
-          size_in_bytes: '225b',
-        },
-      },
-    },
-    {
-      label: 'search-my-index-2',
-      health: 'green',
-      status: 'open',
-      total: {
-        docs: {
-          count: 100,
-          deleted: 0,
-        },
-        store: {
-          size_in_bytes: '225b',
-        },
-      },
-    },
-  ];
 
   it('has expected default values', () => {
     mount();
@@ -333,36 +259,82 @@ describe('EngineCreationLogic', () => {
     });
 
     describe('submitEngine', () => {
-      beforeAll(() => {
-        mount({ language: 'English', rawName: 'test' });
-      });
-
-      afterAll(() => {
-        jest.clearAllMocks();
-      });
-
-      it('POSTS to /internal/app_search/engines', () => {
-        const body = JSON.stringify({
-          name: EngineCreationLogic.values.name,
-          language: EngineCreationLogic.values.language,
+      describe('Indexed engine', () => {
+        beforeAll(() => {
+          mount({ language: 'English', rawName: 'test' });
         });
-        EngineCreationLogic.actions.submitEngine();
-        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines', { body });
+
+        afterAll(() => {
+          jest.clearAllMocks();
+        });
+
+        it('POSTS to /internal/app_search/engines', () => {
+          const body = JSON.stringify({
+            name: EngineCreationLogic.values.name,
+            language: EngineCreationLogic.values.language,
+          });
+          EngineCreationLogic.actions.submitEngine();
+          expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines', { body });
+        });
+
+        it('calls onEngineCreationSuccess on valid submission', async () => {
+          jest.spyOn(EngineCreationLogic.actions, 'onEngineCreationSuccess');
+          http.post.mockReturnValueOnce(Promise.resolve({}));
+          EngineCreationLogic.actions.submitEngine();
+          await nextTick();
+          expect(EngineCreationLogic.actions.onEngineCreationSuccess).toHaveBeenCalledTimes(1);
+        });
+
+        it('calls flashAPIErrors on API Error', async () => {
+          http.post.mockReturnValueOnce(Promise.reject());
+          EngineCreationLogic.actions.submitEngine();
+          await nextTick();
+          expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        });
       });
 
-      it('calls onEngineCreationSuccess on valid submission', async () => {
-        jest.spyOn(EngineCreationLogic.actions, 'onEngineCreationSuccess');
-        http.post.mockReturnValueOnce(Promise.resolve({}));
-        EngineCreationLogic.actions.submitEngine();
-        await nextTick();
-        expect(EngineCreationLogic.actions.onEngineCreationSuccess).toHaveBeenCalledTimes(1);
-      });
+      describe('Elasticsearch index based engine', () => {
+        beforeEach(() => {
+          mount({
+            engineType: 'elasticsearch',
+            name: 'engine-name',
+            selectedIndex: 'search-selected-index',
+          });
+        });
 
-      it('calls flashAPIErrors on API Error', async () => {
-        http.post.mockReturnValueOnce(Promise.reject());
-        EngineCreationLogic.actions.submitEngine();
-        await nextTick();
-        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
+
+        it('POSTS to /internal/app_search/elasticsearch/engines', () => {
+          const body = JSON.stringify({
+            name: EngineCreationLogic.values.name,
+            search_index: {
+              type: 'elasticsearch',
+              index_name: EngineCreationLogic.values.selectedIndex,
+            },
+          });
+          EngineCreationLogic.actions.submitEngine();
+
+          expect(http.post).toHaveBeenCalledWith('/internal/app_search/elasticsearch/engines', {
+            body,
+          });
+        });
+
+        it('calls onEngineCreationSuccess on valid submission', async () => {
+          jest.spyOn(EngineCreationLogic.actions, 'onEngineCreationSuccess');
+          http.post.mockReturnValueOnce(Promise.resolve({}));
+          EngineCreationLogic.actions.submitEngine();
+          await nextTick();
+          expect(EngineCreationLogic.actions.onEngineCreationSuccess).toHaveBeenCalledTimes(1);
+        });
+
+        it('calls flashAPIErrors on API Error', async () => {
+          http.post.mockReturnValueOnce(Promise.reject());
+          EngineCreationLogic.actions.submitEngine();
+          await nextTick();
+          expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        });
       });
     });
 
