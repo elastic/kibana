@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
+import { Logger } from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
@@ -31,13 +32,15 @@ import {
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
 import { InMemoryMetrics } from './monitoring';
+import { AlertingRulesConfig } from '.';
 
 export interface ConstructorOptions {
+  logger: Logger;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
-  minimumScheduleInterval: string;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   inMemoryMetrics: InMemoryMetrics;
 }
 
@@ -128,15 +131,17 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
 >;
 
 export class RuleTypeRegistry {
+  private readonly logger: Logger;
   private readonly taskManager: TaskManagerSetupContract;
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
-  private readonly minimumScheduleInterval: string;
+  private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
   private readonly inMemoryMetrics: InMemoryMetrics;
 
   constructor({
+    logger,
     taskManager,
     taskRunnerFactory,
     licenseState,
@@ -144,6 +149,7 @@ export class RuleTypeRegistry {
     minimumScheduleInterval,
     inMemoryMetrics,
   }: ConstructorOptions) {
+    this.logger = logger;
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
     this.licenseState = licenseState;
@@ -225,21 +231,18 @@ export class RuleTypeRegistry {
       }
 
       const defaultIntervalInMs = parseDuration(ruleType.defaultScheduleInterval);
-      const minimumIntervalInMs = parseDuration(this.minimumScheduleInterval);
+      const minimumIntervalInMs = parseDuration(this.minimumScheduleInterval.value);
       if (defaultIntervalInMs < minimumIntervalInMs) {
-        throw new Error(
-          i18n.translate(
-            'xpack.alerting.ruleTypeRegistry.register.defaultTimeoutTooShortRuleTypeError',
-            {
-              defaultMessage:
-                'Rule type "{id}" cannot specify a default interval less than {minimumInterval}.',
-              values: {
-                id: ruleType.id,
-                minimumInterval: this.minimumScheduleInterval,
-              },
-            }
-          )
-        );
+        if (this.minimumScheduleInterval.enforce) {
+          this.logger.warn(
+            `Rule type "${ruleType.id}" cannot specify a default interval less than the configured minimum of "${this.minimumScheduleInterval.value}". "${this.minimumScheduleInterval.value}" will be used.`
+          );
+          ruleType.defaultScheduleInterval = this.minimumScheduleInterval.value;
+        } else {
+          this.logger.warn(
+            `Rule type "${ruleType.id}" has a default interval of "${ruleType.defaultScheduleInterval}", which is less than the configured minimum of "${this.minimumScheduleInterval.value}".`
+          );
+        }
       }
     }
 

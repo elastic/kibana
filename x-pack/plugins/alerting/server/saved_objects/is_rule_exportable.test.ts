@@ -14,6 +14,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { isRuleExportable } from './is_rule_exportable';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 let ruleTypeRegistryParams: ConstructorOptions;
 let logger: MockedLogger;
@@ -26,11 +27,12 @@ beforeEach(() => {
   mockedLicenseState = licenseStateMock.create();
   logger = loggerMock.create();
   ruleTypeRegistryParams = {
+    logger: loggingSystemMock.create().get(),
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
-    minimumScheduleInterval: '1m',
+    minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
   };
 });
