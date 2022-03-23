@@ -7,3 +7,4 @@
  */
 
 export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
+export type { KibanaPageTemplateSolutionNavAvatarProps } from './solution_nav_avatar';

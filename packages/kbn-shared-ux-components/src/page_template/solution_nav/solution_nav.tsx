@@ -22,7 +22,7 @@ import classNames from 'classnames';
 import {
   KibanaPageTemplateSolutionNavAvatar,
   KibanaPageTemplateSolutionNavAvatarProps,
-} from './solution_nav_avatar';
+} from '../solution_nav_avatar';
 import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
 export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
