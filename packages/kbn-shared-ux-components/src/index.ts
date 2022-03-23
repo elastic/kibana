@@ -42,9 +42,9 @@ export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
 export const ToolbarButton = withSuspense(LazyToolbarButton);
 
 /**
- * An example of the solution toolbar button
+ * An example of the toolbar button and popover
  */
-export { AddFromLibraryButton } from './toolbar';
+export { AddFromLibraryButton, ToolbarPopover } from './toolbar';
 
 /**
  * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspense` or the
@@ -111,5 +111,3 @@ export const KibanaSolutionAvatarLazy = React.lazy(() =>
  * a predefined fallback and error boundary.
  */
 export const KibanaSolutionAvatar = withSuspense(KibanaSolutionAvatarLazy);
-
-export { PrimaryActionPopover, ToolbarPopover } from './toolbar/popovers/index';
