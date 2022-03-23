@@ -184,7 +184,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -325,7 +324,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -466,7 +464,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -607,7 +604,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -663,7 +659,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"

@@ -29,7 +29,9 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL, START_BUTTON_LABEL } from '../../../../shared/constants';
@@ -107,6 +109,8 @@ export const Overview: React.FC = () => {
     hasPermissions,
     isFederatedSource,
     isIndexedSource,
+    serviceType,
+    name,
   } = contentSource;
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -582,6 +586,32 @@ export const Overview: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {serviceType === 'external' && (
+        <>
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                size="s"
+                color="primary"
+                iconType="email"
+                title={
+                  <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
+                      {
+                        defaultMessage:
+                          'Have feedback about deploying a {name} Connector Package? Let us know.',
+                        values: { name },
+                      }
+                    )}
+                  </EuiLink>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </SourceLayout>
   );
 };

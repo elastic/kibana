@@ -36,6 +36,7 @@ describe('ProcessTreeNode component', () => {
       },
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
+    onShowAlertDetails: jest.fn(),
   };
 
   beforeEach(() => {
@@ -179,6 +180,24 @@ describe('ProcessTreeNode component', () => {
 
       // cleanup
       windowGetSelectionSpy.mockRestore();
+    });
+
+    it('When Timestamp is ON, it shows Timestamp', async () => {
+      // set a mock where Timestamp is turned ON
+      renderResult = mockedContext.render(
+        <ProcessTreeNode {...props} timeStampOn={true} process={processMock} />
+      );
+
+      expect(renderResult.getByTestId('sessionView:processTreeNodeTimestamp')).toBeTruthy();
+    });
+
+    it('When Timestamp is OFF, it doesnt show Timestamp', async () => {
+      // set a mock where Timestamp is turned OFF
+      renderResult = mockedContext.render(
+        <ProcessTreeNode {...props} timeStampOn={false} process={processMock} />
+      );
+
+      expect(renderResult.queryByTestId('sessionView:processTreeNodeTimestamp')).toBeFalsy();
     });
     describe('Alerts', () => {
       it('renders Alert button when process has one alert', async () => {

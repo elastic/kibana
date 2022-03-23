@@ -33,7 +33,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   authorization: authorization as unknown as AlertingAuthorization,
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
@@ -86,6 +86,7 @@ describe('aggregate()', () => {
             { key: 'ok', doc_count: 10 },
             { key: 'pending', doc_count: 4 },
             { key: 'unknown', doc_count: 2 },
+            { key: 'warning', doc_count: 1 },
           ],
         },
         enabled: {
@@ -135,6 +136,7 @@ describe('aggregate()', () => {
           "ok": 10,
           "pending": 4,
           "unknown": 2,
+          "warning": 1,
         },
         "ruleEnabledStatus": Object {
           "disabled": 2,

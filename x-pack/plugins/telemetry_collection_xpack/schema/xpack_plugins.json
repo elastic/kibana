@@ -5818,7 +5818,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5859,16 +5859,23 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -5885,7 +5892,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5926,16 +5933,23 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -5952,7 +5966,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5993,16 +6007,39 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
+                "png_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "png_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -6019,7 +6056,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6060,16 +6097,39 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
+                "png_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "png_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -6086,7 +6146,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6137,6 +6197,58 @@
                 },
                 "preserve_layout": {
                   "type": "long"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "pdf_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_pages": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -6153,7 +6265,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6204,6 +6316,58 @@
                 },
                 "preserve_layout": {
                   "type": "long"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "pdf_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_pages": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -6779,7 +6943,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -6820,16 +6984,23 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -6846,7 +7017,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -6887,16 +7058,23 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -6913,7 +7091,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -6954,16 +7132,39 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
+                    "png_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "png_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -6980,7 +7181,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7021,16 +7222,39 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
+                    "png_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "png_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -7047,7 +7271,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7098,6 +7322,58 @@
                     },
                     "preserve_layout": {
                       "type": "long"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "pdf_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_pages": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -7114,7 +7390,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7165,6 +7441,58 @@
                     },
                     "preserve_layout": {
                       "type": "long"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "pdf_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_pages": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }

@@ -23,7 +23,8 @@ import { getVisData } from './lib/get_vis_data';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { HomeServerPluginSetup } from '../../../home/server';
 import { PluginStart } from '../../../data/server';
-import { IndexPatternsService } from '../../../data/common';
+import type { DataViewsService } from '../../../data_views/common';
+import type { PluginStart as DataViewsPublicPluginStart } from '../../../data_views/server';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { getUiSettings } from './ui_settings';
@@ -53,6 +54,7 @@ interface VisTypeTimeseriesPluginSetupDependencies {
 
 interface VisTypeTimeseriesPluginStartDependencies {
   data: PluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface VisTypeTimeseriesSetup {
@@ -73,7 +75,7 @@ export interface Framework {
   searchStrategyRegistry: SearchStrategyRegistry;
   getIndexPatternsService: (
     requestContext: VisTypeTimeseriesRequestHandlerContext
-  ) => Promise<IndexPatternsService>;
+  ) => Promise<DataViewsService>;
   getFieldFormatsService: (uiSettings: IUiSettingsClient) => Promise<FieldFormatsRegistry>;
   getEsShardTimeout: () => Promise<number>;
 }
@@ -109,9 +111,9 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
           )
           .toPromise(),
       getIndexPatternsService: async (requestContext) => {
-        const [, { data }] = await core.getStartServices();
+        const [, { dataViews }] = await core.getStartServices();
 
-        return await data.indexPatterns.indexPatternsServiceFactory(
+        return await dataViews.dataViewsServiceFactory(
           requestContext.core.savedObjects.client,
           requestContext.core.elasticsearch.client.asCurrentUser
         );

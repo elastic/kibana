@@ -21,6 +21,12 @@ export interface SessionViewDeps {
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader
   // session view will fetch a page worth of events starting from jumpToEvent as well as a page backwards.
   jumpToEvent?: ProcessEvent;
+  // Callback to open the alerts flyout
+  loadAlertDetails?: (
+    alertUuid: string,
+    // Callback used when alert flyout panel is closed
+    handleOnAlertDetailsClosed: () => void
+  ) => void;
 }
 
 export interface EuiTabProps {

@@ -17,7 +17,8 @@ import {
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { spacesPluginMock } from '../../../spaces/public/mocks';
 import { Filter } from '@kbn/es-query';
-import { Query, TimeRange, IndexPatternsContract, FilterManager } from 'src/plugins/data/public';
+import { Query, TimeRange, FilterManager } from 'src/plugins/data/public';
+import type { DataViewsContract } from 'src/plugins/data_views/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public/embeddable';
@@ -140,7 +141,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -186,7 +187,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         inspector: inspectorPluginMock.createStartContract(),
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
@@ -231,7 +232,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -288,7 +289,7 @@ describe('embeddable', () => {
         inspector: inspectorPluginMock.createStartContract(),
         expressionRenderer,
         basePath,
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         spaces: spacesPluginStart,
         capabilities: {
           canSaveDashboards: true,
@@ -336,7 +337,7 @@ describe('embeddable', () => {
         inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {
           get: (id: string) => Promise.resolve({ id, isTimeBased: jest.fn(() => true) }),
-        } as unknown as IndexPatternsContract,
+        } as unknown as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -382,7 +383,7 @@ describe('embeddable', () => {
         inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {
           get: (id: string) => Promise.resolve({ id, isTimeBased: () => false }),
-        } as unknown as IndexPatternsContract,
+        } as unknown as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -424,7 +425,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -472,7 +473,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         visualizationMap: {},
@@ -521,7 +522,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -571,7 +572,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -628,7 +629,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -686,7 +687,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -745,7 +746,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: { get: jest.fn() } as unknown as IndexPatternsContract,
+        indexPatternService: { get: jest.fn() } as unknown as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -793,7 +794,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -841,7 +842,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -886,7 +887,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -946,7 +947,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1025,7 +1026,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1079,7 +1080,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1130,7 +1131,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1202,7 +1203,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,

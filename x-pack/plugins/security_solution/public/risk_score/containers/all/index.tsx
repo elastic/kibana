@@ -266,5 +266,13 @@ export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskS
     };
   }, [riskScoreRequest, riskScoreSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, riskScoreResponse];
 };

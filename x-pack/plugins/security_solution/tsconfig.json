@@ -39,6 +39,7 @@
     { "path": "../lists/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
     { "path": "../ml/tsconfig.json" },
+    { "path": "../osquery/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../timelines/tsconfig.json" },

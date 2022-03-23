@@ -129,7 +129,7 @@ export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTab
   const pageSize = 5;
 
   const pagination = {
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
     pageIndex,
     pageSize,
     totalItemCount: jobs.length,

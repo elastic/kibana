@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { indexTimestamp } from '../../../plugins/reporting/server/lib/store/index_timestamp';
 import {
   AvailableTotal,
-  BaseJobTypes,
+  JobTypes,
   LayoutCounts,
   ReportingUsageType,
 } from '../../../plugins/reporting/server/usage/types';
@@ -121,11 +121,11 @@ export function createUsageServices({ getService }: FtrProviderContext) {
     },
 
     expectRecentJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting.last_7_days[jobType as BaseJobTypes].total).to.be(count);
+      expect(stats.reporting.last_7_days[jobType as keyof JobTypes].total).to.be(count);
     },
 
     expectAllTimeJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting[jobType as BaseJobTypes].total).to.be(count);
+      expect(stats.reporting[jobType as keyof JobTypes].total).to.be(count);
     },
 
     getCompletedReportCount(stats: UsageStats) {
