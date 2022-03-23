@@ -17,9 +17,13 @@ export interface ObservabilityStatusProps {
   boxes: ObservabilityStatusBoxProps[];
 }
 
+const sortingFn = (a: ObservabilityStatusBoxProps, b: ObservabilityStatusBoxProps) => {
+  return a.weight - b.weight;
+};
+
 export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
-  const hasDataBoxes = boxes.filter((box) => box.hasData);
-  const noHasDataBoxes = boxes.filter((box) => !box.hasData);
+  const hasDataBoxes = boxes.filter((box) => box.hasData).sort(sortingFn);
+  const noHasDataBoxes = boxes.filter((box) => !box.hasData).sort(sortingFn);
 
   return (
     <EuiFlexGroup direction="column">
@@ -34,7 +38,7 @@ export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
         </EuiTitle>
       </EuiFlexItem>
       {noHasDataBoxes.map((box) => (
-        <EuiFlexItem key={box.id}>
+        <EuiFlexItem key={box.id} data-test-id={`box-${box.id}`}>
           <EmptyStatusBox {...box} />
         </EuiFlexItem>
       ))}
@@ -52,7 +56,7 @@ export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
         </EuiTitle>
       </EuiFlexItem>
       {hasDataBoxes.map((box) => (
-        <EuiFlexItem key={box.id}>
+        <EuiFlexItem key={box.id} data-test-subj={`box-${box.id}`}>
           <CompletedStatusBox {...box} />
         </EuiFlexItem>
       ))}
