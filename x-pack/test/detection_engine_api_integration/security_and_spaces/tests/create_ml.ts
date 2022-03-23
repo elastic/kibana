@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('Generating signals from ml anomalies', () => {
+  describe.skip('Generating signals from ml anomalies', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
