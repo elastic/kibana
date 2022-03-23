@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import { Subscription } from 'rxjs';
 
-export class StateService {
-  protected unsubscribeAll$ = new Subject();
+export abstract class StateService {
+  private subscribtions$: Subscription;
+
+  protected constructor() {
+    this.subscribtions$ = this._initSubscribtions();
+  }
+
+  /**
+   * Should return all active subscribtions.
+   * @protected
+   */
+  protected abstract _initSubscribtions(): Subscription;
 
   public destroy() {
-    this.unsubscribeAll$.next();
-    this.unsubscribeAll$.complete();
+    this.subscribtions$.unsubscribe();
   }
 }

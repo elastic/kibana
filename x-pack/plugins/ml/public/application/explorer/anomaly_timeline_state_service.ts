@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable, of, Subscription } from 'rxjs';
 import {
   switchMap,
   map,
@@ -14,7 +14,6 @@ import {
   startWith,
   tap,
   debounceTime,
-  takeUntil,
 } from 'rxjs/operators';
 import { isEqual, sortBy, uniq } from 'lodash';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
@@ -93,45 +92,49 @@ export class AnomalyTimelineStateService extends StateService {
       map(() => this.timefilter.getBounds())
     );
     this._refreshSubject$ = mlTimefilterRefresh$.pipe(startWith({ lastRefresh: 0 }));
-    this._init();
   }
 
   /**
    * Initializes required subscriptions for fetching swim lanes data.
    * @private
    */
-  private _init() {
-    this._initViewByData();
+  protected _initSubscribtions(): Subscription {
+    const subscribtions = new Subscription();
 
-    this._swimLaneUrlState$
-      .pipe(
-        takeUntil(this.unsubscribeAll$),
-        map((v) => v?.severity ?? 0),
-        distinctUntilChanged()
-      )
-      .subscribe(this._swimLaneSeverity$);
+    subscribtions.add(this._initViewByData());
 
-    this._initSwimLanePagination();
-    this._initOverallSwimLaneData();
-    this._initTopFieldValues();
-    this._initViewBySwimLaneData();
+    subscribtions.add(
+      this._swimLaneUrlState$
+        .pipe(
+          map((v) => v?.severity ?? 0),
+          distinctUntilChanged()
+        )
+        .subscribe(this._swimLaneSeverity$)
+    );
 
-    combineLatest([
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this.getContainerWidth$(),
-    ])
-      .pipe(takeUntil(this.unsubscribeAll$))
-      .subscribe(([selectedJobs, containerWidth]) => {
+    subscribtions.add(this._initSwimLanePagination());
+    subscribtions.add(this._initOverallSwimLaneData());
+    subscribtions.add(this._initTopFieldValues());
+    subscribtions.add(this._initViewBySwimLaneData());
+
+    subscribtions.add(
+      combineLatest([
+        this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+        this.getContainerWidth$(),
+      ]).subscribe(([selectedJobs, containerWidth]) => {
         this._swimLaneBucketInterval$.next(
           this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
         );
-      });
+      })
+    );
 
-    this._initSelectedCells();
+    subscribtions.add(this._initSelectedCells());
+
+    return subscribtions;
   }
 
-  private _initViewByData(): void {
-    combineLatest([
+  private _initViewByData(): Subscription {
+    return combineLatest([
       this._swimLaneUrlState$.pipe(
         map((v) => v?.viewByFieldName),
         distinctUntilChanged()
@@ -139,24 +142,22 @@ export class AnomalyTimelineStateService extends StateService {
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this.anomalyExplorerCommonStateService.getFilterSettings$(),
       this._selectedCells$,
-    ])
-      .pipe(takeUntil(this.unsubscribeAll$))
-      .subscribe(([currentlySelected, selectedJobs, filterSettings, selectedCells]) => {
-        const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
-          currentlySelected,
-          filterSettings.filterActive,
-          filterSettings.filteredFields as string[],
-          false,
-          selectedCells,
-          selectedJobs
-        );
-        this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
-        this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
-      });
+    ]).subscribe(([currentlySelected, selectedJobs, filterSettings, selectedCells]) => {
+      const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
+        currentlySelected,
+        filterSettings.filterActive,
+        filterSettings.filteredFields as string[],
+        false,
+        selectedCells,
+        selectedJobs
+      );
+      this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
+      this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
+    });
   }
 
   private _initSwimLanePagination() {
-    combineLatest([
+    return combineLatest([
       this._swimLaneUrlState$.pipe(
         map((v) => {
           return {
@@ -168,19 +169,17 @@ export class AnomalyTimelineStateService extends StateService {
       ),
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
       this._timeBounds$,
-    ])
-      .pipe(takeUntil(this.unsubscribeAll$))
-      .subscribe(([pagination, influencersFilerQuery]) => {
-        let resultPaginaiton: SwimLanePagination = pagination;
-        if (influencersFilerQuery) {
-          resultPaginaiton = { viewByPerPage: pagination.viewByPerPage, viewByFromPage: 1 };
-        }
-        this._swimLanePaginations$.next(resultPaginaiton);
-      });
+    ]).subscribe(([pagination, influencersFilerQuery]) => {
+      let resultPaginaiton: SwimLanePagination = pagination;
+      if (influencersFilerQuery) {
+        resultPaginaiton = { viewByPerPage: pagination.viewByPerPage, viewByFromPage: 1 };
+      }
+      this._swimLanePaginations$.next(resultPaginaiton);
+    });
   }
 
   private _initOverallSwimLaneData() {
-    combineLatest([
+    return combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._swimLaneSeverity$,
       this.getContainerWidth$(),
@@ -188,7 +187,6 @@ export class AnomalyTimelineStateService extends StateService {
       this._refreshSubject$,
     ])
       .pipe(
-        takeUntil(this.unsubscribeAll$),
         tap(() => {
           this._isOverallSwimLaneLoading$.next(true);
         }),
@@ -210,7 +208,7 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   private _initTopFieldValues() {
-    (
+    return (
       combineLatest([
         this.anomalyExplorerCommonStateService.getSelectedJobs$(),
         this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
@@ -236,7 +234,6 @@ export class AnomalyTimelineStateService extends StateService {
       >
     )
       .pipe(
-        takeUntil(this.unsubscribeAll$),
         switchMap(
           ([
             selectedJobs,
@@ -280,7 +277,7 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   private _initViewBySwimLaneData() {
-    combineLatest([
+    return combineLatest([
       this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
@@ -293,7 +290,6 @@ export class AnomalyTimelineStateService extends StateService {
       this._refreshSubject$,
     ])
       .pipe(
-        takeUntil(this.unsubscribeAll$),
         tap(() => {
           this._isViewBySwimLaneLoading$.next(true);
         }),
@@ -337,14 +333,13 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   private _initSelectedCells() {
-    combineLatest([
+    return combineLatest([
       this._viewBySwimlaneFieldName$,
       this._swimLaneUrlState$,
       this.getSwimLaneBucketInterval$(),
       this._timeBounds$,
     ])
       .pipe(
-        takeUntil(this.unsubscribeAll$),
         map(([viewByFieldName, swimLaneUrlState, swimLaneBucketInterval]) => {
           if (!swimLaneUrlState?.selectedType) {
             return;

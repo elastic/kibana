@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { distinctUntilChanged, map, skipWhile, switchMap, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { distinctUntilChanged, map, skipWhile, switchMap } from 'rxjs/operators';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
@@ -33,20 +33,28 @@ export class AnomalyChartsStateService extends StateService {
     private _tableSeverityState: PageUrlStateService<TableSeverity>
   ) {
     super();
-    this._init();
   }
 
-  private _init() {
-    this._anomalyExplorerUrlStateService
-      .getPageUrlState$()
-      .pipe(
-        takeUntil(this.unsubscribeAll$),
-        map((urlState) => urlState?.mlShowCharts ?? true),
-        distinctUntilChanged()
-      )
-      .subscribe(this._showCharts$);
+  protected _initSubscribtions(): Subscription {
+    const subscribtions = new Subscription();
 
-    combineLatest([
+    subscribtions.add(
+      this._anomalyExplorerUrlStateService
+        .getPageUrlState$()
+        .pipe(
+          map((urlState) => urlState?.mlShowCharts ?? true),
+          distinctUntilChanged()
+        )
+        .subscribe(this._showCharts$)
+    );
+
+    subscribtions.add(this.initChartDataSubscribtion());
+
+    return subscribtions;
+  }
+
+  private initChartDataSubscribtion() {
+    return combineLatest([
       this._anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
       this._anomalyTimelineStateServices.getContainerWidth$().pipe(skipWhile((v) => v === 0)),
@@ -55,7 +63,6 @@ export class AnomalyChartsStateService extends StateService {
       this._tableSeverityState.getPageUrlState$(),
     ])
       .pipe(
-        takeUntil(this.unsubscribeAll$),
         switchMap(
           ([
             selectedJobs,
