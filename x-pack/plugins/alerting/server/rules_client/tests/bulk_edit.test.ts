@@ -22,6 +22,11 @@ import { ActionsAuthorization, ActionsClient } from '../../../../actions/server'
 import { TaskStatus } from '../../../../task_manager/server';
 import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -71,7 +76,7 @@ describe('bulkEdit()', () => {
     id: '1',
     type: 'alert',
     attributes: {
-      enabled: true,
+      enabled: false,
       tags: ['foo'],
       alertTypeId: 'myType',
       schedule: { interval: '1m' },
@@ -80,17 +85,8 @@ describe('bulkEdit()', () => {
       params: {},
       throttle: null,
       notifyWhen: null,
-      actions: [
-        {
-          group: 'default',
-          id: '1',
-          actionTypeId: '1',
-          actionRef: '1',
-          params: {
-            foo: true,
-          },
-        },
-      ],
+      actions: [],
+      name: 'my alert name',
     },
     references: [],
     version: '123',
@@ -101,6 +97,17 @@ describe('bulkEdit()', () => {
       ...existingAlert.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
+  };
+
+  const mockCreatePointInTimeFinderAsInternalUser = (
+    response = { saved_objects: [existingDecryptedAlert] }
+  ) => {
+    encryptedSavedObjects.createPointInTimeFinderAsInternalUser = jest.fn().mockResolvedValue({
+      close: jest.fn(),
+      find: function* asyncGenerator() {
+        yield response;
+      },
+    });
   };
 
   beforeEach(async () => {
@@ -129,7 +136,7 @@ describe('bulkEdit()', () => {
       ensureRuleTypeIsAuthorized() {},
     });
 
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
+    //  encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
     // ruleTypeRegistry.get.mockReturnValue({
     //   id: 'myType',
     //   name: 'Test',
@@ -157,55 +164,25 @@ describe('bulkEdit()', () => {
       total: 1,
     });
 
-    encryptedSavedObjects.createPointInTimeFinderAsInternalUser = jest.fn().mockResolvedValue({
-      close: jest.fn(),
-      find: function* asyncGenerator() {
-        yield {
-          saved_objects: [
-            {
-              id: '1',
-              type: 'alert',
-              attributes: {
-                enabled: true,
-                tags: ['foo'],
-                alertTypeId: 'myType',
-                schedule: { interval: '1m' },
-                consumer: 'myApp',
-                scheduledTaskId: 'task-123',
-                params: {},
-                throttle: null,
-                notifyWhen: null,
-                actions: [],
-              },
-              references: [],
-              version: '123',
-            },
-          ],
-        };
-      },
-    });
+    mockCreatePointInTimeFinderAsInternalUser();
 
     unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'alert',
-          attributes: {
-            enabled: true,
-            tags: ['foo'],
-            alertTypeId: 'myType',
-            schedule: { interval: '1m' },
-            consumer: 'myApp',
-            scheduledTaskId: 'task-123',
-            params: {},
-            throttle: null,
-            notifyWhen: null,
-            actions: [],
-          },
-          references: [],
-          version: '123',
-        },
+      saved_objects: [existingAlert],
+    });
+
+    ruleTypeRegistry.get.mockReturnValue({
+      id: 'myType',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'custom', name: 'Not the Default' },
       ],
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      recoveryActionGroup: RecoveredActionGroup,
+      async executor() {},
+      producer: 'alerts',
     });
   });
   describe('tags actions', () => {
@@ -511,22 +488,120 @@ describe('bulkEdit()', () => {
   });
 
   describe('apiKeys', () => {
-    test('encrypted createPointInTimeFinderAsInternalUser returns api Keys', async () => {});
+    test('should call createPointInTimeFinderAsInternalUser that returns api Keys', async () => {
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        actions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
 
-    test('should not call bulkApiKeys invalidate if all rules disabled', async () => {});
+      expect(encryptedSavedObjects.createPointInTimeFinderAsInternalUser).toHaveBeenCalledWith(
+        { namespace: 'default', type: 'alert' },
+        { filter: 'alert.attributes.tags: "APM"', perPage: 1000, type: 'alert' }
+      );
+    });
 
-    test('should call bulkApiKeys invalidate if at least one rule enabled', async () => {});
+    test('should call bulkMarkApiKeysForInvalidation if apiKey present', async () => {
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        actions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
 
-    test('should return error in rule errors if key is not generated', async () => {});
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: ['MTIzOmFiYw=='] },
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    test('should not call bulkMarkApiKeysForInvalidation if apiKey absent', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingAlert,
+            attributes: { ...existingAlert.attributes, apiKey: undefined as unknown as string },
+          },
+        ],
+      });
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        actions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+
+    test('should not call create apiKey if rule is disabled', async () => {
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        actions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+      expect(rulesClientParams.createAPIKey).not.toHaveBeenCalledWith();
+    });
+
+    test('should return error in rule errors if key is not generated', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedAlert,
+            attributes: { ...existingDecryptedAlert.attributes, enabled: true },
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        actions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+      expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+    });
   });
 
   describe('params validation', () => {
-    test('should validate params for rules', async () => {});
+    test('should validate params for rules', async () => {
+      // TODO: implement test
+      expect(true).toBe(false);
+    });
 
-    test('should validate mutatedParams for rules', async () => {});
+    test('should validate mutatedParams for rules', async () => {
+      // TODO: implement test
+      expect(true).toBe(false);
+    });
   });
 
   describe('paramsModifier', () => {
-    test('should update index pattern params', async () => {});
+    test('should update index pattern params', async () => {
+      // TODO: implement test
+      expect(true).toBe(false);
+    });
   });
 });
