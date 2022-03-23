@@ -310,7 +310,7 @@ export const Controls: FC<Props> = React.memo(
         </EuiFlyout>
         {isDeleteJobCheckModalVisible && item && (
           <DeleteSpaceAwareItemCheckModal
-            jobType={jobType}
+            mlSavedObjectType={jobType}
             ids={[item.config.id]}
             onCloseCallback={closeDeleteJobCheckModal}
             canDeleteCallback={() => {
