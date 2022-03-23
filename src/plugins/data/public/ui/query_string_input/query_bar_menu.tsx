@@ -287,6 +287,7 @@ export function QueryBarMenu({
       panel: 4,
       width: 350,
       icon: 'filter',
+      'data-test-subj': 'saved-query-management-load-button',
       disabled: !savedQueries.length,
     },
     {
@@ -326,7 +327,11 @@ export function QueryBarMenu({
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText color={savedQuery ? '#0071c2' : 'default'} size="s">
+              <EuiText
+                color={savedQuery ? '#0071c2' : 'default'}
+                size="s"
+                data-test-subj="savedQueryTitle"
+              >
                 <strong>{savedQuery ? savedQuery.attributes.title : 'Filter set'}</strong>
               </EuiText>
             </EuiFlexItem>
@@ -502,7 +507,9 @@ export function QueryBarMenu({
     switch (renderedComponent) {
       case 'menu':
       default:
-        return <EuiContextMenu initialPanelId={0} panels={panels} />;
+        return (
+          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="queryBarMenuPanel" />
+        );
       case 'saveForm':
         return (
           <EuiContextMenuPanel items={[<div style={{ padding: 16 }}>{saveFormComponent}</div>]} />

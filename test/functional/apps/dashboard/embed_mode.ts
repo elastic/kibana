@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('top-nav');
       await testSubjects.missingOrFail('queryInput');
       await testSubjects.missingOrFail('superDatePickerToggleQuickMenuButton');
-      await testSubjects.existOrFail('showFilterActions');
+      await testSubjects.existOrFail('showQueryBarMenu');
 
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = [currentUrl].concat(urlParamExtensions).join('&');
@@ -70,7 +70,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('top-nav');
       await testSubjects.existOrFail('queryInput');
       await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
-      await testSubjects.missingOrFail('showFilterActions');
     });
 
     after(async function () {

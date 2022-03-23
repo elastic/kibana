@@ -286,7 +286,7 @@ export const QueryBarTopRow = React.memo(
     }
 
     function shouldRenderUpdatebutton(): boolean {
-      return Boolean(showQueryInput);
+      return Boolean(showQueryInput || showDatePicker || showAutoRefreshOnly);
     }
 
     function renderDatePicker() {

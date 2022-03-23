@@ -206,6 +206,7 @@ export function SavedQueryManagementList({
         key: savedQuery.id,
         label: itemLabel(savedQuery.attributes),
         title: itemTitle(savedQuery.attributes, format),
+        'data-test-subj': `load-saved-query-${savedQuery.attributes.title}-button`,
         value: savedQuery.id,
         checked:
           (loadedSavedQuery && savedQuery.id === loadedSavedQuery.id) ||
@@ -226,6 +227,7 @@ export function SavedQueryManagementList({
             `}
             iconType="trash"
             aria-label={`Delete ${savedQuery.attributes.title}`}
+            data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
             title={`Delete ${savedQuery.attributes.title}`}
             onClick={() => handleDelete(savedQuery)}
             color="danger"
