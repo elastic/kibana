@@ -19,7 +19,13 @@ interface RuleState {
   totalItemCount: number;
 }
 
-export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }: FetchRulesProps) {
+export function useFetchRules({
+  searchText,
+  ruleLastResponseFilter,
+  typesFilter,
+  page,
+  sort,
+}: FetchRulesProps) {
   const { http } = useKibana().services;
 
   const [rulesState, setRulesState] = useState<RuleState>({
@@ -37,7 +43,7 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
         http,
         page,
         searchText,
-        typesFilter: OBSERVABILITY_RULE_TYPES,
+        typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
         ruleStatusesFilter: ruleLastResponseFilter,
         sort,
       });
@@ -50,7 +56,7 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
     } catch (_e) {
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
-  }, [http, page, searchText, ruleLastResponseFilter, sort]);
+  }, [http, page, searchText, ruleLastResponseFilter, typesFilter, sort]);
   useEffect(() => {
     fetchRules();
   }, [fetchRules]);

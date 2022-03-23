@@ -27,6 +27,7 @@ import type {
 import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { FeaturesPluginStart } from '../../features/public';
 import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
@@ -47,6 +48,7 @@ import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
+import { KibanaFeature } from '../../features/common';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -65,6 +67,8 @@ export interface ObservabilityPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
+  features: FeaturesPluginStart;
+  kibanaFeatures: KibanaFeature[];
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -144,6 +148,15 @@ export class Plugin
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
+      // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+      // subset of this privilege are not authorized to access this endpoint and will receive a 404
+      // error that causes the Alerting view to fail to load.
+      let kibanaFeatures: KibanaFeature[];
+      try {
+        kibanaFeatures = await pluginsStart.features.getFeatures();
+      } catch (err) {
+        kibanaFeatures = [];
+      }
 
       return renderApp({
         config,
@@ -152,6 +165,7 @@ export class Plugin
         appMountParameters: params,
         observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
+        kibanaFeatures,
       });
     };
 
