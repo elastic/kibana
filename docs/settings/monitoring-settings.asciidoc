@@ -29,9 +29,16 @@ For more information, see
 [[monitoring-general-settings]]
 ==== General monitoring settings
 
+`monitoring.cluster_alerts.email_notifications.enabled`::
+deprecated:[7.11.0] 
+When enabled, sends email notifications for Watcher alerts to the specified email address. The default is `true`. 
+
+`monitoring.cluster_alerts.email_notifications.email_address` {ess-icon}::
+deprecated:[7.11.0] 
+When enabled, specifies the email address where you want to receive cluster alert notifications.
+
 `monitoring.ui.ccs.enabled`::
 Set to `true` (default) to enable {ref}/modules-cross-cluster-search.html[cross-cluster search] of your monitoring data. The {ref}/modules-remote-clusters.html#remote-cluster-settings[`remote_cluster_client`] role must exist on each node.
-
 
 `monitoring.ui.elasticsearch.hosts`::
 Specifies the location of the {es} cluster where your monitoring data is stored.

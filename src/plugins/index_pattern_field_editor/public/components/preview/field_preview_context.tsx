@@ -167,7 +167,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [documents, currentIdx]
   );
 
-  const currentDocIndex = currentDocument?._index;
   const currentDocId: string = currentDocument?._id ?? '';
   const totalDocs = documents.length;
   const { name, document, script, format, type } = params;
@@ -334,7 +333,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     const currentApiCall = ++previewCount.current;
 
     const response = await getFieldPreview({
-      index: currentDocIndex,
+      index: indexPattern.title,
       document: params.document!,
       context: `${params.type!}_field` as FieldPreviewContext,
       script: params.script!,
@@ -386,11 +385,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [
     needToUpdatePreview,
     params,
-    currentDocIndex,
     currentDocId,
     getFieldPreview,
     notifications.toasts,
     valueFormatter,
+    indexPattern.title,
   ]);
 
   const goToNextDoc = useCallback(() => {

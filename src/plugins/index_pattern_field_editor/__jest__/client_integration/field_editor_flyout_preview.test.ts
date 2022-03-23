@@ -367,7 +367,7 @@ describe('Field editor Preview panel', () => {
           title: 'First doc - title',
         },
         documentId: '001',
-        index: 'testIndex',
+        index: 'testIndexPattern',
         script: {
           source: 'echo("hello")',
         },

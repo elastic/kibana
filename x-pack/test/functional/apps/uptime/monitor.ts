@@ -28,7 +28,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload(archive);
     });
 
-    describe('navigation to monitor page', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/119770
+    describe.skip('navigation to monitor page', () => {
       before(async () => {
         await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId);
       });

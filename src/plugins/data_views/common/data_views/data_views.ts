@@ -427,7 +427,7 @@ export class DataViewsService {
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(DATA_VIEW_SAVED_OBJECT_TYPE, id, 'management/kibana/dataViews');
+      throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
     }
 
     return this.initFromSavedObject(savedObject);

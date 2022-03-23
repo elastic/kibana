@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
     deb.vm.provision "ansible" do |ansible|
       ansible.playbook = "deb.yml"
     end
-    deb.vm.network "private_network", ip: "192.168.50.5"
+    deb.vm.network "private_network", ip: "192.168.56.5"
   end
 
   config.vm.define "rpm" do |rpm|
@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
     rpm.vm.provision "ansible" do |ansible|
       ansible.playbook = "rpm.yml"
     end
-    rpm.vm.network "private_network", ip: "192.168.50.6"
+    rpm.vm.network "private_network", ip: "192.168.56.6"
   end
 
   config.vm.define "docker" do |docker|
@@ -22,6 +22,6 @@ Vagrant.configure("2") do |config|
     docker.vm.provision "ansible" do |ansible|
       ansible.playbook = "docker.yml"
     end
-    docker.vm.network "private_network", ip: "192.168.50.7"
+    docker.vm.network "private_network", ip: "192.168.56.7"
   end
 end
