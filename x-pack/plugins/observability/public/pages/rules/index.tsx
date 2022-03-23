@@ -112,7 +112,7 @@ export function RulesPage() {
     setRefreshInterval(refreshIntervalChanged);
   };
 
-  const { rulesState, setRulesState, reload } = useFetchRules({
+  const { rulesState, setRulesState, reload, noData } = useFetchRules({
     searchText,
     ruleLastResponseFilter,
     page,
@@ -247,7 +247,7 @@ export function RulesPage() {
   );
 
   const getRulesTable = () => {
-    if (totalItemCount === 0 && !rulesState.isLoading) {
+    if (noData && !rulesState.isLoading) {
       return authorizedToCreateAnyRules ? (
         <NoDataPrompt
           documentationLink={documentationLink}

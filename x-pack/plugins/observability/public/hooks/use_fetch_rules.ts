@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
+import { isEmpty } from 'lodash';
 import { loadRules, Rule } from '../../../triggers_actions_ui/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
 import { FetchRulesProps } from '../pages/rules/types';
@@ -29,6 +30,8 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
     totalItemCount: 0,
   });
 
+  const [noData, setNoData] = useState<boolean>(true);
+
   const fetchRules = useCallback(async () => {
     setRulesState((oldState) => ({ ...oldState, isLoading: true }));
 
@@ -47,6 +50,9 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
         data: response.data,
         totalItemCount: response.total,
       }));
+      const isFilterApplied = !(isEmpty(searchText) && isEmpty(ruleLastResponseFilter));
+
+      setNoData(response.data.length === 0 && !isFilterApplied);
     } catch (_e) {
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
@@ -59,5 +65,6 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
     rulesState,
     reload: fetchRules,
     setRulesState,
+    noData,
   };
 }
