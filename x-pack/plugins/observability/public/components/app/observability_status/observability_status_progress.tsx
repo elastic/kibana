@@ -19,6 +19,7 @@ import {
 import { reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasData } from '../../../hooks/use_has_data';
+import { useUiTracker } from '../../../hooks/use_track_metric';
 
 const LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY = 'HIDE_GUIDED_SETUP';
 
@@ -29,17 +30,15 @@ export function ObservabilityStatusProgress({
   onViewDetailsClick,
 }: ObservabilityStatusProgressProps) {
   const { hasDataMap, isAllRequestsComplete } = useHasData();
+  const trackMetric = useUiTracker({ app: 'observability-overview' });
   const hideGuidedSetupLocalStorageKey = window.localStorage.getItem(
     LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY
   );
   const [isGuidedSetupHidden, setIsGuidedSetupHidden] = useState(
     JSON.parse(hideGuidedSetupLocalStorageKey || 'false')
   );
+  const [progress, setProgress] = useState(0);
 
-  const hideGuidedSetup = () => {
-    window.localStorage.setItem(LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY, 'true');
-    setIsGuidedSetupHidden(true);
-  };
   useEffect(() => {
     const totalCounts = Object.keys(hasDataMap);
     if (isAllRequestsComplete) {
@@ -56,7 +55,17 @@ export function ObservabilityStatusProgress({
     }
   }, [isAllRequestsComplete, hasDataMap]);
 
-  const [progress, setProgress] = useState(0);
+  const hideGuidedSetup = () => {
+    window.localStorage.setItem(LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY, 'true');
+    setIsGuidedSetupHidden(true);
+    trackMetric({ metric: 'guided_setup_progress_dismiss' });
+  };
+
+  const showDetails = () => {
+    onViewDetailsClick();
+    trackMetric({ metric: 'guided_setup_progress_view_details' });
+  };
+
   return !isGuidedSetupHidden ? (
     <>
       <EuiPanel color="primary" data-test-subj="status-progress">
@@ -92,7 +101,7 @@ export function ObservabilityStatusProgress({
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton size="s" onClick={onViewDetailsClick}>
+                <EuiButton size="s" onClick={showDetails}>
                   <FormattedMessage
                     id="xpack.observability.status.progressBarViewDetails"
                     defaultMessage="View details"
