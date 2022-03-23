@@ -38,7 +38,7 @@ interface ManagedConsole {
   onBeforeClose?: ConsoleRegistrationInterface['onBeforeClose'];
 }
 
-interface ConsoleManagerInterface {
+interface ConsoleManagerClient {
   /** Registers a new console */
   register(console: ConsoleRegistrationInterface): Immutable<RegisteredConsoleClient>;
   /** Opens console in a dialog */
@@ -55,7 +55,7 @@ interface ConsoleManagerInterface {
 
 type RunningConsoleStorage = Record<string, ManagedConsole>;
 
-const ConsoleManagerContext = React.createContext<ConsoleManagerInterface | undefined>(undefined);
+const ConsoleManagerContext = React.createContext<ConsoleManagerClient | undefined>(undefined);
 
 export type ConsoleManagerProps = PropsWithChildren<{
   storage?: RunningConsoleStorage;
@@ -64,8 +64,8 @@ export type ConsoleManagerProps = PropsWithChildren<{
 export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, children }) => {
   const [consoleStorage, setConsoleStorage] = useState<RunningConsoleStorage>(storage);
 
-  const consoleManagerClient = useMemo<ConsoleManagerInterface>(() => {
-    const show: ConsoleManagerInterface['show'] = (id) => {
+  const consoleManagerClient = useMemo<ConsoleManagerClient>(() => {
+    const show: ConsoleManagerClient['show'] = (id) => {
       setConsoleStorage((prevState) => {
         if (!prevState[id]) {
           throw new Error(`Unable to show Console with id ${id}. Not found.`);
@@ -92,7 +92,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       });
     };
 
-    const hide: ConsoleManagerInterface['hide'] = (id) => {
+    const hide: ConsoleManagerClient['hide'] = (id) => {
       setConsoleStorage((prevState) => {
         if (!prevState[id]) {
           throw new Error(`Unable to hide Console with id ${id}. Not found.`);
@@ -108,17 +108,13 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       });
     };
 
-    const terminate: ConsoleManagerInterface['terminate'] = () => {};
+    const terminate: ConsoleManagerClient['terminate'] = () => {};
 
-    const getOne: ConsoleManagerInterface['getOne'] = () => {};
+    const getOne: ConsoleManagerClient['getOne'] = () => {};
 
-    const getList: ConsoleManagerInterface['getList'] = () => {};
+    const getList: ConsoleManagerClient['getList'] = () => {};
 
-    const register: ConsoleManagerInterface['register'] = ({
-      id,
-      title,
-      ...otherRegisterProps
-    }) => {
+    const register: ConsoleManagerClient['register'] = ({ id, title, ...otherRegisterProps }) => {
       const managedConsole: ManagedConsole = {
         ...otherRegisterProps,
         client: {
@@ -192,7 +188,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 });
 ConsoleManager.displayName = 'ConsoleManager';
 
-export const useConsoleManager = (): ConsoleManagerInterface => {
+export const useConsoleManager = (): ConsoleManagerClient => {
   const consoleManager = useContext(ConsoleManagerContext);
 
   if (!consoleManager) {
