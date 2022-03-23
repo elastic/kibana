@@ -15,7 +15,8 @@ export const DETAILS_HEADER = i18n.translate('xpack.securitySolution.blocklists.
 export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.blocklists.details.header.description',
   {
-    defaultMessage: 'Add a blocklist to prevent selected applications from running on your hosts.',
+    defaultMessage:
+      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
   }
 );
 
@@ -60,6 +61,13 @@ export const OPERATOR_LABEL = i18n.translate('xpack.securitySolution.blocklists.
 export const VALUE_LABEL = i18n.translate('xpack.securitySolution.blocklists.value.label', {
   defaultMessage: 'Value',
 });
+
+export const VALUE_LABEL_HELPER = i18n.translate(
+  'xpack.securitySolution.blocklists.value.label.helper',
+  {
+    defaultMessage: 'Type or copy & paste one or multiple comma delimited values',
+  }
+);
 
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
   [ConditionEntryField.HASH]: i18n.translate('xpack.securitySolution.blocklists.entry.field.hash', {

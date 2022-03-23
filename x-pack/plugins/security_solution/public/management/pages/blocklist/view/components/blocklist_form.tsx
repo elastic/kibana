@@ -21,6 +21,8 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   OperatingSystem,
@@ -49,6 +51,7 @@ import {
   SELECT_OS_LABEL,
   VALUE_LABEL,
   ERRORS,
+  VALUE_LABEL_HELPER,
 } from '../../translations';
 import {
   EffectedPolicySelect,
@@ -164,6 +167,18 @@ export const BlockListForm = memo(
 
       return selectableFields;
     }, [selectedOs]);
+
+    const valueLabel = useMemo(() => {
+      return (
+        <div>
+          <EuiToolTip content={VALUE_LABEL_HELPER}>
+            <>
+              {VALUE_LABEL} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+            </>
+          </EuiToolTip>
+        </div>
+      );
+    }, []);
 
     const validateValues = useCallback((nextItem: ArtifactFormComponentProps['item']) => {
       const os = ((nextItem.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
@@ -432,7 +447,7 @@ export const BlockListForm = memo(
           </EuiFlexGroup>
         </EuiFormRow>
         <EuiFormRow
-          label={VALUE_LABEL}
+          label={valueLabel}
           isInvalid={visited.value && !!errorsRef.current.value?.length}
           helpText={warningsRef.current.value}
           error={errorsRef.current.value}

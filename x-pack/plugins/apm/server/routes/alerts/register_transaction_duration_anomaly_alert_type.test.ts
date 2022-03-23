@@ -201,6 +201,8 @@ describe('Transaction duration anomaly alert', () => {
         triggerValue: 'critical',
         reason:
           'critical anomaly with a score of 80 was detected in the last 5 mins for foo.',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=development',
       });
     });
   });

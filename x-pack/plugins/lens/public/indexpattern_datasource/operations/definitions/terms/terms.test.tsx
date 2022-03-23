@@ -79,7 +79,7 @@ describe('terms', () => {
       columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
-          label: 'Top values of source',
+          label: 'Top 3 values of source',
           dataType: 'string',
           isBucketed: true,
           operationType: 'terms',
@@ -199,7 +199,7 @@ describe('terms', () => {
       const oldColumn: TermsIndexPatternColumn = {
         operationType: 'terms',
         sourceField: 'source',
-        label: 'Top values of source',
+        label: 'Top 5 values of source',
         isBucketed: true,
         dataType: 'string',
         params: {
@@ -226,7 +226,7 @@ describe('terms', () => {
       const oldColumn: TermsIndexPatternColumn = {
         operationType: 'terms',
         sourceField: 'bytes',
-        label: 'Top values of bytes',
+        label: 'Top 5 values of bytes',
         isBucketed: true,
         dataType: 'number',
         params: {
@@ -254,7 +254,7 @@ describe('terms', () => {
       const oldColumn: TermsIndexPatternColumn = {
         operationType: 'terms',
         sourceField: 'bytes',
-        label: 'Top values of bytes',
+        label: 'Top 5 values of bytes',
         isBucketed: true,
         dataType: 'number',
         params: {
@@ -278,7 +278,7 @@ describe('terms', () => {
       const oldColumn: TermsIndexPatternColumn = {
         operationType: 'terms',
         sourceField: 'bytes',
-        label: 'Top values of bytes',
+        label: 'Top 5 values of bytes',
         isBucketed: true,
         dataType: 'number',
         params: {
@@ -304,7 +304,7 @@ describe('terms', () => {
       const oldColumn: TermsIndexPatternColumn = {
         operationType: 'terms',
         sourceField: 'bytes',
-        label: 'Top values of bytes',
+        label: 'Top 5 values of bytes',
         isBucketed: true,
         dataType: 'number',
         params: {
@@ -327,7 +327,7 @@ describe('terms', () => {
       const oldColumn: TermsIndexPatternColumn = {
         operationType: 'terms',
         sourceField: 'bytes',
-        label: 'Top values of bytes',
+        label: 'Top 5 values of bytes',
         isBucketed: true,
         dataType: 'number',
         params: {
@@ -929,7 +929,7 @@ describe('terms', () => {
           createMockedIndexPattern(),
           {}
         )
-      ).toBe('Top values of source');
+      ).toBe('Top 3 values of source');
     });
 
     it('should return main value with single counter for two fields', () => {
@@ -2083,6 +2083,7 @@ describe('terms', () => {
           ...layer.columns,
           col1: {
             ...layer.columns.col1,
+            label: 'Top 7 values of source',
             params: {
               ...(layer.columns.col1 as TermsIndexPatternColumn).params,
               size: 7,
@@ -2101,7 +2102,7 @@ describe('terms', () => {
           col1: {
             dataType: 'boolean',
             isBucketed: true,
-            label: 'Top values of bytes',
+            label: 'Top 5 values of bytes',
             operationType: 'terms',
             params: {
               missingBucket: false,

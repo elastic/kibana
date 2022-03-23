@@ -45,7 +45,6 @@ describe('Super User - Metrics', () => {
 
     cy.getBySel('comboBoxInput').first().click();
     cy.wait(500);
-    cy.get('div[role=listBox]').should('have.lengthOf.above', 0);
     cy.getBySel('comboBoxInput').first().type('{downArrow}{enter}');
 
     submitQuery();
