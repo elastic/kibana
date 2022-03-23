@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { useNetworkUsers } from '../../containers/users';
+import { useNetworkUsers, ID } from '../../containers/users';
 import { NetworkComponentsQueryProps } from './types';
 import { UsersTable } from '../../components/users_table';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const UsersTableManage = manageQuery(UsersTable);
 
@@ -24,6 +25,11 @@ export const UsersQueryTable = ({
   startDate,
   type,
 }: NetworkComponentsQueryProps) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { id, inspect, isInspected, networkUsers, totalCount, pageInfo, loadPage, refetch },
@@ -32,7 +38,7 @@ export const UsersQueryTable = ({
     filterQuery,
     flowTarget,
     ip,
-    skip,
+    skip: querySkip,
     startDate,
   });
 
@@ -49,6 +55,7 @@ export const UsersQueryTable = ({
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       totalCount={totalCount}
       type={type}
     />

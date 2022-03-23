@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './authentications';
-export * from './hosts';
-export * from './unique_ips';
+export { IconCircle } from './circle';
+export { IconTriangle } from './triangle';
