@@ -100,4 +100,26 @@ describe('Documents', () => {
       expect(wrapper.find('[data-test-subj="MetaEnginesCallout"]').exists()).toBe(false);
     });
   });
+
+  describe('Elasticsearch indices', () => {
+    it('renders an Elasticsearch indices message if this is an Elasticsearch index', () => {
+      setMockValues({
+        ...values,
+        isElasticsearchEngine: true,
+      });
+
+      const wrapper = shallow(<Documents />);
+      expect(wrapper.find('[data-test-subj="ElasticsearchEnginesCallout"]').exists()).toBe(true);
+    });
+
+    it('does not render an Elasticsearch indices message if this is not an Elasticsearch index', () => {
+      setMockValues({
+        ...values,
+        isElasticsearchEngine: false,
+      });
+
+      const wrapper = shallow(<Documents />);
+      expect(wrapper.find('[data-test-subj="ElasticsearchEnginesCallout"]').exists()).toBe(false);
+    });
+  });
 });
