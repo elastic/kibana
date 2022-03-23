@@ -15,6 +15,7 @@ const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 export interface FleetServerHostForm {
   saveFleetServerHost: () => Promise<void>;
   fleetServerHost?: string;
+  isFleetServerHostSubmitted: boolean;
   setFleetServerHost: React.Dispatch<React.SetStateAction<string | undefined>>;
   error?: string;
   validateFleetServerHost: () => boolean;
@@ -22,6 +23,7 @@ export interface FleetServerHostForm {
 
 export const useFleetServerHost = (): FleetServerHostForm => {
   const [fleetServerHost, setFleetServerHost] = useState<string>();
+  const [isFleetServerHostSubmitted, setIsFleetServerHostSubmitted] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
   const { data: settings } = useGetSettings();
@@ -43,6 +45,8 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   }, [fleetServerHost]);
 
   const saveFleetServerHost = useCallback(async () => {
+    setIsFleetServerHostSubmitted(false);
+
     if (!validateFleetServerHost()) {
       return;
     }
@@ -50,14 +54,18 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     const res = await sendPutSettings({
       fleet_server_hosts: [fleetServerHost!, ...(settings?.item.fleet_server_hosts || [])],
     });
+
     if (res.error) {
       throw res.error;
     }
+
+    setIsFleetServerHostSubmitted(true);
   }, [fleetServerHost, settings?.item.fleet_server_hosts, validateFleetServerHost]);
 
   return {
     saveFleetServerHost,
     fleetServerHost,
+    isFleetServerHostSubmitted,
     setFleetServerHost,
     error,
     validateFleetServerHost,

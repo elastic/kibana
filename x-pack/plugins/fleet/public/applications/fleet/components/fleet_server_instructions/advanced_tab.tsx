@@ -40,22 +40,26 @@ export const AdvancedTab: React.FunctionComponent = () => {
       eligibleFleetServerPolicies,
       refreshEligibleFleetServerPolicies,
     }),
-    getSetDeploymentModeStep({ deploymentMode, setDeploymentMode, disabled: false }),
-    getAddFleetServerHostStep({ fleetServerHostForm, disabled: false }),
+    getSetDeploymentModeStep({
+      deploymentMode,
+      setDeploymentMode,
+      disabled: !Boolean(fleetServerPolicyId),
+    }),
+    getAddFleetServerHostStep({ fleetServerHostForm, disabled: !Boolean(fleetServerPolicyId) }),
     getGenerateServiceTokenStep({
       serviceToken,
       generateServiceToken,
       isLoadingServiceToken,
-      disabled: false,
+      disabled: !Boolean(fleetServerHostForm.isFleetServerHostSubmitted),
     }),
     getInstallFleetServerStep({
       isFleetServerReady,
       serviceToken,
       fleetServerHost: fleetServerHostForm.fleetServerHost,
       fleetServerPolicyId,
-      disabled: false,
+      disabled: !Boolean(serviceToken),
     }),
-    getConfirmFleetServerConnectionStep({ isFleetServerReady, disabled: false }),
+    getConfirmFleetServerConnectionStep({ isFleetServerReady, disabled: !Boolean(serviceToken) }),
   ];
 
   return <EuiSteps steps={steps} className="eui-textLeft" />;

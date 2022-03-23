@@ -26,11 +26,11 @@ export const QuickStartTab: React.FunctionComponent = () => {
     }),
     getInstallFleetServerStep({
       isFleetServerReady,
-      disabled: false,
+      disabled: quickStartCreateForm.status !== 'success',
     }),
     getConfirmFleetServerConnectionStep({
       isFleetServerReady,
-      disabled: false,
+      disabled: quickStartCreateForm.status !== 'success',
     }),
   ];
 
