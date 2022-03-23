@@ -207,6 +207,9 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       for (const log of execLogs) {
         expect(log.status).to.equal('failure');
         expect(log.timed_out).to.equal(false);
+        expect(log.message).to.equal(
+          `rule execution failure: test.throw:${createdRule.id}: 'abc' - this alert is intended to fail`
+        );
       }
 
       expect(response.body.totalErrors).to.eql(1);
