@@ -193,7 +193,8 @@ export const useEngineNav = () => {
     });
   }
 
-  if (canViewEngineCrawler && !isMetaEngine) {
+  const showCrawlerNavItem = canViewEngineCrawler && !isMetaEngine && !isElasticsearchEngine;
+  if (showCrawlerNavItem) {
     navItems.push({
       id: 'crawler',
       name: CRAWLER_TITLE,

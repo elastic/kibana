@@ -190,6 +190,11 @@ describe('useEngineNav', () => {
         setMockValues({ ...values, myRole, isMetaEngine: true });
         expect(useEngineNav()).toEqual(BASE_NAV);
       });
+
+      it('does not return a crawler nav item for elasticsearch engines', () => {
+        setMockValues({ ...values, myRole, isElasticsearchEngine: true });
+        expect(useEngineNav()).toEqual(BASE_NAV);
+      });
     });
 
     describe('meta engine source engines', () => {
