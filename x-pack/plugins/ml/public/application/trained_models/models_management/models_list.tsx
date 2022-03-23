@@ -53,7 +53,7 @@ import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constan
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { TestTrainedModelFlyout, isTestable } from './test';
+import { TestTrainedModelFlyout, isTestable } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
