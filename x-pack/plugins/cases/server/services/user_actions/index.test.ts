@@ -988,41 +988,47 @@ describe('CaseUserActionService', () => {
                   Object {
                     "arguments": Array [
                       Object {
-                        "type": "literal",
-                        "value": "cases-user-actions.attributes.type",
+                        "arguments": Array [
+                          Object {
+                            "type": "literal",
+                            "value": "cases-user-actions.attributes.type",
+                          },
+                          Object {
+                            "type": "literal",
+                            "value": "connector",
+                          },
+                          Object {
+                            "type": "literal",
+                            "value": false,
+                          },
+                        ],
+                        "function": "is",
+                        "type": "function",
                       },
                       Object {
-                        "type": "literal",
-                        "value": "connector",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": false,
+                        "arguments": Array [
+                          Object {
+                            "type": "literal",
+                            "value": "cases-user-actions.attributes.type",
+                          },
+                          Object {
+                            "type": "literal",
+                            "value": "create_case",
+                          },
+                          Object {
+                            "type": "literal",
+                            "value": false,
+                          },
+                        ],
+                        "function": "is",
+                        "type": "function",
                       },
                     ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "type": "literal",
-                        "value": "cases-user-actions.attributes.type",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": "create_case",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": false,
-                      },
-                    ],
-                    "function": "is",
+                    "function": "or",
                     "type": "function",
                   },
                 ],
-                "function": "or",
+                "function": "and",
                 "type": "function",
               },
               "hasReference": Object {

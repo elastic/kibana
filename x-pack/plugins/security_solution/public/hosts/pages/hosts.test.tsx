@@ -175,7 +175,7 @@ describe('Hosts - rendering', () => {
     myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
     wrapper.update();
     expect(wrapper.find(HostsTabs).props().filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
     );
   });
 });

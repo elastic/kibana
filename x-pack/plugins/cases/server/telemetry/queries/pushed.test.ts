@@ -71,22 +71,28 @@ describe('pushes', () => {
           },
         },
         filter: {
+          type: 'function',
+          function: 'or',
           arguments: [
             {
-              type: 'literal',
-              value: 'cases-user-actions.attributes.type',
-            },
-            {
-              type: 'literal',
-              value: 'pushed',
-            },
-            {
-              type: 'literal',
-              value: false,
+              arguments: [
+                {
+                  type: 'literal',
+                  value: 'cases-user-actions.attributes.type',
+                },
+                {
+                  type: 'literal',
+                  value: 'pushed',
+                },
+                {
+                  type: 'literal',
+                  value: false,
+                },
+              ],
+              function: 'is',
+              type: 'function',
             },
           ],
-          function: 'is',
-          type: 'function',
         },
         page: 0,
         perPage: 0,

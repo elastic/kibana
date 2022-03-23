@@ -26,19 +26,25 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
-              "type": "literal",
-              "value": "a",
-            },
-            Object {
-              "type": "literal",
-              "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "a",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "hello",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
             },
           ],
-          "function": "is",
+          "function": "and",
           "type": "function",
         }
       `);
@@ -50,19 +56,25 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
-              "type": "literal",
-              "value": "a",
-            },
-            Object {
-              "type": "literal",
-              "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "a",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "hello",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
             },
           ],
-          "function": "is",
+          "function": "and",
           "type": "function",
         }
       `);
@@ -229,19 +241,25 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
-              "type": "literal",
-              "value": "a.attributes.owner",
-            },
-            Object {
-              "type": "literal",
-              "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
+              "arguments": Array [
+                Object {
+                  "type": "literal",
+                  "value": "a.attributes.owner",
+                },
+                Object {
+                  "type": "literal",
+                  "value": "hello",
+                },
+                Object {
+                  "type": "literal",
+                  "value": false,
+                },
+              ],
+              "function": "is",
+              "type": "function",
             },
           ],
-          "function": "is",
+          "function": "or",
           "type": "function",
         }
       `);

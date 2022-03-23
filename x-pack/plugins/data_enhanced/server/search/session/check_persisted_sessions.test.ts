@@ -67,7 +67,7 @@ describe('checkPersistedSessionsProgress', () => {
     expect(findInput.filter.arguments[0].arguments[0].value).toBe(
       'search-session.attributes.persisted'
     );
-    expect(findInput.filter.arguments[0].arguments[1].value).toBe('true');
+    expect(findInput.filter.arguments[0].arguments[1].value).toBe(true);
     expect(findInput.filter.arguments[1].arguments[0].value).toBe(
       'search-session.attributes.status'
     );

@@ -117,8 +117,15 @@ describe('findAndCleanupTasks', () => {
                 "minimum_should_match": 1,
                 "should": Array [
                   Object {
-                    "match": Object {
-                      "task.attributes.taskType": "actions:my-action-type",
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "task.attributes.taskType": "actions:my-action-type",
+                          },
+                        },
+                      ],
                     },
                   },
                 ],

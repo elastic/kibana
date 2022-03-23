@@ -631,7 +631,11 @@ describe('SearchSessionService', () => {
         const [[findOptions]] = savedObjectsClient.find.mock.calls;
         expect(findOptions).toMatchInlineSnapshot(`
           Object {
-            "filter": undefined,
+            "filter": Object {
+              "arguments": Array [],
+              "function": "and",
+              "type": "function",
+            },
             "page": 0,
             "perPage": 5,
             "type": "search-session",

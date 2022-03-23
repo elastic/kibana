@@ -8,6 +8,7 @@
 
 import { KqlNode } from './types';
 import { KqlLiteralNode, KqlLiteralType } from './literal';
+import { fromLiteralExpression } from '../ast';
 
 export const KQL_NODE_TYPE_WILDCARD = 'wildcard';
 export const KQL_WILDCARD_SYMBOL = '@kuery-wildcard@';
@@ -26,6 +27,12 @@ export function isNode(node: KqlNode): node is KqlWildcardNode {
 }
 
 export function buildNode(value: string): KqlWildcardNode {
+  if (!value.includes(KQL_WILDCARD_SYMBOL)) {
+    const node = fromLiteralExpression(value);
+    if (isNode(node)) return node;
+    throw new Error(`Cannot create wildcard node from value: "${value}"`);
+  }
+
   return {
     type: KQL_NODE_TYPE_WILDCARD,
     value: `${value}`,

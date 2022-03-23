@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../common';
 import {
   AlertingAuthorizationFilterType,
@@ -44,7 +44,12 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         'space1'
       )
     ).toEqual(
-      fromKueryExpression(`((path.to.rule_type_id:myAppAlertType and consumer-field:(myApp)))`)
+      nodeBuilder.or([
+        nodeBuilder.and([
+          nodeBuilder.is('path.to.rule_type_id', 'myAppAlertType'),
+          nodeBuilder.or([nodeBuilder.is('consumer-field', 'myApp')]),
+        ]),
+      ])
     );
   });
 
@@ -79,9 +84,16 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         'space1'
       )
     ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp)))`
-      )
+      nodeBuilder.or([
+        nodeBuilder.and([
+          nodeBuilder.is('path.to.rule_type_id', 'myAppAlertType'),
+          nodeBuilder.or([
+            nodeBuilder.is('consumer-field', 'alerts'),
+            nodeBuilder.is('consumer-field', 'myApp'),
+            nodeBuilder.is('consumer-field', 'myOtherApp'),
+          ]),
+        ]),
+      ])
     );
   });
 

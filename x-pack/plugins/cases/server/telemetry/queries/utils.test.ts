@@ -378,22 +378,28 @@ describe('utils', () => {
   describe('getOnlyAlertsCommentsFilter', () => {
     it('return the correct filter', () => {
       expect(getOnlyAlertsCommentsFilter()).toEqual({
+        type: 'function',
+        function: 'or',
         arguments: [
           {
-            type: 'literal',
-            value: 'cases-comments.attributes.type',
-          },
-          {
-            type: 'literal',
-            value: 'alert',
-          },
-          {
-            type: 'literal',
-            value: false,
+            arguments: [
+              {
+                type: 'literal',
+                value: 'cases-comments.attributes.type',
+              },
+              {
+                type: 'literal',
+                value: 'alert',
+              },
+              {
+                type: 'literal',
+                value: false,
+              },
+            ],
+            function: 'is',
+            type: 'function',
           },
         ],
-        function: 'is',
-        type: 'function',
       });
     });
   });
@@ -401,22 +407,28 @@ describe('utils', () => {
   describe('getOnlyConnectorsFilter', () => {
     it('return the correct filter', () => {
       expect(getOnlyConnectorsFilter()).toEqual({
+        type: 'function',
+        function: 'or',
         arguments: [
           {
-            type: 'literal',
-            value: 'cases-user-actions.attributes.type',
-          },
-          {
-            type: 'literal',
-            value: 'connector',
-          },
-          {
-            type: 'literal',
-            value: false,
+            arguments: [
+              {
+                type: 'literal',
+                value: 'cases-user-actions.attributes.type',
+              },
+              {
+                type: 'literal',
+                value: 'connector',
+              },
+              {
+                type: 'literal',
+                value: false,
+              },
+            ],
+            function: 'is',
+            type: 'function',
           },
         ],
-        function: 'is',
-        type: 'function',
       });
     });
   });

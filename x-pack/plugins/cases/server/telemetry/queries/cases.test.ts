@@ -347,22 +347,28 @@ describe('getCasesTelemetryData', () => {
           },
         },
         filter: {
+          type: 'function',
+          function: 'or',
           arguments: [
             {
-              type: 'literal',
-              value: 'cases-comments.attributes.type',
-            },
-            {
-              type: 'literal',
-              value: 'alert',
-            },
-            {
-              type: 'literal',
-              value: false,
+              arguments: [
+                {
+                  type: 'literal',
+                  value: 'cases-comments.attributes.type',
+                },
+                {
+                  type: 'literal',
+                  value: 'alert',
+                },
+                {
+                  type: 'literal',
+                  value: false,
+                },
+              ],
+              function: 'is',
+              type: 'function',
             },
           ],
-          function: 'is',
-          type: 'function',
         },
         page: 0,
         perPage: 0,
