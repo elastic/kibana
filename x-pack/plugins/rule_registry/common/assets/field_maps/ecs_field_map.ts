@@ -5318,6 +5318,26 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.feed.dashboard_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.reference': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.framework': {
     type: 'keyword',
     array: false,
