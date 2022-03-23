@@ -113,7 +113,7 @@ export class AnomalyExplorerChartsService {
     influencerFilterQuery?: InfluencersFilterQuery,
     influencers?: EntityField[],
     severity = 0,
-    maxSeries = DEFAULT_MAX_SERIES_TO_PLOT
+    maxSeries?: number
   ): Observable<ExplorerChartsData> {
     const optimumPointSpacing = 5;
     const optimumNumPoints = Math.ceil(chartsContainerWidth / optimumPointSpacing);
@@ -128,7 +128,7 @@ export class AnomalyExplorerChartsService {
     let chartsPerRow = Math.min(Math.max(Math.floor(containerWidth / 550), 1), MAX_CHARTS_PER_ROW);
 
     // Expand the charts to not have blank space in the row if necessary
-    if (maxSeries < chartsPerRow) {
+    if (maxSeries && maxSeries < chartsPerRow) {
       chartsPerRow = maxSeries;
     }
 
