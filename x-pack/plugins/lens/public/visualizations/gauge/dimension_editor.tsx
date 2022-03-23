@@ -31,7 +31,6 @@ import {
   applyPaletteParams,
   CustomizablePalette,
   CUSTOM_PALETTE,
-  DimensionEditorSection,
   FIXED_PROGRESSION,
   PalettePanelContainer,
   TooltipWrapper,
@@ -85,7 +84,7 @@ export function GaugeDimensionEditor(
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
   return (
-    <DimensionEditorSection>
+    <>
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -239,6 +238,6 @@ export function GaugeDimensionEditor(
           </EuiFormRow>
         </>
       )}
-    </DimensionEditorSection>
+    </>
   );
 }

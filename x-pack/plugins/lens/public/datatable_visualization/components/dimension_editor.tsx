@@ -30,7 +30,6 @@ import {
   useDebouncedValue,
   PalettePanelContainer,
   findMinMaxByColumnId,
-  DimensionEditorSection,
 } from '../../shared_components/';
 import type { ColumnState } from '../../../common/expressions';
 import {
@@ -129,7 +128,7 @@ export function TableDimensionEditor(
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
   return (
-    <DimensionEditorSection>
+    <>
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -396,6 +395,6 @@ export function TableDimensionEditor(
           )}
         </>
       )}
-    </DimensionEditorSection>
+    </>
   );
 }

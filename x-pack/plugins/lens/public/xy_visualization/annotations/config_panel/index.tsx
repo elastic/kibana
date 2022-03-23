@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import './index.scss';
 import { i18n } from '@kbn/i18n';
-import { EuiDatePicker, EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiTitle } from '@elastic/eui';
+import { EuiDatePicker, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import moment from 'moment';
 import { EventAnnotationConfig } from 'src/plugins/event_annotation/common/types';
@@ -68,14 +68,11 @@ export const AnnotationsPanel = (
 
   return (
     <>
-      <DimensionEditorSection>
-        <EuiTitle size="xxs" className="lnsXyConfigHeading">
-          <h3>
-            {i18n.translate('xpack.lens.xyChart.placement', {
-              defaultMessage: 'Placement',
-            })}
-          </h3>
-        </EuiTitle>
+      <DimensionEditorSection
+        title={i18n.translate('xpack.lens.xyChart.placement', {
+          defaultMessage: 'Placement',
+        })}
+      >
         <ConfigPanelDatePicker
           value={moment(currentAnnotations?.key.timestamp)}
           onChange={(date) => {
@@ -93,14 +90,11 @@ export const AnnotationsPanel = (
           })}
         />
       </DimensionEditorSection>
-      <DimensionEditorSection hasBorder>
-        <EuiTitle size="xxs" className="lnsXyConfigHeading">
-          <h3>
-            {i18n.translate('xpack.lens.xyChart.appearance', {
-              defaultMessage: 'Appearance',
-            })}
-          </h3>
-        </EuiTitle>
+      <DimensionEditorSection
+        title={i18n.translate('xpack.lens.xyChart.appearance', {
+          defaultMessage: 'Appearance',
+        })}
+      >
         <NameInput
           value={currentAnnotations?.label || defaultAnnotationLabel}
           defaultValue={defaultAnnotationLabel}

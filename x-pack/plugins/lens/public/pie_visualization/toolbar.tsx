@@ -26,7 +26,6 @@ import {
   ToolbarPopover,
   LegendSettingsPopover,
   useDebouncedValue,
-  DimensionEditorSection,
   PalettePicker,
 } from '../shared_components';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -303,14 +302,12 @@ export function DimensionEditor(
   }
 ) {
   return (
-    <DimensionEditorSection>
-      <PalettePicker
-        palettes={props.paletteService}
-        activePalette={props.state.palette}
-        setPalette={(newPalette) => {
-          props.setState({ ...props.state, palette: newPalette });
-        }}
-      />
-    </DimensionEditorSection>
+    <PalettePicker
+      palettes={props.paletteService}
+      activePalette={props.state.palette}
+      setPalette={(newPalette) => {
+        props.setState({ ...props.state, palette: newPalette });
+      }}
+    />
   );
 }

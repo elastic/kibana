@@ -20,7 +20,6 @@ import {
   CustomizablePalette,
   FIXED_PROGRESSION,
   PalettePanelContainer,
-  DimensionEditorSection,
 } from '../shared_components/';
 import './dimension_editor.scss';
 import type { HeatmapVisualizationState } from './types';
@@ -47,7 +46,7 @@ export function HeatmapDimensionEditor(
   );
 
   return (
-    <DimensionEditorSection>
+    <>
       <EuiFormRow
         className="lnsDynamicColoringRow"
         display="columnCompressed"
@@ -116,6 +115,6 @@ export function HeatmapDimensionEditor(
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-    </DimensionEditorSection>
+    </>
   );
 }

@@ -1,7 +1,24 @@
 .lnsDimensionEditorSection {
-  padding: $euiSize;
+  padding-top: $euiSize;
+  padding-bottom: $euiSize;
 }
 
-.lnsDimensionEditorSection--hasBorder {
-  border-top: 1px solid $euiColorLightShade;
+.lnsDimensionEditorSection:first-child {
+  padding-top: 0;
+}
+
+.lnsDimensionEditorSection:first-child .lnsDimensionEditorSection__border {
+  display: none;
+}
+
+.lnsDimensionEditorSection__border {
+  position: relative;
+  &:before {
+    content: '';
+    position: absolute;
+    top: -$euiSize;
+    right: -$euiSize;
+    left: -$euiSize;
+    border-top: 1px solid $euiColorLightShade;
+  }
 }

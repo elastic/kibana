@@ -17,7 +17,7 @@ import { FillStyle, XYReferenceLineLayerConfig } from '../../../common/expressio
 
 import { ColorPicker } from './color_picker';
 import { updateLayer } from '.';
-import { DimensionEditorSection, useDebouncedValue } from '../../shared_components';
+import { useDebouncedValue } from '../../shared_components';
 import { idPrefix } from './dimension_editor';
 import { isHorizontalChart } from '../state_helpers';
 import { MarkerDecorationSettings } from './shared/marker_decoration_settings';
@@ -69,7 +69,8 @@ export const ReferenceLinePanel = (
   );
 
   return (
-    <DimensionEditorSection>
+    <>
+      {' '}
       <MarkerDecorationSettings
         isHorizontal={isHorizontal}
         setConfig={setConfig}
@@ -89,7 +90,7 @@ export const ReferenceLinePanel = (
           defaultMessage: 'Color',
         })}
       />
-    </DimensionEditorSection>
+    </>
   );
 };
 

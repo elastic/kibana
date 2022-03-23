@@ -15,7 +15,7 @@ import { FormatFactory } from '../../../common';
 import { XYDataLayerConfig, YAxisMode, YConfig } from '../../../common/expressions';
 import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
-import { DimensionEditorSection, PalettePicker, useDebouncedValue } from '../../shared_components';
+import { PalettePicker, useDebouncedValue } from '../../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -79,7 +79,7 @@ export function DimensionEditor(
 
   if (props.groupId === 'breakdown') {
     return (
-      <DimensionEditorSection>
+      <>
         <PalettePicker
           palettes={props.paletteService}
           activePalette={localLayer?.palette}
@@ -87,14 +87,14 @@ export function DimensionEditor(
             setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
           }}
         />
-      </DimensionEditorSection>
+      </>
     );
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
 
   return (
-    <DimensionEditorSection>
+    <>
       <ColorPicker {...props} disabled={Boolean(localLayer.splitAccessor)} setConfig={setConfig} />
 
       <EuiFormRow
@@ -150,6 +150,6 @@ export function DimensionEditor(
           }}
         />
       </EuiFormRow>
-    </DimensionEditorSection>
+    </>
   );
 }

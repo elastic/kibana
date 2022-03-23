@@ -4,18 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import './dimension_section.scss';
 
 export const DimensionEditorSection = ({
   children,
-  hasBorder,
+  title,
 }: {
+  title?: string;
   children?: React.ReactNode | React.ReactNode[];
-  hasBorder?: boolean;
 }) => {
-  const classNames = hasBorder
-    ? 'lnsDimensionEditorSection--hasBorder lnsDimensionEditorSection'
-    : 'lnsDimensionEditorSection';
-  return <div className={classNames}>{children}</div>;
+  return (
+    <div className="lnsDimensionEditorSection">
+      <div className="lnsDimensionEditorSection__border" />
+      {title && (
+        <EuiTitle size="xxs" className="lnsXyConfigHeading">
+          <h3>{title}</h3>
+        </EuiTitle>
+      )}
+      {children}
+    </div>
+  );
 };

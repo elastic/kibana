@@ -23,7 +23,6 @@ import {
   applyPaletteParams,
   CustomizablePalette,
   CUSTOM_PALETTE,
-  DimensionEditorSection,
   FIXED_PROGRESSION,
   PalettePanelContainer,
 } from '../shared_components';
@@ -77,7 +76,7 @@ export function MetricDimensionEditor(
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
   return (
-    <DimensionEditorSection>
+    <>
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -213,6 +212,6 @@ export function MetricDimensionEditor(
           </EuiFlexGroup>
         </EuiFormRow>
       )}
-    </DimensionEditorSection>
+    </>
   );
 }
