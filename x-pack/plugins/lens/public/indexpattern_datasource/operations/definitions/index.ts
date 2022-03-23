@@ -191,6 +191,16 @@ export interface HelpProps<C> {
 
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
+export interface AdvancedOption {
+  title: string;
+  optionElement?: React.ReactElement;
+  dataTestSubj: string;
+  onClick: () => void;
+  showInPopover: boolean;
+  inlineElement: React.ReactElement | null;
+  helpPopup?: string | null;
+}
+
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}> {
   type: C['operationType'];
   /**
@@ -227,6 +237,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * React component for operation specific settings shown in the flyout editor
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
+  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
@@ -416,6 +427,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
+      usedInMath?: boolean;
     }
   ) => C;
   /**
