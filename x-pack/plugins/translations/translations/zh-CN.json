@@ -660,7 +660,6 @@
     "xpack.lens.indexPattern.terms.size": "值数目",
     "xpack.lens.indexPattern.terms.sizeLimitMax": "值大于最大值 {max}，将改为使用最大值。",
     "xpack.lens.indexPattern.terms.sizeLimitMin": "值小于最小值 {min}，将改为使用最小值。",
-    "xpack.lens.indexPattern.termsOf": "{name} 排名最前值",
     "xpack.lens.indexPattern.termsWithMultipleShifts": "在单个图层中，无法将指标与不同时间偏移和动态排名最前值组合。将相同的时间偏移值用于所有指标或使用筛选，而非排名最前值。",
     "xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel": "使用筛选",
     "xpack.lens.indexPattern.termsWithMultipleTermsAndScriptedFields": "使用多个字段时不支持脚本字段，找到 {fields}",

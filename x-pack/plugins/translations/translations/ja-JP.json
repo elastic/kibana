@@ -654,7 +654,6 @@
     "xpack.lens.indexPattern.terms.size": "値の数",
     "xpack.lens.indexPattern.terms.sizeLimitMax": "値が最大値{max}を超えています。最大値が使用されます。",
     "xpack.lens.indexPattern.terms.sizeLimitMin": "値が最小値{min}未満です。最小値が使用されます。",
-    "xpack.lens.indexPattern.termsOf": "{name} のトップの値",
     "xpack.lens.indexPattern.termsWithMultipleShifts": "単一のレイヤーでは、メトリックを異なる時間シフトと動的な上位の値と組み合わせることができません。すべてのメトリックで同じ時間シフト値を使用するか、上位の値ではなくフィルターを使用します。",
     "xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel": "フィルターを使用",
     "xpack.lens.indexPattern.termsWithMultipleTermsAndScriptedFields": "複数のフィールドを使用するときには、スクリプトフィールドがサポートされていません。{fields}が見つかりました",
