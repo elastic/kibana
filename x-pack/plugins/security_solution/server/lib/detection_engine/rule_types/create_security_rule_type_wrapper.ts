@@ -50,7 +50,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
-      ruleTaskTimeout: '10s',
       cancelAlertsOnRuleTimeout: false,
       useSavedObjectReferences: {
         extractReferences: (params) => extractReferences({ logger, params }),
