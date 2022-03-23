@@ -66,7 +66,7 @@ export const useActions = (
               deleteAction.closeDeleteJobCheckModal();
             }}
             refreshJobsCallback={refresh}
-            jobType={deleteAction.jobType}
+            mlSavedObjectType={deleteAction.jobType}
             ids={[deleteAction.item.config.id]}
           />
         )}

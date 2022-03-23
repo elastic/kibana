@@ -17,6 +17,7 @@
   "references": [
     { "path": "../../../core/tsconfig.json" },
     { "path": "../../data/tsconfig.json" },
+    { "path": "../../data_views/tsconfig.json" },
     { "path": "../../visualizations/tsconfig.json" },
     { "path": "../../maps_ems/tsconfig.json" },
     { "path": "../../expressions/tsconfig.json" },

@@ -7,10 +7,11 @@
  */
 
 import { get } from 'lodash';
+import { isNestedField } from '../../../..//data_views/common';
 import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
 import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
-import { indexPatterns as indexPatternsUtils, KBN_FIELD_TYPES } from '../../../../data/public';
+import { KBN_FIELD_TYPES } from '../../../../data/public';
 
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();
@@ -71,9 +72,7 @@ export function getArgValueSuggestions() {
           .getByType(KBN_FIELD_TYPES.NUMBER)
           .filter(
             (field) =>
-              field.aggregatable &&
-              containsFieldName(valueSplit[1], field) &&
-              !indexPatternsUtils.isNestedField(field)
+              field.aggregatable && containsFieldName(valueSplit[1], field) && !isNestedField(field)
           )
           .map((field) => {
             const suggestionValue = field.name.replaceAll(':', '\\:');
@@ -103,7 +102,7 @@ export function getArgValueSuggestions() {
                 KBN_FIELD_TYPES.STRING,
               ].includes(field.type as KBN_FIELD_TYPES) &&
               containsFieldName(partial, field) &&
-              !indexPatternsUtils.isNestedField(field)
+              !isNestedField(field)
           )
           .map((field) => ({ name: field.name, help: field.type, insertText: field.name }));
       },
@@ -115,9 +114,7 @@ export function getArgValueSuggestions() {
 
         return indexPattern.fields
           .getByType(KBN_FIELD_TYPES.DATE)
-          .filter(
-            (field) => containsFieldName(partial, field) && !indexPatternsUtils.isNestedField(field)
-          )
+          .filter((field) => containsFieldName(partial, field) && !isNestedField(field))
           .map((field) => ({ name: field.name, insertText: field.name }));
       },
     },

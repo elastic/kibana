@@ -45,7 +45,7 @@ export function tabifyAggResponse(
       switch (agg.type.type) {
         case AggGroupNames.Buckets:
           const aggBucket = get(bucket, agg.id) as Record<string, unknown>;
-          const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
+          const tabifyBuckets = new TabifyBuckets(aggBucket, agg, respOpts?.timeRange);
           const precisionError = agg.type.hasPrecisionError?.(aggBucket);
 
           if (precisionError) {
