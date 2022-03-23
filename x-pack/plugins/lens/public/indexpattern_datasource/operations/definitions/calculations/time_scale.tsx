@@ -126,7 +126,7 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
       description: i18n.translate('xpack.lens.indexPattern.time_scale.documentation.markdown', {
         defaultMessage: `
 
-    Normalizes a metric to always be shown by a certain time unit independently of the actual interval of the underlying date histogram.
+Normalizes a metric to always be shown by a certain time unit independently of the actual interval of the underlying date histogram.
 
 This function can only be used if there's a date histogram function used in the current chart.
 
