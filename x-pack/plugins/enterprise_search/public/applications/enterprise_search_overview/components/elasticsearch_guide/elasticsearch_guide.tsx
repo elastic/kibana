@@ -24,10 +24,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { ElasticsearchClientInstructions } from '../elasticsearch_client_instructions';
 import { ElasticsearchCloudId } from '../elasticsearch_cloud_id';
 import { ElasticsearchResources } from '../elasticsearch_resources';
-
-import { LanguageInstructions } from './language_instructions';
 
 // Replace FormattedMessage with i18n strings
 
@@ -106,17 +105,16 @@ export const ElasticsearchGuide: React.FC = () => {
                           }
                         )}
                       </p>
+                      <EuiLink href="#" external>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsLink',
+                          { defaultMessage: 'Learn more about Elasticsearch clients' }
+                        )}
+                      </EuiLink>
                     </EuiText>
-                    <EuiSpacer size="m" />
-                    <EuiSpacer size="xs" />
-                    <EuiLink href="#" external>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsLink',
-                        { defaultMessage: 'Learn more about Elasticsearch clients' }
-                      )}
-                    </EuiLink>
-                    <EuiSpacer size="l" />
-                    <EuiSpacer size="xs" />
+
+                    <EuiSpacer />
+
                     <EuiSelect
                       prepend={i18n.translate(
                         'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsSelectLabel',
@@ -132,7 +130,7 @@ export const ElasticsearchGuide: React.FC = () => {
                       )}
                     />
                     <EuiSpacer size="m" />
-                    <LanguageInstructions language={selectedLanguage} />
+                    <ElasticsearchClientInstructions language={selectedLanguage} />
                   </>
                 ),
               },
@@ -157,20 +155,24 @@ export const ElasticsearchGuide: React.FC = () => {
                     <EuiSpacer size="l" />
                     <EuiFlexGroup gutterSize="l" alignItems="center">
                       <EuiFlexItem grow={false}>
-                        <EuiLink href="#" external>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIMarketingLink',
-                            { defaultMessage: 'Learn more about Search UI' }
-                          )}
-                        </EuiLink>
+                        <EuiText>
+                          <EuiLink href="#" external>
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIMarketingLink',
+                              { defaultMessage: 'Learn more about Search UI' }
+                            )}
+                          </EuiLink>
+                        </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiLink href="#" external>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIGitHubLink',
-                            { defaultMessage: 'Search UI on GitHub' }
-                          )}
-                        </EuiLink>
+                        <EuiText>
+                          <EuiLink href="#" external>
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIGitHubLink',
+                              { defaultMessage: 'Search UI on GitHub' }
+                            )}
+                          </EuiLink>
+                        </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </>
