@@ -111,6 +111,10 @@ export const defineFindingsIndexRoute = (router: CspRouter, cspContext: CspAppCo
       validate: { query: findingsInputSchema },
     },
     async (context, request, response) => {
+      if (!context.fleet.authz.fleet.all) {
+        return response.forbidden();
+      }
+
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const options = buildOptionsRequest(request.query);

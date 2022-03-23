@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IRouter } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,

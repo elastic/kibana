@@ -6,7 +6,6 @@
  */
 import type {
   ElasticsearchClient,
-  IRouter,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from 'src/core/server';

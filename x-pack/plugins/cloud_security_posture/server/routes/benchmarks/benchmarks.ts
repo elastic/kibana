@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { uniq, map } from 'lodash';
-import type { IRouter, SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
