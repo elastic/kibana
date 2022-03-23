@@ -35,10 +35,13 @@ export class TimesliderEmbeddableFactory
       const { TimeSliderControlEmbeddableBuilder } = await import('./time_slider_embeddable');
       const {
         data: { fetchFieldRange, getDataView },
+        settings: { getDateFormat, getTimezone },
       } = pluginServices.getServices();
       this.EmbeddableClass = TimeSliderControlEmbeddableBuilder({
         fetchRange: fetchFieldRange,
         getDataView,
+        getDateFormat,
+        getTimezone,
       });
     }
 

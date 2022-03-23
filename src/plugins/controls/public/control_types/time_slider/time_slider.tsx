@@ -29,9 +29,15 @@ export interface TimeSliderSubjectState {
 
 interface TimeSliderProps {
   componentStateSubject: BehaviorSubject<TimeSliderSubjectState>;
+  dateFormat: string;
+  timezone: string;
 }
 
-export const TimeSlider: FC<TimeSliderProps> = ({ componentStateSubject }) => {
+export const TimeSlider: FC<TimeSliderProps> = ({
+  componentStateSubject,
+  dateFormat,
+  timezone,
+}) => {
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector,
@@ -51,7 +57,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({ componentStateSubject }) => {
   );
 
   const dispatchChange = useCallback(
-    (range: [number, number]) => {
+    (range: [number | undefined, number | undefined]) => {
       dispatch(selectRange(range));
     },
     [dispatch, selectRange]
@@ -60,10 +66,9 @@ export const TimeSlider: FC<TimeSliderProps> = ({ componentStateSubject }) => {
   const debouncedDispatchChange = useCallback(debounce(dispatchChange, 500), [dispatchChange]);
 
   const onChangeComplete = useCallback(
-    (range: [string, string]) => {
-      const numberRange = range.map((num: string) => Number(num)) as [number, number];
-      debouncedDispatchChange(numberRange);
-      setSelectedValue(numberRange);
+    (range: [number | undefined, number | undefined]) => {
+      debouncedDispatchChange(range);
+      setSelectedValue(range);
     },
     [setSelectedValue, debouncedDispatchChange]
   );
@@ -74,6 +79,8 @@ export const TimeSlider: FC<TimeSliderProps> = ({ componentStateSubject }) => {
       value={selectedValue}
       range={[min, max]}
       isLoading={loading}
+      dateFormat={dateFormat}
+      timezone={timezone}
     />
   );
 };

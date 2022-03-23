@@ -30,6 +30,7 @@ import {
 } from '../../../../presentation_util/public';
 //import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import { ControlsDataViewsService } from '../../services/data_views';
+import { ControlsSettingsService } from '../../services/settings';
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
 import { ControlsDataService } from '../../services/data';
 import { DataView, DataViewField } from '../../../../data_views/public';
@@ -62,9 +63,13 @@ const diffDataFetchProps = (current?: any, last?: any) => {
 export const TimeSliderControlEmbeddableBuilder = ({
   fetchRange,
   getDataView,
+  getDateFormat,
+  getTimezone,
 }: {
   fetchRange: ControlsDataService['fetchFieldRange'];
   getDataView: ControlsDataService['getDataView'];
+  getDateFormat: ControlsSettingsService['getDateFormat'];
+  getTimezone: ControlsSettingsService['getTimezone'];
 }) => {
   class TimeSliderControlEmbeddable extends Embeddable<
     TimeSliderControlEmbeddableInput,
@@ -236,7 +241,11 @@ export const TimeSliderControlEmbeddableBuilder = ({
 
       ReactDOM.render(
         <TimeSliderControlReduxWrapper embeddable={this} reducers={timeSliderReducers}>
-          <TimeSliderComponent componentStateSubject={this.componentStateSubject$} />
+          <TimeSliderComponent
+            componentStateSubject={this.componentStateSubject$}
+            timezone={getTimezone()}
+            dateFormat={getDateFormat()}
+          />
         </TimeSliderControlReduxWrapper>,
         node
       );

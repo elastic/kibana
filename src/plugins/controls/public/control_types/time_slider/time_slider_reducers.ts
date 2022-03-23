@@ -14,7 +14,7 @@ import { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
 export const timeSliderReducers = {
   selectRange: (
     state: WritableDraft<TimeSliderControlEmbeddableInput>,
-    action: PayloadAction<[number, number]>
+    action: PayloadAction<[number | undefined, number | undefined]>
   ) => {
     state.value = action.payload;
   },

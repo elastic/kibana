@@ -8,4 +8,5 @@
 
 export interface ControlsSettingsService {
   getTimezone: () => string;
+  getDateFormat: () => string;
 }

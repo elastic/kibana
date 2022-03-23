@@ -17,8 +17,11 @@ export type SettingsServiceFactory = KibanaPluginServiceFactory<
 
 export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart }) => {
   return {
-    getTimezone: () => {
+    getDateFormat: () => {
       return coreStart.uiSettings.get('dateFormat', 'MMM D, YYYY @ HH:mm:ss.SSS');
+    },
+    getTimezone: () => {
+      return coreStart.uiSettings.get('dateFormat:tz', 'Browser');
     },
   };
 };
