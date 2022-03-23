@@ -10300,7 +10300,6 @@
     "xpack.enterpriseSearch.appSearch.documents.search.sortBy.ariaLabel": "结果排序方式",
     "xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.ascendingDropDownOptionLabel": "{fieldName}（升序）",
     "xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.descendingDropDownOptionLabel": "{fieldName}（降序）",
-    "xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.recentlyUploaded": "最近上传",
     "xpack.enterpriseSearch.appSearch.documents.title": "文档",
     "xpack.enterpriseSearch.appSearch.editorRoleTypeDescription": "编辑人员可以管理搜索设置。",
     "xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta": "创建引擎",
