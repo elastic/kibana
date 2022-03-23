@@ -76,7 +76,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       id: 'alerts',
       name: (
         <FormattedMessage
-          id="xpack.triggersActionsUI.home.rulesTabTitle"
+          id="xpack.triggersActionsUI.home.TabTitle"
           defaultMessage="Alerts (Internal use only)"
         />
       ),
