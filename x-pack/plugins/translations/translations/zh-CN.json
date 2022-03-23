@@ -7492,6 +7492,8 @@
     "xpack.apm.settings.customLink.delete": "删除",
     "xpack.apm.settings.customLink.delete.failed": "无法删除定制链接",
     "xpack.apm.settings.customLink.delete.successed": "已删除定制链接。",
+    "xpack.apm.settings.customLink.emptyPromptText": "让我们改动一下！可以通过每个服务的事务详情将定制链接添加到“操作”上下文菜单。创建指向公司支持门户或用于提交新错误报告的有用链接。在我们的文档中详细了解。",
+    "xpack.apm.settings.customLink.emptyPromptTitle": "未找到链接。",
     "xpack.apm.settings.customLink.flyout.action.title": "链接",
     "xpack.apm.settings.customLink.flyout.close": "关闭",
     "xpack.apm.settings.customLink.flyout.filters.addAnotherFilter": "添加另一个筛选",
