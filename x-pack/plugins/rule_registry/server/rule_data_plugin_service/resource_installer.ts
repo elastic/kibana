@@ -316,7 +316,7 @@ export class ResourceInstaller {
               name: ilmPolicyName,
               rollover_alias: primaryNamespacedAlias,
             },
-            'index.mapping.total_fields.limit': 1700,
+            'index.mapping.total_fields.limit': 2000,
           },
           mappings: {
             dynamic: false,
