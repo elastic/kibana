@@ -18,7 +18,6 @@ const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
-
 beforeEach(() => {
   jest.resetAllMocks();
 });

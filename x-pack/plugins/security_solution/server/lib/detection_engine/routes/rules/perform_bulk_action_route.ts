@@ -345,9 +345,9 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                // if (rule.params.immutable) {
-                //   throw new BadRequestError('Elastic rule can`t be edited');
-                // }
+                if (rule.params.immutable) {
+                  throw new BadRequestError('Elastic rule can`t be edited');
+                }
 
                 throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
 

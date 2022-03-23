@@ -1311,7 +1311,11 @@ export class RulesClient {
               ruleParams,
               ruleType.validate?.params
             );
-            validateMutatedRuleTypeParams(validatedAlertTypeParams, ruleType.validate?.params);
+            validateMutatedRuleTypeParams(
+              validatedAlertTypeParams,
+              rule.attributes.params,
+              ruleType.validate?.params
+            );
 
             // validate schedule interval
             if (attributes.schedule.interval) {
