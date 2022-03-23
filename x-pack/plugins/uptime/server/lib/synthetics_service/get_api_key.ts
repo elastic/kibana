@@ -148,20 +148,21 @@ export const getSyntheticsEnablement = async ({
     security.authc.apiKeys.areAPIKeysEnabled(),
   ]);
 
+  const { cluster } = hasPrivileges;
   const {
-    cluster: {
-      manage_security: manageSecurity,
-      manage_api_key: manageApiKey,
-      manage_own_api_key: manageOwnApiKey,
-      monitor,
-      read_ilm: readILM,
-      read_pipeline: readPipeline,
-    },
-  } = hasPrivileges;
+    manage_security: manageSecurity,
+    manage_api_key: manageApiKey,
+    manage_own_api_key: manageOwnApiKey,
+    monitor,
+    read_ilm: readILM,
+    read_pipeline: readPipeline,
+  } = cluster || {};
 
   const canManageApiKeys = manageSecurity || manageApiKey || manageOwnApiKey;
   const hasClusterPermissions = readILM && readPipeline && monitor;
-  const hasIndexPermissions = !Object.values(hasPrivileges.index['synthetics-*']).includes(false);
+  const hasIndexPermissions = !Object.values(hasPrivileges.index?.['synthetics-*'] || []).includes(
+    false
+  );
 
   return {
     canEnable: canManageApiKeys && hasClusterPermissions && hasIndexPermissions,
