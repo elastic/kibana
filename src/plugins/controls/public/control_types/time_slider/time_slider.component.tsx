@@ -7,20 +7,17 @@
  */
 
 import React, { FC, useState, useMemo, useCallback } from 'react';
-import { css } from '@emotion/react';
 import {
-  EuiDualRange,
-  EuiRangeProps,
   EuiDualRangeProps,
   EuiText,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiButton,
-  EuiPopover,
+  EuiLoadingSpinner,
+  EuiInputPopover,
   EuiPopoverTitle,
-  EuiFlexGroup,
+  EuiSpacer,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import moment from 'moment-timezone';
@@ -142,59 +139,48 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
       (!isValidRange(range) || (value[1] <= range[1] && value[1] >= range[0]));
 
     valueText = (
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiText
-            size="s"
-            className={
-              hasLowerValueInRange ? 'timeSlider_anchorText' : 'timeSlider_anchorText__default'
-            }
-          >
-            {epochToKbnDateFormat(lower)}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText className="timeSlider_anchorArrow"> → </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText
-            size="s"
-            className={
-              hasUpperValueInRange ? 'timeSlider_anchorText' : 'timeSlider_anchorText__default'
-            }
-          >
-            {epochToKbnDateFormat(upper)}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiText className="eui-textTruncate" size="s">
+        <span
+          className={
+            hasLowerValueInRange ? 'timeSlider__anchorText' : 'timeSlider__anchorText--default'
+          }
+        >
+          {epochToKbnDateFormat(lower)}
+        </span>
+        &nbsp;&nbsp;→&nbsp;&nbsp;
+        <span
+          className={
+            hasUpperValueInRange ? 'timeSlider__anchorText' : 'timeSlider__anchorText--default'
+          }
+        >
+          {epochToKbnDateFormat(upper)}
+        </span>
+      </EuiText>
     );
   }
 
   const button = (
-    <EuiFilterButton
-      className="timeSlider_anchor"
-      color="text"
-      iconType={'empty'}
-      iconSide="right"
-      isLoading={!hasRange}
-      onClick={togglePopover}
-      isSelected={true}
-    >
+    <button className="timeSlider__anchor eui-textTruncate" color="text" onClick={togglePopover}>
       {valueText}
-    </EuiFilterButton>
+      {!hasRange ? (
+        <div className="timeSliderAnchor__spinner">
+          <EuiLoadingSpinner />
+        </div>
+      ) : undefined}
+    </button>
   );
 
   return (
-    //<EuiFilterGroup style={{ width: '100%', height: '100%' }}>
-    <EuiPopover
-      button={button}
+    <EuiInputPopover
+      input={button}
       isOpen={isPopoverOpen}
-      className="optionsList__popoverOverride"
-      anchorClassName="optionsList__anchorOverride"
+      className="timeSlider__popoverOverride"
+      anchorClassName="timeSlider__anchorOverride"
+      panelClassName="timeSlider__panelOverride"
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="s"
       anchorPosition="downCenter"
-      ownFocus
+      disableFocusTrap
       repositionOnScroll
     >
       {isValidRange(range) ? (
@@ -202,13 +188,12 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
       ) : (
         <TimeSliderComponentPopoverNoDocuments />
       )}
-    </EuiPopover>
-    //</EuiFilterGroup>
+    </EuiInputPopover>
   );
 };
 
 const TimeSliderComponentPopoverNoDocuments: FC = () => {
-  return <EuiText color="default">There were no documents found, so no range is available</EuiText>;
+  return <EuiText size="s">There were no documents found, so no range is available</EuiText>;
 };
 
 export const TimeSliderComponentPopover: FC<TimeSliderProps & { range: [number, number] }> = ({
@@ -234,26 +219,42 @@ export const TimeSliderComponentPopover: FC<TimeSliderProps & { range: [number, 
 
   return (
     <>
-      <EuiPopoverTitle paddingSize="s">
+      <EuiPopoverTitle paddingSize="s">title</EuiPopoverTitle>
+      <EuiText textAlign="center" size="s">
         {epochToKbnDateFormat(lowerValue)} - {epochToKbnDateFormat(upperValue)}
-      </EuiPopoverTitle>
-      <div className="rangeSlider__actions">
-        <ValidatedDualRange
-          id={'my-id'}
-          max={upperBound}
-          min={lowerBound}
-          onChange={onChange}
-          step={undefined}
-          value={[lowerValue, upperValue]}
-          fullWidth
-          ticks={ticks}
-          // levels={levels}
-          showTicks
-          disabled={false}
-          errorMessage={''}
-          allowEmptyRange
-        />
-      </div>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>
+          <ValidatedDualRange
+            id={'my-id'}
+            max={upperBound}
+            min={lowerBound}
+            onChange={onChange}
+            step={undefined}
+            value={[lowerValue, upperValue]}
+            fullWidth
+            ticks={ticks}
+            // levels={levels}
+            showTicks
+            disabled={false}
+            errorMessage={''}
+            allowEmptyRange
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content="placeholder content">
+            <EuiButtonIcon
+              iconType="eraser"
+              color="danger"
+              onClick={() => onChange(['', ''])}
+              aria-label="placeholder aria label"
+              data-test-subj="timeSlider__clearRangeButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
     </>
   );
 };

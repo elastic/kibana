@@ -1,18 +1,28 @@
-.optionsList__anchorOverride {
+.timeSlider__anchorOverride {
   display:block;
+  >div {
+    height: 100%;
+  }
 }
 
-.optionsList__popoverOverride {
+.timeSlider__popoverOverride {
   width: 100%;
+  max-width: 100%;
   height: 100%;
 }
 
-.timeSlider_anchor {
+.timeSlider__panelOverride {
+  min-width: $euiSizeXXL * 15;
+}
+
+.timeSlider__anchor {
   text-decoration: none;
   width: 100%;
   background-color: $euiFormBackgroundColor;
   box-shadow: none;
   @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
+  overflow: hidden;
+  height: 100%;
 
   &:enabled:focus {
     background-color: $euiFormBackgroundColor;
@@ -22,24 +32,11 @@
     background-color: $euiFormBackgroundColor;
   }
 
-  .timeSlider_anchorArrow {
-    padding: $euiSizeM 0;
-  }
-
-  .euiButtonContent {
-    padding: 0;
-  }
-
-  .euiButtonContent,
-  .euiButtonEmpty__text {
-    width: 100%;
-  }
-
-  .timeSlider_anchorText {
+  .timeSlider__anchorText {
     font-weight: $euiFontWeightBold;
   }
 
-  .timeSlider_anchorText__default {
+  .timeSlider__anchorText--default {
     color: $euiColorMediumShade;
   }
 }
