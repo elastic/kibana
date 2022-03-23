@@ -59,7 +59,7 @@ export function ObservabilityStatusProgress({
   const [progress, setProgress] = useState(0);
   return !isGuidedSetupHidden ? (
     <>
-      <EuiPanel color="primary">
+      <EuiPanel color="primary" data-test-subj="status-progress">
         <EuiProgress color="primary" value={progress} max={100} size="m" />
         <EuiSpacer size="s" />
         <EuiFlexGroup>
