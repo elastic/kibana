@@ -1,0 +1,57 @@
+{
+  "attributes": {
+    "fields": "[{\"name\":\"@date\",\"type\":\"date\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"metric\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"name\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"power\",\"type\":\"number\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"success\",\"type\":\"boolean\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+    "title": "sales"
+  },
+  "coreMigrationVersion": "7.17.2",
+  "id": "timeless-sales",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2019-03-05T22:52:35.474Z",
+  "version": "WzQsMl0="
+}
+
+{
+  "attributes": {
+    "columns": [
+      "name",
+      "power"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"key\":\"power\",\"negate\":false,\"params\":{\"gte\":1,\"lt\":null},\"type\":\"range\",\"value\":\"1 to \",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"range\":{\"power\":{\"gte\":1,\"lt\":null}}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "power",
+        "asc"
+      ]
+    ],
+    "title": "SALE POWER",
+    "version": 1
+  },
+  "coreMigrationVersion": "7.17.2",
+  "id": "71e3ee20-3f99-11e9-b8ee-6b9604f2f877",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "timeless-sales",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "timeless-sales",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2019-03-05T22:53:08.481Z",
+  "version": "WzUsMl0="
+}
