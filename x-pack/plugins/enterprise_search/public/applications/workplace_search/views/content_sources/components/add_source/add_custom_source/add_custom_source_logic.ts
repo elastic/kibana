@@ -7,10 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, clearFlashMessages } from '../../../../../shared/flash_messages';
-import { HttpLogic } from '../../../../../shared/http';
-import { AppLogic } from '../../../../app_logic';
-import { CustomSource, SourceDataItem } from '../../../../types';
+import { flashAPIErrors, clearFlashMessages } from '../../../../../../shared/flash_messages';
+import { HttpLogic } from '../../../../../../shared/http';
+import { AppLogic } from '../../../../../app_logic';
+import { CustomSource, SourceDataItem } from '../../../../../types';
 
 export interface AddCustomSourceProps {
   sourceData: SourceDataItem;
@@ -80,7 +80,7 @@ export const AddCustomSourceLogic = kea<
     ],
     sourceData: [props.sourceData],
   }),
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     createContentSource: async () => {
       clearFlashMessages();
       const { isOrganization } = AppLogic.values;
@@ -90,14 +90,24 @@ export const AddCustomSourceLogic = kea<
 
       const { customSourceNameValue } = values;
 
-      const params = {
+      const baseParams = {
         service_type: 'custom',
         name: customSourceNameValue,
       };
 
+      // pre-configured custom sources have a serviceType reflecting their target service
+      // we submit this as `base_service_type` to keep track of
+      const params =
+        props.sourceData.serviceType === 'custom'
+          ? baseParams
+          : {
+              ...baseParams,
+              base_service_type: props.sourceData.serviceType,
+            };
+
       try {
         const response = await HttpLogic.values.http.post<CustomSource>(route, {
-          body: JSON.stringify({ ...params }),
+          body: JSON.stringify(params),
         });
         actions.setNewCustomSource(response);
       } catch (e) {
