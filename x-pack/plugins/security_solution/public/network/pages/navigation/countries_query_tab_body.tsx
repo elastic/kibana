@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
-import { useNetworkTopCountries } from '../../containers/network_top_countries';
+import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
 import { networkModel } from '../../store';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { IPsQueryTabBodyProps as CountriesQueryTabBodyProps } from './types';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 
@@ -27,6 +28,11 @@ export const CountriesQueryTabBody = ({
   indexPattern,
   flowTarget,
 }: CountriesQueryTabBodyProps) => {
+  const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkTopCountries, pageInfo, refetch, totalCount },
@@ -35,7 +41,7 @@ export const CountriesQueryTabBody = ({
     flowTarget,
     filterQuery,
     indexNames,
-    skip,
+    skip: querySkip,
     startDate,
     type: networkModel.NetworkType.page,
   });
@@ -53,6 +59,7 @@ export const CountriesQueryTabBody = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={networkModel.NetworkType.page}

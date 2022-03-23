@@ -17,6 +17,7 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
+import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   AlertType,
@@ -60,6 +61,7 @@ export function registerTransactionErrorRateAlertType({
   ruleDataClient,
   logger,
   config$,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -84,6 +86,7 @@ export function registerTransactionErrorRateAlertType({
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
           apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
@@ -207,6 +210,18 @@ export function registerTransactionErrorRateAlertType({
             windowSize: ruleParams.windowSize,
             windowUnit: ruleParams.windowUnit,
           });
+
+          const relativeViewInAppUrl = getAlertUrlTransaction(
+            serviceName,
+            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+            transactionType
+          );
+          const viewInAppUrl = basePath.publicBaseUrl
+            ? new URL(
+                basePath.prepend(relativeViewInAppUrl),
+                basePath.publicBaseUrl
+              ).toString()
+            : relativeViewInAppUrl;
           services
             .alertWithLifecycle({
               id: [
@@ -235,6 +250,7 @@ export function registerTransactionErrorRateAlertType({
               triggerValue: asDecimalOrInteger(errorRate),
               interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
               reason: reasonMessage,
+              viewInAppUrl,
             });
         });
 
