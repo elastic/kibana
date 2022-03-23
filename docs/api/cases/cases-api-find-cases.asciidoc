@@ -1,0 +1,193 @@
+[[cases-api-find-cases]]
+== Find cases API
+++++
+<titleabbrev>Find cases</titleabbrev>
+++++
+
+Retrieves a paginated subset of cases.
+
+=== Request
+
+`GET <kibana host>:<port>/api/cases/_find`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/_find`
+
+=== Prerequisite
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're seeking.
+
+=== Path parameters
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Query parameters
+
+`defaultSearchOperator`::
+(Optional, string) The default operator to use for the `simple_query_string`.
+Defaults to `OR`.
+
+////
+`fields`::
+(Optional, array of strings) The fields in the entity to return in the response.
+////
+`owner`::
+(Optional, string or array of strings) A filter to limit the retrieved cases to
+a specific set of applications. Valid values are: `cases`, `observability`,
+and `securitySolution`. If this parameter is omitted, the response contains all
+cases that the user has access to read.
+
+`page`::
+(Optional, integer) The page number to return. Defaults to `1`.
+
+`perPage`::
+(Optional, integer) The number of rules to return per page. Defaults to `20`.
+
+`reporters`::
+(Optional, string or array of strings) Filters the returned cases by the
+reporter's `username`.
+
+`search`::
+(Optional, string) An {es}
+{ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that
+filters the objects in the response.
+
+`searchFields`::
+(Optional, string or array of strings) The fields to perform the
+`simple_query_string` parsed query against.
+
+`sortField`::
+(Optional, string) Determines which field is used to sort the results,
+`createdAt` or `updatedAt`. Defaults to `createdAt`.
++
+NOTE: Even though the JSON case object uses `created_at` and `updated_at`
+fields, you must use `createdAt` and `updatedAt` fields in the URL
+query.
+
+`sortOrder`::
+(Optional, string) Determines the sort order, which can be `desc` or `asc`.
+Defaults to `desc`.
+
+`status`::
+(Optional, string) Filters the returned cases by state, which can be  `open`,
+`in-progress`, or `closed`.
+
+`tags`::
+(Optional, string or array of strings) Filters the returned cases by tags.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+Retrieve the first five cases with the `phishing` tag, in ascending order by
+last update time:
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/_find?page=1&perPage=5&sortField=updatedAt&sortOrder=asc&tags=phishing
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON object listing the retrieved cases. For example:
+
+[source,json]
+--------------------------------------------------
+{
+  "page": 1,
+  "per_page": 5,
+  "total": 2,
+  "cases": [
+    {
+      "id": "abed3a70-71bd-11ea-a0b2-c51ea50a58e2",
+      "version": "WzExMCwxXQ==",
+      "comments": [],
+      "totalComment": 0,
+      "totalAlerts": 0,
+      "title": "The Long Game",
+      "tags": [
+        "windows",
+        "phishing"
+      ],
+      "description": "Windows 95",
+      "settings": {
+        "syncAlerts": true
+      },
+      "owner": "securitySolution",
+      "closed_at": null,
+      "closed_by": null,
+      "created_at": "2022-03-29T13:03:23.533Z",
+      "created_by": {
+        "email": "rhustler@email.com",
+        "full_name": "Rat Hustler",
+        "username": "rhustler"
+      },
+      "status": "open",
+      "updated_at": null,
+      "updated_by": null,
+      "connector": {
+        "id": "131d4448-abe0-4789-939d-8ef60680b498",
+        "name": "My connector",
+        "type": ".jira",
+        "fields": {
+          "issueType": "10006",
+          "priority": null,
+        }
+      }
+      "external_service": null,
+    },
+    {
+      "id": "a18b38a0-71b0-11ea-a0b2-c51ea50a58e2",
+      "version": "Wzk4LDFd",
+      "comments": [],
+      "totalComment": 0,
+      "totalAlerts": 0,
+      "title": "This case will self-destruct in 5 seconds",
+      "tags": [
+        "phishing",
+        "social engineering",
+        "bubblegum"
+      ],
+      "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
+      "settings": {
+        "syncAlerts": false
+      },
+      "owner": "cases",
+      "closed_at": null,
+      "closed_by": null,
+      "created_at": "2022-03-29T11:30:02.658Z",
+      "created_by": {
+        "email": "ahunley@imf.usa.gov",
+        "full_name": "Alan Hunley",
+        "username": "ahunley"
+      },
+      "status": "open",
+      "updated_at": "2022-03-29T12:01:50.244Z",
+      "updated_by": {
+        "full_name": "Classified",
+        "email": "classified@hms.oo.gov.uk",
+        "username": "M"
+      },
+      "connector": {
+        "id": "131d4448-abe0-4789-939d-8ef60680b498",
+        "name": "My connector",
+        "type": ".resilient",
+        "fields": {
+          "issueTypes": [13],
+          "severityCode": 6,
+        }
+      },
+      "external_service": null,
+    }
+  ],
+  "count_open_cases": 2,
+  "count_in_progress_cases":0,
+  "count_closed_cases": 0
+}
+--------------------------------------------------

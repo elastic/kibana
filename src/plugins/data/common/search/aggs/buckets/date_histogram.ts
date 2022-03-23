@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get, noop, find, every } from 'lodash';
+import { get, noop, find, every, omitBy, isNil } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
@@ -71,6 +71,7 @@ export interface AggParamsDateHistogram extends BaseAggParams {
   format?: string;
   min_doc_count?: number;
   extended_bounds?: ExtendedBounds;
+  extendToTimeRange?: boolean;
 }
 
 export const getDateHistogramBucketAgg = ({
@@ -169,6 +170,11 @@ export const getDateHistogramBucketAgg = ({
       {
         name: 'useNormalizedEsInterval',
         default: true,
+        write: noop,
+      },
+      {
+        name: 'extendToTimeRange',
+        default: false,
         write: noop,
       },
       {
@@ -302,6 +308,17 @@ export const getDateHistogramBucketAgg = ({
             };
 
             return;
+          }
+
+          if (agg.params.extendToTimeRange && agg.buckets.hasBounds()) {
+            const bucketBounds = agg.buckets.getBounds()!;
+            output.params.extended_bounds = omitBy(
+              {
+                min: bucketBounds.min?.valueOf(),
+                max: bucketBounds.max?.valueOf(),
+              },
+              isNil
+            );
           }
         },
         toExpressionAst: extendedBoundsToAst,

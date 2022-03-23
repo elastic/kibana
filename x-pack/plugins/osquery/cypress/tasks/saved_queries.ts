@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RESULTS_TABLE_BUTTON } from '../screens/live_query';
+import { navigateTo } from '../../tasks/navigation';
+import { RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import {
   checkResults,
   BIG_QUERY,

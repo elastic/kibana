@@ -23,11 +23,13 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "@npm//moment",
   "@npm//moment-timezone",
   "@npm//tslib",
 ]
 
 TYPES_DEPS = [
+  "@npm//moment",
   "@npm//@types/moment-timezone",
   "@npm//@types/node",
 ]
@@ -70,6 +72,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

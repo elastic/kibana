@@ -68,7 +68,7 @@ describe('ALL - Packs', () => {
     });
 
     it('to click the edit button and edit pack', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       findAndClickButton('Edit');
       cy.contains(`Edit ${PACK_NAME}`);
       findAndClickButton('Add query');
@@ -86,7 +86,7 @@ describe('ALL - Packs', () => {
     });
 
     it('should trigger validation when saved query is being chosen', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       findAndClickButton('Edit');
       findAndClickButton('Add query');
       cy.contains('Attach next query');
@@ -98,7 +98,7 @@ describe('ALL - Packs', () => {
     });
     // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
     it.skip('to click the icon and visit discover', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
       }).click();
@@ -119,7 +119,7 @@ describe('ALL - Packs', () => {
             lensUrl = url;
           });
       });
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 1, item: { id: SAVED_QUERY_ID } },
       }).click();
@@ -149,7 +149,7 @@ describe('ALL - Packs', () => {
     });
 
     it('delete all queries in the pack', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.contains(/^Edit$/).click();
 
       cy.getBySel('checkboxSelectAll').click();
@@ -165,7 +165,7 @@ describe('ALL - Packs', () => {
     });
 
     it('enable changing saved queries and ecs_mappings', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.contains(/^Edit$/).click();
 
       findAndClickButton('Add query');
@@ -199,7 +199,7 @@ describe('ALL - Packs', () => {
     });
 
     it('to click delete button', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       findAndClickButton('Edit');
       deleteAndConfirm('pack');
     });
