@@ -11,6 +11,7 @@ import {
   AXE_CONFIG,
   AXE_OPTIONS,
 } from 'test/accessibility/services/a11y/constants';
+import moment from 'moment';
 
 Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
@@ -50,16 +51,18 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
 Cypress.Commands.add(
   'selectAbsoluteTimeRange',
   (start: string, end: string) => {
+    const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
+
     cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').click();
     cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .eq(0)
       .clear()
-      .type(start, { force: true });
+      .type(moment(start).format(format), { force: true });
     cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').click();
     cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .eq(1)
       .clear()
-      .type(end, { force: true });
+      .type(moment(end).format(format), { force: true });
   }
 );
 
