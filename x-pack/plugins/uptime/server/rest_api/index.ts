@@ -39,7 +39,7 @@ import { deleteSyntheticsMonitorRoute } from './synthetics_service/delete_monito
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
 import { testNowMonitorRoute } from './synthetics_service/test_now_monitor';
 import {
-  canEnableSyntheticsRoute,
+  getSyntheticsEnablementRoute,
   disableSyntheticsRoute,
   enableSyntheticsRoute,
 } from './synthetics_service/api_key';
@@ -50,7 +50,7 @@ export { uptimeRouteWrapper } from './uptime_route_wrapper';
 
 export const restApiRoutes: UMRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
-  canEnableSyntheticsRoute,
+  getSyntheticsEnablementRoute,
   createGetPingsRoute,
   createGetIndexStatusRoute,
   createGetDynamicSettingsRoute,

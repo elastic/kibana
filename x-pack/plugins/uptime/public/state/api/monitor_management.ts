@@ -81,13 +81,14 @@ export const testNowMonitor = async (configId: string): Promise<TestNowResponse 
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
 };
 
-export const fetchCanEnableSynthetics = async (): Promise<MonitorManagementEnablementResult> => {
-  return await apiService.get(
-    API_URLS.SYNTHETICS_ENABLEMENT,
-    undefined,
-    MonitorManagementEnablementResultCodec
-  );
-};
+export const fetchGetSyntheticsEnablement =
+  async (): Promise<MonitorManagementEnablementResult> => {
+    return await apiService.get(
+      API_URLS.SYNTHETICS_ENABLEMENT,
+      undefined,
+      MonitorManagementEnablementResultCodec
+    );
+  };
 
 export const fetchDisableSynthetics = async (): Promise<void> => {
   return await apiService.delete(API_URLS.SYNTHETICS_ENABLEMENT);

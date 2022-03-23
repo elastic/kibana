@@ -26,7 +26,7 @@ import {
 import {
   fetchMonitorManagementList,
   fetchServiceLocations,
-  fetchCanEnableSynthetics,
+  fetchGetSyntheticsEnablement,
   fetchDisableSynthetics,
   fetchEnableSynthetics,
 } from '../api';
@@ -48,7 +48,7 @@ export function* fetchMonitorManagementEffect() {
   yield takeLatest(
     getSyntheticsEnablement,
     fetchEffectFactory(
-      fetchCanEnableSynthetics,
+      fetchGetSyntheticsEnablement,
       getSyntheticsEnablementSuccess,
       getSyntheticsEnablementFailure
     )

@@ -9,6 +9,7 @@ import type {
   SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
+
 import { SecurityPluginStart } from '../../../../security/server';
 import {
   getSyntheticsServiceAPIKey,
@@ -57,10 +58,12 @@ export const getAPIKeyForSyntheticsService = async ({
 };
 
 export const generateAndSaveServiceAPIKey = async ({
+  server,
   security,
   request,
   authSavedObjectsClient,
 }: {
+  server: UptimeServerSetup;
   request?: KibanaRequest;
   security: SecurityPluginStart;
   // authSavedObject is needed for write operations
@@ -74,6 +77,11 @@ export const generateAndSaveServiceAPIKey = async ({
 
   if (!request) {
     throw new Error('User authorization is needed for api key generation');
+  }
+
+  const { canEnable } = await getSyntheticsEnablement({ request, server });
+  if (!canEnable) {
+    throw new SyntheticsForbiddenError();
   }
 
   const apiKeyResult = await security.authc.apiKeys?.create(request, {
@@ -99,14 +107,23 @@ export const generateAndSaveServiceAPIKey = async ({
 };
 
 export const deleteServiceApiKey = async ({
+  request,
+  server,
   savedObjectsClient,
 }: {
+  server: UptimeServerSetup;
+  request?: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
 }) => {
+  const { canEnable } = await getSyntheticsEnablement({ request, server });
+  if (!canEnable) {
+    throw new SyntheticsForbiddenError();
+  }
+
   await deleteSyntheticsServiceApiKey(savedObjectsClient);
 };
 
-export const canEnableSynthetics = async ({
+export const getSyntheticsEnablement = async ({
   request,
   server: { uptimeEsClient, security, encryptedSavedObjects },
 }: {
@@ -154,3 +171,11 @@ export const canEnableSynthetics = async ({
     areApiKeysEnabled,
   };
 };
+
+export class SyntheticsForbiddenError extends Error {
+  constructor() {
+    super();
+    this.message = 'Forbidden';
+    this.name = 'SyntheticsForbiddenError';
+  }
+}
