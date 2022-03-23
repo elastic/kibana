@@ -17,7 +17,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../../test_helpers';
 
-jest.mock('../../../../app_logic', () => ({
+jest.mock('../../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
 
