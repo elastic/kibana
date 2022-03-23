@@ -32,11 +32,17 @@ import { Fields, SortOption } from './types';
 import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
 
 const RECENTLY_UPLOADED = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.recentlyUploaded',
+  'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.documentId',
   {
-    defaultMessage: 'Recently Uploaded',
+    defaultMessage: 'Document ID',
   }
 );
+
+const RELEVANCE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.relevance',
+  { defaultMessage: 'Relevance' }
+);
+
 const DEFAULT_SORT_OPTIONS: SortOption[] = [
   {
     name: DESCENDING(RECENTLY_UPLOADED),
@@ -47,6 +53,14 @@ const DEFAULT_SORT_OPTIONS: SortOption[] = [
     name: ASCENDING(RECENTLY_UPLOADED),
     value: 'id',
     direction: 'asc',
+  },
+];
+
+const RELEVANCE_SORT_OPTIONS: SortOption[] = [
+  {
+    name: RELEVANCE,
+    value: '_score',
+    direction: 'desc',
   },
 ];
 
@@ -66,8 +80,10 @@ export const SearchExperience: React.FC = () => {
       sortFields: [],
     }
   );
+  const sortOptions =
+    engine.type === 'elasticsearch' ? RELEVANCE_SORT_OPTIONS : DEFAULT_SORT_OPTIONS;
 
-  const sortingOptions = buildSortOptions(fields, DEFAULT_SORT_OPTIONS);
+  const sortingOptions = buildSortOptions(fields, sortOptions);
 
   const connector = new AppSearchAPIConnector({
     cacheResponses: false,
@@ -78,7 +94,17 @@ export const SearchExperience: React.FC = () => {
     },
   });
 
-  const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {}, fields);
+  const initialState = {
+    sortField: engine.type === 'elasticsearch' ? '_score' : 'id',
+    sortDirection: 'desc',
+  };
+
+  const searchProviderConfig = buildSearchUIConfig(
+    connector,
+    engine.schema || {},
+    fields,
+    initialState
+  );
 
   return (
     <div className="documentsSearchExperience">
