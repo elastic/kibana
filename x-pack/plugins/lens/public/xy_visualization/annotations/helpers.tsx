@@ -114,16 +114,15 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   if (!foundLayer || !isAnnotationsLayer(foundLayer)) {
     return prevState;
   }
-  let annotations = [...foundLayer.annotations] as XYAnnotationLayerConfig['annotations'];
-  const currentConfigIndex = annotations?.findIndex(({ id }) => id === columnId);
-  const previousConfigIndex = previousColumn
-    ? annotations?.findIndex(({ id }) => id === previousColumn)
-    : -1;
-  const previousConfig =
-    previousConfigIndex >= 0 ? { ...annotations[previousConfigIndex] } : undefined;
+  const inputAnnotations = foundLayer.annotations as XYAnnotationLayerConfig['annotations'];
+  const currentConfig = inputAnnotations?.find(({ id }) => id === columnId);
+  const previousConfig = previousColumn
+    ? inputAnnotations?.find(({ id }) => id === previousColumn)
+    : undefined;
 
-  if (currentConfigIndex === -1) {
-    annotations.push({
+  let resultAnnotations = [...inputAnnotations] as XYAnnotationLayerConfig['annotations'];
+  if (!currentConfig) {
+    resultAnnotations.push({
       label: defaultAnnotationLabel,
       key: {
         type: 'point_in_time',
@@ -133,22 +132,23 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
       ...previousConfig,
       id: columnId,
     });
-  } else if (currentConfigIndex >= 0 && previousConfig) {
-    annotations = foundLayer.annotations.filter((c) => c.id !== previousColumn);
-    const targetIndex = foundLayer.annotations.findIndex((c) => c.id === previousColumn);
-    const sourceIndex = foundLayer.annotations.findIndex((c) => c.id === columnId);
-    const targetPosition = annotations.findIndex((c) => c.id === columnId);
-    annotations.splice(
+  } else if (currentConfig && previousConfig) {
+    // reorder if both configs exist
+    resultAnnotations = inputAnnotations.filter((c) => c.id !== previousConfig.id);
+    const targetPosition = resultAnnotations.findIndex((c) => c.id === currentConfig.id);
+    const targetIndex = inputAnnotations.indexOf(previousConfig);
+    const sourceIndex = inputAnnotations.indexOf(currentConfig);
+    resultAnnotations.splice(
       targetIndex < sourceIndex ? targetPosition + 1 : targetPosition,
       0,
-      foundLayer.annotations.find((c) => c.id === previousColumn)!
+      previousConfig
     );
   }
 
   return {
     ...prevState,
     layers: prevState.layers.map((l) =>
-      l.layerId === layerId ? { ...foundLayer, annotations } : l
+      l.layerId === layerId ? { ...foundLayer, annotations: resultAnnotations } : l
     ),
   };
 };
