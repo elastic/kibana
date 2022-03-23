@@ -23,21 +23,24 @@ export const controlGroupInputToRawAttributes = (
   };
 };
 
+const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
+  if (!jsonString && typeof jsonString !== 'string') return;
+  try {
+    return JSON.parse(jsonString) as OutType;
+  } catch {
+    return;
+  }
+};
+
 export const rawAttributesToControlGroupInput = (
   rawControlGroupAttributes: RawControlGroupAttributes
 ): Omit<ControlGroupInput, 'id'> | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
   const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =
     rawControlGroupAttributes;
-  const panels =
-    panelsJSON && typeof rawControlGroupAttributes?.panelsJSON === 'string'
-      ? JSON.parse(rawControlGroupAttributes?.panelsJSON)
-      : undefined;
+  const panels = safeJSONParse<ControlGroupInput['panels']>(panelsJSON);
   const ignoreParentSettings =
-    ignoreParentSettingsJSON &&
-    typeof rawControlGroupAttributes?.ignoreParentSettingsJSON === 'string'
-      ? JSON.parse(rawControlGroupAttributes?.ignoreParentSettingsJSON)
-      : undefined;
+    safeJSONParse<ControlGroupInput['ignoreParentSettings']>(ignoreParentSettingsJSON);
   return {
     ...defaultControlGroupInput,
     ...(chainingSystem ? { chainingSystem } : {}),
@@ -54,16 +57,8 @@ export const rawAttributesToSerializable = (
   return {
     chainingSystem: rawControlGroupAttributes?.chainingSystem,
     controlStyle: rawControlGroupAttributes?.controlStyle ?? defaultControlGroupInput.controlStyle,
-    parentIgnoreSettings:
-      rawControlGroupAttributes?.ignoreParentSettingsJSON &&
-      typeof rawControlGroupAttributes?.ignoreParentSettingsJSON === 'string'
-        ? (JSON.parse(rawControlGroupAttributes?.ignoreParentSettingsJSON) as SerializableRecord)
-        : {},
-    panels:
-      rawControlGroupAttributes?.panelsJSON &&
-      typeof rawControlGroupAttributes?.panelsJSON === 'string'
-        ? (JSON.parse(rawControlGroupAttributes?.panelsJSON) as SerializableRecord)
-        : {},
+    ignoreParentSettings: safeJSONParse(rawControlGroupAttributes?.ignoreParentSettingsJSON) ?? {},
+    panels: safeJSONParse(rawControlGroupAttributes?.panelsJSON) ?? {},
   };
 };
 
