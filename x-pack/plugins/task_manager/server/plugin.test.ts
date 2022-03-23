@@ -45,6 +45,10 @@ describe('TaskManagerPlugin', () => {
         unsafe: {
           exclude_task_types: [],
         },
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
+        },
       });
 
       pluginInitializerContext.env.instanceUuid = '';
@@ -87,6 +91,10 @@ describe('TaskManagerPlugin', () => {
         },
         unsafe: {
           exclude_task_types: [],
+        },
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
         },
       });
 
@@ -159,6 +167,10 @@ describe('TaskManagerPlugin', () => {
         },
         unsafe: {
           exclude_task_types: ['*'],
+        },
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
         },
       });
 
