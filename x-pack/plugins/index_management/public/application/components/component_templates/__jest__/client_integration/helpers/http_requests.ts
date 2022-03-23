@@ -63,10 +63,17 @@ const registerHttpRequestMockHelpers = (
   const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/component_templates`, response, error);
 
-  const setLoadComponentTemplateResponse = (templateId: string, response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/component_templates/${templateId}`, response, error);
+  const setLoadComponentTemplateResponse = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/component_templates/${templateId}`, response, error);
 
-  const setDeleteComponentTemplateResponse = (templateId: string, response?: HttpResponse, error?: ResponseError) =>
+  const setDeleteComponentTemplateResponse = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
     mockResponse('DELETE', `${API_BASE_PATH}/component_templates/${templateId}`, response, error);
 
   const setCreateComponentTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>

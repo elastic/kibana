@@ -37,7 +37,10 @@ describe('<ComponentTemplateDetails />', () => {
 
   describe('With component template details', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE.name, COMPONENT_TEMPLATE);
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE.name,
+        COMPONENT_TEMPLATE
+      );
 
       await act(async () => {
         testBed = setup(httpSetup, {
@@ -153,7 +156,10 @@ describe('<ComponentTemplateDetails />', () => {
 
   describe('With actions', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE.name, COMPONENT_TEMPLATE);
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE.name,
+        COMPONENT_TEMPLATE
+      );
 
       await act(async () => {
         testBed = setup(httpSetup, {
@@ -200,7 +206,11 @@ describe('<ComponentTemplateDetails />', () => {
     };
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE.name, undefined, error);
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE.name,
+        undefined,
+        error
+      );
 
       await act(async () => {
         testBed = setup(httpSetup, {

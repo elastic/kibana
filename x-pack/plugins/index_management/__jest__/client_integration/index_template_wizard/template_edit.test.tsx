@@ -119,20 +119,22 @@ describe('<TemplateEdit />', () => {
 
       expect(httpSetup.put).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates/test`,
-        expect.objectContaining({ body: JSON.stringify({
-          name: 'test',
-          indexPatterns: ['myPattern*'],
-          version: 1,
-          dataStream: {
-            hidden: true,
-            anyUnknownKey: 'should_be_kept',
-          },
-          _kbnMeta: {
-            type: 'default',
-            hasDatastream: true,
-            isLegacy: false,
-          },
-        })})
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'test',
+            indexPatterns: ['myPattern*'],
+            version: 1,
+            dataStream: {
+              hidden: true,
+              anyUnknownKey: 'should_be_kept',
+            },
+            _kbnMeta: {
+              type: 'default',
+              hasDatastream: true,
+              isLegacy: false,
+            },
+          }),
+        })
       );
     });
   });
@@ -152,7 +154,7 @@ describe('<TemplateEdit />', () => {
 
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup(httpSetup)
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
     });
@@ -226,35 +228,37 @@ describe('<TemplateEdit />', () => {
 
         expect(httpSetup.put).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/index_templates/${TEMPLATE_NAME}`,
-          expect.objectContaining({ body: JSON.stringify({
-            name: TEMPLATE_NAME,
-            indexPatterns: UPDATED_INDEX_PATTERN,
-            priority: 3,
-            version: templateToEdit.version,
-            _kbnMeta: {
-              type: 'default',
-              hasDatastream: false,
-              isLegacy: templateToEdit._kbnMeta.isLegacy,
-            },
-            template: {
-              settings: SETTINGS,
-              mappings: {
-                properties: {
-                  [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
-                    type: 'text',
-                    index: true,
-                    eager_global_ordinals: false,
-                    index_phrases: false,
-                    norms: true,
-                    fielddata: false,
-                    store: false,
-                    index_options: 'positions',
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: TEMPLATE_NAME,
+              indexPatterns: UPDATED_INDEX_PATTERN,
+              priority: 3,
+              version: templateToEdit.version,
+              _kbnMeta: {
+                type: 'default',
+                hasDatastream: false,
+                isLegacy: templateToEdit._kbnMeta.isLegacy,
+              },
+              template: {
+                settings: SETTINGS,
+                mappings: {
+                  properties: {
+                    [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
+                      type: 'text',
+                      index: true,
+                      eager_global_ordinals: false,
+                      index_phrases: false,
+                      norms: true,
+                      fielddata: false,
+                      store: false,
+                      index_options: 'positions',
+                    },
                   },
                 },
+                aliases: ALIASES,
               },
-              aliases: ALIASES,
-            },
-          })})
+            }),
+          })
         );
       });
     });
@@ -306,18 +310,20 @@ describe('<TemplateEdit />', () => {
 
         expect(httpSetup.put).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/index_templates/${TEMPLATE_NAME}`,
-          expect.objectContaining({ body: JSON.stringify({
-            name,
-            indexPatterns,
-            version,
-            order,
-            template: {
-              aliases: undefined,
-              mappings: template!.mappings,
-              settings: undefined,
-            },
-            _kbnMeta,
-          })})
+          expect.objectContaining({
+            body: JSON.stringify({
+              name,
+              indexPatterns,
+              version,
+              order,
+              template: {
+                aliases: undefined,
+                mappings: template!.mappings,
+                settings: undefined,
+              },
+              _kbnMeta,
+            }),
+          })
         );
       });
     });

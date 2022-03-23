@@ -98,7 +98,10 @@ describe('<TemplateClone />', () => {
         actions.clickNextButton();
       });
 
-      expect(httpSetup.post).toHaveBeenLastCalledWith(`${API_BASE_PATH}/index_templates`, expect.anything());
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates`,
+        expect.anything()
+      );
     });
   });
 });

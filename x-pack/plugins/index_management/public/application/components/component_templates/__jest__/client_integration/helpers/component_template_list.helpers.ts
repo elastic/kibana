@@ -74,7 +74,10 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateListTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(ComponentTemplateList, httpSetup), testBedConfig);
+  const initTestBed = registerTestBed(
+    WithAppDependencies(ComponentTemplateList, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

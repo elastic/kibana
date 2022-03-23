@@ -163,21 +163,23 @@ describe('<ComponentTemplateCreate />', () => {
 
         expect(httpSetup.post).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/component_templates`,
-          expect.objectContaining({body: JSON.stringify({
-            name: COMPONENT_TEMPLATE_NAME,
-            template: {
-              settings: SETTINGS,
-              mappings: {
-                properties: {
-                  [BOOLEAN_MAPPING_FIELD.name]: {
-                    type: BOOLEAN_MAPPING_FIELD.type,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: COMPONENT_TEMPLATE_NAME,
+              template: {
+                settings: SETTINGS,
+                mappings: {
+                  properties: {
+                    [BOOLEAN_MAPPING_FIELD.name]: {
+                      type: BOOLEAN_MAPPING_FIELD.type,
+                    },
                   },
                 },
+                aliases: ALIASES,
               },
-              aliases: ALIASES,
-            },
-            _kbnMeta: { usedBy: [], isManaged: false },
-          })})
+              _kbnMeta: { usedBy: [], isManaged: false },
+            }),
+          })
         );
       });
 

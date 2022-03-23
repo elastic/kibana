@@ -94,8 +94,11 @@ const registerHttpRequestMockHelpers = (
   const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates`, response, error);
 
-  const setUpdateTemplateResponse = (templateId: string, response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('PUT', `${API_BASE_PATH}/index_templates/${templateId}`, response, error);
+  const setUpdateTemplateResponse = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}/index_templates/${templateId}`, response, error);
 
   const setUpdateIndexSettingsResponse = (
     indexName: string,

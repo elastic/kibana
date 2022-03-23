@@ -29,7 +29,10 @@ const testBedConfig: AsyncTestBedConfig = {
 };
 
 export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateCreateTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(ComponentTemplateCreate, httpSetup), testBedConfig);
+  const initTestBed = registerTestBed(
+    WithAppDependencies(ComponentTemplateCreate, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

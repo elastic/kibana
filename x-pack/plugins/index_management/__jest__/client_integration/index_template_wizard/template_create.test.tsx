@@ -536,33 +536,35 @@ describe('<TemplateCreate />', () => {
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates`,
-        expect.objectContaining({ body: JSON.stringify({
-          name: TEMPLATE_NAME,
-          indexPatterns: DEFAULT_INDEX_PATTERNS,
-          _kbnMeta: {
-            type: 'default',
-            hasDatastream: false,
-            isLegacy: false,
-          },
-          composedOf: ['test_component_template_1'],
-          template: {
-            settings: SETTINGS,
-            mappings: {
-              properties: {
-                [BOOLEAN_MAPPING_FIELD.name]: {
-                  type: BOOLEAN_MAPPING_FIELD.type,
-                },
-                [TEXT_MAPPING_FIELD.name]: {
-                  type: TEXT_MAPPING_FIELD.type,
-                },
-                [KEYWORD_MAPPING_FIELD.name]: {
-                  type: KEYWORD_MAPPING_FIELD.type,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: TEMPLATE_NAME,
+            indexPatterns: DEFAULT_INDEX_PATTERNS,
+            _kbnMeta: {
+              type: 'default',
+              hasDatastream: false,
+              isLegacy: false,
+            },
+            composedOf: ['test_component_template_1'],
+            template: {
+              settings: SETTINGS,
+              mappings: {
+                properties: {
+                  [BOOLEAN_MAPPING_FIELD.name]: {
+                    type: BOOLEAN_MAPPING_FIELD.type,
+                  },
+                  [TEXT_MAPPING_FIELD.name]: {
+                    type: TEXT_MAPPING_FIELD.type,
+                  },
+                  [KEYWORD_MAPPING_FIELD.name]: {
+                    type: KEYWORD_MAPPING_FIELD.type,
+                  },
                 },
               },
+              aliases: ALIASES,
             },
-            aliases: ALIASES,
-          },
-        })})
+          }),
+        })
       );
     });
 

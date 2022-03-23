@@ -46,7 +46,10 @@ describe('<ComponentTemplateEdit />', () => {
   };
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE_TO_EDIT.name, COMPONENT_TEMPLATE_TO_EDIT);
+    httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+      COMPONENT_TEMPLATE_TO_EDIT.name,
+      COMPONENT_TEMPLATE_TO_EDIT
+    );
 
     await act(async () => {
       testBed = await setup(httpSetup);
@@ -97,13 +100,15 @@ describe('<ComponentTemplateEdit />', () => {
 
       expect(httpSetup.put).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
-        expect.objectContaining({body: JSON.stringify({
-          ...COMPONENT_TEMPLATE_TO_EDIT,
-          template: {
-            ...COMPONENT_TEMPLATE_TO_EDIT.template,
-          },
-          version: 1,
-        })})
+        expect.objectContaining({
+          body: JSON.stringify({
+            ...COMPONENT_TEMPLATE_TO_EDIT,
+            template: {
+              ...COMPONENT_TEMPLATE_TO_EDIT.template,
+            },
+            version: 1,
+          }),
+        })
       );
     });
   });
