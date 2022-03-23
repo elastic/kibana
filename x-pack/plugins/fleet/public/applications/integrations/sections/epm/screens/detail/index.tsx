@@ -149,7 +149,7 @@ export function Detail() {
     if (packageInstallStatus === 'not_installed') {
       setOldPackageStatus(packageInstallStatus);
     }
-    if (packageInstallStatus === 'installed') {
+    if (oldPackageInstallStatus === 'not_installed' && packageInstallStatus === 'installed') {
       setOldPackageStatus(packageInstallStatus);
       refreshPackageInfo();
     }
