@@ -1716,6 +1716,85 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceAvatarProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [
+              "\nCallback to be invoked when the avatar is clicked."
+            ],
+            "signature": [
+              "((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpaceAvatarProps.onClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "React.MouseEvent<HTMLDivElement, MouseEvent>"
+                ],
+                "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceAvatarProps.onKeyPress",
+            "type": "Function",
+            "tags": [],
+            "label": "onKeyPress",
+            "description": [
+              "\nCallback to be invoked when the avatar is clicked via keyboard."
+            ],
+            "signature": [
+              "((event: React.KeyboardEvent<HTMLDivElement>) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpaceAvatarProps.onKeyPress.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "React.KeyboardEvent<HTMLDivElement>"
+                ],
+                "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceAvatarProps.style",
+            "type": "Object",
+            "tags": [],
+            "label": "style",
+            "description": [
+              "\nStyle props for the avatar."
+            ],
+            "signature": [
+              "React.CSSProperties | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1776,6 +1855,23 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceListProps.listOnClick",
+            "type": "Function",
+            "tags": [],
+            "label": "listOnClick",
+            "description": [
+              "\nClick handler for spaces list, specifically excluding expand and contract buttons."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_list/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3028,6 +3124,48 @@
                     "section": "def-common.Space",
                     "text": "Space"
                   }
+                ],
+                "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.createSavedObjectFinder",
+            "type": "Function",
+            "tags": [],
+            "label": "createSavedObjectFinder",
+            "description": [
+              "\nReturns a {@link ISavedObjectsPointInTimeFinder} to help page through\nsaved objects within the specified space."
+            ],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
+              "<unknown, unknown>"
+            ],
+            "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.createSavedObjectFinder.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "the id of the space to search."
+                ],
+                "signature": [
+                  "string"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,

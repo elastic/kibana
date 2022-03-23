@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { AlertExecutionStatusErrorReasons } from '../../../../../plugins/alerting/common';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,7 +28,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.noop',
             schedule: { interval: '1s' },
           })

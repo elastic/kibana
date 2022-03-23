@@ -8,15 +8,16 @@
 import { http } from '../http_service';
 
 import { basePath } from './index';
-import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
-import {
+import type { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
+import type {
   DataFrameAnalyticsConfig,
   UpdateDataFrameAnalyticsConfig,
 } from '../../data_frame_analytics/common';
-import { DeepPartial } from '../../../../common/types/common';
-import { NewJobCapsResponse } from '../../../../common/types/fields';
-import {
+import type { DeepPartial } from '../../../../common/types/common';
+import type { NewJobCapsResponse } from '../../../../common/types/fields';
+import type { JobMessage } from '../../../../common/types/audit_message';
+import type {
   DeleteDataFrameAnalyticsWithIndexStatus,
   AnalyticsMapReturnType,
 } from '../../../../common/types/data_frame_analytics';
@@ -54,12 +55,12 @@ export interface JobsExistsResponse {
 }
 
 export const dataFrameAnalytics = {
-  getDataFrameAnalytics(analyticsId?: string, excludeGenerated?: boolean) {
+  getDataFrameAnalytics(analyticsId?: string, excludeGenerated?: boolean, size?: number) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
     return http<GetDataFrameAnalyticsResponse>({
       path: `${basePath()}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
-      ...(excludeGenerated ? { query: { excludeGenerated } } : {}),
+      ...(excludeGenerated ? { query: { excludeGenerated, size } } : {}),
     });
   },
   getDataFrameAnalyticsStats(analyticsId?: string) {
@@ -161,7 +162,7 @@ export const dataFrameAnalytics = {
     });
   },
   getAnalyticsAuditMessages(analyticsId: string) {
-    return http<any>({
+    return http<JobMessage[]>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
     });

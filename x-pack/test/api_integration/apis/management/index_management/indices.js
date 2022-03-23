@@ -199,7 +199,9 @@ export default function ({ getService }) {
           'primary',
           'replica',
           'documents',
+          'documents_deleted',
           'size',
+          'primary_size',
           'isFrozen',
           'aliases',
           // Cloud disables CCR, so wouldn't expect follower indices.
@@ -233,7 +235,9 @@ export default function ({ getService }) {
             'primary',
             'replica',
             'documents',
+            'documents_deleted',
             'size',
+            'primary_size',
             'isFrozen',
             'aliases',
             // Cloud disables CCR, so wouldn't expect follower indices.

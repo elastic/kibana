@@ -18,7 +18,7 @@ export function getMonitoringUsageCollector(
   config: MonitoringConfig,
   getClient: () => IClusterClient
 ) {
-  return usageCollection.makeUsageCollector<MonitoringUsage, true>({
+  return usageCollection.makeUsageCollector<MonitoringUsage>({
     type: 'monitoring',
     isReady: () => true,
     schema: {
@@ -95,13 +95,8 @@ export function getMonitoringUsageCollector(
         },
       },
     },
-    extendFetchContext: {
-      kibanaRequest: true,
-    },
-    fetch: async ({ kibanaRequest }) => {
-      const callCluster = kibanaRequest
-        ? getClient().asScoped(kibanaRequest).asCurrentUser
-        : getClient().asInternalUser;
+    fetch: async () => {
+      const callCluster = getClient().asInternalUser;
       const usageClusters: MonitoringClusterStackProductUsage[] = [];
       const availableCcs = config.ui.ccs.enabled;
       const clusters = await fetchClusters(callCluster);

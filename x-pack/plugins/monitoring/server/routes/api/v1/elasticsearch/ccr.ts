@@ -19,6 +19,7 @@ import {
   ElasticsearchMetricbeatSource,
 } from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
+import { MonitoringConfig } from '../../../../config';
 
 function getBucketScript(max: string, min: string) {
   return {
@@ -32,16 +33,10 @@ function getBucketScript(max: string, min: string) {
   };
 }
 
-function buildRequest(
-  req: LegacyRequest,
-  config: {
-    get: (key: string) => string | undefined;
-  },
-  esIndexPattern: string
-) {
+function buildRequest(req: LegacyRequest, config: MonitoringConfig, esIndexPattern: string) {
   const min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const maxBucketSize = config.ui.max_bucket_size;
   const aggs = {
     ops_synced_max: {
       max: {
@@ -200,12 +195,7 @@ function buildRequest(
   };
 }
 
-export function ccrRoute(server: {
-  route: (p: any) => void;
-  config: () => {
-    get: (key: string) => string | undefined;
-  };
-}) {
+export function ccrRoute(server: { route: (p: any) => void; config: MonitoringConfig }) {
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr',
@@ -224,7 +214,7 @@ export function ccrRoute(server: {
       },
     },
     async handler(req: LegacyRequest) {
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 

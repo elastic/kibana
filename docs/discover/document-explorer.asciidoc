@@ -6,8 +6,19 @@ beta::[]
 *Discover* has a *Document Explorer* with resizable columns, better data sorting and comparison,
 and a fullscreen view.
 
-[role="screenshot"]
-image::images/document-explorer.png[Document Explorer with improved look over classic view]
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
+</script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/BgbLpBo3qvPZvtXrwZoNuD.jpg"
+data-uuid="BgbLpBo3qvPZvtXrwZoNuD"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
 
 To use the *Document Explorer* instead of the classic document table:
 
@@ -32,6 +43,18 @@ To resize a column, drag the right edge of the column header until the column is
 Column widths are stored with a saved search.  When you visualize saved searches on dashboards, the saved search appears the same as in **Discover**.
 
 [float]
+[[document-explorer-row-height]]
+=== Adjust row height
+
+To set the row height to 1 or more lines, or automatically
+adjust the height to fit the contents, click the row height icon
+image:images/row-height-icon.png[icon to open the Row height pop-up].
+
+[role="screenshot"]
+image::images/document-explorer-row-height.png[Row height settings for Document Explroer, width="75%"]
+
+
+[float]
 [[document-explorer-sort-data]]
 === Sort data
 
@@ -43,7 +66,7 @@ The default sort is based on the time field, from new to old.
 [role="screenshot"]
 image::images/document-explorer-sort-data.png[Pop-up in Document Explorer for sorting columns, width="75%"]
 
-. To add more fields to the sort, expand the dropdown menu.
+. To add more fields to the sort, select from the dropdown menu.
 +
 By default, columns are sorted in the order they are added.
 For example, to sort by `order_date` then `geo.country_iso_code`, make sure `order_date` appears first.
@@ -77,13 +100,21 @@ the documents that occurred before and after it.
 image:images/expand-icon-2.png[double arrow icon to open a flyout with the document details].
 +
 [role="screenshot"]
-image::images/document-explorer-expand.png[Multi field sort in Document Explorer]
+image::images/document-explorer-expand.png[Expanded view in Document Explorer]
 
-. Scan through the fields and their values. If you find a field of interest,
+. Scan through the fields and their values, or search for a field by name.
+
+. When you find a field of interest,
 click
-image:images/actions-icon.png[three dots icon in table column] in the *Actions* column for filters and other controls.
-. To view documents that occurred before or after the event you are looking at, click <<discover-view-surrounding-documents,**Surrounding documents**>>.
+image:images/actions-icon.png[three dots icon in table column] in the *Actions* column
+to:
+.. Filter the view of the data
+.. Toggle the field in or out the document table
+.. Pin the field so it stays at the top
+
 . For direct access to a particular document, click <<discover-view-single-document,**Single document**>>.
+
+. To view documents that occurred before or after the event you are looking at, click <<discover-view-surrounding-documents,**Surrounding documents**>>.
 
 [float]
 [[document-explorer-full-screen]]

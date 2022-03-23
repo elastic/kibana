@@ -44,3 +44,11 @@ export const assertText = async ({ page, text }: { page: Page; text: string }) =
 export const assertNotText = async ({ page, text }: { page: Page; text: string }) => {
   expect(await page.$(`text=${text}`)).toBeFalsy();
 };
+
+export const getQuerystring = (params: object) => {
+  return Object.entries(params)
+    .map(([key, value]) => encodeURIComponent(key) + '=' + encodeURIComponent(value))
+    .join('&');
+};
+
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

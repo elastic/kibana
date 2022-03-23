@@ -1,0 +1,231 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Fleet preconfiguration reset Preconfigred cloud policy Create correct .fleet-policies 1`] = `
+Object {
+  "agent": Object {
+    "monitoring": Object {
+      "enabled": false,
+      "logs": false,
+      "metrics": false,
+    },
+  },
+  "id": "policy-elastic-agent-on-cloud",
+  "inputs": Array [
+    Object {
+      "data_stream": Object {
+        "namespace": "default",
+      },
+      "id": "fleet-server-fleet_server-elastic-cloud-fleet-server",
+      "meta": Object {
+        "package": Object {
+          "name": "fleet_server",
+          "version": "1.1.1",
+        },
+      },
+      "name": "Fleet Server",
+      "revision": 1,
+      "server": Object {
+        "host": "0.0.0.0",
+        "port": 8220,
+      },
+      "server.runtime": Object {
+        "gc_percent": 20,
+      },
+      "type": "fleet-server",
+      "use_output": "es-containerhost",
+    },
+    Object {
+      "apm-server": Object {
+        "auth": Object {
+          "anonymous": Object {
+            "allow_agent": Array [
+              "rum-js",
+              "js-base",
+              "iOS/swift",
+            ],
+            "allow_service": null,
+            "enabled": true,
+            "rate_limit": Object {
+              "event_limit": 300,
+              "ip_limit": 1000,
+            },
+          },
+          "api_key": Object {
+            "enabled": true,
+            "limit": 100,
+          },
+          "secret_token": "CLOUD_SECRET_TOKEN",
+        },
+        "capture_personal_data": true,
+        "default_service_environment": null,
+        "expvar.enabled": false,
+        "host": "0.0.0.0:8200",
+        "idle_timeout": "45s",
+        "java_attacher": Object {
+          "discovery-rules": null,
+          "download-agent-version": null,
+          "enabled": false,
+        },
+        "max_connections": 0,
+        "max_event_size": 307200,
+        "max_header_size": 1048576,
+        "read_timeout": "3600s",
+        "response_headers": null,
+        "rum": Object {
+          "allow_headers": null,
+          "allow_origins": Array [
+            "*",
+          ],
+          "enabled": true,
+          "exclude_from_grouping": "^/webpack",
+          "library_pattern": "node_modules|bower_components|~",
+          "response_headers": null,
+        },
+        "sampling": Object {
+          "tail": Object {
+            "enabled": false,
+            "interval": "1m",
+            "policies": Array [
+              Object {
+                "sample_rate": 0.1,
+              },
+            ],
+          },
+        },
+        "shutdown_timeout": "30s",
+        "ssl": Object {
+          "certificate": "/app/config/certs/node.crt",
+          "cipher_suites": null,
+          "curve_types": null,
+          "enabled": true,
+          "key": "/app/config/certs/node.key",
+          "key_passphrase": null,
+          "supported_protocols": Array [
+            "TLSv1.0",
+            "TLSv1.1",
+            "TLSv1.2",
+          ],
+        },
+        "write_timeout": "30s",
+      },
+      "data_stream": Object {
+        "namespace": "default",
+      },
+      "id": "elastic-cloud-apm",
+      "meta": Object {
+        "package": Object {
+          "name": "apm",
+          "version": "8.2.0-dev4",
+        },
+      },
+      "name": "Elastic APM",
+      "revision": 1,
+      "type": "apm",
+      "use_output": "es-containerhost",
+    },
+  ],
+  "output_permissions": Object {
+    "es-containerhost": Object {
+      "Elastic APM": Object {
+        "cluster": Array [
+          "cluster:monitor/main",
+        ],
+        "indices": Array [
+          Object {
+            "names": Array [
+              "logs-apm.app-default",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+          Object {
+            "names": Array [
+              "metrics-apm.app.*-default",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+          Object {
+            "names": Array [
+              "logs-apm.error-default",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+          Object {
+            "names": Array [
+              "metrics-apm.internal-default",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+          Object {
+            "names": Array [
+              "metrics-apm.profiling-default",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+          Object {
+            "names": Array [
+              "traces-apm.rum-default",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+          Object {
+            "names": Array [
+              "traces-apm.sampled-default",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+              "maintenance",
+              "monitor",
+              "read",
+            ],
+          },
+          Object {
+            "names": Array [
+              "traces-apm-default",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+        ],
+      },
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [],
+      },
+    },
+  },
+  "outputs": Object {
+    "es-containerhost": Object {
+      "hosts": Array [
+        "https://cloudinternales:9200",
+      ],
+      "type": "elasticsearch",
+    },
+  },
+  "revision": 4,
+}
+`;

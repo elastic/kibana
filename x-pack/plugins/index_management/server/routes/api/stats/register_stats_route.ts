@@ -41,7 +41,7 @@ export function registerStatsRoute({ router, lib: { handleEsError } }: RouteDepe
       };
 
       try {
-        const { body: hit } = await client.asCurrentUser.indices.stats(params);
+        const hit = await client.asCurrentUser.indices.stats(params);
 
         return response.ok({ body: formatHit(hit, indexName) });
       } catch (error) {

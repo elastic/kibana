@@ -160,10 +160,10 @@ export function getAlertType(logger: Logger): RuleType<
     >
   ) {
     const { alertId, name, services, params, state } = options;
-    const { alertInstanceFactory, search } = services;
+    const { alertFactory, scopedClusterClient } = services;
     const previousTimestamp = state.latestTimestamp;
 
-    const abortableEsClient = search.asCurrentUser;
+    const esClient = scopedClusterClient.asCurrentUser;
     const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -224,7 +224,7 @@ export function getAlertType(logger: Logger): RuleType<
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
-    const { body: searchResult } = await abortableEsClient.search(query);
+    const { body: searchResult } = await esClient.search(query, { meta: true });
 
     logger.debug(
       `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
@@ -255,7 +255,7 @@ export function getAlertType(logger: Logger): RuleType<
       };
 
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = alertInstanceFactory(ConditionMetAlertInstanceId);
+      const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
       alertInstance
         // store the params we would need to recreate the query that led to this alert instance
         .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })

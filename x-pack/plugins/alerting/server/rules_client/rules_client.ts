@@ -9,6 +9,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Logger,
@@ -19,26 +20,25 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
 } from '../../../../../src/core/server';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
-  Alert,
-  PartialAlert,
+  Alert as Rule,
+  PartialAlert as PartialRule,
   RawRule,
   RuleTypeRegistry,
-  AlertAction,
+  AlertAction as RuleAction,
   IntervalSchedule,
-  SanitizedAlert,
+  SanitizedAlert as SanitizedRule,
   RuleTaskState,
   AlertSummary,
-  AlertExecutionStatusValues,
-  AlertNotifyWhenType,
-  AlertTypeParams,
+  AlertExecutionStatusValues as RuleExecutionStatusValues,
+  AlertNotifyWhenType as RuleNotifyWhenType,
+  AlertTypeParams as RuleTypeParams,
   ResolvedSanitizedRule,
-  AlertWithLegacyId,
+  AlertWithLegacyId as RuleWithLegacyId,
   SanitizedRuleWithLegacyId,
-  PartialAlertWithLegacyId,
-  RawAlertInstance,
+  PartialAlertWithLegacyId as PartialRuleWithLegacyId,
+  RawAlertInstance as RawAlert,
 } from '../types';
 import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
 import {
@@ -71,18 +71,32 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField, validateOperationOnAttributes } from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
-import { AlertInstance } from '../alert_instance';
+import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
+import {
+  getMappedParams,
+  getModifiedField,
+  getModifiedSearchFields,
+  getModifiedSearch,
+  modifyFilterKueryNode,
+} from './lib/mapped_params_utils';
+import { AlertingRulesConfig } from '../config';
+import {
+  formatExecutionLogResult,
+  getExecutionLogAggregation,
+  IExecutionLogResult,
+} from '../lib/get_execution_log_aggregation';
+import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { RuleMutedError } from '../lib/errors/rule_muted';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }
-type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
+type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
@@ -120,6 +134,7 @@ export interface ConstructorOptions {
   authorization: AlertingAuthorization;
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
@@ -135,6 +150,10 @@ export interface ConstructorOptions {
 export interface MuteOptions extends IndexType {
   alertId: string;
   alertInstanceId: string;
+}
+
+export interface SnoozeOptions extends IndexType {
+  snoozeEndTime: string | -1;
 }
 
 export interface FindOptions extends IndexType {
@@ -174,16 +193,16 @@ export interface AggregateResult {
   ruleMutedStatus?: { muted: number; unmuted: number };
 }
 
-export interface FindResult<Params extends AlertTypeParams> {
+export interface FindResult<Params extends RuleTypeParams> {
   page: number;
   perPage: number;
   total: number;
-  data: Array<SanitizedAlert<Params>>;
+  data: Array<SanitizedRule<Params>>;
 }
 
-export interface CreateOptions<Params extends AlertTypeParams> {
+export interface CreateOptions<Params extends RuleTypeParams> {
   data: Omit<
-    Alert<Params>,
+    Rule<Params>,
     | 'id'
     | 'createdBy'
     | 'updatedBy'
@@ -195,6 +214,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
+    | 'snoozeEndTime'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -202,7 +222,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
   };
 }
 
-export interface UpdateOptions<Params extends AlertTypeParams> {
+export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   data: {
     name: string;
@@ -211,7 +231,7 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
     actions: NormalizedAlertAction[];
     params: Params;
     throttle: string | null;
-    notifyWhen: AlertNotifyWhenType | null;
+    notifyWhen: RuleNotifyWhenType | null;
   };
 }
 
@@ -219,6 +239,16 @@ export interface GetAlertSummaryParams {
   id: string;
   dateStart?: string;
   numberOfExecutions?: number;
+}
+
+export interface GetExecutionLogByIdParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -240,6 +270,8 @@ export class RulesClient {
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertingAuthorization;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  private readonly minimumScheduleIntervalInMs: number;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
@@ -248,10 +280,15 @@ export class RulesClient {
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
   private readonly eventLogger?: IEventLogger;
-  private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedAlert> = ['monitoring'];
+  private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
+    'monitoring',
+    'mapped_params',
+    'snoozeEndTime',
+  ];
 
   constructor({
     ruleTypeRegistry,
+    minimumScheduleInterval,
     unsecuredSavedObjectsClient,
     authorization,
     taskManager,
@@ -274,6 +311,8 @@ export class RulesClient {
     this.namespace = namespace;
     this.taskManager = taskManager;
     this.ruleTypeRegistry = ruleTypeRegistry;
+    this.minimumScheduleInterval = minimumScheduleInterval;
+    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval.value);
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
@@ -286,10 +325,10 @@ export class RulesClient {
     this.eventLogger = eventLogger;
   }
 
-  public async create<Params extends AlertTypeParams = never>({
+  public async create<Params extends RuleTypeParams = never>({
     data,
     options,
-  }: CreateOptions<Params>): Promise<SanitizedAlert<Params>> {
+  }: CreateOptions<Params>): Promise<SanitizedRule<Params>> {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
@@ -329,13 +368,17 @@ export class RulesClient {
 
     await this.validateActions(ruleType, data.actions);
 
-    // Validate intervals, if configured
-    if (ruleType.minimumScheduleInterval) {
-      const intervalInMs = parseDuration(data.schedule.interval);
-      const minimumScheduleIntervalInMs = parseDuration(ruleType.minimumScheduleInterval);
-      if (intervalInMs < minimumScheduleIntervalInMs) {
+    // Validate that schedule interval is not less than configured minimum
+    const intervalInMs = parseDuration(data.schedule.interval);
+    if (intervalInMs < this.minimumScheduleIntervalInMs) {
+      if (this.minimumScheduleInterval.enforce) {
         throw Boom.badRequest(
-          `Error updating rule: the interval is less than the minimum interval of ${ruleType.minimumScheduleInterval}`
+          `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be created
+        this.logger.warn(
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
         );
       }
     }
@@ -360,6 +403,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
+      snoozeEndTime: null,
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -367,6 +411,12 @@ export class RulesClient {
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
       monitoring: getDefaultRuleMonitoring(),
     };
+
+    const mappedParams = getMappedParams(updatedParams);
+
+    if (Object.keys(mappedParams).length) {
+      rawRule.mapped_params = mappedParams;
+    }
 
     this.auditLogger?.log(
       ruleAuditEvent({
@@ -432,7 +482,7 @@ export class RulesClient {
     );
   }
 
-  public async get<Params extends AlertTypeParams = never>({
+  public async get<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId = false,
     excludeFromPublicApi = false,
@@ -440,7 +490,7 @@ export class RulesClient {
     id: string;
     includeLegacyId?: boolean;
     excludeFromPublicApi?: boolean;
-  }): Promise<SanitizedAlert<Params> | SanitizedRuleWithLegacyId<Params>> {
+  }): Promise<SanitizedRule<Params> | SanitizedRuleWithLegacyId<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
@@ -475,7 +525,7 @@ export class RulesClient {
     );
   }
 
-  public async resolve<Params extends AlertTypeParams = never>({
+  public async resolve<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId,
   }: {
@@ -575,7 +625,7 @@ export class RulesClient {
             page: 1,
             per_page: 10000,
             start: parsedDateStart.toISOString(),
-            sort_order: 'desc',
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
             end: dateNow.toISOString(),
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined
@@ -587,7 +637,7 @@ export class RulesClient {
             page: 1,
             per_page: numberOfExecutions ?? 60,
             filter: 'event.provider: alerting AND event.action:execute',
-            sort_order: 'desc',
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
             end: dateNow.toISOString(),
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined
@@ -612,7 +662,71 @@ export class RulesClient {
     });
   }
 
-  public async find<Params extends AlertTypeParams = never>({
+  public async getExecutionLogForRule({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetExecutionLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_EXECUTION_LOG,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_EXECUTION_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
+      'alert',
+      [id],
+      {
+        start: parsedDateStart.toISOString(),
+        end: parsedDateEnd.toISOString(),
+        filter,
+        aggs: getExecutionLogAggregation({
+          page,
+          perPage,
+          sort,
+        }),
+      },
+      rule.legacyId !== null ? [rule.legacyId] : undefined
+    );
+
+    return formatExecutionLogResult(results);
+  }
+
+  public async find<Params extends RuleTypeParams = never>({
     options: { fields, ...options } = {},
     excludeFromPublicApi = false,
   }: { options?: FindOptions; excludeFromPublicApi?: boolean } = {}): Promise<FindResult<Params>> {
@@ -631,9 +745,10 @@ export class RulesClient {
       );
       throw error;
     }
+
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-    const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
-    const sortField = mapSortField(options.sortField);
+    const filterKueryNode = options.filter ? fromKueryExpression(options.filter) : null;
+    let sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
       try {
         validateOperationOnAttributes(
@@ -645,6 +760,24 @@ export class RulesClient {
       } catch (error) {
         throw Boom.badRequest(`Error find rules: ${error.message}`);
       }
+    }
+
+    sortField = mapSortField(getModifiedField(options.sortField));
+
+    // Generate new modified search and search fields, translating certain params properties
+    // to mapped_params. Thus, allowing for sort/search/filtering on params.
+    // We do the modifcation after the validate check to make sure the public API does not
+    // use the mapped_params in their queries.
+    options = {
+      ...options,
+      ...(options.searchFields && { searchFields: getModifiedSearchFields(options.searchFields) }),
+      ...(options.search && { search: getModifiedSearch(options.searchFields, options.search) }),
+    };
+
+    // Modifies kuery node AST to translate params filter and the filter value to mapped_params.
+    // This translation is done in place, and therefore is not a pure function.
+    if (filterKueryNode) {
+      modifyFilterKueryNode({ astFilter: filterKueryNode });
     }
 
     const {
@@ -730,7 +863,7 @@ export class RulesClient {
       ...options,
       filter:
         (authorizationFilter && filter
-          ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+          ? nodeBuilder.and([fromKueryExpression(filter), authorizationFilter as KueryNode])
           : authorizationFilter) ?? filter,
       page: 1,
       perPage: 0,
@@ -762,7 +895,7 @@ export class RulesClient {
         },
       };
 
-      for (const key of AlertExecutionStatusValues) {
+      for (const key of RuleExecutionStatusValues) {
         placeholder.alertExecutionStatus[key] = 0;
       }
 
@@ -783,7 +916,7 @@ export class RulesClient {
     };
 
     // Fill missing keys with zeroes
-    for (const key of AlertExecutionStatusValues) {
+    for (const key of RuleExecutionStatusValues) {
       if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
         ret.alertExecutionStatus[key] = 0;
       }
@@ -878,10 +1011,10 @@ export class RulesClient {
     return removeResult;
   }
 
-  public async update<Params extends AlertTypeParams = never>({
+  public async update<Params extends RuleTypeParams = never>({
     id,
     data,
-  }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
+  }: UpdateOptions<Params>): Promise<PartialRule<Params>> {
     return await retryIfConflicts(
       this.logger,
       `rulesClient.update('${id}')`,
@@ -889,10 +1022,10 @@ export class RulesClient {
     );
   }
 
-  private async updateWithOCC<Params extends AlertTypeParams>({
+  private async updateWithOCC<Params extends RuleTypeParams>({
     id,
     data,
-  }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
+  }: UpdateOptions<Params>): Promise<PartialRule<Params>> {
     let alertSavedObject: SavedObject<RawRule>;
 
     try {
@@ -974,23 +1107,27 @@ export class RulesClient {
     return updateResult;
   }
 
-  private async updateAlert<Params extends AlertTypeParams>(
+  private async updateAlert<Params extends RuleTypeParams>(
     { id, data }: UpdateOptions<Params>,
     { attributes, version }: SavedObject<RawRule>
-  ): Promise<PartialAlert<Params>> {
+  ): Promise<PartialRule<Params>> {
     const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
     const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
     await this.validateActions(ruleType, data.actions);
 
-    // Validate intervals, if configured
-    if (ruleType.minimumScheduleInterval) {
-      const intervalInMs = parseDuration(data.schedule.interval);
-      const minimumScheduleIntervalInMs = parseDuration(ruleType.minimumScheduleInterval);
-      if (intervalInMs < minimumScheduleIntervalInMs) {
+    // Validate that schedule interval is not less than configured minimum
+    const intervalInMs = parseDuration(data.schedule.interval);
+    if (intervalInMs < this.minimumScheduleIntervalInMs) {
+      if (this.minimumScheduleInterval.enforce) {
         throw Boom.badRequest(
-          `Error updating rule: the interval is less than the minimum interval of ${ruleType.minimumScheduleInterval}`
+          `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be updated
+        this.logger.warn(
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
         );
       }
     }
@@ -1027,6 +1164,13 @@ export class RulesClient {
       updatedBy: username,
       updatedAt: new Date().toISOString(),
     });
+
+    const mappedParams = getMappedParams(updatedParams);
+
+    if (Object.keys(mappedParams).length) {
+      createAttributes.mapped_params = mappedParams;
+    }
+
     try {
       updatedObject = await this.unsecuredSavedObjectsClient.create<RawRule>(
         'alert',
@@ -1048,7 +1192,7 @@ export class RulesClient {
       throw e;
     }
 
-    return this.getPartialAlertFromRaw(
+    return this.getPartialRuleFromRaw(
       id,
       ruleType,
       updatedObject.attributes,
@@ -1264,6 +1408,7 @@ export class RulesClient {
           lastDuration: 0,
           lastExecutionDate: new Date().toISOString(),
           error: null,
+          warning: null,
         },
       });
       try {
@@ -1332,12 +1477,12 @@ export class RulesClient {
       try {
         const { state } = taskInstanceToAlertTaskInstance(
           await this.taskManager.get(attributes.scheduledTaskId),
-          attributes as unknown as SanitizedAlert
+          attributes as unknown as SanitizedRule
         );
 
-        const recoveredAlertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
+        const recoveredAlertInstances = mapValues<Record<string, RawAlert>, Alert>(
           state.alertInstances ?? {},
-          (rawAlertInstance) => new AlertInstance(rawAlertInstance)
+          (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
         );
         const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
@@ -1435,6 +1580,85 @@ export class RulesClient {
     }
   }
 
+  public async snooze({
+    id,
+    snoozeEndTime,
+  }: {
+    id: string;
+    snoozeEndTime: string | -1;
+  }): Promise<void> {
+    if (typeof snoozeEndTime === 'string') {
+      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
+      if (snoozeDateValidationMsg) {
+        throw new RuleMutedError(snoozeDateValidationMsg);
+      }
+    }
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.snooze('${id}', ${snoozeEndTime})`,
+      async () => await this.snoozeWithOCC({ id, snoozeEndTime })
+    );
+  }
+
+  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: WriteOperations.Snooze,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.SNOOZE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.SNOOZE,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    // If snoozeEndTime is -1, instead mute all
+    const newAttrs =
+      snoozeEndTime === -1
+        ? { muteAll: true, snoozeEndTime: null }
+        : { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false };
+
+    const updateAttributes = this.updateMeta({
+      ...newAttrs,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    );
+  }
+
   public async muteAll({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
@@ -1484,6 +1708,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1546,6 +1771,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1568,7 +1794,7 @@ export class RulesClient {
   }
 
   private async muteInstanceWithOCC({ alertId, alertInstanceId }: MuteOptions) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Alert>(
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Rule>(
       'alert',
       alertId
     );
@@ -1636,7 +1862,7 @@ export class RulesClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Alert>(
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Rule>(
       'alert',
       alertId
     );
@@ -1751,22 +1977,22 @@ export class RulesClient {
         ...omit(action, 'actionRef'),
         id: reference.id,
       };
-    }) as Alert['actions'];
+    }) as Rule['actions'];
   }
 
-  private getAlertFromRaw<Params extends AlertTypeParams>(
+  private getAlertFromRaw<Params extends RuleTypeParams>(
     id: string,
     ruleTypeId: string,
     rawRule: RawRule,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false
-  ): Alert | AlertWithLegacyId {
+  ): Rule | RuleWithLegacyId {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawRule, it is safe
     // to cast the result to an Alert
-    const res = this.getPartialAlertFromRaw<Params>(
+    const res = this.getPartialRuleFromRaw<Params>(
       id,
       ruleType,
       rawRule,
@@ -1776,13 +2002,13 @@ export class RulesClient {
     );
     // include to result because it is for internal rules client usage
     if (includeLegacyId) {
-      return res as AlertWithLegacyId;
+      return res as RuleWithLegacyId;
     }
     // exclude from result because it is an internal variable
-    return omit(res, ['legacyId']) as Alert;
+    return omit(res, ['legacyId']) as Rule;
   }
 
-  private getPartialAlertFromRaw<Params extends AlertTypeParams>(
+  private getPartialRuleFromRaw<Params extends RuleTypeParams>(
     id: string,
     ruleType: UntypedNormalizedRuleType,
     {
@@ -1801,7 +2027,7 @@ export class RulesClient {
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false
-  ): PartialAlert<Params> | PartialAlertWithLegacyId<Params> {
+  ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
     const rule = {
       id,
       notifyWhen,
@@ -1820,8 +2046,8 @@ export class RulesClient {
     };
 
     return includeLegacyId
-      ? ({ ...rule, legacyId } as PartialAlertWithLegacyId<Params>)
-      : (rule as PartialAlert<Params>);
+      ? ({ ...rule, legacyId } as PartialRuleWithLegacyId<Params>)
+      : (rule as PartialRule<Params>);
   }
 
   private async validateActions(
@@ -1873,8 +2099,8 @@ export class RulesClient {
   }
 
   private async extractReferences<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams
   >(
     ruleType: UntypedNormalizedRuleType,
     ruleActions: NormalizedAlertAction[],
@@ -1909,8 +2135,8 @@ export class RulesClient {
   }
 
   private injectReferencesIntoParams<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams
   >(
     ruleId: string,
     ruleType: UntypedNormalizedRuleType,

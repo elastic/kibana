@@ -54,9 +54,7 @@ describe('deleteLegacyUrlAliases', () => {
         body: { error: { type: 'es_type', reason: 'es_reason' } },
       })
     );
-    params.client.updateByQuery.mockResolvedValueOnce(
-      elasticsearchClientMock.createErrorTransportRequestPromise(esError)
-    );
+    params.client.updateByQuery.mockResolvedValueOnce(Promise.reject(esError));
     mockGetEsErrorMessage.mockClear();
     mockGetEsErrorMessage.mockReturnValue('Oh no!');
 
@@ -71,15 +69,15 @@ describe('deleteLegacyUrlAliases', () => {
   describe('deleteBehavior "inclusive"', () => {
     const deleteBehavior = 'inclusive' as const;
 
-    it('when filtered namespaces is not empty, returns early', async () => {
-      const namespaces = ['default'];
+    it('when namespaces is empty, returns early', async () => {
+      const namespaces: string[] = [];
       const params = setup({ type, id, namespaces, deleteBehavior });
 
       await deleteLegacyUrlAliases(params);
       expect(params.client.updateByQuery).not.toHaveBeenCalled();
     });
 
-    it('when filtered namespaces is not empty, calls updateByQuery with expected script params', async () => {
+    it('when namespaces is not empty, calls updateByQuery with expected script params', async () => {
       const namespaces = ['space-a', 'default', 'space-b'];
       const params = setup({ type, id, namespaces, deleteBehavior });
 
@@ -90,7 +88,7 @@ describe('deleteLegacyUrlAliases', () => {
           body: expect.objectContaining({
             script: expect.objectContaining({
               params: {
-                namespaces: ['space-a', 'space-b'], // 'default' is filtered out
+                namespaces,
                 matchTargetNamespaceOp: 'delete',
                 notMatchTargetNamespaceOp: 'noop',
               },
@@ -105,8 +103,7 @@ describe('deleteLegacyUrlAliases', () => {
   describe('deleteBehavior "exclusive"', () => {
     const deleteBehavior = 'exclusive' as const;
 
-    it('when filtered namespaces is empty, calls updateByQuery with expected script params', async () => {
-      const namespaces = ['default'];
+    async function doTest(namespaces: string[]) {
       const params = setup({ type, id, namespaces, deleteBehavior });
 
       await deleteLegacyUrlAliases(params);
@@ -116,7 +113,7 @@ describe('deleteLegacyUrlAliases', () => {
           body: expect.objectContaining({
             script: expect.objectContaining({
               params: {
-                namespaces: [], // 'default' is filtered out
+                namespaces,
                 matchTargetNamespaceOp: 'noop',
                 notMatchTargetNamespaceOp: 'delete',
               },
@@ -125,28 +122,16 @@ describe('deleteLegacyUrlAliases', () => {
         }),
         expect.anything()
       );
+    }
+
+    it('when namespaces is empty, calls updateByQuery with expected script params', async () => {
+      const namespaces: string[] = [];
+      await doTest(namespaces);
     });
 
-    it('when filtered namespaces is not empty, calls updateByQuery with expected script params', async () => {
+    it('when namespaces is not empty, calls updateByQuery with expected script params', async () => {
       const namespaces = ['space-a', 'default', 'space-b'];
-      const params = setup({ type, id, namespaces, deleteBehavior });
-
-      await deleteLegacyUrlAliases(params);
-      expect(params.client.updateByQuery).toHaveBeenCalledTimes(1);
-      expect(params.client.updateByQuery).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: expect.objectContaining({
-            script: expect.objectContaining({
-              params: {
-                namespaces: ['space-a', 'space-b'], // 'default' is filtered out
-                matchTargetNamespaceOp: 'noop',
-                notMatchTargetNamespaceOp: 'delete',
-              },
-            }),
-          }),
-        }),
-        expect.anything()
-      );
+      await doTest(namespaces);
     });
   });
 });

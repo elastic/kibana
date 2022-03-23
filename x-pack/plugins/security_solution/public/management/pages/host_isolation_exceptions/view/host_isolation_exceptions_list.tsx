@@ -50,7 +50,21 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   typeof ExceptionItem
 >;
 
-/* eslint-disable complexity */
+const getPaginationObject = ({
+  total = 0,
+  perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+  page = 1,
+}: {
+  total?: number;
+  perPage?: number;
+  page?: number;
+}) => ({
+  totalItemCount: total,
+  pageSize: perPage,
+  pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+  pageIndex: page - 1,
+});
+
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
   const privileges = useUserPrivileges().endpointPrivileges;
@@ -102,12 +116,11 @@ export const HostIsolationExceptionsList = () => {
     },
   });
 
-  const pagination = {
-    totalItemCount: data?.total ?? 0,
-    pageSize: data?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
-    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-    pageIndex: (data?.page ?? 1) - 1,
-  };
+  const pagination = getPaginationObject({
+    total: data?.total,
+    perPage: data?.per_page,
+    page: data?.page,
+  });
 
   const listItems = data?.data || [];
   const allListItems = allData?.data || [];

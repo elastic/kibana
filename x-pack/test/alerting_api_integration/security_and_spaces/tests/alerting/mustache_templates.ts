@@ -19,7 +19,7 @@ import httpProxy from 'http-proxy';
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSlackServer } from '../../../common/fixtures/plugins/actions_simulators/server/plugin';
 import { getHttpProxyServer } from '../../../common/lib/get_proxy_server';
@@ -81,7 +81,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces[0].id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             name: 'testing context variable kibanaBaseUrl',
             rule_type_id: 'test.patternFiring',
             params: {

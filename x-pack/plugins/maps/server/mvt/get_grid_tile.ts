@@ -56,7 +56,10 @@ export async function getEsGridTile({
     };
 
     const tile = await core.executionContext.withContext(
-      makeExecutionContext('mvt:get_grid_tile', url),
+      makeExecutionContext({
+        description: 'mvt:get_grid_tile',
+        url,
+      }),
       async () => {
         return await context.core.elasticsearch.client.asCurrentUser.transport.request(
           {
@@ -70,6 +73,7 @@ export async function getEsGridTile({
               'Accept-Encoding': 'gzip',
             },
             asStream: true,
+            meta: true,
           }
         );
       }

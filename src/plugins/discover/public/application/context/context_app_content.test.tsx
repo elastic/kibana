@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from './components/action_bar/action_bar';
 import { GetStateReturn } from './services/context_state';
-import { SortDirection } from 'src/plugins/data/common';
+import { SortDirection } from 'src/plugins/data/public';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
 import { indexPatternMock } from '../../__mocks__/index_pattern';

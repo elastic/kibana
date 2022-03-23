@@ -8,10 +8,10 @@
 import type { Transaction } from 'elastic-apm-node';
 import { defer, forkJoin, throwError, Observable } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
-import type { Layout as ScreenshotModeLayout } from 'src/plugins/screenshot_mode/common';
-import type { ConditionalHeaders, HeadlessChromiumDriver } from '../browsers';
-import { getChromiumDisconnectedError } from '../browsers';
+import type { Headers, Logger } from 'src/core/server';
+import { errors } from '../../common';
+import type { Context, HeadlessChromiumDriver } from '../browsers';
+import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
 import type { Layout } from '../layouts';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
@@ -22,7 +22,6 @@ import type { Screenshot } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import type { UrlOrUrlWithContext } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
@@ -48,6 +47,10 @@ export interface PhaseTimeouts {
   loadDelay: number;
 }
 
+type Url = string;
+type UrlWithContext = [url: Url, context: Context];
+export type UrlOrUrlWithContext = Url | UrlWithContext;
+
 export interface ScreenshotObservableOptions {
   /**
    * The browser timezone that will be emulated in the browser instance.
@@ -58,7 +61,7 @@ export interface ScreenshotObservableOptions {
   /**
    * Custom headers to be sent with each request.
    */
-  conditionalHeaders: ConditionalHeaders;
+  headers?: Headers;
 
   /**
    * Timeouts for each phase of the screenshot.
@@ -105,14 +108,12 @@ interface PageSetupResults {
   elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   timeRange: string | null;
   error?: Error;
+  renderErrors?: string[];
 }
 
-const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
-const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
-
 const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
-  const height = dimensions?.height || DEFAULT_SCREENSHOT_CLIP_HEIGHT;
-  const width = dimensions?.width || DEFAULT_SCREENSHOT_CLIP_WIDTH;
+  const height = dimensions?.height || DEFAULT_VIEWPORT.height;
+  const width = dimensions?.width || DEFAULT_VIEWPORT.width;
 
   return [
     {
@@ -130,8 +131,7 @@ const getDefaultElementPosition = (dimensions: { height?: number; width?: number
  * provided by the browser.
  */
 const getDefaultViewPort = () => ({
-  height: DEFAULT_SCREENSHOT_CLIP_HEIGHT,
-  width: DEFAULT_SCREENSHOT_CLIP_WIDTH,
+  ...DEFAULT_VIEWPORT,
   zoom: 1,
 });
 
@@ -161,18 +161,27 @@ export class ScreenshotObservableHandler {
       );
   }
 
-  private openUrl(index: number, url: UrlOrUrlWithContext) {
-    return defer(() =>
-      openUrl(
+  private openUrl(index: number, urlOrUrlWithContext: UrlOrUrlWithContext) {
+    return defer(() => {
+      let url: string;
+      let context: Context | undefined;
+
+      if (typeof urlOrUrlWithContext === 'string') {
+        url = urlOrUrlWithContext;
+      } else {
+        [url, context] = urlOrUrlWithContext;
+      }
+
+      return openUrl(
         this.driver,
         this.logger,
         this.options.timeouts.openUrl,
         index,
         url,
-        this.options.conditionalHeaders,
-        this.layout.id as ScreenshotModeLayout
-      )
-    ).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
+        { ...(context ?? {}), layout: this.layout.id },
+        this.options.headers ?? {}
+      );
+    }).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
   }
 
   private waitForElements() {
@@ -180,14 +189,14 @@ export class ScreenshotObservableHandler {
     const waitTimeout = this.options.timeouts.waitForElements;
 
     return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
-      mergeMap((itemsCount) => {
-        // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
+      mergeMap(async (itemsCount) => {
+        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
         const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
 
-        return forkJoin([
-          driver.setViewport(viewport, this.logger),
-          waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout),
-        ]);
+        // Set the viewport allowing time for the browser to handle reflow and redraw
+        // before checking for readiness of visualizations.
+        await driver.setViewport(viewport, this.logger);
+        await waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
@@ -233,17 +242,22 @@ export class ScreenshotObservableHandler {
       withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotObservableResult> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
-
           const elements =
             data.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
-          const screenshots = await getScreenshots(this.driver, this.logger, elements);
-          const { timeRange, error: setupError } = data;
+          let screenshots: Screenshot[] = [];
+          try {
+            screenshots = await getScreenshots(this.driver, this.logger, elements);
+          } catch (e) {
+            throw new errors.FailedToCaptureScreenshot(e.message);
+          }
+          const { timeRange, error: setupError, renderErrors } = data;
 
           return {
             timeRange,
             screenshots,
             error: setupError,
+            renderErrors,
             elementsPositionAndAttributes: elements,
           };
         })

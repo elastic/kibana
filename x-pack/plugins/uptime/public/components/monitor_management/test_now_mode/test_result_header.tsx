@@ -63,7 +63,7 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiBadge style={{ width: 100 }} color={journeyStarted ? 'primary' : 'warning'}>
-                {journeyStarted ? IN_PROGRESS : PENDING_LABEL}
+                {journeyStarted ? IN_PROGRESS_LABEL : PENDING_LABEL}
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -86,7 +86,7 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
   );
 }
 
-const PENDING_LABEL = i18n.translate('xpack.uptime.monitorManagement.pending', {
+export const PENDING_LABEL = i18n.translate('xpack.uptime.monitorManagement.pending', {
   defaultMessage: 'PENDING',
 });
 
@@ -98,7 +98,7 @@ const COMPLETED_LABEL = i18n.translate('xpack.uptime.monitorManagement.completed
   defaultMessage: 'COMPLETED',
 });
 
-const IN_PROGRESS = i18n.translate('xpack.uptime.monitorManagement.inProgress', {
+export const IN_PROGRESS_LABEL = i18n.translate('xpack.uptime.monitorManagement.inProgress', {
   defaultMessage: 'IN PROGRESS',
 });
 

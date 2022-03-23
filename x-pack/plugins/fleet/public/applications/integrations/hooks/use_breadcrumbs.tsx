@@ -50,6 +50,19 @@ const breadcrumbGetters: {
     },
     { text: policyName },
   ],
+  integration_policy_upgrade: ({ pkgTitle, pkgkey, policyName }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.integration_details_policies({ pkgkey })[1],
+      text: pkgTitle,
+    },
+    { text: policyName },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePackagePolicyPageTitle', {
+        defaultMessage: 'Upgrade integration ',
+      }),
+    },
+  ],
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {

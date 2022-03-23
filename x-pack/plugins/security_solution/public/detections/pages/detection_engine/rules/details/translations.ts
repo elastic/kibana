@@ -24,14 +24,14 @@ export const BACK_TO_RULES = i18n.translate(
 export const EXPERIMENTAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.experimentalDescription',
   {
-    defaultMessage: 'Experimental',
+    defaultMessage: 'Technical preview',
   }
 );
 
-export const ACTIVATE_RULE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.activateRuleLabel',
+export const ENABLE_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel',
   {
-    defaultMessage: 'Activate',
+    defaultMessage: 'Enable',
   }
 );
 

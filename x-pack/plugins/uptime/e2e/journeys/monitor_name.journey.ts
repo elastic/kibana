@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, Page } from '@elastic/synthetics';
+import { journey, step, expect, after, before, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 import { byTestId } from './utils';
 
@@ -21,6 +21,11 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
 
   before(async () => {
     await uptime.waitForLoadingToFinish();
+  });
+
+  after(async () => {
+    await uptime.navigateToMonitorManagement();
+    await uptime.deleteMonitor();
   });
 
   step('Go to monitor-management', async () => {

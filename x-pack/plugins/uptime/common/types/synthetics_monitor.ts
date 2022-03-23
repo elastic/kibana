@@ -12,4 +12,6 @@ export interface MonitorIdParam {
   monitorId: string;
 }
 
-export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor>;
+export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor> & {
+  updated_at: string;
+};

@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'test_logstash_reader',
           'global_visualize_all',
         ],
-        false
+        { skipBrowserRefresh: true }
       );
     });
     after(async () => {

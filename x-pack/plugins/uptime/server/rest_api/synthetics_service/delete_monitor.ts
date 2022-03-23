@@ -11,6 +11,10 @@ import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from './service_errors';
+import {
+  sendTelemetryEvents,
+  formatTelemetryDeleteEvent,
+} from './telemetry/monitor_upgrade_sender';
 
 export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'DELETE',
@@ -36,8 +40,16 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         { ...monitor.attributes, id: monitorId },
       ]);
 
-      if (errors) {
-        return errors;
+      sendTelemetryEvents(
+        server.logger,
+        server.telemetry,
+        formatTelemetryDeleteEvent(monitor, server.kibanaVersion, new Date().toISOString(), errors)
+      );
+
+      if (errors && errors.length > 0) {
+        return response.ok({
+          body: { message: 'error pushing monitor to the service', attributes: { errors } },
+        });
       }
 
       return monitorId;

@@ -30,6 +30,7 @@
     "esUiShared",
     "fieldFormats",
     "uiActions",
+    "lens",
     "cloud"
   ],
   "owner": {

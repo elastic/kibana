@@ -13,9 +13,10 @@ import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore } from '@kbn/es-query';
-import type { Query, TimeRange, IndexPattern } from 'src/plugins/data/common';
+import type { Query, TimeRange, DataView } from 'src/plugins/data/common';
 import {
   getData,
+  getExecutionContext,
   getCoreChrome,
   getMapsCapabilities,
   getNavigation,
@@ -87,7 +88,7 @@ export interface Props {
 
 export interface State {
   initialized: boolean;
-  indexPatterns: IndexPattern[];
+  indexPatterns: DataView[];
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;
@@ -114,6 +115,12 @@ export class MapApp extends React.Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
+
+    getExecutionContext().set({
+      type: 'application',
+      page: 'editor',
+      id: this.props.savedMap.getSavedObjectId() || 'new',
+    });
 
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
@@ -341,9 +348,13 @@ export class MapApp extends React.Component<Props, State> {
     const spaces = getSpacesApi();
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newObjectId = sharingSavedObjectProps.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
       const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
-      await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
+      await spaces.ui.redirectLegacyUrl({
+        path: newPath,
+        aliasPurpose: sharingSavedObjectProps.aliasPurpose,
+        objectNoun: getMapEmbeddableDisplayName(),
+      });
       return;
     }
 

@@ -9,7 +9,7 @@
 import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 
 import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { coreMock, httpServiceMock } from '../../../../../../core/public/mocks';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
@@ -90,6 +90,52 @@ describe('Flyout', () => {
     expect(component.state('file')).toBe(mockFile);
     component.find('EuiFilePicker').simulate('change', []);
     expect(component.state('file')).toBe(undefined);
+  });
+
+  it('should only allow import once a file is selected', async () => {
+    const component = shallowRender(defaultProps);
+
+    // Ensure all promises resolve
+    await Promise.resolve();
+    // Ensure state changes are reflected
+    component.update();
+
+    expect(component.state('file')).toBe(undefined);
+    const importButton = await component.find(
+      'EuiButton[data-test-subj="importSavedObjectsImportBtn"]'
+    );
+    expect(importButton.prop('isDisabled')).toBe(true);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
+
+    // Ensure state changes are reflected
+    component.update();
+    const enabledImportButton = await component.find(
+      'EuiButton[data-test-subj="importSavedObjectsImportBtn"]'
+    );
+    expect(enabledImportButton.prop('isDisabled')).toBe(false);
+  });
+
+  it('should show "missing_file" error on import if import button is bypassed and no file is selected', async () => {
+    const component = shallowRender(defaultProps);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    // Go through the import flow
+    await component.instance().import();
+    component.update();
+    // Ensure all promises resolve
+    await Promise.resolve();
+
+    expect(component.state('error')).toBe('missing_file');
+    expect(component.state('status')).toBe('error');
+
+    const callOutText = await component
+      .find('p[data-test-subj="importSavedObjectsErrorText"]')
+      .text();
+    expect(callOutText).toBe('missing_file');
   });
 
   describe('conflicts', () => {

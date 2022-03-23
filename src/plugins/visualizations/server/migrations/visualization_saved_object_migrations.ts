@@ -11,11 +11,8 @@ import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/ser
 import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
 import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
 
-import {
-  DEFAULT_QUERY_LANGUAGE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
-  SerializedSearchSourceFields,
-} from '../../../data/common';
+import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '../../../data/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../data_views/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -26,6 +23,7 @@ import {
   commonAddDropLastBucketIntoTSVBModel,
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
+  commonUpdatePieVisApi,
 } from './visualization_common_migrations';
 import { VisualizationSavedObjectAttributes } from '../../common';
 
@@ -46,7 +44,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
-      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       id: searchSource.index,
     });
     delete searchSource.index;
@@ -59,7 +57,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
-        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: filterRow.meta.index,
       });
       delete filterRow.meta.index;
@@ -657,7 +655,7 @@ const migrateControls: SavedObjectMigrationFn<any, any> = (doc) => {
         control.indexPatternRefName = `control_${i}_index_pattern`;
         doc.references.push({
           name: control.indexPatternRefName,
-          type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+          type: DATA_VIEW_SAVED_OBJECT_TYPE,
           id: control.indexPattern,
         });
         delete control.indexPattern;
@@ -1102,7 +1100,7 @@ export const replaceIndexPatternReference: SavedObjectMigrationFn<any, any> = (d
   references: Array.isArray(doc.references)
     ? doc.references.map((reference) => {
         if (reference.type === 'index_pattern') {
-          reference.type = INDEX_PATTERN_SAVED_OBJECT_TYPE;
+          reference.type = DATA_VIEW_SAVED_OBJECT_TYPE;
         }
         return reference;
       })
@@ -1129,6 +1127,30 @@ export const removeMarkdownLessFromTSVB: SavedObjectMigrationFn<any, any> = (doc
       },
     };
   }
+  return doc;
+};
+
+export const updatePieVisApi: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    const newVisState = commonUpdatePieVisApi(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  }
+
   return doc;
 };
 
@@ -1187,6 +1209,7 @@ const visualizationSavedObjectTypeMigrations = {
   ),
   '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
+  '8.1.0': flow(updatePieVisApi),
 };
 
 /**

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactWrapper } from 'enzyme';

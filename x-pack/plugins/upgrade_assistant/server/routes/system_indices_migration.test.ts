@@ -70,9 +70,7 @@ describe('Migrate system indices API', () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
           .request as jest.Mock
-      ).mockResolvedValue({
-        body: mockedResponse,
-      });
+      ).mockResolvedValue(mockedResponse);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -113,9 +111,7 @@ describe('Migrate system indices API', () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
           .request as jest.Mock
-      ).mockResolvedValue({
-        body: mockedResponse,
-      });
+      ).mockResolvedValue(mockedResponse);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',

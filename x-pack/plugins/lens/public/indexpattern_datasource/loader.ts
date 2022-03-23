@@ -7,10 +7,12 @@
 
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { DataView } from 'src/plugins/data_views/public';
 import type { HttpSetup, SavedObjectReference } from 'kibana/public';
-import type { InitializationOptions, StateSetter } from '../types';
-
+import type {
+  DatasourceDataPanelProps,
+  InitializationOptions,
+  VisualizeEditorContext,
+} from '../types';
 import {
   IndexPattern,
   IndexPatternRef,
@@ -23,27 +25,21 @@ import {
 import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
-import {
-  IndexPatternsContract,
-  IndexPattern as IndexPatternInstance,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../src/plugins/data/public';
+import type { DataViewsContract, DataView } from '../../../../../src/plugins/data_views/public';
+import { isNestedField } from '../../../../../src/plugins/data_views/common';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
 import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
-type SetState = StateSetter<IndexPatternPrivateState>;
-type IndexPatternsService = Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+type SetState = DatasourceDataPanelProps<IndexPatternPrivateState>['setState'];
+type IndexPatternsService = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
 type ErrorHandler = (err: Error) => void;
 
 export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPattern {
   const newFields = dataView.fields
-    .filter(
-      (field) =>
-        !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
-    )
+    .filter((field) => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
     .map((field): IndexPatternField => {
       // Convert the getters on the index pattern service into plain JSON
       const base = {
@@ -132,8 +128,7 @@ export async function loadIndexPatterns({
   // ignore rejected indexpatterns here, they're already handled at the app level
   let indexPatterns = allIndexPatterns
     .filter(
-      (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
-        response.status === 'fulfilled'
+      (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
     )
     .map((response) => response.value);
 
@@ -226,7 +221,7 @@ export async function loadInitialState({
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
@@ -237,12 +232,20 @@ export async function loadInitialState({
 
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
   const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
-
+  const indexPatternIds = [];
+  if (initialContext && 'isVisualizeAction' in initialContext) {
+    for (let layerIdx = 0; layerIdx < initialContext.layers.length; layerIdx++) {
+      const layerContext = initialContext.layers[layerIdx];
+      indexPatternIds.push(layerContext.indexPatternId);
+    }
+  } else if (initialContext) {
+    indexPatternIds.push(initialContext.indexPatternId);
+  }
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
   const usedPatterns = (
     initialContext
-      ? [initialContext.indexPatternId]
+      ? indexPatternIds
       : uniq(
           state
             ? Object.values(state.layers)
@@ -272,11 +275,9 @@ export async function loadInitialState({
   // * start with the indexPattern in context
   // * then fallback to the used ones
   // * then as last resort use a first one from not used refs
-  const availableIndexPatternIds = [
-    initialContext?.indexPatternId,
-    ...usedPatterns,
-    ...notUsedPatterns,
-  ].filter((id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]);
+  const availableIndexPatternIds = [...indexPatternIds, ...usedPatterns, ...notUsedPatterns].filter(
+    (id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]
+  );
 
   const currentIndexPatternId = availableIndexPatternIds[0];
 
@@ -321,17 +322,20 @@ export async function changeIndexPattern({
   }
 
   try {
-    setState((s) => ({
-      ...s,
-      layers: isSingleEmptyLayer(state.layers)
-        ? mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
-        : state.layers,
-      indexPatterns: {
-        ...s.indexPatterns,
-        [id]: indexPatterns[id],
-      },
-      currentIndexPatternId: id,
-    }));
+    setState(
+      (s) => ({
+        ...s,
+        layers: isSingleEmptyLayer(state.layers)
+          ? mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
+          : state.layers,
+        indexPatterns: {
+          ...s.indexPatterns,
+          [id]: indexPatterns[id],
+        },
+        currentIndexPatternId: id,
+      }),
+      { applyImmediately: true }
+    );
     setLastUsedIndexPatternId(storage, id);
   } catch (err) {
     onError(err);
@@ -453,33 +457,39 @@ export async function syncExistingFields({
       }
     }
 
-    setState((state) => ({
-      ...state,
-      isFirstExistenceFetch: false,
-      existenceFetchFailed: false,
-      existenceFetchTimeout: false,
-      existingFields: emptinessInfo.reduce(
-        (acc, info) => {
-          acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
-          return acc;
-        },
-        { ...state.existingFields }
-      ),
-    }));
+    setState(
+      (state) => ({
+        ...state,
+        isFirstExistenceFetch: false,
+        existenceFetchFailed: false,
+        existenceFetchTimeout: false,
+        existingFields: emptinessInfo.reduce(
+          (acc, info) => {
+            acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
+            return acc;
+          },
+          { ...state.existingFields }
+        ),
+      }),
+      { applyImmediately: true }
+    );
   } catch (e) {
     // show all fields as available if fetch failed or timed out
-    setState((state) => ({
-      ...state,
-      existenceFetchFailed: e.res?.status !== 408,
-      existenceFetchTimeout: e.res?.status === 408,
-      existingFields: indexPatterns.reduce(
-        (acc, pattern) => {
-          acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
-          return acc;
-        },
-        { ...state.existingFields }
-      ),
-    }));
+    setState(
+      (state) => ({
+        ...state,
+        existenceFetchFailed: e.res?.status !== 408,
+        existenceFetchTimeout: e.res?.status === 408,
+        existingFields: indexPatterns.reduce(
+          (acc, pattern) => {
+            acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
+            return acc;
+          },
+          { ...state.existingFields }
+        ),
+      }),
+      { applyImmediately: true }
+    );
   }
 }
 

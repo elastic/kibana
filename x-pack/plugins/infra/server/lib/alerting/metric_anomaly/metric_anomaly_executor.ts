@@ -83,7 +83,7 @@ export const createMetricAnomalyExecutor =
         typical,
         influencers,
       } = first(data as MappedAnomalyHit[])!;
-      const alert = services.alertInstanceFactory(`${nodeType}-${metric}`);
+      const alert = services.alertFactory.create(`${nodeType}-${metric}`);
 
       alert.scheduleActions(FIRED_ACTIONS_ID, {
         alertState: stateToAlertMessage[AlertStates.ALERT],

@@ -1,0 +1,41 @@
+[[saved-object-migrations]]
+=== Migrate saved objects
+
+Each time you upgrade {kib}, an upgrade migration is performed to ensure that all <<managing-saved-objects,saved objects>> are compatible with the new version.
+
+NOTE: To help you prepare for the upgrade to 8.0.0, 7.17.0 includes an https://www.elastic.co/guide/en/kibana/7.17/upgrade-assistant.html[*Upgrade Assistant*].
+To access the assistant, go to *Stack Management > Upgrade Assistant*.
+
+WARNING: {kib} 7.12.0 and later uses a new migration process and index naming scheme. Before you upgrade, read the documentation for your version of {kib}.
+
+WARNING: The following instructions assumes {kib} is using the default index names. If the `kibana.index` or `xpack.tasks.index` configuration settings are different from the default, adapt the instructions accordingly.
+
+[float]
+[[upgrade-migrations-process]]
+==== How saved objects migrations work
+
+Saved objects are stored in two indices:
+
+* `.kibana_{kibana_version}_001`, e.g. for {kib} 7.12.0 `.kibana_7.12.0_001`.
+* `.kibana_task_manager_{kibana_version}_001`, e.g. for {kib} 7.12.0 `.kibana_task_manager_7.12.0_001`.
+
+The index aliases `.kibana` and `.kibana_task_manager` always point to
+the most up-to-date saved object indices.
+
+When you start a new {kib} installation, an upgrade migration is performed before starting plugins or serving HTTP traffic.
+Before you upgrade, shut down old nodes to prevent losing acknowledged writes.
+To reduce the likelihood of old nodes losing acknowledged writes, {kib} 7.12.0 and later
+adds a write block to the outdated index.
+
+The following tables lists the saved objects indices used by previous {kib} versions.
+
+.Saved object indices and aliases per {kib} version
+[options="header"]
+|=======================
+|Upgrading from version | Outdated index (alias)
+| 6.5.0 through 7.3.x    | `.kibana_N` (`.kibana` alias)
+| 7.4.0 through 7.11.x
+| `.kibana_N` (`.kibana` alias)
+
+`.kibana_task_manager_N` (`.kibana_task_manager` alias)
+|=======================

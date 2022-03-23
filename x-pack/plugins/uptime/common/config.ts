@@ -10,7 +10,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { sslSchema } from '@kbn/server-http-tools';
 
 const serviceConfig = schema.object({
-  enabled: schema.maybe(schema.boolean()),
   username: schema.maybe(schema.string()),
   password: schema.maybe(schema.string()),
   manifestUrl: schema.maybe(schema.string()),

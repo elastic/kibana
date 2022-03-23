@@ -8,7 +8,7 @@
 import { EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import type { Space } from '../../../../../../../../spaces/public';
 import type { Role } from '../../../../../../../common/model';

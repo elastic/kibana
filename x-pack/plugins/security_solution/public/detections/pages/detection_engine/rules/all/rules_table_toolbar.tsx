@@ -8,20 +8,23 @@
 import { EuiSwitch, EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
+import { useRulesFeatureTourContext } from './rules_feature_tour_context';
+import { OptionalEuiTourStep } from './optional_eui_tour_step';
 
 const ToolbarLayout = styled.div`
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   grid-gap: 16px;
-  box-shadow: inset 0 -1px 0 #d3dae6;
+  box-shadow: inset 0 -1px 0 ${({ theme }) => theme.eui.euiBorderColor};
 `;
 
 interface RulesTableToolbarProps {
   activeTab: AllRulesTabs;
   onTabChange: (tab: AllRulesTabs) => void;
+  loading: boolean;
 }
 
 export enum AllRulesTabs {
@@ -43,11 +46,16 @@ const allRulesTabs = [
 ];
 
 export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
-  ({ onTabChange, activeTab }) => {
+  ({ onTabChange, activeTab, loading }) => {
     const {
       state: { isInMemorySorting },
       actions: { setIsInMemorySorting },
     } = useRulesTableContext();
+
+    const {
+      steps: { inMemoryTableStepProps },
+      goToNextStep,
+    } = useRulesFeatureTourContext();
 
     return (
       <ToolbarLayout>
@@ -64,13 +72,22 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
             </EuiTab>
           ))}
         </EuiTabs>
-        <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
-          <EuiSwitch
-            label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
-            checked={isInMemorySorting}
-            onChange={(e) => setIsInMemorySorting(e.target.checked)}
-          />
-        </EuiToolTip>
+        {/* delaying render of tour due to EuiPopover can't react to layout changes
+        https://github.com/elastic/kibana/pull/124343#issuecomment-1032467614 */}
+        <OptionalEuiTourStep stepProps={loading ? undefined : inMemoryTableStepProps}>
+          <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
+            <EuiSwitch
+              label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
+              checked={isInMemorySorting}
+              onChange={(e) => {
+                if (inMemoryTableStepProps.isStepOpen) {
+                  goToNextStep();
+                }
+                setIsInMemorySorting(e.target.checked);
+              }}
+            />
+          </EuiToolTip>
+        </OptionalEuiTourStep>
       </ToolbarLayout>
     );
   }

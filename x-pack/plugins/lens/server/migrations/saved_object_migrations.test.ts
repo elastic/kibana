@@ -18,13 +18,15 @@ import {
   VisState716,
   VisStatePost715,
   VisStatePre715,
+  VisState810,
+  VisState820,
 } from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
 import { PaletteOutput } from 'src/plugins/charts/common';
 import { Filter } from '@kbn/es-query';
 
 describe('Lens migrations', () => {
-  const migrations = getAllMigrations({});
+  const migrations = getAllMigrations({}, {});
   describe('7.7.0 missing dimensions in XY', () => {
     const context = {} as SavedObjectMigrationContext;
 
@@ -1611,14 +1613,17 @@ describe('Lens migrations', () => {
       },
     };
 
-    const migrationFunctionsObject = getAllMigrations({
-      [migrationVersion]: (filters: Filter[]) => {
-        return filters.map((filterState) => ({
-          ...filterState,
-          migrated: true,
-        }));
+    const migrationFunctionsObject = getAllMigrations(
+      {
+        [migrationVersion]: (filters: Filter[]) => {
+          return filters.map((filterState) => ({
+            ...filterState,
+            migrated: true,
+          }));
+        },
       },
-    });
+      {}
+    );
 
     const migratedLensDoc = migrationFunctionsObject[migrationVersion](
       lensVisualizationDoc as SavedObjectUnsanitizedDoc,
@@ -1640,6 +1645,423 @@ describe('Lens migrations', () => {
           ],
         },
       },
+    });
+  });
+
+  test('should properly apply a custom visualization migration', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        visualizationType: 'abc',
+        state: {
+          visualization: { oldState: true },
+        },
+      },
+    };
+
+    const migrationFn = jest.fn((oldState: { oldState: boolean }) => ({
+      newState: oldState.oldState,
+    }));
+
+    const migrationFunctionsObject = getAllMigrations(
+      {},
+      {
+        abc: () => ({
+          [migrationVersion]: migrationFn,
+        }),
+      }
+    );
+    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
+      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+    const otherLensDoc = migrationFunctionsObject[migrationVersion](
+      {
+        ...lensVisualizationDoc,
+        attributes: {
+          ...lensVisualizationDoc.attributes,
+          visualizationType: 'def',
+        },
+      } as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+
+    expect(migrationFn).toHaveBeenCalledTimes(1);
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        visualizationType: 'abc',
+        state: {
+          visualization: { newState: true },
+        },
+      },
+    });
+    expect(otherLensDoc).toEqual({
+      attributes: {
+        visualizationType: 'def',
+        state: {
+          visualization: { oldState: true },
+        },
+      },
+    });
+  });
+
+  describe('8.1.0 add parentFormat to terms operation', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      dataType: 'string',
+                      isBucketed: true,
+                      label: 'Top values of geoip.country_iso_code',
+                      operationType: 'terms',
+                      params: {},
+                      scale: 'ordinal',
+                      sourceField: 'geoip.country_iso_code',
+                    },
+                    '4': {
+                      label: 'Anzahl der Aufnahmen',
+                      dataType: 'number',
+                      operationType: 'count',
+                      sourceField: 'Aufnahmen',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                    '5': {
+                      label: 'Sum of bytes',
+                      dataType: 'numver',
+                      operationType: 'sum',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('should change field for count operations but not for others, not changing the vis', () => {
+      const result = migrations['8.1.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      expect(
+        Object.values(
+          result.attributes.state.datasourceStates.indexpattern.layers['2'].columns
+        ).find(({ operationType }) => operationType === 'terms')
+      ).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({ parentFormat: { id: 'terms' } }),
+        })
+      );
+    });
+  });
+
+  describe('8.2.0', () => {
+    describe('last_value columns', () => {
+      const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+      const example = {
+        type: 'lens',
+        id: 'mocked-saved-object-id',
+        attributes: {
+          savedObjectId: '1',
+          title: 'MyRenamedOps',
+          description: '',
+          visualizationType: null,
+          state: {
+            datasourceMetaData: {
+              filterableIndexPatterns: [],
+            },
+            datasourceStates: {
+              indexpattern: {
+                currentIndexPatternId: 'logstash-*',
+                layers: {
+                  '2': {
+                    columns: {
+                      '3': {
+                        dataType: 'string',
+                        isBucketed: true,
+                        label: 'Top values of geoip.country_iso_code',
+                        operationType: 'terms',
+                        params: {},
+                        scale: 'ordinal',
+                        sourceField: 'geoip.country_iso_code',
+                      },
+                      '4': {
+                        label: 'Anzahl der Aufnahmen',
+                        dataType: 'number',
+                        operationType: 'count',
+                        sourceField: 'Aufnahmen',
+                        isBucketed: false,
+                        scale: 'ratio',
+                      },
+                      '5': {
+                        label: 'Sum of bytes',
+                        dataType: 'numver',
+                        operationType: 'last_value',
+                        params: {
+                          // no showArrayValues
+                        },
+                        sourceField: 'bytes',
+                        isBucketed: false,
+                        scale: 'ratio',
+                      },
+                    },
+                    columnOrder: ['3', '4', '5'],
+                  },
+                  '3': {
+                    columns: {
+                      '5': {
+                        label: 'Sum of bytes',
+                        dataType: 'numver',
+                        operationType: 'last_value',
+                        params: {
+                          // no showArrayValues
+                        },
+                        sourceField: 'bytes',
+                        isBucketed: false,
+                        scale: 'ratio',
+                      },
+                    },
+                    columnOrder: ['3', '4', '5'],
+                  },
+                },
+              },
+            },
+            visualization: {},
+            query: { query: '', language: 'kuery' },
+            filters: [],
+          },
+        },
+      } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+      it('should set showArrayValues for last-value columns', () => {
+        const result = migrations['8.2.0'](example, context) as ReturnType<
+          SavedObjectMigrationFn<LensDocShape, LensDocShape>
+        >;
+
+        const layer2Columns =
+          result.attributes.state.datasourceStates.indexpattern.layers['2'].columns;
+        const layer3Columns =
+          result.attributes.state.datasourceStates.indexpattern.layers['3'].columns;
+        expect(layer2Columns['5'].params).toHaveProperty('showArrayValues', true);
+        expect(layer2Columns['3'].params).not.toHaveProperty('showArrayValues');
+        expect(layer3Columns['5'].params).toHaveProperty('showArrayValues', true);
+      });
+    });
+
+    describe('rename fitRowToContent to new detailed rowHeight and rowHeightLines', () => {
+      const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+      function getExample(fitToContent: boolean) {
+        return {
+          type: 'lens',
+          id: 'mocked-saved-object-id',
+          attributes: {
+            visualizationType: 'lnsDatatable',
+            title: 'Lens visualization',
+            references: [
+              {
+                id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                name: 'indexpattern-datasource-current-indexpattern',
+                type: 'index-pattern',
+              },
+              {
+                id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                name: 'indexpattern-datasource-layer-cddd8f79-fb20-4191-a3e7-92484780cc62',
+                type: 'index-pattern',
+              },
+            ],
+            state: {
+              datasourceStates: {
+                indexpattern: {
+                  layers: {
+                    'cddd8f79-fb20-4191-a3e7-92484780cc62': {
+                      indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                      columns: {
+                        '221f0abf-6e54-4c61-9316-4107ad6fa500': {
+                          label: 'Top values of category.keyword',
+                          dataType: 'string',
+                          operationType: 'terms',
+                          scale: 'ordinal',
+                          sourceField: 'category.keyword',
+                          isBucketed: true,
+                          params: {
+                            size: 5,
+                            orderBy: {
+                              type: 'column',
+                              columnId: 'c6f07a26-64eb-4871-ad62-c7d937230e33',
+                            },
+                            orderDirection: 'desc',
+                            otherBucket: true,
+                            missingBucket: false,
+                            parentFormat: {
+                              id: 'terms',
+                            },
+                          },
+                        },
+                        'c6f07a26-64eb-4871-ad62-c7d937230e33': {
+                          label: 'Count of records',
+                          dataType: 'number',
+                          operationType: 'count',
+                          isBucketed: false,
+                          scale: 'ratio',
+                          sourceField: '___records___',
+                        },
+                      },
+                      columnOrder: [
+                        '221f0abf-6e54-4c61-9316-4107ad6fa500',
+                        'c6f07a26-64eb-4871-ad62-c7d937230e33',
+                      ],
+                      incompleteColumns: {},
+                    },
+                  },
+                },
+              },
+              visualization: {
+                columns: [
+                  {
+                    isTransposed: false,
+                    columnId: '221f0abf-6e54-4c61-9316-4107ad6fa500',
+                  },
+                  {
+                    isTransposed: false,
+                    columnId: 'c6f07a26-64eb-4871-ad62-c7d937230e33',
+                  },
+                ],
+                layerId: 'cddd8f79-fb20-4191-a3e7-92484780cc62',
+                layerType: 'data',
+                fitRowToContent: fitToContent,
+              },
+              filters: [],
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+            },
+          },
+        } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+      }
+
+      it('should migrate enabled fitRowToContent to new rowHeight: "auto"', () => {
+        const result = migrations['8.2.0'](getExample(true), context) as ReturnType<
+          SavedObjectMigrationFn<LensDocShape810<VisState810>, LensDocShape810<VisState820>>
+        >;
+
+        expect(result.attributes.state.visualization as VisState820).toEqual(
+          expect.objectContaining({
+            rowHeight: 'auto',
+          })
+        );
+      });
+
+      it('should migrate disabled fitRowToContent to new rowHeight: "single"', () => {
+        const result = migrations['8.2.0'](getExample(false), context) as ReturnType<
+          SavedObjectMigrationFn<LensDocShape810<VisState810>, LensDocShape810<VisState820>>
+        >;
+
+        expect(result.attributes.state.visualization as VisState820).toEqual(
+          expect.objectContaining({
+            rowHeight: 'single',
+            rowHeightLines: 1,
+          })
+        );
+      });
+    });
+  });
+
+  describe('8.2.0 include empty rows for date histogram columns', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto', timeZone: 'Europe/Berlin' },
+                    },
+                    '4': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                    },
+                    '6': {
+                      label: 'Sum of bytes',
+                      dataType: 'number',
+                      operationType: 'sum',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('should set include empty rows for all date histogram columns', () => {
+      const result = migrations['8.2.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      const layer2Columns =
+        result.attributes.state.datasourceStates.indexpattern.layers['2'].columns;
+      expect(layer2Columns['3'].params).toHaveProperty('includeEmptyRows', true);
+      expect(layer2Columns['4'].params).toHaveProperty('includeEmptyRows', true);
     });
   });
 });

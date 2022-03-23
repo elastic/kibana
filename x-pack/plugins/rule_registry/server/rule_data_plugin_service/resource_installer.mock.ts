@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ResourceInstaller } from './resource_installer';
+import { IResourceInstaller, ResourceInstaller } from './resource_installer';
 
 type Schema = PublicMethodsOf<ResourceInstaller>;
 export type ResourceInstallerMock = jest.Mocked<Schema>;
-const createResourceInstallerMock = () => {
+const createResourceInstallerMock = (): jest.Mocked<IResourceInstaller> => {
   return {
     installCommonResources: jest.fn(),
     installIndexLevelResources: jest.fn(),

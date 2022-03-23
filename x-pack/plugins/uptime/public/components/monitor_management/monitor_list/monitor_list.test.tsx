@@ -25,7 +25,7 @@ describe('<MonitorManagementList />', () => {
         enabled: true,
         schedule: {
           unit: ScheduleUnit.MINUTES,
-          number: `${i}`,
+          number: `${i * 10}`,
         },
         urls: `https://test-${i}.co`,
         type: DataStream.HTTP,
@@ -76,11 +76,7 @@ describe('<MonitorManagementList />', () => {
     monitor.attributes.tags.forEach((tag) => {
       expect(screen.getByText(tag)).toBeInTheDocument();
     });
-    expect(
-      screen.getByText(
-        `@every ${monitor.attributes.schedule.number}${monitor.attributes.schedule.unit}`
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(monitor.attributes.schedule.number)).toBeInTheDocument();
   });
 
   it('handles changing per page', () => {

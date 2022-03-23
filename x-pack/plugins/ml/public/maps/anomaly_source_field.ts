@@ -98,6 +98,12 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
     }),
     type: 'string',
   },
+  influencers: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerInfluencersLabel', {
+      defaultMessage: 'Influencers',
+    }),
+    type: 'string',
+  },
 };
 
 export class AnomalySourceTooltipProperty implements ITooltipProperty {

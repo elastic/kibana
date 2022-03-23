@@ -24,6 +24,7 @@ interface PoliciesMap {
     };
   };
 }
+
 function formatPolicies(policiesMap: PoliciesMap): PolicyFromES[] {
   return Object.keys(policiesMap).reduce((accum: PolicyFromES[], lifecycleName: string) => {
     const policyEntry = policiesMap[lifecycleName];
@@ -50,6 +51,7 @@ async function fetchPolicies(client: ElasticsearchClient): Promise<TransportResu
   const options = {
     // we allow 404 since they may have no policies
     ignore: [404],
+    meta: true,
   };
 
   // @ts-expect-error Policy doesn't contain all known properties (name, in_use_by)

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { TaskRunnerFactory } from '../task_runner';
 import { RuleTypeRegistry, ConstructorOptions } from '../rule_type_registry';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
@@ -13,6 +13,7 @@ import { ILicenseState } from '../lib/license_state';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { isRuleExportable } from './is_rule_exportable';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 let ruleTypeRegistryParams: ConstructorOptions;
 let logger: MockedLogger;
@@ -24,10 +25,12 @@ beforeEach(() => {
   mockedLicenseState = licenseStateMock.create();
   logger = loggerMock.create();
   ruleTypeRegistryParams = {
+    logger: loggingSystemMock.create().get(),
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
+    minimumScheduleInterval: { value: '1m', enforce: false },
   };
 });
 

@@ -16,7 +16,6 @@ import { sharePluginMock } from '../../../../../src/plugins/share/public/mocks';
 export const createSetupDepsMock = () => {
   const cloud = cloudMock.createSetup();
   return {
-    licensing: licensingMock.createSetup(),
     data: dataPluginMock.createSetupContract(),
     home: homePluginMock.createSetupContract(),
     customIntegrations: customIntegrationsMock.createSetup(),
@@ -26,6 +25,7 @@ export const createSetupDepsMock = () => {
 
 export const createStartDepsMock = () => {
   return {
+    licensing: licensingMock.createStart(),
     data: dataPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
     customIntegrations: customIntegrationsMock.createStart(),

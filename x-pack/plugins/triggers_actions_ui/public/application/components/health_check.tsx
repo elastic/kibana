@@ -20,7 +20,7 @@ import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
-import { alertingFrameworkHealth } from '../lib/alert_api';
+import { alertingFrameworkHealth } from '../lib/rule_api';
 
 interface Props {
   inFlyout?: boolean;
@@ -28,7 +28,7 @@ interface Props {
 }
 
 interface HealthStatus {
-  isAlertsAvailable: boolean;
+  isRulesAvailable: boolean;
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
 }
@@ -51,7 +51,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
         isSufficientlySecure: false,
         hasPermanentEncryptionKey: false,
       };
-      if (healthStatus.isAlertsAvailable) {
+      if (healthStatus.isRulesAvailable) {
         const alertingHealthResult = await alertingFrameworkHealth({ http });
         healthStatus.isSufficientlySecure = alertingHealthResult.isSufficientlySecure;
         healthStatus.hasPermanentEncryptionKey = alertingHealthResult.hasPermanentEncryptionKey;
@@ -79,7 +79,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <>{children}</>
-        ) : !healthCheck.isAlertsAvailable ? (
+        ) : !healthCheck.isRulesAvailable ? (
           <AlertsError docLinks={docLinks} className={className} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
           <ApiKeysAndEncryptionError docLinks={docLinks} className={className} />

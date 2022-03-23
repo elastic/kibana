@@ -30,6 +30,7 @@ export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
+export const OPEN_LAYER_WIZARD = 'openLayerWizard';
 
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
@@ -144,6 +145,7 @@ export enum DRAW_SHAPE {
   LINE = 'LINE',
   SIMPLE_SELECT = 'SIMPLE_SELECT',
   DELETE = 'DELETE',
+  WAIT = 'WAIT',
 }
 
 export const AGG_DELIMITER = '_of_';
@@ -285,3 +287,23 @@ export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
 export const emsWorldLayerId = 'world_countries';
+
+export enum WIZARD_ID {
+  CHOROPLETH = 'choropleth',
+  GEO_FILE = 'uploadGeoFile',
+  NEW_VECTOR = 'newVectorLayer',
+  OBSERVABILITY = 'observabilityLayer',
+  SECURITY = 'securityLayer',
+  EMS_BOUNDARIES = 'emsBoundaries',
+  EMS_BASEMAP = 'emsBaseMap',
+  CLUSTERS = 'clusters',
+  HEATMAP = 'heatmap',
+  GEO_LINE = 'geoLine',
+  POINT_2_POINT = 'point2Point',
+  ES_DOCUMENT = 'esDocument',
+  ES_TOP_HITS = 'esTopHits',
+  KIBANA_BASEMAP = 'kibanaBasemap',
+  MVT_VECTOR = 'mvtVector',
+  WMS_LAYER = 'wmsLayer',
+  TMS_LAYER = 'tmsLayer',
+}

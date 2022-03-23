@@ -41,4 +41,5 @@ export enum API_URLS {
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITORS = '/internal/uptime/service/monitors',
   RUN_ONCE_MONITOR = '/internal/uptime/service/monitors/run_once',
+  TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
 }

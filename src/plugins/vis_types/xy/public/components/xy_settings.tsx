@@ -62,6 +62,8 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: number;
+  ariaLabel?: string;
 };
 
 function getValueLabelsStyling() {
@@ -96,6 +98,8 @@ export const XYSettings: FC<XYSettingsProps> = ({
   legendPosition,
   maxLegendLines,
   truncateLegend,
+  legendSize,
+  ariaLabel,
 }) => {
   const themeService = getThemeService();
   const theme = themeService.useChartsTheme();
@@ -165,6 +169,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       baseTheme={baseTheme}
       showLegend={showLegend}
       legendPosition={legendPosition}
+      legendSize={legendSize}
       allowBrushingLastHistogramBin={isTimeChart}
       roundHistogramBrushValues={enableHistogramMode && !isTimeChart}
       legendColorPicker={legendColorPicker}
@@ -173,6 +178,8 @@ export const XYSettings: FC<XYSettingsProps> = ({
       onRenderChange={onRenderChange}
       legendAction={legendAction}
       tooltip={tooltipProps}
+      ariaLabel={ariaLabel}
+      ariaUseDefaultSummary={!ariaLabel}
       orderOrdinalBinsBy={
         orderBucketsBySum
           ? {

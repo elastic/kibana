@@ -13,6 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
   SavedObjectsImportFailure,
+  SavedObjectsImportRetry,
 } from '../../types';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { savedObjectsClientMock } from '../../../mocks';
@@ -65,6 +66,7 @@ describe('#checkOriginConflicts', () => {
     ignoreRegularConflicts?: boolean;
     importStateMap?: ImportStateMap;
     pendingOverwrites?: Set<string>;
+    retries?: SavedObjectsImportRetry[];
   }): CheckOriginConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     find = savedObjectsClient.find;
@@ -122,6 +124,24 @@ describe('#checkOriginConflicts', () => {
       expect(find).not.toHaveBeenCalled();
     });
 
+    test('does not execute searches for multi-namespace objects that have a retry with a destinationId specified', async () => {
+      const objects = [multiNsObj, multiNsObjWithOriginId];
+      const params = setupParams({
+        objects,
+        retries: [
+          { type: multiNsObj.type, id: multiNsObj.id, destinationId: 'doesnt-matter' },
+          {
+            type: multiNsObjWithOriginId.type,
+            id: multiNsObjWithOriginId.id,
+            destinationId: 'doesnt-matter',
+          },
+        ] as SavedObjectsImportRetry[],
+      });
+
+      await checkOriginConflicts(params);
+      expect(find).not.toHaveBeenCalled();
+    });
+
     test('executes searches for multi-namespace objects', async () => {
       const objects = [multiNsObj, otherObj, multiNsObjWithOriginId, otherObjWithOriginId];
       const params1 = setupParams({ objects });
@@ -156,7 +176,6 @@ describe('#checkOriginConflicts', () => {
     ): SavedObjectsImportFailure => ({
       type: object.type,
       id: object.id,
-      title: object.attributes.title,
       meta: { title: object.attributes.title },
       error: {
         type: 'ambiguous_conflict',
@@ -169,7 +188,6 @@ describe('#checkOriginConflicts', () => {
     ): SavedObjectsImportFailure => ({
       type: object.type,
       id: object.id,
-      title: object.attributes?.title,
       meta: { title: object.attributes.title },
       error: {
         type: 'conflict',
@@ -203,6 +221,65 @@ describe('#checkOriginConflicts', () => {
         pendingOverwrites: new Set(),
       };
       expect(checkOriginConflictsResult).toEqual(expectedResult);
+    });
+
+    describe('retries', () => {
+      // retries are only defined when called from resolveSavedObjectsImportErrors
+      test('filters inexact matches of other retries ("retryDestinations" check)', async () => {
+        // obj1 and obj2 exist in this space
+        // try to import obj3 and obj4; simulating a scenario where they both share an origin, but obj3 is being retried with the
+        // destinationId of obj1, and obj2 is being retried without a destinationId
+        const obj1 = createObject(MULTI_NS_TYPE, 'id-1', 'some-originId');
+        const obj2 = createObject(MULTI_NS_TYPE, 'id-2', 'some-originId');
+        const obj3 = createObject(MULTI_NS_TYPE, 'id-3', 'some-originId');
+        const obj4 = createObject(MULTI_NS_TYPE, 'id-4', 'some-originId');
+        const objects = [obj3, obj4];
+        const params = setupParams({
+          objects,
+          importStateMap: new Map([
+            [`${obj3.type}:${obj3.id}`, {}],
+            [`${obj4.type}:${obj4.id}`, {}],
+          ]),
+          pendingOverwrites: new Set([`${obj3.type}:${obj3.id}`]),
+          retries: [
+            { type: obj3.type, id: obj3.id, destinationId: obj1.id, overwrite: true }, // if obj1 already exists, this would have had to have overwrite=true to pass the earlier call to checkConflicts without an error
+            { type: obj4.type, id: obj4.id },
+          ] as SavedObjectsImportRetry[],
+        });
+        // find is skipped for obj1 because it has a retry with a destinationId
+        mockFindResult(obj1, obj2); // find for obj4: the result is an inexact match with two destinations, but obj1 is matched by obj3 -- accordingly, obj4 has an inexact match to obj2
+
+        const checkOriginConflictsResult = await checkOriginConflicts(params);
+        const expectedResult = {
+          importStateMap: new Map(),
+          errors: [createConflictError(obj4, obj2.id)],
+          pendingOverwrites: new Set(), // does not capture obj3 because that would have been captured in pendingOverwrites for the checkConflicts function
+        };
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
+      });
+
+      test('does not return a conflict error when a retry has overwrite=true', async () => {
+        // obj1 exists in this space
+        // try to import 2; simulating a scenario where they both share an origin
+        const obj1 = createObject(MULTI_NS_TYPE, 'id-1', 'some-originId');
+        const obj2 = createObject(MULTI_NS_TYPE, 'id-2', 'some-originId');
+        const objects = [obj2];
+        const params = setupParams({
+          objects,
+          importStateMap: new Map([[`${obj2.type}:${obj2.id}`, {}]]),
+          pendingOverwrites: new Set(), // obj2 wouldn't be included in pendingOverwrites from the earlier call to checkConflicts because obj2 doesn't exist
+          retries: [{ type: obj2.type, id: obj2.id, overwrite: true }] as SavedObjectsImportRetry[],
+        });
+        mockFindResult(obj1); // find for obj2: the result is an inexact match with one destination -- accordingly, obj2 has an inexact match to obj1
+
+        const checkOriginConflictsResult = await checkOriginConflicts(params);
+        const expectedResult = {
+          importStateMap: new Map([[`${obj2.type}:${obj2.id}`, { destinationId: obj1.id }]]),
+          errors: [],
+          pendingOverwrites: new Set([`${obj2.type}:${obj2.id}`]),
+        };
+        expect(checkOriginConflictsResult).toEqual(expectedResult);
+      });
     });
 
     describe('object result without a `importStateMap` entry (no match or exact match)', () => {

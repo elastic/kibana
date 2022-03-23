@@ -10,6 +10,7 @@ import { waitFor } from '@testing-library/react';
 import ReactDOM from 'react-dom';
 import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldList } from './field_list';
 import { FieldItem } from './field_item';
@@ -17,7 +18,7 @@ import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
@@ -259,6 +260,7 @@ describe('IndexPattern Data Panel', () => {
       indexPatternRefs: [],
       existingFields: {},
       data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onUpdateIndexPattern: jest.fn(),
@@ -857,7 +859,7 @@ describe('IndexPattern Data Panel', () => {
       });
       it('should call field editor plugin on clicking add button', async () => {
         const mockIndexPattern = {};
-        (props.data.indexPatterns.get as jest.Mock).mockImplementation(() =>
+        (props.dataViews.get as jest.Mock).mockImplementation(() =>
           Promise.resolve(mockIndexPattern)
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
@@ -895,7 +897,7 @@ describe('IndexPattern Data Panel', () => {
           ],
           metaFields: [],
         };
-        (props.data.indexPatterns.get as jest.Mock).mockImplementation(() =>
+        (props.dataViews.get as jest.Mock).mockImplementation(() =>
           Promise.resolve(mockIndexPattern)
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);

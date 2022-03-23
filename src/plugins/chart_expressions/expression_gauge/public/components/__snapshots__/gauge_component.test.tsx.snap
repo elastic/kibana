@@ -5,8 +5,18 @@ exports[`GaugeComponent renders the chart 1`] = `
   renderer="canvas"
 >
   <Settings
+    ariaUseDefaultSummary={true}
     debugState={false}
-    theme={Object {}}
+    theme={
+      Array [
+        Object {
+          "background": Object {
+            "color": "transparent",
+          },
+        },
+        Object {},
+      ]
+    }
   />
   <Component
     actual={3}
@@ -31,6 +41,7 @@ exports[`GaugeComponent renders the chart 1`] = `
         4,
       ]
     }
+    tooltipValueFormatter={[Function]}
   />
 </Chart>
 `;

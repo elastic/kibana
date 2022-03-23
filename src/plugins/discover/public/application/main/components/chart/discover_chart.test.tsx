@@ -7,9 +7,11 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { DataView } from '../../../../../../data_views/public';
+import { setHeaderActionMenuMounter, setUiActions } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
@@ -21,10 +23,12 @@ import { Chart } from './point_series';
 import { DiscoverChart } from './discover_chart';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { ReactWrapper } from 'enzyme';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(isTimeBased: boolean = false) {
+async function mountComponent(isTimeBased: boolean = false) {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -86,7 +90,12 @@ function mountComponent(isTimeBased: boolean = false) {
   }) as DataCharts$;
 
   const props = {
-    isTimeBased,
+    indexPattern: {
+      isTimeBased: () => isTimeBased,
+      id: '123',
+      getFieldByName: () => ({ type: 'date', name: 'timefield', visualizable: true }),
+      timeFieldName: 'timefield',
+    } as unknown as DataView,
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchDataChart$: charts$,
@@ -99,20 +108,64 @@ function mountComponent(isTimeBased: boolean = false) {
     setDiscoverViewMode: jest.fn(),
   };
 
-  return mountWithIntl(
-    <KibanaContextProvider services={services}>
-      <DiscoverChart {...props} />
-    </KibanaContextProvider>
-  );
+  let instance: ReactWrapper = {} as ReactWrapper;
+  await act(async () => {
+    instance = mountWithIntl(
+      <KibanaContextProvider services={services}>
+        <DiscoverChart {...props} />
+      </KibanaContextProvider>
+    );
+    // wait for initial async loading to complete
+    await new Promise((r) => setTimeout(r, 0));
+    await instance.update();
+  });
+  return instance;
 }
 
 describe('Discover chart', () => {
-  test('render without timefield', () => {
-    const component = mountComponent();
+  let triggerActions: unknown[] = [];
+  beforeEach(() => {
+    setUiActions({
+      getTriggerCompatibleActions: () => {
+        return triggerActions;
+      },
+    } as unknown as UiActionsStart);
+  });
+  test('render without timefield', async () => {
+    const component = await mountComponent();
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
-  test('render with filefield', () => {
-    const component = mountComponent(true);
+
+  test('render with timefield without visualize permissions', async () => {
+    const component = await mountComponent(true);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverEditVisualization"]').exists()).toBeFalsy();
+  });
+
+  test('render with timefield with visualize permissions', async () => {
+    triggerActions = [{}];
+    const component = await mountComponent(true);
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverEditVisualization"]').exists()).toBeTruthy();
+  });
+
+  test('triggers ui action on click', async () => {
+    const fn = jest.fn();
+    setUiActions({
+      getTrigger: () => ({
+        exec: fn,
+      }),
+      getTriggerCompatibleActions: () => {
+        return [{}];
+      },
+    } as unknown as UiActionsStart);
+    const component = await mountComponent(true);
+    component.find('[data-test-subj="discoverEditVisualization"]').first().simulate('click');
+    expect(fn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatternId: '123',
+        fieldName: 'timefield',
+      })
+    );
   });
 });

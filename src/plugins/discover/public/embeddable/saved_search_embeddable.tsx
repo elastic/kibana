@@ -12,21 +12,21 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { KibanaExecutionContext } from 'kibana/public';
 import { Container, Embeddable } from '../../../embeddable/public';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../data/public';
-import { DiscoverServices } from '../build_services';
 import {
-  Filter,
-  DataView,
-  DataViewField,
-  ISearchSource,
-  Query,
-  TimeRange,
-} from '../../../data/common';
+  APPLY_FILTER_TRIGGER,
+  esFilters,
+  FilterManager,
+  generateFilters,
+} from '../../../data/public';
+import { DiscoverServices } from '../build_services';
+import { Filter, ISearchSource, Query, TimeRange, FilterStateStore } from '../../../data/public';
+import { DataView, DataViewField } from '../../../data_views/public';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
 import {
@@ -168,14 +168,21 @@ export class SavedSearchEmbeddable
     this.searchProps!.isLoading = true;
 
     this.updateOutput({ loading: true, error: undefined });
-    const executionContext = {
+
+    const parentContext = this.input.executionContext;
+    const child: KibanaExecutionContext = {
       type: this.type,
       name: 'discover',
       id: this.savedSearch.id!,
       description: this.output.title || this.output.defaultTitle || '',
       url: this.output.editUrl,
-      parent: this.input.executionContext,
     };
+    const executionContext = parentContext
+      ? {
+          ...parentContext,
+          child,
+        }
+      : child;
 
     try {
       // Make the request
@@ -273,7 +280,7 @@ export class SavedSearchEmbeddable
       },
       sampleSize: 500,
       onFilter: async (field, value, operator) => {
-        let filters = esFilters.generateFilters(
+        let filters = generateFilters(
           this.filterManager,
           // @ts-expect-error
           field,
@@ -283,7 +290,7 @@ export class SavedSearchEmbeddable
         );
         filters = filters.map((filter) => ({
           ...filter,
-          $state: { store: esFilters.FilterStateStore.APP_STATE },
+          $state: { store: FilterStateStore.APP_STATE },
         }));
 
         await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {

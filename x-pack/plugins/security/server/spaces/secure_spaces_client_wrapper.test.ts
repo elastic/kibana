@@ -20,7 +20,7 @@ import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '../../../
 import { spacesClientMock } from '../../../spaces/server/mocks';
 import type { AuditEvent, AuditLogger } from '../audit';
 import { SavedObjectAction, SpaceAuditAction } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import type {
   AuthorizationServiceSetup,
   AuthorizationServiceSetupInternal,
@@ -98,7 +98,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
   });
   authorization.mode.useRbacForRequest.mockReturnValue(securityEnabled);
 
-  const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+  const auditLogger = auditLoggerMock.create();
 
   const request = httpServerMock.createKibanaRequest();
 

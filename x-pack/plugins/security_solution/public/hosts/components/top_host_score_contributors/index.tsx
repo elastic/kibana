@@ -19,13 +19,14 @@ import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
 import { Direction } from '../../../../../timelines/common';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
-import { HostRiskScoreFields } from '../../../../common/search_strategy';
-import { useHostRiskScore } from '../../containers/host_risk_score';
+
+import { buildHostNamesFilter, RiskScoreFields } from '../../../../common/search_strategy';
+
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
 import { RuleLink } from '../../../detections/pages/detection_engine/rules/all/use_columns';
+import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
 
 export interface TopHostScoreContributorsProps
   extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
@@ -36,7 +37,7 @@ export interface TopHostScoreContributorsProps
 interface TableItem {
   rank: number;
   name: string;
-  id?: string; // TODO Remove the '?' when the new transform is delivered
+  id: string;
 }
 
 const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
@@ -74,13 +75,10 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     [from, to]
   );
 
-  const sort = useMemo(
-    () => ({ field: HostRiskScoreFields.timestamp, direction: Direction.desc }),
-    []
-  );
+  const sort = useMemo(() => ({ field: RiskScoreFields.timestamp, direction: Direction.desc }), []);
 
   const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     timerange,
     onlyLatest: false,
     sort,
@@ -100,7 +98,7 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
 
   const tablePagination = useMemo(
     () => ({
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
       pageSize: PAGE_SIZE,
       totalItemCount: items.length,
     }),

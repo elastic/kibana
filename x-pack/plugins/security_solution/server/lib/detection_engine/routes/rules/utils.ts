@@ -16,13 +16,12 @@ import { RulesSchema } from '../../../../../common/detection_engine/schemas/resp
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
-import { ActionsClient } from '../../../../../../actions/server';
+import { ActionsClient, FindActionResult } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 import { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
@@ -93,21 +92,11 @@ export const transformTags = (tags: string[]): string[] => {
   return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
-// Transforms the data but will remove any null or undefined it encounters and not include
-// those on the export
-export const transformAlertToRule = (
-  rule: SanitizedAlert<RuleParams>,
-  ruleExecutionSummary?: RuleExecutionSummary | null,
-  legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
-};
-
 export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
 ): Array<Partial<RulesSchema>> => {
-  return rules.map((rule) => transformAlertToRule(rule, null, legacyRuleActions[rule.id]));
+  return rules.map((rule) => internalRuleToAPIResponse(rule, null, legacyRuleActions[rule.id]));
 };
 
 export const transformFindAlerts = (
@@ -138,7 +127,7 @@ export const transform = (
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
   if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
-    return transformAlertToRule(rule, ruleExecutionSummary, legacyRuleActions);
+    return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
   }
 
   return null;
@@ -316,7 +305,32 @@ export const getInvalidConnectors = async (
   rules: PromiseFromStreams[],
   actionsClient: ActionsClient
 ): Promise<[BulkError[], PromiseFromStreams[]]> => {
-  const actionsFind = await actionsClient.getAll();
+  let actionsFind: FindActionResult[] = [];
+  const reducerAccumulator = {
+    errors: new Map<string, BulkError>(),
+    rulesAcc: new Map<string, PromiseFromStreams>(),
+  };
+  try {
+    actionsFind = await actionsClient.getAll();
+  } catch (exc) {
+    if (exc?.output?.statusCode === 403) {
+      reducerAccumulator.errors.set(
+        uuid.v4(),
+        createBulkErrorObject({
+          statusCode: exc.output.statusCode,
+          message: `You may not have actions privileges required to import rules with actions: ${exc.output.payload.message}`,
+        })
+      );
+    } else {
+      reducerAccumulator.errors.set(
+        uuid.v4(),
+        createBulkErrorObject({
+          statusCode: 404,
+          message: JSON.stringify(exc),
+        })
+      );
+    }
+  }
   const actionIds = new Set(actionsFind.map((action) => action.id));
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
@@ -350,10 +364,7 @@ export const getInvalidConnectors = async (
       }
       return acc;
     }, // using map (preserves ordering)
-    {
-      errors: new Map<string, BulkError>(),
-      rulesAcc: new Map<string, PromiseFromStreams>(),
-    }
+    reducerAccumulator
   );
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];

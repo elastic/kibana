@@ -14,10 +14,11 @@ import { ConfigKey, MonitorFields, ScheduleUnit } from './types';
 interface Props {
   number: string;
   onChange: (schedule: MonitorFields[ConfigKey.SCHEDULE]) => void;
+  onBlur: () => void;
   unit: ScheduleUnit;
 }
 
-export const ScheduleField = ({ number, onChange, unit }: Props) => {
+export const ScheduleField = ({ number, onChange, onBlur, unit }: Props) => {
   const { allowedScheduleUnits } = usePolicyConfigContext();
   const options = !allowedScheduleUnits?.length
     ? allOptions
@@ -51,6 +52,8 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
               const updatedNumber = `${Math.ceil(+event.target.value)}`;
               onChange({ number: updatedNumber, unit });
             }
+
+            onBlur();
           }}
         />
       </EuiFlexItem>
@@ -70,6 +73,7 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
             const updatedUnit = event.target.value;
             onChange({ number, unit: updatedUnit as ScheduleUnit });
           }}
+          onBlur={() => onBlur()}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

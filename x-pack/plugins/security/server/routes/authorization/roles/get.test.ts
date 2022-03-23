@@ -20,7 +20,7 @@ const reservedPrivilegesApplicationWildcard = 'kibana-*';
 interface TestOptions {
   name?: string;
   licenseCheckResult?: LicenseCheck;
-  apiResponse?: () => Promise<unknown>;
+  apiResponse?: () => unknown;
   asserts: { statusCode: number; result?: Record<string, any> };
 }
 
@@ -40,8 +40,8 @@ describe('GET role', () => {
       };
 
       if (apiResponse) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockImplementation(
-          (async () => ({ body: await apiResponse() })) as any
+        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementation(
+          (() => ({ body: apiResponse() })) as any
         );
       }
 
@@ -79,7 +79,7 @@ describe('GET role', () => {
     const error = Boom.notAcceptable('test not acceptable message');
     getRoleTest('returns error from cluster client', {
       name: 'first_role',
-      apiResponse: async () => {
+      apiResponse: () => {
         throw error;
       },
       asserts: { statusCode: 406, result: error },
@@ -87,7 +87,7 @@ describe('GET role', () => {
 
     getRoleTest(`return error if we have empty resources`, {
       name: 'first_role',
-      apiResponse: async () => ({
+      apiResponse: () => ({
         first_role: {
           cluster: [],
           indices: [],
@@ -117,7 +117,7 @@ describe('GET role', () => {
   describe('success', () => {
     getRoleTest(`transforms elasticsearch privileges`, {
       name: 'first_role',
-      apiResponse: async () => ({
+      apiResponse: () => ({
         first_role: {
           cluster: ['manage_watcher'],
           indices: [
@@ -168,7 +168,7 @@ describe('GET role', () => {
         `transforms matching applications with * resource to kibana global base privileges`,
         {
           name: 'first_role',
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -221,7 +221,7 @@ describe('GET role', () => {
         `transforms matching applications with * resource to kibana global feature privileges`,
         {
           name: 'first_role',
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -281,7 +281,7 @@ describe('GET role', () => {
         `transforms matching applications with * resource to kibana _reserved privileges`,
         {
           name: 'first_role',
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -335,7 +335,7 @@ describe('GET role', () => {
         `transforms applications with wildcard and * resource to kibana _reserved privileges`,
         {
           name: 'first_role',
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -391,7 +391,7 @@ describe('GET role', () => {
         `transforms matching applications with space resources to kibana space base privileges`,
         {
           name: 'first_role',
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -454,7 +454,7 @@ describe('GET role', () => {
         `transforms matching applications with space resources to kibana space feature privileges`,
         {
           name: 'first_role',
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -527,7 +527,7 @@ describe('GET role', () => {
       `resource not * without space: prefix returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -574,7 +574,7 @@ describe('GET role', () => {
       `* and a space in the same entry returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -621,7 +621,7 @@ describe('GET role', () => {
       `* appearing in multiple entries returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -673,7 +673,7 @@ describe('GET role', () => {
       `space privilege assigned globally returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -725,7 +725,7 @@ describe('GET role', () => {
       `space privilege with application wildcard returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -772,7 +772,7 @@ describe('GET role', () => {
       `global base privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -824,7 +824,7 @@ describe('GET role', () => {
       `global base privilege with application wildcard returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -871,7 +871,7 @@ describe('GET role', () => {
       `reserved privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -923,7 +923,7 @@ describe('GET role', () => {
       `reserved privilege assigned with a base privilege returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -970,7 +970,7 @@ describe('GET role', () => {
       `reserved privilege assigned with a feature privilege returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -1017,7 +1017,7 @@ describe('GET role', () => {
       `global base privilege assigned with a feature privilege returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -1064,7 +1064,7 @@ describe('GET role', () => {
       `space base privilege assigned with a feature privilege returns empty kibana section with _transform_error set to ['kibana']`,
       {
         name: 'first_role',
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -1109,7 +1109,7 @@ describe('GET role', () => {
 
     getRoleTest(`transforms unrecognized applications`, {
       name: 'first_role',
-      apiResponse: async () => ({
+      apiResponse: () => ({
         first_role: {
           cluster: [],
           indices: [],

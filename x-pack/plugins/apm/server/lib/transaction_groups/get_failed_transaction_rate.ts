@@ -35,7 +35,7 @@ export async function getFailedTransactionRate({
   environment,
   kuery,
   serviceName,
-  transactionType,
+  transactionTypes,
   transactionName,
   setup,
   searchAggregatedTransactions,
@@ -46,7 +46,7 @@ export async function getFailedTransactionRate({
   environment: string;
   kuery: string;
   serviceName: string;
-  transactionType?: string;
+  transactionTypes: string[];
   transactionName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
@@ -66,8 +66,8 @@ export async function getFailedTransactionRate({
         [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
       },
     },
+    { terms: { [TRANSACTION_TYPE]: transactionTypes } },
     ...termQuery(TRANSACTION_NAME, transactionName),
-    ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),

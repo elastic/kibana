@@ -112,7 +112,7 @@ or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, 
 . Click a pack name to view the status.
 +
 Details include the last time each query ran, how many results were returned, and the number of agents the query ran against.
-If there are errors, expand the row to view the details.
+If there are errors, expand the row to view the details, including an option to view more information in the Logs.
 +
 [role="screenshot"]
 image::images/scheduled-pack.png[Shows queries in the pack and details about each query, including the last time it ran, how many results were returned, the number of agents it ran against, and if there are errors]
@@ -273,11 +273,17 @@ for an agent policy through Fleet.
 This integration supports x64 architecture on Windows, MacOS, and Linux platforms, 
 and ARM64 architecture on Linux.
 
-NOTE: The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
+[NOTE]
+=========================
+
+* The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
 and the https://docs.elastic.co/en/integrations/osquery[Osquery]
 integration collect logs from self-managed Osquery deployments.
 The *Osquery Manager* integration manages Osquery deployments
 and supports running and scheduling queries from {kib}.
+
+* *Osquery Manager* cannot be integrated with an Elastic Agent in standalone mode.
+=========================
 
 [float]
 === Customize Osquery sub-feature privileges

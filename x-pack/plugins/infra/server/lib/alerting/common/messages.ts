@@ -172,8 +172,7 @@ export const alertStateActionVariableDescription = i18n.translate(
 export const reasonActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.reasonActionVariableDescription',
   {
-    defaultMessage:
-      'A description of why the alert is in this state, including which metrics have crossed which thresholds',
+    defaultMessage: 'A concise description of the reason for the alert',
   }
 );
 

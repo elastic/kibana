@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
@@ -46,6 +46,9 @@ describe('ContextApp test', () => {
     toastNotifications: { addDanger: () => {} },
     navigation: mockNavigationPlugin,
     core: {
+      executionContext: {
+        set: jest.fn(),
+      },
       notifications: { toasts: [] },
       theme: { theme$: themeServiceMock.createStartContract().theme$ },
     },

@@ -18,26 +18,41 @@ import {
   htmlIdGenerator,
   EuiButtonGroup,
 } from '@elastic/eui';
+import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
-import { updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
+import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
-import { getInvalidFieldMessage, isColumnOfType } from '../helpers';
-import { FieldInputs, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
+import { getInvalidFieldMessage } from '../helpers';
+import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
 import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPattern, IndexPatternField } from '../../../types';
+import type { IndexPatternField } from '../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
+  getFieldsByValidationState,
   isSortableByColumn,
 } from './helpers';
+import {
+  DEFAULT_MAX_DOC_COUNT,
+  DEFAULT_SIZE,
+  MAXIMUM_MAX_DOC_COUNT,
+  supportedTypes,
+} from './constants';
+
+export function supportsRarityRanking(field?: IndexPatternField) {
+  // these es field types can't be sorted by rarity
+  return !field?.esTypes?.some((esType) =>
+    ['double', 'float', 'half_float', 'scaled_float'].includes(esType)
+  );
+}
 
 export type { TermsIndexPatternColumn } from './types';
 
@@ -71,22 +86,12 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
   });
 }
 
-function isScriptedField(field: IndexPatternField): boolean;
-function isScriptedField(fieldName: string, indexPattern: IndexPattern): boolean;
-function isScriptedField(fieldName: string | IndexPatternField, indexPattern?: IndexPattern) {
-  if (typeof fieldName === 'string') {
-    const field = indexPattern?.getFieldByName(fieldName);
-    return field && field.scripted;
-  }
-  return fieldName.scripted;
+// It is not always possible to know if there's a numeric field, so just ignore it for now
+function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) {
+  return { id: params.secondaryFields?.length ? 'multi_terms' : 'terms' };
 }
 
 const idPrefix = htmlIdGenerator()();
-const DEFAULT_SIZE = 3;
-// Elasticsearch limit
-const MAXIMUM_MAX_DOC_COUNT = 100;
-export const DEFAULT_MAX_DOC_COUNT = 1;
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {
   type: 'terms',
@@ -99,58 +104,43 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
   },
   getParamsForMultipleFields: ({ targetColumn, sourceColumn, field, indexPattern }) => {
-    const secondaryFields = new Set<string>();
-    if (targetColumn.params?.secondaryFields?.length) {
-      targetColumn.params.secondaryFields.forEach((fieldName) => {
-        if (!isScriptedField(fieldName, indexPattern)) {
-          secondaryFields.add(fieldName);
-        }
-      });
+    const secondaryFields = new Set<string>(
+      getFieldsByValidationState(indexPattern, targetColumn).validFields
+    );
+
+    const validFieldsToAdd = getFieldsByValidationState(
+      indexPattern,
+      sourceColumn,
+      field
+    ).validFields;
+
+    for (const validField of validFieldsToAdd) {
+      secondaryFields.add(validField);
     }
-    if (sourceColumn && 'sourceField' in sourceColumn && sourceColumn?.sourceField) {
-      if (!isScriptedField(sourceColumn.sourceField, indexPattern)) {
-        secondaryFields.add(sourceColumn.sourceField);
-      }
-    }
-    if (sourceColumn && isColumnOfType<TermsIndexPatternColumn>('terms', sourceColumn)) {
-      if (sourceColumn?.params?.secondaryFields?.length) {
-        sourceColumn.params.secondaryFields.forEach((fieldName) => {
-          if (!isScriptedField(fieldName, indexPattern)) {
-            secondaryFields.add(fieldName);
-          }
-        });
-      }
-    }
-    if (field && !isScriptedField(field)) {
-      secondaryFields.add(field.name);
-    }
-    return {
-      secondaryFields: [...secondaryFields].filter((f) => targetColumn.sourceField !== f),
+    // remove the sourceField
+    secondaryFields.delete(targetColumn.sourceField);
+
+    const secondaryFieldsList: string[] = [...secondaryFields];
+    const ret: Partial<TermsIndexPatternColumn['params']> = {
+      secondaryFields: secondaryFieldsList,
+      parentFormat: getParentFormatter({
+        ...targetColumn.params,
+        secondaryFields: secondaryFieldsList,
+      }),
     };
+    return ret;
   },
   canAddNewField: ({ targetColumn, sourceColumn, field, indexPattern }) => {
-    // first step: collect the fields from the targetColumn
-    const originalTerms = new Set([
-      targetColumn.sourceField,
-      ...(targetColumn.params?.secondaryFields ?? []),
-    ]);
-    // now check how many fields can be added
-    let counter = field && !isScriptedField(field) && !originalTerms.has(field.name) ? 1 : 0;
-    if (sourceColumn) {
-      if ('sourceField' in sourceColumn) {
-        counter +=
-          !isScriptedField(sourceColumn.sourceField, indexPattern) &&
-          !originalTerms.has(sourceColumn.sourceField)
-            ? 1
-            : 0;
-        if (isColumnOfType<TermsIndexPatternColumn>('terms', sourceColumn)) {
-          counter +=
-            sourceColumn.params.secondaryFields?.filter((f) => {
-              return !isScriptedField(f, indexPattern) && !originalTerms.has(f);
-            }).length ?? 0;
-        }
-      }
+    if (targetColumn.params.orderBy.type === 'rare') {
+      return false;
     }
+    // collect the fields from the targetColumn
+    const originalTerms = new Set(
+      getFieldsByValidationState(indexPattern, targetColumn).validFields
+    );
+    // now check how many fields can be added
+    const { validFields } = getFieldsByValidationState(indexPattern, sourceColumn, field);
+    const counter = validFields.filter((fieldName) => !originalTerms.has(fieldName)).length;
     // reject when there are no new fields to add
     if (!counter) {
       return false;
@@ -184,14 +174,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     ].filter(Boolean);
     return messages.length ? messages : undefined;
   },
+  getNonTransferableFields: (column, newIndexPattern) => {
+    return getFieldsByValidationState(newIndexPattern, column).invalidFields;
+  },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.getFieldByName(column.sourceField);
+    const { allFields, invalidFields } = getFieldsByValidationState(newIndexPattern, column);
 
     return Boolean(
-      newField &&
-        supportedTypes.has(newField.type) &&
-        newField.aggregatable &&
-        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
+      allFields.length &&
+        invalidFields.length === 0 &&
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
@@ -222,6 +213,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
         missingBucket: false,
+        parentFormat: { id: 'terms' },
       },
     };
   },
@@ -289,14 +281,20 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
     }
+    newParams.parentFormat = getParentFormatter(newParams);
+    if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') {
+      newParams.orderBy = { type: 'alphabetical' };
+    }
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(
-        field.displayName,
-        newParams.secondaryFields?.length,
-        newParams.orderBy.type === 'rare'
-      ),
+      label: oldColumn.customLabel
+        ? oldColumn.label
+        : ofName(
+            field.displayName,
+            newParams.secondaryFields?.length,
+            newParams.orderBy.type === 'rare'
+          ),
       sourceField: field.name,
       params: newParams,
     };
@@ -346,31 +344,84 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       existingFields,
       operationSupportMatrix,
       updateLayer,
+      dimensionGroups,
+      groupId,
+      incompleteParams,
     } = props;
     const onFieldSelectChange = useCallback(
-      (fields) => {
+      (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
+        const [sourcefield, ...secondaryFields] = fields;
+        const dataTypes = uniq(fields.map((field) => indexPattern.getFieldByName(field)?.type));
+        const newDataType = (dataTypes.length === 1 ? dataTypes[0] : 'string') || column.dataType;
+        const newParams = {
+          ...column.params,
+        };
+        if ('format' in newParams && newDataType !== 'number') {
+          delete newParams.format;
+        }
+        const mainField = indexPattern.getFieldByName(sourcefield);
+        if (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') {
+          newParams.orderBy = { type: 'alphabetical' };
+        }
+        // in single field mode, allow the automatic switch of the function to
+        // the most appropriate one
+        if (fields.length === 1) {
+          const possibleOperations = operationSupportMatrix.operationByField[sourcefield];
+          const termsSupported = possibleOperations?.has('terms');
+          if (!termsSupported) {
+            const newFieldOp = possibleOperations?.values().next().value;
+            return updateLayer(
+              insertOrReplaceColumn({
+                layer,
+                columnId,
+                indexPattern,
+                op: newFieldOp,
+                field: mainField,
+                visualizationGroups: dimensionGroups,
+                targetGroup: groupId,
+                incompleteParams,
+              })
+            );
+          }
+        }
         updateLayer({
           ...layer,
           columns: {
             ...layer.columns,
             [columnId]: {
               ...column,
-              sourceField: fields[0],
-              label: ofName(
-                indexPattern.getFieldByName(fields[0])?.displayName,
-                fields.length - 1,
-                column.params.orderBy.type === 'rare'
-              ),
+              dataType: newDataType,
+              sourceField: sourcefield,
+              label: column.customLabel
+                ? column.label
+                : ofName(
+                    mainField?.displayName,
+                    fields.length - 1,
+                    newParams.orderBy.type === 'rare'
+                  ),
               params: {
-                ...column.params,
-                secondaryFields: fields.length > 1 ? fields.slice(1) : undefined,
+                ...newParams,
+                secondaryFields,
+                parentFormat: getParentFormatter({
+                  ...newParams,
+                  secondaryFields,
+                }),
               },
             },
           } as Record<string, TermsIndexPatternColumn>,
         });
       },
-      [columnId, indexPattern, layer, updateLayer]
+      [
+        columnId,
+        dimensionGroups,
+        groupId,
+        incompleteParams,
+        indexPattern,
+        layer,
+        operationSupportMatrix.operationByField,
+        updateLayer,
+      ]
     );
     const currentColumn = layer.columns[columnId];
 
@@ -394,6 +445,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     const showScriptedFieldError = Boolean(
       getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern)
     );
+    const { invalidFields } = getFieldsByValidationState(indexPattern, selectedColumn);
 
     return (
       <EuiFormRow
@@ -405,14 +457,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           },
         })}
         fullWidth
-        isInvalid={Boolean(showScriptedFieldError)}
-        error={
-          showScriptedFieldError
-            ? i18n.translate('xpack.lens.indexPattern.terms.scriptedFieldErrorShort', {
-                defaultMessage: 'Scripted fields are not supported when using multiple fields',
-              })
-            : []
-        }
+        isInvalid={Boolean(showScriptedFieldError || invalidFields.length)}
+        error={getInputFieldErrorMessage(showScriptedFieldError, invalidFields)}
       >
         <FieldInputs
           column={selectedColumn}
@@ -420,6 +466,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           onChange={onFieldSelectChange}
+          invalidFields={invalidFields}
         />
       </EuiFormRow>
     );
@@ -463,7 +510,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         defaultMessage: 'Alphabetical',
       }),
     });
-    if (!currentColumn.params.secondaryFields?.length) {
+    if (
+      !currentColumn.params.secondaryFields?.length &&
+      supportsRarityRanking(indexPattern.getFieldByName(currentColumn.sourceField))
+    ) {
       orderOptions.push({
         value: toValue({ type: 'rare', maxDocCount: DEFAULT_MAX_DOC_COUNT }),
         text: i18n.translate('xpack.lens.indexPattern.terms.orderRare', {
@@ -622,6 +672,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               buttonContent={i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
                 defaultMessage: 'Advanced',
               })}
+              data-test-subj="indexPattern-terms-advanced"
             >
               <EuiSpacer size="m" />
               <EuiSwitch

@@ -8,7 +8,6 @@
 import React, { ReactElement } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
 import { Feature } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
@@ -26,6 +25,7 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
+import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -41,7 +41,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
@@ -211,7 +211,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
     precision: number;
     layerName: string;
     registerCancelCallback: (callback: () => void) => void;
@@ -317,7 +317,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
     precision: number;
     layerName: string;
     registerCancelCallback: (callback: () => void) => void;
@@ -385,7 +385,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       throw new Error('Cannot get GeoJson without searchFilter.buffer');
     }
 
-    const indexPattern: IndexPattern = await this.getIndexPattern();
+    const indexPattern: DataView = await this.getIndexPattern();
     const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', false);
 
@@ -447,9 +447,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
-    const dsl = searchSource.getSearchRequestBody();
-
-    const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
@@ -462,7 +459,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
-&requestBody=${risonDsl}\
+&requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &requestType=${requestType}\
 &token=${refreshToken}`;
   }

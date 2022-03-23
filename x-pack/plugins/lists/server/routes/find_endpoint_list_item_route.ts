@@ -48,6 +48,8 @@ export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
           filter,
           page,
           perPage,
+          pit: undefined,
+          searchAfter: undefined,
           sortField,
           sortOrder,
         });

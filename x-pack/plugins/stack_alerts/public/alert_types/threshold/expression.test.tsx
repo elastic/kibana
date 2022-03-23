@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import IndexThresholdAlertTypeExpression, { DEFAULT_VALUES } from './expression';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';

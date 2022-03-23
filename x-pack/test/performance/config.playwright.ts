@@ -4,25 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import uuid from 'uuid';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
 // These "secret" values are intentionally written in the source. We would make the APM server accept anonymous traffic if we could
-const APM_SERVER_URL = 'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gcp.cloud.es.io:443';
-const APM_PUBLIC_TOKEN = 'Q5q5rWQEw6tKeirBpw';
+const APM_SERVER_URL = 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443';
+const APM_PUBLIC_TOKEN = 'CTs9y3cvcfq13bQqsB';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
-  const testFiles = [require.resolve('./tests/playwright/home.ts')];
+  const testFiles = [require.resolve('./tests/playwright')];
+
+  const testJobId = process.env.TEST_JOB_ID ?? uuid();
+  log.info(`👷 JOB ID ${testJobId}👷`);
 
   return {
     testFiles,
     services,
     pageObjects,
+    servicesRequiredForTestAnalysis: ['performance'],
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
@@ -32,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
       env: {
         ELASTIC_APM_ACTIVE: process.env.ELASTIC_APM_ACTIVE,
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
@@ -41,7 +46,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           ftrConfig: `x-pack/test/performance/tests/config.playwright`,
-          performancePhase: process.env.PERF_TEST_PHASE,
+          performancePhase: process.env.TEST_PERFORMANCE_PHASE,
+          journeyName: process.env.JOURNEY_NAME,
+          testJobId,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),

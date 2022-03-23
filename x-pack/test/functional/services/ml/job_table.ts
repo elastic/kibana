@@ -244,8 +244,13 @@ export function MachineLearningJobTableProvider(
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
+    public async filterWithSearchString(
+      filter: string,
+      expectedRowCount: number = 1,
+      tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
+    ) {
       await this.waitForJobsToLoad();
+      await this.refreshJobList(tableEnvironment);
       const searchBar = await testSubjects.find('mlJobListSearchBar');
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();

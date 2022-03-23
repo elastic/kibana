@@ -60,7 +60,7 @@ export const initServerWithKibana = (
         catalogue: ['uptime'],
         api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
-          all: [umDynamicSettings.name, 'alert', syntheticsMonitorType, syntheticsApiKeyObjectType],
+          all: [umDynamicSettings.name, syntheticsMonitorType, syntheticsApiKeyObjectType],
           read: [],
         },
         alerting: {
@@ -91,7 +91,7 @@ export const initServerWithKibana = (
         catalogue: ['uptime'],
         api: ['uptime-read', 'lists-read'],
         savedObject: {
-          all: ['alert'],
+          all: [],
           read: [umDynamicSettings.name, syntheticsMonitorType, syntheticsApiKeyObjectType],
         },
         alerting: {

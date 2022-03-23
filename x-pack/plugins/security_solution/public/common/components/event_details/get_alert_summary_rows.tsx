@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { getOr, find, isEmpty, uniqBy } from 'lodash/fp';
-import {
-  ALERT_RULE_NAMESPACE,
-  ALERT_RULE_TYPE,
-  ALERT_RULE_DESCRIPTION,
-} from '@kbn/rule-data-utils';
+import { find, isEmpty, uniqBy } from 'lodash/fp';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -18,23 +14,29 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
-  ALERTS_HEADERS_TARGET_IMPORT_HASH,
   ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { getEnrichedFieldInfo, SummaryRow } from './helpers';
-import { EventSummaryField } from './types';
+import { getEnrichedFieldInfo, AlertSummaryRow } from './helpers';
+import { EventSummaryField, EnrichedFieldInfo } from './types';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { EventCode, EventCategory } from '../../../../common/ecs/event';
+
+const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
+const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
+const THRESHOLD_CARDINALITY_FIELD = `${ALERT_THRESHOLD_RESULT}.cardinality.field`;
+const THRESHOLD_CARDINALITY_VALUE = `${ALERT_THRESHOLD_RESULT}.cardinality.value`;
+const THRESHOLD_COUNT = `${ALERT_THRESHOLD_RESULT}.count`;
 
 /** Always show these fields */
 const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
+  { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
 ];
 
 /**
@@ -60,10 +62,9 @@ function getFieldsByCategory({
         { id: 'destination.port' },
         { id: 'source.address' },
         { id: 'source.port' },
+        { id: 'dns.question.name' },
         { id: 'process.name' },
       ];
-    case EventCategory.DNS:
-      return [{ id: 'dns.query.name' }, { id: 'process.name' }];
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
     case EventCategory.MALWARE:
@@ -101,7 +102,7 @@ function getFieldsByEventCode(
   switch (eventCode) {
     case EventCode.BEHAVIOR:
       return [
-        { id: ALERT_RULE_DESCRIPTION, label: ALERTS_HEADERS_RULE_DESCRIPTION },
+        { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
         // Resolve more fields based on the source event
         ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
       ];
@@ -109,15 +110,16 @@ function getFieldsByEventCode(
       return [
         { id: 'Target.process.executable' },
         {
-          id: 'Target.process.thread.Ext.start_address_detaiuls.memory_pe.imphash',
-          label: ALERTS_HEADERS_TARGET_IMPORT_HASH,
-        },
-        {
           id: 'Memory_protection.unique_key_v1',
         },
       ];
-    case EventCode.MEMORY_SIGNATURE:
     case EventCode.RANSOMWARE:
+      return [
+        { id: 'Ransomware.feature' },
+        { id: 'process.hash.sha256' },
+        ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
+      ];
+    case EventCode.MEMORY_SIGNATURE:
       // Resolve more fields based on the source event
       return getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined });
     default:
@@ -132,29 +134,33 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
   switch (ruleType) {
     case 'threshold':
       return [
-        { id: `${ALERT_THRESHOLD_RESULT}.count`, label: ALERTS_HEADERS_THRESHOLD_COUNT },
-        { id: `${ALERT_THRESHOLD_RESULT}.terms`, label: ALERTS_HEADERS_THRESHOLD_TERMS },
+        { id: THRESHOLD_COUNT, label: ALERTS_HEADERS_THRESHOLD_COUNT },
+        { id: THRESHOLD_TERMS_FIELD, label: ALERTS_HEADERS_THRESHOLD_TERMS },
         {
-          id: `${ALERT_THRESHOLD_RESULT}.cardinality`,
+          id: THRESHOLD_CARDINALITY_FIELD,
           label: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
         },
       ];
     case 'machine_learning':
       return [
         {
-          id: `${ALERT_RULE_NAMESPACE}.machine_learning_job_id`,
+          id: `${ALERT_RULE_PARAMETERS}.machine_learning_job_id`,
+          legacyId: 'signal.rule.machine_learning_job_id',
         },
         {
-          id: `${ALERT_RULE_NAMESPACE}.anomaly_threshold`,
+          id: `${ALERT_RULE_PARAMETERS}.anomaly_threshold`,
+          legacyId: 'signal.rule.anomaly_threshold',
         },
       ];
     case 'threat_match':
       return [
         {
-          id: `${ALERT_RULE_NAMESPACE}.threat_index`,
+          id: `${ALERT_RULE_PARAMETERS}.threat_index`,
+          legacyId: 'signal.rule.threat_index',
         },
         {
-          id: `${ALERT_RULE_NAMESPACE}.index`,
+          id: `${ALERT_RULE_PARAMETERS}.threat_query`,
+          legacyId: 'signal.rule.threat_query',
         },
       ];
     default:
@@ -247,10 +253,17 @@ export const getSummaryRows = ({
   });
 
   return data != null
-    ? tableFields.reduce<SummaryRow[]>((acc, field) => {
-        const item = data.find((d) => d.field === field.id);
-        if (!item || isEmpty(item?.values)) {
+    ? tableFields.reduce<AlertSummaryRow[]>((acc, field) => {
+        const item = data.find(
+          (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
+        );
+        if (!item || isEmpty(item.values)) {
           return acc;
+        }
+
+        // If we found the data by its legacy id we swap the ids to display the correct one
+        if (item.field === field.legacyId) {
+          field.id = field.legacyId;
         }
 
         const linkValueField =
@@ -272,42 +285,20 @@ export const getSummaryRows = ({
           return acc;
         }
 
-        if (field.id === `${ALERT_THRESHOLD_RESULT}.terms`) {
-          try {
-            const terms = getOr(null, 'originalValue', item);
-            const parsedValue = terms.map((term: string) => JSON.parse(term));
-            const thresholdTerms = (parsedValue ?? []).map(
-              (entry: { field: string; value: string }) => {
-                return {
-                  title: `${entry.field} [threshold]`,
-                  description: {
-                    ...description,
-                    values: [entry.value],
-                  },
-                };
-              }
-            );
-            return [...acc, ...thresholdTerms];
-          } catch (err) {
-            return [...acc];
+        if (field.id === THRESHOLD_TERMS_FIELD) {
+          const enrichedInfo = enrichThresholdTerms(item, data, description);
+          if (enrichedInfo) {
+            return [...acc, ...enrichedInfo];
+          } else {
+            return acc;
           }
         }
 
-        if (field.id === `${ALERT_THRESHOLD_RESULT}.cardinality`) {
-          try {
-            const value = getOr(null, 'originalValue.0', field);
-            const parsedValue = JSON.parse(value);
-            return [
-              ...acc,
-              {
-                title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
-                description: {
-                  ...description,
-                  values: [`count(${parsedValue.field}) == ${parsedValue.value}`],
-                },
-              },
-            ];
-          } catch (err) {
+        if (field.id === THRESHOLD_CARDINALITY_FIELD) {
+          const enrichedInfo = enrichThresholdCardinality(item, data, description);
+          if (enrichedInfo) {
+            return [...acc, enrichedInfo];
+          } else {
             return acc;
           }
         }
@@ -322,3 +313,63 @@ export const getSummaryRows = ({
       }, [])
     : [];
 };
+
+/**
+ * Enriches the summary data for threshold terms.
+ * For any given threshold term, it generates a row with the term's name and the associated value.
+ */
+function enrichThresholdTerms(
+  { values: termsFieldArr }: TimelineEventsDetailsItem,
+  data: TimelineEventsDetailsItem[],
+  description: EnrichedFieldInfo
+) {
+  const termsValueItem = data.find((d) => d.field === THRESHOLD_TERMS_VALUE);
+  const termsValueArray = termsValueItem && termsValueItem.values;
+
+  // Make sure both `fields` and `values` are an array and that they have the same length
+  if (
+    Array.isArray(termsFieldArr) &&
+    termsFieldArr.length > 0 &&
+    Array.isArray(termsValueArray) &&
+    termsFieldArr.length === termsValueArray.length
+  ) {
+    return termsFieldArr.map((field, index) => {
+      return {
+        title: `${field} [threshold]`,
+        description: {
+          ...description,
+          values: [termsValueArray[index]],
+        },
+      };
+    });
+  }
+}
+
+/**
+ * Enriches the summary data for threshold cardinality.
+ * Reads out the cardinality field and the value and interpolates them into a combined string value.
+ */
+function enrichThresholdCardinality(
+  { values: cardinalityFieldArr }: TimelineEventsDetailsItem,
+  data: TimelineEventsDetailsItem[],
+  description: EnrichedFieldInfo
+) {
+  const cardinalityValueItem = data.find((d) => d.field === THRESHOLD_CARDINALITY_VALUE);
+  const cardinalityValueArray = cardinalityValueItem && cardinalityValueItem.values;
+
+  // Only return a summary row if we actually have the correct field and value
+  if (
+    Array.isArray(cardinalityFieldArr) &&
+    cardinalityFieldArr.length === 1 &&
+    Array.isArray(cardinalityValueArray) &&
+    cardinalityFieldArr.length === cardinalityValueArray.length
+  ) {
+    return {
+      title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
+      description: {
+        ...description,
+        values: [`count(${cardinalityFieldArr[0]}) >= ${cardinalityValueArray[0]}`],
+      },
+    };
+  }
+}

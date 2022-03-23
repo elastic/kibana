@@ -126,7 +126,7 @@ describe('getAggsFormats', () => {
     const mapping = {
       id: 'multi_terms',
       params: {
-        paramsPerField: Array(terms.length).fill({ id: 'terms' }),
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
       },
     };
 
@@ -141,7 +141,7 @@ describe('getAggsFormats', () => {
     const mapping = {
       id: 'multi_terms',
       params: {
-        paramsPerField: Array(terms.length).fill({ id: 'terms' }),
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
         separator: ' - ',
       },
     };

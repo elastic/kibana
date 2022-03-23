@@ -249,6 +249,16 @@ describe('useSecuritySolutionNavigation', () => {
                 "name": "Host isolation exceptions",
                 "onClick": [Function],
               },
+              Object {
+                "data-href": "securitySolutionUI/blocklist",
+                "data-test-subj": "navigation-blocklist",
+                "disabled": false,
+                "href": "securitySolutionUI/blocklist",
+                "id": "blocklist",
+                "isSelected": false,
+                "name": "Blocklist",
+                "onClick": [Function],
+              },
             ],
             "name": "Manage",
           },
@@ -258,17 +268,28 @@ describe('useSecuritySolutionNavigation', () => {
     `);
   });
 
-  // TODO: Steph/ueba remove when no longer experimental
-  it('should include ueba when feature flag is on', async () => {
+  // TODO: Steph/users remove when no longer experimental
+  it('should include users when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
 
-    // possibly undefined, but if undefined we want this test to fail
-    // @ts-expect-error TS2532
-    expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
+    expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
+  });
+
+  // TODO: Sergi/detectionAndResponse remove when no longer experimental
+  it('should include detectionAndResponse when feature flag is on', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
+
+    expect(result?.current?.items?.[0].items?.[1].id).toEqual(
+      SecurityPageName.detectionAndResponse
+    );
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { Observable } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';

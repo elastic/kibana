@@ -70,6 +70,7 @@ describe('TaskPollingLifecycle', () => {
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
+    unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
     maxWorkersConfiguration$: of(100),

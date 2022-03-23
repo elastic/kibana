@@ -101,7 +101,7 @@ exports[`extend index management ilm summary extension should return extension w
     Object {
       "aliases": "none",
       "documents": 2,
-      "documents_deleted": "0",
+      "documents_deleted": 0,
       "health": "yellow",
       "hidden": false,
       "ilm": Object {
@@ -649,7 +649,7 @@ exports[`extend index management ilm summary extension should return extension w
     Object {
       "aliases": "none",
       "documents": 2,
-      "documents_deleted": "0",
+      "documents_deleted": 0,
       "health": "yellow",
       "hidden": false,
       "ilm": Object {

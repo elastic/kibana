@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('anomaly detectors', function () {
     loadTestFile(require.resolve('./get_with_spaces'));
     loadTestFile(require.resolve('./get_stats_with_spaces'));
+    loadTestFile(require.resolve('./update'));
   });
 }

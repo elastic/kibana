@@ -6,7 +6,7 @@
  */
 
 import { ChartEmptyState } from './chart_empty_state';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 

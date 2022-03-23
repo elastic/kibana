@@ -1,0 +1,24 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "isolatedModules": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "references": [
+    { "path": "../../../core/tsconfig.json" },
+    { "path": "../../expressions/tsconfig.json" },
+    { "path": "../../presentation_util/tsconfig.json" },
+    { "path": "../../data/tsconfig.json" },
+    { "path": "../../field_formats/tsconfig.json" },
+    { "path": "../../charts/tsconfig.json" },
+    { "path": "../../visualizations/tsconfig.json" }
+  ]
+}

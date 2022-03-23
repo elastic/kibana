@@ -66,23 +66,27 @@ export interface Configuration {
   needsConfiguration?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
-  helpText: string;
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
+  githubRepository?: string;
 }
 
 export interface SourceDataItem {
   name: string;
+  iconName: string;
+  categories?: string[];
   serviceType: string;
   configuration: Configuration;
   configured?: boolean;
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
-  addPath: string;
-  editPath?: string; // undefined for GitHub apps, as they are configured on a source level, and don't use a connector where you can edit the configuration
   accountContextOnly: boolean;
+  internalConnectorAvailable?: boolean;
+  externalConnectorAvailable?: boolean;
+  customConnectorAvailable?: boolean;
+  isBeta?: boolean;
 }
 
 export interface ContentSource {
@@ -109,6 +113,8 @@ export interface ContentSourceDetails extends ContentSource {
   boost: number;
   activities: SourceActivity[];
   isOauth1: boolean;
+  altIcon?: string; // base64 encoded png
+  mainIcon?: string; // base64 encoded png
 }
 
 interface DescriptionList {
@@ -168,6 +174,18 @@ export interface BlockedWindow {
   end: string;
 }
 
+export interface IndexingRuleExclude {
+  filterType: 'object_type' | 'path_template' | 'file_extension';
+  exclude: string;
+}
+
+export interface IndexingRuleInclude {
+  filterType: 'object_type' | 'path_template' | 'file_extension';
+  include: string;
+}
+
+export type IndexingRule = IndexingRuleInclude | IndexingRuleExclude;
+
 export interface IndexingConfig {
   enabled: boolean;
   features: {
@@ -178,6 +196,7 @@ export interface IndexingConfig {
       enabled: boolean;
     };
   };
+  rules: IndexingRule[];
   schedule: IndexingSchedule;
 }
 

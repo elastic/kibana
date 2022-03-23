@@ -36,15 +36,16 @@ import {
   SELECT_ALL_RULES_BTN,
   MODAL_CONFIRMATION_BTN,
   RULES_DELETE_CONFIRMATION_MODAL,
-  ACTIVATE_RULE_BULK_BTN,
-  DEACTIVATE_RULE_BULK_BTN,
+  ENABLE_RULE_BULK_BTN,
+  DISABLE_RULE_BULK_BTN,
   RULE_DETAILS_DELETE_BTN,
   RULE_IMPORT_MODAL_BUTTON,
   RULE_IMPORT_MODAL,
   INPUT_FILE,
-  TOASTER,
   RULE_IMPORT_OVERWRITE_CHECKBOX,
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
+  RULES_TAGS_POPOVER_BTN,
+  RULES_TAGS_POPOVER_WRAPPER,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -85,7 +86,7 @@ export const duplicateRuleFromMenu = () => {
 
 /**
  * Check that the duplicated rule is on the table
- * and it is deactivated (default)
+ * and it is disabled (default)
  */
 export const checkDuplicatedRule = () => {
   cy.contains(RULE_NAME, duplicatedRuleName)
@@ -124,14 +125,14 @@ export const duplicateSelectedRules = () => {
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
 };
 
-export const activateSelectedRules = () => {
+export const enableSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
-  cy.get(ACTIVATE_RULE_BULK_BTN).click();
+  cy.get(ENABLE_RULE_BULK_BTN).click();
 };
 
-export const deactivateSelectedRules = () => {
+export const disableSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
-  cy.get(DEACTIVATE_RULE_BULK_BTN).click();
+  cy.get(DISABLE_RULE_BULK_BTN).click();
 };
 
 export const exportFirstRule = () => {
@@ -231,7 +232,7 @@ export const changeRowsPerPageTo = (rowsCount: number) => {
   cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
   cy.get(rowsPerPageSelector(rowsCount))
     .pipe(($el) => $el.trigger('click'))
-    .should('not.be.visible');
+    .should('not.exist');
 };
 
 export const changeRowsPerPageTo100 = () => {
@@ -249,24 +250,6 @@ export const importRules = (rulesFile: string) => {
   cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
-};
-
-export const getRulesImportExportToast = (headers: string[]) => {
-  cy.get(TOASTER)
-    .should('exist')
-    .then(($els) => {
-      const arrayOfText = Cypress.$.makeArray($els).map((el) => el.innerText);
-
-      return headers.reduce((areAllIncluded, header) => {
-        const isContained = arrayOfText.includes(header);
-        if (!areAllIncluded) {
-          return false;
-        } else {
-          return isContained;
-        }
-      }, true);
-    })
-    .should('be.true');
 };
 
 export const selectOverwriteRulesImport = () => {
@@ -289,4 +272,14 @@ export const importRulesWithOverwriteAll = (rulesFile: string) => {
   selectOverwriteExceptionsRulesImport();
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
+};
+
+export const testAllTagsBadges = (tags: string[]) => {
+  cy.get(RULES_TAGS_POPOVER_BTN).each(($el) => {
+    // open tags popover
+    cy.wrap($el).click();
+    cy.get(RULES_TAGS_POPOVER_WRAPPER).should('have.text', tags.join(''));
+    // close tags popover
+    cy.wrap($el).click();
+  });
 };

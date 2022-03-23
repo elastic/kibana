@@ -29,6 +29,15 @@ import { isColumnFormatted, isColumnOfType } from './operations/definitions/help
 
 type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
+declare global {
+  interface Window {
+    /**
+     * Debug setting to make requests complete slower than normal. data.search.aggs.shardDelay.enabled has to be set via settings for this to work
+     */
+    ELASTIC_LENS_DELAY_SECONDS?: number;
+  }
+}
+
 function getExpressionForLayer(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
@@ -139,8 +148,27 @@ function getExpressionForLayer(
       }
     });
 
+    if (window.ELASTIC_LENS_DELAY_SECONDS) {
+      aggs.push(
+        buildExpression({
+          type: 'expression',
+          chain: [
+            buildExpressionFunction('aggShardDelay', {
+              id: 'the-delay',
+              enabled: true,
+              schema: 'metric',
+              delay: `${window.ELASTIC_LENS_DELAY_SECONDS}s`,
+            }).toAst(),
+          ],
+        })
+      );
+    }
+
     const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = `col-${index}-${index}`;
+      const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+        ? `col-${index + (column.isBucketed ? 0 : 1)}-${index}`
+        : `col-${index}-${index}`;
+
       return {
         ...currentIdMap,
         [esAggsId]: {
@@ -235,7 +263,8 @@ function getExpressionForLayer(
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
-        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+        !column.params.ignoreTimeRange
           ? column.sourceField
           : null
       )

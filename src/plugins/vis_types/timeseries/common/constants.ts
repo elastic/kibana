@@ -11,6 +11,7 @@ export const UI_SETTINGS = {
   ALLOW_STRING_INDICES: 'metrics:allowStringIndices',
   ALLOW_CHECKING_FOR_FAILED_SHARDS: 'metrics:allowCheckingForFailedShards',
 };
+export const SERIES_SEPARATOR = '╰┄►';
 export const INDEXES_SEPARATOR = ',';
 export const AUTO_INTERVAL = 'auto';
 export const ROUTES = {

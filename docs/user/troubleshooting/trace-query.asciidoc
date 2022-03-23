@@ -29,16 +29,16 @@ Now, you can see the request to {es} has been initiated by the `[Logs] Unique Vi
 [source,text]
 ----
 [DEBUG][execution_context] stored the execution context: {
-  "parent": {
-    "type": "application",
-    "name": "dashboard",
-    "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
-    "description": "[Logs] Web Traffic","url":"/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b"
+  "type": "application",
+  "name": "dashboard",
+  "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "description": "[Logs] Web Traffic","url":"/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b"
+  "child": {
+    "type": "visualization",
+    "name": "Vega",
+    "id": "cb099a20-ea66-11eb-9425-113343a037e3",
+    "description": "[Logs] Unique Visitor Heatmap",
+    "url": "/app/visualize#/edit/cb099a20-ea66-11eb-9425-113343a037e3"
   },
-  "type": "visualization",
-  "name": "Vega",
-  "id": "cb099a20-ea66-11eb-9425-113343a037e3",
-  "description": "[Logs] Unique Visitor Heatmap",
-  "url": "/app/visualize#/edit/cb099a20-ea66-11eb-9425-113343a037e3"
 }
 ----

@@ -26,7 +26,7 @@ export const CHART_NAMES = {
     shapeType: CHART_SHAPES.HEATMAP,
     icon: HeatmapIcon,
     label: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
-      defaultMessage: 'Heatmap',
+      defaultMessage: 'Heat map',
     }),
     groupLabel,
   },

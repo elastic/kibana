@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { layerTypes } from '../../../common';
@@ -123,8 +123,11 @@ describe('Axes Settings', () => {
           setExtent={setSpy}
         />
       );
-      const lower = component.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
-      const upper = component.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
+      const rangeInput = component
+        .find('[data-test-subj="lnsXY_axisExtent_customBounds"]')
+        .shallow();
+      const lower = rangeInput.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
+      const upper = rangeInput.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
       expect(lower.prop('value')).toEqual(123);
       expect(upper.prop('value')).toEqual(456);
     });

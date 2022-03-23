@@ -26,6 +26,9 @@ describe('SuperUser - Packs', () => {
   describe('Create and edit a pack', () => {
     before(() => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_2');
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_3');
     });
     beforeEach(() => {
       login();
@@ -34,6 +37,9 @@ describe('SuperUser - Packs', () => {
 
     after(() => {
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_2');
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_3');
     });
 
     it('should add a pack from a saved query', () => {
@@ -65,22 +71,39 @@ describe('SuperUser - Packs', () => {
     });
 
     it('to click the edit button and edit pack', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       findAndClickButton('Edit');
       cy.contains(`Edit ${PACK_NAME}`);
       findAndClickButton('Add query');
       cy.contains('Attach next query');
       inputQuery('select * from uptime');
+      findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);
+      cy.contains('ID must be unique').should('exist');
       findFormFieldByRowsLabelAndType('ID', NEW_QUERY_NAME);
+      cy.contains('ID must be unique').should('not.exist');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(NEW_QUERY_NAME);
       findAndClickButton('Update pack');
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
     });
+
+    it('should trigger validation when saved query is being chosen', () => {
+      preparePack(PACK_NAME);
+      findAndClickButton('Edit');
+      findAndClickButton('Add query');
+      cy.contains('Attach next query');
+      cy.contains('ID must be unique').should('not.exist');
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type(SAVED_QUERY_ID);
+      cy.react('List').first().click();
+      cy.contains('ID must be unique').should('exist');
+      cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
+    });
     // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
     it.skip('to click the icon and visit discover', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
       }).click();
@@ -101,7 +124,7 @@ describe('SuperUser - Packs', () => {
             lensUrl = url;
           });
       });
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 1, item: { id: SAVED_QUERY_ID } },
       }).click();
@@ -131,7 +154,7 @@ describe('SuperUser - Packs', () => {
     });
 
     it('delete all queries in the pack', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.contains(/^Edit$/).click();
 
       cy.getBySel('checkboxSelectAll').click();
@@ -146,8 +169,48 @@ describe('SuperUser - Packs', () => {
       cy.contains(/^No items found/);
     });
 
+    it('enable changing saved queries and ecs_mappings', () => {
+      preparePack(PACK_NAME);
+      cy.contains(/^Edit$/).click();
+
+      findAndClickButton('Add query');
+
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type('Multiple {downArrow} {enter}');
+      cy.contains('Custom key/value pairs');
+      cy.contains('Days of uptime');
+      cy.contains('List of keywords used to tag each');
+      cy.contains('Seconds of uptime');
+      cy.contains('Client network address.');
+      cy.contains('Total uptime seconds');
+
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type('NOMAPPING {downArrow} {enter}');
+      cy.contains('Custom key/value pairs').should('not.exist');
+      cy.contains('Days of uptime').should('not.exist');
+      cy.contains('List of keywords used to tag each').should('not.exist');
+      cy.contains('Seconds of uptime').should('not.exist');
+      cy.contains('Client network address.').should('not.exist');
+      cy.contains('Total uptime seconds').should('not.exist');
+
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type('ONE_MAPPING {downArrow} {enter}');
+      cy.contains('Name of the continent');
+      cy.contains('Seconds of uptime');
+
+      findAndClickButton('Save');
+      cy.react('CustomItemAction', {
+        props: { index: 0, item: { id: 'ONE_MAPPING_CHANGED' } },
+      }).click();
+      cy.contains('Name of the continent');
+      cy.contains('Seconds of uptime');
+    });
+
     it('to click delete button', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       findAndClickButton('Edit');
       deleteAndConfirm('pack');
     });
@@ -156,7 +219,7 @@ describe('SuperUser - Packs', () => {
     beforeEach(() => {
       login();
     });
-    const AGENT_NAME = 'PackTest';
+    const AGENT_NAME = 'PackTest2';
     const REMOVING_PACK = 'removing-pack';
     it('add integration', () => {
       cy.visit(FLEET_AGENT_POLICIES);
@@ -165,7 +228,7 @@ describe('SuperUser - Packs', () => {
       cy.get('.euiFlyoutFooter').contains('Create agent policy').click();
       cy.contains(`Agent policy '${AGENT_NAME}' created`);
       cy.visit(FLEET_AGENT_POLICIES);
-      cy.contains('Default Fleet Server policy').click();
+      cy.contains(AGENT_NAME).click();
       cy.contains('Add integration').click();
       cy.contains(integration).click();
       addIntegration(AGENT_NAME);
@@ -194,25 +257,9 @@ describe('SuperUser - Packs', () => {
       navigateTo('app/osquery/packs');
       cy.contains(REMOVING_PACK).click();
       cy.contains(`${REMOVING_PACK} details`);
+      cy.wait(1000);
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');
-    });
-  });
-  describe.skip('Remove queries from pack', () => {
-    const TEST_PACK = 'Test-pack';
-    before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'hardware_monitoring');
-    });
-    beforeEach(() => {
-      login();
-      navigateTo('/app/osquery');
-    });
-    after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'hardware_monitoring');
-    });
-
-    it('should remove ALL queries', () => {
-      preparePack(TEST_PACK, SAVED_QUERY_ID);
     });
   });
 });

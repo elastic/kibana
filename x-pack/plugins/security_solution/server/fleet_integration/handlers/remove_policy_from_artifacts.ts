@@ -7,19 +7,9 @@
 
 import pMap from 'p-map';
 
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
 import { ExceptionListClient } from '../../../../lists/server';
 import { PostPackagePolicyDeleteCallback } from '../../../../fleet/server';
-
-export const ARTIFACT_LISTS_IDS_TO_REMOVE = [
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-];
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 
 /**
  * Removes policy from artifacts
@@ -32,11 +22,11 @@ export const removePolicyFromArtifacts = async (
 
   const findArtifactsByPolicy = (currentPage: number) => {
     return exceptionsClient.findExceptionListsItem({
-      listId: ARTIFACT_LISTS_IDS_TO_REMOVE,
-      filter: ARTIFACT_LISTS_IDS_TO_REMOVE.map(
+      listId: ALL_ENDPOINT_ARTIFACT_LIST_IDS as string[],
+      filter: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(
         () => `exception-list-agnostic.attributes.tags:"policy:${policy.id}"`
       ),
-      namespaceType: ARTIFACT_LISTS_IDS_TO_REMOVE.map(() => 'agnostic'),
+      namespaceType: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(() => 'agnostic'),
       page: currentPage,
       perPage: 50,
       sortField: undefined,

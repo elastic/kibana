@@ -6,7 +6,6 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use [ElasticsearchServiceStart.legacy](./kibana-plugin-core-server.elasticsearchservicestart.legacy.md) instead.
 > 
 
 <b>Signature:</b>

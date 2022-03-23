@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  DataView,
-  IndexPatternAttributes,
-  Query,
-  SavedObject,
-  TimeRange,
-} from '../../../../../../data/common';
+import type { Query, TimeRange, SavedObject } from '../../../../../../data/public';
+import type { DataView, DataViewAttributes } from '../../../../../../data_views/public';
 import { ISearchSource } from '../../../../../../data/public';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../utils/use_saved_search';
@@ -22,7 +17,7 @@ import { ElasticSearchHit } from '../../../../types';
 
 export interface DiscoverLayoutProps {
   indexPattern: DataView;
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<SavedObject<DataViewAttributes>>;
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
   onChangeIndexPattern: (id: string) => void;

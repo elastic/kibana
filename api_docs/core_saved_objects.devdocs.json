@@ -628,7 +628,7 @@
                 "section": "def-public.SavedObjectsBatchResponse",
                 "text": "SavedObjectsBatchResponse"
               },
-              "<unknown>>"
+              "<T>>"
             ],
             "path": "src/core/public/saved_objects/saved_objects_client.ts",
             "deprecated": false,
@@ -789,6 +789,19 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.SimpleSavedObject.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/saved_objects/simple_saved_object.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.SimpleSavedObject.namespaces",
             "type": "Array",
             "tags": [],
@@ -840,7 +853,7 @@
                 "id": "def-public.SimpleSavedObject.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n      namespaces,\n    }",
+                "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n      namespaces,\n      updated_at: updatedAt,\n    }",
                 "description": [],
                 "signature": [
                   "SavedObject",
@@ -1609,7 +1622,7 @@
                 "section": "def-public.SavedObjectsBatchResponse",
                 "text": "SavedObjectsBatchResponse"
               },
-              "<unknown>>; }"
+              "<T>>; }"
             ],
             "path": "src/core/public/saved_objects/saved_objects_service.ts",
             "deprecated": false
@@ -1807,7 +1820,7 @@
             "section": "def-public.SavedObjectsBatchResponse",
             "text": "SavedObjectsBatchResponse"
           },
-          "<unknown>>; }"
+          "<T>>; }"
         ],
         "path": "src/core/public/saved_objects/saved_objects_client.ts",
         "deprecated": false,
@@ -4849,13 +4862,7 @@
             "label": "#log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
             "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
             "deprecated": false
@@ -5283,13 +5290,7 @@
                     "label": "logger",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/logging",
-                        "scope": "server",
-                        "docId": "kibKbnLoggingPluginApi",
-                        "section": "def-server.Logger",
-                        "text": "Logger"
-                      }
+                      "Logger"
                     ],
                     "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
                     "deprecated": false
@@ -12563,22 +12564,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.SavedObjectsImportFailure.title",
-            "type": "string",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/saved_objects/import/types.ts",
-            "deprecated": true,
-            "references": []
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-server.SavedObjectsImportFailure.meta",
             "type": "Object",
             "tags": [],
@@ -13496,6 +13481,10 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/server/saved_objects/saved_object_migrations.ts"
               }
             ],
             "children": [
@@ -13555,21 +13544,9 @@
             "description": [],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(msg: string, meta: Meta) => void"
             ],
             "path": "src/core/server/saved_objects/migrations/core/migration_logger.ts",

@@ -17,12 +17,13 @@ export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
-  uebaEnabled: false,
+  usersEnabled: false,
+  detectionResponseEnabled: false,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
+  riskyUsersEnabled: false,
   securityRulesCancelEnabled: false,
   pendingActionResponsesWithAck: true,
-  rulesBulkEditEnabled: true,
   policyListEnabled: false,
 
   /**
@@ -34,6 +35,11 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
+
+  /**
+   * Enables the Endpoint response actions console in various areas of the app
+   */
+  responseActionsConsoleEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

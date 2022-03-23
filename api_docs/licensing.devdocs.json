@@ -735,10 +735,6 @@
               "path": "x-pack/plugins/ml/public/plugin.ts"
             },
             {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/plugin.ts"
-            },
-            {
               "plugin": "apm",
               "path": "x-pack/plugins/apm/public/context/license/license_context.tsx"
             },
@@ -2530,10 +2526,6 @@
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/plugin.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/plugin.ts"
             },
             {
               "plugin": "remoteClusters",

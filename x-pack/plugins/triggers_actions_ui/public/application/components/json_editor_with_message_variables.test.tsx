@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 import { MockCodeEditor } from '../code_editor.mock';
 

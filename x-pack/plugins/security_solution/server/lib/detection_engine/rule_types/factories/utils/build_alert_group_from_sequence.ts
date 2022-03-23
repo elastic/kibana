@@ -71,8 +71,9 @@ export const buildAlertGroupFromSequence = (
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
   const doc = buildAlertRoot(wrappedBuildingBlocks, completeRule, spaceId, buildReasonMessage);
+  const sequenceAlertId = generateAlertId(doc);
   const sequenceAlert = {
-    _id: generateAlertId(doc),
+    _id: sequenceAlertId,
     _index: '',
     _source: doc,
   };
@@ -81,6 +82,8 @@ export const buildAlertGroupFromSequence = (
     block._source[ALERT_GROUP_ID] = sequenceAlert._source[ALERT_GROUP_ID];
     block._source[ALERT_GROUP_INDEX] = i;
   });
+
+  sequenceAlert._source[ALERT_UUID] = sequenceAlertId;
 
   return [...wrappedBuildingBlocks, sequenceAlert];
 };

@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
-import { DataView } from '../../../../../../../data/common';
+import { DataView } from '../../../../../../../data_views/public';
 import { DocViewRenderProps } from '../../../doc_views_types';
 import { ElasticSearchHit } from '../../../../../types';
 import { KibanaContextProvider } from '../../../../../../../kibana_react/public';

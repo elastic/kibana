@@ -17,7 +17,7 @@ export function MachineLearningNavigationProvider({
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   return {
     async navigateToMl() {
@@ -55,7 +55,7 @@ export function MachineLearningNavigationProvider({
     async navigateToAlertsAndAction() {
       await PageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
-      await testSubjects.existOrFail('alertsList');
+      await testSubjects.existOrFail('rulesList');
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
@@ -89,13 +89,15 @@ export function MachineLearningNavigationProvider({
     },
 
     async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled(tabSubject);
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected ML tab '${tabSubject}' to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(10000, async () => {
+        const isEnabled = await testSubjects.isEnabled(tabSubject);
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected ML tab '${tabSubject}' to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
     },
 
     async assertOverviewTabEnabled(expectedValue: boolean) {
@@ -106,12 +108,36 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~anomalyDetection', expectedValue);
     },
 
+    async assertAnomalyExplorerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~anomalyExplorer', expectedValue);
+    },
+
+    async assertSingleMetricViewerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~singleMetricViewer', expectedValue);
+    },
+
     async assertDataFrameAnalyticsTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalytics', expectedValue);
     },
 
+    async assertTrainedModelsNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~trainedModels', expectedValue);
+    },
+
+    async assertNodesNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~nodesOverview', expectedValue);
+    },
+
     async assertDataVisualizerTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataVisualizer', expectedValue);
+    },
+
+    async assertFileDataVisualizerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~fileDataVisualizer', expectedValue);
+    },
+
+    async assertIndexDataVisualizerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~indexDataVisualizer', expectedValue);
     },
 
     async assertSettingsTabEnabled(expectedValue: boolean) {
@@ -263,6 +289,12 @@ export function MachineLearningNavigationProvider({
         expectedUrlPart,
         `Expected the current URL "${currentUrl}" to not include ${expectedUrlPart}`
       );
+    },
+
+    async browserBackTo(backTestSubj: string) {
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail(backTestSubj, { timeout: 10 * 1000 });
     },
   };
 }

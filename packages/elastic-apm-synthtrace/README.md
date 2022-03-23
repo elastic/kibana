@@ -1,6 +1,6 @@
 # @elastic/apm-synthtrace
 
-`@elastic/apm-synthtrace` is an experimental tool to generate synthetic APM data. It is intended to be used for development and testing of the Elastic APM app in Kibana.
+`@elastic/apm-synthtrace` is a tool in technical preview to generate synthetic APM data. It is intended to be used for development and testing of the Elastic APM app in Kibana.
 
 At a high-level, the module works by modeling APM events/metricsets with [a fluent API](https://en.wikipedia.org/wiki/Fluent_interface). The models can then be serialized and converted to Elasticsearch documents. In the future we might support APM Server as an output as well.
 
@@ -98,19 +98,20 @@ Via the CLI, you can upload scenarios, either using a fixed time range or contin
 For a fixed time window:
 `$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
 
-The script will try to automatically find bootstrapped APM indices. __If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.__
+The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
 
 The following options are supported:
-| Option            | Description                                             | Default      |
-| ------------------| ------------------------------------------------------- | ------------ |
-| `--target`        | Elasticsearch target, including username/password.      | **Required** |
-| `--from`          | The start of the time window.                           | `now - 15m`  |
-| `--to`            | The end of the time window.                             | `now`        |
-| `--live`          | Continously ingest data                                 | `false`      |
-| `--clean`         | Clean APM indices before indexing new data.             | `false`      |
-| `--workers`       | Amount of Node.js worker threads                        | `5`          |
-| `--bucketSize`    | Size of bucket for which to generate data.              | `15m`        |
-| `--interval`      | The interval at which to index data.                    | `10s`        |
-| `--clientWorkers` | Number of simultaneously connected ES clients           | `5`          |
-| `--batchSize`     | Number of documents per bulk index request              | `1000`       |
-| `--logLevel`      | Log level.                                              | `info`       |
+
+| Option            | Description                                        | Default      |
+| ----------------- | -------------------------------------------------- | ------------ |
+| `--target`        | Elasticsearch target, including username/password. | **Required** |
+| `--from`          | The start of the time window.                      | `now - 15m`  |
+| `--to`            | The end of the time window.                        | `now`        |
+| `--live`          | Continously ingest data                            | `false`      |
+| `--clean`         | Clean APM indices before indexing new data.        | `false`      |
+| `--workers`       | Amount of Node.js worker threads                   | `5`          |
+| `--bucketSize`    | Size of bucket for which to generate data.         | `15m`        |
+| `--interval`      | The interval at which to index data.               | `10s`        |
+| `--clientWorkers` | Number of simultaneously connected ES clients      | `5`          |
+| `--batchSize`     | Number of documents per bulk index request         | `1000`       |
+| `--logLevel`      | Log level.                                         | `info`       |

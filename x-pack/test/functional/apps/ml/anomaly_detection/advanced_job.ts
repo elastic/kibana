@@ -433,7 +433,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'job creation displays the created job in the job list'
           );
-          await ml.jobTable.refreshJobList();
           await ml.jobTable.filterWithSearchString(testData.jobId, 1);
 
           await ml.testExecution.logTestStep(
@@ -649,7 +648,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'job cloning displays the created job in the job list'
           );
-          await ml.jobTable.refreshJobList();
           await ml.jobTable.filterWithSearchString(testData.jobIdClone, 1);
 
           await ml.testExecution.logTestStep(

@@ -63,7 +63,7 @@ const verifySnapshotUpgrade = async (
   const { snapshotId, jobId } = snapshot;
 
   try {
-    const { body: deprecations } = await esClient.asCurrentUser.migration.deprecations();
+    const deprecations = await esClient.asCurrentUser.migration.deprecations();
 
     const mlSnapshotDeprecations = deprecations.ml_settings.filter((deprecation) => {
       return /[Mm]odel snapshot/.test(deprecation.message);
@@ -115,10 +115,13 @@ const getModelSnapshotUpgradeStatus = async (
   snapshotId: string
 ) => {
   try {
-    const { body } = (await esClient.asCurrentUser.transport.request({
-      method: 'GET',
-      path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
-    })) as TransportResult<ModelSnapshotUpgradeStatus>;
+    const { body } = (await esClient.asCurrentUser.transport.request(
+      {
+        method: 'GET',
+        path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
+      },
+      { meta: true }
+    )) as TransportResult<ModelSnapshotUpgradeStatus>;
 
     return body && body.model_snapshot_upgrades[0];
   } catch (err) {
@@ -162,7 +165,7 @@ export function registerMlSnapshotRoutes({
         try {
           const { snapshotId, jobId } = request.body;
 
-          const { body } = await esClient.asCurrentUser.ml.upgradeJobSnapshot({
+          const body = await esClient.asCurrentUser.ml.upgradeJobSnapshot({
             job_id: jobId,
             snapshot_id: snapshotId,
           });
@@ -352,7 +355,7 @@ export function registerMlSnapshotRoutes({
         response
       ) => {
         try {
-          const { body: mlInfo } = await esClient.asCurrentUser.ml.info();
+          const mlInfo = await esClient.asCurrentUser.ml.info();
 
           return response.ok({
             body: {
@@ -390,11 +393,10 @@ export function registerMlSnapshotRoutes({
         try {
           const { snapshotId, jobId } = request.params;
 
-          const { body: deleteSnapshotResponse } =
-            await client.asCurrentUser.ml.deleteModelSnapshot({
-              job_id: jobId,
-              snapshot_id: snapshotId,
-            });
+          const deleteSnapshotResponse = await client.asCurrentUser.ml.deleteModelSnapshot({
+            job_id: jobId,
+            snapshot_id: snapshotId,
+          });
 
           return response.ok({
             body: deleteSnapshotResponse,

@@ -7,6 +7,7 @@
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  uiSettingsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import {
   AlertExecutorOptions,
@@ -67,13 +68,12 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
-    alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
-      .alertInstanceFactory,
+    alertFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>().alertFactory,
     savedObjectsClient: savedObjectsClientMock.create(),
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
-    search: alertsMock.createAlertServices<InstanceState, InstanceContext>().search,
   },
   state,
   updatedBy: null,

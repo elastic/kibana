@@ -27,11 +27,11 @@ export function handleResponse(response: ElasticsearchResponse) {
 export async function getStats(req: LegacyRequest, apmIndexPattern: string, clusterUuid: string) {
   checkParam(apmIndexPattern, 'apmIndexPattern in getBeats');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
-  const cgroup = config.get('monitoring.ui.container.apm.enabled');
+  const maxBucketSize = config.ui.max_bucket_size;
+  const cgroup = config.ui.container.apm.enabled;
 
   const params = {
     index: apmIndexPattern,

@@ -21,7 +21,7 @@ import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
 } from './dimension_panel';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { generateId } from '../../id_generator';
@@ -113,12 +113,12 @@ const expectedIndexPatterns = {
 };
 
 const bytesColumn: GenericIndexPatternColumn = {
-  label: 'Max of bytes',
+  label: 'Sum of bytes',
   dataType: 'number',
   isBucketed: false,
 
   // Private
-  operationType: 'max',
+  operationType: 'sum',
   sourceField: 'bytes',
   params: { format: { id: 'bytes' } },
 };
@@ -216,7 +216,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
           deserialize: jest.fn().mockReturnValue({
             convert: () => 'formatted',
           }),
-        } as unknown as DataPublicPluginStart['fieldFormats'],
+        },
+        search: {
+          aggs: {
+            calculateAutoTimeExpression: jest.fn(),
+          },
+        },
       } as unknown as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
@@ -529,7 +534,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
-              operationType: 'max',
+              operationType: 'sum',
               sourceField: 'memory',
               params: { format: { id: 'bytes' } },
               // Other parts of this don't matter for this test
@@ -597,7 +602,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             col1: expect.objectContaining({
               operationType: 'min',
               sourceField: 'bytes',
-              params: { format: { id: 'bytes' } },
+              params: { format: { id: 'bytes' }, emptyAsNull: true },
               // Other parts of this don't matter for this test
             }),
           },
@@ -728,7 +733,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     act(() => {
       wrapper
         .find('input[data-test-subj="indexPattern-label-edit"]')
-        .simulate('change', { target: { value: 'Maximum of bytes' } });
+        .simulate('change', { target: { value: 'Sum of bytes' } });
     });
 
     expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
@@ -740,7 +745,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
-              label: 'Maximum of bytes',
+              label: 'Sum of bytes',
               customLabel: false,
               // Other parts of this don't matter for this test
             }),

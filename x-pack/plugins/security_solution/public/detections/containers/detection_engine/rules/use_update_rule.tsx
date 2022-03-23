@@ -14,7 +14,7 @@ import { transformOutput } from './transforms';
 
 import { updateRule } from './api';
 import * as i18n from './translations';
-import { useInvalidateRules } from './rules_table/use_find_rules';
+import { useInvalidateRules } from './use_find_rules_query';
 
 interface UpdateRuleReturn {
   isLoading: boolean;

@@ -7,7 +7,7 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ToastsStart } from 'kibana/public';
 import React from 'react';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';

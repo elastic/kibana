@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from 'src/core/server';
 
 import { appContextService } from '../../../app_context';
@@ -45,11 +45,6 @@ describe('buildDefaultSettings', () => {
           "codec": "best_compression",
           "lifecycle": Object {
             "name": "logs",
-          },
-          "mapping": Object {
-            "total_fields": Object {
-              "limit": "10000",
-            },
           },
           "query": Object {
             "default_field": Array [

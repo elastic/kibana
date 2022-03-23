@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import {
   KibanaRequest,
   Logger,
@@ -26,7 +25,6 @@ import { SecurityPluginSetup } from '../../../../security/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  MAX_CONCURRENT_SEARCHES,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import {
@@ -34,17 +32,16 @@ import {
   CaseResponse,
   CasesFindRequest,
   CommentAttributes,
-  CommentType,
   User,
   CaseAttributes,
+  CaseStatuses,
+  caseStatuses,
 } from '../../../common/api';
 import { SavedObjectFindOptionsKueryNode } from '../../common/types';
-import { defaultSortField, flattenCaseSavedObject, groupTotalAlertsByID } from '../../common/utils';
-import { defaultPage, defaultPerPage } from '../../routes/api';
-import { ClientArgs } from '..';
+import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-import { EnsureSOAuthCallback } from '../../authorization';
 import {
   transformSavedObjectToExternalModel,
   transformAttributesToESModel,
@@ -54,8 +51,9 @@ import {
   transformFindResponseToExternalModel,
 } from './transform';
 import { ESCaseAttributes } from './types';
+import { AttachmentService } from '../attachments';
 
-interface GetCaseIdsByAlertIdArgs extends ClientArgs {
+interface GetCaseIdsByAlertIdArgs {
   alertId: string;
   filter?: KueryNode;
 }
@@ -65,31 +63,25 @@ interface PushedArgs {
   pushed_by: User;
 }
 
-interface GetCaseArgs extends ClientArgs {
+interface GetCaseArgs {
   id: string;
 }
 
-interface GetCasesArgs extends ClientArgs {
+interface GetCasesArgs {
   caseIds: string[];
 }
 
 interface FindCommentsArgs {
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindCaseCommentsArgs {
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
 }
 
-interface FindCasesArgs extends ClientArgs {
-  options?: SavedObjectFindOptionsKueryNode;
-}
-
-interface PostCaseArgs extends ClientArgs {
+interface PostCaseArgs {
   attributes: CaseAttributes;
   id: string;
 }
@@ -100,19 +92,14 @@ interface PatchCase {
   originalCase: SavedObject<CaseAttributes>;
   version?: string;
 }
-type PatchCaseArgs = PatchCase & ClientArgs;
+type PatchCaseArgs = PatchCase;
 
-interface PatchCasesArgs extends ClientArgs {
+interface PatchCasesArgs {
   cases: PatchCase[];
 }
 
 interface GetUserArgs {
   request: KibanaRequest;
-}
-
-interface CaseCommentStats {
-  commentTotals: Map<string, number>;
-  alertTotals: Map<string, number>;
 }
 
 interface CasesMapWithPageInfo {
@@ -135,10 +122,27 @@ interface GetReportersArgs {
 }
 
 export class CasesService {
-  constructor(
-    private readonly log: Logger,
-    private readonly authentication?: SecurityPluginSetup['authc']
-  ) {}
+  private readonly log: Logger;
+  private readonly authentication?: SecurityPluginSetup['authc'];
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  private readonly attachmentService: AttachmentService;
+
+  constructor({
+    log,
+    authentication,
+    unsecuredSavedObjectsClient,
+    attachmentService,
+  }: {
+    log: Logger;
+    authentication?: SecurityPluginSetup['authc'];
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    attachmentService: AttachmentService;
+  }) {
+    this.log = log;
+    this.authentication = authentication;
+    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
+    this.attachmentService = attachmentService;
+  }
 
   private buildCaseIdsAggs = (
     size: number = 100
@@ -159,7 +163,6 @@ export class CasesService {
   });
 
   public async getCaseIdsByAlertId({
-    unsecuredSavedObjectsClient,
     alertId,
     filter,
   }: GetCaseIdsByAlertIdArgs): Promise<
@@ -172,7 +175,7 @@ export class CasesService {
         filter,
       ]);
 
-      const response = await unsecuredSavedObjectsClient.find<
+      const response = await this.unsecuredSavedObjectsClient.find<
         CommentAttributes,
         GetCaseIdsByAlertIdAggs
       >({
@@ -204,35 +207,32 @@ export class CasesService {
    * Returns a map of all cases.
    */
   public async findCasesGroupedByID({
-    unsecuredSavedObjectsClient,
     caseOptions,
   }: {
-    unsecuredSavedObjectsClient: SavedObjectsClientContract;
     caseOptions: FindCaseOptions;
   }): Promise<CasesMapWithPageInfo> {
-    const cases = await this.findCases({
-      unsecuredSavedObjectsClient,
-      options: caseOptions,
-    });
+    const cases = await this.findCases(caseOptions);
 
     const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
       accMap.set(caseInfo.id, caseInfo);
       return accMap;
     }, new Map<string, SavedObjectsFindResult<CaseAttributes>>());
 
-    const totalCommentsForCases = await this.getCaseCommentStats({
-      unsecuredSavedObjectsClient,
-      ids: Array.from(casesMap.keys()),
+    const commentTotals = await this.attachmentService.getCaseCommentStats({
+      unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+      caseIds: Array.from(casesMap.keys()),
     });
 
     const casesWithComments = new Map<string, CaseResponse>();
     for (const [id, caseInfo] of casesMap.entries()) {
+      const { alerts, nonAlerts } = commentTotals.get(id) ?? { alerts: 0, nonAlerts: 0 };
+
       casesWithComments.set(
         id,
         flattenCaseSavedObject({
           savedObject: caseInfo,
-          totalComment: totalCommentsForCases.commentTotals.get(id) ?? 0,
-          totalAlerts: totalCommentsForCases.alertTotals.get(id) ?? 0,
+          totalComment: nonAlerts,
+          totalAlerts: alerts,
         })
       );
     }
@@ -245,107 +245,69 @@ export class CasesService {
     };
   }
 
-  /**
-   * Retrieves the number of cases that exist with a given status (open, closed, etc).
-   */
-  public async findCaseStatusStats({
-    unsecuredSavedObjectsClient,
-    caseOptions,
-    ensureSavedObjectsAreAuthorized,
+  public async getCaseStatusStats({
+    searchOptions,
   }: {
-    unsecuredSavedObjectsClient: SavedObjectsClientContract;
-    caseOptions: SavedObjectFindOptionsKueryNode;
-    ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
-  }): Promise<number> {
-    const cases = await this.findCases({
-      unsecuredSavedObjectsClient,
-      options: {
-        ...caseOptions,
-        page: 1,
-        perPage: MAX_DOCS_PER_PAGE,
+    searchOptions: SavedObjectFindOptionsKueryNode;
+  }): Promise<{
+    [status in CaseStatuses]: number;
+  }> {
+    const cases = await this.unsecuredSavedObjectsClient.find<
+      ESCaseAttributes,
+      {
+        statuses: {
+          buckets: Array<{
+            key: string;
+            doc_count: number;
+          }>;
+        };
+      }
+    >({
+      ...searchOptions,
+      type: CASE_SAVED_OBJECT,
+      perPage: 0,
+      aggs: {
+        statuses: {
+          terms: {
+            field: `${CASE_SAVED_OBJECT}.attributes.status`,
+            size: caseStatuses.length,
+            order: { _key: 'asc' },
+          },
+        },
       },
     });
 
-    // make sure that the retrieved cases were correctly filtered by owner
-    ensureSavedObjectsAreAuthorized(
-      cases.saved_objects.map((caseInfo) => ({ id: caseInfo.id, owner: caseInfo.attributes.owner }))
-    );
-
-    return cases.saved_objects.length;
+    const statusBuckets = CasesService.getStatusBuckets(cases.aggregations?.statuses.buckets);
+    return {
+      open: statusBuckets?.get('open') ?? 0,
+      'in-progress': statusBuckets?.get('in-progress') ?? 0,
+      closed: statusBuckets?.get('closed') ?? 0,
+    };
   }
 
-  /**
-   * Returns the number of total comments and alerts for a case
-   */
-  public async getCaseCommentStats({
-    unsecuredSavedObjectsClient,
-    ids,
-  }: {
-    unsecuredSavedObjectsClient: SavedObjectsClientContract;
-    ids: string[];
-  }): Promise<CaseCommentStats> {
-    if (ids.length <= 0) {
-      return {
-        commentTotals: new Map<string, number>(),
-        alertTotals: new Map<string, number>(),
-      };
-    }
-
-    const getCommentsMapper = async (id: string) =>
-      this.getAllCaseComments({
-        unsecuredSavedObjectsClient,
-        id,
-        options: { page: 1, perPage: 1 },
-      });
-
-    // Ensuring we don't do too many concurrent get running.
-    const allComments = await pMap(ids, getCommentsMapper, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
-    });
-
-    const alerts = await this.getAllCaseComments({
-      unsecuredSavedObjectsClient,
-      id: ids,
-      options: {
-        filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
-      },
-    });
-
-    const getID = (comments: SavedObjectsFindResponse<unknown>) => {
-      return comments.saved_objects.length > 0
-        ? comments.saved_objects[0].references.find((ref) => ref.type === CASE_SAVED_OBJECT)?.id
-        : undefined;
-    };
-
-    const groupedComments = allComments.reduce((acc, comments) => {
-      const id = getID(comments);
-      if (id) {
-        acc.set(id, comments.total);
-      }
+  private static getStatusBuckets(
+    buckets: Array<{ key: string; doc_count: number }> | undefined
+  ): Map<string, number> | undefined {
+    return buckets?.reduce((acc, bucket) => {
+      acc.set(bucket.key, bucket.doc_count);
       return acc;
     }, new Map<string, number>());
-
-    const groupedAlerts = groupTotalAlertsByID({ comments: alerts });
-    return { commentTotals: groupedComments, alertTotals: groupedAlerts };
   }
 
-  public async deleteCase({ unsecuredSavedObjectsClient, id: caseId }: GetCaseArgs) {
+  public async deleteCase({ id: caseId }: GetCaseArgs) {
     try {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
-      return await unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId);
+      return await this.unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId);
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
     }
   }
 
-  public async getCase({
-    unsecuredSavedObjectsClient,
-    id: caseId,
-  }: GetCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async getCase({ id: caseId }: GetCaseArgs): Promise<SavedObject<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
-      const caseSavedObject = await unsecuredSavedObjectsClient.get<ESCaseAttributes>(
+      const caseSavedObject = await this.unsecuredSavedObjectsClient.get<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId
       );
@@ -357,12 +319,11 @@ export class CasesService {
   }
 
   public async getResolveCase({
-    unsecuredSavedObjectsClient,
     id: caseId,
   }: GetCaseArgs): Promise<SavedObjectsResolveResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to resolve case ${caseId}`);
-      const resolveCaseResult = await unsecuredSavedObjectsClient.resolve<ESCaseAttributes>(
+      const resolveCaseResult = await this.unsecuredSavedObjectsClient.resolve<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId
       );
@@ -377,12 +338,11 @@ export class CasesService {
   }
 
   public async getCases({
-    unsecuredSavedObjectsClient,
     caseIds,
   }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
-      const cases = await unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
+      const cases = await this.unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
       return transformBulkResponseToExternalModel(cases);
@@ -392,13 +352,12 @@ export class CasesService {
     }
   }
 
-  public async findCases({
-    unsecuredSavedObjectsClient,
-    options,
-  }: FindCasesArgs): Promise<SavedObjectsFindResponse<CaseAttributes>> {
+  public async findCases(
+    options?: SavedObjectFindOptionsKueryNode
+  ): Promise<SavedObjectsFindResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to find cases`);
-      const cases = await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
+      const cases = await this.unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         sortField: defaultSortField,
         ...options,
         type: CASE_SAVED_OBJECT,
@@ -421,21 +380,20 @@ export class CasesService {
   }
 
   private async getAllComments({
-    unsecuredSavedObjectsClient,
     id,
     options,
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
-        return unsecuredSavedObjectsClient.find<CommentAttributes>({
+        return this.unsecuredSavedObjectsClient.find<CommentAttributes>({
           type: CASE_COMMENT_SAVED_OBJECT,
           sortField: defaultSortField,
           ...options,
         });
       }
 
-      return unsecuredSavedObjectsClient.find<CommentAttributes>({
+      return this.unsecuredSavedObjectsClient.find<CommentAttributes>({
         type: CASE_COMMENT_SAVED_OBJECT,
         page: 1,
         perPage: MAX_DOCS_PER_PAGE,
@@ -453,7 +411,6 @@ export class CasesService {
    * to override this pass in the either the page or perPage options.
    */
   public async getAllCaseComments({
-    unsecuredSavedObjectsClient,
     id,
     options,
   }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
@@ -463,14 +420,13 @@ export class CasesService {
         return {
           saved_objects: [],
           total: 0,
-          per_page: options?.perPage ?? defaultPerPage,
-          page: options?.page ?? defaultPage,
+          per_page: options?.perPage ?? DEFAULT_PER_PAGE,
+          page: options?.page ?? DEFAULT_PAGE,
         };
       }
 
       this.log.debug(`Attempting to GET all comments for case caseID ${JSON.stringify(id)}`);
       return await this.getAllComments({
-        unsecuredSavedObjectsClient,
         id,
         options: {
           hasReferenceOperator: 'OR',
@@ -485,14 +441,11 @@ export class CasesService {
     }
   }
 
-  public async getReporters({
-    unsecuredSavedObjectsClient,
-    filter,
-  }: GetReportersArgs): Promise<User[]> {
+  public async getReporters({ filter }: GetReportersArgs): Promise<User[]> {
     try {
       this.log.debug(`Attempting to GET all reporters`);
 
-      const results = await unsecuredSavedObjectsClient.find<
+      const results = await this.unsecuredSavedObjectsClient.find<
         ESCaseAttributes,
         {
           reporters: {
@@ -549,11 +502,11 @@ export class CasesService {
     }
   }
 
-  public async getTags({ unsecuredSavedObjectsClient, filter }: GetTagsArgs): Promise<string[]> {
+  public async getTags({ filter }: GetTagsArgs): Promise<string[]> {
     try {
       this.log.debug(`Attempting to GET all cases`);
 
-      const results = await unsecuredSavedObjectsClient.find<
+      const results = await this.unsecuredSavedObjectsClient.find<
         ESCaseAttributes,
         { tags: { buckets: Array<{ key: string }> } }
       >({
@@ -604,15 +557,11 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({
-    unsecuredSavedObjectsClient,
-    attributes,
-    id,
-  }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async postNewCase({ attributes, id }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new case`);
       const transformedAttributes = transformAttributesToESModel(attributes);
-      const createdCase = await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
+      const createdCase = await this.unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
         { id, references: transformedAttributes.referenceHandler.build() }
@@ -625,7 +574,6 @@ export class CasesService {
   }
 
   public async patchCase({
-    unsecuredSavedObjectsClient,
     caseId,
     updatedAttributes,
     originalCase,
@@ -635,7 +583,7 @@ export class CasesService {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
       const transformedAttributes = transformAttributesToESModel(updatedAttributes);
 
-      const updatedCase = await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
+      const updatedCase = await this.unsecuredSavedObjectsClient.update<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId,
         transformedAttributes.attributes,
@@ -653,7 +601,6 @@ export class CasesService {
   }
 
   public async patchCases({
-    unsecuredSavedObjectsClient,
     cases,
   }: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseAttributes>> {
     try {
@@ -670,7 +617,7 @@ export class CasesService {
         };
       });
 
-      const updatedCases = await unsecuredSavedObjectsClient.bulkUpdate<ESCaseAttributes>(
+      const updatedCases = await this.unsecuredSavedObjectsClient.bulkUpdate<ESCaseAttributes>(
         bulkUpdate
       );
       return transformUpdateResponsesToExternalModels(updatedCases);

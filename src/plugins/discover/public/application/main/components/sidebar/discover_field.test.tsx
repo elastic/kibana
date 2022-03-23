@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverField } from './discover_field';
-import { DataViewField } from '../../../../../../data/common';
-import { stubIndexPattern } from '../../../../../../data/common/stubs';
+import { DataViewField } from '../../../../../../data_views/public';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { stubDataView } from '../../../../../../data_views/common/data_view.stub';
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
@@ -46,7 +46,7 @@ function getComponent({
     });
 
   const props = {
-    indexPattern: stubIndexPattern,
+    indexPattern: stubDataView,
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
     onAddFilter: jest.fn(),

@@ -8,17 +8,14 @@
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { OperatingSystem, TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { BaseValidator } from './base_validator';
 import { ExceptionItemLikeOptions } from '../types';
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
-import {
-  ConditionEntry,
-  OperatingSystem,
-  TrustedAppEntryTypes,
-} from '../../../../common/endpoint/types';
+import { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
 import {
   getDuplicateFields,
   isValidHash,

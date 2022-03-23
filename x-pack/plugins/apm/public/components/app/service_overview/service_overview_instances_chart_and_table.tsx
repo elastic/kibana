@@ -10,7 +10,6 @@ import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -21,6 +20,7 @@ import {
   ServiceOverviewInstancesTable,
   TableOptions,
 } from './service_overview_instances_table';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;
@@ -73,12 +73,16 @@ export function ServiceOverviewInstancesChartAndTable({
   const { direction, field } = sort;
 
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      comparisonEnabled,
+      comparisonType,
+      latencyAggregationType,
+    },
   } = useApmParams('/services/{serviceName}/overview');
-
-  const {
-    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useLegacyUrlParams();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -108,7 +112,8 @@ export function ServiceOverviewInstancesChartAndTable({
             query: {
               environment,
               kuery,
-              latencyAggregationType,
+              latencyAggregationType:
+                latencyAggregationType as LatencyAggregationType,
               start,
               end,
               transactionType,
@@ -190,7 +195,8 @@ export function ServiceOverviewInstancesChartAndTable({
               query: {
                 environment,
                 kuery,
-                latencyAggregationType,
+                latencyAggregationType:
+                  latencyAggregationType as LatencyAggregationType,
                 start,
                 end,
                 numBuckets: 20,

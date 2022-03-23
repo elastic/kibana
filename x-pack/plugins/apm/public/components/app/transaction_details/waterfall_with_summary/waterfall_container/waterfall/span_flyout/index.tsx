@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -126,14 +125,12 @@ export function SpanFlyout({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DiscoverSpanLink span={span}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    {
-                      defaultMessage: 'View span in Discover',
-                    }
-                  )}
-                </EuiButtonEmpty>
+                {i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                  {
+                    defaultMessage: 'View span in Discover',
+                  }
+                )}
               </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>

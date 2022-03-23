@@ -13,12 +13,19 @@ import { registry as stubRegistry } from './stub';
 import { ControlsPluginStart } from '../types';
 import { ControlsDataService } from './data';
 import { ControlsService } from './controls';
+import { ControlsHTTPService } from './http';
+import { ControlsOptionsListService } from './options_list';
 
 export interface ControlsServices {
+  // dependency services
   dataViews: ControlsDataViewsService;
   overlays: ControlsOverlaysService;
   data: ControlsDataService;
+  http: ControlsHTTPService;
+
+  // controls plugin's own services
   controls: ControlsService;
+  optionsList: ControlsOptionsListService;
 }
 
 export const pluginServices = new PluginServices<ControlsServices>();
@@ -26,7 +33,7 @@ export const pluginServices = new PluginServices<ControlsServices>();
 export const getStubPluginServices = (): ControlsPluginStart => {
   pluginServices.setRegistry(stubRegistry.start({}));
   return {
-    ContextProvider: pluginServices.getContextProvider(),
-    controlsService: pluginServices.getServices().controls,
+    getControlFactory: pluginServices.getServices().controls.getControlFactory,
+    getControlTypes: pluginServices.getServices().controls.getControlTypes,
   };
 };

@@ -14,7 +14,7 @@ import {
   EuiLoadingContent,
   EuiProgress,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { partition } from 'lodash/fp';
 
 import { AllRulesTabs } from './rules_table_toolbar';
@@ -30,8 +30,8 @@ import {
   Rule,
   RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
-import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
-import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
+import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
@@ -59,7 +59,6 @@ interface RulesTableProps {
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
   selectedTab: AllRulesTabs;
-  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
 }
 
 const NO_ITEMS_MESSAGE = (
@@ -85,7 +84,6 @@ export const RulesTables = React.memo<RulesTableProps>(
     rulesNotInstalled,
     rulesNotUpdated,
     selectedTab,
-    setRefreshRulesData,
   }) => {
     const { timelines } = useKibana().services;
     const tableRef = useRef<EuiBasicTable>(null);
@@ -137,11 +135,11 @@ export const RulesTables = React.memo<RulesTableProps>(
       onFinish: hideDeleteConfirmation,
     });
 
-    const [isBulkEditConfirmationVisible, showBulkEditonfirmation, hideBulkEditConfirmation] =
+    const [isBulkEditConfirmationVisible, showBulkEditConfirmation, hideBulkEditConfirmation] =
       useBoolState();
 
     const [confirmBulkEdit, handleBulkEditConfirm, handleBulkEditCancel] = useAsyncConfirmation({
-      onInit: showBulkEditonfirmation,
+      onInit: showBulkEditConfirmation,
       onFinish: hideBulkEditConfirmation,
     });
 
@@ -162,8 +160,8 @@ export const RulesTables = React.memo<RulesTableProps>(
     const hasPagination = pagination.total > pagination.perPage;
 
     const [selectedElasticRuleIds, selectedCustomRuleIds] = useMemo(() => {
-      const ruleImmutablityMap = new Map(rules.map((rule) => [rule.id, rule.immutable]));
-      const predicate = (id: string) => ruleImmutablityMap.get(id);
+      const ruleImmutabilityMap = new Map(rules.map((rule) => [rule.id, rule.immutable]));
+      const predicate = (id: string) => ruleImmutabilityMap.get(id);
       return partition(predicate, selectedRuleIds);
     }, [rules, selectedRuleIds]);
 
@@ -209,12 +207,6 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const rulesColumns = useRulesColumns({ hasPermissions });
     const monitoringColumns = useMonitoringColumns({ hasPermissions });
-
-    useEffect(() => {
-      setRefreshRulesData(async () => {
-        await reFetchRules();
-      });
-    }, [reFetchRules, setRefreshRulesData]);
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
@@ -398,7 +390,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onChange={tableOnChangeCallback}
               pagination={paginationMemo}
               ref={tableRef}
-              selection={euiBasicTableSelectionProps}
+              selection={hasPermissions ? euiBasicTableSelectionProps : undefined}
               sorting={{
                 sort: {
                   // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation

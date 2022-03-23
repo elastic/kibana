@@ -9,7 +9,9 @@
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import type { Adapters } from 'src/plugins/inspector';
-import type { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
+import type { AggGroupNames, AggParam, AggGroupName, Query } from '../../../data/public';
+import type { DataView } from '../../../data_views/public';
+import { PaletteOutput } from '../../../charts/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
 
@@ -67,6 +69,74 @@ interface CustomEditorConfig {
   editor: string;
 }
 
+interface SplitByFilters {
+  color?: string;
+  filter?: Query;
+  id?: string;
+  label?: string;
+}
+
+interface VisualizeEditorMetricContext {
+  agg: string;
+  fieldName: string;
+  pipelineAggType?: string;
+  params?: Record<string, unknown>;
+  isFullReference: boolean;
+  color?: string;
+  accessor?: string;
+}
+
+export interface VisualizeEditorLayersContext {
+  indexPatternId: string;
+  splitWithDateHistogram?: boolean;
+  timeFieldName?: string;
+  chartType?: string;
+  axisPosition?: string;
+  termsParams?: Record<string, unknown>;
+  splitFields?: string[];
+  splitMode?: string;
+  splitFilters?: SplitByFilters[];
+  palette?: PaletteOutput;
+  metrics: VisualizeEditorMetricContext[];
+  timeInterval?: string;
+  format?: string;
+  label?: string;
+  layerId?: string;
+  dropPartialBuckets?: boolean;
+}
+
+interface AxisExtents {
+  mode: string;
+  lowerBound?: number;
+  upperBound?: number;
+}
+
+export interface NavigateToLensContext {
+  layers: {
+    [key: string]: VisualizeEditorLayersContext;
+  };
+  type: string;
+  configuration: {
+    fill: number | string;
+    legend: {
+      isVisible: boolean;
+      position: string;
+      shouldTruncate: boolean;
+      maxLines: number;
+      showSingleSeries: boolean;
+    };
+    gridLinesVisibility: {
+      x: boolean;
+      yLeft: boolean;
+      yRight: boolean;
+    };
+    extents: {
+      yLeftExtent: AxisExtents;
+      yRightExtent: AxisExtents;
+    };
+  };
+}
+
 /**
  * A visualization type definition representing a spec of one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
@@ -92,12 +162,21 @@ export interface VisTypeDefinition<TVisParams> {
    * If given, it will return the supported triggers for this vis.
    */
   readonly getSupportedTriggers?: (params?: VisParams) => string[];
+  /**
+   * If given, it will navigateToLens with the given viz params.
+   * Every visualization that wants to be edited also in Lens should have this function.
+   * It receives the current visualization params as a parameter and should return the correct config
+   * in order to be displayed in the Lens editor.
+   */
+  readonly navigateToLens?: (
+    params?: VisParams
+  ) => Promise<NavigateToLensContext | null> | undefined;
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
    * Using this method we can rewrite the standard mechanism for getting used indexes
    */
-  readonly getUsedIndexPattern?: (visParams: VisParams) => IndexPattern[] | Promise<IndexPattern[]>;
+  readonly getUsedIndexPattern?: (visParams: VisParams) => DataView[] | Promise<DataView[]>;
 
   readonly isAccessible?: boolean;
   /**

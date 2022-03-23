@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock, httpServerMock } from '../../../core/server/mocks';
+import { coreMock } from '../../../core/server/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 import type { BasicStatsPayload, CollectionStrategyConfig, StatsGetterConfig } from './types';
@@ -135,6 +135,45 @@ describe('Telemetry Collection Manager', () => {
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
+
+          it('calls getStats with passed refreshCache config', async () => {
+            const getStatsCollectionConfig: jest.SpyInstance<
+              TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              // @ts-expect-error spying on private method.
+            > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
+            await setupApi.getStats(config);
+            await setupApi.getStats({ ...config, refreshCache: false });
+            await setupApi.getStats({ ...config, refreshCache: true });
+
+            expect(getStatsCollectionConfig).toBeCalledTimes(3);
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(1, config, usageCollection);
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              1,
+              expect.objectContaining({ refreshCache: false })
+            );
+
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(
+              2,
+              expect.objectContaining({ refreshCache: false }),
+              usageCollection
+            );
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              2,
+              expect.objectContaining({ refreshCache: false })
+            );
+
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(
+              3,
+              expect.objectContaining({ refreshCache: true }),
+              usageCollection
+            );
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              3,
+              expect.objectContaining({ refreshCache: true })
+            );
+
+            getStatsCollectionConfig.mockRestore();
+          });
         });
 
         describe('getOptInStats', () => {
@@ -180,16 +219,15 @@ describe('Telemetry Collection Manager', () => {
       describe('unencrypted: true', () => {
         const config: StatsGetterConfig = {
           unencrypted: true,
-          request: httpServerMock.createKibanaRequest(),
         };
 
         describe('getStats', () => {
-          test('getStats returns empty because clusterDetails returns empty, and the soClient is not an instance of the TelemetrySavedObjectsClient', async () => {
+          test('getStats returns empty because clusterDetails returns empty, and the soClient is an instance of the TelemetrySavedObjectsClient', async () => {
             collectionStrategy.clusterDetailsGetter.mockResolvedValue([]);
             await expect(setupApi.getStats(config)).resolves.toStrictEqual([]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
           test('returns encrypted payload (assumes opted-in when no explicitly opted-out)', async () => {
             collectionStrategy.clusterDetailsGetter.mockResolvedValue([
@@ -209,26 +247,28 @@ describe('Telemetry Collection Manager', () => {
 
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
 
-          test('returns cached object on multiple calls', async () => {
-            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
-              { clusterUuid: 'clusterUuid' },
-            ]);
-            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+          it('calls getStats with config { refreshCache: true } even if set to false', async () => {
+            const getStatsCollectionConfig: jest.SpyInstance<
+              TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              // @ts-expect-error spying on private method.
+            > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);
 
-            await expect(setupApi.getStats(config)).resolves.toStrictEqual([
-              {
-                clusterUuid: 'clusterUuid',
-                stats: {
-                  ...basicStats,
-                  cacheDetails: { updatedAt: expect.any(String), fetchedAt: expect.any(String) },
-                  collectionSource: 'test_collection',
-                },
-              },
-            ]);
+            expect(getStatsCollectionConfig).toBeCalledTimes(1);
+            expect(getStatsCollectionConfig).toBeCalledWith(
+              expect.not.objectContaining({ refreshCache: true }),
+              usageCollection
+            );
+            expect(getStatsCollectionConfig).toReturnWith(
+              expect.objectContaining({
+                refreshCache: true,
+              })
+            );
+
+            getStatsCollectionConfig.mockRestore();
           });
         });
 
@@ -238,7 +278,7 @@ describe('Telemetry Collection Manager', () => {
             await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
 
           test('returns results for opt-in true', async () => {
@@ -253,7 +293,7 @@ describe('Telemetry Collection Manager', () => {
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
 
           test('returns results for opt-in false', async () => {
@@ -268,7 +308,7 @@ describe('Telemetry Collection Manager', () => {
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
-            ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+            ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
         });
       });

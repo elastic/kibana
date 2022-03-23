@@ -22,27 +22,9 @@ import {
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
+import type { Metric } from '../metrics/metrics';
 
 type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } };
-
-interface Metric {
-  app: string;
-  derivative: boolean;
-  mbField?: string;
-  aggs: any;
-  getDateHistogramSubAggs?: Function;
-  dateHistogramSubAggs?: any;
-  metricAgg: string;
-  field: string;
-  timestampField: string;
-  calculation: (
-    b: SeriesBucket,
-    key: string,
-    metric: Metric,
-    defaultSizeInSeconds: number
-  ) => number | null;
-  serialize: () => string;
-}
 
 /**
  * Derivative metrics for the first two agg buckets are unusable. For the first bucket, there
@@ -72,7 +54,12 @@ function getUuid(req: LegacyRequest, metric: Metric) {
   }
 }
 
-function defaultCalculation(bucket: SeriesBucket, key: string) {
+function defaultCalculation(
+  bucket: SeriesBucket,
+  key: string,
+  metric?: Metric,
+  defaultSizeInSeconds?: number
+) {
   const legacyValue: number = get(bucket, key, null);
   const mbValue = bucket.metric_mb_deriv?.normalized_value ?? null;
   let value;
@@ -142,7 +129,7 @@ async function fetchSeries(
   } else {
     dateHistogramSubAggs = {
       metric: {
-        [metric.metricAgg]: {
+        [metric.metricAgg!]: {
           field: metric.field,
         },
       },
@@ -150,7 +137,7 @@ async function fetchSeries(
     };
     if (metric.mbField) {
       Reflect.set(dateHistogramSubAggs, 'metric_mb', {
-        [metric.metricAgg]: {
+        [metric.metricAgg!]: {
           field: metric.mbField,
         },
       });

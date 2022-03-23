@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import { BehaviorSubject } from 'rxjs';
 import tls from 'tls';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import { pollEsNodesVersion } from '../../../../src/core/server';
@@ -197,9 +197,7 @@ describe('ElasticsearchService', () => {
       });
 
       it('checks connection status only once if connection is known to be configured right from start', async () => {
-        mockConnectionStatusClient.asInternalUser.ping.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({ body: true })
-        );
+        mockConnectionStatusClient.asInternalUser.ping.mockResponse(true);
 
         const mockHandler = jest.fn();
         setupContract.connectionStatus$.subscribe(mockHandler);
@@ -410,9 +408,9 @@ describe('ElasticsearchService', () => {
         );
         mockEnrollClient.asScoped.mockReturnValue(mockEnrollScopedClusterClient);
 
-        mockAuthenticateClient.asInternalUser.security.authenticate.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({ statusCode: 200, body: {} as any })
-        );
+        mockAuthenticateClient.asInternalUser.security.authenticate.mockResponse({} as any, {
+          statusCode: 200,
+        });
 
         mockCompatibility(false, 'Oh no!');
 
@@ -457,9 +455,9 @@ describe('ElasticsearchService', () => {
           .mockReturnValueOnce(mockHostOneEnrollScopedClusterClient)
           .mockReturnValueOnce(mockHostTwoEnrollScopedClusterClient);
 
-        mockAuthenticateClient.asInternalUser.security.authenticate.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({ statusCode: 200, body: {} as any })
-        );
+        mockAuthenticateClient.asInternalUser.security.authenticate.mockResponse({} as any, {
+          statusCode: 200,
+        });
 
         const expectedCa = `-----BEGIN CERTIFICATE-----
 
@@ -521,19 +519,25 @@ some weird+ca/with
         ).toHaveBeenCalledTimes(1);
         expect(
           mockHostOneEnrollScopedClusterClient.asCurrentUser.transport.request
-        ).toHaveBeenCalledWith({
-          method: 'GET',
-          path: '/_security/enroll/kibana',
-        });
+        ).toHaveBeenCalledWith(
+          {
+            method: 'GET',
+            path: '/_security/enroll/kibana',
+          },
+          { meta: true }
+        );
         expect(
           mockHostTwoEnrollScopedClusterClient.asCurrentUser.transport.request
         ).toHaveBeenCalledTimes(1);
         expect(
           mockHostTwoEnrollScopedClusterClient.asCurrentUser.transport.request
-        ).toHaveBeenCalledWith({
-          method: 'GET',
-          path: '/_security/enroll/kibana',
-        });
+        ).toHaveBeenCalledWith(
+          {
+            method: 'GET',
+            path: '/_security/enroll/kibana',
+          },
+          { meta: true }
+        );
         expect(mockAuthenticateClient.asInternalUser.security.authenticate).toHaveBeenCalledTimes(
           1
         );
@@ -560,9 +564,7 @@ some weird+ca/with
       });
 
       it('fails if version is incompatible', async () => {
-        mockAuthenticateClient.asInternalUser.ping.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
-        );
+        mockAuthenticateClient.asInternalUser.ping.mockResponse(true);
 
         mockCompatibility(false, 'Oh no!');
 
@@ -573,9 +575,7 @@ some weird+ca/with
       });
 
       it('succeeds if ping call succeeds', async () => {
-        mockAuthenticateClient.asInternalUser.ping.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
-        );
+        mockAuthenticateClient.asInternalUser.ping.mockResponse(true);
 
         await expect(
           setupContract.authenticate({ host: 'http://localhost:9200' })
@@ -612,9 +612,8 @@ some weird+ca/with
       });
 
       it('fails if host is not Elasticsearch', async () => {
-        mockPingClient.asInternalUser.ping.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
-        );
+        mockAuthenticateClient.asInternalUser.ping.mockResponse(true);
+
         mockPingClient.asInternalUser.transport.request.mockResolvedValue(
           interactiveSetupMock.createApiResponse({ statusCode: 200, body: {}, headers: {} })
         );
@@ -626,9 +625,7 @@ some weird+ca/with
       });
 
       it('succeeds if host does not require authentication', async () => {
-        mockPingClient.asInternalUser.ping.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
-        );
+        mockAuthenticateClient.asInternalUser.ping.mockResponse(true);
 
         await expect(setupContract.ping('http://localhost:9200')).resolves.toEqual({
           authRequired: false,

@@ -27,7 +27,7 @@ import { appContextService } from '../../app_context';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
 import type { ArchiveEntry } from './index';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
+import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './parse';
 
 const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17

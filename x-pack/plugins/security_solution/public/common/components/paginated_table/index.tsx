@@ -49,9 +49,6 @@ import { useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
-import { RiskScoreColumns } from '../../../ueba/components/risk_score_table';
-import { HostRulesColumns } from '../../../ueba/components/host_rules_table';
-import { HostTacticsColumns } from '../../../ueba/components/host_tactics_table';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -80,8 +77,6 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
-  | HostRulesColumns
-  | HostTacticsColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
@@ -91,7 +86,6 @@ declare type BasicTableColumns =
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
   | HostRiskScoreColumns
-  | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
@@ -309,12 +303,14 @@ const PaginatedTableComponent: FC<SiemTables> = ({
               </EuiFlexItem>
 
               <PaginationWrapper grow={false}>
-                <EuiPagination
-                  data-test-subj="numberedPagination"
-                  pageCount={pageCount}
-                  activePage={myActivePage}
-                  onPageClick={goToPage}
-                />
+                {totalCount > 0 && (
+                  <EuiPagination
+                    data-test-subj="numberedPagination"
+                    pageCount={pageCount}
+                    activePage={myActivePage}
+                    onPageClick={goToPage}
+                  />
+                )}
               </PaginationWrapper>
             </FooterAction>
             {(isInspect || myLoading) && (

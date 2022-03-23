@@ -1676,6 +1676,38 @@
         "children": [
           {
             "parentPluginId": "core",
+            "id": "def-public.IExternalUrl.isInternalUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "isInternalUrl",
+            "description": [
+              "\nDetermines if the provided URL is an internal url.\n"
+            ],
+            "signature": [
+              "(relativeOrAbsoluteUrl: string) => boolean"
+            ],
+            "path": "src/core/public/http/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IExternalUrl.isInternalUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "relativeOrAbsoluteUrl",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/public/http/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.IExternalUrl.validateUrl",
             "type": "Function",
             "tags": [],
@@ -3831,30 +3863,6 @@
             ],
             "path": "src/core/server/http/types.ts",
             "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.HttpServiceSetup.auth",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "auth",
-            "description": [
-              "\nAuth status.\nSee {@link HttpAuth}\n"
-            ],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.HttpAuth",
-                "text": "HttpAuth"
-              }
-            ],
-            "path": "src/core/server/http/types.ts",
-            "deprecated": true,
-            "references": []
           },
           {
             "parentPluginId": "core",

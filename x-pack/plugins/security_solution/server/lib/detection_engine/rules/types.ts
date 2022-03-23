@@ -199,13 +199,13 @@ export interface CreateRulesOptions {
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   defaultOutputIndex: string;
-  existingRule: SanitizedAlert<RuleParams> | null | undefined;
+  existingRule: RuleAlertType | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions extends Partial<PatchRulesFieldsOptions> {
   rulesClient: RulesClient;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
+  rule: RuleAlertType | null | undefined;
 }
 
 interface PatchRulesFieldsOptions {

@@ -11,6 +11,13 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overvi
   defaultMessage: 'Overview',
 });
 
+export const DETECTION_RESPONSE = i18n.translate(
+  'xpack.securitySolution.navigation.detectionResponse',
+  {
+    defaultMessage: 'Detection & Response',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
@@ -19,8 +26,8 @@ export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network
   defaultMessage: 'Network',
 });
 
-export const UEBA = i18n.translate('xpack.securitySolution.navigation.ueba', {
-  defaultMessage: 'Users & Entities',
+export const USERS = i18n.translate('xpack.securitySolution.navigation.users', {
+  defaultMessage: 'Users',
 });
 
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
@@ -85,6 +92,10 @@ export const INVESTIGATE = i18n.translate('xpack.securitySolution.navigation.inv
 });
 export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
   defaultMessage: 'Manage',
+});
+
+export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
+  defaultMessage: 'Blocklist',
 });
 
 export const GO_TO_DOCUMENTATION = i18n.translate(

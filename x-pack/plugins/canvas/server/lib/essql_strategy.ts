@@ -27,23 +27,26 @@ export const essqlSearchStrategyProvider = (): ISearchStrategy<
 
       const searchUntilEnd = async () => {
         try {
-          let response = await esClient.asCurrentUser.sql.query({
-            format: 'json',
-            body: {
-              query,
-              // @ts-expect-error `params` missing from `QuerySqlRequest` type
-              params,
-              field_multi_value_leniency: true,
-              time_zone: timezone,
-              fetch_size: count,
-              client_id: 'canvas',
-              filter: {
-                bool: {
-                  must: [{ match_all: {} }, ...buildBoolArray(filter)],
+          let response = await esClient.asCurrentUser.sql.query(
+            {
+              format: 'json',
+              body: {
+                query,
+                params,
+                field_multi_value_leniency: true,
+                time_zone: timezone,
+                fetch_size: count,
+                // @ts-expect-error `client_id` missing from `QuerySqlRequest` type
+                client_id: 'canvas',
+                filter: {
+                  bool: {
+                    must: [{ match_all: {} }, ...buildBoolArray(filter)],
+                  },
                 },
               },
             },
-          });
+            { meta: true }
+          );
 
           let body = response.body;
 
@@ -60,12 +63,16 @@ export const essqlSearchStrategyProvider = (): ISearchStrategy<
           // If we still have rows to retrieve, continue requesting data
           // using the cursor until we have everything
           while (rows.length < count && body.cursor !== undefined) {
-            response = await esClient.asCurrentUser.sql.query({
-              format: 'json',
-              body: {
-                cursor: body.cursor,
+            // @ts-expect-error previous ts-ignore mess with the signature override
+            response = await esClient.asCurrentUser.sql.query(
+              {
+                format: 'json',
+                body: {
+                  cursor: body.cursor,
+                },
               },
-            });
+              { meta: true }
+            );
 
             body = response.body;
 

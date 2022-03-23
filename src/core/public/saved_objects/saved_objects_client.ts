@@ -596,7 +596,7 @@ export class SavedObjectsClient {
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,
         SavedObjectsBatchResponse
-      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse<T>;
     });
   }
 
@@ -612,6 +612,7 @@ export class SavedObjectsClient {
       saved_object: simpleSavedObject,
       outcome: resolveResponse.outcome,
       alias_target_id: resolveResponse.alias_target_id,
+      alias_purpose: resolveResponse.alias_purpose,
     };
   }
 

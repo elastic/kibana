@@ -17,7 +17,7 @@ import {
   CommonAlertParams,
   AlertVersions,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_LOGSTASH_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
@@ -87,7 +87,7 @@ export class LogstashVersionMismatchRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

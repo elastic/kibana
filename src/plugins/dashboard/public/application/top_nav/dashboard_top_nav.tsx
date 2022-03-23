@@ -525,7 +525,7 @@ export function DashboardTopNav({
       showDatePicker,
       showFilterBar,
       setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
-      indexPatterns: dashboardAppState.indexPatterns,
+      indexPatterns: dashboardAppState.dataViews,
       showSaveQuery: dashboardCapabilities.saveQuery,
       useDefaultBehaviors: true,
       savedQuery: state.savedQuery,
@@ -598,17 +598,16 @@ export function DashboardTopNav({
                 />
               ),
               quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-              addFromLibraryButton: (
-                <AddFromLibraryButton
-                  onClick={addFromLibrary}
-                  data-test-subj="dashboardAddPanelButton"
-                />
-              ),
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}
                   dashboardContainer={dashboardAppState.dashboardContainer}
                 />,
+                <AddFromLibraryButton
+                  onClick={addFromLibrary}
+                  data-test-subj="dashboardAddPanelButton"
+                />,
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
               ],
             }}
           </SolutionToolbar>

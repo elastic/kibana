@@ -42,7 +42,7 @@ export const register = (deps: RouteDependencies): void => {
       const itemsDeleted: any[] = [];
       const errors: any[] = [];
 
-      const { body: clusterSettings } = await clusterClient.asCurrentUser.cluster.getSettings();
+      const clusterSettings = await clusterClient.asCurrentUser.cluster.getSettings();
 
       // Validator that returns an error if the remote cluster does not exist.
       const validateClusterDoesExist = async (name: string) => {
@@ -74,10 +74,9 @@ export const register = (deps: RouteDependencies): void => {
         try {
           const body = serializeCluster({ name, hasDeprecatedProxySetting });
 
-          const { body: updateClusterResponse } =
-            await clusterClient.asCurrentUser.cluster.putSettings({
-              body,
-            });
+          const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings({
+            body,
+          });
           const acknowledged = get(updateClusterResponse, 'acknowledged');
           const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
 

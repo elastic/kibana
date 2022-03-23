@@ -584,7 +584,9 @@
             "label": "queryEventsBySavedObjects",
             "description": [],
             "signature": [
-              "(queryOptions: QueryOptionsEventsBySavedObjectFilter) => Promise<",
+              "(queryOptions: ",
+              "FindEventsOptionsBySavedObjectFilter",
+              ") => Promise<",
               {
                 "pluginId": "eventLog",
                 "scope": "server",
@@ -600,12 +602,52 @@
               {
                 "parentPluginId": "eventLog",
                 "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "queryOptions",
                 "description": [],
                 "signature": [
-                  "QueryOptionsEventsBySavedObjectFilter"
+                  "FindEventsOptionsBySavedObjectFilter"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.aggregateEventsBySavedObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "aggregateEventsBySavedObjects",
+            "description": [],
+            "signature": [
+              "(queryOptions: ",
+              "AggregateEventsOptionsBySavedObjectFilter",
+              ") => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.AggregateEventsBySavedObjectResult",
+                "text": "AggregateEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.aggregateEventsBySavedObjects.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "queryOptions",
+                "description": [],
+                "signature": [
+                  "AggregateEventsOptionsBySavedObjectFilter"
                 ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
@@ -639,6 +681,34 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.AggregateEventsBySavedObjectResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggregateEventsBySavedObjectResult",
+        "description": [],
+        "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.AggregateEventsBySavedObjectResult.aggregations",
+            "type": "Object",
+            "tags": [],
+            "label": "aggregations",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "AggregationsAggregate",
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "eventLog",
         "id": "def-server.IEventLogClient",
@@ -719,6 +789,90 @@
               {
                 "parentPluginId": "eventLog",
                 "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "legacyIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds",
+            "type": "Function",
+            "tags": [],
+            "label": "aggregateEventsBySavedObjectIds",
+            "description": [],
+            "signature": [
+              "(type: string, ids: string[], options?: Partial<",
+              "AggregateOptionsType",
+              "> | undefined, legacyIds?: string[] | undefined) => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.AggregateEventsBySavedObjectResult",
+                "text": "AggregateEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  "AggregateOptionsType",
+                  "> | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$4",
                 "type": "Array",
                 "tags": [],
                 "label": "legacyIds",
@@ -893,7 +1047,7 @@
             "label": "data",
             "description": [],
             "signature": [
-              "(Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; total_indexing_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; scheduled?: string | undefined; schedule_delay?: number | undefined; } & {}> | undefined; reporting?: Readonly<{ id?: string | undefined; jobType?: string | undefined; byteSize?: number | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; outcome?: string | undefined; url?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; dataset?: string | undefined; severity?: number | undefined; created?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}> | undefined)[]"
+              "(Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; number_of_searches?: number | undefined; total_indexing_duration_ms?: number | undefined; es_search_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; scheduled?: string | undefined; schedule_delay?: number | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; outcome?: string | undefined; url?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; dataset?: string | undefined; severity?: number | undefined; created?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}> | undefined)[]"
             ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false
@@ -912,7 +1066,7 @@
         "label": "IEvent",
         "description": [],
         "signature": [
-          "DeepPartial<DeepWriteable<Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; total_indexing_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; scheduled?: string | undefined; schedule_delay?: number | undefined; } & {}> | undefined; reporting?: Readonly<{ id?: string | undefined; jobType?: string | undefined; byteSize?: number | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; outcome?: string | undefined; url?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; dataset?: string | undefined; severity?: number | undefined; created?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}>>> | undefined"
+          "DeepPartial<DeepWriteable<Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; number_of_searches?: number | undefined; total_indexing_duration_ms?: number | undefined; es_search_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; scheduled?: string | undefined; schedule_delay?: number | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; outcome?: string | undefined; url?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; dataset?: string | undefined; severity?: number | undefined; created?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}>>> | undefined"
         ],
         "path": "x-pack/plugins/event_log/generated/schemas.ts",
         "deprecated": false,
@@ -926,7 +1080,7 @@
         "label": "IValidatedEvent",
         "description": [],
         "signature": [
-          "Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; total_indexing_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; scheduled?: string | undefined; schedule_delay?: number | undefined; } & {}> | undefined; reporting?: Readonly<{ id?: string | undefined; jobType?: string | undefined; byteSize?: number | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; outcome?: string | undefined; url?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; dataset?: string | undefined; severity?: number | undefined; created?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}> | undefined"
+          "Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; number_of_searches?: number | undefined; total_indexing_duration_ms?: number | undefined; es_search_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; scheduled?: string | undefined; schedule_delay?: number | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; end?: string | undefined; category?: string[] | undefined; outcome?: string | undefined; url?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; dataset?: string | undefined; severity?: number | undefined; created?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}> | undefined"
         ],
         "path": "x-pack/plugins/event_log/generated/schemas.ts",
         "deprecated": false,
@@ -1291,7 +1445,7 @@
         "label": "BASE_EVENT_LOG_API_PATH",
         "description": [],
         "signature": [
-          "\"/api/event_log\""
+          "\"/internal/event_log\""
         ],
         "path": "x-pack/plugins/event_log/common/index.ts",
         "deprecated": false,

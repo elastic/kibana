@@ -45,7 +45,7 @@ import {
   BulkRuleResponse,
   PatchRuleProps,
   BulkActionProps,
-  BulkActionResponse,
+  BulkActionResponseMap,
   PreviewRulesProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -266,16 +266,19 @@ export const performBulkAction = async <Action extends BulkAction>({
   query,
   edit,
   ids,
-}: BulkActionProps<Action>): Promise<BulkActionResponse<Action>> =>
-  KibanaServices.get().http.fetch<BulkActionResponse<Action>>(DETECTION_ENGINE_RULES_BULK_ACTION, {
-    method: 'POST',
-    body: JSON.stringify({
-      action,
-      ...(edit ? { edit } : {}),
-      ...(ids ? { ids } : {}),
-      ...(query !== undefined ? { query } : {}),
-    }),
-  });
+}: BulkActionProps<Action>): Promise<BulkActionResponseMap<Action>> =>
+  KibanaServices.get().http.fetch<BulkActionResponseMap<Action>>(
+    DETECTION_ENGINE_RULES_BULK_ACTION,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        ...(edit ? { edit } : {}),
+        ...(ids ? { ids } : {}),
+        ...(query !== undefined ? { query } : {}),
+      }),
+    }
+  );
 
 /**
  * Create Prepackaged Rules

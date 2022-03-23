@@ -6,14 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  EuiToolTip,
-  EuiButton,
-  EuiPopover,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiPopover, EuiIcon, EuiContextMenu } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LayerType, layerTypes } from '../../../../common';
@@ -106,25 +99,29 @@ export function AddLayerButton({
       closePopover={() => toggleLayersChoice(false)}
       panelPaddingSize="none"
     >
-      <EuiContextMenuPanel
-        size="s"
-        items={supportedLayers.map(({ type, label, icon, disabled, tooltipContent }) => {
-          return (
-            <EuiContextMenuItem
-              key={type}
-              data-test-subj={`lnsLayerAddButton-${type}`}
-              onClick={() => {
-                onAddLayerClick(type);
-                toggleLayersChoice(false);
-              }}
-              icon={icon && <EuiIcon size="m" type={icon} />}
-              disabled={disabled}
-              toolTipContent={tooltipContent}
-            >
-              {label}
-            </EuiContextMenuItem>
-          );
-        })}
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: i18n.translate('xpack.lens.configPanel.selectLayerType', {
+              defaultMessage: 'Select layer type',
+            }),
+            items: supportedLayers.map(({ type, label, icon, disabled, toolTipContent }) => {
+              return {
+                toolTipContent,
+                disabled,
+                name: label,
+                icon: icon && <EuiIcon size="m" type={icon} />,
+                ['data-test-subj']: `lnsLayerAddButton-${type}`,
+                onClick: () => {
+                  onAddLayerClick(type);
+                  toggleLayersChoice(false);
+                },
+              };
+            }),
+          },
+        ]}
       />
     </EuiPopover>
   );

@@ -8,14 +8,14 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
-import { DataView, IndexPatternAttributes } from '../../../../../../data/common';
+import type { DataView, DataViewAttributes } from '../../../../../../data_views/public';
 import { SavedObject } from '../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
@@ -57,7 +57,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
+  }) as unknown as Array<SavedObject<DataViewAttributes>>;
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,

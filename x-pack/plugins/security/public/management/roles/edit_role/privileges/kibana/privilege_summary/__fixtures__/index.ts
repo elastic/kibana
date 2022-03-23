@@ -8,7 +8,7 @@
 import { EuiTableRow } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 
-import { findTestSubject } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test-jest-helpers';
 
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
 import { FeatureTableCell } from '../../feature_table_cell';

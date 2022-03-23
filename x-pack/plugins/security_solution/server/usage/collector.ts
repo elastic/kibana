@@ -5,38 +5,26 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
-import { CollectorDependencies } from './types';
-import { fetchDetectionsMetrics } from './detections';
-import { SAVED_OBJECT_TYPES } from '../../../cases/common/constants';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from '../lib/detection_engine/rule_actions/legacy_saved_object_mappings';
+import type { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
+import type { CollectorDependencies } from './types';
+import { getDetectionsMetrics } from './detections/get_metrics';
+import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
+
 export interface UsageData {
   detectionMetrics: {};
 }
 
-export async function getInternalSavedObjectsClient(core: CoreSetup) {
-  return core.getStartServices().then(async ([coreStart]) => {
-    // note: we include the "cases" and "alert" hidden types here otherwise we would not be able to query them. If at some point cases and alert is not considered a hidden type this can be removed
-    return coreStart.savedObjects.createInternalRepository([
-      'alert',
-      legacyRuleActionsSavedObjectType,
-      ...SAVED_OBJECT_TYPES,
-    ]);
-  });
-}
-
 export const registerCollector: RegisterCollector = ({
   core,
-  kibanaIndex,
   signalsIndex,
   ml,
   usageCollection,
+  logger,
 }) => {
   if (!usageCollection) {
+    logger.debug('Usage collection is undefined, therefore returning early without registering it');
     return;
   }
 
@@ -525,12 +513,16 @@ export const registerCollector: RegisterCollector = ({
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
-      const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
-      const soClient = internalSavedObjectsClient as unknown as SavedObjectsClientContract;
-
+      const savedObjectsClient = await getInternalSavedObjectsClient(core);
+      const detectionMetrics = await getDetectionsMetrics({
+        signalsIndex,
+        esClient,
+        savedObjectsClient,
+        logger,
+        mlClient: ml,
+      });
       return {
-        detectionMetrics:
-          (await fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, soClient, ml)) || {},
+        detectionMetrics: detectionMetrics || {},
       };
     },
   });

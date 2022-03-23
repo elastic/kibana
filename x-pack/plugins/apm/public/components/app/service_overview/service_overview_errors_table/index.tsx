@@ -15,8 +15,6 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
@@ -59,10 +57,6 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 };
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
-  const {
-    urlParams: { comparisonType, comparisonEnabled },
-  } = useLegacyUrlParams();
-  const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -74,9 +68,16 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
+  const { query } = useApmParams('/services/{serviceName}/overview');
+
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/overview');
+    environment,
+    kuery,
+    rangeFrom,
+    rangeTo,
+    comparisonType,
+    comparisonEnabled,
+  } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -92,7 +93,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end || !transactionType) {
+      if (!start || !end) {
         return;
       }
       return callApmApi(
@@ -105,7 +106,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               kuery,
               start,
               end,
-              transactionType,
             },
           },
         }
@@ -131,7 +131,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       start,
       end,
       serviceName,
-      transactionType,
       pageIndex,
       direction,
       field,
@@ -148,7 +147,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
   } = useFetcher(
     (callApmApi) => {
-      if (requestId && items.length && start && end && transactionType) {
+      if (requestId && items.length && start && end) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -160,7 +159,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 start,
                 end,
                 numBuckets: 20,
-                transactionType,
                 groupIds: JSON.stringify(
                   items.map(({ groupId: groupId }) => groupId).sort()
                 ),
@@ -182,10 +180,15 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     serviceName,
     errorGroupDetailedStatistics,
     comparisonEnabled,
+    query,
   });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="serviceOverviewErrorsTable"
+    >
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -198,7 +201,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ErrorOverviewLink serviceName={serviceName}>
+            <ErrorOverviewLink serviceName={serviceName} query={query}>
               {i18n.translate('xpack.apm.serviceOverview.errorsTableLinkText', {
                 defaultMessage: 'View errors',
               })}
@@ -240,7 +243,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               pageSize: PAGE_SIZE,
               totalItemCount: totalItems,
               pageSizeOptions: [PAGE_SIZE],
-              hidePerPageOptions: true,
+              showPerPageOptions: false,
             }}
             loading={status === FETCH_STATUS.LOADING}
             onChange={(newTableOptions: {

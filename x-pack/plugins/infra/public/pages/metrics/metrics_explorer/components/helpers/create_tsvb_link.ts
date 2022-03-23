@@ -23,7 +23,7 @@ import {
 import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../../../lib/lib';
 import { createMetricLabel } from './create_metric_label';
-import { LinkDescriptor } from '../../../../../hooks/use_link_props';
+import { LinkDescriptor } from '../../../../../../../observability/public';
 
 /*
  We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to

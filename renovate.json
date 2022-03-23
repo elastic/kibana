@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base", ":disableDependencyDashboard"],
+  "extends": ["config:base"],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm"],
   "baseBranches": ["main", "7.16", "7.15"],
@@ -35,14 +35,14 @@
       "matchPackageNames": ["@elastic/elasticsearch"],
       "reviewers": ["team:kibana-operations", "team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:Core", "v8.1.0"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:Core"],
       "enabled": true
     },
     {
       "groupName": "@elastic/elasticsearch",
       "matchPackageNames": ["@elastic/elasticsearch"],
       "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["7.16"],
+      "matchBaseBranches": ["8.1"],
       "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
       "enabled": true
     },
@@ -50,7 +50,7 @@
       "groupName": "@elastic/elasticsearch",
       "matchPackageNames": ["@elastic/elasticsearch"],
       "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["7.15"],
+      "matchBaseBranches": ["7.17"],
       "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
       "enabled": true
     },

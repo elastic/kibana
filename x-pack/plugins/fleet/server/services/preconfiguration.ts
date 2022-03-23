@@ -8,7 +8,6 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
-import { safeDump } from 'js-yaml';
 
 import type {
   NewPackagePolicy,
@@ -18,11 +17,9 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PreconfigurationError,
-  PreconfiguredOutput,
   PackagePolicy,
 } from '../../common';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
-import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -32,109 +29,14 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { preconfigurePackageInputs, packagePolicyService } from './package_policy';
+import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
-import { outputService } from './output';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
   nonFatalErrors: Array<PreconfigurationError | UpgradeManagedPackagePoliciesResult>;
-}
-
-function isPreconfiguredOutputDifferentFromCurrent(
-  existingOutput: Output,
-  preconfiguredOutput: Partial<Output>
-): boolean {
-  return (
-    existingOutput.is_default !== preconfiguredOutput.is_default ||
-    existingOutput.is_default_monitoring !== preconfiguredOutput.is_default_monitoring ||
-    existingOutput.name !== preconfiguredOutput.name ||
-    existingOutput.type !== preconfiguredOutput.type ||
-    (preconfiguredOutput.hosts &&
-      !isEqual(
-        existingOutput.hosts?.map(normalizeHostsForAgents),
-        preconfiguredOutput.hosts.map(normalizeHostsForAgents)
-      )) ||
-    existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
-    existingOutput.ca_trusted_fingerprint !== preconfiguredOutput.ca_trusted_fingerprint ||
-    existingOutput.config_yaml !== preconfiguredOutput.config_yaml
-  );
-}
-
-export async function ensurePreconfiguredOutputs(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  outputs: PreconfiguredOutput[]
-) {
-  const logger = appContextService.getLogger();
-
-  if (outputs.length === 0) {
-    return;
-  }
-
-  const existingOutputs = await outputService.bulkGet(
-    soClient,
-    outputs.map(({ id }) => id),
-    { ignoreNotFound: true }
-  );
-
-  await Promise.all(
-    outputs.map(async (output) => {
-      const existingOutput = existingOutputs.find((o) => o.id === output.id);
-
-      const { id, config, ...outputData } = output;
-
-      const configYaml = config ? safeDump(config) : undefined;
-
-      const data = {
-        ...outputData,
-        config_yaml: configYaml,
-        is_preconfigured: true,
-      };
-
-      if (!data.hosts || data.hosts.length === 0) {
-        data.hosts = outputService.getDefaultESHosts();
-      }
-
-      const isCreate = !existingOutput;
-      const isUpdateWithNewData =
-        existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
-
-      if (isCreate) {
-        logger.debug(`Creating output ${output.id}`);
-        await outputService.create(soClient, data, { id, fromPreconfiguration: true });
-      } else if (isUpdateWithNewData) {
-        logger.debug(`Updating output ${output.id}`);
-        await outputService.update(soClient, id, data, { fromPreconfiguration: true });
-        // Bump revision of all policies using that output
-        if (outputData.is_default || outputData.is_default_monitoring) {
-          await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
-        } else {
-          await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
-        }
-      }
-    })
-  );
-}
-
-export async function cleanPreconfiguredOutputs(
-  soClient: SavedObjectsClientContract,
-  outputs: PreconfiguredOutput[]
-) {
-  const existingPreconfiguredOutput = (await outputService.list(soClient)).items.filter(
-    (o) => o.is_preconfigured === true
-  );
-  const logger = appContextService.getLogger();
-
-  for (const output of existingPreconfiguredOutput) {
-    if (!outputs.find(({ id }) => output.id === id)) {
-      logger.info(`Deleting preconfigured output ${output.id}`);
-      await outputService.delete(soClient, output.id, { fromPreconfiguration: true });
-    }
-  }
 }
 
 export async function ensurePreconfiguredPackagesAndPolicies(
@@ -181,9 +83,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     spaceId,
-    // During setup, we'll try to install preconfigured packages from the versions bundled with Kibana
-    // whenever possible
-    preferredSource: 'bundled',
   });
 
   const fulfilledPackages = [];
@@ -338,7 +237,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
         return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
-          (packagePolicy) => packagePolicy.name === installablePackagePolicy.name
+          (packagePolicy) =>
+            (packagePolicy.id !== undefined && packagePolicy.id === installablePackagePolicy.id) ||
+            packagePolicy.name === installablePackagePolicy.name
         );
       });
 
@@ -348,7 +249,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         policy!,
         packagePoliciesToAdd!,
         defaultOutput,
-        !created
+        true
       );
 
       // Add the is_managed flag after configuring package policies to avoid errors
@@ -357,18 +258,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
     }
   }
-
-  // Handle automatic package policy upgrades for managed packages and package with
-  // the `keep_policies_up_to_date` setting enabled
-  const allPackagePolicyIds = await packagePolicyService.listIds(soClient, {
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-  });
-  const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
-    soClient,
-    esClient,
-    allPackagePolicyIds.items
-  );
 
   return {
     policies: fulfilledPolicies.map((p) =>
@@ -386,7 +275,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           }
     ),
     packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
-    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
+    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };
 }
 

@@ -13,9 +13,10 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
+import { DataViewAttributes } from '../../../../../../data_views/public';
+import { flattenHit } from '../../../../../../data/public';
 import { SavedObject } from '../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
@@ -78,9 +79,9 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   > as ElasticSearchHit[];
 
   const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+    { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
   ];
 
   for (const hit of hits) {

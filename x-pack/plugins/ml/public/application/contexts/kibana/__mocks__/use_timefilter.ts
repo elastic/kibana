@@ -12,3 +12,17 @@ export const timefilterMock = dataPluginMock.createStartContract().query.timefil
 export const useTimefilter = jest.fn(() => {
   return timefilterMock;
 });
+
+export const useRefreshIntervalUpdates = jest.fn(() => {
+  return {
+    pause: false,
+    value: 0,
+  };
+});
+
+export const useTimeRangeUpdates = jest.fn(() => {
+  return {
+    from: '',
+    to: '',
+  };
+});

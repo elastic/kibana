@@ -6,7 +6,7 @@
  */
 
 import React, { FormEvent } from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ToolbarButton } from 'src/plugins/kibana_react/public';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';

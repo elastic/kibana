@@ -18,20 +18,22 @@ const dataView = {
   },
 } as DataView;
 
-const field = {
-  toSpec: () => {
-    return {
-      name: 'field',
-    };
+const fields = [
+  {
+    toSpec: () => {
+      return {
+        name: 'field',
+      };
+    },
   },
-} as DataViewField;
+] as DataViewField[];
 
 describe('responseFormatter', () => {
   it('returns correct format', () => {
     const response = responseFormatter({
       serviceKey: SERVICE_KEY,
       dataView,
-      field,
+      fields,
     });
     expect(response).toMatchSnapshot();
   });
@@ -40,7 +42,7 @@ describe('responseFormatter', () => {
     const response = responseFormatter({
       serviceKey: SERVICE_KEY_LEGACY,
       dataView,
-      field,
+      fields,
     });
     expect(response).toMatchSnapshot();
   });

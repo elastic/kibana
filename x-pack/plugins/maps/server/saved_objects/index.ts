@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { mapsTelemetrySavedObjects } from './maps_telemetry';
-export { mapSavedObjects } from './map';
+export { getPersistedStateMigrations, setupSavedObjects } from './setup_saved_objects';

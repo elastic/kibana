@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { i18n } from '@kbn/i18n';
-import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import type { IScopedClusterClient, IUiSettingsClient, Logger } from 'kibana/server';
 import type { IScopedSearchClient } from 'src/plugins/data/server';
 import type { Datatable } from 'src/plugins/expressions/server';
 import type { Writable } from 'stream';
@@ -16,8 +16,6 @@ import type {
   DataView,
   ISearchSource,
   ISearchStartSearchSource,
-  SearchFieldValue,
-  SearchSourceFields,
 } from '../../../../../../../src/plugins/data/common';
 import {
   cellHasFormulas,
@@ -32,11 +30,16 @@ import type {
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
+import {
+  AuthenticationExpiredError,
+  ReportingError,
+  UnknownError,
+} from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import type { LevelLogger } from '../../../lib';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
+import { i18nTexts } from './i18n_texts';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
 interface Clients {
@@ -50,23 +53,7 @@ interface Dependencies {
   fieldFormatsRegistry: IFieldFormatsRegistry;
 }
 
-// Function to check if the field name values can be used as the header row
-function isPlainStringArray(
-  fields: SearchFieldValue[] | string | boolean | undefined
-): fields is string[] {
-  let result = true;
-  if (Array.isArray(fields)) {
-    fields.forEach((field) => {
-      if (typeof field !== 'string' || field === '*' || field === '_source') {
-        result = false;
-      }
-    });
-  }
-  return result;
-}
-
 export class CsvGenerator {
-  private _columns?: string[];
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -77,7 +64,7 @@ export class CsvGenerator {
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
-    private logger: LevelLogger,
+    private logger: Logger,
     private stream: Writable
   ) {}
 
@@ -104,13 +91,11 @@ export class CsvGenerator {
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
     this.logger.debug(`executing scroll request`);
-    const results = (
-      await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
-      })
-    ).body;
-    return results;
+
+    return await this.clients.es.asCurrentUser.scroll({
+      scroll: scrollSettings.duration,
+      scroll_id: scrollId,
+    });
   }
 
   /*
@@ -136,36 +121,10 @@ export class CsvGenerator {
     };
   }
 
-  private getColumns(searchSource: ISearchSource, table: Datatable) {
-    if (this._columns != null) {
-      return this._columns;
-    }
-
-    // if columns is not provided in job params,
-    // default to use fields/fieldsFromSource from the searchSource to get the ordering of columns
-    const getFromSearchSource = (): string[] => {
-      const fieldValues: Pick<SearchSourceFields, 'fields' | 'fieldsFromSource'> = {
-        fields: searchSource.getField('fields'),
-        fieldsFromSource: searchSource.getField('fieldsFromSource'),
-      };
-      const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-      this.logger.debug(`Getting columns from '${fieldSource}' in search source.`);
-
-      const fields = fieldValues[fieldSource];
-      // Check if field name values are string[] and if the fields are user-defined
-      if (isPlainStringArray(fields)) {
-        return fields;
-      }
-
-      // Default to using the table column IDs as the fields
-      const columnIds = table.columns.map((c) => c.id);
-      // Fields in the API response don't come sorted - they need to be sorted client-side
-      columnIds.sort();
-      return columnIds;
-    };
-    this._columns = this.job.columns?.length ? this.job.columns : getFromSearchSource();
-
-    return this._columns;
+  private getColumnsFromTabify(table: Datatable) {
+    const columnIds = table.columns.map((c) => c.id);
+    columnIds.sort();
+    return columnIds;
   }
 
   private formatCellValues(formatters: Record<string, FieldFormat>) {
@@ -301,6 +260,7 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
+    let reportingError: undefined | ReportingError;
 
     const index = searchSource.getField('index');
 
@@ -355,7 +315,7 @@ export class CsvGenerator {
         }
 
         if (!results) {
-          this.logger.warning(`Search results are undefined!`);
+          this.logger.warn(`Search results are undefined!`);
           break;
         }
 
@@ -379,9 +339,12 @@ export class CsvGenerator {
           break;
         }
 
-        // If columns exists in the job params, use it to order the CSV columns
-        // otherwise, get the ordering from the searchSource's fields / fieldsFromSource
-        const columns = this.getColumns(searchSource, table) || [];
+        let columns: string[];
+        if (this.job.columns && this.job.columns.length > 0) {
+          columns = this.job.columns;
+        } else {
+          columns = this.getColumnsFromTabify(table);
+        }
 
         if (first) {
           first = false;
@@ -401,16 +364,19 @@ export class CsvGenerator {
 
       // Add warnings to be logged
       if (this.csvContainsFormulas && escapeFormulaValues) {
-        warnings.push(
-          i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues', {
-            defaultMessage: 'CSV may contain formulas whose values have been escaped',
-          })
-        );
+        warnings.push(i18nTexts.escapedFormulaValuesMessage);
       }
     } catch (err) {
       this.logger.error(err);
       if (err instanceof KbnServerError && err.errBody) {
         throw JSON.stringify(err.errBody.error);
+      }
+
+      if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
+        reportingError = new AuthenticationExpiredError();
+        warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+      } else {
+        throw new UnknownError(err.message);
       }
     } finally {
       // clear scrollID
@@ -429,7 +395,7 @@ export class CsvGenerator {
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
-      this.logger.warning(
+      this.logger.warn(
         `ES scroll returned fewer total hits than expected! ` +
           `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
       );
@@ -439,7 +405,11 @@ export class CsvGenerator {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
+      metrics: {
+        csv: { rows: this.csvRowCount },
+      },
       warnings,
+      error_code: reportingError?.code,
     };
   }
 }

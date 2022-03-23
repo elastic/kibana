@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsErrorHelpers,
-  Logger,
-} from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, Logger } from '../../../../../src/core/server';
 import { fetchProvider } from './fetch';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
 describe('fetchProvider', () => {
   let fetchFn: any;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockLogger: Logger;
 
   beforeEach(async () => {
@@ -29,13 +25,10 @@ describe('fetchProvider', () => {
   });
 
   test('returns when ES returns no results', async () => {
-    esClient.search.mockResolvedValue({
-      statusCode: 200,
-      body: {
-        aggregations: {
-          persisted: {
-            buckets: [],
-          },
+    esClient.search.mockResponse({
+      aggregations: {
+        persisted: {
+          buckets: [],
         },
       },
     } as any);
@@ -60,22 +53,19 @@ describe('fetchProvider', () => {
   });
 
   test('returns when ES returns full buckets', async () => {
-    esClient.search.mockResolvedValue({
-      statusCode: 200,
-      body: {
-        aggregations: {
-          persisted: {
-            buckets: [
-              {
-                key_as_string: 'true',
-                doc_count: 10,
-              },
-              {
-                key_as_string: 'false',
-                doc_count: 7,
-              },
-            ],
-          },
+    esClient.search.mockResponse({
+      aggregations: {
+        persisted: {
+          buckets: [
+            {
+              key_as_string: 'true',
+              doc_count: 10,
+            },
+            {
+              key_as_string: 'false',
+              doc_count: 7,
+            },
+          ],
         },
       },
     } as any);

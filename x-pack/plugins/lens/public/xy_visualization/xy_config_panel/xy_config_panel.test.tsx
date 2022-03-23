@@ -6,17 +6,19 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
-import { LayerContextMenu, XyToolbar, DimensionEditor } from '.';
+import { XyToolbar } from '.';
+import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../../types';
-import { State } from '../types';
+import { State, XYState } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { layerTypes } from '../../../common';
+import { XYDataLayerConfig } from '../../../common/expressions';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -46,61 +48,6 @@ describe('XY Config panels', () => {
     };
   });
 
-  describe('LayerContextMenu', () => {
-    test('enables stacked chart types even when there is no split series', () => {
-      const state = testState();
-      const component = mount(
-        <LayerContextMenu
-          layerId={state.layers[0].layerId}
-          frame={frame}
-          setState={jest.fn()}
-          state={{ ...state, layers: [{ ...state.layers[0], xAccessor: 'shazm' }] }}
-        />
-      );
-
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
-
-      expect(options!.map(({ id }) => id)).toEqual([
-        'bar',
-        'bar_stacked',
-        'bar_percentage_stacked',
-        'area',
-        'area_stacked',
-        'area_percentage_stacked',
-        'line',
-      ]);
-
-      expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
-    });
-
-    test('shows only horizontal bar options when in horizontal mode', () => {
-      const state = testState();
-      const component = mount(
-        <LayerContextMenu
-          layerId={state.layers[0].layerId}
-          frame={frame}
-          setState={jest.fn()}
-          state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
-        />
-      );
-
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
-
-      expect(options!.map(({ id }) => id)).toEqual([
-        'bar_horizontal',
-        'bar_horizontal_stacked',
-        'bar_horizontal_percentage_stacked',
-      ]);
-      expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
-    });
-  });
-
   describe('XyToolbar', () => {
     it('should disable the popover if there is no right axis', () => {
       const state = testState();
@@ -117,7 +64,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'bar' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'bar' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
@@ -133,7 +85,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
@@ -153,7 +110,12 @@ describe('XY Config panels', () => {
           state={{
             ...state,
             hideEndzones: true,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
@@ -259,7 +221,10 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           accessor="bar"
           groupId="left"
-          state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
+          }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -271,7 +236,7 @@ describe('XY Config panels', () => {
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
-      expect(options!.map(({ label }) => label)).toEqual(['Auto', 'Bottom', 'Top']);
+      expect(options!.map(({ label }) => label)).toEqual(['Bottom', 'Auto', 'Top']);
     });
 
     test('shows the default axis side options when not in horizontal mode', () => {
@@ -295,11 +260,23 @@ describe('XY Config panels', () => {
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
-      expect(options!.map(({ label }) => label)).toEqual(['Auto', 'Left', 'Right']);
+      expect(options!.map(({ label }) => label)).toEqual(['Left', 'Auto', 'Right']);
     });
 
     test('sets the color of a dimension to the color from palette service if not set explicitly', () => {
-      const state = testState();
+      const state = {
+        ...testState(),
+        layers: [
+          {
+            seriesType: 'bar',
+            layerType: layerTypes.DATA,
+            layerId: 'first',
+            splitAccessor: undefined,
+            xAccessor: 'foo',
+            accessors: ['bar'],
+          },
+        ],
+      } as XYState;
       const component = mount(
         <DimensionEditor
           layerId={state.layers[0].layerId}
@@ -316,19 +293,7 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           accessor="bar"
           groupId="left"
-          state={{
-            ...state,
-            layers: [
-              {
-                seriesType: 'bar',
-                layerType: layerTypes.DATA,
-                layerId: 'first',
-                splitAccessor: undefined,
-                xAccessor: 'foo',
-                accessors: ['bar'],
-              },
-            ],
-          }}
+          state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -339,7 +304,21 @@ describe('XY Config panels', () => {
     });
 
     test('uses the overwrite color if set', () => {
-      const state = testState();
+      const state = {
+        ...testState(),
+        layers: [
+          {
+            seriesType: 'bar',
+            layerType: layerTypes.DATA,
+            layerId: 'first',
+            splitAccessor: undefined,
+            xAccessor: 'foo',
+            accessors: ['bar'],
+            yConfig: [{ forAccessor: 'bar', color: 'red' }],
+          },
+        ],
+      } as XYState;
+
       const component = mount(
         <DimensionEditor
           layerId={state.layers[0].layerId}
@@ -356,20 +335,7 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           accessor="bar"
           groupId="left"
-          state={{
-            ...state,
-            layers: [
-              {
-                seriesType: 'bar',
-                layerType: layerTypes.DATA,
-                layerId: 'first',
-                splitAccessor: undefined,
-                xAccessor: 'foo',
-                accessors: ['bar'],
-                yConfig: [{ forAccessor: 'bar', color: 'red' }],
-              },
-            ],
-          }}
+          state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}

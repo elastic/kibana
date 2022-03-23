@@ -30,6 +30,8 @@ export const validateExceptionListSize = async (
     namespaceType,
     page: undefined,
     perPage: undefined,
+    pit: undefined,
+    searchAfter: undefined,
     sortField: undefined,
     sortOrder: undefined,
   });

@@ -8,7 +8,7 @@
 import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { AllRule, AnyRule, ExceptAnyRule, FieldRule } from '../../model';
 import { AddRuleButton } from './add_rule_button';

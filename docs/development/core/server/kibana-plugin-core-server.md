@@ -244,7 +244,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-server.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [kibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution. |
-|  [mergeSavedObjectMigrationMaps](./kibana-plugin-core-server.mergesavedobjectmigrationmaps.md) | Merges two saved object migration maps. |
+|  [mergeSavedObjectMigrationMaps](./kibana-plugin-core-server.mergesavedobjectmigrationmaps.md) | Merges two saved object migration maps.<!-- -->If there is a migration for a given version on only one of the maps, that migration function will be used:<!-- -->mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '4.5.6': g }<!-- -->) -<!-- -->&gt; { '1.2.3': f, '4.5.6': g }<!-- -->If there is a migration for a given version on both maps, the migrations will be composed:<!-- -->mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '1.2.3': g }<!-- -->) -<!-- -->&gt; { '1.2.3': (doc, context) =<!-- -->&gt; f(g(doc, context), context) } |
 |  [pollEsNodesVersion](./kibana-plugin-core-server.pollesnodesversion.md) |  |
 |  [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md) | The current "level" of availability of a service. |
 |  [validBodyOutput](./kibana-plugin-core-server.validbodyoutput.md) | The set of valid body.output |

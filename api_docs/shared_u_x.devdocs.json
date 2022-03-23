@@ -72,6 +72,76 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sharedUX",
+        "id": "def-public.LazyNoDataViewsPage",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyNoDataViewsPage",
+        "description": [
+          "\nThe Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the\n`withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ onDataViewCreated, dataViewsDocLink }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "src/plugins/shared_ux/public/components/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "sharedUX",
+            "id": "def-public.LazyNoDataViewsPage.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sharedUX",
+        "id": "def-public.NoDataViewsPage",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataViewsPage",
+        "description": [
+          "\nA `NoDataViewsPage` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyNoDataViewsPage` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/shared_ux/public/components/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "sharedUX",
+            "id": "def-public.NoDataViewsPage.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

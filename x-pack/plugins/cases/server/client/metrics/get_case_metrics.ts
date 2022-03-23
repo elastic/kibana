@@ -105,10 +105,9 @@ const checkAndThrowIfInvalidFeatures = (
 };
 
 const checkAuthorization = async (params: CaseMetricsParams, clientArgs: CasesClientArgs) => {
-  const { caseService, unsecuredSavedObjectsClient, authorization } = clientArgs;
+  const { caseService, authorization } = clientArgs;
 
   const caseInfo = await caseService.getCase({
-    unsecuredSavedObjectsClient,
     id: params.caseId,
   });
 

@@ -19,7 +19,7 @@ import {
   PluginInitializerContext,
   ThemeServiceStart,
 } from 'src/core/public';
-import type { ScreenshottingSetup } from '../../screenshotting/public';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -79,7 +79,7 @@ export interface ReportingPublicPluginSetupDendencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
   uiActions: UiActionsSetup;
-  screenshotting: ScreenshottingSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
 }
 
@@ -152,7 +152,7 @@ export class ReportingPublicPlugin
     setupDeps: ReportingPublicPluginSetupDendencies
   ) {
     const { getStartServices, uiSettings } = core;
-    const { home, management, screenshotting, share, uiActions } = setupDeps;
+    const { home, management, screenshotMode, share, uiActions } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
@@ -209,7 +209,7 @@ export class ReportingPublicPlugin
       id: 'reportingRedirect',
       mount: async (params) => {
         const { mountRedirectApp } = await import('./redirect');
-        return mountRedirectApp({ ...params, apiClient, screenshotting, share });
+        return mountRedirectApp({ ...params, apiClient, screenshotMode, share });
       },
       title: 'Reporting redirect app',
       searchable: false,

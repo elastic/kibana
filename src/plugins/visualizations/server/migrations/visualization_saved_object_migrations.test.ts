@@ -2469,4 +2469,74 @@ describe('migration visualization', () => {
       },
     });
   });
+
+  describe('8.1.0 pie - labels and addLegend migration', () => {
+    const getDoc = (addLegend: boolean, lastLevel: boolean = false) => ({
+      attributes: {
+        title: 'Pie Vis',
+        description: 'Pie vis',
+        visState: JSON.stringify({
+          type: 'pie',
+          title: 'Pie vis',
+          params: {
+            addLegend,
+            addTooltip: true,
+            isDonut: true,
+            labels: {
+              position: 'default',
+              show: true,
+              truncate: 100,
+              values: true,
+              valuesFormat: 'percent',
+              percentDecimals: 2,
+              last_level: lastLevel,
+            },
+            legendPosition: 'right',
+            nestedLegend: false,
+            maxLegendLines: 1,
+            truncateLegend: true,
+            distinctColors: false,
+            palette: {
+              name: 'default',
+              type: 'palette',
+            },
+            dimensions: {
+              metric: {
+                type: 'vis_dimension',
+                accessor: 1,
+                format: {
+                  id: 'number',
+                  params: {
+                    id: 'number',
+                  },
+                },
+              },
+              buckets: [],
+            },
+          },
+        }),
+      },
+    });
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['8.1.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    it('should migrate addLegend to legendDisplay', () => {
+      const pie = getDoc(true);
+      const migrated = migrate(pie);
+      const params = JSON.parse(migrated.attributes.visState).params;
+
+      expect(params.legendDisplay).toBe('show');
+      expect(params.addLegend).toBeUndefined();
+
+      const otherPie = getDoc(false);
+      const otherMigrated = migrate(otherPie);
+      const otherParams = JSON.parse(otherMigrated.attributes.visState).params;
+
+      expect(otherParams.legendDisplay).toBe('hide');
+      expect(otherParams.addLegend).toBeUndefined();
+    });
+  });
 });

@@ -13,13 +13,15 @@ import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { ID as OverviewHostQueryId } from '../../containers/overview_host';
 import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
-import { filterHostData } from '../../../hosts/pages/navigation/alerts_query_tab_body';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { filterNetworkData } from '../../../network/pages/navigation/alerts_query_tab_body';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import {
+  filterHostExternalAlertData,
+  filterNetworkExternalAlertData,
+} from '../../../common/components/visualization_actions/utils';
 
 const HorizontalSpacer = styled(EuiFlexItem)`
   width: 24px;
@@ -49,7 +51,7 @@ const EventCountsComponent: React.FC<Props> = ({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
-        filters: [...filters, ...filterHostData],
+        filters: [...filters, ...filterHostExternalAlertData],
       }),
     [filters, indexPattern, query, uiSettings]
   );
@@ -60,7 +62,7 @@ const EventCountsComponent: React.FC<Props> = ({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
-        filters: [...filters, ...filterNetworkData],
+        filters: [...filters, ...filterNetworkExternalAlertData],
       }),
     [filters, indexPattern, uiSettings, query]
   );

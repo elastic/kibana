@@ -13,7 +13,7 @@ import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of } from 'rxjs';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { CoreTheme } from 'src/core/public';
 
 import { KibanaThemeProvider } from './kibana_theme_provider';

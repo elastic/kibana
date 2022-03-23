@@ -11,8 +11,9 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { formatFieldValue } from '../../../utils/format_value';
-import { flattenHit, DataView } from '../../../../../data/common';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer/doc_viewer';
+import { flattenHit } from '../../../../../data/public';
+import { DataView } from '../../../../../data_views/public';
+import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
 import { useNavigationProps } from '../../../utils/use_navigation_props';
@@ -57,7 +58,6 @@ export const TableRow = ({
   );
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'kbnDocTable__row--highlight': row.isAnchor,
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';

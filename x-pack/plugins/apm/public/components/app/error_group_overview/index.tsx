@@ -46,7 +46,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 };
 
 export function ErrorGroupOverview() {
-  const { serviceName, transactionType } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
 
   const {
     query: {
@@ -68,7 +68,6 @@ export function ErrorGroupOverview() {
     comparisonType,
     comparisonEnabled,
   });
-
   const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
@@ -82,7 +81,7 @@ export function ErrorGroupOverview() {
         const normalizedSortDirection =
           sortDirection === 'asc' ? 'asc' : 'desc';
 
-        if (start && end && transactionType) {
+        if (start && end) {
           return callApmApi(
             'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
             {
@@ -92,7 +91,6 @@ export function ErrorGroupOverview() {
                 },
                 query: {
                   environment,
-                  transactionType,
                   kuery,
                   start,
                   end,
@@ -110,16 +108,7 @@ export function ErrorGroupOverview() {
           });
         }
       },
-      [
-        environment,
-        kuery,
-        serviceName,
-        transactionType,
-        start,
-        end,
-        sortField,
-        sortDirection,
-      ]
+      [environment, kuery, serviceName, start, end, sortField, sortDirection]
     );
 
   const { requestId, errorGroupMainStatistics } = errorGroupListData;
@@ -128,13 +117,7 @@ export function ErrorGroupOverview() {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
   } = useFetcher(
     (callApmApi) => {
-      if (
-        requestId &&
-        errorGroupMainStatistics.length &&
-        start &&
-        end &&
-        transactionType
-      ) {
+      if (requestId && errorGroupMainStatistics.length && start && end) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -146,7 +129,6 @@ export function ErrorGroupOverview() {
                 start,
                 end,
                 numBuckets: 20,
-                transactionType,
                 groupIds: JSON.stringify(
                   errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
                 ),

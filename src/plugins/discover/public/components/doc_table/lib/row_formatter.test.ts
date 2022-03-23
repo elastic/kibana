@@ -8,7 +8,7 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 import { fieldFormatsMock } from '../../../../../field_formats/common/mocks';
 import { DiscoverServices } from '../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '../../../../../data/common/stubs';

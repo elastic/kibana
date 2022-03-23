@@ -12,7 +12,6 @@ import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-import * as i18n from './translations';
 import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store/timeline';
@@ -25,7 +24,6 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { DetailsPanel } from '../../timelines/components/side_panel';
-import { InvestigateInTimelineAction } from '../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
 const TimelineDetailsPanel = () => {
@@ -44,19 +42,8 @@ const TimelineDetailsPanel = () => {
   );
 };
 
-const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
-  return (
-    <InvestigateInTimelineAction
-      ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
-      alertIds={alertIds}
-      key="investigate-in-timeline"
-      ecsRowData={null}
-    />
-  );
-};
-
 const CaseContainerComponent: React.FC = () => {
-  const { cases: casesUi } = useKibana().services;
+  const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
@@ -111,18 +98,11 @@ const CaseContainerComponent: React.FC = () => {
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
-        {casesUi.getCases({
+        {cases.ui.getCases({
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
-            metrics: [
-              'alerts.count',
-              'alerts.users',
-              'alerts.hosts',
-              'actions.isolateHost',
-              'connectors',
-              'lifespan',
-            ],
+            metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
           },
           refreshRef,
           onComponentInitialized,
@@ -163,7 +143,6 @@ const CaseContainerComponent: React.FC = () => {
               useInsertTimeline,
             },
             ui: {
-              renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
               renderTimelineDetailsPanel: TimelineDetailsPanel,
             },
           },

@@ -33,13 +33,13 @@ export const verifyReindex =
   () => {
     const count = (index: string) =>
       client
-        .count<{ count: number }>({
+        .count({
           index,
           // Return an error when targeting missing or closed indices
           allow_no_indices: false,
         })
         .then((res) => {
-          return res.body.count;
+          return res.count;
         });
 
     return Promise.all([count(sourceIndex), count(targetIndex)])

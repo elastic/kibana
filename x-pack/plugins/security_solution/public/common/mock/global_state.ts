@@ -14,9 +14,6 @@ import {
   NetworkTlsFields,
   NetworkUsersFields,
   RiskScoreFields,
-  HostRulesFields,
-  HostTacticsFields,
-  HostRiskScoreFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -31,7 +28,6 @@ import {
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { uebaModel } from '../../ueba/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
@@ -44,6 +40,7 @@ import {
   mockIndexFields,
   mockRuntimeMappings,
 } from '../containers/source/mock';
+import { usersModel } from '../../users/store';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -87,7 +84,7 @@ export const mockGlobalState: State = {
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
       },
@@ -108,7 +105,7 @@ export const mockGlobalState: State = {
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
       },
@@ -200,33 +197,29 @@ export const mockGlobalState: State = {
       },
     },
   },
-  ueba: {
+  users: {
     page: {
       queries: {
-        [uebaModel.UebaTableType.riskScore]: {
+        [usersModel.UsersTableType.allUsers]: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          // TODO sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+        },
+        [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            field: RiskScoreFields.timestamp,
+            direction: Direction.asc,
+          },
+          severitySelection: [],
         },
       },
     },
     details: {
       queries: {
-        [uebaModel.UebaTableType.hostRules]: {
-          activePage: 0,
-          limit: 10,
-          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
-        },
-        [uebaModel.UebaTableType.hostTactics]: {
-          activePage: 0,
-          limit: 10,
-          sort: { field: HostTacticsFields.riskScore, direction: Direction.desc },
-        },
-        [uebaModel.UebaTableType.userRules]: {
-          activePage: 0,
-          limit: 10,
-          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
-        },
+        [usersModel.UsersTableType.anomalies]: null,
       },
     },
   },

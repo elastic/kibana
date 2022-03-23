@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  CollectorSet,
-  UsageCollectorOptions,
-} from '../../plugins/usage_collection/server/collector';
-import { loggerMock } from '../../core/server/logging/logger.mock';
+import type { UsageCollectorOptions } from 'src/plugins/usage_collection/server';
+import { createUsageCollectionSetupMock } from '../../plugins/usage_collection/server/mocks';
 
-const collectorSet = new CollectorSet({
-  logger: loggerMock.create(),
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+const collectorSet = createUsageCollectionSetupMock();
 
 interface Usage {
   locale: string;

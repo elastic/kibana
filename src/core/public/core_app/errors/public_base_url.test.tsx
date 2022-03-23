@@ -85,7 +85,7 @@ describe('publicBaseUrl warning', () => {
       });
 
       expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
-        title: 'Configuration missing',
+        title: 'Configuration recommended',
         text: expect.any(Function),
       });
     });

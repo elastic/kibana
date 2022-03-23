@@ -23,7 +23,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern, Query } from 'src/plugins/data/public';
+import type { DataView, Query } from 'src/plugins/data/common';
 import { APP_ID } from '../../../../common/constants';
 import { getIndexPatternService, getData } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
@@ -39,7 +39,7 @@ export interface Props {
 
 interface State {
   isPopoverOpen: boolean;
-  indexPatterns: IndexPattern[];
+  indexPatterns: DataView[];
   isSourceTimeAware: boolean;
 }
 
@@ -64,7 +64,7 @@ export class FilterEditor extends Component<Props, State> {
   async _loadIndexPatterns() {
     // Filter only effects source so only load source indices.
     const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
-    const indexPatterns: IndexPattern[] = [];
+    const indexPatterns: DataView[] = [];
     const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
       try {
         const indexPattern = await getIndexPatternService().get(indexPatternId);

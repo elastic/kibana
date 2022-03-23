@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ActionConnector } from '../../../../types';
 import { useGetChoices } from './use_get_choices';
@@ -168,7 +168,6 @@ describe('ServiceNowSIRParamsFields renders', () => {
   test('If short_description has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
     const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);

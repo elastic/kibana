@@ -25,11 +25,16 @@ import {
 import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
 import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
-import type { DatatableColumn } from '../../../../expressions/public';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../visualizations/common/utils';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
-import { getColorPicker } from '../utils/get_color_picker';
+import {
+  LegendColorPickerWrapperContext,
+  LegendColorPickerWrapper,
+} from '../utils/get_color_picker';
 import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
 import { HeatmapIcon } from './heatmap_icon';
 import './index.scss';
@@ -113,17 +118,6 @@ function computeColorRanges(
   return { colors, ranges };
 }
 
-const getAccessor = (value: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  const accessor = value.accessor;
-  if (typeof accessor === 'number') {
-    return columns[accessor].id;
-  }
-  return accessor.id;
-};
-
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
     data,
@@ -135,6 +129,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     onSelectRange,
     paletteService,
     uiState,
+    interactive,
   }) => {
     const chartTheme = chartsThemeService.useChartsTheme();
     const isDarkTheme = chartsThemeService.useDarkMode();
@@ -145,12 +140,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     });
 
     const toggleLegend = useCallback(() => {
+      if (!interactive) {
+        return;
+      }
       setShowLegend((value) => {
         const newValue = !value;
         uiState?.set?.('vis.legendOpen', newValue);
         return newValue;
       });
-    }, [uiState]);
+    }, [uiState, interactive]);
 
     const setColor = useCallback(
       (newColor: string | null, seriesLabel: string | number) => {
@@ -168,13 +166,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       [uiState]
     );
 
-    const legendColorPicker = useMemo(
-      () => getColorPicker(args.legend.position, setColor, uiState),
-      [args.legend.position, setColor, uiState]
-    );
     const table = data;
     const valueAccessor = args.valueAccessor
-      ? getAccessor(args.valueAccessor, table.columns)
+      ? getAccessorByDimension(args.valueAccessor, table.columns)
       : undefined;
     const minMaxByColumnId = useMemo(
       () => findMinMaxByColumnId([valueAccessor!], table),
@@ -182,8 +176,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     );
 
     const paletteParams = args.palette?.params;
-    const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
-    const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
+    const xAccessor = args.xAccessor
+      ? getAccessorByDimension(args.xAccessor, table.columns)
+      : undefined;
+    const yAccessor = args.yAccessor
+      ? getAccessorByDimension(args.yAccessor, table.columns)
+      : undefined;
 
     const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
     const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
@@ -191,13 +189,108 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const xAxisColumn = table.columns[xAxisColumnIndex];
     const yAxisColumn = table.columns[yAxisColumnIndex];
     const valueColumn = table.columns.find((v) => v.id === valueAccessor);
+    const xAxisMeta = xAxisColumn?.meta;
+    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+
+    const onElementClick = useCallback(
+      (e: HeatmapElementEvent[]) => {
+        const cell = e[0][0];
+        const { x, y } = cell.datum;
+
+        const points = [
+          {
+            row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
+            column: xAxisColumnIndex,
+            value: x,
+          },
+          ...(yAxisColumn
+            ? [
+                {
+                  row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
+                  column: yAxisColumnIndex,
+                  value: y,
+                },
+              ]
+            : []),
+        ];
+
+        const context: FilterEvent['data'] = {
+          data: points.map((point) => ({
+            row: point.row,
+            column: point.column,
+            value: point.value,
+            table,
+          })),
+        };
+        onClickValue(context);
+      },
+      [onClickValue, table, xAxisColumn?.id, xAxisColumnIndex, yAxisColumn, yAxisColumnIndex]
+    );
+
+    const onBrushEnd = useCallback(
+      (e: HeatmapBrushEvent) => {
+        const { x, y } = e;
+
+        if (isTimeBasedSwimLane) {
+          const context: BrushEvent['data'] = {
+            range: x as number[],
+            table,
+            column: xAxisColumnIndex,
+          };
+          onSelectRange(context);
+        } else {
+          const points: Array<{ row: number; column: number; value: string | number }> = [];
+
+          if (yAxisColumn) {
+            (y as string[]).forEach((v) => {
+              points.push({
+                row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
+                column: yAxisColumnIndex,
+                value: v,
+              });
+            });
+          }
+          if (xAxisColumn) {
+            (x as string[]).forEach((v) => {
+              points.push({
+                row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+                column: xAxisColumnIndex,
+                value: v,
+              });
+            });
+          }
+
+          const context: FilterEvent['data'] = {
+            data: points.map((point) => ({
+              row: point.row,
+              column: point.column,
+              value: point.value,
+              table,
+            })),
+          };
+          onClickValue(context);
+        }
+      },
+      [
+        isTimeBasedSwimLane,
+        onClickValue,
+        onSelectRange,
+        table,
+        xAxisColumn,
+        xAxisColumnIndex,
+        yAxisColumn,
+        yAxisColumnIndex,
+      ]
+    );
 
     if (!valueColumn) {
       // Chart is not ready
       return null;
     }
 
-    let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+    let chartData = table.rows.filter(
+      (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
+    );
     if (!chartData || !chartData.length) {
       return <EmptyPlaceholder icon={HeatmapIcon} />;
     }
@@ -213,12 +306,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     }
     const { min, max } = minMaxByColumnId[valueAccessor!];
     // formatters
-    const xAxisMeta = xAxisColumn?.meta;
     const xValuesFormatter = formatFactory(xAxisMeta?.params);
-    const metricFormatter = formatFactory(
-      typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
-    );
-    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+    const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor!, table.columns));
     const dateHistogramMeta = xAxisColumn
       ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
       : undefined;
@@ -271,121 +360,47 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     // adds a very small number to the max value to make sure the max value will be included
     const smattering = 0.00001;
-    let endValue = max + smattering;
+    let endValueDistinctBounds = max + smattering;
     if (paletteParams?.rangeMax || paletteParams?.rangeMax === 0) {
-      endValue =
+      endValueDistinctBounds =
         (paletteParams?.range === 'number'
           ? paletteParams.rangeMax
           : min + ((max - min) * paletteParams.rangeMax) / 100) + smattering;
     }
 
     const overwriteColors = uiState?.get('vis.colors') ?? null;
-
+    const hasSingleValue = max === min;
     const bands = ranges.map((start, index, array) => {
+      const isPenultimate = index === array.length - 1;
+      const nextValue = array[index + 1];
       // by default the last range is right-open
-      let end = index === array.length - 1 ? Infinity : array[index + 1];
+      let endValue = isPenultimate ? Number.POSITIVE_INFINITY : nextValue;
+      const startValue = isPenultimate && hasSingleValue ? min : start;
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
-        const lastBand = max === start ? Infinity : endValue;
-        end = index === array.length - 1 ? lastBand : array[index + 1];
+        const lastBand = hasSingleValue ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
+        endValue = isPenultimate ? lastBand : nextValue;
       }
-      const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
-        end
-      )}`;
+
+      let overwriteArrayIdx;
+
+      if (endValue === Number.POSITIVE_INFINITY) {
+        overwriteArrayIdx = `≥ ${metricFormatter.convert(startValue)}`;
+      } else {
+        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
+          endValue
+        )}`;
+      }
+
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
       return {
         // with the default continuity:above the every range is left-closed
-        start,
-        end,
+        start: startValue,
+        end: endValue,
         // the current colors array contains a duplicated color at the beginning that we need to skip
         color: overwriteColor ?? colors[index + 1],
       };
     });
-
-    const onElementClick = ((e: HeatmapElementEvent[]) => {
-      const cell = e[0][0];
-      const { x, y } = cell.datum;
-
-      const xAxisFieldName = xAxisColumn?.meta?.field;
-      const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
-      const points = [
-        {
-          row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
-          column: xAxisColumnIndex,
-          value: x,
-        },
-        ...(yAxisColumn
-          ? [
-              {
-                row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
-                column: yAxisColumnIndex,
-                value: y,
-              },
-            ]
-          : []),
-      ];
-
-      const context: FilterEvent['data'] = {
-        data: points.map((point) => ({
-          row: point.row,
-          column: point.column,
-          value: point.value,
-          table,
-        })),
-        timeFieldName,
-      };
-      onClickValue(context);
-    }) as ElementClickListener;
-
-    const onBrushEnd = (e: HeatmapBrushEvent) => {
-      const { x, y } = e;
-
-      const xAxisFieldName = xAxisColumn?.meta?.field;
-      const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
-      if (isTimeBasedSwimLane) {
-        const context: BrushEvent['data'] = {
-          range: x as number[],
-          table,
-          column: xAxisColumnIndex,
-          timeFieldName,
-        };
-        onSelectRange(context);
-      } else {
-        const points: Array<{ row: number; column: number; value: string | number }> = [];
-
-        if (yAxisColumn) {
-          (y as string[]).forEach((v) => {
-            points.push({
-              row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
-              column: yAxisColumnIndex,
-              value: v,
-            });
-          });
-        }
-        if (xAxisColumn) {
-          (x as string[]).forEach((v) => {
-            points.push({
-              row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
-              column: xAxisColumnIndex,
-              value: v,
-            });
-          });
-        }
-
-        const context: FilterEvent['data'] = {
-          data: points.map((point) => ({
-            row: point.row,
-            column: point.column,
-            value: point.value,
-            table,
-          })),
-          timeFieldName,
-        };
-        onClickValue(context);
-      }
-    };
 
     const themeOverrides: PartialTheme = {
       legend: {
@@ -456,55 +471,71 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             legendPosition={args.legend.position}
           />
         )}
-        <Chart>
-          <Settings
-            onElementClick={onElementClick}
-            showLegend={showLegend ?? args.legend.isVisible}
-            legendPosition={args.legend.position}
-            legendColorPicker={uiState ? legendColorPicker : undefined}
-            debugState={window._echDebugStateFlag ?? false}
-            tooltip={tooltip}
-            theme={[themeOverrides, chartTheme]}
-            xDomain={{
-              min:
-                dateHistogramMeta && dateHistogramMeta.timeRange
-                  ? new Date(dateHistogramMeta.timeRange.from).getTime()
-                  : NaN,
-              max:
-                dateHistogramMeta && dateHistogramMeta.timeRange
-                  ? new Date(dateHistogramMeta.timeRange.to).getTime()
-                  : NaN,
-            }}
-            onBrushEnd={onBrushEnd as BrushEndListener}
-          />
-          <Heatmap
-            id="heatmap"
-            name={valueColumn.name}
-            colorScale={{
-              type: 'bands',
-              bands,
-            }}
-            timeZone={timeZone}
-            data={chartData}
-            xAccessor={xAccessor}
-            yAccessor={yAccessor || 'unifiedY'}
-            valueAccessor={valueAccessor}
-            valueFormatter={valueFormatter}
-            xScale={xScale}
-            ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
-            xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
-            xAxisLabelName={xAxisColumn?.name}
-            yAxisLabelName={yAxisColumn?.name}
-            xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
-            yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
-            xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
-            yAxisLabelFormatter={
-              yAxisColumn
-                ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
-                : undefined
-            }
-          />
-        </Chart>
+        <LegendColorPickerWrapperContext.Provider
+          value={{
+            uiState,
+            setColor,
+            legendPosition: args.legend.position,
+          }}
+        >
+          <Chart>
+            <Settings
+              onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
+              showLegend={showLegend ?? args.legend.isVisible}
+              legendPosition={args.legend.position}
+              legendSize={args.legend.legendSize}
+              legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
+              debugState={window._echDebugStateFlag ?? false}
+              tooltip={tooltip}
+              theme={[themeOverrides, chartTheme]}
+              xDomain={{
+                min:
+                  dateHistogramMeta && dateHistogramMeta.timeRange
+                    ? new Date(dateHistogramMeta.timeRange.from).getTime()
+                    : NaN,
+                max:
+                  dateHistogramMeta && dateHistogramMeta.timeRange
+                    ? new Date(dateHistogramMeta.timeRange.to).getTime()
+                    : NaN,
+              }}
+              onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
+              ariaLabel={args.ariaLabel}
+              ariaUseDefaultSummary={!args.ariaLabel}
+            />
+            <Heatmap
+              id="heatmap"
+              name={valueColumn.name}
+              colorScale={{
+                type: 'bands',
+                bands,
+              }}
+              timeZone={timeZone}
+              data={chartData}
+              xAccessor={xAccessor}
+              yAccessor={yAccessor || 'unifiedY'}
+              valueAccessor={valueAccessor}
+              valueFormatter={valueFormatter}
+              xScale={xScale}
+              ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
+              xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
+              xAxisLabelName={xAxisColumn?.name}
+              yAxisLabelName={yAxisColumn?.name}
+              xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
+              yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
+              xAxisLabelFormatter={(v) =>
+                args.gridConfig.isXAxisLabelVisible ? `${xValuesFormatter.convert(v)}` : ''
+              }
+              yAxisLabelFormatter={
+                yAxisColumn
+                  ? (v) =>
+                      args.gridConfig.isYAxisLabelVisible
+                        ? `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                        : ''
+                  : undefined
+              }
+            />
+          </Chart>
+        </LegendColorPickerWrapperContext.Provider>
       </>
     );
   }

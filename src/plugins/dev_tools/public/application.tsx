@@ -15,8 +15,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { ApplicationStart, ChromeStart, ScopedHistory, CoreTheme } from 'src/core/public';
-import { KibanaThemeProvider } from '../../kibana_react/public';
+import type {
+  ApplicationStart,
+  ChromeStart,
+  ScopedHistory,
+  CoreTheme,
+  ExecutionContextStart,
+} from 'src/core/public';
+import { KibanaThemeProvider, useExecutionContext } from '../../kibana_react/public';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
@@ -24,6 +30,7 @@ import { DevToolApp } from './dev_tool';
 export interface AppServices {
   docTitleService: DocTitleService;
   breadcrumbService: BreadcrumbService;
+  executionContext: ExecutionContextStart;
 }
 
 interface DevToolsWrapperProps {
@@ -63,6 +70,11 @@ function DevToolsWrapper({
     docTitleService.setTitle(activeDevTool.title);
     breadcrumbService.setBreadcrumbs(activeDevTool.title);
   }, [activeDevTool, docTitleService, breadcrumbService]);
+
+  useExecutionContext(appServices.executionContext, {
+    type: 'application',
+    page: activeDevTool.id,
+  });
 
   return (
     <main className="devApp">

@@ -13,26 +13,26 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import type { AuditLogger } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
 import { getSessionIndexTemplate, SessionIndex } from './session_index';
 import { sessionIndexMock } from './session_index.mock';
 
 describe('Session index', () => {
-  let mockElasticsearchClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let mockElasticsearchClient: ReturnType<
+    typeof elasticsearchServiceMock.createElasticsearchClient
+  >;
   let sessionIndex: SessionIndex;
   let auditLogger: AuditLogger;
   const indexName = '.kibana_some_tenant_security_session_1';
   const indexTemplateName = '.kibana_some_tenant_security_session_index_template_1';
   beforeEach(() => {
     mockElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
-    auditLogger = auditServiceMock.create().withoutRequest;
+    auditLogger = auditLoggerMock.create();
     sessionIndex = new SessionIndex({
       logger: loggingSystemMock.createLogger(),
       kibanaIndexName: '.kibana_some_tenant',
@@ -60,15 +60,9 @@ describe('Session index', () => {
     }
 
     it('debounces initialize calls', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: true })
-      );
-      mockElasticsearchClient.indices.exists.mockResolvedValue(
-        securityMock.createApiResponse({ body: true })
-      );
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
 
       await Promise.all([
         sessionIndex.initialize(),
@@ -81,15 +75,9 @@ describe('Session index', () => {
     });
 
     it('does not delete legacy index template if it does not exist and creates neither index template nor index if they exist', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: true })
-      );
-      mockElasticsearchClient.indices.exists.mockResolvedValue(
-        securityMock.createApiResponse({ body: true })
-      );
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
 
       await sessionIndex.initialize();
 
@@ -101,15 +89,9 @@ describe('Session index', () => {
     });
 
     it('deletes legacy index template if needed and creates both index template and index if they do not exist', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: true })
-      );
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.exists.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
 
       await sessionIndex.initialize();
 
@@ -127,15 +109,9 @@ describe('Session index', () => {
     });
 
     it('creates both index template and index if they do not exist', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.exists.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
 
       await sessionIndex.initialize();
 
@@ -151,15 +127,9 @@ describe('Session index', () => {
     });
 
     it('creates only index template if it does not exist even if index exists', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.exists.mockResolvedValue(
-        securityMock.createApiResponse({ body: true })
-      );
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
 
       await sessionIndex.initialize();
 
@@ -171,15 +141,9 @@ describe('Session index', () => {
     });
 
     it('creates only index if it does not exist even if index template exists', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: true })
-      );
-      mockElasticsearchClient.indices.exists.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
 
       await sessionIndex.initialize();
 
@@ -192,15 +156,9 @@ describe('Session index', () => {
     });
 
     it('does not fail if tries to create index when it exists already', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(
-        securityMock.createApiResponse({ body: true })
-      );
-      mockElasticsearchClient.indices.exists.mockResolvedValue(
-        securityMock.createApiResponse({ body: false })
-      );
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
       mockElasticsearchClient.indices.create.mockRejectedValue(
         new errors.ResponseError(
           securityMock.createApiResponse({
@@ -217,9 +175,7 @@ describe('Session index', () => {
         securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
       );
       mockElasticsearchClient.indices.existsIndexTemplate.mockRejectedValueOnce(unexpectedError);
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResolvedValueOnce(
-        securityMock.createApiResponse({ body: true })
-      );
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
 
       await expect(sessionIndex.initialize()).rejects.toBe(unexpectedError);
       await expect(sessionIndex.initialize()).resolves.toBe(undefined);
@@ -234,28 +190,17 @@ describe('Session index', () => {
       sort: [0],
     };
     beforeEach(() => {
-      mockElasticsearchClient.openPointInTime.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { id: 'PIT_ID' } as OpenPointInTimeResponse,
-        })
-      );
-      mockElasticsearchClient.closePointInTime.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { succeeded: true, num_freed: 1 } as ClosePointInTimeResponse,
-        })
-      );
-      mockElasticsearchClient.search.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            hits: { hits: [sessionValue] },
-          } as SearchResponse,
-        })
-      );
-      mockElasticsearchClient.bulk.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { items: [{}] } as BulkResponse,
-        })
-      );
+      mockElasticsearchClient.openPointInTime.mockResponse({
+        id: 'PIT_ID',
+      } as OpenPointInTimeResponse);
+      mockElasticsearchClient.closePointInTime.mockResponse({
+        succeeded: true,
+        num_freed: 1,
+      } as ClosePointInTimeResponse);
+      mockElasticsearchClient.search.mockResponse({
+        hits: { hits: [sessionValue] },
+      } as SearchResponse);
+      mockElasticsearchClient.bulk.mockResponse({ items: [{}] } as BulkResponse);
       jest.spyOn(Date, 'now').mockImplementation(() => now);
     });
 
@@ -270,6 +215,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).not.toHaveBeenCalled(); // since the search failed, we don't refresh the index
     });
 
     it('throws if bulk delete call to Elasticsearch fails', async () => {
@@ -282,7 +228,20 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1); // since we attempted to delete sessions, we still refresh the index
+    });
+
+    it('does not throw if index refresh call to Elasticsearch fails', async () => {
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
+      );
+      mockElasticsearchClient.indices.refresh.mockRejectedValue(failureReason);
+
+      await sessionIndex.cleanUp();
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1); // since we attempted to delete sessions, we still refresh the index
     });
 
     it('when neither `lifespan` nor `idleTimeout` is configured', async () => {
@@ -364,7 +323,7 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
-        auditLogger: auditServiceMock.create().withoutRequest,
+        auditLogger,
       });
 
       await sessionIndex.cleanUp();
@@ -443,6 +402,7 @@ describe('Session index', () => {
         }
       );
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('when only `idleTimeout` is configured', async () => {
@@ -456,7 +416,7 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
-        auditLogger: auditServiceMock.create().withoutRequest,
+        auditLogger,
       });
 
       await sessionIndex.cleanUp();
@@ -529,6 +489,7 @@ describe('Session index', () => {
         }
       );
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('when both `lifespan` and `idleTimeout` are configured', async () => {
@@ -542,7 +503,7 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
-        auditLogger: auditServiceMock.create().withoutRequest,
+        auditLogger,
       });
 
       await sessionIndex.cleanUp();
@@ -625,6 +586,7 @@ describe('Session index', () => {
         }
       );
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('when both `lifespan` and `idleTimeout` are configured and multiple providers are enabled', async () => {
@@ -653,7 +615,7 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
-        auditLogger: auditServiceMock.create().withoutRequest,
+        auditLogger,
       });
 
       await sessionIndex.cleanUp();
@@ -769,17 +731,14 @@ describe('Session index', () => {
         }
       );
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('should clean up sessions in batches of 10,000', async () => {
       for (const count of [10_000, 1]) {
-        mockElasticsearchClient.search.mockResolvedValueOnce(
-          securityMock.createApiResponse({
-            body: {
-              hits: { hits: new Array(count).fill(sessionValue, 0) },
-            } as SearchResponse,
-          })
-        );
+        mockElasticsearchClient.search.mockResponseOnce({
+          hits: { hits: new Array(count).fill(sessionValue, 0) },
+        } as SearchResponse);
       }
 
       await sessionIndex.cleanUp();
@@ -788,16 +747,13 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('should limit number of batches to 10', async () => {
-      mockElasticsearchClient.search.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            hits: { hits: new Array(10_000).fill(sessionValue, 0) },
-          } as SearchResponse,
-        })
-      );
+      mockElasticsearchClient.search.mockResponse({
+        hits: { hits: new Array(10_000).fill(sessionValue, 0) },
+      } as SearchResponse);
 
       await sessionIndex.cleanUp();
 
@@ -805,6 +761,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(10);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(10);
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('should log audit event', async () => {
@@ -829,23 +786,25 @@ describe('Session index', () => {
     });
 
     it('returns `null` if index is not found', async () => {
-      mockElasticsearchClient.get.mockResolvedValue(
-        securityMock.createApiResponse({
-          statusCode: 404,
-          body: { _index: 'my-index', _type: '_doc', _id: '0', found: false },
-        })
-      );
+      mockElasticsearchClient.get.mockResponse({
+        _index: 'my-index',
+        // @ts-expect-error incomplete definition
+        _type: '_doc',
+        _id: '0',
+        found: false,
+      });
 
       await expect(sessionIndex.get('some-sid')).resolves.toBeNull();
     });
 
     it('returns `null` if session index value document is not found', async () => {
-      mockElasticsearchClient.get.mockResolvedValue(
-        securityMock.createApiResponse({
-          statusCode: 200,
-          body: { _index: 'my-index', _type: '_doc', _id: '0', found: false },
-        })
-      );
+      mockElasticsearchClient.get.mockResponse({
+        _index: 'my-index',
+        // @ts-expect-error incomplete definition
+        _type: '_doc',
+        _id: '0',
+        found: false,
+      });
 
       await expect(sessionIndex.get('some-sid')).resolves.toBeNull();
     });
@@ -859,20 +818,16 @@ describe('Session index', () => {
         content: 'some-encrypted-content',
       };
 
-      mockElasticsearchClient.get.mockResolvedValue(
-        securityMock.createApiResponse({
-          statusCode: 200,
-          body: {
-            found: true,
-            _index: 'my-index',
-            _type: '_doc',
-            _id: '0',
-            _source: indexDocumentSource,
-            _primary_term: 1,
-            _seq_no: 456,
-          },
-        })
-      );
+      mockElasticsearchClient.get.mockResponse({
+        found: true,
+        _index: 'my-index',
+        // @ts-expect-error incomplete definition
+        _type: '_doc',
+        _id: '0',
+        _source: indexDocumentSource,
+        _primary_term: 1,
+        _seq_no: 456,
+      });
 
       await expect(sessionIndex.get('some-sid')).resolves.toEqual({
         ...indexDocumentSource,
@@ -883,7 +838,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.get).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.get).toHaveBeenCalledWith(
         { id: 'some-sid', index: indexName },
-        { ignore: [404] }
+        { ignore: [404], meta: true }
       );
     });
   });
@@ -908,19 +863,15 @@ describe('Session index', () => {
     });
 
     it('properly stores session value in the index', async () => {
-      mockElasticsearchClient.create.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
-            _index: 'my-index',
-            _id: 'W0tpsmIBdwcYyG50zbta',
-            _version: 1,
-            _primary_term: 321,
-            _seq_no: 654,
-            result: 'created',
-          },
-        })
-      );
+      mockElasticsearchClient.create.mockResponse({
+        _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
+        _index: 'my-index',
+        _id: 'W0tpsmIBdwcYyG50zbta',
+        _version: 1,
+        _primary_term: 321,
+        _seq_no: 654,
+        result: 'created',
+      });
 
       const sid = 'some-long-sid';
       const sessionValue = {
@@ -966,33 +917,27 @@ describe('Session index', () => {
         content: 'some-updated-encrypted-content',
       };
 
-      mockElasticsearchClient.get.mockResolvedValue(
-        securityMock.createApiResponse({
-          statusCode: 200,
-          body: {
-            _index: 'my-index',
-            _type: '_doc',
-            _id: '0',
-            _source: latestSessionValue,
-            _primary_term: 321,
-            _seq_no: 654,
-            found: true,
-          },
-        })
-      );
-      mockElasticsearchClient.index.mockResolvedValue(
-        securityMock.createApiResponse({
-          statusCode: 409,
-          body: {
-            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
-            _index: 'my-index',
-            _id: 'W0tpsmIBdwcYyG50zbta',
-            _version: 1,
-            _primary_term: 321,
-            _seq_no: 654,
-            result: 'updated',
-          },
-        })
+      mockElasticsearchClient.get.mockResponse({
+        _index: 'my-index',
+        // @ts-expect-error incomplete definition
+        _type: '_doc',
+        _id: '0',
+        _source: latestSessionValue,
+        _primary_term: 321,
+        _seq_no: 654,
+        found: true,
+      });
+      mockElasticsearchClient.index.mockResponse(
+        {
+          _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
+          _index: 'my-index',
+          _id: 'W0tpsmIBdwcYyG50zbta',
+          _version: 1,
+          _primary_term: 321,
+          _seq_no: 654,
+          result: 'updated',
+        },
+        { statusCode: 409 }
       );
 
       const sid = 'some-long-sid';
@@ -1020,25 +965,20 @@ describe('Session index', () => {
           if_primary_term: 123,
           refresh: 'wait_for',
         },
-        { ignore: [409] }
+        { ignore: [409], meta: true }
       );
     });
 
     it('properly stores session value in the index', async () => {
-      mockElasticsearchClient.index.mockResolvedValue(
-        securityMock.createApiResponse({
-          statusCode: 200,
-          body: {
-            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
-            _index: 'my-index',
-            _id: 'W0tpsmIBdwcYyG50zbta',
-            _version: 1,
-            _primary_term: 321,
-            _seq_no: 654,
-            result: 'created',
-          },
-        })
-      );
+      mockElasticsearchClient.index.mockResponse({
+        _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
+        _index: 'my-index',
+        _id: 'W0tpsmIBdwcYyG50zbta',
+        _version: 1,
+        _primary_term: 321,
+        _seq_no: 654,
+        result: 'created',
+      });
 
       const sid = 'some-long-sid';
       const metadata = { primaryTerm: 123, sequenceNumber: 456 };
@@ -1066,16 +1006,14 @@ describe('Session index', () => {
           if_primary_term: 123,
           refresh: 'wait_for',
         },
-        { ignore: [409] }
+        { ignore: [409], meta: true }
       );
     });
   });
 
   describe('#invalidate', () => {
     beforeEach(() => {
-      mockElasticsearchClient.deleteByQuery.mockResolvedValue(
-        securityMock.createApiResponse({ body: { deleted: 10 } })
-      );
+      mockElasticsearchClient.deleteByQuery.mockResponse({ deleted: 10 });
     });
 
     it('[match=sid] throws if call to Elasticsearch fails', async () => {
@@ -1095,7 +1033,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.delete).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.delete).toHaveBeenCalledWith(
         { id: 'some-long-sid', index: indexName, refresh: 'wait_for' },
-        { ignore: [404] }
+        { ignore: [404], meta: true }
       );
     });
 

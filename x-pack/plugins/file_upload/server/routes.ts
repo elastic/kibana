@@ -182,8 +182,9 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const { body: indexExists } =
-          await context.core.elasticsearch.client.asCurrentUser.indices.exists(request.body);
+        const indexExists = await context.core.elasticsearch.client.asCurrentUser.indices.exists(
+          request.body
+        );
         return response.ok({ body: { exists: indexExists } });
       } catch (e) {
         return response.customError(wrapError(e));

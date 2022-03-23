@@ -16,6 +16,7 @@ import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
 type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
   render(visData: VegaParser): Promise<void>;
+  resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
 };
 
@@ -64,6 +65,7 @@ export const createVegaVisualization = (
 
     async _render(vegaParser: VegaParser) {
       if (vegaParser) {
+        vegaParser.searchAPI.inspectorAdapters?.vega.clearError();
         // New data received, rebuild the graph
         if (this.vegaView) {
           await this.vegaView.destroy();
@@ -94,6 +96,10 @@ export const createVegaVisualization = (
         }
         await this.vegaView?.init();
       }
+    }
+
+    async resize(dimensions?: { height: number; width: number }) {
+      return this.vegaView?.resize(dimensions);
     }
 
     destroy() {

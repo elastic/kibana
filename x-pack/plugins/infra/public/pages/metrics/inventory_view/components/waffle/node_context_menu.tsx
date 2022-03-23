@@ -27,7 +27,7 @@ import {
   SectionLink,
   ActionMenuDivider,
 } from '../../../../../../../observability/public';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../observability/public';
 
 interface Props {
   options: InfraWaffleMapOptions;

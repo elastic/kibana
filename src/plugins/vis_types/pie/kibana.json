@@ -3,7 +3,7 @@
     "version": "kibana",
     "ui": true,
     "server": true,
-    "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection", "expressionPie"],
+    "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection", "expressionPartitionVis"],
     "requiredBundles": ["visDefaultEditor"],
     "extraPublicDirs": ["common/index"],
     "owner": {

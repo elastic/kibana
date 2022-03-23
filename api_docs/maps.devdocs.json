@@ -2838,6 +2838,20 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-public.GEOJSON_FEATURE_ID_PROPERTY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "GEOJSON_FEATURE_ID_PROPERTY_NAME",
+        "description": [],
+        "signature": [
+          "\"__kbn__feature_id__\""
+        ],
+        "path": "x-pack/plugins/maps/public/classes/layers/vector_layer/geojson_vector_layer/assign_feature_ids.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-public.ImmutableSourceProperty",
         "type": "Type",
         "tags": [],
@@ -2858,7 +2872,7 @@
         "label": "LayerWizard",
         "description": [],
         "signature": [
-          "{ title: string; categories: ",
+          "{ id: string; title: string; categories: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -2930,8 +2944,8 @@
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.IndexPattern",
-            "text": "IndexPattern"
+            "section": "def-common.DataView",
+            "text": "DataView"
           },
           "[]; }"
         ],

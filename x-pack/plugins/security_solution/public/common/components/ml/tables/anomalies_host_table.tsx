@@ -15,13 +15,12 @@ import * as i18n from './translations';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
 import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
 import { Loader } from '../../loader';
-import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { AnomaliesHostTableProps } from '../types';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
-import { hostEquality } from './host_equality';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
 import { Panel } from '../../panel';
+import { anomaliesTableDefaultEquality } from './default_equality';
 
 const sorting = {
   sort: {
@@ -33,7 +32,6 @@ const sorting = {
 const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   startDate,
   endDate,
-  narrowDateRange,
   hostName,
   skip,
   type,
@@ -44,24 +42,20 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     endDate,
     skip,
     criteriaFields: getCriteriaFromHostType(type, hostName),
+    filterQuery: {
+      exists: { field: 'host.name' },
+    },
   });
 
   const hosts = convertAnomaliesToHosts(tableData, hostName);
 
-  const interval = getIntervalFromAnomalies(tableData);
-  const columns = getAnomaliesHostTableColumnsCurated(
-    type,
-    startDate,
-    endDate,
-    interval,
-    narrowDateRange
-  );
+  const columns = getAnomaliesHostTableColumnsCurated(type, startDate, endDate);
   const pagination = {
     initialPageIndex: 0,
     initialPageSize: 10,
     totalItemCount: hosts.length,
     pageSizeOptions: [5, 10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   if (!hasMlUserPermissions(capabilities)) {
@@ -94,4 +88,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   }
 };
 
-export const AnomaliesHostTable = React.memo(AnomaliesHostTableComponent, hostEquality);
+export const AnomaliesHostTable = React.memo(
+  AnomaliesHostTableComponent,
+  anomaliesTableDefaultEquality
+);

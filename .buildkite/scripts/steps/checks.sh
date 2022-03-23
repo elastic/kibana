@@ -6,6 +6,7 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/bootstrap.sh
 
 .buildkite/scripts/steps/checks/commit/commit.sh
+.buildkite/scripts/steps/checks/bazel_packages.sh
 .buildkite/scripts/steps/checks/telemetry.sh
 .buildkite/scripts/steps/checks/ts_projects.sh
 .buildkite/scripts/steps/checks/jest_configs.sh

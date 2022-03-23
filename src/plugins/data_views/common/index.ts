@@ -8,7 +8,7 @@
 
 export {
   RUNTIME_FIELD_TYPES,
-  FLEET_ASSETS_TO_IGNORE,
+  DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
@@ -28,6 +28,8 @@ export type {
   FieldFormatMap,
   RuntimeType,
   RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeFieldSubField,
   IIndexPattern,
   DataViewAttributes,
   IndexPatternAttributes,
@@ -41,7 +43,6 @@ export type {
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
-  IIndexPatternsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
@@ -49,15 +50,18 @@ export type {
   FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
-  IndexPatternFieldMap,
   DataViewSpec,
-  IndexPatternSpec,
   SourceFilter,
+  HasDataService,
 } from './types';
 export { DataViewType } from './types';
 export type { IndexPatternsContract, DataViewsContract } from './data_views';
 export { IndexPatternsService, DataViewsService } from './data_views';
-export type { DataViewListItem, TimeBasedDataView } from './data_views';
+export type {
+  DataViewListItem,
+  DataViewsServicePublicMethods,
+  TimeBasedDataView,
+} from './data_views';
 export { IndexPattern, DataView } from './data_views';
 export {
   DuplicateDataViewError,

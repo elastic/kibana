@@ -24,7 +24,8 @@ export const dateHistogram: TableRequestProcessorsFunction =
 
     const meta: TableSearchRequestMeta = {
       timeField,
-      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      dataViewId: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      indexPatternString: seriesIndex.indexPatternString,
       panelId: panel.id,
     };
 

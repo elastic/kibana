@@ -152,7 +152,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     ) {
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         for (const expected of expectedHistogramCharts.values()) {
           const id = expected.id;
           await testSubjects.existOrFail(`mlDataGridChart-${id}`);
@@ -185,16 +185,6 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect');
       });
     },
-
-    // async assertIncludedFieldsSelection(expectedSelection: string[]) {
-    //   const includesTable = await testSubjects.find('mlAnalyticsCreateJobWizardIncludesSelect');
-    //   const actualSelection = await includesTable.findByClassName('euiTableRow-isSelected');
-
-    //   expect(actualSelection).to.eql(
-    //     expectedSelection,
-    //     `Included fields should be '${expectedSelection}' (got '${actualSelection}')`
-    //   );
-    // },
 
     async assertDestIndexInputExists() {
       await retry.tryForTime(4000, async () => {

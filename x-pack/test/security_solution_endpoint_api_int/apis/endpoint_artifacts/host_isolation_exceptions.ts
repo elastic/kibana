@@ -11,7 +11,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../plugins/security_solution/common/endpoint/service/artifacts';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../../plugins/security_solution/common/endpoint/service/artifacts';
 import {
   createUserAndRole,
   deleteUserAndRole,
@@ -29,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const log = getService('log');
 
   type ApiCallsInterface<BodyReturnType = unknown> = Array<{
     method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
@@ -62,12 +66,15 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     const apiCalls: ApiCallsInterface<
-      Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>
+      Pick<ExceptionListItemSchema, 'item_id' | 'namespace_type' | 'os_types' | 'tags' | 'entries'>
     > = [
       {
         method: 'post',
         path: EXCEPTION_LIST_ITEM_URL,
-        getBody: () => exceptionsGenerator.generateHostIsolationExceptionForCreate(),
+        getBody: () =>
+          exceptionsGenerator.generateHostIsolationExceptionForCreate({
+            tags: [GLOBAL_ARTIFACT_TAG],
+          }),
       },
       {
         method: 'put',
@@ -77,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: existingExceptionData.artifact.id,
             item_id: existingExceptionData.artifact.item_id,
             _version: existingExceptionData.artifact._version,
+            tags: [GLOBAL_ARTIFACT_TAG],
           }),
       },
     ];
@@ -214,19 +222,17 @@ export default function ({ getService }: FtrProviderContext) {
 
             await supertest[apiCall.method](apiCall.path)
               .set('kbn-xsrf', 'true')
+              .on('error', (error) => {
+                log.error(JSON.stringify(error?.response?.body ?? error, null, 2));
+              })
               .send(body)
               .expect(200);
-          });
 
-          it(`[${apiCall.method}] and accept all OSs for os_types`, async () => {
-            const body = apiCall.getBody();
+            const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${body.item_id}&namespace_type=${body.namespace_type}`;
 
-            body.os_types = ['linux', 'windows', 'macos'];
+            log.info(`cleaning up: ${deleteUrl}`);
 
-            await supertest[apiCall.method](apiCall.path)
-              .set('kbn-xsrf', 'true')
-              .send(body)
-              .expect(200);
+            await supertest.delete(deleteUrl).set('kbn-xsrf', 'true').expect(200);
           });
         }
       });
@@ -276,23 +282,6 @@ export default function ({ getService }: FtrProviderContext) {
             return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${existingExceptionData.artifact.list_id}&namespace_type=${existingExceptionData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
           },
           getBody: () => undefined,
-        },
-        {
-          method: 'post',
-          info: 'create item',
-          path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () => exceptionsGenerator.generateHostIsolationExceptionForCreate(),
-        },
-        {
-          method: 'put',
-          info: 'update item',
-          path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () =>
-            exceptionsGenerator.generateHostIsolationExceptionForUpdate({
-              id: existingExceptionData.artifact.id,
-              item_id: existingExceptionData.artifact.item_id,
-              _version: existingExceptionData.artifact._version,
-            }),
         },
       ];
 

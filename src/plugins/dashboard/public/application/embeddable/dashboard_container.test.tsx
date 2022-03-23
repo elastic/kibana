@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { findTestSubject, nextTick } from '@kbn/test/jest';
+import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -134,26 +134,27 @@ test('DashboardContainer.replacePanel', async (done) => {
   const container = new DashboardContainer(initialInput, options);
   let counter = 0;
 
-  const subscriptionHandler = jest.fn(({ panels }) => {
-    counter++;
-    expect(panels[ID]).toBeDefined();
-    // It should be called exactly 2 times and exit the second time
-    switch (counter) {
-      case 1:
-        return expect(panels[ID].type).toBe(CONTACT_CARD_EMBEDDABLE);
+  const subscription = container.getInput$().subscribe(
+    jest.fn(({ panels }) => {
+      counter++;
+      expect(panels[ID]).toBeDefined();
+      // It should be called exactly 2 times and exit the second time
+      switch (counter) {
+        case 1:
+          return expect(panels[ID].type).toBe(CONTACT_CARD_EMBEDDABLE);
 
-      case 2: {
-        expect(panels[ID].type).toBe(EMPTY_EMBEDDABLE);
-        subscription.unsubscribe();
-        done();
+        case 2: {
+          expect(panels[ID].type).toBe(EMPTY_EMBEDDABLE);
+          subscription.unsubscribe();
+          done();
+          return;
+        }
+
+        default:
+          throw Error('Called too many times!');
       }
-
-      default:
-        throw Error('Called too many times!');
-    }
-  });
-
-  const subscription = container.getInput$().subscribe(subscriptionHandler);
+    })
+  );
 
   // replace the panel now
   container.replacePanel(container.getInput().panels[ID], {
@@ -162,7 +163,7 @@ test('DashboardContainer.replacePanel', async (done) => {
   });
 });
 
-test('Container view mode change propagates to existing children', async () => {
+test('Container view mode change propagates to existing children', async (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -172,12 +173,12 @@ test('Container view mode change propagates to existing children', async () => {
     },
   });
   const container = new DashboardContainer(initialInput, options);
-  await nextTick();
 
-  const embeddable = await container.getChild('123');
+  const embeddable = await container.untilEmbeddableLoaded('123');
   expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
   container.updateInput({ viewMode: ViewMode.EDIT });
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+  done();
 });
 
 test('Container view mode change propagates to new children', async () => {

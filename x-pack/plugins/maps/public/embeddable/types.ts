@@ -6,7 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { IndexPattern } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data/common';
 import {
   Embeddable,
   EmbeddableInput,
@@ -43,7 +43,7 @@ export type MapByReferenceInput = SavedObjectEmbeddableInput & {
 export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
 
 export type MapEmbeddableOutput = EmbeddableOutput & {
-  indexPatterns: IndexPattern[];
+  indexPatterns: DataView[];
 };
 
 export type MapEmbeddableType = Embeddable<MapEmbeddableInput, MapEmbeddableOutput> & {

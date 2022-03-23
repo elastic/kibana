@@ -74,6 +74,7 @@ export const OUTPUT_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
+  LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 
 // Settings API routes
@@ -104,6 +105,7 @@ export const AGENT_API_ROUTES = {
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
+  DATA_PATTERN: `${API_ROOT}/agent_status/data`,
   // deprecated since 8.0
   STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,

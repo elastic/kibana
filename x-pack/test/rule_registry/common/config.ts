@@ -78,6 +78,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          `--xpack.alerting.rules.minimumScheduleInterval.value="1s"`,
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins
             .filter((k) => k !== 'security')

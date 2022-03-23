@@ -39,14 +39,14 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
   title,
 }) => {
   const simpleFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'BulkEditForm',
+    prefix: 'RulesBulkEditForm',
   });
 
   const { isValid } = form;
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby={simpleFlyoutTitleId} size="s">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="rulesBulkEditFormTitle">
           <h2 id={simpleFlyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -56,12 +56,22 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+              data-test-subj="rulesBulkEditFormCancelBtn"
+            >
               {i18n.BULK_EDIT_FLYOUT_FORM_CLOSE}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSubmit} fill disabled={isValid === false}>
+            <EuiButton
+              onClick={onSubmit}
+              fill
+              disabled={isValid === false}
+              data-test-subj="rulesBulkEditFormSaveBtn"
+            >
               {i18n.BULK_EDIT_FLYOUT_FORM_SAVE}
             </EuiButton>
           </EuiFlexItem>

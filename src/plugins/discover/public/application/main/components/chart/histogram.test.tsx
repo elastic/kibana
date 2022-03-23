@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { DataCharts$ } from '../../utils/use_saved_search';

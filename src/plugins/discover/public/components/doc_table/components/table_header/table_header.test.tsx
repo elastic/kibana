@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import type { DataView, DataViewField } from 'src/plugins/data/common';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { DataView, DataViewField } from 'src/plugins/data_views/public';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';

@@ -11,7 +11,11 @@ import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '../../../../../../src/core/server';
-import { MonitorFields, ServiceLocations } from '../../../common/runtime_types';
+import {
+  MonitorFields,
+  ServiceLocations,
+  ServiceLocationErrors,
+} from '../../../common/runtime_types';
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../../common/config';
 
@@ -28,7 +32,6 @@ export interface ServiceData {
 
 export class ServiceAPIClient {
   private readonly username?: string;
-  private readonly devUrl?: string;
   private readonly authorization: string;
   public locations: ServiceLocations;
   private logger: Logger;
@@ -37,9 +40,8 @@ export class ServiceAPIClient {
 
   constructor(logger: Logger, config: ServiceConfig, kibanaVersion: string) {
     this.config = config;
-    const { username, password, devUrl } = config;
+    const { username, password } = config;
     this.username = username;
-    this.devUrl = devUrl;
     this.kibanaVersion = kibanaVersion;
 
     if (username && password) {
@@ -57,8 +59,10 @@ export class ServiceAPIClient {
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
 
+      const rejectUnauthorized = process.env.NODE_ENV === 'production';
+
       return new https.Agent({
-        rejectUnauthorized: true, // (NOTE: this will disable client verification)
+        rejectUnauthorized,
         cert: tlsConfig.certificate,
         key: tlsConfig.key,
       });
@@ -98,18 +102,19 @@ export class ServiceAPIClient {
 
       return axios({
         method,
-        url: (this.devUrl ?? url) + (runOnce ? '/run' : '/monitors'),
+        url: url + (runOnce ? '/run' : '/monitors'),
         data: { monitors: monitorsStreams, output, stack_version: this.kibanaVersion },
-        headers: this.authorization
-          ? {
-              Authorization: this.authorization,
-            }
-          : undefined,
+        headers:
+          process.env.NODE_ENV !== 'production' && this.authorization
+            ? {
+                Authorization: this.authorization,
+              }
+            : undefined,
         httpsAgent: this.getHttpsAgent(),
       });
     };
 
-    const pushErrors: Array<{ locationId: string; error: Error }> = [];
+    const pushErrors: ServiceLocationErrors = [];
 
     const promises: Array<Observable<unknown>> = [];
 
@@ -128,7 +133,7 @@ export class ServiceAPIClient {
               );
             }),
             catchError((err) => {
-              pushErrors.push({ locationId: id, error: err });
+              pushErrors.push({ locationId: id, error: err.response?.data });
               this.logger.error(err);
               // we don't want to throw an unhandled exception here
               return of(true);

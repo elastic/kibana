@@ -60,8 +60,6 @@ filtered out, you can begin viewing sample traces to continue your investigation
 [[correlations-error-rate]]
 ==== Find failed transaction correlations
 
-beta::[]
-
 The correlations on the *Failed transaction correlations* tab help you discover
 which attributes are most influential in distinguishing between transaction
 failures and successes. In this context, the success or failure of a transaction

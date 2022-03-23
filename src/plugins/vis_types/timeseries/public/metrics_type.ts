@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { DataViewsContract, IndexPattern } from 'src/plugins/data_views/public';
+import type { DataViewsContract, DataView } from 'src/plugins/data_views/public';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import {
@@ -24,7 +24,7 @@ import {
   VisParams,
   VisTypeDefinition,
 } from '../../../visualizations/public';
-import { getDataStart } from './services';
+import { getDataViewsStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
 import { RequestAdapter } from '../../../inspector/public';
@@ -52,6 +52,19 @@ export const withReplacedIds = (
   return vis;
 };
 
+async function withDefaultIndexPattern(
+  vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
+): Promise<Vis<TimeseriesVisParams>> {
+  const dataViews = getDataViewsStart();
+
+  const defaultIndex = await dataViews.getDefault();
+  if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
+  vis.params.index_pattern = {
+    id: defaultIndex.id,
+  };
+  return vis;
+}
+
 async function resolveIndexPattern(
   indexPatternValue: IndexPatternValue,
   indexPatterns: DataViewsContract
@@ -66,16 +79,16 @@ async function resolveIndexPattern(
   }
 }
 
-async function getUsedIndexPatterns(params: VisParams): Promise<IndexPattern[]> {
-  const { indexPatterns } = getDataStart();
+async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
+  const dataViews = getDataViewsStart();
 
-  const defaultIndex = await indexPatterns.getDefault();
-  const resolvedIndexPatterns: IndexPattern[] = [];
+  const defaultIndex = await dataViews.getDefault();
+  const resolvedIndexPatterns: DataView[] = [];
   const indexPatternValues = extractIndexPatternValues(params as Panel, defaultIndex?.id);
   (
     await Promise.all(
       indexPatternValues.map((indexPatternValue) =>
-        resolveIndexPattern(indexPatternValue, indexPatterns)
+        resolveIndexPattern(indexPatternValue, dataViews)
       )
     )
   ).forEach((patterns) => patterns && resolvedIndexPatterns.push(...patterns));
@@ -138,7 +151,7 @@ export const metricsVisDefinition: VisTypeDefinition<
       drop_last_bucket: 0,
     },
   },
-  setup: (vis) => Promise.resolve(withReplacedIds(vis)),
+  setup: (vis) => withDefaultIndexPattern(withReplacedIds(vis)),
   editorConfig: {
     editor: TSVB_EDITOR_NAME,
   },
@@ -153,6 +166,14 @@ export const metricsVisDefinition: VisTypeDefinition<
       return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
     }
     return [];
+  },
+  navigateToLens: async (params?: VisParams) => {
+    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
+
+    const triggerConfiguration = params
+      ? await triggerTSVBtoLensConfiguration(params as Panel)
+      : null;
+    return triggerConfiguration;
   },
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),

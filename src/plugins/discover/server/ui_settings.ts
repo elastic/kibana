@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -31,7 +31,9 @@ import {
   ROW_HEIGHT_OPTION,
 } from '../common';
 
-export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
+export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
+  docLinks: DocLinksServiceSetup
+) => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
@@ -162,11 +164,20 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
       defaultMessage: 'Document Explorer or classic view',
     }),
-    value: true,
+    value: false,
     description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'To use the new {documentExplorerDocs} instead of the classic view, turn off this option. ' +
         'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
+      values: {
+        documentExplorerDocs:
+          `<a href=${docLinks.links.discover.documentExplorer}
+            target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
+            defaultMessage: 'Document Explorer',
+          }) +
+          '</a>',
+      },
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -215,7 +226,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
         defaultMessage: `Enable the {fieldStatisticsDocs} to show details such as the minimum and maximum values of a numeric field or a map of a geo field. This functionality is in beta and is subject to change.`,
         values: {
           fieldStatisticsDocs:
-            `<a href="https://www.elastic.co/guide/en/kibana/current/show-field-statistics.html"
+            `<a href=${docLinks.links.discover.fieldStatistics}
             target="_blank" rel="noopener">` +
             i18n.translate('discover.advancedSettings.discover.fieldStatisticsLinkText', {
               defaultMessage: 'Field statistics view',
@@ -240,7 +251,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       defaultMessage: `Controls whether {multiFields} display in the expanded document view. In most cases, multi-fields are the same as the original field. This option is only available when \`searchFieldsFromSource\` is off.`,
       values: {
         multiFields:
-          `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html"
+          `<a href=${docLinks.links.elasticsearch.mappingMultifields}
             target="_blank" rel="noopener">` +
           i18n.translate('discover.advancedSettings.discover.multiFieldsLinkText', {
             defaultMessage: 'multi-fields',

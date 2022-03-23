@@ -16,8 +16,6 @@ import semverPatch from 'semver/functions/patch';
 import type { AgentPolicy } from '../../types';
 import { useKibanaVersion } from '../../hooks';
 
-import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
-
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 import { SelectCreateAgentPolicy } from './agent_policy_select_create';
 
@@ -81,32 +79,35 @@ export const AgentPolicySelectionStep = ({
   selectedApiKeyId,
   setSelectedAPIKeyId,
   excludeFleetServer,
+  refreshAgentPolicies,
 }: {
-  agentPolicies?: AgentPolicy[];
+  agentPolicies: AgentPolicy[];
   setSelectedPolicyId?: (policyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
+  refreshAgentPolicies: () => void;
 }) => {
-  const [agentPolicyList, setAgentPolicyList] = useState<AgentPolicy[]>(agentPolicies || []);
-
+  // storing the created agent policy id as the child component is being recreated
+  const [policyId, setPolicyId] = useState<string | undefined>(undefined);
   const regularAgentPolicies = useMemo(() => {
-    return agentPolicyList.filter(
+    return agentPolicies.filter(
       (policy) =>
-        policy && !policy.is_managed && (!excludeFleetServer || !policyHasFleetServer(policy))
+        policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
     );
-  }, [agentPolicyList, excludeFleetServer]);
+  }, [agentPolicies, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
     async (key?: string, policy?: AgentPolicy) => {
       if (policy) {
-        setAgentPolicyList([...agentPolicyList, policy]);
+        refreshAgentPolicies();
       }
       if (setSelectedPolicyId) {
         setSelectedPolicyId(key);
+        setPolicyId(key);
       }
     },
-    [setSelectedPolicyId, setAgentPolicyList, agentPolicyList]
+    [setSelectedPolicyId, refreshAgentPolicies]
   );
 
   return {
@@ -122,6 +123,7 @@ export const AgentPolicySelectionStep = ({
           onKeyChange={setSelectedAPIKeyId}
           onAgentPolicyChange={onAgentPolicyChange}
           excludeFleetServer={excludeFleetServer}
+          policyId={policyId}
         />
       </>
     ),

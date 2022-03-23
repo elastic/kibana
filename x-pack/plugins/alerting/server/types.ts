@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
+import type {
+  IRouter,
+  RequestHandlerContext,
+  SavedObjectReference,
+  IUiSettingsClient,
+} from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicAlertInstance } from './alert_instance';
+import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
 export * from '../common';
 import {
   IScopedClusterClient,
-  KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
@@ -34,12 +38,12 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
+  MappedParams,
+  AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
-
+import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 /**
@@ -64,22 +68,20 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
-export interface Services {
-  savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: IScopedClusterClient;
-}
-
 export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
-> extends Services {
-  alertInstanceFactory: (
-    id: string
-  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+> {
+  savedObjectsClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
+  scopedClusterClient: IScopedClusterClient;
+  alertFactory: {
+    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+    done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
+  };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
-  search: IAbortableClusterClient;
 }
 
 export interface AlertExecutorOptions<
@@ -123,6 +125,7 @@ export type ExecutorType<
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
 }
+
 export interface RuleType<
   Params extends AlertTypeParams = never,
   ExtractedParams extends AlertTypeParams = never,
@@ -164,9 +167,10 @@ export interface RuleType<
   };
   isExportable: boolean;
   defaultScheduleInterval?: string;
-  minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
+  doesSetRecoveryContext?: boolean;
+  config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,
@@ -196,6 +200,10 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   lastDuration?: number;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning: null | {
+    reason: AlertExecutionStatusWarningReasons;
     message: string;
   };
 }
@@ -228,6 +236,7 @@ export interface RawRule extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
@@ -242,6 +251,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
+  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
 }
 
 export type AlertInfoParams = Pick<

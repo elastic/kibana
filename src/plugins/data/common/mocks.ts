@@ -7,3 +7,4 @@
  */
 
 export * from '../../data_views/common/fields/fields.mocks';
+export * from './datatable_utilities/mock';

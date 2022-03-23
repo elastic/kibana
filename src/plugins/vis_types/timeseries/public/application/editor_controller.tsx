@@ -15,7 +15,7 @@ import type {
   IEditorController,
   EditorRenderProps,
 } from 'src/plugins/visualizations/public';
-import { getUISettings, getI18n, getCoreStart } from '../services';
+import { getUISettings, getI18n, getCoreStart, getDataViewsStart } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
 import type { TimeseriesVisParams } from '../types';
 import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
@@ -30,8 +30,9 @@ export class EditorController implements IEditorController {
     private embeddableHandler: VisualizeEmbeddableContract
   ) {}
 
-  render({ timeRange, uiState, filters, query }: EditorRenderProps) {
+  async render({ timeRange, uiState, filters, query }: EditorRenderProps) {
     const I18nContext = getI18n().Context;
+    const defaultIndexPattern = (await getDataViewsStart().getDefault()) || undefined;
 
     render(
       <I18nContext>
@@ -45,6 +46,7 @@ export class EditorController implements IEditorController {
             uiState={uiState}
             filters={filters}
             query={query}
+            defaultIndexPattern={defaultIndexPattern}
           />
         </KibanaThemeProvider>
       </I18nContext>,

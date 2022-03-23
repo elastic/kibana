@@ -5,11 +5,13 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { SavedObject } from 'kibana/server';
 import { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
+import { sendTelemetryEvents, formatTelemetryEvent } from './telemetry/monitor_upgrade_sender';
 
 export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -27,10 +29,11 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    const newMonitor = await savedObjectsClient.create<SyntheticsMonitor>(
-      syntheticsMonitorType,
-      monitor
-    );
+    const newMonitor: SavedObject<SyntheticsMonitor> =
+      await savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, {
+        ...monitor,
+        revision: 1,
+      });
 
     const { syntheticsService } = server;
 
@@ -38,13 +41,25 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       {
         ...newMonitor.attributes,
         id: newMonitor.id,
+        fields: {
+          config_id: newMonitor.id,
+        },
+        fields_under_root: true,
       },
     ]);
 
-    if (errors) {
-      return errors;
+    sendTelemetryEvents(
+      server.logger,
+      server.telemetry,
+      formatTelemetryEvent({ monitor: newMonitor, errors, kibanaVersion: server.kibanaVersion })
+    );
+
+    if (errors && errors.length > 0) {
+      return response.ok({
+        body: { message: 'error pushing monitor to the service', attributes: { errors } },
+      });
     }
 
-    return newMonitor;
+    return response.ok({ body: newMonitor });
   },
 });

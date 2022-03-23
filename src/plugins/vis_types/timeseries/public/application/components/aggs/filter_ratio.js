@@ -168,7 +168,11 @@ export const FilterRatioAgg = (props) => {
               restrict={getSupportedFieldsByMetricType(model.metric_agg)}
               indexPattern={indexPattern}
               value={model.field}
-              onChange={handleSelectChange('field')}
+              onChange={(value) =>
+                handleChange({
+                  field: value?.[0],
+                })
+              }
             />
           </EuiFlexItem>
         ) : null}

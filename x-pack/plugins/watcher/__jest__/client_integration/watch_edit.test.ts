@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
-import { getRandomString } from '@kbn/test/jest';
+import { getRandomString } from '@kbn/test-jest-helpers';
 
 import { getWatch } from '../../__fixtures__';
 import { defaultWatch } from '../../public/application/models/watch';

@@ -38,6 +38,7 @@ import {
   packageToPackagePolicy,
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
+  FLEET_APM_PACKAGE,
 } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
@@ -57,11 +58,13 @@ import { elasticAgentManifest } from './elastic_agent_manifest';
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
+import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
+import { validateOutputForPolicy } from './agent_policies';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -83,24 +86,31 @@ class AgentPolicyService {
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentPolicy> {
-    const oldAgentPolicy = await this.get(soClient, id, false);
+    const existingAgentPolicy = await this.get(soClient, id, true);
 
-    if (!oldAgentPolicy) {
+    if (!existingAgentPolicy) {
       throw new Error('Agent policy not found');
     }
 
     if (
-      oldAgentPolicy.status === agentPolicyStatuses.Inactive &&
+      existingAgentPolicy.status === agentPolicyStatuses.Inactive &&
       agentPolicy.status !== agentPolicyStatuses.Active
     ) {
       throw new Error(
-        `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
+        `Agent policy ${id} cannot be updated because it is ${existingAgentPolicy.status}`
       );
     }
 
+    await validateOutputForPolicy(
+      soClient,
+      agentPolicy,
+      existingAgentPolicy,
+      this.hasAPMIntegration(existingAgentPolicy)
+    );
+
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
-      ...(options.bumpRevision ? { revision: oldAgentPolicy.revision + 1 } : {}),
+      ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
@@ -160,6 +170,12 @@ class AgentPolicyService {
     };
   }
 
+  public hasAPMIntegration(agentPolicy: AgentPolicy) {
+    return agentPolicy.package_policies.some(
+      (p) => typeof p !== 'string' && p.package?.name === FLEET_APM_PACKAGE
+    );
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -167,6 +183,8 @@ class AgentPolicyService {
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     await this.requireUniqueName(soClient, agentPolicy);
+
+    await validateOutputForPolicy(soClient, agentPolicy);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -291,8 +309,9 @@ class AgentPolicyService {
       }
     }
 
-    const agentPolicies = await Promise.all(
-      agentPoliciesSO.saved_objects.map(async (agentPolicySO) => {
+    const agentPolicies = await pMap(
+      agentPoliciesSO.saved_objects,
+      async (agentPolicySO) => {
         const agentPolicy = {
           id: agentPolicySO.id,
           ...agentPolicySO.attributes,
@@ -308,7 +327,8 @@ class AgentPolicyService {
           }
         }
         return agentPolicy;
-      })
+      },
+      { concurrency: 50 }
     );
 
     return {
@@ -360,14 +380,16 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies and append (copy) to their names
+    // Copy all package policies and append (copy n) to their names
     if (baseAgentPolicy.package_policies.length) {
-      const newPackagePolicies = (baseAgentPolicy.package_policies as PackagePolicy[]).map(
-        (packagePolicy: PackagePolicy) => {
+      const newPackagePolicies = await pMap(
+        baseAgentPolicy.package_policies as PackagePolicy[],
+        async (packagePolicy: PackagePolicy) => {
           const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
+
           const updatedPackagePolicy = {
             ...newPackagePolicy,
-            name: `${packagePolicy.name} (copy)`,
+            name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
           };
           return updatedPackagePolicy;
         }
@@ -404,6 +426,49 @@ class AgentPolicyService {
     const res = await this._update(soClient, esClient, id, {}, options?.user);
 
     return res;
+  }
+
+  /**
+   * Remove an output from all agent policies that are using it, and replace the output by the default ones.
+   * @param soClient
+   * @param esClient
+   * @param outputId
+   */
+  public async removeOutputFromAll(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    outputId: string
+  ) {
+    const agentPolicies = (
+      await soClient.find<AgentPolicySOAttributes>({
+        type: SAVED_OBJECT_TYPE,
+        fields: ['revision', 'data_output_id', 'monitoring_output_id'],
+        searchFields: ['data_output_id', 'monitoring_output_id'],
+        search: escapeSearchQueryPhrase(outputId),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).saved_objects.map((so) => ({
+      id: so.id,
+      ...so.attributes,
+    }));
+
+    if (agentPolicies.length > 0) {
+      await pMap(
+        agentPolicies,
+        (agentPolicy) =>
+          this.update(soClient, esClient, agentPolicy.id, {
+            data_output_id:
+              agentPolicy.data_output_id === outputId ? null : agentPolicy.data_output_id,
+            monitoring_output_id:
+              agentPolicy.monitoring_output_id === outputId
+                ? null
+                : agentPolicy.monitoring_output_id,
+          }),
+        {
+          concurrency: 50,
+        }
+      );
+    }
   }
 
   public async bumpAllAgentPoliciesForOutput(
@@ -659,6 +724,7 @@ class AgentPolicyService {
     const res = await esClient.search({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           term: {
@@ -670,12 +736,11 @@ class AgentPolicyService {
       },
     });
 
-    // @ts-expect-error value is number | TotalHits
-    if (res.body.hits.total.value === 0) {
+    if ((res.hits.total as number) === 0) {
       return null;
     }
 
-    return res.body.hits.hits[0]._source;
+    return res.hits.hits[0]._source;
   }
 
   public async getFullAgentConfigMap(

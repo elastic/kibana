@@ -29,6 +29,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           { id: 'recovered', name: 'Recovered' },
         ],
         default_action_group_id: 'default',
+        does_set_recovery_context: false,
         id: 'test.noop',
         name: 'Test: Noop',
         action_variables: {
@@ -115,6 +116,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
             { id: 'recovered', name: 'Recovered' },
           ],
           defaultActionGroupId: 'default',
+          doesSetRecoveryContext: false,
           id: 'test.noop',
           name: 'Test: Noop',
           actionVariables: {

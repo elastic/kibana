@@ -62,6 +62,7 @@ export interface ISourcesValues {
   permissionsModal: IPermissionsModalProps | null;
   dataLoading: boolean;
   serverStatuses: ServerStatuses | null;
+  externalConfigured: boolean;
 }
 
 interface ISourcesServerResponse {
@@ -149,6 +150,11 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       () => [selectors.sourceData],
       (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => configured),
     ],
+    externalConfigured: [
+      () => [selectors.configuredSources],
+      (configuredSources: SourceDataItem[]) =>
+        !!configuredSources.find((item) => item.serviceType === 'external'),
+    ],
     sourceData: [
       () => [selectors.serviceTypes, selectors.contentSources],
       (serviceTypes, contentSources) =>
@@ -178,7 +184,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       if (isOrganization && !values.serverStatuses) {
         // We want to get the initial statuses from the server to compare our polling results to.
         const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
-        actions.setServerSourceStatuses(sourceStatuses);
+        actions.setServerSourceStatuses(sourceStatuses ?? []);
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
@@ -190,7 +196,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       pollingInterval = window.setInterval(async () => {
         const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
 
-        sourceStatuses.some((source: ContentSourceStatus) => {
+        (sourceStatuses ?? []).some((source: ContentSourceStatus) => {
           if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
             return actions.initializeSources();
           }
@@ -249,7 +255,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 export const fetchSourceStatuses = async (
   isOrganization: boolean,
   breakpoint: BreakPointFunction
-) => {
+): Promise<ContentSourceStatus[] | undefined> => {
   const route = isOrganization
     ? '/internal/workplace_search/org/sources/status'
     : '/internal/workplace_search/account/sources/status';
@@ -267,8 +273,7 @@ export const fetchSourceStatuses = async (
     }
   }
 
-  // TODO: remove casting. return type should be ContentSourceStatus[] | undefined
-  return response as ContentSourceStatus[];
+  return response;
 };
 
 const updateSourcesOnToggle = (
@@ -293,7 +298,7 @@ const updateSourcesOnToggle = (
  * The second is the base list of available sources that the server sends back in the collection,
  * `availableTypes` that is the source of truth for the name and whether the source has been configured.
  *
- * Fnally, also in the collection response is the current set of connected sources. We check for the
+ * Finally, also in the collection response is the current set of connected sources. We check for the
  * existence of a `connectedSource` of the type in the loop and set `connected` to true so that the UI
  * can diplay "Add New" instead of "Connect", the latter of which is displated only when a connector
  * has been configured but there are no connected sources yet.
@@ -304,13 +309,13 @@ export const mergeServerAndStaticData = (
   contentSources: ContentSourceDetails[]
 ) => {
   const combined = [] as CombinedDataItem[];
-  serverData.forEach((serverItem) => {
-    const type = serverItem.serviceType;
-    const staticItem = staticData.find(({ serviceType }) => serviceType === type);
+  staticData.forEach((staticItem) => {
+    const type = staticItem.serviceType;
+    const serverItem = serverData.find(({ serviceType }) => serviceType === type);
     const connectedSource = contentSources.find(({ serviceType }) => serviceType === type);
     combined.push({
-      ...serverItem,
       ...staticItem,
+      ...serverItem,
       connected: !!connectedSource,
     } as CombinedDataItem);
   });
