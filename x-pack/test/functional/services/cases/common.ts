@@ -15,6 +15,8 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const find = getService('find');
   const comboBox = getService('comboBox');
   const header = getPageObject('header');
+  const retry = getService('retry');
+
   return {
     /**
      * Opens the create case page pressing the "create case" button.
@@ -172,6 +174,13 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
       await label.click();
       await this.assertRadioGroupValue(testSubject, value);
+    },
+
+    async waitForCasesToBeListed() {
+      retry.waitFor('cases to appear on the all cases table', async () => {
+        await testSubjects.click('all-cases-refresh');
+        return await testSubjects.exists('case-details-link');
+      });
     },
   };
 }
