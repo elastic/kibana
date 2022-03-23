@@ -38,7 +38,7 @@ import {
   useFieldBrowserOptions,
   FieldEditorActions,
 } from '../../../timelines/components/fields_browser';
-import { useLoadDetailPanel } from '../../../timelines/components/side_panel/hooks/use_load_detail_panel';
+import { useDetailPanel } from '../../../timelines/components/side_panel/hooks/use_detail_panel';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -163,10 +163,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
 
-  const { openDetailsPanel, FlyoutDetailsPanel } = useLoadDetailPanel({
+  const { openDetailsPanel, FlyoutDetailsPanel } = useDetailPanel({
     isFlyoutView: true,
     entityType,
-    sourcerScope: SourcererScopeName.timeline,
+    sourcererScope: SourcererScopeName.timeline,
     timelineId: id,
     tabType: TimelineTabs.query,
   });

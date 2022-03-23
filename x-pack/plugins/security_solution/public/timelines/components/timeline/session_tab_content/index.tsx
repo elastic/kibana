@@ -13,7 +13,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useLoadDetailPanel } from '../../side_panel/hooks/use_load_detail_panel';
+import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
@@ -44,13 +44,11 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
   const sessionViewId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewId
   );
-  const { openDetailsPanel, shouldShowFlyoutDetailsPanel, FlyoutDetailsPanel } = useLoadDetailPanel(
-    {
-      sourcerScope: SourcererScopeName.timeline,
-      timelineId,
-      tabType: TimelineTabs.session,
-    }
-  );
+  const { openDetailsPanel, shouldShowFlyoutDetailsPanel, FlyoutDetailsPanel } = useDetailPanel({
+    sourcererScope: SourcererScopeName.timeline,
+    timelineId,
+    tabType: TimelineTabs.session,
+  });
   const sessionViewMain = useMemo(() => {
     return sessionViewId !== null
       ? sessionView.getSessionView({

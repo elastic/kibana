@@ -17,35 +17,35 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel } from '..';
 
-export interface UseLoadDetailPanelConfig {
+export interface UseDetailPanelConfig {
   entityType?: EntityType;
   isFlyoutView?: boolean;
-  sourcerScope: SourcererScopeName;
+  sourcererScope: SourcererScopeName;
   timelineId: TimelineId;
   tabType?: TimelineTabs;
 }
 
-export interface UseLoadDetailPanelReturn {
+export interface UseDetailPanelReturn {
   openDetailsPanel: (eventId?: string, onClose?: () => void) => void;
   handleOnDetailsPanelClosed: () => void;
   FlyoutDetailsPanel: JSX.Element;
   shouldShowFlyoutDetailsPanel: boolean;
 }
 
-export const useLoadDetailPanel = ({
+export const useDetailPanel = ({
   entityType,
   isFlyoutView,
-  sourcerScope,
+  sourcererScope,
   timelineId,
   tabType,
-}: UseLoadDetailPanelConfig): UseLoadDetailPanelReturn => {
+}: UseDetailPanelConfig): UseDetailPanelReturn => {
   const { browserFields, docValueFields, selectedPatterns, runtimeMappings } =
-    useSourcererDataView(sourcerScope);
+    useSourcererDataView(sourcererScope);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const dispatch = useDispatch();
 
   const expandedDetail = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults)?.expandedDetail
   );
   const onFlyoutClose = useRef(() => {});
 
