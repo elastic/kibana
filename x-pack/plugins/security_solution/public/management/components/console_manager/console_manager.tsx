@@ -64,6 +64,8 @@ export type ConsoleManagerProps = PropsWithChildren<{
 export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, children }) => {
   const [consoleStorage, setConsoleStorage] = useState<RunningConsoleStorage>(storage);
 
+  // NOTE: should try to keep the `useMemo()` array of dependencies empty so that it minimizes re-renders to
+  // components that use this client interface.
   const consoleManagerClient = useMemo<ConsoleManagerClient>(() => {
     const show: ConsoleManagerClient['show'] = (id) => {
       setConsoleStorage((prevState) => {
@@ -195,19 +197,20 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   }, [consoleStorage]);
 
   const handleOnTerminate = useCallback(() => {
-    // FIXME:PT implement
-  }, []);
+    if (visibleConsole) {
+      consoleManagerClient.terminate(visibleConsole.client.id);
+    }
+  }, [consoleManagerClient, visibleConsole]);
 
   const handleOnHide = useCallback(() => {
-    // FIXME:PT implement
-  }, []);
+    if (visibleConsole) {
+      consoleManagerClient.hide(visibleConsole.client.id);
+    }
+  }, [consoleManagerClient, visibleConsole]);
 
   const runningConsoles = useMemo(() => {
     return Object.values(consoleStorage).map((managedConsole) => managedConsole.console);
   }, [consoleStorage]);
-
-  // TODO: might need to have registration process provide the input for the Console, so that we can control "show/hide" and not lose console content
-  // TODO: Console may need to interact with this manager in order to determine if its a managed or non-managed console
 
   return (
     <ConsoleManagerContext.Provider value={consoleManagerClient}>
