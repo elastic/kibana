@@ -13,7 +13,7 @@ import {
 } from './solution_nav_avatar';
 
 export default {
-  title: 'Solution Nav Avatar',
+  title: 'Page Template/Solution Nav/Solution Nav Avatar',
   description: 'A wrapper around EuiAvatar, with some extra styling',
 };
 

@@ -14,7 +14,7 @@ import {
 } from './solution_nav_collapse_button';
 
 export default {
-  title: 'Solution Nav Collapse Button',
+  title: 'Page Template/Solution Nav/Solution Nav Collapse Button',
   description: 'A wrapper around EuiButtonIcon, styled to look like a show/hide button',
 };
 
@@ -27,6 +27,6 @@ export const PureComponent = (params: Params) => {
 PureComponent.argTypes = {
   collapsed: {
     control: 'boolean',
-    defaultValue: false,
+    defaultValue: true,
   },
 };

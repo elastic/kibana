@@ -10,7 +10,7 @@ import React from 'react';
 import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
 export default {
-  title: 'Solution Nav',
+  title: 'Page Template/Solution Nav/Solution NavBar',
   description: 'Solution-specific sidebar',
 };
 
