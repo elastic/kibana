@@ -97,7 +97,7 @@ describe('ServiceList', () => {
             color="green"
             comparisonSeriesColor="black"
             hideSeries={false}
-            seriesLoading={false}
+            isLoading={false}
             valueLabel="0 ms"
           />
         `);
@@ -125,7 +125,7 @@ describe('ServiceList', () => {
             color="green"
             comparisonSeriesColor="black"
             hideSeries={true}
-            seriesLoading={false}
+            isLoading={false}
             valueLabel="0 ms"
           />
         `);
@@ -161,7 +161,7 @@ describe('ServiceList', () => {
               color="green"
               comparisonSeriesColor="black"
               hideSeries={false}
-              seriesLoading={false}
+              isLoading={false}
               valueLabel="0 ms"
             />
           `);
@@ -199,7 +199,7 @@ describe('ServiceList', () => {
               color="green"
               comparisonSeriesColor="black"
               hideSeries={false}
-              seriesLoading={false}
+              isLoading={false}
               valueLabel="0 ms"
             />
           `);
