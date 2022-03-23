@@ -105,6 +105,7 @@ describe('aggregate()', () => {
           buckets: [
             {
               key: '2022-03-21T20:22:01.501Z-*',
+              format: 'strict_date_time',
               from: 1.647894121501e12,
               from_as_string: '2022-03-21T20:22:01.501Z',
               doc_count: 2,
@@ -182,6 +183,7 @@ describe('aggregate()', () => {
           snoozed: {
             date_range: {
               field: 'alert.attributes.snoozeEndTime',
+              format: 'strict_date_time',
               ranges: [{ from: 'now' }],
             },
           },
@@ -215,6 +217,7 @@ describe('aggregate()', () => {
           snoozed: {
             date_range: {
               field: 'alert.attributes.snoozeEndTime',
+              format: 'strict_date_time',
               ranges: [{ from: 'now' }],
             },
           },
