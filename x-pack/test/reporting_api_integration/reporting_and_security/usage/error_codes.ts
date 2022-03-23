@@ -22,18 +22,21 @@ const DATA_ARCHIVE_PATH = 'x-pack/test/functional/es_archives/reporting/errors';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
   describe(`error codes`, () => {
     let reporting: ReportingUsageApiResponse;
 
     before(async () => {
+      await reportingAPI.deleteAllReports();
       await esArchiver.load(DATA_ARCHIVE_PATH);
       ({ reporting } = await usageAPI.getUsageStats());
     });
 
     after(async () => {
       await esArchiver.unload(DATA_ARCHIVE_PATH);
+      await reportingAPI.deleteAllReports();
     });
 
     it('includes error code statistics', async () => {
