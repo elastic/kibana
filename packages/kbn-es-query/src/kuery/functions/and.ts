@@ -42,9 +42,6 @@ export function toElasticsearchQuery(
     return nodeTypes.function.toElasticsearchQuery(node, indexPattern, config, context);
   });
 
-  // If we have only one query, no need to wrap it in a bool clause
-  if (clause.length === 1) return clause[0];
-
   return {
     bool: {
       [key]: clause,
