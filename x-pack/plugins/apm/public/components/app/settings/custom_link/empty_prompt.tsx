@@ -35,9 +35,9 @@ export function EmptyPrompt({
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.apm.settings.customLink.emptyPromptText"
-              defaultMessage="Let's change that! You can add custom links to the Actions context menu by the transaction details for each service. Create a helpful link to your company's support portal or open a new bug report. Need more ideas? See the {customLinkDocLink}."
+              defaultMessage="Let's change that! You can add custom links to the Actions context menu by the transaction details for each service. Create a helpful link to your company's support portal or open a new bug report. Need more ideas? See the {customLinkDocLinkText}."
               values={{
-                customLinkDocLink: (
+                customLinkDocLinkText: (
                   <EuiLink
                     target="_blank"
                     href={docLinks.links.apm.customLinks}
