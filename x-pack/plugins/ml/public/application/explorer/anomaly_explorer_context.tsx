@@ -88,6 +88,7 @@ export function useAnomalyExplorerContextValue(
       anomalyExplorerCommonStateService,
       anomalyTimelineStateService,
       anomalyExplorerChartsService,
+      anomalyExplorerUrlStateService,
       tableSeverityState
     );
 

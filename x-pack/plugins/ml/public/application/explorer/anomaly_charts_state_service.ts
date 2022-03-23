@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { skipWhile, switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, map, skipWhile, switchMap, takeUntil } from 'rxjs/operators';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
@@ -18,15 +18,18 @@ import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_chart
 import { getSelectionInfluencers } from './explorer_utils';
 import type { PageUrlStateService } from '../util/url_state';
 import type { TableSeverity } from '../components/controls/select_severity/select_severity';
+import { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 export class AnomalyChartsStateService extends StateService {
   private _isChartsDataLoading$ = new BehaviorSubject<boolean>(false);
   private _chartsData$ = new BehaviorSubject<ExplorerChartsData>(getDefaultChartsData());
+  private _showCharts$ = new BehaviorSubject<boolean>(true);
 
   constructor(
     private _anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private _anomalyTimelineStateServices: AnomalyTimelineStateService,
     private _anomalyExplorerChartsService: AnomalyExplorerChartsService,
+    private _anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService,
     private _tableSeverityState: PageUrlStateService<TableSeverity>
   ) {
     super();
@@ -34,6 +37,15 @@ export class AnomalyChartsStateService extends StateService {
   }
 
   private _init() {
+    this._anomalyExplorerUrlStateService
+      .getPageUrlState$()
+      .pipe(
+        takeUntil(this.unsubscribeAll$),
+        map((urlState) => urlState?.mlShowCharts ?? true),
+        distinctUntilChanged()
+      )
+      .subscribe(this._showCharts$);
+
     combineLatest([
       this._anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
@@ -87,5 +99,17 @@ export class AnomalyChartsStateService extends StateService {
 
   public getChartsData(): ExplorerChartsData {
     return this._chartsData$.getValue();
+  }
+
+  public getShowCharts$(): Observable<boolean> {
+    return this._showCharts$.asObservable();
+  }
+
+  public getShowCharts(): boolean {
+    return this._showCharts$.getValue();
+  }
+
+  public setShowCharts(update: boolean) {
+    this._anomalyExplorerUrlStateService.updateUrlState({ mlShowCharts: update });
   }
 }

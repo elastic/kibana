@@ -211,8 +211,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableSeverity] = useTableSeverity();
 
   const showCharts = useObservable(
-    anomalyExplorerContext.anomalyExplorerCommonStateService.getShowCharts$(),
-    anomalyExplorerContext.anomalyExplorerCommonStateService.getShowCharts()
+    anomalyExplorerContext.chartsStateService.getShowCharts$(),
+    anomalyExplorerContext.chartsStateService.getShowCharts()
   );
 
   const selectedCells = useObservable(
