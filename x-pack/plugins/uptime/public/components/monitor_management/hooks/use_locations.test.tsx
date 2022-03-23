@@ -37,13 +37,16 @@ describe('useExpViewTimeRange', function () {
           monitors: [],
         },
         locations: [],
+        enablement: null,
         error: {
           serviceLocations: error,
           monitorList: null,
+          enablement: null,
         },
         loading: {
           monitorList: false,
           serviceLocations: loading,
+          enablement: false,
         },
       },
     };

@@ -35,6 +35,7 @@ describe('getAPIKeyTest', function () {
 
   it('should generate an api key and return it', async () => {
     const apiKey = await generateAndSaveServiceAPIKey({
+      server,
       request,
       security,
     });
@@ -73,7 +74,6 @@ describe('getAPIKeyTest', function () {
       getDecryptedAsInternalUser: getObject,
     });
     const apiKey = await getAPIKeyForSyntheticsService({
-      request,
       server,
     });
 
