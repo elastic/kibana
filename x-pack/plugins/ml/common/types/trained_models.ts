@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
 import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 import type { XOR } from './common';
@@ -87,14 +87,12 @@ export type PutTrainedModelConfig = {
   }
 >; // compressed_definition and definition are mutually exclusive
 
-export interface TrainedModelConfigResponse {
-  description?: string;
-  created_by: string;
-  create_time: string;
-  default_field_map: Record<string, string>;
-  estimated_heap_memory_usage_bytes: number;
-  estimated_operations: number;
-  license_level: string;
+export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
+  pipelines?: Record<string, PipelineDefinition> | null;
+
   metadata?: {
     analytics_config: DataFrameAnalyticsConfig;
     input: unknown;
@@ -107,11 +105,7 @@ export interface TrainedModelConfigResponse {
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
-  /**
-   * Associated pipelines. Extends response from the ES endpoint.
-   */
-  pipelines?: Record<string, PipelineDefinition> | null;
-}
+};
 
 export interface PipelineDefinition {
   processors?: Array<Record<string, any>>;

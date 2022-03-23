@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -13,6 +14,7 @@ import {
   modelIdSchema,
   optionalModelIdSchema,
   putTrainedModelQuerySchema,
+  pipelineSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -343,6 +345,81 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const body = await mlClient.stopTrainedModelDeployment({
           model_id: modelId,
           force: request.query.force ?? false,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/:modelId/deployment/_stop Stop trained model deployment
+   * @apiName StopTrainedModelDeployment
+   * @apiDescription Stops trained model deployment.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/infer/{modelId}',
+      validate: {
+        params: modelIdSchema,
+        body: schema.object({
+          docs: schema.any(),
+          timeout: schema.maybe(schema.number()),
+        }),
+      },
+      options: {
+        tags: ['access:ml:canStartStopTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const body = await mlClient.inferTrainedModelDeployment({
+          model_id: modelId,
+          docs: request.body.docs,
+          ...(request.body.timeout ? { timeout: request.body.timeout } : {}),
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/:modelId/deployment/_stop Stop trained model deployment
+   * @apiName StopTrainedModelDeployment
+   * @apiDescription Stops trained model deployment.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/ingest_pipeline_simulate',
+      validate: {
+        body: pipelineSchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { pipeline, docs, verbose } = request.body;
+
+        const body = await client.asCurrentUser.ingest.simulate({
+          verbose,
+          body: {
+            pipeline,
+            docs: docs as estypes.IngestSimulateDocument[],
+          },
         });
         return response.ok({
           body,
