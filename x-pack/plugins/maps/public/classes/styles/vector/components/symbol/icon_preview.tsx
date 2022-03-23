@@ -210,12 +210,12 @@ export class IconPreview extends Component<Props, State> {
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiPanel hasBorder={true} hasShadow={false}>
-            <div
-              id="mapsCustomIconPreview__mapContainer"
-              ref={this._setContainerRef}
-              data-test-subj="mapsCustomIconPreview"
-              className="mapsCustomIconPreview__mapContainer"
-            />
+              <div
+                id="mapsCustomIconPreview__mapContainer"
+                ref={this._setContainerRef}
+                data-test-subj="mapsCustomIconPreview"
+                className="mapsCustomIconPreview__mapContainer"
+              />
             </EuiPanel>
             <EuiSpacer size="m" />
             <EuiFormRow label="Preview color">

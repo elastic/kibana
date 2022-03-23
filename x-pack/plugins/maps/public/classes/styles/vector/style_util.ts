@@ -62,7 +62,7 @@ export function assignCategoriesToIcons({
   icons,
 }: {
   categories: Category[];
-  icons: { value: string; label: string; svg: string }[];
+  icons: Array<{ value: string; label: string; svg: string }>;
 }) {
   const stops: IconStop[] = [];
   let fallbackSymbol: IconStop | null = null;

@@ -94,7 +94,7 @@ export interface ILayer {
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
-    onCustomIconChange: (customIcons: Record<string, CustomIcon>) => void,
+    onCustomIconChange: (customIcons: Record<string, CustomIcon>) => void
   ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
@@ -434,7 +434,7 @@ export class AbstractLayer implements ILayer {
 
   renderStyleEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
-    onCustomIconsChange: (customIcons: Record<string, CustomIcon>) => void,
+    onCustomIconsChange: (customIcons: Record<string, CustomIcon>) => void
   ): ReactElement<any> | null {
     const style = this.getStyleForEditing();
     if (!style) {

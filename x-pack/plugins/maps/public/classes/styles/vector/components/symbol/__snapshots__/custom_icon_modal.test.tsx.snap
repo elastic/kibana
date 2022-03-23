@@ -126,7 +126,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
                 >
                   <React.Fragment>
                     Alpha threshold
-
+                     
                     <EuiIcon
                       color="subdued"
                       type="questionInCircle"
@@ -164,7 +164,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
                 >
                   <React.Fragment>
                     Radius
-
+                     
                     <EuiIcon
                       color="subdued"
                       type="questionInCircle"

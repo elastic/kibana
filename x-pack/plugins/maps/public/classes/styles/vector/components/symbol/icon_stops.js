@@ -53,8 +53,8 @@ export function IconStops({
 }) {
   return iconStops.map(({ stop, value }, index) => {
     const { svg, label } = value.startsWith(CUSTOM_ICON_PREFIX_SDF)
-    ? customIcons[value]
-    : getMakiSymbol(value);
+      ? customIcons[value]
+      : getMakiSymbol(value);
     const onIconSelect = ({ selectedIconId }) => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {
@@ -86,7 +86,7 @@ export function IconStops({
             stop: '',
             value: getFirstUnusedSymbol(iconStops),
             svg,
-            label
+            label,
           },
           ...iconStops.slice(index + 1),
         ],

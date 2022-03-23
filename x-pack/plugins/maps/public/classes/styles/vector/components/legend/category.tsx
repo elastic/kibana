@@ -20,7 +20,15 @@ interface Props {
   svg?: string;
 }
 
-export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, symbolId, svg }: Props) {
+export function Category({
+  styleName,
+  label,
+  color,
+  isLinesOnly,
+  isPointsOnly,
+  symbolId,
+  svg,
+}: Props) {
   function renderIcon() {
     if (styleName === VECTOR_STYLES.LABEL_COLOR) {
       return (

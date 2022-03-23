@@ -20,15 +20,8 @@ export interface Props {
   customIcons: CustomIcon[];
 }
 
-export function StyleSettings({
-  layer,
-  updateStyleDescriptor,
-  updateCustomIcons,
-}: Props) {
-  const settingsEditor = layer.renderStyleEditor(
-    updateStyleDescriptor,
-    updateCustomIcons,
-  );
+export function StyleSettings({ layer, updateStyleDescriptor, updateCustomIcons }: Props) {
+  const settingsEditor = layer.renderStyleEditor(updateStyleDescriptor, updateCustomIcons);
 
   if (!settingsEditor) {
     return null;
