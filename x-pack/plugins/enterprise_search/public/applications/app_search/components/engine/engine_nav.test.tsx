@@ -92,6 +92,13 @@ describe('useEngineNav', () => {
 
         expect(wrapper.find(EuiBadge).prop('children')).toEqual('META ENGINE');
       });
+
+      it('renders an elasticsearch index badge for elasticsearch indexed engines', () => {
+        setMockValues({ ...values, isElasticsearchEngine: true });
+        const wrapper = renderEngineLabel(useEngineNav());
+
+        expect(wrapper.find(EuiBadge).prop('children')).toEqual('ELASTICSEARCH INDEX');
+      });
     });
 
     it('returns an analytics nav item', () => {
