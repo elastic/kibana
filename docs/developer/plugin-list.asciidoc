@@ -284,7 +284,7 @@ In general this plugin provides:
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
-|A Kibana plugin
+|Contains all the components of Kibana's unified search experience. Specifically:
 
 
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
