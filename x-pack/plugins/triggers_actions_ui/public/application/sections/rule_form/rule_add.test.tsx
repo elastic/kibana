@@ -27,6 +27,7 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -40,7 +41,7 @@ jest.mock('../../lib/rule_api', () => ({
 }));
 
 jest.mock('../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+  triggersActionsUiConfig: jest.fn(),
 }));
 
 jest.mock('../../../common/lib/health_api', () => ({
@@ -175,6 +176,9 @@ describe('rule_add', () => {
   }
 
   it('renders rule add flyout', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
     const onClose = jest.fn();
     await setup({}, onClose);
 
@@ -194,6 +198,9 @@ describe('rule_add', () => {
   });
 
   it('renders rule add flyout with initial values', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
     const onClose = jest.fn();
     await setup(
       {
@@ -207,13 +214,33 @@ describe('rule_add', () => {
     );
 
     expect(wrapper.find('input#ruleName').props().value).toBe('Simple status rule');
-
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('uptimelogs');
+    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
+    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('h');
+  });
 
-    expect(wrapper.find('.euiSelect').first().props().value).toBe('h');
+  it('renders rule add flyout with DEFAULT_RULE_INTERVAL if no initialValues specified and no minimumScheduleInterval', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({});
+    await setup();
+
+    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
+    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
+  });
+
+  it('renders rule add flyout with minimumScheduleInterval if minimumScheduleInterval is greater than DEFAULT_RULE_INTERVAL', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '5m', enforce: false },
+    });
+    await setup();
+
+    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(5);
+    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
   });
 
   it('emit an onClose event when the rule is saved', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
     const onClose = jest.fn();
     const rule = mockRule();
 
@@ -242,7 +269,10 @@ describe('rule_add', () => {
     expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED);
   });
 
-  it('should enforce any default inteval', async () => {
+  it('should enforce any default interval', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
     await setup({ ruleTypeId: 'my-rule-type' }, jest.fn(), '3h');
 
     // Wait for handlers to fire

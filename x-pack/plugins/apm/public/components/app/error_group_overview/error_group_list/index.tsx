@@ -59,6 +59,7 @@ type ErrorGroupDetailedStatistics =
 interface Props {
   mainStatistics: ErrorGroupItem[];
   serviceName: string;
+  detailedStatisticsLoading: boolean;
   detailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
 }
@@ -66,6 +67,7 @@ interface Props {
 function ErrorGroupList({
   mainStatistics,
   serviceName,
+  detailedStatisticsLoading,
   detailedStatistics,
   comparisonEnabled,
 }: Props) {
@@ -210,6 +212,7 @@ function ErrorGroupList({
           return (
             <SparkPlot
               color={currentPeriodColor}
+              isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
               valueLabel={i18n.translate(
                 'xpack.apm.serviceOveriew.errorsTableOccurrences',
@@ -229,7 +232,13 @@ function ErrorGroupList({
         },
       },
     ] as Array<ITableColumn<ErrorGroupItem>>;
-  }, [serviceName, query, detailedStatistics, comparisonEnabled]);
+  }, [
+    serviceName,
+    query,
+    detailedStatistics,
+    comparisonEnabled,
+    detailedStatisticsLoading,
+  ]);
 
   return (
     <ManagedTable

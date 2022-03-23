@@ -17,7 +17,7 @@ import {
 import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
-const config = { minimumScheduleInterval: '1m' };
+const config = { minimumScheduleInterval: { value: '1m', enforce: false } };
 describe('rule_errors', () => {
   describe('validateBaseProperties()', () => {
     it('should validate the name', () => {
@@ -44,10 +44,24 @@ describe('rule_errors', () => {
       });
     });
 
-    it('should validate the minimumScheduleInterval', () => {
+    it('should validate the minimumScheduleInterval if enforce = false', () => {
       const rule = mockRule();
       rule.schedule.interval = '2s';
       const result = validateBaseProperties(rule, config);
+      expect(result.errors).toStrictEqual({
+        name: [],
+        'schedule.interval': [],
+        ruleTypeId: [],
+        actionConnectors: [],
+      });
+    });
+
+    it('should validate the minimumScheduleInterval if enforce = true', () => {
+      const rule = mockRule();
+      rule.schedule.interval = '2s';
+      const result = validateBaseProperties(rule, {
+        minimumScheduleInterval: { value: '1m', enforce: true },
+      });
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': ['Interval must be at least 1 minute.'],

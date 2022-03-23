@@ -349,5 +349,8 @@ export enum Percentiles {
 }
 
 export interface TriggersActionsUiConfig {
-  minimumScheduleInterval?: string;
+  minimumScheduleInterval?: {
+    value: string;
+    enforce: boolean;
+  };
 }

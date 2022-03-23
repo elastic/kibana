@@ -34,7 +34,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -82,6 +82,7 @@ describe('muteAll()', () => {
       {
         muteAll: true,
         mutedInstanceIds: [],
+        snoozeEndTime: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },

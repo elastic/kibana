@@ -74,10 +74,11 @@ export class DashboardPageControls extends FtrService {
   public async openCreateControlFlyout(type: string) {
     this.log.debug(`Opening flyout for ${type} control`);
     await this.testSubjects.click('dashboard-controls-menu-button');
-    await this.testSubjects.click(`create-${type}-control`);
+    await this.testSubjects.click('controls-create-button');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
+    await this.testSubjects.click(`create-${type}-control`);
   }
 
   /* -----------------------------------------------------------
