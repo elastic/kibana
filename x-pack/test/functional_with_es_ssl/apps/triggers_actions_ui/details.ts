@@ -550,6 +550,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Get action groups
         const { actionGroups } = alwaysFiringAlertType;
 
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -648,6 +651,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // refresh to see rule
         await browser.refresh();
 
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         const alertsList: any[] = await pageObjects.ruleDetailsUI.getAlertsList();
         expect(alertsList.filter((a) => a.alert === 'eu/east')).to.eql([
           {
@@ -660,6 +666,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user to mute a specific alert', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -674,6 +683,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user to unmute a specific alert', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -694,6 +706,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user unmute an inactive alert', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         log.debug(`Ensuring eu/east is muted`);
         await pageObjects.ruleDetailsUI.ensureAlertMuteState('eu/east', true);
 
@@ -747,6 +762,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const PAGE_SIZE = 10;
       it('renders the first page', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -760,6 +778,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('navigates to the next page', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
