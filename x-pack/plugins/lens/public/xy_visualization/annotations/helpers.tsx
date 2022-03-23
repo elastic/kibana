@@ -173,11 +173,23 @@ export const getAnnotationsConfiguration = ({
       )
   );
 
+  const groupLabel = getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) });
+
+  const emptyButtonLabels = {
+    buttonAriaLabel: i18n.translate('xpack.lens.indexPattern.addColumnAriaLabelClick', {
+      defaultMessage: 'Add an annotation to {groupLabel}',
+      values: { groupLabel },
+    }),
+    buttonLabel: i18n.translate('xpack.lens.configure.emptyConfigClick', {
+      defaultMessage: 'Add an annotation',
+    }),
+  };
+
   return {
     groups: [
       {
         groupId: 'xAnnotations',
-        groupLabel: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        groupLabel,
         accessors: getAnnotationsAccessorColorConfig(layer),
         dataTestSubj: 'lnsXY_xAnnotationsPanel',
         invalid: !hasDateHistogram,
@@ -190,6 +202,7 @@ export const getAnnotationsConfiguration = ({
         supportFieldFormat: false,
         enableDimensionEditor: true,
         filterOperations: () => false,
+        labels: emptyButtonLabels,
       },
     ],
   };

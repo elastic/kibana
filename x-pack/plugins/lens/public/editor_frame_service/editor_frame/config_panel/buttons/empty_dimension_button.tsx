@@ -29,16 +29,16 @@ interface EmptyButtonProps {
   onClick: (id: string) => void;
   group: VisualizationDimensionGroupConfig;
   labels?: {
-    ariaLabel: (group: VisualizationDimensionGroupConfig) => string;
+    ariaLabel: (label: string) => string;
     label: JSX.Element | string;
   };
 }
 
 const defaultButtonLabels = {
-  ariaLabel: (group: VisualizationDimensionGroupConfig) =>
+  ariaLabel: (l: string) =>
     i18n.translate('xpack.lens.indexPattern.addColumnAriaLabel', {
       defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
-      values: { groupLabel: group.groupLabel },
+      values: { groupLabel: l },
     }),
   label: (
     <FormattedMessage
@@ -48,44 +48,27 @@ const defaultButtonLabels = {
   ),
 };
 
-// todo: come back to it to make the name flexible
-const noDndButtonLabels = {
-  ariaLabel: (group: VisualizationDimensionGroupConfig) =>
-    i18n.translate('xpack.lens.indexPattern.addColumnAriaLabelClick', {
-      defaultMessage: 'Add an annotation to {groupLabel}',
-      values: { groupLabel: group.groupLabel },
-    }),
-  label: (
-    <FormattedMessage
-      id="xpack.lens.configure.emptyConfigClick"
-      defaultMessage="Add an annotation"
-    />
-  ),
+const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
+  const { buttonAriaLabel, buttonLabel } = group.labels || {};
+  return (
+    <EuiButtonEmpty
+      className="lnsLayerPanel__triggerText"
+      color="text"
+      size="s"
+      iconType="plusInCircleFilled"
+      contentProps={{
+        className: 'lnsLayerPanel__triggerTextContent',
+      }}
+      aria-label={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
+      data-test-subj="lns-empty-dimension"
+      onClick={() => {
+        onClick(columnId);
+      }}
+    >
+      {buttonLabel || defaultButtonLabels.label}
+    </EuiButtonEmpty>
+  );
 };
-
-const DefaultEmptyButton = ({
-  columnId,
-  group,
-  onClick,
-  labels = defaultButtonLabels,
-}: EmptyButtonProps) => (
-  <EuiButtonEmpty
-    className="lnsLayerPanel__triggerText"
-    color="text"
-    size="s"
-    iconType="plusInCircleFilled"
-    contentProps={{
-      className: 'lnsLayerPanel__triggerTextContent',
-    }}
-    aria-label={labels.ariaLabel(group)}
-    data-test-subj="lns-empty-dimension"
-    onClick={() => {
-      onClick(columnId);
-    }}
-  >
-    {labels.label}
-  </EuiButtonEmpty>
-);
 
 const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) => (
   <EuiButtonEmpty
@@ -192,10 +175,6 @@ export function EmptyDimensionButton({
     onClick,
     group,
   };
-
-  if (!layerDatasource) {
-    buttonProps.labels = noDndButtonLabels;
-  }
 
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
