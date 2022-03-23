@@ -30,9 +30,9 @@ export function getCommonServices(
   // Useful when debugging trough mitmproxy
   /*
   options.Connection = HttpConnection;
-  options.proxy = "http://localhost:8080";
+  options.proxy = 'http://localhost:8080';
   options.tls = {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
   };
 
    */
@@ -40,7 +40,10 @@ export function getCommonServices(
 
   logger = logger ?? createLogger(logLevel);
 
-  const apmEsClient = new ApmSynthtraceEsClient(client, logger, forceLegacyIndices ?? false);
+  const apmEsClient = new ApmSynthtraceEsClient(client, logger, {
+    forceLegacyIndices,
+    refreshAfterIndex: false,
+  });
 
   return {
     logger,

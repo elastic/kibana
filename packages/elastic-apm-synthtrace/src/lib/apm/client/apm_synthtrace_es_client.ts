@@ -27,15 +27,29 @@ export interface StreamToBulkOptions<TFields extends Fields = ApmFields> {
   itemStartStopCallback?: (item: TFields | null, done: boolean) => void;
 }
 
+export interface ApmSynthtraceEsClientOptions {
+  forceLegacyIndices?: boolean;
+  // defaults to true if unspecified
+  refreshAfterIndex?: boolean;
+}
+
 export class ApmSynthtraceEsClient {
+  private readonly forceLegacyIndices: boolean;
+  private readonly refreshAfterIndex: boolean;
   constructor(
     private readonly client: Client,
     private readonly logger: Logger,
-    private readonly forceLegacyIndices: boolean
-  ) {}
+    options?: ApmSynthtraceEsClientOptions
+  ) {
+    this.forceLegacyIndices = options?.forceLegacyIndices ?? false;
+    this.refreshAfterIndex = options?.refreshAfterIndex ?? true;
+  }
 
   private getWriteTargets() {
-    return getApmWriteTargets({ client: this.client, forceLegacyIndices: this.forceLegacyIndices });
+    return getApmWriteTargets({
+      client: this.client,
+      forceLegacyIndices: this.forceLegacyIndices,
+    });
   }
 
   async runningVersion() {
@@ -192,5 +206,9 @@ export class ApmSynthtraceEsClient {
       },
     });
     options?.itemStartStopCallback?.apply(this, [item, true]);
+
+    if (this.refreshAfterIndex) {
+      await this.refresh();
+    }
   }
 }

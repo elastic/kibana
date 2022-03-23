@@ -38,11 +38,13 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     isCloud: !!config.env.TEST_CLOUD,
   });
 
-  const forceDataStreams = false;
   const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
     client,
     createLogger(LogLevel.info),
-    forceDataStreams
+    {
+      forceLegacyIndices: true,
+      refreshAfterIndex: true,
+    }
   );
 
   on('task', {
