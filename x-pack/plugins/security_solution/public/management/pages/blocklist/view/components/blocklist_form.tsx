@@ -104,8 +104,7 @@ export const BlockListForm = memo(
     const warningsRef = useRef<ItemValidation>({});
     const errorsRef = useRef<ItemValidation>({});
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
-    // const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isPlatinumPlus = false;
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
     const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
     const [hasFormChanged, setHasFormChanged] = useState(false);
