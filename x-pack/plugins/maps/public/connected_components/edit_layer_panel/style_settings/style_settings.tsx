@@ -16,7 +16,7 @@ import { ILayer } from '../../../classes/layers/layer';
 export interface Props {
   layer: ILayer;
   updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
-  updateCustomIcons: (customIcons: CustomIcon[]) => void;
+  updateCustomIcons: (customIcons: Record<string, CustomIcon>) => void;
   customIcons: CustomIcon[];
 }
 
@@ -24,12 +24,10 @@ export function StyleSettings({
   layer,
   updateStyleDescriptor,
   updateCustomIcons,
-  customIcons,
 }: Props) {
   const settingsEditor = layer.renderStyleEditor(
     updateStyleDescriptor,
     updateCustomIcons,
-    customIcons
   );
 
   if (!settingsEditor) {

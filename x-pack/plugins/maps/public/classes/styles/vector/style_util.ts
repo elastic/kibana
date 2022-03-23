@@ -69,11 +69,11 @@ export function assignCategoriesToIcons({
 
   if (categories.length && iconValues.length) {
     const maxLength = Math.min(iconValues.length, categories.length + 1);
-    fallbackSymbol = { icon: iconValues[maxLength - 1], stop: null };
+    fallbackSymbol = { value: iconValues[maxLength - 1], stop: null };
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: categories[i].key,
-        icon: iconValues[i],
+        value: iconValues[i],
       });
     }
   }

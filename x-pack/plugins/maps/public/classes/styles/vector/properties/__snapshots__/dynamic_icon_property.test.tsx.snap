@@ -43,16 +43,11 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
     >
       <Category
         color="grey"
-        icon={
-          Object {
-            "svg": undefined,
-            "value": "circle",
-          }
-        }
         isLinesOnly={false}
         isPointsOnly={true}
         label="US_format"
         styleName="icon"
+        symbolId="circle"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -60,16 +55,11 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
     >
       <Category
         color="grey"
-        icon={
-          Object {
-            "svg": undefined,
-            "value": "marker",
-          }
-        }
         isLinesOnly={false}
         isPointsOnly={true}
         label="CN_format"
         styleName="icon"
+        symbolId="marker"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -77,12 +67,6 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
     >
       <Category
         color="grey"
-        icon={
-          Object {
-            "svg": undefined,
-            "value": "square",
-          }
-        }
         isLinesOnly={false}
         isPointsOnly={true}
         label={
@@ -93,6 +77,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
           </EuiTextColor>
         }
         styleName="icon"
+        symbolId="square"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -142,16 +127,17 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
     >
       <Category
         color="grey"
-        icon={
-          Object {
-            "svg": undefined,
-            "value": "marker",
-          }
-        }
         isLinesOnly={false}
         isPointsOnly={true}
         label="MX_format"
         styleName="icon"
+        svg="<svg width=\\"24\\" height=\\"24\\" stroke-width=\\"1.5\\" viewBox=\\"0 0 24 24\\" fill=\\"none\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+<rect x=\\"9\\" y=\\"2\\" width=\\"6\\" height=\\"12\\" rx=\\"3\\" stroke=\\"currentColor\\" stroke-width=\\"1.5\\"/>
+<path d=\\"M5 10V11C5 14.866 8.13401 18 12 18V18V18C15.866 18 19 14.866 19 11V10\\" stroke=\\"currentColor\\" stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\"/>
+<path d=\\"M12 18V22M12 22H9M12 22H15\\" stroke=\\"currentColor\\" stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\"/>
+</svg>
+"
+        symbolId="marker"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -159,12 +145,6 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
     >
       <Category
         color="grey"
-        icon={
-          Object {
-            "svg": "<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>",
-            "value": "kbn__custom_icon_sdf__foobar",
-          }
-        }
         isLinesOnly={false}
         isPointsOnly={true}
         label={
@@ -175,6 +155,8 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
           </EuiTextColor>
         }
         styleName="icon"
+        svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
+        symbolId="kbn__custom_icon_sdf__foobar"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

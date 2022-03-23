@@ -68,10 +68,6 @@ export class BreakedLegend extends Component<Props, State> {
     }
 
     const categories = this.props.breaks.map(({ symbolId, svg, label, color }, index) => {
-      let icon;
-      if (symbolId !== undefined) {
-        icon = { value: symbolId, svg };
-      }
       return (
         <EuiFlexItem key={index}>
           <Category
@@ -80,7 +76,8 @@ export class BreakedLegend extends Component<Props, State> {
             color={color}
             isLinesOnly={this.props.isLinesOnly}
             isPointsOnly={this.props.isPointsOnly}
-            icon={icon}
+            symbolId={symbolId}
+            svg={svg}
           />
         </EuiFlexItem>
       );

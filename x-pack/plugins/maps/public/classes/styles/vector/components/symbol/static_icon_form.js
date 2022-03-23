@@ -16,13 +16,9 @@ export function StaticIconForm({
   staticDynamicSelect,
   styleProperty,
 }) {
-  const onChange = ({ selectedIconId, svg, label, cutoff, radius }) => {
+  const onChange = ({ selectedIconId }) => {
     onStaticStyleChange(styleProperty.getStyleName(), {
       value: selectedIconId,
-      svg,
-      label,
-      cutoff,
-      radius,
     });
   };
 

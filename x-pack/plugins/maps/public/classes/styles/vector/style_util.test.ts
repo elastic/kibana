@@ -83,12 +83,12 @@ describe('assignCategoriesToIcons', () => {
     const iconValues = ['circle', 'marker', 'triangle', 'square'];
     expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
       stops: [
-        { stop: 'alpah', icon: 'circle' },
-        { stop: 'bravo', icon: 'marker' },
-        { stop: 'charlie', icon: 'triangle' },
+        { stop: 'alpah', value: 'circle' },
+        { stop: 'bravo', value: 'marker' },
+        { stop: 'charlie', value: 'triangle' },
       ],
       fallbackSymbol: {
-        icon: 'square',
+        value: 'square',
         stop: null,
       },
     });
@@ -104,12 +104,12 @@ describe('assignCategoriesToIcons', () => {
     const iconValues = ['circle', 'square', 'triangle'];
     expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
       stops: [
-        { stop: 'alpah', icon: 'circle' },
-        { stop: 'bravo', icon: 'square' },
+        { stop: 'alpah', value: 'circle' },
+        { stop: 'bravo', value: 'square' },
       ],
       fallbackSymbol: {
         stop: null,
-        icon: 'triangle',
+        value: 'triangle',
       },
     });
   });
@@ -122,12 +122,12 @@ describe('assignCategoriesToIcons', () => {
     const iconValues = ['circle', 'triangle', 'marker', 'square', 'rectangle'];
     expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
       stops: [
-        { stop: 'alpah', icon: 'circle' },
-        { stop: 'bravo', icon: 'triangle' },
+        { stop: 'alpah', value: 'circle' },
+        { stop: 'bravo', value: 'triangle' },
       ],
       fallbackSymbol: {
         stop: null,
-        icon: 'marker',
+        value: 'marker',
       },
     });
   });

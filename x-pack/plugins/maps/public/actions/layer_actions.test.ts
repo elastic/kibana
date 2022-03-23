@@ -39,6 +39,10 @@ describe('layer_actions', () => {
         return true;
       };
 
+      require('../selectors/map_selectors').getCustomIcons = () => {
+        return undefined;
+      };
+
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../selectors/map_selectors').createLayerInstance = () => {
         return {

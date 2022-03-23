@@ -11,7 +11,6 @@ import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
-import { IconStaticOptions } from '../../../../../../common/descriptor_types';
 
 interface Props {
   borderStyle?: CSSProperties;
@@ -19,7 +18,8 @@ interface Props {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   strokeColor?: string;
-  icon?: IconStaticOptions;
+  symbolId?: string;
+  svg?: string;
 }
 
 export function VectorIcon({
@@ -28,9 +28,9 @@ export function VectorIcon({
   isPointsOnly,
   isLinesOnly,
   strokeColor,
-  icon,
+  symbolId,
+  svg,
 }: Props) {
-  const { value: symbolId, svg } = icon || {};
   if (isLinesOnly) {
     const style = {
       stroke: strokeColor,
@@ -60,9 +60,9 @@ export function VectorIcon({
       key={`${symbolId}${fillColor}${strokeColor}`}
       symbolId={symbolId}
       fill={fillColor}
-      svg={svg}
       stroke={strokeColor}
       style={borderStyle}
+      svg={svg}
     />
   );
 }

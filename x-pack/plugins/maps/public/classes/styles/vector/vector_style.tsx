@@ -17,6 +17,7 @@ import {
   POLYGON_STYLES,
 } from './vector_style_defaults';
 import {
+  CUSTOM_ICON_PREFIX_SDF,
   DEFAULT_ICON,
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
@@ -28,6 +29,8 @@ import {
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
+// @ts-expect-error
+import { getMakiSymbol, PREFERRED_ICONS } from './symbol_utils';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { isOnlySingleFeatureType, getHasLabel } from './style_util';
@@ -152,6 +155,7 @@ export interface IVectorStyle extends IStyle {
 export class VectorStyle implements IVectorStyle {
   private readonly _descriptor: VectorStyleDescriptor;
   private readonly _layer: IVectorLayer;
+  private readonly _customIcons: Record<string, CustomIcon> | undefined;
   private readonly _source: IVectorSource;
   private readonly _styleMeta: StyleMeta;
 
@@ -187,10 +191,12 @@ export class VectorStyle implements IVectorStyle {
     descriptor: VectorStyleDescriptor | null,
     source: IVectorSource,
     layer: IVectorLayer,
+    customIcons?: CustomIcon[],
     chartsPaletteServiceGetColor?: (value: string) => string | null
   ) {
     this._source = source;
     this._layer = layer;
+    this._customIcons = customIcons ? customIconsToObject(customIcons) : undefined;
     this._descriptor = descriptor
       ? {
           ...descriptor,
@@ -461,8 +467,7 @@ export class VectorStyle implements IVectorStyle {
 
   renderEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
-    onCustomIconsChange: (customIcons: CustomIcon[]) => void,
-    customIcons: CustomIcon[]
+    onCustomIconsChange: (customIcons: Record<string, CustomIcon>) => void
   ) {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
@@ -496,7 +501,7 @@ export class VectorStyle implements IVectorStyle {
         onCustomIconsChange={onCustomIconsChange}
         isTimeAware={this.isTimeAware()}
         showIsTimeAware={propertiesWithFieldMeta.length > 0}
-        customIcons={customIcons}
+        customIcons={this._customIcons}
         hasBorder={this._hasBorder()}
       />
     );
@@ -704,10 +709,25 @@ export class VectorStyle implements IVectorStyle {
     return formatters ? formatters[fieldName] : null;
   };
 
-  _getIconOptions() {
+  _getSymbolId() {
     return this.arePointsSymbolizedAsCircles() || this._iconStyleProperty.isDynamic()
       ? undefined
-      : (this._iconStyleProperty as StaticIconProperty).getOptions();
+      : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
+  }
+
+  _getIconMeta(symbolId: string | undefined) {
+    if (!symbolId) return;
+    let meta;
+    if (
+      symbolId.startsWith(CUSTOM_ICON_PREFIX_SDF) &&
+      typeof this._customIcons === 'object' &&
+      `${symbolId}` in this._customIcons
+    ) {
+      meta = this._customIcons[symbolId];
+    } else {
+      meta = getMakiSymbol(symbolId);
+    }
+    return meta;
   }
 
   getPrimaryColor() {
@@ -755,7 +775,8 @@ export class VectorStyle implements IVectorStyle {
         isLinesOnly={isLinesOnly}
         strokeColor={strokeColor}
         fillColor={fillColor}
-        icon={this._getIconOptions()}
+        symbolId={this._getSymbolId()}
+        svg={this._getIconMeta(this._getSymbolId())?.svg}
       />
     );
   }
@@ -790,12 +811,14 @@ export class VectorStyle implements IVectorStyle {
   }
 
   renderLegendDetails() {
+    const symbolId = this._getSymbolId();
     return (
       <VectorStyleLegend
         styles={this._getLegendDetailStyleProperties()}
         isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
-        icon={this._getIconOptions()}
+        symbolId={symbolId}
+        svg={this._getIconMeta(symbolId)?.svg}
       />
     );
   }
@@ -1047,9 +1070,22 @@ export class VectorStyle implements IVectorStyle {
     if (!descriptor || !descriptor.options) {
       return new StaticIconProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.ICON);
     } else if (descriptor.type === StaticStyleProperty.type) {
-      return new StaticIconProperty(descriptor.options as IconStaticOptions, VECTOR_STYLES.ICON);
+      const { value } = { ...descriptor.options } as IconStaticOptions;
+      const { svg, label } = this._getIconMeta(value);
+      return new StaticIconProperty({ value, svg, label } as IconStaticOptions, VECTOR_STYLES.ICON);
     } else if (descriptor.type === DynamicStyleProperty.type) {
-      const options = descriptor.options as IconDynamicOptions;
+      const options = { ...descriptor.options } as IconDynamicOptions;
+      if (!options.customIconStops) {
+        options.customIconStops = [
+          { stop: null, value: PREFERRED_ICONS[0], ...this._getIconMeta(PREFERRED_ICONS[0]) }, // first stop is the "other" category
+          { stop: '', value: PREFERRED_ICONS[1], ...this._getIconMeta(PREFERRED_ICONS[1]) },
+        ];
+      } else {
+        options.customIconStops.forEach((iconStop) => {
+          const { svg, label } = this._getIconMeta(iconStop.value);
+          iconStop = { ...iconStop, svg, label };
+        });
+      }
       const field = this._makeField(options.field);
       return new DynamicIconProperty(
         options,
@@ -1091,4 +1127,8 @@ function rectifyFieldDescriptor(
     origin: previousFieldDescriptor.origin,
     name: currentField.getName(),
   };
+}
+
+function customIconsToObject(customIcons: CustomIcon[]) {
+  return Object.fromEntries(customIcons.map((icon) => [icon.symbolId, icon]));
 }

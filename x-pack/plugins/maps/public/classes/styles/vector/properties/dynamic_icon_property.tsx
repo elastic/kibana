@@ -70,13 +70,13 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     }
 
     const mbStops = [];
-    stops.forEach(({ stop, icon }) => {
+    stops.forEach(({ stop, value }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(`${icon}`);
+      mbStops.push(`${value}`);
     });
 
-    if (fallbackSymbol && 'icon' in fallbackSymbol) {
-      mbStops.push(fallbackSymbol.icon); // last item is fallback style for anything that does not match provided stops
+    if (fallbackSymbol && 'value' in fallbackSymbol) {
+      mbStops.push(fallbackSymbol.value); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
@@ -90,13 +90,13 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     }
 
     const mbStops = [];
-    stops.forEach(({ stop, icon }) => {
+    stops.forEach(({ stop, value }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(getMakiSymbolAnchor(icon));
+      mbStops.push(getMakiSymbolAnchor(value));
     });
 
-    if (fallbackSymbol && 'icon' in fallbackSymbol) {
-      mbStops.push(getMakiSymbolAnchor(fallbackSymbol.icon)); // last item is fallback style for anything that does not match provided stops
+    if (fallbackSymbol && 'value' in fallbackSymbol) {
+      mbStops.push(getMakiSymbolAnchor(fallbackSymbol.value)); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
@@ -108,23 +108,23 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps) {
     const { stops, fallbackSymbol } = this._getPaletteStops();
     const breaks = [];
-    stops.forEach(({ stop, icon, svg }) => {
+    stops.forEach(({ stop, value, svg }) => {
       if (stop) {
         breaks.push({
           color: 'grey',
           label: this.formatField(stop),
-          symbolId: icon,
+          symbolId: value,
           svg,
         });
       }
     });
 
-    if (fallbackSymbol && 'icon' in fallbackSymbol) {
-      const { icon, svg } = fallbackSymbol;
+    if (fallbackSymbol && 'value' in fallbackSymbol) {
+      const { value, svg } = fallbackSymbol;
       breaks.push({
         color: 'grey',
         label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
-        symbolId: icon,
+        symbolId: value,
         svg,
       });
     }

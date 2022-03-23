@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { DEFAULT_ICON } from '../../../../../../common/constants';
+import { CUSTOM_ICON_PREFIX_SDF, DEFAULT_ICON } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getOtherCategoryLabel } from '../../style_util';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
-import { PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
+import { getMakiSymbol, PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
 
 function isDuplicateStop(targetStop, iconStops) {
   const stops = iconStops.filter(({ stop }) => {
@@ -51,16 +51,17 @@ export function IconStops({
   onCustomIconsChange,
   customIcons,
 }) {
-  return iconStops.map(({ stop, icon, svg, label, cutoff, radius }, index) => {
-    const onIconSelect = ({ selectedIconId, svg, label, cutoff, radius }) => {
+  return iconStops.map(({ stop, value }, index) => {
+    const { svg, label } = value.startsWith(CUSTOM_ICON_PREFIX_SDF)
+    ? customIcons[value]
+    : getMakiSymbol(value);
+    const onIconSelect = ({ selectedIconId }) => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {
         ...iconStops[index],
-        icon: selectedIconId,
+        value: selectedIconId,
         svg,
         label,
-        cutoff,
-        radius,
       };
       onChange({ customStops: newIconStops });
     };
@@ -69,6 +70,8 @@ export function IconStops({
       newIconStops[index] = {
         ...iconStops[index],
         stop: newStopValue,
+        svg,
+        label,
       };
       onChange({
         customStops: newIconStops,
@@ -81,7 +84,9 @@ export function IconStops({
           ...iconStops.slice(0, index + 1),
           {
             stop: '',
-            icon: getFirstUnusedSymbol(iconStops),
+            value: getFirstUnusedSymbol(iconStops),
+            svg,
+            label
           },
           ...iconStops.slice(index + 1),
         ],
@@ -161,7 +166,7 @@ export function IconStops({
               onCustomIconsChange={onCustomIconsChange}
               customIcons={customIcons}
               onChange={onIconSelect}
-              icon={{ value: icon, svg, label, cutoff, radius }}
+              icon={{ value, svg, label }}
               append={iconStopButtons}
             />
           </EuiFlexItem>

@@ -6,24 +6,25 @@
  */
 
 import React from 'react';
-import { IconStaticOptions } from '../../../../../../common/descriptor_types';
 import { IStyleProperty } from '../../properties/style_property';
 
 interface Props {
   isLinesOnly: boolean;
   isPointsOnly: boolean;
   styles: Array<IStyleProperty<any>>;
-  icon?: IconStaticOptions;
+  symbolId?: string;
+  svg?: string;
 }
 
-export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, icon }: Props) {
+export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId, svg }: Props) {
   const legendRows = [];
 
   for (let i = 0; i < styles.length; i++) {
     const row = styles[i].renderLegendDetailRow({
       isLinesOnly,
       isPointsOnly,
-      icon,
+      symbolId,
+      svg,
     });
 
     legendRows.push(

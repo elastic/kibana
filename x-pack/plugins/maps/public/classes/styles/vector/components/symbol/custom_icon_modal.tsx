@@ -33,7 +33,7 @@ import { IconPreview } from './icon_preview';
 import { ValidatedRange } from '../../../../../components/validated_range';
 import { CustomIcon } from '../../../../../../common/descriptor_types';
 
-const MAX_NAME_LENGTH = 40;
+const MAX_LABEL_LENGTH = 40;
 
 const strings = {
   getAdvancedOptionsLabel: () =>
@@ -125,9 +125,9 @@ interface Props {
    */
   symbolId?: string;
   /**
-   * initial value of the name of the custom element
+   * initial value of the label of the custom element
    */
-  name?: string;
+  label?: string;
   /**
    * initial value of the preview image of the custom element as a base64 dataurl
    */
@@ -155,7 +155,7 @@ interface Props {
   /**
    * A click handler for the delete button
    */
-  onDelete?: (icon: CustomIcon) => void;
+  onDelete?: (symbolId: string) => void;
 }
 
 interface State {
@@ -164,9 +164,9 @@ interface State {
    */
   symbolId?: string;
   /**
-   * name of the custom element to be saved
+   * label of the custom element to be saved
    */
-  name?: string;
+  label?: string;
   /**
    * image of the custom element to be saved
    */
@@ -180,7 +180,7 @@ interface State {
 export class CustomIconModal extends Component<Props, State> {
   public static propTypes = {
     symbolId: PropTypes.string,
-    name: PropTypes.string,
+    label: PropTypes.string,
     svg: PropTypes.string,
     cutoff: PropTypes.number.isRequired,
     radius: PropTypes.number.isRequired,
@@ -192,14 +192,14 @@ export class CustomIconModal extends Component<Props, State> {
 
   public state = {
     symbolId: this.props.symbolId || '',
-    name: this.props.name || '',
+    label: this.props.label || '',
     svg: this.props.svg || '',
     cutoff: this.props.cutoff,
     radius: this.props.radius,
     isFileInvalid: this.props.svg ? false : true,
   };
 
-  private _handleChange = (type: 'name' | 'svg', value: string) => {
+  private _handleChange = (type: 'label' | 'svg', value: string) => {
     this.setState({ [type]: value });
   };
 
@@ -217,7 +217,7 @@ export class CustomIconModal extends Component<Props, State> {
 
   private _onFileSelect = (files: FileList | null) => {
     this.setState({
-      name: '',
+      label: '',
       svg: '',
       isFileInvalid: false,
     });
@@ -226,11 +226,11 @@ export class CustomIconModal extends Component<Props, State> {
       const file = files[0];
       const { type } = file;
       if (type === 'image/svg+xml') {
-        const name = this.props.name ?? getFileNameWithoutExt(file.name);
+        const label = this.props.label ?? getFileNameWithoutExt(file.name);
         file
           .text()
           .then((svg: string) => {
-            this.setState({ isFileInvalid: false, name, svg });
+            this.setState({ isFileInvalid: false, label, svg });
           })
           .catch((err) => {
             this.setState({ isFileInvalid: true });
@@ -297,20 +297,20 @@ export class CustomIconModal extends Component<Props, State> {
   }
 
   private _renderIconForm() {
-    const { name, svg } = this.state;
+    const { label, svg } = this.state;
     return svg !== '' ? (
       <>
         <EuiFormRow
           label={strings.getNameInputLabel()}
-          helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
+          helpText={strings.getCharactersRemainingDescription(MAX_LABEL_LENGTH - label.length)}
           display="rowCompressed"
         >
           <EuiFieldText
-            value={name}
-            className="mapsCustomIconForm__name"
-            onChange={(e) => this._handleChange('name', e.target.value)}
+            value={label}
+            className="mapsCustomIconForm__label"
+            onChange={(e) => this._handleChange('label', e.target.value)}
             required
-            data-test-subj="mapsCustomIconForm-name"
+            data-test-subj="mapsCustomIconForm-label"
           />
         </EuiFormRow>
         <EuiSpacer />
@@ -330,8 +330,8 @@ export class CustomIconModal extends Component<Props, State> {
 
   public render() {
     const { onSave, onCancel, onDelete, title, ...rest } = this.props;
-    const { symbolId, name, svg, cutoff, radius, isFileInvalid } = this.state;
-    const isComplete = name.length !== 0 && svg.length !== 0 && !isFileInvalid;
+    const { symbolId, label, svg, cutoff, radius, isFileInvalid } = this.state;
+    const isComplete = label.length !== 0 && svg.length !== 0 && !isFileInvalid;
     const fileError = svg && isFileInvalid ? strings.getInvalidFileLabel() : '';
     return (
       <EuiModal
@@ -339,7 +339,7 @@ export class CustomIconModal extends Component<Props, State> {
         className={`mapsCustomIconModal`}
         maxWidth={700}
         onClose={onCancel}
-        initialFocus=".mapsCustomIconForm__name"
+        initialFocus=".mapsCustomIconForm__image"
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
@@ -350,7 +350,7 @@ export class CustomIconModal extends Component<Props, State> {
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" gutterSize="m">
             <EuiFlexItem className="mapsCustomIconForm" grow={2}>
               <EuiFormRow
-                className="mapsCustomIconForm__thumbnail"
+                className="mapsCustomIconForm__image"
                 display="rowCompressed"
                 isInvalid={!!fileError}
                 error={fileError}
@@ -364,7 +364,7 @@ export class CustomIconModal extends Component<Props, State> {
                   required
                 />
               </EuiFormRow>
-              <EuiText grow={false} className="mapsCustomIconForm__thumbnailHelp" size="xs">
+              <EuiText grow={false} className="mapsCustomIconForm__imageHelp" size="xs">
                 <p>{strings.getImageInputDescription()}</p>
               </EuiText>
               <EuiSpacer />
@@ -383,7 +383,7 @@ export class CustomIconModal extends Component<Props, State> {
                 <EuiButton
                   color="danger"
                   onClick={() => {
-                    onDelete({ symbolId, name, svg, cutoff, radius });
+                    onDelete(symbolId);
                   }}
                   data-test-subj="mapsCustomIconForm-submit"
                 >
@@ -395,7 +395,7 @@ export class CustomIconModal extends Component<Props, State> {
               <EuiButton
                 fill
                 onClick={() => {
-                  onSave({ symbolId, name, svg, cutoff, radius });
+                  onSave({ symbolId, label, svg, cutoff, radius });
                 }}
                 data-test-subj="mapsCustomIconForm-submit"
                 isDisabled={!isComplete}

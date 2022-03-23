@@ -12,7 +12,6 @@ export interface IStyle {
   getType(): string;
   renderEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
-    onCustomIconsChange: (customIcons: CustomIcon[]) => void,
-    customIcons: CustomIcon[]
+    onCustomIconsChange: (customIcons: Record<string, CustomIcon>) => void
   ): ReactElement<any> | null;
 }

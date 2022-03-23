@@ -71,10 +71,14 @@ describe('renderLegendDetailRow', () => {
       customIconStops: [
         {
           stop: null,
-          icon: 'kbn__custom_icon_sdf__foobar',
+          value: 'kbn__custom_icon_sdf__foobar',
           svg: '<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>',
         },
-        { stop: 'MX', icon: 'marker' },
+        {
+          stop: 'MX',
+          value: 'marker',
+          svg: '<svg width="24" height="24" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">\n<rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/>\n<path d="M5 10V11C5 14.866 8.13401 18 12 18V18V18C15.866 18 19 14.866 19 11V10" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>\n<path d="M12 18V22M12 22H9M12 22H15" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>\n</svg>\n',
+        },
       ],
     });
     const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
@@ -107,8 +111,16 @@ describe('get mapbox icon-image expression (via internal _getMbIconImageExpressi
       const iconStyle = makeProperty({
         useCustomIconMap: true,
         customIconStops: [
-          { stop: null, icon: 'circle' },
-          { stop: 'MX', icon: 'marker' },
+          {
+            stop: null,
+            value: 'circle',
+            svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="circle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z"/>\n</svg>',
+          },
+          {
+            stop: 'MX',
+            value: 'marker',
+            svg: '<svg width="24" height="24" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">\n<rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/>\n<path d="M5 10V11C5 14.866 8.13401 18 12 18V18V18C15.866 18 19 14.866 19 11V10" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>\n<path d="M12 18V22M12 22H9M12 22H15" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>\n</svg>\n',
+          },
         ],
       });
       expect(iconStyle._getMbIconImageExpression()).toEqual([

@@ -20,7 +20,6 @@ import { mapboxgl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { ResizeChecker } from '.././../../../../../../../../src/plugins/kibana_utils/public';
 import {
-  CUSTOM_ICON_PREFIX_SDF,
   CUSTOM_ICON_PIXEL_RATIO,
   createSdfIcon,
   // @ts-expect-error
@@ -39,7 +38,7 @@ interface State {
 }
 
 export class IconPreview extends Component<Props, State> {
-  static iconId = `${CUSTOM_ICON_PREFIX_SDF}iconPreview`;
+  static iconId = `iconPreview`;
   private _checker?: ResizeChecker;
   private _isMounted = false;
   private _containerRef: HTMLDivElement | null = null;

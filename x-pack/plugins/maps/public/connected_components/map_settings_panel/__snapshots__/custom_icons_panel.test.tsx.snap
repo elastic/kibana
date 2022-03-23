@@ -8,7 +8,7 @@ exports[`should render 1`] = `
     >
       <h5>
         <FormattedMessage
-          defaultMessage="Custom Icons"
+          defaultMessage="Custom icons"
           id="xpack.maps.mapSettingsPanel.customIconsTitle"
           values={Object {}}
         />
@@ -17,32 +17,38 @@ exports[`should render 1`] = `
     <EuiSpacer
       size="m"
     />
-    <EuiEmptyPrompt
-      actions={
-        Array [
-          <EuiButton
-            data-test-subj="mapsCustomIconPanel-add"
-            fill={true}
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Add custom icon"
-              id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
-              values={Object {}}
-            />
-          </EuiButton>,
-        ]
-      }
-      title={
-        <h2>
-          This map does not have any custom icons yet
-        </h2>
-      }
-      titleSize="xs"
-    />
-    <EuiSpacer
-      size="m"
-    />
+    <EuiText
+      size="s"
+      textAlign="center"
+    >
+      <p>
+        <EuiTextColor
+          color="subdued"
+        >
+          <FormattedMessage
+            defaultMessage="Add a custom icon that can be used in layers in this map."
+            id="mapSettingsPanel.customIcons.emptyState.description"
+            values={Object {}}
+          />
+        </EuiTextColor>
+      </p>
+    </EuiText>
+    <EuiTextAlign
+      textAlign="center"
+    >
+      <EuiButtonEmpty
+        data-test-subj="mapsCustomIconPanel-add"
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="Add custom icon"
+          id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiTextAlign>
   </EuiPanel>
 </Fragment>
 `;
@@ -55,7 +61,7 @@ exports[`should render with custom icons 1`] = `
     >
       <h5>
         <FormattedMessage
-          defaultMessage="Custom Icons"
+          defaultMessage="Custom icons"
           id="xpack.maps.mapSettingsPanel.customIconsTitle"
           values={Object {}}
         />
@@ -98,23 +104,22 @@ exports[`should render with custom icons 1`] = `
         ]
       }
     />
-    <EuiSpacer
-      size="m"
-    />
-    <EuiButton
-      data-test-subj="mapsCustomIconPanel-add"
-      fill={true}
-      onClick={[Function]}
+    <EuiTextAlign
+      textAlign="center"
     >
-      <FormattedMessage
-        defaultMessage="Add custom icon"
-        id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
-        values={Object {}}
-      />
-    </EuiButton>
-    <EuiSpacer
-      size="m"
-    />
+      <EuiButtonEmpty
+        data-test-subj="mapsCustomIconPanel-add"
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="Add custom icon"
+          id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiTextAlign>
   </EuiPanel>
 </Fragment>
 `;

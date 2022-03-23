@@ -59,11 +59,9 @@ export type CategoryColorStop = {
 
 export type IconStop = {
   stop: string | null;
-  icon: string;
-  svg?: string;
+  value: string;
   label?: string;
-  cutoff?: number;
-  radius?: number;
+  svg?: string;
 };
 
 export type ColorDynamicOptions = {
@@ -112,10 +110,8 @@ export type IconDynamicOptions = {
 
 export type IconStaticOptions = {
   value: string; // icon id
-  svg?: string;
   label?: string;
-  cutoff?: number;
-  radius?: number;
+  svg?: string;
 };
 
 export type IconStylePropertyDescriptor =
@@ -189,7 +185,7 @@ export type SizeStylePropertyDescriptor =
 export type CustomIcon = {
   symbolId: string;
   svg: string; // svg string
-  name: string; // user given name
+  label: string; // user given label
   cutoff: number;
   radius: number;
 };

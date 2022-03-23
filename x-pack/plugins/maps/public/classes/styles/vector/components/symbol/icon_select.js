@@ -35,18 +35,10 @@ export class IconSelect extends Component {
     isModalVisible: false,
   };
 
-  _handleSave = (icon) => {
-    const { symbolId, name, svg, radius, cutoff } = icon;
-    const icons = [
-      ...this.props.customIcons,
-      {
-        symbolId: symbolId || getCustomIconId(),
-        svg,
-        name,
-        cutoff,
-        radius,
-      },
-    ];
+  _handleSave = ({svg, cutoff, radius, label}) => {
+    const symbolId = getCustomIconId();
+    const icons = {...this.props.customIcons};
+    icons[symbolId] = { symbolId, label, svg, cutoff, radius };
     this.props.onCustomIconsChange(icons);
     this._hideModal();
   };
@@ -96,8 +88,8 @@ export class IconSelect extends Component {
     });
 
     if (selectedOption) {
-      const { key, svg, label, cutoff, radius } = selectedOption;
-      this.props.onChange({ selectedIconId: key, svg, label, cutoff, radius });
+      const { key } = selectedOption;
+      this.props.onChange({ selectedIconId: key });
     }
     this._closePopover();
   };
@@ -140,7 +132,7 @@ export class IconSelect extends Component {
         label: 'Maki icons',
         isGroupLabel: true,
       },
-      ...SYMBOL_OPTIONS.map(({ value, label }) => {
+      ...SYMBOL_OPTIONS.map(({ value, label, svg }) => {
         return {
           key: value,
           label,
@@ -149,6 +141,7 @@ export class IconSelect extends Component {
               key={value}
               symbolId={value}
               fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+              svg={svg}
             />
           ),
         };
@@ -158,13 +151,10 @@ export class IconSelect extends Component {
     const customOptions = [];
 
     if (this.props.customIcons) {
-      this.props.customIcons.forEach(({ symbolId, svg, name, cutoff, radius }) => {
+      for (const [symbolId, { label, svg }] of Object.entries(this.props.customIcons)) {
         customOptions.push({
           key: symbolId,
-          label: name,
-          svg,
-          cutoff,
-          radius,
+          label,
           prepend: (
             <SymbolIcon
               key={symbolId}
@@ -174,7 +164,7 @@ export class IconSelect extends Component {
             />
           ),
         });
-      });
+      };
     }
 
     if (customOptions.length)

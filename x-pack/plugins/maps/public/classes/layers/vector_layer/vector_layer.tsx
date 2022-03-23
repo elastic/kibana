@@ -38,6 +38,7 @@ import {
 } from '../../util/mb_filter_expressions';
 import {
   AggDescriptor,
+  CustomIcon,
   DynamicStylePropertyOptions,
   DataFilters,
   ESTermSourceDescriptor,
@@ -70,6 +71,7 @@ export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
   layerDescriptor: VectorLayerDescriptor;
+  customIcons?: CustomIcon[],
   chartsPaletteServiceGetColor?: (value: string) => string | null;
 }
 
@@ -133,6 +135,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     layerDescriptor,
     source,
     joins = [],
+    customIcons,
     chartsPaletteServiceGetColor,
   }: VectorLayerArguments) {
     super({
@@ -144,7 +147,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       layerDescriptor.style,
       source,
       this,
-      chartsPaletteServiceGetColor
+      customIcons,
+      chartsPaletteServiceGetColor,
     );
   }
 

@@ -31,6 +31,7 @@ import { ISource } from '../../../sources/source';
 import { DataRequestContext } from '../../../../actions';
 import { DataRequestAbortError } from '../../../util/data_request';
 import {
+  CustomIcon,
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
@@ -171,6 +172,7 @@ export interface BlendedVectorLayerArguments {
   chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
+  customIcons?: CustomIcon[];
 }
 
 export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLayer {
@@ -207,6 +209,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       clusterStyleDescriptor,
       this._clusterSource,
       this,
+      options.customIcons,
       options.chartsPaletteServiceGetColor
     );
 

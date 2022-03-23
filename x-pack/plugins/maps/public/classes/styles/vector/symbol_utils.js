@@ -10,21 +10,21 @@ import xml2js from 'xml2js';
 import uuid from 'uuid/v4';
 import { Canvg } from 'canvg';
 import calcSDF from 'bitmap-sdf';
-import { CUSTOM_ICON_SIZE, MAKI_ICON_SIZE } from '../../../../common/constants';
+import { CUSTOM_ICON_SIZE, CUSTOM_ICON_PREFIX_SDF, MAKI_ICON_SIZE } from '../../../../common/constants';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
 import { MAKI_ICONS } from './maki_icons';
 
-export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
 export const CUSTOM_ICON_PIXEL_RATIO = Math.floor(
   window.devicePixelRatio * (CUSTOM_ICON_SIZE / MAKI_ICON_SIZE) * 0.75
 );
 
-export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
+export const SYMBOL_OPTIONS = Object.entries(MAKI_ICONS).map(([value, { svg, label }]) => {
   return {
-    value: symbolId,
-    label: symbolId,
+    value,
+    label,
+    svg,
   };
 });
 
@@ -75,12 +75,12 @@ export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radiu
   return imageData;
 }
 
-export function getMakiSymbolSvg(symbolId) {
-  const svg = MAKI_ICONS?.[symbolId]?.svg;
-  if (!svg) {
-    throw new Error(`Unable to find symbol: ${symbolId}`);
+export function getMakiSymbol(symbolId) {
+  const symbol = MAKI_ICONS?.[symbolId];
+  if (!symbol) {
+    return {};
   }
-  return svg;
+  return symbol;
 }
 
 export function getMakiSymbolAnchor(symbolId) {
@@ -163,6 +163,7 @@ export function getIconPaletteOptions() {
             className="mapIcon"
             symbolId={iconId}
             fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            svg={getMakiSymbol(iconId).svg}
           />
         </div>
       );

@@ -59,12 +59,12 @@ export class CustomIconsPanel extends Component<Props, State> {
       return null;
     }
     if (this.state.selectedIcon) {
-      const { symbolId, name, svg, cutoff, radius } = this.state.selectedIcon;
+      const { symbolId, label, svg, cutoff, radius } = this.state.selectedIcon;
       return (
         <CustomIconModal
           title="Edit custom icon"
           symbolId={symbolId}
-          name={name}
+          label={label}
           svg={svg}
           cutoff={cutoff || DEFAULT_CUSTOM_ICON_CUTOFF}
           radius={radius || DEFAULT_CUSTOM_ICON_RADIUS}
@@ -90,7 +90,7 @@ export class CustomIconsPanel extends Component<Props, State> {
   };
 
   private _handleSave = (icon: CustomIcon) => {
-    const { symbolId, name, svg, cutoff, radius } = icon;
+    const { symbolId, label, svg, cutoff, radius } = icon;
 
     const icons = [
       ...this.props.settings.customIcons.filter((i) => {
@@ -99,7 +99,7 @@ export class CustomIconsPanel extends Component<Props, State> {
       {
         symbolId: symbolId || getCustomIconId(),
         svg,
-        name,
+        label,
         cutoff,
         radius,
       },
@@ -108,8 +108,7 @@ export class CustomIconsPanel extends Component<Props, State> {
     this._hideModal();
   };
 
-  private _handleDelete = (icon: CustomIcon) => {
-    const { symbolId } = icon;
+  private _handleDelete = (symbolId: string) => {
     const icons = [
       ...this.props.settings.customIcons.filter((i) => {
         return i.symbolId !== symbolId;
@@ -156,13 +155,13 @@ export class CustomIconsPanel extends Component<Props, State> {
     }
 
     const customIconsList = this.props.settings.customIcons.map((icon) => {
-      const { symbolId, svg, name } = icon;
+      const { symbolId, label, svg } = icon;
       return {
-        label: name,
+        label,
         key: symbolId,
         icon: (
           <SymbolIcon
-            symbolId={name}
+            symbolId={label}
             svg={svg}
             fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
           />
