@@ -6,7 +6,6 @@
  */
 
 import { esArchiverResetKibana } from './es_archiver';
-import { RuleEcs } from '../../common/ecs/rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
@@ -68,19 +67,14 @@ export const reload = () => {
 export const cleanKibana = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
-  cy.request('GET', '/api/detection_engine/rules/_find').then((response) => {
-    const rules: RuleEcs[] = response.body.data;
-
-    if (response.body.data.length > 0) {
-      rules.forEach((rule) => {
-        const jsonRule = rule;
-        cy.request({
-          method: 'DELETE',
-          url: `/api/detection_engine/rules?rule_id=${jsonRule.rule_id}`,
-          headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-        });
-      });
-    }
+  cy.request({
+    method: 'POST',
+    url: '/api/detection_engine/rules/_bulk_action',
+    body: {
+      query: '',
+      action: 'delete',
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });
 
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
