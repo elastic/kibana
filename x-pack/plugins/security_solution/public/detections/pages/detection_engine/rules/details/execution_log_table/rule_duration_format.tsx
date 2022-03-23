@@ -17,7 +17,7 @@ interface Props {
 
 export function getFormattedDuration(value: number) {
   if (!value) {
-    return '00:00';
+    return '00:00:00:000';
   }
   const duration = moment.duration(value);
   const hours = Math.floor(duration.asHours()).toString().padStart(2, '0');

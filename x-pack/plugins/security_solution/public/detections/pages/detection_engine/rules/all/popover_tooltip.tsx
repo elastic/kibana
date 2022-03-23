@@ -30,9 +30,7 @@ const PopoverTooltipComponent = ({ columnName, children }: PopoverTooltipProps) 
       button={
         <EuiButtonIcon
           aria-label={i18n.POPOVER_TOOLTIP_ARIA_LABEL(columnName)}
-          // TODO: Proper type here? `MouseEventHandler<HTMLButtonElement>` satisfies onClick but doesn't have stopPropagation()
-          // TODO: and `MouseEvent` has stopPropagation() but doesn't satisfy onClick?
-          onClick={(event: { stopPropagation: () => void }) => {
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
             setIsPopoverOpen(!isPopoverOpen);
             event.stopPropagation();
           }}
