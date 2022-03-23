@@ -9,21 +9,16 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useState, useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiSpacer,
-  EuiTextArea,
-  EuiButton,
-  EuiTabs,
-  EuiTab,
-  EuiLoadingContent,
-} from '@elastic/eui';
-import { LineRange } from '@elastic/eui/src/components/loading/loading_content';
+import { EuiSpacer, EuiTextArea, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
 
 import { useMlApiContext } from '../../../../../contexts/kibana';
 import { DgaInference } from './dga_inference';
 import type { FormattedDgaResp } from './dga_inference';
 import { DGAOutput } from './dga_output';
 import { MLJobEditor } from '../../../../../jobs/jobs_list/components/ml_job_editor';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { ErrorMessage } from '../../error';
+import { OutputLoadingContent } from '../../output_loading';
 
 interface Props {
   model: estypes.MlTrainedModelConfig;
@@ -48,18 +43,24 @@ export const DgaModel: FC<Props> = ({ model }) => {
   const [rawOutput, setRawOutput] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [showOutput, setShowOutput] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
 
   async function run() {
     setShowOutput(true);
     setOutput(null);
     setRawOutput(null);
     setIsRunning(true);
+    setErrorText(null);
     try {
       const { response, rawResponse } = await ner.infer(inputText);
       setOutput(response);
       setRawOutput(JSON.stringify(rawResponse, null, 2));
-    } catch (error) {
+    } catch (e) {
       setIsRunning(false);
+      setIsRunning(false);
+      setOutput(null);
+      setErrorText(extractErrorMessage(e));
+      setRawOutput(JSON.stringify(e.body ?? e, null, 2));
     }
     setIsRunning(false);
   }
@@ -110,7 +111,9 @@ export const DgaModel: FC<Props> = ({ model }) => {
 
           {selectedTab === TAB.TEXT ? (
             <>
-              {output === null ? (
+              {errorText !== null ? (
+                <ErrorMessage errorText={errorText} />
+              ) : output === null ? (
                 <OutputLoadingContent text={inputText} />
               ) : (
                 <DGAOutput result={output} />
@@ -123,11 +126,4 @@ export const DgaModel: FC<Props> = ({ model }) => {
       ) : null}
     </>
   );
-};
-
-const OutputLoadingContent: FC<{ text: string }> = ({ text }) => {
-  const actualLines = text.split(/\r\n|\r|\n/).length + 1;
-  const lines = actualLines > 4 && actualLines <= 10 ? actualLines : 4;
-
-  return <EuiLoadingContent lines={lines as LineRange} />;
 };
