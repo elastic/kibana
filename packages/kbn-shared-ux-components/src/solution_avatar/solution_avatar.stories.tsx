@@ -10,7 +10,7 @@ import React from 'react';
 import { KibanaSolutionAvatar, KibanaSolutionAvatarProps } from './solution_avatar';
 
 export default {
-  title: 'Page Template/Solution Nav Avatar',
+  title: 'Solution Avatar',
   description: 'A wrapper around EuiAvatar, with some extra styling',
 };
 
