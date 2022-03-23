@@ -31,7 +31,7 @@ import { SearchExperienceContent } from './search_experience_content';
 import { Fields, SortOption } from './types';
 import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
 
-const RECENTLY_UPLOADED = i18n.translate(
+const DOCUMENT_ID = i18n.translate(
   'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.documentId',
   {
     defaultMessage: 'Document ID',
@@ -45,12 +45,12 @@ const RELEVANCE = i18n.translate(
 
 const DEFAULT_SORT_OPTIONS: SortOption[] = [
   {
-    name: DESCENDING(RECENTLY_UPLOADED),
+    name: DESCENDING(DOCUMENT_ID),
     value: 'id',
     direction: 'desc',
   },
   {
-    name: ASCENDING(RECENTLY_UPLOADED),
+    name: ASCENDING(DOCUMENT_ID),
     value: 'id',
     direction: 'asc',
   },
