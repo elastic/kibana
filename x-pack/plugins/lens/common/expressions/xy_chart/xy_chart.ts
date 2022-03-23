@@ -11,6 +11,7 @@ import type { LensMultiTable } from '../../types';
 import type { XYArgs } from './xy_args';
 import { fittingFunctionDefinitions } from './fitting_function';
 import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
+import { endValueDefinitions } from './end_value';
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -105,6 +106,16 @@ export const xyChart: ExpressionFunctionDefinition<
       help: i18n.translate('xpack.lens.xyChart.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
       }),
+    },
+    endValue: {
+      types: ['string'],
+      options: [...endValueDefinitions.map(({ id }) => id)],
+      help: '',
+    },
+    emphasizeFitting: {
+      types: ['boolean'],
+      default: false,
+      help: '',
     },
     valueLabels: {
       types: ['string'],
