@@ -12,7 +12,7 @@ To get started, open the main menu, click *Dev Tools*, then click *Console*.
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
 
-NOTE: You cannot to interact with the REST API of {kib} with the Console.
+NOTE: You cannot interact with the REST API of {kib} with the Console.
 
 [float]
 [[console-api]]
