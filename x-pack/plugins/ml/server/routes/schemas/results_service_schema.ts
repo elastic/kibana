@@ -128,7 +128,7 @@ export const getAnomalyChartsSchema = schema.object({
   maxResults: schema.number({ defaultValue: 6, min: 1, max: 10 }),
   influencersFilterQuery: schema.maybe(schema.any()),
   /**
-   * Optimal number of data point per chart
+   * Optimal number of data points per chart
    */
   numberOfPoints: schema.number(),
   timeBounds: schema.object({
