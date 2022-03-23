@@ -33,7 +33,9 @@ describe('getChartAggConfigs', () => {
         Object {
           "enabled": true,
           "id": "1",
-          "params": Object {},
+          "params": Object {
+            "emptyAsNull": false,
+          },
           "schema": "metric",
           "type": "count",
         },

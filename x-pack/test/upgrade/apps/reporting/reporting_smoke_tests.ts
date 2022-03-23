@@ -89,11 +89,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
             await postUrl.click();
             const url = await browser.getClipboardValue();
-            await reportingAPI.expectAllJobsToFinishSuccessfully(
-              await Promise.all([
-                reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
-              ])
-            );
+            await reportingAPI.expectAllJobsToFinishSuccessfully([
+              await reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
+            ]);
             usage = (await usageAPI.getUsageStats()) as UsageStats;
             reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
           });
