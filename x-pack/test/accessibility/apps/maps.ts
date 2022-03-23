@@ -119,7 +119,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('single cancel modal', async function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/128332
+    it.skip('single cancel modal', async function () {
       await testSubjects.click('confirmModalCancelButton');
       await a11y.testAppSnapshot();
     });

@@ -12,6 +12,7 @@ export enum EngineTypes {
   default = 'default',
   indexed = 'indexed',
   meta = 'meta',
+  elasticsearch = 'elasticsearch',
 }
 export interface Engine {
   name: string;

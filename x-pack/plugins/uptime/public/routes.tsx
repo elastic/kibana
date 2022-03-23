@@ -239,7 +239,7 @@ const getRoutes = (canSave: boolean): RouteProps[] => {
         defaultMessage: 'Manage Monitors | {baseTitle}',
         values: { baseTitle },
       }),
-      path: MONITOR_MANAGEMENT_ROUTE,
+      path: MONITOR_MANAGEMENT_ROUTE + '/:type',
       component: () => (
         <ServiceEnabledWrapper>
           <MonitorManagementPage />
