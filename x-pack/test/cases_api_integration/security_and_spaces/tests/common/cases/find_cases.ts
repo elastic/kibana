@@ -195,6 +195,46 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_in_progress_cases).to.eql(1);
       });
 
+      it('returns the correct fields', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
+          'title',
+          ['title', 'description'],
+        ];
+
+        for (const fields of queryFields) {
+          const cases = await findCases({ supertest, query: { fields } });
+          const fieldsAsArray = Array.isArray(fields) ? fields : [fields];
+
+          const expectedValues = fieldsAsArray.reduce(
+            (theCase, field) => ({
+              ...theCase,
+              [field]: postedCase[field],
+            }),
+            {}
+          );
+
+          expect(cases).to.eql({
+            ...findCasesResp,
+            total: 1,
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                external_service: postedCase.external_service,
+                owner: postedCase.owner,
+                connector: postedCase.connector,
+                comments: [],
+                totalAlerts: 0,
+                totalComment: 0,
+                ...expectedValues,
+              },
+            ],
+            count_open_cases: 1,
+          });
+        }
+      });
+
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
       });
