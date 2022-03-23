@@ -137,7 +137,7 @@ export async function getResultsForJobId(
         ? _source.influencers.filter(
             ({ influencer_field_name: name, influencer_field_values: values }) => {
               // remove influencers without values and influencers on partition fields
-              return name.length && !splitFieldKeys.includes(values);
+              return values.length && !splitFieldKeys.includes(name);
             }
           )
         : [];
