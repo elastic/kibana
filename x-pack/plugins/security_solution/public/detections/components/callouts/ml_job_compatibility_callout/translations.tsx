@@ -13,28 +13,27 @@ import { MlJobCompatibilityLink } from '../../../../common/components/links_to_d
 export const ML_JOB_COMPATIBILITY_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageTitle',
   {
-    defaultMessage: 'Your ML jobs may be incompatible with your data sources and/or ML rules',
+    defaultMessage:
+      'New updates are available for your ML jobs, please see documentation before updating Detection Rules to ensure continued coverage',
   }
 );
 
 export const MlJobCompatibilityCalloutBody = () => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody"
-    defaultMessage="{summary} Related documentation: {docs}"
+    defaultMessage="{summary} Documentation: {docs}"
     values={{
       summary: (
         <p>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody.summary"
-            defaultMessage="Machine learning rules specify ML jobs that in
-            turn have dependencies on data fields populated by the Elastic
-            beats and agent integrations that were current when the ML job
-            was created. New ML jobs, prefixed with V2, have been updated to
-            operate on now-current ECS fields. If you are using multiple
-            versions of beats and agents, you need to create new machine
-            learning rules that specify the new ML (V2) jobs, and enable them
-            to run alongside your existing machine learning rules, in order
-            to ensure continued rule coverage."
+            defaultMessage="New V3 Machine Learning jobs have been released and
+            the corresponding Detections Rules have been updated to use these
+            new jobs. You are currently running one or more V1/V2 jobs and
+            action is required to ensure continued coverage before updating
+            your Detection Rules. Please see the below documentation for
+            instructions on how to keep using the V1/V2 jobs, and how
+            to start using the new V3 jobs."
           />
         </p>
       ),

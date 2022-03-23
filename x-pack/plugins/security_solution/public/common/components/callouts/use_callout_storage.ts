@@ -49,6 +49,7 @@ export const useCallOutStorage = (
 
       // Remember dismissal in local storage for primary and success messages.
       // NOTE: danger and warning ones are not stored!
+      // TODO: May need to update this to allow override for warning callouts
       if (type === 'primary' || type === 'success') {
         addMessage(dismissedMessagesKey, id);
       }

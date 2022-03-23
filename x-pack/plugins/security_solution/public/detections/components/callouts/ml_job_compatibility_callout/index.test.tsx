@@ -44,7 +44,7 @@ describe('MlJobCompatibilityCallout', () => {
   it('does not render if no affected jobs are installed', () => {
     (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
       loading: false,
-      jobs: [{ id: 'windows_rare_user_type10_remote_login' }],
+      jobs: [{ id: 'high_count_network_denies' }],
     });
     const wrapper = mount(
       <TestProviders>

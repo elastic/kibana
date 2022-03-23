@@ -13,7 +13,7 @@ import { affectedJobIds } from './affected_job_ids';
 import * as i18n from './translations';
 
 const mlJobCompatibilityCalloutMessage: CallOutMessage = {
-  type: 'primary',
+  type: 'warning',
   id: 'ml-job-compatibility',
   title: i18n.ML_JOB_COMPATIBILITY_CALLOUT_TITLE,
   description: <i18n.MlJobCompatibilityCalloutBody />,
