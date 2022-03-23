@@ -12,7 +12,6 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   applicationServiceMock,
-  httpServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
 
 import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
@@ -40,18 +39,9 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup) => ({
   getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
 });
 
-export const setupEnvironment = () => {
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
+export const setupEnvironment = initHttpRequests;
 
-  return {
-    server,
-    httpRequestsMockHelpers,
-  };
-};
-
-const httpSetup = httpServiceMock.createSetupContract();
-
-export const WithAppDependencies = (Comp: any) => (props: any) =>
+export const WithAppDependencies = (Comp: any, httpSetup: HttpSetup) => (props: any) =>
   (
     <AppContextProvider value={appDependencies}>
       <MappingsEditorProvider>

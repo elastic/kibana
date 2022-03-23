@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { HttpSetup } from 'src/core/public';
 
 import {
   registerTestBed,
@@ -25,8 +26,6 @@ const testBedConfig: AsyncTestBedConfig = {
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed(WithAppDependencies(ComponentTemplateList), testBedConfig);
 
 export type ComponentTemplateListTestBed = TestBed<ComponentTemplateTestSubjects> & {
   actions: ReturnType<typeof createActions>;
@@ -74,7 +73,8 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setup = async (): Promise<ComponentTemplateListTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateListTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(ComponentTemplateList, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   return {

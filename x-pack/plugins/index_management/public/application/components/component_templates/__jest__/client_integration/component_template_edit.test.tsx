@@ -10,6 +10,7 @@ import { act } from 'react-dom/test-utils';
 
 import '../../../../../../test/global_mocks';
 import { setupEnvironment } from './helpers';
+import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateEditTestBed } from './helpers/component_template_edit.helpers';
 
 jest.mock('@elastic/eui', () => {
@@ -33,11 +34,7 @@ jest.mock('@elastic/eui', () => {
 describe('<ComponentTemplateEdit />', () => {
   let testBed: ComponentTemplateEditTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   const COMPONENT_TEMPLATE_NAME = 'comp-1';
   const COMPONENT_TEMPLATE_TO_EDIT = {
@@ -49,10 +46,10 @@ describe('<ComponentTemplateEdit />', () => {
   };
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE_TO_EDIT);
+    httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE_TO_EDIT.name, COMPONENT_TEMPLATE_TO_EDIT);
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
 
     testBed.component.update();
@@ -98,17 +95,16 @@ describe('<ComponentTemplateEdit />', () => {
 
       component.update();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-
-      const expected = {
-        version: 1,
-        ...COMPONENT_TEMPLATE_TO_EDIT,
-        template: {
-          ...COMPONENT_TEMPLATE_TO_EDIT.template,
-        },
-      };
-
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        expect.objectContaining({body: JSON.stringify({
+          ...COMPONENT_TEMPLATE_TO_EDIT,
+          template: {
+            ...COMPONENT_TEMPLATE_TO_EDIT.template,
+          },
+          version: 1,
+        })})
+      );
     });
   });
 });
