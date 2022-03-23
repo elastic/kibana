@@ -10,6 +10,7 @@ import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 
+import { ApplicationStart } from 'src/core/public';
 import { NotificationsSetup, IUiSettingsClient, CoreTheme } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
@@ -40,6 +41,7 @@ export interface AppServices {
   uiSettings: IUiSettingsClient;
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
+  application: ApplicationStart;
 }
 
 export interface CoreServices {
