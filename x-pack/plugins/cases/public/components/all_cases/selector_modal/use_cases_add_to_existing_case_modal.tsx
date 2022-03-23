@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import { CaseStatuses, StatusAll } from '../../../../common';
 import { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { Case } from '../../../containers/types';
@@ -44,6 +45,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
       type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
       payload: {
         ...props,
+        hiddenStatuses: [CaseStatuses.closed, StatusAll],
         onRowClick: (theCase?: Case) => {
           // when the case is undefined in the modal
           // the user clicked "create new case"
