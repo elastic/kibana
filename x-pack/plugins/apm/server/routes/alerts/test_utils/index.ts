@@ -59,7 +59,7 @@ export const createRuleTypeMocks = () => {
       basePath: {
         serverBasePath: '/eyr',
         publicBaseUrl: 'http://localhost:5601/eyr',
-        prepend: (path: string) => `http://localhost:5601/eyr'${path}`,
+        prepend: (path: string) => `http://localhost:5601/eyr${path}`,
       } as IBasePath,
     },
     services,
