@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { skipWhile, switchMap } from 'rxjs/operators';
+import { skipWhile, switchMap, takeUntil } from 'rxjs/operators';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
@@ -24,10 +24,10 @@ export class AnomalyChartsStateService extends StateService {
   private _chartsData$ = new BehaviorSubject<ExplorerChartsData>(getDefaultChartsData());
 
   constructor(
-    private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
-    private anomalyTimelineStateServices: AnomalyTimelineStateService,
-    private anomalyExplorerChartsService: AnomalyExplorerChartsService,
-    private tableSeverityState$: PageUrlStateService<TableSeverity>
+    private _anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
+    private _anomalyTimelineStateServices: AnomalyTimelineStateService,
+    private _anomalyExplorerChartsService: AnomalyExplorerChartsService,
+    private _tableSeverityState: PageUrlStateService<TableSeverity>
   ) {
     super();
     this._init();
@@ -35,14 +35,15 @@ export class AnomalyChartsStateService extends StateService {
 
   private _init() {
     combineLatest([
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
-      this.anomalyTimelineStateServices.getContainerWidth$().pipe(skipWhile((v) => v === 0)),
-      this.anomalyTimelineStateServices.getSelectedCells$(),
-      this.anomalyTimelineStateServices.getViewBySwimlaneFieldName$(),
-      this.tableSeverityState$.getPageUrlState$(),
+      this._anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this._anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+      this._anomalyTimelineStateServices.getContainerWidth$().pipe(skipWhile((v) => v === 0)),
+      this._anomalyTimelineStateServices.getSelectedCells$(),
+      this._anomalyTimelineStateServices.getViewBySwimlaneFieldName$(),
+      this._tableSeverityState.getPageUrlState$(),
     ])
       .pipe(
+        takeUntil(this.unsubscribeAll$),
         switchMap(
           ([
             selectedJobs,
@@ -61,7 +62,7 @@ export class AnomalyChartsStateService extends StateService {
               viewBySwimlaneFieldName!
             );
 
-            return this.anomalyExplorerChartsService.getAnomalyData$(
+            return this._anomalyExplorerChartsService.getAnomalyData$(
               jobIds,
               containerWidth!,
               selectedCells?.times[0] * 1000,

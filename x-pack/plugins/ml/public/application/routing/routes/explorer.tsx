@@ -195,6 +195,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
       anomalyExplorerContext.anomalyExplorerCommonStateService.destroy();
       anomalyExplorerContext.anomalyTimelineStateService.destroy();
+      anomalyExplorerContext.chartsStateService.destroy();
     };
   }, []);
 
