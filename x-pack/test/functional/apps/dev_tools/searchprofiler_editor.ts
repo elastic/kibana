@@ -154,6 +154,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         };
 
+        await testSubjects.setValue('indexName', '_all');
         await aceEditor.setValue(editorTestSubjectSelector, JSON.stringify(input));
 
         await testSubjects.click('profileButton');
