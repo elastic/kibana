@@ -64,6 +64,15 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
             _meta: { description: 'total number of es grid layers in cluster' },
           },
         },
+        es_agg_hexagons: {
+          min: { type: 'long', _meta: { description: 'min number of es grid layers per map' } },
+          max: { type: 'long', _meta: { description: 'max number of es grid layers per map' } },
+          avg: { type: 'float', _meta: { description: 'avg number of es grid layers per map' } },
+          total: {
+            type: 'long',
+            _meta: { description: 'total number of es grid layers in cluster' },
+          },
+        },
         es_agg_heatmap: {
           min: { type: 'long', _meta: { description: 'min number of es heatmap layers per map' } },
           max: { type: 'long', _meta: { description: 'max number of es heatmap layers  per map' } },
