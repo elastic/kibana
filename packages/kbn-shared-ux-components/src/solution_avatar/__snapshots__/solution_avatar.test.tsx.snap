@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaSolutionAvatar renders 1`] = `
+<EuiAvatar
+  className="kbnSolutionAvatar"
+  iconType="logoElastic"
+  name="Solution"
+/>
+`;

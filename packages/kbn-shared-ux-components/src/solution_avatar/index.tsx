@@ -5,5 +5,4 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { NoDataCard, ElasticAgentCard } from './no_data_page';
+export { KibanaSolutionAvatar } from './solution_avatar';

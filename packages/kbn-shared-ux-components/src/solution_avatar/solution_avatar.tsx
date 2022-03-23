@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './solution_nav_avatar.scss';
+import './solution_avatar.scss';
 
 import React from 'react';
 
 import { DistributiveOmit, EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 import classNames from 'classnames';
 
-export type KibanaPageTemplateSolutionNavAvatarProps = DistributiveOmit<EuiAvatarProps, 'size'> & {
+export type KibanaSolutionAvatarProps = DistributiveOmit<EuiAvatarProps, 'size'> & {
   /**
    * Any EuiAvatar size available, or `xxl` for custom large, brand-focused version
    */
@@ -22,18 +22,14 @@ export type KibanaPageTemplateSolutionNavAvatarProps = DistributiveOmit<EuiAvata
 /**
  * Applies extra styling to a typical EuiAvatar
  */
-export const KibanaPageTemplateSolutionNavAvatar = ({
-  className,
-  size,
-  ...rest
-}: KibanaPageTemplateSolutionNavAvatarProps) => {
+export const KibanaSolutionAvatar = ({ className, size, ...rest }: KibanaSolutionAvatarProps) => {
   return (
     // @ts-ignore
     <EuiAvatar
       className={classNames(
-        'kbnPageTemplateSolutionNavAvatar',
+        'kbnSolutionAvatar',
         {
-          [`kbnPageTemplateSolutionNavAvatar--${size}`]: size,
+          [`kbnSolutionAvatar--${size}`]: size,
         },
         className
       )}

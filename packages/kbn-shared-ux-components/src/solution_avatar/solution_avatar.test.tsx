@@ -6,5 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
-export type { KibanaPageTemplateSolutionNavAvatarProps } from './solution_nav_avatar';
+import React from 'react';
+import { shallow } from 'enzyme';
+import { KibanaSolutionAvatar } from './solution_avatar';
+
+describe('KibanaSolutionAvatar', () => {
+  test('renders', () => {
+    const component = shallow(<KibanaSolutionAvatar name="Solution" iconType="logoElastic" />);
+    expect(component).toMatchSnapshot();
+  });
+});
