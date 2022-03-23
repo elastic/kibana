@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Dispatch, SetStateAction } from 'react';
 import { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
 import { AlertExecutionStatus } from '../../../../alerting/common';
 import { RuleTableItem, Rule } from '../../../../triggers_actions_ui/public';
@@ -69,6 +70,7 @@ export interface FetchRulesProps {
   searchText: string | undefined;
   ruleLastResponseFilter: string[];
   page: Pagination;
+  setPage: Dispatch<SetStateAction<Pagination>>;
   sort: EuiTableSortingType<RuleTableItem>['sort'];
 }
 

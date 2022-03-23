@@ -117,6 +117,7 @@ export function RulesPage() {
     searchText,
     ruleLastResponseFilter,
     page,
+    setPage,
     sort,
   });
   const { data: rules, totalItemCount, error } = rulesState;
