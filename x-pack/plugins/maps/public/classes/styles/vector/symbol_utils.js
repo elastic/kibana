@@ -10,7 +10,11 @@ import xml2js from 'xml2js';
 import uuid from 'uuid/v4';
 import { Canvg } from 'canvg';
 import calcSDF from 'bitmap-sdf';
-import { CUSTOM_ICON_SIZE, CUSTOM_ICON_PREFIX_SDF, MAKI_ICON_SIZE } from '../../../../common/constants';
+import {
+  CUSTOM_ICON_SIZE,
+  CUSTOM_ICON_PREFIX_SDF,
+  MAKI_ICON_SIZE,
+} from '../../../../common/constants';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
@@ -177,5 +181,12 @@ export function getIconPaletteOptions() {
 
 export function getIconPalette(paletteId) {
   const palette = ICON_PALETTES.find(({ id }) => id === paletteId);
-  return palette ? [...palette.icons] : [];
+  return palette
+    ? palette.icons.map((value) => {
+        return {
+          value,
+          ...getMakiSymbol(value),
+        };
+      })
+    : [];
 }

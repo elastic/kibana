@@ -61,7 +61,7 @@ export type IconStop = {
   stop: string | null;
   value: string;
   label?: string;
-  svg?: string;
+  svg: string;
 };
 
 export type ColorDynamicOptions = {

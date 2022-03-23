@@ -1097,7 +1097,8 @@ export class VectorStyle implements IVectorStyle {
       } else {
         options.customIconStops.forEach((iconStop) => {
           const { svg, label } = this._getIconMeta(iconStop.value);
-          iconStop = { ...iconStop, svg, label };
+          iconStop.svg = svg;
+          iconStop.label = label;
         });
       }
       const field = this._makeField(options.field);

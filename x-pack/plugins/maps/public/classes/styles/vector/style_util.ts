@@ -59,21 +59,21 @@ export function dynamicRound(value: number | string) {
 
 export function assignCategoriesToIcons({
   categories,
-  iconValues,
+  icons,
 }: {
   categories: Category[];
-  iconValues: string[];
+  icons: { value: string; label: string; svg: string }[];
 }) {
   const stops: IconStop[] = [];
   let fallbackSymbol: IconStop | null = null;
 
-  if (categories.length && iconValues.length) {
-    const maxLength = Math.min(iconValues.length, categories.length + 1);
-    fallbackSymbol = { value: iconValues[maxLength - 1], stop: null };
+  if (categories.length && icons.length) {
+    const maxLength = Math.min(icons.length, categories.length + 1);
+    fallbackSymbol = { ...icons[maxLength - 1], stop: null };
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: categories[i].key,
-        value: iconValues[i],
+        ...icons[i],
       });
     }
   }

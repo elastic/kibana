@@ -80,15 +80,53 @@ describe('assignCategoriesToIcons', () => {
       { key: 'charlie', count: 1 },
       { key: 'delta', count: 1 },
     ];
-    const iconValues = ['circle', 'marker', 'triangle', 'square'];
-    expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
+    const icons = [
+      {
+        value: 'circle',
+        label: 'circle',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="circle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z"/>\n</svg>',
+      },
+      {
+        value: 'marker',
+        label: 'marker',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="marker-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path4133" d="M7.5,0C5.0676,0,2.2297,1.4865,2.2297,5.2703&#xA;&#x9;C2.2297,7.8378,6.2838,13.5135,7.5,15c1.0811-1.4865,5.2703-7.027,5.2703-9.7297C12.7703,1.4865,9.9324,0,7.5,0z"/>\n</svg>',
+      },
+      {
+        value: 'triangle',
+        label: 'triangle',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="triangle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path21090-9" d="M7.5385,2&#xA;&#x9;C7.2437,2,7.0502,2.1772,6.9231,2.3846l-5.8462,9.5385C1,12,1,12.1538,1,12.3077C1,12.8462,1.3846,13,1.6923,13h11.6154&#xA;&#x9;C13.6923,13,14,12.8462,14,12.3077c0-0.1538,0-0.2308-0.0769-0.3846L8.1538,2.3846C8.028,2.1765,7.7882,2,7.5385,2z"/>\n</svg>',
+      },
+      {
+        value: 'square',
+        label: 'square',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="square-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z"/>\n</svg>',
+      },
+    ];
+    expect(assignCategoriesToIcons({ categories, icons })).toEqual({
       stops: [
-        { stop: 'alpah', value: 'circle' },
-        { stop: 'bravo', value: 'marker' },
-        { stop: 'charlie', value: 'triangle' },
+        {
+          stop: 'alpah',
+          value: 'circle',
+          label: 'circle',
+          svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="circle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z"/>\n</svg>',
+        },
+        {
+          stop: 'bravo',
+          value: 'marker',
+          label: 'marker',
+          svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="marker-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path4133" d="M7.5,0C5.0676,0,2.2297,1.4865,2.2297,5.2703&#xA;&#x9;C2.2297,7.8378,6.2838,13.5135,7.5,15c1.0811-1.4865,5.2703-7.027,5.2703-9.7297C12.7703,1.4865,9.9324,0,7.5,0z"/>\n</svg>',
+        },
+        {
+          stop: 'charlie',
+          value: 'triangle',
+          label: 'triangle',
+          svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="triangle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path21090-9" d="M7.5385,2&#xA;&#x9;C7.2437,2,7.0502,2.1772,6.9231,2.3846l-5.8462,9.5385C1,12,1,12.1538,1,12.3077C1,12.8462,1.3846,13,1.6923,13h11.6154&#xA;&#x9;C13.6923,13,14,12.8462,14,12.3077c0-0.1538,0-0.2308-0.0769-0.3846L8.1538,2.3846C8.028,2.1765,7.7882,2,7.5385,2z"/>\n</svg>',
+        },
       ],
       fallbackSymbol: {
         value: 'square',
+        label: 'square',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="square-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z"/>\n</svg>',
         stop: null,
       },
     });
@@ -101,15 +139,43 @@ describe('assignCategoriesToIcons', () => {
       { key: 'charlie', count: 1 },
       { key: 'delta', count: 1 },
     ];
-    const iconValues = ['circle', 'square', 'triangle'];
-    expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
+    const icons = [
+      {
+        value: 'circle',
+        label: 'circle',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="circle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z"/>\n</svg>',
+      },
+      {
+        value: 'square',
+        label: 'square',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="square-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z"/>\n</svg>',
+      },
+      {
+        value: 'triangle',
+        label: 'triangle',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="triangle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path21090-9" d="M7.5385,2&#xA;&#x9;C7.2437,2,7.0502,2.1772,6.9231,2.3846l-5.8462,9.5385C1,12,1,12.1538,1,12.3077C1,12.8462,1.3846,13,1.6923,13h11.6154&#xA;&#x9;C13.6923,13,14,12.8462,14,12.3077c0-0.1538,0-0.2308-0.0769-0.3846L8.1538,2.3846C8.028,2.1765,7.7882,2,7.5385,2z"/>\n</svg>',
+      },
+    ];
+    expect(assignCategoriesToIcons({ categories, icons })).toEqual({
       stops: [
-        { stop: 'alpah', value: 'circle' },
-        { stop: 'bravo', value: 'square' },
+        {
+          stop: 'alpah',
+          value: 'circle',
+          label: 'circle',
+          svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="circle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z"/>\n</svg>',
+        },
+        {
+          stop: 'bravo',
+          value: 'square',
+          label: 'square',
+          svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="square-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z"/>\n</svg>',
+        },
       ],
       fallbackSymbol: {
         stop: null,
         value: 'triangle',
+        label: 'triangle',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="triangle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path21090-9" d="M7.5385,2&#xA;&#x9;C7.2437,2,7.0502,2.1772,6.9231,2.3846l-5.8462,9.5385C1,12,1,12.1538,1,12.3077C1,12.8462,1.3846,13,1.6923,13h11.6154&#xA;&#x9;C13.6923,13,14,12.8462,14,12.3077c0-0.1538,0-0.2308-0.0769-0.3846L8.1538,2.3846C8.028,2.1765,7.7882,2,7.5385,2z"/>\n</svg>',
       },
     });
   });
@@ -119,15 +185,53 @@ describe('assignCategoriesToIcons', () => {
       { key: 'alpah', count: 1 },
       { key: 'bravo', count: 1 },
     ];
-    const iconValues = ['circle', 'triangle', 'marker', 'square', 'rectangle'];
-    expect(assignCategoriesToIcons({ categories, iconValues })).toEqual({
+    const icons = [
+      {
+        value: 'circle',
+        label: 'circle',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="circle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z"/>\n</svg>',
+      },
+      {
+        value: 'triangle',
+        label: 'triangle',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="triangle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path21090-9" d="M7.5385,2&#xA;&#x9;C7.2437,2,7.0502,2.1772,6.9231,2.3846l-5.8462,9.5385C1,12,1,12.1538,1,12.3077C1,12.8462,1.3846,13,1.6923,13h11.6154&#xA;&#x9;C13.6923,13,14,12.8462,14,12.3077c0-0.1538,0-0.2308-0.0769-0.3846L8.1538,2.3846C8.028,2.1765,7.7882,2,7.5385,2z"/>\n</svg>',
+      },
+      {
+        value: 'marker',
+        label: 'marker',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="marker-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path4133" d="M7.5,0C5.0676,0,2.2297,1.4865,2.2297,5.2703&#xA;&#x9;C2.2297,7.8378,6.2838,13.5135,7.5,15c1.0811-1.4865,5.2703-7.027,5.2703-9.7297C12.7703,1.4865,9.9324,0,7.5,0z"/>\n</svg>',
+      },
+      {
+        value: 'square',
+        label: 'square',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="square-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z"/>\n</svg>',
+      },
+      {
+        value: 'rectangle',
+        label: 'rectangle',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="rectangle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z"/>\n</svg>',
+      },
+    ];
+    expect(assignCategoriesToIcons({ categories, icons })).toEqual({
       stops: [
-        { stop: 'alpah', value: 'circle' },
-        { stop: 'bravo', value: 'triangle' },
+        {
+          stop: 'alpah',
+          value: 'circle',
+          label: 'circle',
+          svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="circle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path d="M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z"/>\n</svg>',
+        },
+        {
+          stop: 'bravo',
+          value: 'triangle',
+          label: 'triangle',
+          svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="triangle-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path21090-9" d="M7.5385,2&#xA;&#x9;C7.2437,2,7.0502,2.1772,6.9231,2.3846l-5.8462,9.5385C1,12,1,12.1538,1,12.3077C1,12.8462,1.3846,13,1.6923,13h11.6154&#xA;&#x9;C13.6923,13,14,12.8462,14,12.3077c0-0.1538,0-0.2308-0.0769-0.3846L8.1538,2.3846C8.028,2.1765,7.7882,2,7.5385,2z"/>\n</svg>',
+        },
       ],
       fallbackSymbol: {
         stop: null,
         value: 'marker',
+        label: 'marker',
+        svg: '<?xml version="1.0" encoding="UTF-8"?>\n<svg version="1.1" id="marker-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">\n  <path id="path4133" d="M7.5,0C5.0676,0,2.2297,1.4865,2.2297,5.2703&#xA;&#x9;C2.2297,7.8378,6.2838,13.5135,7.5,15c1.0811-1.4865,5.2703-7.027,5.2703-9.7297C12.7703,1.4865,9.9324,0,7.5,0z"/>\n</svg>',
       },
     });
   });
