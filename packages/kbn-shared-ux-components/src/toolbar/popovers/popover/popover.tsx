@@ -38,12 +38,7 @@ export const ToolbarPopover = ({ label, iconType, children, ...popover }: Props)
   );
 
   return (
-    <EuiPopover
-      anchorPosition="downLeft"
-      panelPaddingSize="none"
-      {...{ isOpen, button, closePopover }}
-      {...popover}
-    >
+    <EuiPopover {...{ isOpen, button, closePopover }} {...popover}>
       {children({ closePopover })}
     </EuiPopover>
   );
