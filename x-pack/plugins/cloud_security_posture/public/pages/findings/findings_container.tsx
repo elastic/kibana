@@ -5,7 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FindingsTable } from './findings_table';
 import { FindingsSearchBar } from './findings_search_bar';
 import * as TEST_SUBJECTS from './test_subjects';
@@ -15,14 +17,9 @@ import { useUrlQuery } from '../../common/hooks/use_url_query';
 import { useFindings, type CspFindingsRequest } from './use_findings';
 
 // TODO: define this as a schema with default values
-// need to get Query and DateRange schema
 const getDefaultQuery = (): CspFindingsRequest => ({
   query: { language: 'kuery', query: '' },
   filters: [],
-  dateRange: {
-    from: 'now-15m',
-    to: 'now',
-  },
   sort: [{ ['@timestamp']: SortDirection.desc }],
   from: 0,
   size: 10,
@@ -40,8 +37,23 @@ export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
         {...findingsQuery}
         {...findingsResult}
       />
-      <EuiSpacer />
-      <FindingsTable setQuery={setUrlQuery} {...findingsQuery} {...findingsResult} />
+      <div
+        css={css`
+          padding: 24px;
+        `}
+      >
+        <PageTitle />
+        <EuiSpacer />
+        <FindingsTable setQuery={setUrlQuery} {...findingsQuery} {...findingsResult} />
+      </div>
     </div>
   );
 };
+
+const PageTitle = () => (
+  <EuiTitle size="l">
+    <h2>
+      <FormattedMessage id="xpack.csp.findings.findingsLabel" defaultMessage="Findings" />
+    </h2>
+  </EuiTitle>
+);
