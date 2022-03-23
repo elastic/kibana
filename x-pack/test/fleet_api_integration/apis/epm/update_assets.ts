@@ -394,6 +394,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'security-rule',
           },
           {
+            id: 'sample_osquery_pack_asset',
+            type: 'osquery-pack-asset',
+          },
+          {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
