@@ -44,7 +44,11 @@ export const PolicyList = memo(() => {
   const { getAppUrl } = useAppUrl();
 
   // load the list of policies
-  const { data, isFetching, error } = useGetEndpointSpecificPolicies({
+  const {
+    data,
+    isFetching: policyIsFetching,
+    error,
+  } = useGetEndpointSpecificPolicies({
     page: pagination.page,
     perPage: pagination.pageSize,
   });
@@ -57,9 +61,10 @@ export const PolicyList = memo(() => {
   });
 
   // grab endpoint version for empty page
-  const { data: endpointPackageInfo } = useGetEndpointSecurityPackage({
-    customQueryOptions: { enabled: policyIds.length === 0 },
-  });
+  const { data: endpointPackageInfo, isFetching: packageIsFetching } =
+    useGetEndpointSecurityPackage({
+      customQueryOptions: { enabled: policyIds.length === 0 },
+    });
 
   const policyIdToEndpointCount = useMemo(() => {
     const map = new Map<AgentPolicy['package_policies'][number], number>();
@@ -285,12 +290,12 @@ export const PolicyList = memo(() => {
             columns={policyColumns}
             pagination={tablePagination}
             onChange={handleTableOnChange}
-            loading={isFetching}
+            loading={policyIsFetching}
             error={error !== null ? policyListErrorMessage : ''}
           />
         </>
       ) : (
-        <PolicyEmptyState loading={isFetching} onActionClick={handleCreatePolicyClick} />
+        <PolicyEmptyState loading={packageIsFetching} onActionClick={handleCreatePolicyClick} />
       )}
     </AdministrationListPage>
   );
