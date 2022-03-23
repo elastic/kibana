@@ -28,8 +28,8 @@ import { generateId } from '../../id_generator';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 import { defaultAnnotationLabel } from './config_panel';
 
-const MAX_DATE = Number(new Date(8640000000000000));
-const MIN_DATE = Number(new Date(-8640000000000000));
+const MAX_DATE = 8640000000000000;
+const MIN_DATE = -8640000000000000;
 
 export function getStaticDate(
   dataLayers: XYDataLayerConfig[],
