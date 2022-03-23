@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
 import { map, distinctUntilChanged, pluck, filter, debounceTime, bufferTime } from 'rxjs/operators';
 import { sortBy } from 'lodash';
 
@@ -32,11 +32,6 @@ interface PluginData {
     derivedStatus: ServiceStatus;
   };
 }
-
-interface UpdatedPlugins {
-  [name: PluginName]: boolean;
-}
-
 interface PluginStatus {
   [name: PluginName]: ServiceStatus;
 }
@@ -51,14 +46,13 @@ export class PluginsStatusService {
   private rootPlugins: PluginName[];
   private orderedPluginNames: PluginName[];
   private pluginData$ = new ReplaySubject<PluginData>(1);
-  private pluginStatus: PluginStatus;
-  private pluginStatus$ = new ReplaySubject<PluginStatus>(1);
+  private pluginStatus: PluginStatus = {};
+  private pluginStatus$ = new BehaviorSubject<PluginStatus>(this.pluginStatus);
   private pluginReportedStatus: PluginReportedStatus = {};
   private updatePluginStatuses$ = new Subject<PluginName>();
   private newRegistrationsAllowed = true;
 
   constructor(private readonly deps: Deps) {
-    this.pluginStatus = {};
     this.pluginData = this.initPluginData(deps.pluginDependencies);
     this.rootPlugins = this.getRootPlugins();
     this.orderedPluginNames = this.getOrderedPluginNames();
@@ -74,12 +68,11 @@ export class PluginsStatusService {
       )
       .subscribe((plugins) => {
         this.updatePluginsStatuses(plugins);
-
         this.pluginData$.next(this.pluginData);
         this.pluginStatus$.next(this.pluginStatus);
       });
 
-    this.deps.core$.pipe(debounceTime(100)).subscribe((coreStatus) => {
+    this.deps.core$.pipe(debounceTime(50)).subscribe((coreStatus) => {
       this.coreStatus = coreStatus!;
       // console.log('⚡ CORE STATUS! elastic: ', coreStatus.elasticsearch.level.toString(), '; savedObjects: ', coreStatus.savedObjects.level.toString());
       const derivedStatus = getSummaryStatus(Object.entries(this.coreStatus), {
