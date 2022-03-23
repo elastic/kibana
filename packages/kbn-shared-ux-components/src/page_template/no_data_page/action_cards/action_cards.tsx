@@ -26,7 +26,7 @@ export const ActionCards = ({ actionCards }: ActionCardsProps) => {
     </EuiFlexItem>
   ));
   return (
-    <EuiFlexGrid columns={2} style={ActionCardsGridStyles()}>
+    <EuiFlexGrid columns={2} css={ActionCardsGridStyles()}>
       {cards}
     </EuiFlexGrid>
   );
