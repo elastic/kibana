@@ -145,6 +145,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end) {
@@ -176,8 +177,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     { preservePreviousData: false }
   );
 
+  const errorGroupDetailedStatisticsLoading =
+    errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
+
   const columns = getColumns({
     serviceName,
+    errorGroupDetailedStatisticsLoading,
     errorGroupDetailedStatistics,
     comparisonEnabled,
     query,
