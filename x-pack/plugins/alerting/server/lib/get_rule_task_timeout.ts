@@ -22,6 +22,10 @@ export const getRuleTaskTimeout = ({
     (ruleType) => ruleTypeId === ruleType.id
   );
 
+  // First, rule type specific timeout config (ruleTypeOverrides) is applied if it's set in kibana.yml
+  // if not, then timeout for all the rule types is applied if it's set in kibana.yml
+  // if not, ruleTaskTimeout is applied that is passed from the rule type registering plugin
+  // if none of above is set, DEFAULT_EXECUTION_TIMEOUT is applied
   return (
     ruleTypeConfig?.timeout ||
     config.execution.timeout ||
