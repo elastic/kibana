@@ -7,10 +7,7 @@
  */
 
 import React, { useMemo, FunctionComponent } from 'react';
-import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import classNames from 'classnames';
 
 import { ElasticAgentCard, NoDataCard } from './no_data_card';
 import { NoDataPageBody } from './no_data_page_body';
@@ -26,37 +23,24 @@ export const NO_DATA_RECOMMENDED = i18n.translate(
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   solution,
   logo,
-  actions,
+  action,
   docsLink,
   pageTitle,
   ...rest
 }) => {
-  // Convert obj data into an iterable array
-  const entries = Object.entries(actions);
-
-  // This sort fn may look nonsensical, but it's some Good Ol' Javascript (TM)
-  // Sort functions want either a 1, 0, or -1 returned to determine order,
-  // and it turns out in JS you CAN minus booleans from each other to get a 1, 0, or -1 - e.g., (true - false == 1) :whoa:
-  const sortedEntries = entries.sort(([, firstObj], [, secondObj]) => {
-    // The `??` fallbacks are because the recommended key can be missing or undefined
-    return Number(secondObj.recommended ?? false) - Number(firstObj.recommended ?? false);
-  });
-
-  // Convert the iterated [[key, value]] array format back into an object
-  const sortedData = Object.fromEntries(sortedEntries);
-  const actionsKeys = Object.keys(sortedData);
+  const actionKeys = Object.keys(action);
 
   const actionCards = useMemo(() => {
-    return Object.values(sortedData).map((action, i) => {
-      const isAgent = actionsKeys[i] === 'elasticAgent' || actionsKeys[i] === 'beats';
-      const key = isAgent ? 'empty-page-agent-action' : `empty-page-${actionsKeys[i]}-action`;
+    return actionKeys.map((actionKey) => {
+      const isAgent = actionKey === 'elasticAgent';
+      const key = isAgent ? 'empty-page-agent-action' : `empty-page-${actionKey}-action`;
       return isAgent ? (
-        <ElasticAgentCard key={key} {...action} />
+        <ElasticAgentCard key={key} {...action[actionKey]} />
       ) : (
-        <NoDataCard key={key} {...action} />
+        <NoDataCard key={key} {...action[actionKey]} />
       );
     });
-  }, [sortedData, actionsKeys]);
+  }, [action, actionKeys]);
 
   const title =
     pageTitle ||
@@ -66,37 +50,14 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     });
 
   return (
-    <div {...rest} className={classNames('kbnNoDataPageContents', rest.className)}>
+    <div {...rest}>
       <NoDataPageBody
         pageTitle={title}
-        actionCards={actionCards}
+        actionCard={actionCards.length > 0 ? actionCards[0] : null}
         logo={logo}
         solution={solution}
         docsLink={docsLink}
       />
-      {actionsKeys.length > 1 ? (
-        <>
-          <EuiSpacer size="xxl" />
-          <EuiText textAlign="center" color="subdued">
-            <p>
-              <FormattedMessage
-                id="sharedUXComponents.noDataPage.cantDecide"
-                defaultMessage="Confused on which to use? {link}"
-                values={{
-                  link: (
-                    <EuiLink href="https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html">
-                      <FormattedMessage
-                        id="sharedUXComponents.noDataPage.cantDecide.link"
-                        defaultMessage="Check our docs for more information."
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </EuiText>
-        </>
-      ) : undefined}
     </div>
   );
 };

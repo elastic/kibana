@@ -7,8 +7,8 @@
  */
 
 import { EuiPageTemplateProps } from '@elastic/eui';
-import { KibanaPageTemplateSolutionNavProps } from '../../../../src/plugins/kibana_react/public/page_template/solution_nav';
 import { NoDataPageProps } from './no_data_page';
+import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**

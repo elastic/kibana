@@ -15,17 +15,13 @@ export default {
   description: 'A wrapper around EuiCard, to be used on NoData page',
 };
 
-type Params = Pick<NoDataCardProps, 'recommended' | 'button' | 'description'>;
+type Params = Pick<NoDataCardProps, 'button' | 'description'>;
 
 export const PureComponent = (params: Params) => {
   return <NoDataCard title={'Add data'} {...params} />;
 };
 
 PureComponent.argTypes = {
-  recommended: {
-    control: 'boolean',
-    defaultValue: false,
-  },
   button: {
     control: {
       type: 'text',

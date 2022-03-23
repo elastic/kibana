@@ -28,8 +28,6 @@ export type NoDataPageActions = Partial<EuiCardProps> & {
   category?: string;
 };
 
-export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
-
 export interface NoDataPageProps extends CommonProps {
   /**
    * Single name for the current solution, used to auto-generate the title, logo, description, and button label
@@ -48,9 +46,9 @@ export interface NoDataPageProps extends CommonProps {
    */
   pageTitle?: string;
   /**
-   * An object of `NoDataPageActions` configurations with unique primary keys.
-   * Use `elasticAgent` or `beats` as the primary key for pre-configured cards of this type.
+   * An object of `NoDataPageActions`.
+   * Use `elasticAgent` as the primary key for pre-configured cards of this type.
    * Otherwise use a custom key that contains `EuiCard` props.
    */
-  actions: NoDataPageActionsProps;
+  action: Record<string, NoDataPageActions>;
 }

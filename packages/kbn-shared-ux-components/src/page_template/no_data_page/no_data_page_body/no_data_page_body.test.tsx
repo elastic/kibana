@@ -7,27 +7,20 @@
  */
 
 import { NoDataPageBody } from './no_data_page_body';
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { NoDataCard } from '../no_data_card';
+import { ElasticAgentCard } from '../no_data_card';
 
 describe('NoDataPageBody', () => {
   const action = {
-    recommended: false,
     button: 'Button text',
     onClick: jest.fn(),
   };
-  const el = <NoDataCard key={'key'} {...action} />;
-  const actionCards: ReactElement[] = [];
-  actionCards.push(<div key={'action'}>{el}</div>);
+  const el = <ElasticAgentCard key={'ElasticAgentCard'} {...action} />;
+  const actionCard = <div key={'action'}>{el}</div>;
   test('render', () => {
     const component = shallowWithIntl(
-      <NoDataPageBody
-        solution="Elastic"
-        docsLink="test"
-        actionCards={actionCards}
-        logo={'elastic'}
-      />
+      <NoDataPageBody solution="Elastic" docsLink="test" actionCard={actionCard} logo={'elastic'} />
     );
     expect(component).toMatchSnapshot();
   });

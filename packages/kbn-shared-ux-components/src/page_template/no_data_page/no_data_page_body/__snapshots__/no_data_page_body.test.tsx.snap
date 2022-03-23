@@ -42,18 +42,14 @@ exports[`NoDataPageBody render 1`] = `
   <EuiSpacer
     size="xxl"
   />
-  <ActionCards
-    actionCards={
-      Array [
-        <div>
-          <NoDataCard
-            button="Button text"
-            onClick={[MockFunction]}
-            recommended={false}
-          />
-        </div>,
-      ]
-    }
-  />
+  <div
+    key="action"
+  >
+    <ElasticAgentCard
+      button="Button text"
+      key="ElasticAgentCard"
+      onClick={[MockFunction]}
+    />
+  </div>
 </Fragment>
 `;

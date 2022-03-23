@@ -15,10 +15,8 @@ describe('NoDataPage', () => {
     const component = shallowWithIntl(
       <NoDataPage
         solution="Elastic"
-        actions={{
+        action={{
           elasticAgent: {},
-          beats: {},
-          custom: {},
         }}
         docsLink="test"
       />

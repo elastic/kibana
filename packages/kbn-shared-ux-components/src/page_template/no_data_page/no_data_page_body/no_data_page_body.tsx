@@ -11,15 +11,14 @@ import React, { ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPageProps } from '../types';
 import { KibanaPageTemplateSolutionNavAvatar } from '../../solution_nav';
-import { ActionCards } from '../action_cards';
 import { ElasticAgentCard, NoDataCard } from '../no_data_card';
 
 export type NoDataPageBodyProps = {
-  actionCards: Array<ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard>>;
-} & Omit<NoDataPageProps, 'actions'>;
+  actionCard: ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard> | null;
+} & Omit<NoDataPageProps, 'action'>;
 
 export const NoDataPageBody = (props: NoDataPageBodyProps) => {
-  const { pageTitle, docsLink, solution, actionCards, logo } = props;
+  const { pageTitle, docsLink, solution, actionCard, logo } = props;
 
   return (
     <>
@@ -34,14 +33,14 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
         <EuiTextColor color="subdued">
           <p>
             <FormattedMessage
-              id="sharedUX.noDataPage.intro"
+              id="sharedUXComponents.noDataPage.intro"
               defaultMessage="Add your data to get started, or {link} about {solution}."
               values={{
                 solution,
                 link: (
                   <EuiLink href={docsLink}>
                     <FormattedMessage
-                      id="sharedUX.noDataPage.intro.link"
+                      id="sharedUXComponents.noDataPage.intro.link"
                       defaultMessage="learn more"
                     />
                   </EuiLink>
@@ -52,7 +51,7 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="xxl" />
-      <ActionCards actionCards={actionCards} />
+      {actionCard}
     </>
   );
 };
