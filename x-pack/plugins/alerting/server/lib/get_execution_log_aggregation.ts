@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
 import { parseDuration } from '.';
 import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
+import { IExecutionLog, IExecutionLogResult } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
@@ -27,29 +28,6 @@ const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
-
-export interface IExecutionLog {
-  id: string;
-  timestamp: string;
-  duration_ms: number;
-  status: string;
-  message: string;
-  num_active_alerts: number;
-  num_new_alerts: number;
-  num_recovered_alerts: number;
-  num_triggered_actions: number;
-  num_succeeded_actions: number;
-  num_errored_actions: number;
-  total_search_duration_ms: number;
-  es_search_duration_ms: number;
-  schedule_delay_ms: number;
-  timed_out: boolean;
-}
-
-export interface IExecutionLogResult {
-  total: number;
-  data: IExecutionLog[];
-}
 
 interface IAlertCounts extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: {

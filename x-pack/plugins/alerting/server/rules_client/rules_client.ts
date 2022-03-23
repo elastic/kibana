@@ -88,8 +88,8 @@ import { AlertingRulesConfig } from '../config';
 import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
-  IExecutionLogResult,
 } from '../lib/get_execution_log_aggregation';
+import { IExecutionLogResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 

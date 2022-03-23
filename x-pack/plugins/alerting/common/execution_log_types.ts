@@ -5,7 +5,25 @@
  * 2.0.
  */
 
-export {
-  IExecutionLog,
-  IExecutionLogResult,
-} from '../server/lib/get_execution_log_aggregation';
+export interface IExecutionLog {
+  id: string;
+  timestamp: string;
+  duration_ms: number;
+  status: string;
+  message: string;
+  num_active_alerts: number;
+  num_new_alerts: number;
+  num_recovered_alerts: number;
+  num_triggered_actions: number;
+  num_succeeded_actions: number;
+  num_errored_actions: number;
+  total_search_duration_ms: number;
+  es_search_duration_ms: number;
+  schedule_delay_ms: number;
+  timed_out: boolean;
+}
+
+export interface IExecutionLogResult {
+  total: number;
+  data: IExecutionLog[];
+}
