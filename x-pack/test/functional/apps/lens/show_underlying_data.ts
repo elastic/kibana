@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/128396
-  describe.skip('show underlying data', () => {
+  describe('show underlying data', () => {
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -83,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('indexPattern-filter-by-input > switchQueryLanguageButton');
       // apparently setting a filter requires some time before and after typing to work properly
       await PageObjects.common.sleep(1000);
-      await PageObjects.lens.setFilterBy('memory');
+      await PageObjects.lens.setFilterBy('memory:*');
       await PageObjects.common.sleep(1000);
 
       await PageObjects.lens.closeDimensionEditor();
