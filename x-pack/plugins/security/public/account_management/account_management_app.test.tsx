@@ -20,8 +20,6 @@ const AccountManagementPageMock = jest
   .spyOn(AccountManagementPageImports, 'AccountManagementPage')
   .mockReturnValue(null);
 
-const element = document.body.appendChild(document.createElement('div'));
-
 describe('accountManagementApp', () => {
   it('should register application', () => {
     const { authc } = securityMock.createSetup();
@@ -34,7 +32,7 @@ describe('accountManagementApp', () => {
     });
 
     expect(application.register).toHaveBeenCalledTimes(1);
-    expect(application.register).toHaveBeenLastCalledWith(
+    expect(application.register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'security_account',
         appRoute: '/security/account',
@@ -47,8 +45,7 @@ describe('accountManagementApp', () => {
   it('should render AccountManagementPage on mount', async () => {
     const { authc } = securityMock.createSetup();
     const { application, getStartServices } = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
-    getStartServices.mockResolvedValue([coreStart, {}, {}]);
+    getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
 
     accountManagementApp.create({
       application,
@@ -61,7 +58,7 @@ describe('accountManagementApp', () => {
     let unmount: AppUnmount = noop;
     await act(async () => {
       unmount = await mount({
-        element,
+        element: document.createElement('div'),
         appBasePath: '',
         onAppLeave: jest.fn(),
         setHeaderActionMenu: jest.fn(),

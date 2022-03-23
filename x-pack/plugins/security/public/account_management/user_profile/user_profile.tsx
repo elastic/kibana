@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
 import type { FunctionComponent } from 'react';
@@ -79,81 +80,9 @@ export interface UserProfileFormValues {
 }
 
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
-  const { services } = useKibana<CoreStart>();
-  const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
-    user: {
-      full_name: user.full_name || '',
-      email: user.email || '',
-    },
-    data: {
-      avatar: {
-        initials: data.avatar?.initials || getUserAvatarInitials(user),
-        color: data.avatar?.color || getUserAvatarColor(user),
-        imageUrl: data.avatar?.imageUrl || '',
-      },
-    },
-    avatarType: data.avatar?.imageUrl ? 'image' : 'initials',
-  });
-
-  const formik = useFormik<UserProfileFormValues>({
-    onSubmit: async (values) => {
-      try {
-        await Promise.all([
-          new UserAPIClient(services.http).saveUser({
-            username: user.username,
-            roles: user.roles,
-            enabled: user.enabled,
-            full_name: values.user.full_name,
-            email: values.user.email,
-          }),
-          new UserProfileAPIClient(services.http).update(
-            values.avatarType === 'image'
-              ? values.data
-              : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
-          ),
-        ]);
-        resetInitialValues(values);
-        services.notifications.toasts.addSuccess(
-          i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsHelpText', {
-            defaultMessage: 'Profile updated',
-          })
-        );
-      } catch (error) {
-        services.notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsHelpText', {
-            defaultMessage: "Couldn't update profile",
-          }),
-        });
-      }
-    },
-    initialValues,
-    enableReinitialize: true,
-  });
-
+  const formik = useUserProfileForm({ user, data });
   const formChanges = useFormChanges();
-
-  const customAvatarInitials = useRef(
-    !!data.avatar?.initials && data.avatar?.initials !== getUserAvatarInitials(user)
-  );
-
-  useUpdateEffect(() => {
-    if (!customAvatarInitials.current) {
-      const defaultInitials = getUserAvatarInitials({
-        username: user.username,
-        full_name: formik.values.user.full_name,
-      });
-      formik.setFieldValue('data.avatar.initials', defaultInitials);
-    }
-  }, [formik.values.user.full_name]);
-
-  useUpdateEffect(() => {
-    const defaultInitials = getUserAvatarInitials({
-      username: user.username,
-      full_name: formik.values.user.full_name,
-    });
-    customAvatarInitials.current = formik.values.data.avatar.initials !== defaultInitials;
-  }, [formik.values.data.avatar.initials]);
-
+  const titleId = useGeneratedHtmlId();
   const [showDeleteFlyout, setShowDeleteFlyout] = useState(false);
 
   const isReservedUser = isUserReserved(user);
@@ -182,6 +111,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   defaultMessage="Profile"
                 />
               ),
+              pageTitleProps: { id: titleId },
               rightSideItems: [
                 canChangePassword ? (
                   <EuiButton onClick={() => setShowDeleteFlyout(true)} iconType="lock" fill>
@@ -227,7 +157,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               </>
             ) : null}
 
-            <Form>
+            <Form aria-labelledby={titleId}>
               <EuiDescribedFormGroup
                 fullWidth
                 title={
@@ -538,6 +468,83 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
     </FormikProvider>
   );
 };
+
+export function useUserProfileForm({ user, data }: UserProfileProps) {
+  const { services } = useKibana<CoreStart>();
+  const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
+    user: {
+      full_name: user.full_name || '',
+      email: user.email || '',
+    },
+    data: {
+      avatar: {
+        initials: data.avatar?.initials || getUserAvatarInitials(user),
+        color: data.avatar?.color || getUserAvatarColor(user),
+        imageUrl: data.avatar?.imageUrl || '',
+      },
+    },
+    avatarType: data.avatar?.imageUrl ? 'image' : 'initials',
+  });
+
+  const formik = useFormik<UserProfileFormValues>({
+    onSubmit: async (values) => {
+      try {
+        await Promise.all([
+          new UserAPIClient(services.http).saveUser({
+            username: user.username,
+            roles: user.roles,
+            enabled: user.enabled,
+            full_name: values.user.full_name,
+            email: values.user.email,
+          }),
+          new UserProfileAPIClient(services.http).update(
+            values.avatarType === 'image'
+              ? values.data
+              : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
+          ),
+        ]);
+        resetInitialValues(values);
+        services.notifications.toasts.addSuccess(
+          i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsHelpText', {
+            defaultMessage: 'Profile updated',
+          })
+        );
+      } catch (error) {
+        services.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsHelpText', {
+            defaultMessage: "Couldn't update profile",
+          }),
+        });
+      }
+    },
+    initialValues,
+    enableReinitialize: true,
+  });
+
+  const customAvatarInitials = useRef(
+    !!data.avatar?.initials && data.avatar?.initials !== getUserAvatarInitials(user)
+  );
+
+  useUpdateEffect(() => {
+    if (!customAvatarInitials.current) {
+      const defaultInitials = getUserAvatarInitials({
+        username: user.username,
+        full_name: formik.values.user.full_name,
+      });
+      formik.setFieldValue('data.avatar.initials', defaultInitials);
+    }
+  }, [formik.values.user.full_name]);
+
+  useUpdateEffect(() => {
+    const defaultInitials = getUserAvatarInitials({
+      username: user.username,
+      full_name: formik.values.user.full_name,
+    });
+    customAvatarInitials.current = formik.values.data.avatar.initials !== defaultInitials;
+  }, [formik.values.data.avatar.initials]);
+
+  return formik;
+}
 
 export const SaveChangesBottomBar: FunctionComponent = () => {
   const formik = useFormikContext();
