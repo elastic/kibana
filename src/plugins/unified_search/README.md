@@ -1,6 +1,9 @@
 # unifiedSearch
 
-A Kibana plugin
+Contains all the components of Kibana's unified search experience. Specifically:
+ - UI components for rendering unified search bar;
+ - Current state of the search (`data view`, `applied filters, …);
+ - Saved queries management.
 
 ---
 
