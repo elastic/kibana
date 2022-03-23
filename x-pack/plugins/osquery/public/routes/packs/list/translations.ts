@@ -21,6 +21,27 @@ export const LOAD_PREBUILT_PACKS_BUTTON = i18n.translate(
   }
 );
 
+export const UPDATE_PREBUILT_PACKS_BUTTON = i18n.translate(
+  'xpack.osquery.packList.prePackagedPacks.updateButtonLabel',
+  {
+    defaultMessage: 'Update Elastic prebuilt packs',
+  }
+);
+
+export const LOAD_PREBUILT_PACKS_SUCCESS_TEXT = i18n.translate(
+  'xpack.osquery.packList.integrationAssets.loadSuccessToastMessageText',
+  {
+    defaultMessage: 'Successfully loaded prebuilt packs',
+  }
+);
+
+export const UPDATE_PREBUILT_PACKS_SUCCESS_TEXT = i18n.translate(
+  'xpack.osquery.packList.integrationAssets.updateSuccessToastMessageText',
+  {
+    defaultMessage: 'Successfully updated prebuilt packs',
+  }
+);
+
 export const PRE_BUILT_MSG = i18n.translate(
   'xpack.osquery.packList.prePackagedPacks.emptyPromptTitle.emptyPromptMessage',
   {

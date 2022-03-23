@@ -13,7 +13,7 @@ import { INTEGRATION_ASSETS_STATUS_ID } from './constants';
 export const useAssetsStatus = () => {
   const { http } = useKibana().services;
 
-  return useQuery<{ install: SavedObject[]; update: SavedObject[]; up_to_date: SavedObject[] }>(
+  return useQuery<{ install: SavedObject[]; update: SavedObject[]; upToDate: SavedObject[] }>(
     [INTEGRATION_ASSETS_STATUS_ID],
     () => http.get('/internal/osquery/assets'),
     {

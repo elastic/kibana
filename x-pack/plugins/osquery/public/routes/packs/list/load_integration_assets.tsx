@@ -9,7 +9,12 @@ import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { useImportAssets } from '../../../assets/use_import_assets';
 import { useAssetsStatus } from '../../../assets/use_assets_status';
-import { LOAD_PREBUILT_PACKS_BUTTON } from './translations';
+import {
+  LOAD_PREBUILT_PACKS_BUTTON,
+  UPDATE_PREBUILT_PACKS_BUTTON,
+  LOAD_PREBUILT_PACKS_SUCCESS_TEXT,
+  UPDATE_PREBUILT_PACKS_SUCCESS_TEXT,
+} from './translations';
 
 interface LoadIntegrationAssetsButtonProps {
   fill?: EuiButtonProps['fill'];
@@ -19,14 +24,18 @@ const LoadIntegrationAssetsButtonComponent: React.FC<LoadIntegrationAssetsButton
   fill,
 }) => {
   const { data } = useAssetsStatus();
-  const { isLoading, mutateAsync } = useImportAssets();
+  const { isLoading, mutateAsync } = useImportAssets({
+    successToastText: data?.upToDate?.length
+      ? UPDATE_PREBUILT_PACKS_SUCCESS_TEXT
+      : LOAD_PREBUILT_PACKS_SUCCESS_TEXT,
+  });
 
   const handleClick = useCallback(() => mutateAsync(), [mutateAsync]);
 
   if (data?.install.length || data?.update.length) {
     return (
       <EuiButton fill={!!fill} isLoading={isLoading} onClick={handleClick} iconType="plusInCircle">
-        {LOAD_PREBUILT_PACKS_BUTTON}
+        {data?.upToDate?.length ? UPDATE_PREBUILT_PACKS_BUTTON : LOAD_PREBUILT_PACKS_BUTTON}
       </EuiButton>
     );
   }

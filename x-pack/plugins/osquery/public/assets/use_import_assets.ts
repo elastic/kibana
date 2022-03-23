@@ -6,13 +6,16 @@
  */
 
 import { useMutation, useQueryClient } from 'react-query';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { PACKS_ID } from '../packs/constants';
 import { INTEGRATION_ASSETS_STATUS_ID } from './constants';
 
-export const useImportAssets = () => {
+interface UseImportAssetsProps {
+  successToastText: string;
+}
+
+export const useImportAssets = ({ successToastText }: UseImportAssetsProps) => {
   const queryClient = useQueryClient();
   const {
     http,
@@ -29,11 +32,7 @@ export const useImportAssets = () => {
         setErrorToast();
         queryClient.invalidateQueries(PACKS_ID);
         queryClient.invalidateQueries(INTEGRATION_ASSETS_STATUS_ID);
-        toasts.addSuccess(
-          i18n.translate('xpack.osquery.integrationAssetsImport.successToastMessageText', {
-            defaultMessage: 'Successfully imported prebuilt assets',
-          })
-        );
+        toasts.addSuccess(successToastText);
       },
       onError: (error) => {
         setErrorToast(error);

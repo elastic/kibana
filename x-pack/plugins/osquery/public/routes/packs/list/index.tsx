@@ -54,14 +54,14 @@ const PacksPageComponent = () => {
     () => (
       <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem>
-          <LoadIntegrationAssetsButton />
+          <LoadIntegrationAssetsButton fill={!!showEmptyState} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <AddPackButton />
+          <AddPackButton fill={!showEmptyState} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    []
+    [showEmptyState]
   );
 
   const Content = useMemo(() => {
@@ -77,11 +77,7 @@ const PacksPageComponent = () => {
   }, [isLoadingAssetsStatus, isLoadingPacks, showEmptyState]);
 
   return (
-    <WithHeaderLayout
-      leftColumn={LeftColumn}
-      rightColumn={!showEmptyState ? RightColumn : undefined}
-      rightColumnGrow={false}
-    >
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       {Content}
     </WithHeaderLayout>
   );
