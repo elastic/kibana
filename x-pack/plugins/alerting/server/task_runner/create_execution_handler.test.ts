@@ -53,11 +53,6 @@ const ruleType: NormalizedRuleType<
   },
   executor: jest.fn(),
   producer: 'alerts',
-  config: {
-    execution: {
-      actions: { max: 1000 },
-    },
-  },
 };
 
 const actionsClient = actionsClientMock.create();
@@ -107,6 +102,11 @@ const createExecutionHandlerParams: jest.Mocked<
   },
   supportsEphemeralTasks: false,
   maxEphemeralActionsPerRule: 10,
+  actionsConfigMap: {
+    default: {
+      max: 1000,
+    },
+  },
 };
 let alertExecutionStore: AlertExecutionStore;
 
@@ -467,12 +467,9 @@ describe('Create Execution Handler', () => {
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
     const executionHandler = createExecutionHandler({
       ...createExecutionHandlerParams,
-      ruleType: {
-        ...ruleType,
-        config: {
-          execution: {
-            actions: { max: 2 },
-          },
+      actionsConfigMap: {
+        default: {
+          max: 2,
         },
       },
       actions: [
@@ -521,20 +518,12 @@ describe('Create Execution Handler', () => {
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions for the specific action type', async () => {
     const executionHandler = createExecutionHandler({
       ...createExecutionHandlerParams,
-      ruleType: {
-        ...ruleType,
-        config: {
-          execution: {
-            actions: {
-              max: 2,
-              connectorTypeOverrides: [
-                {
-                  id: 'test-action-type-id',
-                  max: 1,
-                },
-              ],
-            },
-          },
+      actionsConfigMap: {
+        default: {
+          max: 2,
+        },
+        'test-action-type-id': {
+          max: 1,
         },
       },
       actions: [

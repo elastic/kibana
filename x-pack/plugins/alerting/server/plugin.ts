@@ -63,7 +63,7 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
-import { getExecutionConfigForRuleType } from './lib/get_rules_config';
+import { getActionsConfigMap } from './lib/get_actions_config_map';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -290,10 +290,6 @@ export class AlertingPlugin {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
-        ruleType.config = getExecutionConfigForRuleType({
-          config: alertingConfig.rules,
-          ruleTypeId: ruleType.id,
-        });
         ruleType.ruleTaskTimeout =
           ruleType.ruleTaskTimeout ?? alertingConfig.defaultRuleTaskTimeout;
         ruleType.cancelAlertsOnRuleTimeout =
@@ -404,6 +400,7 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      actionsConfigMap: getActionsConfigMap(this.config.rules.execution.actions),
       usageCounter: this.usageCounter,
     });
 

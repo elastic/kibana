@@ -127,6 +127,11 @@ describe('Task Runner', () => {
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
     usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 10000,
+      },
+    },
   };
 
   const ephemeralTestParams: Array<
@@ -2457,12 +2462,9 @@ describe('Task Runner', () => {
   });
 
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
-    const ruleTypeWithConfig = {
-      ...ruleType,
-      config: {
-        execution: {
-          actions: { max: 3 },
-        },
+    const actionsConfigMap = {
+      default: {
+        max: 3,
       },
     };
 
@@ -2518,20 +2520,17 @@ describe('Task Runner', () => {
         },
       ],
     } as jest.ResolvedValue<unknown>);
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeWithConfig);
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
 
-    const taskRunner = new TaskRunner(
-      ruleTypeWithConfig,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
-    );
+    const taskRunner = new TaskRunner(ruleType, mockedTaskInstance, {
+      ...taskRunnerFactoryInitializerParams,
+      actionsConfigMap,
+    });
 
     const runnerResult = await taskRunner.run();
 
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(
-      ruleTypeWithConfig.config.execution.actions.max
-    );
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(actionsConfigMap.default.max);
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -2624,7 +2623,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'warning',
-        numberOfTriggeredActions: ruleTypeWithConfig.config.execution.actions.max,
+        numberOfTriggeredActions: actionsConfigMap.default.max,
         reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         task: true,
       })

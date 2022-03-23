@@ -224,6 +224,7 @@ export class TaskRunner<
       ruleParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
+      actionsConfigMap: this.context.actionsConfigMap,
     });
   }
 

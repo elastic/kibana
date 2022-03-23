@@ -27,6 +27,7 @@ import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import { RawRule } from '../types';
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
 
 export interface RuleTaskRunResultWithActions {
   state: RuleExecutionState;
@@ -143,6 +144,7 @@ export interface CreateExecutionHandlerOptions<
   ruleParams: AlertTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
+  actionsConfigMap: ActionsConfigMap;
 }
 
 export interface ExecutionHandlerOptions<ActionGroupIds extends string> {

@@ -20,7 +20,6 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
-import { getActionsConfig } from '../lib/get_actions_config';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
@@ -51,6 +50,7 @@ export function createExecutionHandler<
   ruleParams,
   supportsEphemeralTasks,
   maxEphemeralActionsPerRule,
+  actionsConfigMap,
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -63,6 +63,17 @@ export function createExecutionHandler<
   const ruleTypeActionGroups = new Map(
     ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
+
+  const hasReachedTheNumberOfExecutableActions = ({
+    numberOfTriggeredActions,
+    actionTypeId,
+  }: {
+    numberOfTriggeredActions: number;
+    actionTypeId: string;
+  }): boolean =>
+    numberOfTriggeredActions >=
+    (actionsConfigMap[actionTypeId]?.max || actionsConfigMap.default.max);
+
   return async ({
     actionGroup,
     actionSubgroup,
@@ -118,12 +129,12 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      const actionsConfig = getActionsConfig({
-        actionsConfig: ruleType.config!.execution.actions,
-        connectorTypeId: action.actionTypeId,
-      });
-
-      if (alertExecutionStore.numberOfTriggeredActions >= actionsConfig.max) {
+      if (
+        hasReachedTheNumberOfExecutableActions({
+          numberOfTriggeredActions: alertExecutionStore.numberOfTriggeredActions,
+          actionTypeId: action.actionTypeId,
+        })
+      ) {
         alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
         break;
       }

@@ -1165,11 +1165,6 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1337,11 +1332,6 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
-      },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
       },
     }));
     const data = getMockData({
@@ -2097,11 +2087,6 @@ describe('create()', () => {
       isExportable: true,
       async executor() {},
       producer: 'alerts',
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -2626,11 +2611,6 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
-      },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
       },
     }));
 

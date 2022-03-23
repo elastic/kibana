@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getActionsConfig } from './get_actions_config';
+import { getActionsConfigMap } from './get_actions_config_map';
 
 const connectorTypeId = 'test-connector-type-id';
 const actionsConfig = {
@@ -22,26 +22,23 @@ const actionsConfigWithConnectorType = {
   ],
 };
 
-describe('get actions config', () => {
-  test('returns the connector type specific config and keeps the default values that are not overridden', () => {
-    expect(
-      getActionsConfig({
-        actionsConfig,
-        connectorTypeId,
-      })
-    ).toEqual({
-      max: 1000,
+describe('get actions config map', () => {
+  test('returns the default actions config', () => {
+    expect(getActionsConfigMap(actionsConfig)).toEqual({
+      default: {
+        max: 1000,
+      },
     });
   });
 
   test('applies the connector type specific config', () => {
-    expect(
-      getActionsConfig({
-        actionsConfig: actionsConfigWithConnectorType,
-        connectorTypeId,
-      })
-    ).toEqual({
-      max: 20,
+    expect(getActionsConfigMap(actionsConfigWithConnectorType)).toEqual({
+      default: {
+        max: 1000,
+      },
+      [connectorTypeId]: {
+        max: 20,
+      },
     });
   });
 });

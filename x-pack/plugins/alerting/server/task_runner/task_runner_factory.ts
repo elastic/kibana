@@ -32,6 +32,7 @@ import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -50,6 +51,7 @@ export interface TaskRunnerContext {
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
+  actionsConfigMap: ActionsConfigMap;
   cancelAlertsOnRuleTimeout: boolean;
   usageCounter?: UsageCounter;
 }
