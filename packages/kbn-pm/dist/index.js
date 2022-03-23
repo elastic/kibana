@@ -16437,7 +16437,7 @@ module.exports = function (args, opts) {
         var o = obj;
         for (var i = 0; i < keys.length-1; i++) {
             var key = keys[i];
-            if (key === '__proto__') return;
+            if (isConstructorOrProto(o, key)) return;
             if (o[key] === undefined) o[key] = {};
             if (o[key] === Object.prototype || o[key] === Number.prototype
                 || o[key] === String.prototype) o[key] = {};
@@ -16446,7 +16446,7 @@ module.exports = function (args, opts) {
         }
 
         var key = keys[keys.length - 1];
-        if (key === '__proto__') return;
+        if (isConstructorOrProto(o, key)) return;
         if (o === Object.prototype || o === Number.prototype
             || o === String.prototype) o = {};
         if (o === Array.prototype) o = [];
@@ -16610,6 +16610,10 @@ function isNumber (x) {
     return /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/.test(x);
 }
 
+
+function isConstructorOrProto (obj, key) {
+    return key === 'constructor' && typeof obj[key] === 'function' || key === '__proto__';
+}
 
 
 /***/ }),
