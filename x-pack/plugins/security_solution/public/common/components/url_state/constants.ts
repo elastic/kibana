@@ -31,6 +31,7 @@ export type UrlStateType =
   | 'cases'
   | 'detection_response'
   | 'exceptions'
+  | 'get_started'
   | 'host'
   | 'users'
   | 'network'
