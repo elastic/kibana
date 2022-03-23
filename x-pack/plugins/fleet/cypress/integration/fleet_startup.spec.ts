@@ -78,6 +78,7 @@ describe('Fleet startup', () => {
 
     it('should create Fleet Server policy', () => {
       cy.getBySel('createFleetServerPolicyBtn').click();
+      cy.getBySel('fleetServerFlyoutTab-advanced').click();
       cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
 
       // verify policy is created and has fleet server and system package

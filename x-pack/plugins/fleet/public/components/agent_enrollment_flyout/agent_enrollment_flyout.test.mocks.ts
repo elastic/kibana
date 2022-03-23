@@ -8,6 +8,7 @@
 jest.mock('../../hooks', () => {
   return {
     ...jest.requireActual('../../hooks'),
+    useFleetStatus: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
   };
 });
@@ -17,7 +18,6 @@ jest.mock('../../hooks/use_request', () => {
   return {
     ...module,
     useGetSettings: jest.fn(),
-    sendGetFleetStatus: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
     useGetAgents: jest.fn(),
     useGetAgentPolicies: jest.fn(),
@@ -32,7 +32,7 @@ jest.mock(
     );
     return {
       ...module,
-      useFleetServerInstructions: jest.fn(),
+      useAdvancedForm: jest.fn(),
     };
   }
 );
@@ -57,18 +57,14 @@ jest.mock('./steps', () => {
   const module = jest.requireActual('./steps');
   return {
     ...module,
-    AgentPolicySelectionStep: jest.fn(),
-    AgentEnrollmentKeySelectionStep: jest.fn(),
-    ViewDataStep: jest.fn(),
-    DownloadStep: jest.fn(),
-  };
-});
-
-jest.mock('@elastic/eui', () => {
-  const module = jest.requireActual('@elastic/eui');
-  return {
-    ...module,
-    EuiSteps: 'eui-steps',
+    AgentPolicySelectionStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'agent-policy-selection-step',
+    }),
+    AgentEnrollmentKeySelectionStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'agent-enrollment-key-selection-step',
+    }),
+    ViewDataStep: jest.fn().mockReturnValue({ 'data-test-subj': 'view-data-step' }),
+    DownloadStep: jest.fn().mockReturnValue({ 'data-test-subj': 'download-step' }),
   };
 });
 

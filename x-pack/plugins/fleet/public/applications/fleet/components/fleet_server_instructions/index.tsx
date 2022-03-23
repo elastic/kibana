@@ -105,6 +105,7 @@ const Header: React.FunctionComponent<{
         {tabs.map((tab) => (
           <EuiTab
             key={`fleetServerFlyoutTab-${tab.id}`}
+            data-test-subj={`fleetServerFlyoutTab-${tab.id}`}
             id={tab.id}
             isSelected={tab.id === currentTabId}
             onClick={() => onTabClick(tab.id)}
