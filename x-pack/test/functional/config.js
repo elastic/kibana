@@ -422,6 +422,14 @@ export default async function ({ readConfigFile }) {
         },
 
         global_devtools_read: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'all'],
+              },
+            ],
+          },
           kibana: [
             {
               feature: {
