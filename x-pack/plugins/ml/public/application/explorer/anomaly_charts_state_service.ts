@@ -33,6 +33,7 @@ export class AnomalyChartsStateService extends StateService {
     private _tableSeverityState: PageUrlStateService<TableSeverity>
   ) {
     super();
+    this._init();
   }
 
   protected _initSubscribtions(): Subscription {

@@ -92,6 +92,8 @@ export class AnomalyTimelineStateService extends StateService {
       map(() => this.timefilter.getBounds())
     );
     this._refreshSubject$ = mlTimefilterRefresh$.pipe(startWith({ lastRefresh: 0 }));
+
+    this._init();
   }
 
   /**

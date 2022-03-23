@@ -43,6 +43,7 @@ export class AnomalyExplorerCommonStateService extends StateService {
 
   constructor(private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService) {
     super();
+    this._init();
   }
 
   protected _initSubscribtions(): Subscription {

@@ -8,9 +8,9 @@
 import { Subscription } from 'rxjs';
 
 export abstract class StateService {
-  private subscribtions$: Subscription;
+  private subscribtions$: Subscription = new Subscription();
 
-  protected constructor() {
+  protected _init() {
     this.subscribtions$ = this._initSubscribtions();
   }
 
