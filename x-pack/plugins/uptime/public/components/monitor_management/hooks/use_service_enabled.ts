@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { useFetcher } from '../../../../../observability/public';
-import { fetchServiceEnabled } from '../../../state/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { syntheticsServiceEnabledSelector } from '../../../state/selectors';
+import { getSyntheticsServiceEnabled } from '../../../state/actions';
 
 export const useServiceEnabled = () => {
-  return useFetcher(() => {
-    return fetchServiceEnabled();
-  }, []);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getSyntheticsServiceEnabled.get());
+  }, [dispatch]);
+
+  return useSelector(syntheticsServiceEnabledSelector);
 };

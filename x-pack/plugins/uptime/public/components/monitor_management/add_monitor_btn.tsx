@@ -15,14 +15,14 @@ import { useServiceEnabled } from './hooks/use_service_enabled';
 export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
   const history = useHistory();
 
-  const { data, loading } = useServiceEnabled();
+  const { isEnabled, loading } = useServiceEnabled();
 
   return (
     <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false} data-test-subj="addMonitorButton">
       <EuiButton
         fill
         isLoading={loading}
-        isDisabled={isDisabled || !data?.serviceEnabled}
+        isDisabled={isDisabled || !isEnabled}
         iconType="plus"
         data-test-subj="addMonitorBtn"
         href={history.createHref({

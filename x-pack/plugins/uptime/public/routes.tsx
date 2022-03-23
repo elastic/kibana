@@ -221,7 +221,11 @@ const getRoutes = (config: UptimeConfig, canSave: boolean): RouteProps[] => {
         values: { baseTitle },
       }),
       path: MONITOR_EDIT_ROUTE,
-      component: EditMonitorPage,
+      component: () => (
+        <ServiceEnabledWrapper>
+          <EditMonitorPage />
+        </ServiceEnabledWrapper>
+      ),
       dataTestSubj: 'uptimeMonitorEditPage',
       telemetryId: UptimePage.MonitorEdit,
       pageHeader: {

@@ -14,6 +14,7 @@ import {
   getServiceLocations,
   getServiceLocationsSuccess,
   getServiceLocationsFailure,
+  getSyntheticsServiceEnabled,
 } from '../actions';
 import { MonitorManagementListResult, ServiceLocations } from '../../../common/runtime_types';
 
@@ -22,6 +23,7 @@ export interface MonitorManagementList {
   loading: Record<'monitorList' | 'serviceLocations', boolean>;
   list: MonitorManagementListResult;
   locations: ServiceLocations;
+  syntheticsService: { isEnabled?: boolean; loading: boolean };
 }
 
 export const initialState: MonitorManagementList = {
@@ -39,6 +41,9 @@ export const initialState: MonitorManagementList = {
   error: {
     monitorList: null,
     serviceLocations: null,
+  },
+  syntheticsService: {
+    loading: false,
   },
 };
 
@@ -116,6 +121,39 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         error: {
           ...state.error,
           serviceLocations: action.payload,
+        },
+      })
+    )
+    .addCase(
+      String(getSyntheticsServiceEnabled.get),
+      (state: WritableDraft<MonitorManagementList>) => ({
+        ...state,
+        syntheticsService: {
+          isEnabled: state.syntheticsService?.isEnabled,
+          loading: true,
+        },
+      })
+    )
+    .addCase(
+      String(getSyntheticsServiceEnabled.success),
+      (
+        state: WritableDraft<MonitorManagementList>,
+        action: PayloadAction<{ serviceEnabled: boolean }>
+      ) => ({
+        ...state,
+        syntheticsService: {
+          isEnabled: action.payload.serviceEnabled,
+          loading: false,
+        },
+      })
+    )
+    .addCase(
+      String(getSyntheticsServiceEnabled.fail),
+      (state: WritableDraft<MonitorManagementList>, action: PayloadAction<Error>) => ({
+        ...state,
+        syntheticsService: {
+          isEnabled: false,
+          loading: false,
         },
       })
     );

@@ -12,7 +12,10 @@ import {
   fetchRunNowMonitorEffect,
   fetchUpdatedMonitorEffect,
 } from './monitor_list';
-import { fetchMonitorManagementEffect } from './monitor_management';
+import {
+  fetchMonitorManagementEffect,
+  fetchSyntheticsServiceEnabledEffect,
+} from './monitor_management';
 import { fetchMonitorStatusEffect } from './monitor_status';
 import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
 import { fetchPingsEffect, fetchPingHistogramEffect } from './ping';
@@ -48,4 +51,5 @@ export function* rootEffect() {
   yield fork(generateBlockStatsOnPut);
   yield fork(pruneBlockCache);
   yield fork(fetchRunNowMonitorEffect);
+  yield fork(fetchSyntheticsServiceEnabledEffect);
 }
