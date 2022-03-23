@@ -166,6 +166,8 @@ export const BrowserSimpleFieldsCodec = t.intersection([
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
     [ConfigKey.PARAMS]: t.string,
+    [ConfigKey.URLS]: t.union([t.string, t.undefined]),
+    [ConfigKey.PORT]: t.union([t.number, t.undefined]),
   }),
   ZipUrlTLSFieldsCodec,
   CommonFieldsCodec,
