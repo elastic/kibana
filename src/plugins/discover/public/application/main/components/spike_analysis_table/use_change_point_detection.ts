@@ -115,7 +115,7 @@ export type FrequentItems = ItemsMeta;
 export const DEBOUNCE_INTERVAL = 100;
 
 // Overall progress is a float from 0 to 1.
-const LOADED_OVERALL_HISTOGRAM = 0.05;
+// const LOADED_OVERALL_HISTOGRAM = 0.05;
 const LOADED_FIELD_CANDIDATES = 0.05;
 const LOADED_DONE = 1;
 const PROGRESS_STEP_P_VALUES = 0.6;
@@ -193,7 +193,7 @@ export function useChangePointDetection(
         ccsWarning: false,
       };
 
-      loaded += LOADED_OVERALL_HISTOGRAM;
+      // loaded += LOADED_OVERALL_HISTOGRAM;
 
       setResponse({
         ...responseUpdate,
