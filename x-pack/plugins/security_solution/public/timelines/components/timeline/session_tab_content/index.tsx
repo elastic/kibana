@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { timelineSelectors } from '../../../store/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -51,36 +51,25 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
       tabType: TimelineTabs.session,
     }
   );
-
-  // TODO: DELETE!
-  const handleOpenTimeline = useCallback(() => {
-    openDetailsPanel('f0a40aefee00b545fe13c9b503cc0f1daf6601fafc3a3f0459fab321fd73afa7', () =>
-      console.log('HELLO!')
-    );
-  }, [openDetailsPanel]);
-
   const sessionViewMain = useMemo(() => {
     return sessionViewId !== null
-      ? sessionView.getSessionView({ sessionEntityId: sessionViewId })
+      ? sessionView.getSessionView({
+          sessionEntityId: sessionViewId,
+          loadAlertDetails: openDetailsPanel,
+        })
       : null;
-  }, [sessionView, sessionViewId]);
+  }, [openDetailsPanel, sessionView, sessionViewId]);
 
   return (
-    <>
-      {/* TODO: Delete! */}
-      <button onClick={handleOpenTimeline} type="button">
-        {'Open Flyout'}
-      </button>
-      <FullWidthFlexGroup gutterSize="none">
-        <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
-        {shouldShowFlyoutDetailsPanel && (
-          <>
-            <VerticalRule />
-            <ScrollableFlexItem grow={1}>{FlyoutDetailsPanel}</ScrollableFlexItem>
-          </>
-        )}
-      </FullWidthFlexGroup>
-    </>
+    <FullWidthFlexGroup gutterSize="none">
+      <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
+      {shouldShowFlyoutDetailsPanel && (
+        <>
+          <VerticalRule />
+          <ScrollableFlexItem grow={1}>{FlyoutDetailsPanel}</ScrollableFlexItem>
+        </>
+      )}
+    </FullWidthFlexGroup>
   );
 };
 

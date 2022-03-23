@@ -171,18 +171,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     tabType: TimelineTabs.query,
   });
 
-  // TODO: DELETE!
-  const handleOpenTimeline = useCallback(() => {
-    openDetailsPanel('f0a40aefee00b545fe13c9b503cc0f1daf6601fafc3a3f0459fab321fd73afa7', () =>
-      console.log('HELLO!')
-    );
-  }, [openDetailsPanel]);
-
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
       (graphEventId != null && graphEventId.length > 0) || sessionViewId !== null;
-    return shouldShowOverlay ? <GraphOverlay timelineId={id} /> : null;
-  }, [graphEventId, id, sessionViewId]);
+    return shouldShowOverlay ? (
+      <GraphOverlay timelineId={id} openDetailsPanel={openDetailsPanel} />
+    ) : null;
+  }, [graphEventId, id, sessionViewId, openDetailsPanel]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
@@ -216,10 +211,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     <>
       <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
         <FullScreenContainer $isFullScreen={globalFullScreen}>
-          {/* TODO: Delete! */}
-          <button onClick={handleOpenTimeline} type="button">
-            {'Open Flyout'}
-          </button>
           <InspectButtonContainer>
             {timelinesUi.getTGrid<'embedded'>({
               additionalFilters,

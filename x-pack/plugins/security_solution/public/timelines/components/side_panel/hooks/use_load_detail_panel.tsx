@@ -17,7 +17,7 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel } from '..';
 
-interface UseLoadDetailPanelConfig {
+export interface UseLoadDetailPanelConfig {
   entityType?: EntityType;
   isFlyoutView?: boolean;
   sourcerScope: SourcererScopeName;
@@ -25,7 +25,7 @@ interface UseLoadDetailPanelConfig {
   tabType?: TimelineTabs;
 }
 
-interface UseLoadDetailPanelReturn {
+export interface UseLoadDetailPanelReturn {
   openDetailsPanel: (eventId?: string, onClose?: () => void) => void;
   handleOnDetailsPanelClosed: () => void;
   FlyoutDetailsPanel: JSX.Element;
