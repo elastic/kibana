@@ -29,6 +29,7 @@ import type { SessionViewStart } from '../../session_view/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import type { OsqueryPluginStart } from '../../osquery/public';
 
 import type { Detections } from './detections';
 import type { Cases } from './cases';
@@ -71,6 +72,7 @@ export interface StartPlugins {
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  osquery?: OsqueryPluginStart;
 }
 
 export type StartServices = CoreStart &
