@@ -39,7 +39,7 @@ const getFilter = (filter: string[] | undefined) => {
   if (!filter || !filter.length) {
     return;
   }
-  return filter.join(' AND ');
+  return filter.join(' OR ');
 };
 
 export type SortFields =

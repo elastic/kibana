@@ -15,7 +15,7 @@ import { AlertListItem } from './types';
 import { RuleAlertList } from './rule_alert_list';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
-import { RuleEventLogList } from './rule_event_log_list';
+import { RuleEventLogListWithApi } from './rule_event_log_list';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -427,16 +427,16 @@ describe('tabbed content', () => {
     (tabbedContent.instance() as any).focusTab = jest.fn();
     tabbedContent.update();
 
-    expect(tabbedContent.find(RuleEventLogList).exists()).toBeTruthy();
+    expect(tabbedContent.find(RuleEventLogListWithApi).exists()).toBeTruthy();
     expect(tabbedContent.find(RuleAlertList).exists()).toBeFalsy();
 
     tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
 
-    expect(tabbedContent.find(RuleEventLogList).exists()).toBeFalsy();
+    expect(tabbedContent.find(RuleEventLogListWithApi).exists()).toBeFalsy();
     expect(tabbedContent.find(RuleAlertList).exists()).toBeTruthy();
 
     tabbedContent.find('[data-test-subj="eventLogListTab"]').simulate('click');
-    expect(tabbedContent.find(RuleEventLogList).exists()).toBeTruthy();
+    expect(tabbedContent.find(RuleEventLogListWithApi).exists()).toBeTruthy();
     expect(tabbedContent.find(RuleAlertList).exists()).toBeFalsy();
   });
 });

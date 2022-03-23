@@ -5,48 +5,35 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFilterButton,
-  EuiPopover,
-  EuiFilterGroup,
-  EuiIcon,
-  EuiFilterSelectItem,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
+import { EcsEventOutcome } from 'kibana/server';
+import { RuleEventLogListStatus } from './rule_event_log_list_status';
 
-const listItemStyles = {
-  display: 'flex',
-  alignItems: 'center',
-};
-
-export const statusToIcon: Record<string, React.ReactNode> = {
-  success: <EuiIcon type="dot" color="success" />,
-  failed: <EuiIcon type="dot" color="danger" />,
-};
+const statusFilters: EcsEventOutcome[] = ['success', 'failure', 'unknown'];
 
 interface RuleEventLogListStatusFilterProps {
-  options: string[];
   selectedOptions: string[];
   onChange: (selectedValues: string[]) => void;
 }
 
 export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilterProps) => {
-  const { options = [], selectedOptions = [], onChange = () => {} } = props;
+  const { selectedOptions = [], onChange = () => {} } = props;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const onFilterItemClick = (newOption: string) => () => {
+  const onFilterItemClick = useCallback((newOption: string) => () => {
     if (selectedOptions.includes(newOption)) {
       onChange(selectedOptions.filter((option) => option !== newOption));
       return;
     }
     onChange([...selectedOptions, newOption]);
-  };
+  }, [selectedOptions, onChange]);
 
-  const onClick = () => {
-    setIsPopoverOpen(!isPopoverOpen);
-  };
+  const onClick = useCallback(() => {
+    setIsPopoverOpen((prevIsOpen) => !prevIsOpen);
+  }, [setIsPopoverOpen]);
 
   return (
     <EuiFilterGroup>
@@ -69,16 +56,14 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
         }
       >
         <React.Fragment>
-          {options.map((option) => {
+          {statusFilters.map((status) => {
             return (
               <EuiFilterSelectItem
-                key={option}
-                onClick={onFilterItemClick(option)}
-                checked={selectedOptions.includes(option) ? 'on' : undefined}
+                key={status}
+                onClick={onFilterItemClick(status)}
+                checked={selectedOptions.includes(status) ? 'on' : undefined}
               >
-                <div style={listItemStyles}>
-                  {statusToIcon[option]} {option}
-                </div>
+                <RuleEventLogListStatus status={status} />
               </EuiFilterSelectItem>
             );
           })}
