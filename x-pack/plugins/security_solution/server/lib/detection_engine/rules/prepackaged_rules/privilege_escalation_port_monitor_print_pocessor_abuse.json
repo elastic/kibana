@@ -5,14 +5,12 @@
   "description": "Identifies port monitor and print processor registry modifications. Adversaries may abuse port monitor and print processors to run malicious DLLs during system boot that will be executed as SYSTEM for privilege escalation and/or persistence, if permissions allow writing a fully-qualified pathname for that DLL.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Port Monitor or Print Processor Registration Abuse",
-  "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path : (\"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Print\\\\Monitors\\\\*\",\n    \"HLLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Print\\\\Environments\\\\Windows*\\\\Print Processors\\\\*\") and\n  registry.data.strings : \"*.dll\" and\n  /* exclude SYSTEM SID - look for changes by non-SYSTEM user */\n  not user.id : \"S-1-5-18\"\n",
+  "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path : (\"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Print\\\\Monitors\\\\*\",\n    \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Print\\\\Environments\\\\Windows*\\\\Print Processors\\\\*\") and\n  registry.data.strings : \"*.dll\" and\n  /* exclude SYSTEM SID - look for changes by non-SYSTEM user */\n  not user.id : \"S-1-5-18\"\n",
   "references": [
     "https://www.welivesecurity.com/2020/05/21/no-game-over-winnti-group/"
   ],
@@ -74,5 +72,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

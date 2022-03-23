@@ -9,11 +9,11 @@ import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import type { LensFilterEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
-import type { LayerArgs } from '../../common/expressions';
+import type { DataLayerArgs } from '../../common/expressions';
 import { LegendActionPopover } from '../shared_components';
 
 export const getLegendAction = (
-  filteredLayers: LayerArgs[],
+  filteredLayers: DataLayerArgs[],
   tables: LensMultiTable['tables'],
   onFilter: (data: LensFilterEvent['data']) => void,
   formatFactory: FormatFactory,

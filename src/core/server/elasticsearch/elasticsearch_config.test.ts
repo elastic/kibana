@@ -29,12 +29,14 @@ test('set correct defaults', () => {
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
       "apiVersion": "master",
+      "compression": false,
       "customHeaders": Object {},
       "healthCheckDelay": "PT2.5S",
       "hosts": Array [
         "http://localhost:9200",
       ],
       "ignoreVersionMismatch": false,
+      "maxSockets": Infinity,
       "password": undefined,
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [
@@ -77,6 +79,45 @@ test('#hosts accepts both string and array of strings', () => {
     })
   );
   expect(configValue.hosts).toEqual(['http://some.host:1234', 'https://some.another.host']);
+});
+
+describe('#maxSockets', () => {
+  test('accepts positive numeric values', () => {
+    const configValue = new ElasticsearchConfig(config.schema.validate({ maxSockets: 512 }));
+    expect(configValue.maxSockets).toEqual(512);
+  });
+
+  test('throws if it does not contain a numeric value', () => {
+    expect(() => {
+      config.schema.validate({ maxSockets: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[maxSockets]: expected value of type [number] but got [string]"`
+    );
+
+    expect(() => {
+      config.schema.validate({ maxSockets: true });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[maxSockets]: expected value of type [number] but got [boolean]"`
+    );
+  });
+
+  test('throws if it does not contain a valid numeric value', () => {
+    expect(() => {
+      config.schema.validate({ maxSockets: -1 });
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"[maxSockets]: Value must be equal to or greater than [1]."'
+    );
+
+    expect(() => {
+      config.schema.validate({ maxSockets: 0 });
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"[maxSockets]: Value must be equal to or greater than [1]."'
+    );
+
+    expect(() => {
+      config.schema.validate({ maxSockets: Infinity });
+    }).toThrowErrorMatchingInlineSnapshot('"[maxSockets]: \\"maxSockets\\" cannot be infinity"');
+  });
 });
 
 test('#requestHeadersWhitelist accepts both string and array of strings', () => {

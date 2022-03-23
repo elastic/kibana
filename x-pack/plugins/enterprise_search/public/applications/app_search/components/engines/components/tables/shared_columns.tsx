@@ -50,6 +50,17 @@ export const CREATED_AT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
 };
 
+export const LAST_UPDATED_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
+  field: 'updated_at',
+  name: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.lastUpdated',
+    {
+      defaultMessage: 'Last updated',
+    }
+  ),
+  dataType: 'string',
+};
+
 export const DOCUMENT_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   field: 'document_count',
   name: i18n.translate(

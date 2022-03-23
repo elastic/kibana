@@ -25,6 +25,8 @@ import { getBuildkiteMetadata } from './buildkite_metadata';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
+const DISABLE_MISSING_TEST_REPORT_ERRORS =
+  process.env.DISABLE_MISSING_TEST_REPORT_ERRORS === 'true';
 
 export function runFailedTestsReporterCli() {
   run(
@@ -87,6 +89,11 @@ export function runFailedTestsReporterCli() {
         const reportPaths = await globby(patterns, {
           absolute: true,
         });
+
+        if (!reportPaths.length && DISABLE_MISSING_TEST_REPORT_ERRORS) {
+          // it is fine for code coverage to not have test results
+          return;
+        }
 
         if (!reportPaths.length) {
           throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export const APP_ID = 'discover';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
@@ -22,4 +23,5 @@ export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
 export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
+export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';

@@ -11,7 +11,7 @@ import {
   mockHttpValues,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { OAuthAuthorizeLogic, transformServerPreAuth } from './oauth_authorize_logic';
 

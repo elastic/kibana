@@ -79,5 +79,18 @@ describe('HomePublicPlugin', () => {
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('setVariable');
     });
+
+    test('wires up and returns welcome service', async () => {
+      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
+        coreMock.createSetup() as any,
+        {
+          share: mockShare,
+          urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        }
+      );
+      expect(setup).toHaveProperty('welcomeScreen');
+      expect(setup.welcomeScreen).toHaveProperty('registerOnRendered');
+      expect(setup.welcomeScreen).toHaveProperty('registerTelemetryNoticeRenderer');
+    });
   });
 });

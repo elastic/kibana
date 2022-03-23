@@ -382,6 +382,30 @@ describe('getOperationTypesForField', () => {
           },
           Object {
             "operationMetaData": Object {
+              "dataType": "date",
+              "isBucketed": false,
+              "scale": "ratio",
+            },
+            "operations": Array [
+              Object {
+                "field": "timestamp",
+                "operationType": "min",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "max",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "last_value",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
               "dataType": "string",
               "isBucketed": false,
               "scale": "ordinal",

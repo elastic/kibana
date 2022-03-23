@@ -246,6 +246,40 @@ describe('Executor', () => {
     });
 
     describe('.migrateToLatest', () => {
+      const fnMigrateTo = {
+        name: 'fnMigrateTo',
+        help: 'test',
+        args: {
+          bar: {
+            types: ['string'],
+            help: 'test',
+          },
+        },
+        fn: jest.fn(),
+      };
+
+      const fnMigrateFrom = {
+        name: 'fnMigrateFrom',
+        help: 'test',
+        args: {
+          bar: {
+            types: ['string'],
+            help: 'test',
+          },
+        },
+        migrations: {
+          '8.1.0': ((state: ExpressionAstFunction, version: string) => {
+            const migrateToAst = parseExpression('fnMigrateTo');
+            const { arguments: args } = state;
+            const ast = { ...migrateToAst.chain[0], arguments: args };
+            return { type: 'expression', chain: [ast, ast] };
+          }) as unknown as MigrateFunction,
+        },
+        fn: jest.fn(),
+      };
+      executor.registerFunction(fnMigrateFrom);
+      executor.registerFunction(fnMigrateTo);
+
       test('calls migrate function for every expression function in expression', () => {
         executor.migrateToLatest({
           state: parseExpression(
@@ -254,6 +288,25 @@ describe('Executor', () => {
           version: '7.10.0',
         });
         expect(migrateFn).toBeCalledTimes(5);
+      });
+
+      test('migrates expression function to expression function or chain of expression functions', () => {
+        const plainExpression = 'foo bar={foo bar="baz" | foo bar={foo bar="baz"}}';
+        const plainExpressionAst = parseExpression(plainExpression);
+        const migratedExpressionAst = executor.migrateToLatest({
+          state: parseExpression(`${plainExpression} | fnMigrateFrom bar="baz" | fnMigrateTo`),
+          version: '8.0.0',
+        });
+
+        expect(migratedExpressionAst).toEqual({
+          type: 'expression',
+          chain: [
+            ...plainExpressionAst.chain,
+            { type: 'function', function: 'fnMigrateTo', arguments: { bar: ['baz'] } },
+            { type: 'function', function: 'fnMigrateTo', arguments: { bar: ['baz'] } },
+            { type: 'function', function: 'fnMigrateTo', arguments: {} },
+          ],
+        });
       });
     });
   });

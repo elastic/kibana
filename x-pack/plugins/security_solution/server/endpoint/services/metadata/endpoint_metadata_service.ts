@@ -12,7 +12,6 @@ import {
   SavedObjectsServiceStart,
 } from 'kibana/server';
 
-import { TransportResult } from '@elastic/elasticsearch';
 import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   HostInfo,
@@ -56,7 +55,7 @@ import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/end
 import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import { EndpointError } from '../../../../common/endpoint/errors';
-import { EndpointFleetServicesInterface } from '../endpoint_fleet_services';
+import { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -122,7 +121,7 @@ export class EndpointMetadataService {
   async getHostMetadata(esClient: ElasticsearchClient, endpointId: string): Promise<HostMetadata> {
     const query = getESQueryHostMetadataByID(endpointId);
     const queryResult = await esClient.search<HostMetadata>(query).catch(catchAndWrapError);
-    const endpointMetadata = queryResponseToHostResult(queryResult.body).result;
+    const endpointMetadata = queryResponseToHostResult(queryResult).result;
 
     if (endpointMetadata) {
       return endpointMetadata;
@@ -148,7 +147,7 @@ export class EndpointMetadataService {
       .search<HostMetadata>(query, { ignore: [404] })
       .catch(catchAndWrapError);
 
-    return queryResponseToHostListResult(searchResult.body).resultList;
+    return queryResponseToHostListResult(searchResult).resultList;
   }
 
   /**
@@ -409,14 +408,11 @@ export class EndpointMetadataService {
     fleetServices: EndpointFleetServicesInterface,
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
-    const endpointPolicies = await getAllEndpointPackagePolicies(
-      this.packagePolicyService,
-      this.DANGEROUS_INTERNAL_SO_CLIENT
-    );
+    const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
     const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, endpointPolicyIds);
 
-    let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>, unknown>;
+    let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadata>;
 
     try {
       unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
@@ -426,7 +422,7 @@ export class EndpointMetadataService {
       throw err;
     }
 
-    const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.body?.hits || {};
+    const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.hits || {};
     const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
 
     const agentPolicies =
@@ -482,5 +478,12 @@ export class EndpointMetadataService {
       data: hosts,
       total: (docsCount as unknown as SearchTotalHits).value,
     };
+  }
+
+  async getAllEndpointPackagePolicies() {
+    return getAllEndpointPackagePolicies(
+      this.packagePolicyService,
+      this.DANGEROUS_INTERNAL_SO_CLIENT
+    );
   }
 }

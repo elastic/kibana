@@ -11,12 +11,6 @@ import { CasesClientGetAlertsResponse } from '../client/alerts/types';
 import { CasesClientFactory } from '../client/factory';
 import { RegisterActionType } from '../types';
 
-export type {
-  ContextTypeGeneratedAlertType,
-  CommentSchemaType,
-  ContextTypeAlertSchemaType,
-} from './case/schema';
-
 export interface GetActionTypeParams {
   logger: Logger;
   factory: CasesClientFactory;

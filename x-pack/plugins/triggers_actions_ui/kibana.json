@@ -1,8 +1,8 @@
 {
   "id": "triggersActionsUi",
   "owner": {
-    "name": "Kibana Alerting",
-    "githubTeam": "kibana-alerting-services"
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
   },
   "version": "kibana",
   "server": true,

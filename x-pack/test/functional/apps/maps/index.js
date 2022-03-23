@@ -79,6 +79,11 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', function () {
+      this.tags('ciGroup2'); // same group used in x-pack/test/reporting_functional
+      loadTestFile(require.resolve('./reports'));
+    });
+
+    describe('', function () {
       this.tags('ciGroup10');
       loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));
@@ -86,10 +91,12 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./mvt_scaling'));
       loadTestFile(require.resolve('./mvt_geotile_grid'));
       loadTestFile(require.resolve('./add_layer_panel'));
-      loadTestFile(require.resolve('./import_geojson'));
+      loadTestFile(require.resolve('./file_upload'));
       loadTestFile(require.resolve('./layer_errors'));
       loadTestFile(require.resolve('./visualize_create_menu'));
       loadTestFile(require.resolve('./discover'));
+      loadTestFile(require.resolve('./geofile_wizard_auto_open'));
+      loadTestFile(require.resolve('./lens'));
     });
   });
 }

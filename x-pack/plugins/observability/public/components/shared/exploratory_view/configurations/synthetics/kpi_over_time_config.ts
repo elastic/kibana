@@ -51,7 +51,7 @@ export const isStepLevelMetric = (metric?: string) => {
     SYNTHETICS_DOCUMENT_ONLOAD,
   ].includes(metric);
 };
-export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.KPI,
     defaultSeriesType: 'bar_stacked',
@@ -78,7 +78,7 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
     palette: { type: 'palette', name: 'status' },
     definitionFields: [
       { field: 'monitor.name', nested: SYNTHETICS_STEP_NAME, singleSelection: true },
-      { field: 'url.full', filters: buildExistsFilter('summary.up', indexPattern) },
+      { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
     ],
     metricOptions: [
       {

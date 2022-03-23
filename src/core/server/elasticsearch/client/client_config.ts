@@ -22,6 +22,8 @@ import { DEFAULT_HEADERS } from '../default_headers';
 export type ElasticsearchClientConfig = Pick<
   ElasticsearchConfig,
   | 'customHeaders'
+  | 'maxSockets'
+  | 'compression'
   | 'sniffOnStart'
   | 'sniffOnConnectionFault'
   | 'requestHeadersWhitelist'
@@ -60,9 +62,10 @@ export function parseClientOptions(
     // fixes https://github.com/elastic/kibana/issues/101944
     disablePrototypePoisoningProtection: true,
     agent: {
-      maxSockets: Infinity,
+      maxSockets: config.maxSockets,
       keepAlive: config.keepAlive ?? true,
     },
+    compression: config.compression,
   };
 
   if (config.pingTimeout != null) {

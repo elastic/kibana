@@ -28,7 +28,7 @@ export const loadSavedDashboardState = async ({
   query,
   history,
   notifications,
-  indexPatterns,
+  dataViews,
   savedDashboards,
   usageCollection,
   savedDashboardId,
@@ -51,7 +51,7 @@ export const loadSavedDashboardState = async ({
     notifications.toasts.addWarning(getDashboard60Warning());
     return;
   }
-  await indexPatterns.ensureDefaultDataView();
+  await dataViews.ensureDefaultDataView();
   try {
     const savedDashboard = (await savedDashboards.get({
       id: savedDashboardId,

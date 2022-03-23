@@ -24,7 +24,7 @@ import { isEqual, pull, merge, castArray } from 'lodash';
  );
 */
 
-type JoinedReturnType<
+export type JoinedReturnType<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>
 > = Array<

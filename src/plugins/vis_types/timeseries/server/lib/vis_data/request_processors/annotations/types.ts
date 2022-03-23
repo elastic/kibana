@@ -22,6 +22,11 @@ export interface AnnotationsRequestProcessorsParams {
   annotationIndex: FetchedIndexPattern;
   capabilities: SearchCapabilities;
   uiSettings: IUiSettingsClient;
+  getMetaParams: () => Promise<{
+    maxBars: number;
+    timeField?: string | undefined;
+    interval: string;
+  }>;
 }
 
 export type AnnotationSearchRequest = Record<string, unknown>;

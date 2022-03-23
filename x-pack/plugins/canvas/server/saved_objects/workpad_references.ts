@@ -31,7 +31,10 @@ export const extractReferences = (
         }))
       );
 
-      return { ...element, expression: toExpression(extract.state) };
+      return {
+        ...element,
+        expression: toExpression(extract.state, { source: element.expression }),
+      };
     });
 
     return { ...page, elements };
@@ -59,7 +62,7 @@ export const injectReferences = (
         referencesForElement
       );
 
-      return { ...element, expression: toExpression(injectedAst) };
+      return { ...element, expression: toExpression(injectedAst, { source: element.expression }) };
     });
 
     return { ...page, elements };

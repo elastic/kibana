@@ -16,7 +16,7 @@ import {
   MONITOR_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
-  MONITOR_MANAGEMENT,
+  MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
@@ -57,6 +57,8 @@ import { apiService } from './state/api/utils';
 import { useInspectorContext } from '../../observability/public';
 import { UptimeConfig } from '../common/config';
 import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
+import { useKibana } from '../../../../src/plugins/kibana_react/public';
+import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
 
 interface PageRouterProps {
   config: UptimeConfig;
@@ -83,7 +85,7 @@ export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.h
   defaultMessage: 'Monitors',
 });
 
-const getRoutes = (config: UptimeConfig): RouteProps[] => {
+const getRoutes = (config: UptimeConfig, canSave: boolean): RouteProps[] => {
   return [
     {
       title: i18n.translate('xpack.uptime.monitorRoute.title', {
@@ -114,6 +116,8 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
           <FormattedMessage id="xpack.uptime.settings.heading" defaultMessage="Uptime settings" />
         ),
       },
+      bottomBar: <SettingsBottomBar />,
+      bottomBarProps: { paddingSize: 'm' as const },
     },
     {
       title: i18n.translate('xpack.uptime.certificatesRoute.title', {
@@ -186,7 +190,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
         rightSideItems: [],
       },
     },
-    ...(config.ui?.unsafe?.monitorManagement?.enabled
+    ...(config.ui?.monitorManagement?.enabled
       ? [
           {
             title: i18n.translate('xpack.uptime.addMonitorRoute.title', {
@@ -206,6 +210,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
               ),
             },
             bottomBar: <MonitorManagementBottomBar />,
+            bottomBarProps: { paddingSize: 'm' as const },
           },
           {
             title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
@@ -225,13 +230,14 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
               ),
             },
             bottomBar: <MonitorManagementBottomBar />,
+            bottomBarProps: { paddingSize: 'm' as const },
           },
           {
             title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
               defaultMessage: 'Manage Monitors | {baseTitle}',
               values: { baseTitle },
             }),
-            path: MONITOR_MANAGEMENT,
+            path: MONITOR_MANAGEMENT_ROUTE,
             component: MonitorManagementPage,
             dataTestSubj: 'uptimeMonitorManagementListPage',
             telemetryId: UptimePage.MonitorManagement,
@@ -242,7 +248,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                   defaultMessage="Manage monitors"
                 />
               ),
-              rightSideItems: [<AddMonitorBtn />],
+              rightSideItems: [<AddMonitorBtn isDisabled={!canSave} />],
             },
           },
         ]
@@ -263,7 +269,9 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC<PageRouterProps> = ({ config = {} }) => {
-  const routes = getRoutes(config);
+  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+
+  const routes = getRoutes(config, canSave);
   const { addInspectorRequest } = useInspectorContext();
 
   apiService.addInspectorRequest = addInspectorRequest;

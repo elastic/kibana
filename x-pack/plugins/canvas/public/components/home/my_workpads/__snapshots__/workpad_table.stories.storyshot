@@ -449,7 +449,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Export workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -476,7 +475,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Clone workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -623,7 +621,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Export workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -650,7 +647,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Clone workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -797,7 +793,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Export workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -824,7 +819,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Clone workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -853,7 +847,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
           className="euiSpacer euiSpacer--m"
         />
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
         >
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"

@@ -242,10 +242,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    const dashboardPanels = _.map(panelsInOrder, ({ explicitInput, type }) => (
+    const dashboardPanels = _.map(panelsInOrder, ({ explicitInput, type }, index) => (
       <DashboardGridItem
-        id={explicitInput.id}
         key={explicitInput.id}
+        id={explicitInput.id}
+        index={index + 1}
         type={type}
         container={container}
         PanelComponent={kibana.services.embeddable.EmbeddablePanel}

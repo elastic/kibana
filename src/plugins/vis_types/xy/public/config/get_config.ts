@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ScaleContinuousType } from '@elastic/charts';
+import { Fit, ScaleContinuousType } from '@elastic/charts';
 
 import { Datatable } from '../../../../expressions/public';
 import { BUCKET_TYPES } from '../../../../data/public';
@@ -92,7 +92,7 @@ export function getConfig(
   return {
     // NOTE: downscale ratio to match current vislib implementation
     markSizeRatio: radiusRatio * 0.6,
-    fittingFunction,
+    fittingFunction: fittingFunction ?? Fit.Linear,
     fillOpacity,
     detailedTooltip,
     orderBucketsBySum,

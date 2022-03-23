@@ -176,7 +176,13 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.hits.hits.length}`)
           );
 
-          sendAlertTelemetryEvents(logger, eventsTelemetry, enrichedEvents, buildRuleMessage);
+          sendAlertTelemetryEvents(
+            logger,
+            eventsTelemetry,
+            enrichedEvents,
+            createdItems,
+            buildRuleMessage
+          );
         }
 
         if (!hasSortId) {

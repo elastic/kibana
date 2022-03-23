@@ -10,6 +10,13 @@ import { resolve } from 'path';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
+// Docker image to use for Fleet API integration tests.
+// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
+// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
+// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
+export const dockerImage =
+  'docker.elastic.co/package-registry/distribution@sha256:536fcac0b66de593bd21851fd3553892a28e6e838e191ee25818acb4a23ecc7f';
+
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
@@ -46,7 +53,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
       resolve(__dirname, './apps/api_keys'),
-      resolve(__dirname, './apps/index_patterns'),
+      resolve(__dirname, './apps/data_views'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
       resolve(__dirname, './apps/ingest_pipelines'),
@@ -84,7 +91,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
-        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
       ],
     },
     uiSettings: {
@@ -111,6 +118,9 @@ export default async function ({ readConfigFile }) {
       },
       logstashPipelines: {
         pathname: '/app/management/ingest/pipelines',
+      },
+      cases: {
+        pathname: '/app/management/insightsAndAlerting/cases/',
       },
       maps: {
         pathname: '/app/maps',
@@ -484,7 +494,7 @@ export default async function ({ readConfigFile }) {
           },
         },
 
-        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        // Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
             cluster: ['manage_security', 'manage_api_key'],
@@ -544,6 +554,25 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
+        snapshot_restore_user: {
+          elasticsearch: {
+            cluster: [
+              'monitor',
+              'manage_slm',
+              'cluster:admin/snapshot',
+              'cluster:admin/repository',
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
 
         ingest_pipelines_user: {
           elasticsearch: {
@@ -574,6 +603,27 @@ export default async function ({ readConfigFile }) {
         remote_clusters_user: {
           elasticsearch: {
             cluster: ['manage'],
+          },
+        },
+
+        global_alerts_logs_all_else_read: {
+          kibana: [
+            {
+              feature: {
+                apm: ['read'],
+                logs: ['all'],
+                infrastructure: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
           },
         },
       },

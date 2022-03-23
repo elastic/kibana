@@ -12,22 +12,14 @@ import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
-import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { DiscoverServices } from '../../build_services';
 import { getDocId } from './discover_grid_document_selection';
 import { ElasticSearchHit } from '../../types';
-
-jest.mock('../../kibana_services', () => ({
-  ...jest.requireActual('../../kibana_services'),
-  getServices: () => jest.requireActual('../../__mocks__/services').discoverServiceMock,
-}));
+import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { discoverServiceMock } from '../../__mocks__/services';
 
 function getProps() {
-  const servicesMock = {
-    uiSettings: uiSettingsMock,
-  } as DiscoverServices;
   return {
     ariaLabelledBy: '',
     columns: [],
@@ -44,7 +36,6 @@ function getProps() {
     sampleSize: 30,
     searchDescription: '',
     searchTitle: '',
-    services: servicesMock,
     setExpandedDoc: jest.fn(),
     settings: {},
     showTimeCol: true,
@@ -54,7 +45,13 @@ function getProps() {
 }
 
 function getComponent() {
-  return mountWithIntl(<DiscoverGrid {...getProps()} />);
+  const Proxy = (props: DiscoverGridProps) => (
+    <KibanaContextProvider services={discoverServiceMock}>
+      <DiscoverGrid {...props} />
+    </KibanaContextProvider>
+  );
+
+  return mountWithIntl(<Proxy {...getProps()} />);
 }
 
 function getSelectedDocNr(component: ReactWrapper<DiscoverGridProps>) {

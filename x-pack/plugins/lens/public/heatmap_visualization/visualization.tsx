@@ -29,7 +29,7 @@ import {
   LENS_HEATMAP_ID,
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
-import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
+import { CUSTOM_PALETTE } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
@@ -81,6 +81,8 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: true,
+      isXAxisTitleVisible: true,
     },
   };
 }
@@ -106,10 +108,10 @@ export const getHeatmapVisualization = ({
       id: 'heatmap',
       icon: HeatmapIcon,
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
-        defaultMessage: 'Heatmap',
+        defaultMessage: 'Heat map',
       }),
       groupLabel: groupLabelForHeatmap,
-      showExperimentalBadge: true,
+      showExperimentalBadge: false,
       sortPriority: 1,
     },
   ],
@@ -205,10 +207,7 @@ export const getHeatmapVisualization = ({
                   ? {
                       columnId: state.valueAccessor,
                       triggerIcon: 'colorBy',
-                      palette: getStopsForFixedMode(
-                        displayStops,
-                        activePalette?.params?.colorStops
-                      ),
+                      palette: displayStops.map(({ color }) => color),
                     }
                   : {
                       columnId: state.valueAccessor,
@@ -286,7 +285,7 @@ export const getHeatmapVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.heatmap.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];
@@ -317,6 +316,11 @@ export const getHeatmapVisualization = ({
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
+            lastRangeIsRightOpen: [
+              state.palette?.params?.continuity
+                ? ['above', 'all'].includes(state.palette.params.continuity)
+                : true,
+            ],
             palette: state.palette?.params
               ? [
                   paletteService
@@ -336,6 +340,7 @@ export const getHeatmapVisualization = ({
                     arguments: {
                       isVisible: [state.legend.isVisible],
                       position: [state.legend.position],
+                      legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
                     },
                   },
                 ],
@@ -360,10 +365,14 @@ export const getHeatmapVisualization = ({
                       isCellLabelVisible: [state.gridConfig.isCellLabelVisible],
                       // Y-axis
                       isYAxisLabelVisible: [state.gridConfig.isYAxisLabelVisible],
+                      isYAxisTitleVisible: [state.gridConfig.isYAxisTitleVisible ?? false],
+                      yTitle: state.gridConfig.yTitle ? [state.gridConfig.yTitle] : [],
                       // X-axis
                       isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible
                         ? [state.gridConfig.isXAxisLabelVisible]
                         : [],
+                      isXAxisTitleVisible: [state.gridConfig.isXAxisTitleVisible ?? false],
+                      xTitle: state.gridConfig.xTitle ? [state.gridConfig.xTitle] : [],
                     },
                   },
                 ],
@@ -433,8 +442,12 @@ export const getHeatmapVisualization = ({
                       isCellLabelVisible: [false],
                       // Y-axis
                       isYAxisLabelVisible: [false],
+                      isYAxisTitleVisible: [state.gridConfig.isYAxisTitleVisible],
+                      yTitle: [state.gridConfig.yTitle ?? ''],
                       // X-axis
                       isXAxisLabelVisible: [false],
+                      isXAxisTitleVisible: [state.gridConfig.isXAxisTitleVisible],
+                      xTitle: [state.gridConfig.xTitle ?? ''],
                     },
                   },
                 ],

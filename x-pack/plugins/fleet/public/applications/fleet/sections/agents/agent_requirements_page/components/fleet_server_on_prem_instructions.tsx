@@ -17,25 +17,22 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiCallOut,
-  EuiSelect,
   EuiRadioGroup,
   EuiFieldText,
   EuiForm,
   EuiFormErrorText,
-  EuiButtonGroup,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DownloadStep } from '../../../../components';
+import { DownloadStep, SelectCreateAgentPolicy } from '../../../../components';
 import {
   useStartServices,
   useDefaultOutput,
   sendGenerateServiceToken,
   usePlatform,
-  PLATFORM_OPTIONS,
   useGetAgentPolicies,
   useGetSettings,
   sendPutSettings,
@@ -44,10 +41,14 @@ import {
   useLink,
 } from '../../../../hooks';
 import type { PLATFORM_TYPE } from '../../../../hooks';
-import type { PackagePolicy } from '../../../../types';
-import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import type { AgentPolicy } from '../../../../types';
 import { FleetServerOnPremRequiredCallout } from '../../components';
 
+import { policyHasFleetServer } from '../../services/has_fleet_server';
+
+import { PlatformSelector } from '../../../../../../components/enrollment_instructions/manual/platform_selector';
+
+import type { CommandsByPlatform } from './install_command_utils';
 import { getInstallCommandForPlatform } from './install_command_utils';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
@@ -110,6 +111,7 @@ export const ServiceTokenStep = ({
                 onClick={() => {
                   getServiceToken();
                 }}
+                data-test-subj="fleetServerGenerateServiceTokenBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.generateServiceTokenButton"
@@ -161,7 +163,7 @@ export const FleetServerCommandStep = ({
   setPlatform,
 }: {
   serviceToken?: string;
-  installCommand: string;
+  installCommand: CommandsByPlatform;
   platform: string;
   setPlatform: (platform: PLATFORM_TYPE) => void;
 }): EuiStepProps => {
@@ -195,48 +197,22 @@ export const FleetServerCommandStep = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiButtonGroup
-          options={PLATFORM_OPTIONS}
-          idSelected={platform}
-          onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
-          legend={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
-            defaultMessage: 'Platform',
-          })}
+        <PlatformSelector
+          linuxCommand={installCommand.linux}
+          macCommand={installCommand.mac}
+          windowsCommand={installCommand.windows}
+          linuxDebCommand={installCommand.deb}
+          linuxRpmCommand={installCommand.rpm}
+          troubleshootLink={docLinks.links.fleet.troubleshooting}
+          isK8s={false}
         />
-        <EuiSpacer size="s" />
-        <EuiCodeBlock
-          fontSize="m"
-          isCopyable={true}
-          paddingSize="m"
-          language="console"
-          whiteSpace="pre-wrap"
-        >
-          <CommandCode>{installCommand}</CommandCode>
-        </EuiCodeBlock>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.enrollmentInstructions.troubleshootingText"
-            defaultMessage="If you are having trouble connecting, see our {link}."
-            values={{
-              link: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.troubleshooting}>
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                    defaultMessage="troubleshooting guide"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
       </>
     ) : null,
   };
 };
 
 export const useFleetServerInstructions = (policyId?: string) => {
-  const { output, refresh: refreshOutputs } = useDefaultOutput();
+  const { output } = useDefaultOutput();
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
@@ -247,9 +223,15 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const esHost = output?.hosts?.[0];
   const sslCATrustedFingerprint: string | undefined = output?.ca_trusted_fingerprint;
 
-  const installCommand = useMemo((): string => {
+  const installCommand = useMemo((): CommandsByPlatform => {
     if (!serviceToken || !esHost) {
-      return '';
+      return {
+        linux: '',
+        mac: '',
+        windows: '',
+        deb: '',
+        rpm: '',
+      };
     }
 
     return getInstallCommandForPlatform(
@@ -289,10 +271,6 @@ export const useFleetServerInstructions = (policyId?: string) => {
     setIsLoadingServiceToken(false);
   }, [notifications.toasts]);
 
-  const refresh = useCallback(() => {
-    return Promise.all([refreshOutputs(), refreshSettings()]);
-  }, [refreshOutputs, refreshSettings]);
-
   const addFleetServerHost = useCallback(
     async (host: string) => {
       const res = await sendPutSettings({
@@ -317,7 +295,6 @@ export const useFleetServerInstructions = (policyId?: string) => {
     installCommand,
     platform,
     setPlatform,
-    refresh,
   };
 };
 
@@ -328,71 +305,48 @@ const AgentPolicySelectionStep = ({
   policyId?: string;
   setPolicyId: (v: string) => void;
 }): EuiStepProps => {
-  const { data } = useGetAgentPolicies({ full: true });
+  const { data, resendRequest: refreshAgentPolicies } = useGetAgentPolicies({ full: true });
 
   const agentPolicies = useMemo(
-    () =>
-      data
-        ? data.items.filter((item) => {
-            return item.package_policies.some(
-              (p: string | PackagePolicy) =>
-                (p as PackagePolicy).package?.name === FLEET_SERVER_PACKAGE
-            );
-            return false;
-          })
-        : [],
+    () => (data ? data.items.filter((item) => policyHasFleetServer(item)) : []),
     [data]
   );
-
-  const options = useMemo(() => {
-    return agentPolicies.map((policy) => ({ text: policy.name, value: policy.id }));
-  }, [agentPolicies]);
 
   useEffect(() => {
     // Select default value
     if (agentPolicies.length && !policyId) {
-      const defaultPolicy =
-        agentPolicies.find((p) => p.is_default_fleet_server) || agentPolicies[0];
-      setPolicyId(defaultPolicy.id);
+      setPolicyId(agentPolicies[0].id);
     }
-  }, [options, agentPolicies, policyId, setPolicyId]);
+  }, [agentPolicies, policyId, setPolicyId]);
 
   const onChangeCallback = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setPolicyId(e.target.value);
+    (key: string | undefined, policy?: AgentPolicy) => {
+      if (policy) {
+        refreshAgentPolicies();
+      }
+      setPolicyId(key!);
     },
-    [setPolicyId]
+    [setPolicyId, refreshAgentPolicies]
   );
 
   return {
-    title: i18n.translate('xpack.fleet.fleetServerSetup.stepSelectAgentPolicyTitle', {
-      defaultMessage: 'Select an Agent policy',
-    }),
+    title:
+      agentPolicies.length === 0
+        ? i18n.translate('xpack.fleet.fleetServerSetup.stepCreateAgentPolicyTitle', {
+            defaultMessage: 'Create an agent policy to host Fleet Server',
+          })
+        : i18n.translate('xpack.fleet.fleetServerSetup.stepSelectAgentPolicyTitle', {
+            defaultMessage: 'Select an agent policy to host Fleet Server',
+          }),
     status: undefined,
     children: (
       <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.fleetServerSetup.selectAgentPolicyDescriptionText"
-            defaultMessage="Agent policies allow you to configure and manage your agents remotely. We recommend using the “Default Fleet Server policy” which includes the necessary configuration to run a Fleet Server."
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiSelect
-          prepend={
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.agentPolicySelectLabel"
-                defaultMessage="Agent policy"
-              />
-            </EuiText>
-          }
-          options={options}
-          value={policyId}
-          onChange={onChangeCallback}
-          aria-label={i18n.translate('xpack.fleet.fleetServerSetup.agentPolicySelectAraiLabel', {
-            defaultMessage: 'Agent policy',
-          })}
+        <SelectCreateAgentPolicy
+          agentPolicies={agentPolicies}
+          withKeySelection={false}
+          onAgentPolicyChange={onChangeCallback}
+          excludeFleetServer={false}
+          isFleetServerPolicy={true}
         />
       </>
     ),
@@ -488,7 +442,7 @@ export const AddFleetServerHostStepContent = ({
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
-            placeholder={'e.g. http://127.0.0.1:8220'}
+            placeholder={'e.g. https://127.0.0.1:8220'}
             value={fleetServerHost}
             isInvalid={!!error}
             onChange={onChange}
@@ -501,11 +455,16 @@ export const AddFleetServerHostStepContent = ({
                 />
               </EuiText>
             }
+            data-test-subj="fleetServerHostInput"
           />
           {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton isLoading={isLoading} onClick={onSubmit}>
+          <EuiButton
+            isLoading={isLoading}
+            onClick={onSubmit}
+            data-test-subj="fleetServerAddHostBtn"
+          >
             <FormattedMessage
               id="xpack.fleet.fleetServerSetup.addFleetServerHostButton"
               defaultMessage="Add host"
@@ -579,12 +538,16 @@ const DeploymentModeStepContent = ({
 }) => {
   const onChangeCallback = useCallback(
     (v: string) => {
-      if (v === 'production' || v === 'quickstart') {
-        setDeploymentMode(v);
+      const value = v.split('_')[0];
+      if (value === 'production' || value === 'quickstart') {
+        setDeploymentMode(value);
       }
     },
     [setDeploymentMode]
   );
+
+  // radio id has to be unique so that the component works even if appears twice in DOM (Agents tab, Add agent flyout)
+  const radioSuffix = useMemo(() => Date.now(), []);
 
   return (
     <>
@@ -598,7 +561,7 @@ const DeploymentModeStepContent = ({
       <EuiRadioGroup
         options={[
           {
-            id: 'quickstart',
+            id: `quickstart_${radioSuffix}`,
             label: (
               <FormattedMessage
                 id="xpack.fleet.fleetServerSetup.deploymentModeQuickStartOption"
@@ -617,7 +580,7 @@ const DeploymentModeStepContent = ({
             ),
           },
           {
-            id: 'production',
+            id: `production_${radioSuffix}`,
             label: (
               <FormattedMessage
                 id="xpack.fleet.fleetServerSetup.deploymentModeProductionOption"
@@ -636,9 +599,9 @@ const DeploymentModeStepContent = ({
             ),
           },
         ]}
-        idSelected={deploymentMode}
+        idSelected={`${deploymentMode}_${radioSuffix}`}
         onChange={onChangeCallback}
-        name="radio group"
+        name={`radio group ${radioSuffix}`}
       />
     </>
   );

@@ -109,7 +109,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       await header.waitUntilLoadingHasFinished();
       return retry.tryForTime(60 * 1000, async () => {
         if (await testSubjects.exists('data-missing')) {
-          await testSubjects.click('superDatePickerApplyTimeButton');
+          await browser.refresh();
           await header.waitUntilLoadingHasFinished();
         }
         await testSubjects.missingOrFail('data-missing');

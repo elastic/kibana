@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
+import { Logger } from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
@@ -26,15 +27,19 @@ import {
   RecoveredActionGroupId,
   ActionGroup,
   validateDurationSchema,
+  parseDuration,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
+import { AlertingRulesConfig } from '.';
 
 export interface ConstructorOptions {
+  logger: Logger;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
 }
 
 export interface RegistryRuleType
@@ -49,8 +54,8 @@ export interface RegistryRuleType
     | 'minimumLicenseRequired'
     | 'isExportable'
     | 'ruleTaskTimeout'
-    | 'minimumScheduleInterval'
     | 'defaultScheduleInterval'
+    | 'doesSetRecoveryContext'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -124,17 +129,28 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
 >;
 
 export class RuleTypeRegistry {
+  private readonly logger: Logger;
   private readonly taskManager: TaskManagerSetupContract;
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
+  private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
 
-  constructor({ taskManager, taskRunnerFactory, licenseState, licensing }: ConstructorOptions) {
+  constructor({
+    logger,
+    taskManager,
+    taskRunnerFactory,
+    licenseState,
+    licensing,
+    minimumScheduleInterval,
+  }: ConstructorOptions) {
+    this.logger = logger;
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
     this.licenseState = licenseState;
     this.licensing = licensing;
+    this.minimumScheduleInterval = minimumScheduleInterval;
   }
 
   public has(id: string) {
@@ -208,24 +224,20 @@ export class RuleTypeRegistry {
           )
         );
       }
-    }
 
-    // validate minimumScheduleInterval here
-    if (ruleType.minimumScheduleInterval) {
-      const invalidMinimumTimeout = validateDurationSchema(ruleType.minimumScheduleInterval);
-      if (invalidMinimumTimeout) {
-        throw new Error(
-          i18n.translate(
-            'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutRuleTypeError',
-            {
-              defaultMessage: 'Rule type "{id}" has invalid minimum interval: {errorMessage}.',
-              values: {
-                id: ruleType.id,
-                errorMessage: invalidMinimumTimeout,
-              },
-            }
-          )
-        );
+      const defaultIntervalInMs = parseDuration(ruleType.defaultScheduleInterval);
+      const minimumIntervalInMs = parseDuration(this.minimumScheduleInterval.value);
+      if (defaultIntervalInMs < minimumIntervalInMs) {
+        if (this.minimumScheduleInterval.enforce) {
+          this.logger.warn(
+            `Rule type "${ruleType.id}" cannot specify a default interval less than the configured minimum of "${this.minimumScheduleInterval.value}". "${this.minimumScheduleInterval.value}" will be used.`
+          );
+          ruleType.defaultScheduleInterval = this.minimumScheduleInterval.value;
+        } else {
+          this.logger.warn(
+            `Rule type "${ruleType.id}" has a default interval of "${ruleType.defaultScheduleInterval}", which is less than the configured minimum of "${this.minimumScheduleInterval.value}".`
+          );
+        }
       }
     }
 
@@ -329,8 +341,8 @@ export class RuleTypeRegistry {
             minimumLicenseRequired,
             isExportable,
             ruleTaskTimeout,
-            minimumScheduleInterval,
             defaultScheduleInterval,
+            doesSetRecoveryContext,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -343,8 +355,8 @@ export class RuleTypeRegistry {
           minimumLicenseRequired,
           isExportable,
           ruleTaskTimeout,
-          minimumScheduleInterval,
           defaultScheduleInterval,
+          doesSetRecoveryContext,
           enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
             id,
             name,

@@ -39,6 +39,8 @@ exports[`Error CLOUD_PROVIDER 1`] = `"gcp"`;
 
 exports[`Error CLOUD_REGION 1`] = `"europe-west1"`;
 
+exports[`Error CLOUD_SERVICE_NAME 1`] = `undefined`;
+
 exports[`Error CLS_FIELD 1`] = `undefined`;
 
 exports[`Error CONTAINER_ID 1`] = `undefined`;
@@ -64,6 +66,12 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
+
+exports[`Error FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Error FAAS_ID 1`] = `undefined`;
+
+exports[`Error FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
 exports[`Error FCP_FIELD 1`] = `undefined`;
 
@@ -126,8 +134,6 @@ exports[`Error METRICSET_NAME 1`] = `undefined`;
 exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
-
-exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
 
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
@@ -286,6 +292,8 @@ exports[`Span CLOUD_PROVIDER 1`] = `"gcp"`;
 
 exports[`Span CLOUD_REGION 1`] = `"europe-west1"`;
 
+exports[`Span CLOUD_SERVICE_NAME 1`] = `undefined`;
+
 exports[`Span CLS_FIELD 1`] = `undefined`;
 
 exports[`Span CONTAINER_ID 1`] = `undefined`;
@@ -311,6 +319,12 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
+
+exports[`Span FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Span FAAS_ID 1`] = `undefined`;
+
+exports[`Span FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
 exports[`Span FCP_FIELD 1`] = `undefined`;
 
@@ -369,8 +383,6 @@ exports[`Span METRICSET_NAME 1`] = `undefined`;
 exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
-
-exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
 
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
@@ -525,6 +537,8 @@ exports[`Transaction CLOUD_PROVIDER 1`] = `"gcp"`;
 
 exports[`Transaction CLOUD_REGION 1`] = `"europe-west1"`;
 
+exports[`Transaction CLOUD_SERVICE_NAME 1`] = `undefined`;
+
 exports[`Transaction CLS_FIELD 1`] = `undefined`;
 
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
@@ -550,6 +564,12 @@ exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
+
+exports[`Transaction FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Transaction FAAS_ID 1`] = `undefined`;
+
+exports[`Transaction FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
 exports[`Transaction FCP_FIELD 1`] = `undefined`;
 
@@ -618,8 +638,6 @@ exports[`Transaction METRICSET_NAME 1`] = `undefined`;
 exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
-
-exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 

@@ -31,7 +31,6 @@ export class Actions extends AggregationHandler {
       const theCase = await casesClient.cases.get({
         id: caseId,
         includeComments: false,
-        includeSubCaseComments: false,
       });
 
       const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(

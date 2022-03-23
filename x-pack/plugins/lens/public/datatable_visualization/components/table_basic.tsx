@@ -58,6 +58,8 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const [firstTable] = Object.values(props.data.tables);
 
+  const isInteractive = props.interactive;
+
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
     sortingColumnId: props.args.sortingColumnId,
@@ -160,13 +162,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const handleFilterClick = useMemo(
-    () => createGridFilterHandler(firstTableRef, onClickValue),
-    [firstTableRef, onClickValue]
+    () => (isInteractive ? createGridFilterHandler(firstTableRef, onClickValue) : undefined),
+    [firstTableRef, onClickValue, isInteractive]
   );
 
   const handleTransposedColumnClick = useMemo(
-    () => createTransposeColumnFilterHandler(onClickValue, untransposedDataRef),
-    [onClickValue, untransposedDataRef]
+    () =>
+      isInteractive
+        ? createTransposeColumnFilterHandler(onClickValue, untransposedDataRef)
+        : undefined,
+    [onClickValue, untransposedDataRef, isInteractive]
   );
 
   const bucketColumns = useMemo(
@@ -206,8 +211,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onColumnHide = useMemo(
-    () => createGridHideHandler(columnConfig, setColumnConfig, onEditAction),
-    [onEditAction, setColumnConfig, columnConfig]
+    () =>
+      isInteractive
+        ? createGridHideHandler(columnConfig, setColumnConfig, onEditAction)
+        : undefined,
+    [onEditAction, setColumnConfig, columnConfig, isInteractive]
   );
 
   const isNumericMap: Record<string, boolean> = useMemo(() => {
@@ -247,6 +255,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     );
   }, [firstTable, isNumericMap, columnConfig]);
 
+  const headerRowHeight = props.args.headerRowHeight ?? 'single';
+  const headerRowLines = props.args.headerRowHeightLines ?? 1;
+
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
       createGridColumns(
@@ -260,7 +271,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         formatFactory,
         onColumnResize,
         onColumnHide,
-        alignments
+        alignments,
+        headerRowHeight,
+        headerRowLines
       ),
     [
       bucketColumns,
@@ -274,11 +287,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       onColumnResize,
       onColumnHide,
       alignments,
+      headerRowHeight,
+      headerRowLines,
     ]
   );
 
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
+    if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick || !isInteractive) {
       return [];
     }
     return [
@@ -311,7 +326,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         },
       },
     ];
-  }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
+  }, [
+    firstTableRef,
+    onRowContextMenuClick,
+    columnConfig,
+    hasAtLeastOneRowClickAction,
+    isInteractive,
+  ]);
 
   const renderCellValue = useMemo(
     () =>
@@ -320,9 +341,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         columnConfig,
         DataContext,
         props.uiSettings,
-        props.args.fitRowToContent
+        props.args.fitRowToContent,
+        props.args.rowHeightLines
       ),
-    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
+    [
+      formatters,
+      columnConfig,
+      props.uiSettings,
+      props.args.fitRowToContent,
+      props.args.rowHeightLines,
+    ]
   );
 
   const columnVisibility = useMemo(
@@ -333,7 +361,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [visibleColumns]
   );
 
-  const sorting = useMemo<EuiDataGridSorting>(
+  const sorting = useMemo<EuiDataGridSorting | undefined>(
     () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),
     [onEditAction, sortBy, sortDirection]
   );
@@ -400,13 +428,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
-          rowHeightsOptions={
-            props.args.fitRowToContent
+          rowHeightsOptions={{
+            defaultHeight: props.args.fitRowToContent
+              ? 'auto'
+              : props.args.rowHeightLines
               ? {
-                  defaultHeight: 'auto',
+                  lineCount: props.args.rowHeightLines,
                 }
-              : undefined
-          }
+              : undefined,
+          }}
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}

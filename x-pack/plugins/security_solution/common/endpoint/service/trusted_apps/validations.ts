@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  ConditionEntry,
-  ConditionEntryField,
-  OperatingSystem,
-  TrustedAppEntryTypes,
-} from '../../types';
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
+import { TrustedAppConditionEntry } from '../../types';
 
 const HASH_LENGTHS: readonly number[] = [
   32, // MD5
@@ -22,129 +18,18 @@ const INVALID_CHARACTERS_PATTERN = /[^0-9a-f]/i;
 export const isValidHash = (value: string) =>
   HASH_LENGTHS.includes(value.length) && !INVALID_CHARACTERS_PATTERN.test(value);
 
-export const getDuplicateFields = (entries: ConditionEntry[]) => {
-  const groupedFields = new Map<ConditionEntryField, ConditionEntry[]>();
+export const getDuplicateFields = (entries: TrustedAppConditionEntry[]) => {
+  const groupedFields = new Map<ConditionEntryField, TrustedAppConditionEntry[]>();
 
   entries.forEach((entry) => {
-    groupedFields.set(entry.field, [...(groupedFields.get(entry.field) || []), entry]);
+    // With the move to the Exception Lists api, the server side now validates individual
+    // `process.hash.[type]`'s, so we need to account for that here
+    const field = entry.field.startsWith('process.hash') ? ConditionEntryField.HASH : entry.field;
+
+    groupedFields.set(field, [...(groupedFields.get(field) || []), entry]);
   });
 
   return [...groupedFields.entries()]
     .filter((entry) => entry[1].length > 1)
     .map((entry) => entry[0]);
-};
-
-/*
- * regex to match executable names
- * starts matching from the eol of the path
- * file names with a single or multiple spaces (for spaced names)
- * and hyphens and combinations of these that produce complex names
- * such as:
- * c:\home\lib\dmp.dmp
- * c:\home\lib\my-binary-app-+/ some/  x/ dmp.dmp
- * /home/lib/dmp.dmp
- * /home/lib/my-binary-app+-\ some\  x\ dmp.dmp
- */
-const WIN_EXEC_PATH = /\\(\w+|\w*[\w+|-]+\/ +)+\w+[\w+|-]+\.*\w+$/i;
-const UNIX_EXEC_PATH = /(\/|\w*[\w+|-]+\\ +)+\w+[\w+|-]+\.*\w*$/i;
-
-export const hasSimpleExecutableName = ({
-  os,
-  type,
-  value,
-}: {
-  os: OperatingSystem;
-  type: TrustedAppEntryTypes;
-  value: string;
-}): boolean => {
-  if (type === 'wildcard') {
-    return os === OperatingSystem.WINDOWS ? WIN_EXEC_PATH.test(value) : UNIX_EXEC_PATH.test(value);
-  }
-  return true;
-};
-
-export const isPathValid = ({
-  os,
-  field,
-  type,
-  value,
-}: {
-  os: OperatingSystem;
-  field: ConditionEntryField;
-  type: TrustedAppEntryTypes;
-  value: string;
-}): boolean => {
-  if (field === ConditionEntryField.PATH) {
-    if (type === 'wildcard') {
-      return os === OperatingSystem.WINDOWS
-        ? isWindowsWildcardPathValid(value)
-        : isLinuxMacWildcardPathValid(value);
-    }
-    return doesPathMatchRegex({ value, os });
-  }
-  return true;
-};
-
-const doesPathMatchRegex = ({ os, value }: { os: OperatingSystem; value: string }): boolean => {
-  if (os === OperatingSystem.WINDOWS) {
-    const filePathRegex =
-      /^[a-z]:(?:|\\\\[^<>:"'/\\|?*]+\\[^<>:"'/\\|?*]+|%\w+%|)[\\](?:[^<>:"'/\\|?*]+[\\/])*([^<>:"'/\\|?*])+$/i;
-    return filePathRegex.test(value);
-  }
-  return /^(\/|(\/[\w\-]+)+|\/[\w\-]+\.[\w]+|(\/[\w-]+)+\/[\w\-]+\.[\w]+)$/i.test(value);
-};
-
-const isWindowsWildcardPathValid = (path: string): boolean => {
-  const firstCharacter = path[0];
-  const lastCharacter = path.slice(-1);
-  const trimmedValue = path.trim();
-  const hasSlash = /\//.test(trimmedValue);
-  if (path.length === 0) {
-    return false;
-  } else if (
-    hasSlash ||
-    trimmedValue.length !== path.length ||
-    firstCharacter === '^' ||
-    lastCharacter === '\\' ||
-    !hasWildcard({ path, isWindowsPath: true })
-  ) {
-    return false;
-  } else {
-    return true;
-  }
-};
-
-const isLinuxMacWildcardPathValid = (path: string): boolean => {
-  const firstCharacter = path[0];
-  const lastCharacter = path.slice(-1);
-  const trimmedValue = path.trim();
-  if (path.length === 0) {
-    return false;
-  } else if (
-    trimmedValue.length !== path.length ||
-    firstCharacter !== '/' ||
-    lastCharacter === '/' ||
-    path.length > 1024 === true ||
-    path.includes('//') === true ||
-    !hasWildcard({ path, isWindowsPath: false })
-  ) {
-    return false;
-  } else {
-    return true;
-  }
-};
-
-const hasWildcard = ({
-  path,
-  isWindowsPath,
-}: {
-  path: string;
-  isWindowsPath: boolean;
-}): boolean => {
-  for (const pathComponent of path.split(isWindowsPath ? '\\' : '/')) {
-    if (/[\*|\?]+/.test(pathComponent) === true) {
-      return true;
-    }
-  }
-  return false;
 };

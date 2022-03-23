@@ -35,7 +35,7 @@ const savedObjectsService = savedObjectsServiceMock.createInternalStartContract(
 const securityPluginSetup = securityMock.createSetup();
 const securityPluginStart = securityMock.createStart();
 
-const alertsAuthorization = alertingAuthorizationMock.create();
+const alertingAuthorization = alertingAuthorizationMock.create();
 const alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMock.createFactory();
 
 const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
@@ -44,6 +44,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
+  minimumScheduleInterval: { value: '1m', enforce: false },
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
   actions: actionsMock.createStart(),
   eventLog: eventLogMock.createStart(),
@@ -81,14 +82,14 @@ beforeEach(() => {
   rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
 });
 
-test('creates an alerts client with proper constructor arguments when security is enabled', async () => {
+test('creates a rules client with proper constructor arguments when security is enabled', async () => {
   const factory = new RulesClientFactory();
   factory.initialize({ securityPluginSetup, securityPluginStart, ...rulesClientFactoryParams });
   const request = KibanaRequest.from(fakeRequest);
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   alertingAuthorizationClientFactory.create.mockReturnValue(
-    alertsAuthorization as unknown as AlertingAuthorization
+    alertingAuthorization as unknown as AlertingAuthorization
   );
 
   factory.create(request, savedObjectsService);
@@ -106,7 +107,7 @@ test('creates an alerts client with proper constructor arguments when security i
 
   expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,
-    authorization: alertsAuthorization,
+    authorization: alertingAuthorization,
     actionsAuthorization,
     logger: rulesClientFactoryParams.logger,
     taskManager: rulesClientFactoryParams.taskManager,
@@ -119,17 +120,18 @@ test('creates an alerts client with proper constructor arguments when security i
     createAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
+    minimumScheduleInterval: { value: '1m', enforce: false },
   });
 });
 
-test('creates an alerts client with proper constructor arguments', async () => {
+test('creates a rules client with proper constructor arguments', async () => {
   const factory = new RulesClientFactory();
   factory.initialize(rulesClientFactoryParams);
   const request = KibanaRequest.from(fakeRequest);
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   alertingAuthorizationClientFactory.create.mockReturnValue(
-    alertsAuthorization as unknown as AlertingAuthorization
+    alertingAuthorization as unknown as AlertingAuthorization
   );
 
   factory.create(request, savedObjectsService);
@@ -143,7 +145,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
 
   expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,
-    authorization: alertsAuthorization,
+    authorization: alertingAuthorization,
     actionsAuthorization,
     logger: rulesClientFactoryParams.logger,
     taskManager: rulesClientFactoryParams.taskManager,
@@ -156,6 +158,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     kibanaVersion: '7.10.0',
+    minimumScheduleInterval: { value: '1m', enforce: false },
   });
 });
 

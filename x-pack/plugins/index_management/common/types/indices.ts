@@ -52,14 +52,16 @@ export interface IndexSettings {
 }
 
 export interface Index {
-  health: string;
-  status: string;
+  health?: string;
+  status?: string;
   name: string;
-  uuid: string;
-  primary: string;
-  replica: string;
-  documents?: string;
-  size: any;
+  uuid?: string;
+  primary?: number | string;
+  replica?: number | string;
+  documents: number;
+  documents_deleted: number;
+  size: string;
+  primary_size: string;
   isFrozen: boolean;
   hidden: boolean;
   aliases: string | string[];

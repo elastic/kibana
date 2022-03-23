@@ -25,11 +25,13 @@ import {
   HostItem,
   HostsSortField,
   HostsFields,
-  HostRiskSeverity,
 } from '../../../../common/search_strategy/security_solution/hosts';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, RiskSeverity } from '../../../../common/search_strategy';
 import { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { SecurityPageName } from '../../../../common/constants';
+import { HostsTableType } from '../../store/model';
+import { useNavigateTo } from '../../../common/lib/kibana/hooks';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -50,7 +52,7 @@ export type HostsTableColumns = [
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
-  Columns<HostRiskSeverity>?
+  Columns<RiskSeverity>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -80,10 +82,12 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
+  const { navigateTo } = useNavigateTo();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
   );
+
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(
@@ -129,9 +133,25 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
+  const dispatchSeverityUpdate = useCallback(
+    (s: RiskSeverity) => {
+      dispatch(
+        hostsActions.updateHostRiskScoreSeverityFilter({
+          severitySelection: [s],
+          hostsType: type,
+        })
+      );
+      navigateTo({
+        deepLinkId: SecurityPageName.hosts,
+        path: HostsTableType.risk,
+      });
+    },
+    [dispatch, navigateTo, type]
+  );
+
   const hostsColumns = useMemo(
-    () => getHostsColumns(riskyHostsFeatureEnabled),
-    [riskyHostsFeatureEnabled]
+    () => getHostsColumns(riskyHostsFeatureEnabled, dispatchSeverityUpdate),
+    [dispatchSeverityUpdate, riskyHostsFeatureEnabled]
   );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);

@@ -11,11 +11,8 @@ import { TrustedAppsPage } from './trusted_apps_page';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
-import {
-  ConditionEntryField,
-  OperatingSystem,
-  TrustedApp,
-} from '../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { TrustedApp } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy_select/test_utils';
@@ -24,6 +21,7 @@ import { licenseService } from '../../../../common/hooks/use_license';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { trustedAppsAllHttpMocks } from '../../mocks';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -49,11 +47,17 @@ describe('When on the Trusted Apps Page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
   let mockedApis: ReturnType<typeof trustedAppsAllHttpMocks>;
+  let getFakeTrustedApp = jest.fn();
 
   const originalScrollTo = window.scrollTo;
   const act = reactTestingLibrary.act;
-  const getFakeTrustedApp = jest.fn();
+  const waitForListUI = async (): Promise<void> => {
+    await waitFor(() => {
+      expect(renderResult.getByTestId('trustedAppsListPageContent')).toBeTruthy();
+    });
+  };
 
   beforeAll(() => {
     window.scrollTo = () => {};
@@ -65,7 +69,7 @@ describe('When on the Trusted Apps Page', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    getFakeTrustedApp.mockImplementation(
+    getFakeTrustedApp = jest.fn(
       (): TrustedApp => ({
         id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
         version: 'abc123',
@@ -93,7 +97,7 @@ describe('When on the Trusted Apps Page', () => {
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     mockedApis = trustedAppsAllHttpMocks(coreStart.http);
-    render = () => mockedContext.render(<TrustedAppsPage />);
+    render = () => (renderResult = mockedContext.render(<TrustedAppsPage />));
     reactTestingLibrary.act(() => {
       history.push('/administration/trusted_apps');
     });
@@ -104,10 +108,11 @@ describe('When on the Trusted Apps Page', () => {
 
   describe('and there are trusted app entries', () => {
     const renderWithListData = async () => {
-      const renderResult = render();
+      render();
       await act(async () => {
-        await waitForAction('trustedAppsListResourceStateChanged');
+        await waitForListUI();
       });
+
       return renderResult;
     };
 
@@ -123,15 +128,13 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should display the searchExceptions', async () => {
-      const renderResult = await renderWithListData();
+      await renderWithListData();
       expect(await renderResult.findByTestId('searchExceptions')).not.toBeNull();
     });
 
     describe('and the Grid view is being displayed', () => {
-      let renderResult: ReturnType<AppContextTestRender['render']>;
-
       const renderWithListDataAndClickOnEditCard = async () => {
-        renderResult = await renderWithListData();
+        await renderWithListData();
 
         await act(async () => {
           // The 3rd Trusted app to be rendered will be a policy specific one
@@ -146,7 +149,7 @@ describe('When on the Trusted Apps Page', () => {
       const renderWithListDataAndClickAddButton = async (): Promise<
         ReturnType<AppContextTestRender['render']>
       > => {
-        renderResult = await renderWithListData();
+        await renderWithListData();
 
         act(() => {
           const addButton = renderResult.getByTestId('trustedAppsListAddButton');
@@ -219,7 +222,7 @@ describe('When on the Trusted Apps Page', () => {
 
         it('should persist edit params to url', () => {
           expect(history.location.search).toEqual(
-            '?show=edit&id=2d95bec3-b48f-4db7-9622-a2b061cc031d'
+            '?show=edit&id=bec3b48f-ddb7-4622-a2b0-61cc031d17eb'
           );
         });
 
@@ -251,7 +254,7 @@ describe('When on the Trusted Apps Page', () => {
             'addTrustedAppFlyout-createForm-descriptionField'
           ) as HTMLTextAreaElement;
 
-          expect(formNameInput.value).toEqual('Generated Exception (3xnng)');
+          expect(formNameInput.value).toEqual('Generated Exception (nng74)');
           expect(formDescriptionInput.value).toEqual('created by ExceptionListItemGenerator');
         });
 
@@ -276,15 +279,15 @@ describe('When on the Trusted Apps Page', () => {
             expect(lastCallToPut[0]).toEqual('/api/exception_lists/items');
 
             expect(JSON.parse(lastCallToPut[1].body as string)).toEqual({
-              _version: '3o9za',
-              name: 'Generated Exception (3xnng)',
+              _version: '9zawi',
+              name: 'Generated Exception (nng74)',
               description: 'created by ExceptionListItemGenerator',
               entries: [
                 {
                   field: 'process.hash.md5',
                   operator: 'included',
                   type: 'match',
-                  value: '1234234659af249ddf3e40864e9fb241',
+                  value: '741462ab431a22233c787baab9b653c7',
                 },
                 {
                   field: 'process.executable.caseless',
@@ -300,8 +303,7 @@ describe('When on the Trusted Apps Page', () => {
               ],
               id: '05b5e350-0cad-4dc3-a61d-6e6796b0af39',
               comments: [],
-              item_id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
-              meta: {},
+              item_id: 'bec3b48f-ddb7-4622-a2b0-61cc031d17eb',
               namespace_type: 'agnostic',
               type: 'simple',
             });
@@ -322,7 +324,7 @@ describe('When on the Trusted Apps Page', () => {
             }
           );
 
-          renderResult = await renderWithListData();
+          await renderWithListData();
 
           await reactTestingLibrary.act(async () => {
             await apiResponseForEditTrustedApp;
@@ -338,7 +340,7 @@ describe('When on the Trusted Apps Page', () => {
         });
 
         it('should retrieve trusted app via API using url `id`', async () => {
-          renderResult = await renderAndWaitForGetApi();
+          await renderAndWaitForGetApi();
 
           expect(coreStart.http.get.mock.calls).toContainEqual([
             EXCEPTION_LIST_ITEM_URL,
@@ -393,7 +395,7 @@ describe('When on the Trusted Apps Page', () => {
     const renderAndClickAddButton = async (): Promise<
       ReturnType<AppContextTestRender['render']>
     > => {
-      const renderResult = render();
+      render();
       await act(async () => {
         await Promise.all([
           waitForAction('trustedAppsListResourceStateChanged'),
@@ -461,7 +463,7 @@ describe('When on the Trusted Apps Page', () => {
 
     it('should have list of policies populated', async () => {
       const resetEnv = forceHTMLElementOffsetWidth();
-      const renderResult = await renderAndClickAddButton();
+      await renderAndClickAddButton();
       act(() => {
         fireEvent.click(renderResult.getByTestId('perPolicy'));
       });
@@ -510,8 +512,7 @@ describe('When on the Trusted Apps Page', () => {
       };
 
       it('should enable the Flyout Add button', async () => {
-        const renderResult = await renderAndClickAddButton();
-
+        await renderAndClickAddButton();
         await fillInCreateForm();
 
         const flyoutAddButton = renderResult.getByTestId(
@@ -522,7 +523,6 @@ describe('When on the Trusted Apps Page', () => {
       });
 
       describe('and the Flyout Add button is clicked', () => {
-        let renderResult: ReturnType<AppContextTestRender['render']>;
         let releasePostCreateApi: () => void;
 
         beforeEach(async () => {
@@ -534,7 +534,7 @@ describe('When on the Trusted Apps Page', () => {
             })
           );
 
-          renderResult = await renderAndClickAddButton();
+          await renderAndClickAddButton();
           await fillInCreateForm();
 
           const userClickedSaveActionWatcher = waitForAction('trustedAppCreationDialogConfirmed');
@@ -596,7 +596,7 @@ describe('When on the Trusted Apps Page', () => {
 
           it('should show success toast notification', () => {
             expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual({
-              text: '"Generated Exception (3xnng)" has been added to the Trusted Applications list.',
+              text: '"Generated Exception (3xnng)" has been added to the trusted applications list.',
               title: 'Success!',
             });
           });
@@ -672,7 +672,7 @@ describe('When on the Trusted Apps Page', () => {
 
     describe('and when the form data is not valid', () => {
       it('should not enable the Flyout Add button with an invalid hash', async () => {
-        const renderResult = await renderAndClickAddButton();
+        await renderAndClickAddButton();
         const { getByTestId } = renderResult;
 
         reactTestingLibrary.act(() => {
@@ -730,12 +730,12 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should show a loader until trusted apps existence can be confirmed', async () => {
-      const renderResult = render();
+      render();
       expect(await renderResult.findByTestId('trustedAppsListLoader')).not.toBeNull();
     });
 
     it('should show Empty Prompt if not entries exist', async () => {
-      const renderResult = render();
+      render();
       await act(async () => {
         await waitForAction('trustedAppsExistStateChanged');
       });
@@ -743,7 +743,7 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should hide empty prompt and show list after one trusted app is added', async () => {
-      const renderResult = render();
+      render();
       await act(async () => {
         await waitForAction('trustedAppsExistStateChanged');
       });
@@ -785,7 +785,7 @@ describe('When on the Trusted Apps Page', () => {
         per_page: 1,
       });
 
-      const renderResult = render();
+      render();
 
       await act(async () => {
         await waitForAction('trustedAppsExistStateChanged');
@@ -804,7 +804,7 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should not display the searchExceptions', async () => {
-      const renderResult = render();
+      render();
       await act(async () => {
         await waitForAction('trustedAppsExistStateChanged');
       });
@@ -813,14 +813,13 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and the search is dispatched', () => {
-    let renderResult: ReturnType<AppContextTestRender['render']>;
     beforeEach(async () => {
       reactTestingLibrary.act(() => {
         history.push('/administration/trusted_apps?filter=test');
       });
-      renderResult = render();
+      render();
       await act(async () => {
-        await waitForAction('trustedAppsListResourceStateChanged');
+        await waitForListUI();
       });
     });
 
@@ -837,11 +836,10 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and the back button is present', () => {
-    let renderResult: ReturnType<AppContextTestRender['render']>;
     beforeEach(async () => {
-      renderResult = render();
+      render();
       await act(async () => {
-        await waitForAction('trustedAppsListResourceStateChanged');
+        await waitForListUI();
       });
       reactTestingLibrary.act(() => {
         history.push('/administration/trusted_apps', {
@@ -858,11 +856,30 @@ describe('When on the Trusted Apps Page', () => {
       expect(button).toHaveAttribute('href', '/fleet');
     });
 
-    it('back button is not present', () => {
+    it('back button is present after push history', () => {
       reactTestingLibrary.act(() => {
         history.push('/administration/trusted_apps');
       });
-      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+  });
+
+  describe('and the back button is not present', () => {
+    beforeEach(async () => {
+      render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+      reactTestingLibrary.act(() => {
+        history.push('/administration/trusted_apps');
+      });
+    });
+
+    it('back button is not present when missing history params', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).toBeNull();
     });
   });
 });

@@ -63,7 +63,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "# Sample."\n| render css=".canvasRenderEl h1 {\ntext-align: center;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Sample."\n| render css=".canvasRenderEl h1 {\ntext-align: center;\n}"',
           },
           {
             id: 'element-33286979-7ea0-41ce-9835-b3bf07f09272',
@@ -76,7 +76,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "### This is a subtitle"\n| render css=".canvasRenderEl h3 {\ntext-align: center;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "### This is a subtitle"\n| render css=".canvasRenderEl h3 {\ntext-align: center;\n}"',
           },
           {
             id: 'element-1e3b3ffe-4ed8-4376-aad3-77e06d29cafe',
@@ -89,7 +89,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "Footnote can go here"\n| render \n  css=".canvasRenderEl p {\ntext-align: center;\ncolor: #FFFFFF;\nfont-size: 18px;\nopacity: .7;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "Footnote can go here"\n| render \n  css=".canvasRenderEl p {\ntext-align: center;\ncolor: #FFFFFF;\nfont-size: 18px;\nopacity: .7;\n}"',
           },
           {
             id: 'element-5b5035a3-d5b7-4483-a240-2cf80f5e0acf',
@@ -150,7 +150,8 @@ export const pitch: CanvasTemplate = {
               angle: 0,
               parent: null,
             },
-            expression: 'filters\n| demodata\n| markdown "##### CATEGORY 01"\n| render',
+            expression:
+              'kibana\n| selectFilter\n| demodata\n| markdown "##### CATEGORY 01"\n| render',
           },
           {
             id: 'element-96a390b6-3d0a-4372-89cb-3ff38eec9565',
@@ -162,7 +163,8 @@ export const pitch: CanvasTemplate = {
               angle: 0,
               parent: null,
             },
-            expression: 'filters\n| demodata\n| markdown "## Half text, half _image._"\n| render',
+            expression:
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Half text, half _image._"\n| render',
           },
           {
             id: 'element-118b848d-0f89-4d20-868c-21597b7fd5e0',
@@ -188,7 +190,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
           },
         ],
         groups: [],
@@ -223,7 +225,7 @@ export const pitch: CanvasTemplate = {
               angle: 0,
               parent: null,
             },
-            expression: 'filters\n| demodata\n| markdown "##### BIOS"\n| render',
+            expression: 'kibana\n| selectFilter\n| demodata\n| markdown "##### BIOS"\n| render',
           },
           {
             id: 'element-e2c658ee-7614-4d92-a46e-2b1a81a24485',
@@ -236,7 +238,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Jane Doe" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Jane Doe" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-3d16765e-5251-4954-8e2a-6c64ed465b73',
@@ -249,7 +251,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "### Developer" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h3 {\ncolor: #444444;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "### Developer" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h3 {\ncolor: #444444;\n}"',
           },
           {
             id: 'element-624675cf-46e9-4545-b86a-5409bbe53ac1',
@@ -262,7 +264,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel sollicitudin mauris, ut scelerisque urna. " \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel sollicitudin mauris, ut scelerisque urna. " \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-dc841809-d2a9-491b-b44f-be92927b8034',
@@ -301,7 +303,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel sollicitudin mauris, ut scelerisque urna. " \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel sollicitudin mauris, ut scelerisque urna. " \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-62f241ec-71ce-4edb-a27b-0de990522d20',
@@ -314,7 +316,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "### Designer" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h3 {\ncolor: #444444;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "### Designer" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h3 {\ncolor: #444444;\n}"',
           },
           {
             id: 'element-aa6c07e0-937f-4362-9d52-f70738faa0c5',
@@ -340,7 +342,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## John Smith" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## John Smith" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
           },
         ],
         groups: [],
@@ -388,7 +390,8 @@ export const pitch: CanvasTemplate = {
               angle: 0,
               parent: null,
             },
-            expression: 'filters\n| demodata\n| markdown "##### CATEGORY 10"\n| render',
+            expression:
+              'kibana\n| selectFilter\n| demodata\n| markdown "##### CATEGORY 10"\n| render',
           },
           {
             id: 'element-96be0724-0945-4802-8929-1dc456192fb5',
@@ -401,7 +404,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Another page style."\n| render css=".canvasRenderEl h2 {\nfont-size: 64px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Another page style."\n| render css=".canvasRenderEl h2 {\nfont-size: 64px;\n}"',
           },
           {
             id: 'element-3b4ba0ff-7f95-460e-9fa6-0cbb0f8f3df8',
@@ -427,7 +430,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
           },
           {
             id: 'element-0b9aa82b-fb0c-4000-805b-146cc9280bc5',
@@ -440,7 +443,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "### Introduction"\n| render css=".canvasRenderEl h3 {\ncolor: #444444;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "### Introduction"\n| render css=".canvasRenderEl h3 {\ncolor: #444444;\n}"',
           },
         ],
         groups: [],
@@ -489,7 +492,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "##### CATEGORY 01"\n| render css=".canvasRenderEl h5 {\ncolor: #45bdb0;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "##### CATEGORY 01"\n| render css=".canvasRenderEl h5 {\ncolor: #45bdb0;\n}"',
           },
           {
             id: 'element-1ba728f0-f645-4910-9d32-fa5b5820a94c',
@@ -502,7 +505,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Cras dapibus urna non feugiat imperdiet. Donec mauris, ut scelerisque urna. Sed vel neque quis metus luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Cras dapibus urna non feugiat imperdiet. Donec mauris, ut scelerisque urna. Sed vel neque quis metus luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-db9051eb-7699-4883-b67f-945979cf5650',
@@ -528,7 +531,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=30 align="center" color="#45bdb0" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=30 align="center" color="#45bdb0" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render',
           },
           {
             id: 'element-fc11525c-2d9c-4a7b-9d96-d54e7bc6479b',
@@ -554,7 +557,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Cras dapibus urna non feugiat imperdiet. Donec mauris, ut scelerisque urna. Sed vel neque quis metus luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Cras dapibus urna non feugiat imperdiet. Donec mauris, ut scelerisque urna. Sed vel neque quis metus luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-eb9a8883-de47-4a46-9400-b7569f9e69e6',
@@ -567,7 +570,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=30 align="center" color="#45bdb0" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=30 align="center" color="#45bdb0" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render',
           },
           {
             id: 'element-20c1c86a-658b-4bd2-8326-f987ef84e730',
@@ -580,7 +583,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Cras dapibus urna non feugiat imperdiet. Donec mauris, ut scelerisque urna. Sed vel neque quis metus luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Cras dapibus urna non feugiat imperdiet. Donec mauris, ut scelerisque urna. Sed vel neque quis metus luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-335db0c3-f678-4cb8-8b93-a6494f1787f5',
@@ -593,7 +596,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=30 align="center" color="#45bdb0" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=30 align="center" color="#45bdb0" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render',
           },
           {
             id: 'element-079d3cbf-8b15-4ce2-accb-6ba04481019d',
@@ -667,7 +670,8 @@ export const pitch: CanvasTemplate = {
               angle: 0,
               parent: null,
             },
-            expression: 'filters\n| demodata\n| markdown "##### CATEGORY 01"\n| render',
+            expression:
+              'kibana\n| selectFilter\n| demodata\n| markdown "##### CATEGORY 01"\n| render',
           },
           {
             id: 'element-0f2b9268-f0bd-41b7-abc8-5593276f26fa',
@@ -680,7 +684,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Bold title text goes _here_."\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Bold title text goes _here_."\n| render',
           },
           {
             id: 'element-4f4b503e-f1ef-4ab7-aa1d-5d95b3e2e605',
@@ -706,7 +710,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
           },
           {
             id: 'element-f3f28541-06fe-47ea-89b7-1c5831e28e71',
@@ -719,7 +723,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "Caption text goes here" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="right" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\nfont-size: 18px;\nopacity: .8;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "Caption text goes here" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="right" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\nfont-size: 18px;\nopacity: .8;\n}"',
           },
         ],
         groups: [],
@@ -768,7 +772,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "##### CATEGORY 01"\n| render css=".canvasRenderEl h5 {\ncolor: #45bdb0;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "##### CATEGORY 01"\n| render css=".canvasRenderEl h5 {\ncolor: #45bdb0;\n}"',
           },
           {
             id: 'element-5afa7019-af44-4919-9e11-24e2348cfae9',
@@ -781,7 +785,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Title for live charts."\n| render css=".canvasRenderEl h2 {\ncolor: #FFFFFF;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Title for live charts."\n| render css=".canvasRenderEl h2 {\ncolor: #FFFFFF;\n}"',
           },
           {
             id: 'element-7b856b52-0d8b-492b-a71f-3508a84388a6',
@@ -820,7 +824,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## _Charts with live data._"\n| render css=".canvasRenderEl h1 {\n\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## _Charts with live data._"\n| render css=".canvasRenderEl h1 {\n\n}"',
           },
           {
             id: 'element-317bed0b-f067-4d2d-8cb4-1145f6e0a11c',
@@ -833,7 +837,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="horizontalBar" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=18 align="center" color="#444444" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render css=".canvasRenderEl {\nwidth: 100%;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="horizontalBar" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=18 align="center" color="#444444" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render css=".canvasRenderEl {\nwidth: 100%;\n}"',
           },
           {
             id: 'element-34385617-6eb7-4918-b4db-1a0e8dd6eabe',
@@ -846,7 +850,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="horizontalBar" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=18 align="center" color="#444444" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render css=".canvasRenderEl {\nwidth: 100%;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="horizontalBar" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=18 align="center" color="#444444" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render css=".canvasRenderEl {\nwidth: 100%;\n}"',
           },
           {
             id: 'element-b22a35eb-b177-4664-800e-57b91436a879',
@@ -859,7 +863,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="horizontalBar" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=18 align="center" color="#444444" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render css=".canvasRenderEl {\nwidth: 100%;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="horizontalBar" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=18 align="center" color="#444444" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render css=".canvasRenderEl {\nwidth: 100%;\n}"',
           },
           {
             id: 'element-651f8a4a-6069-49bf-a7b0-484854628a79',
@@ -872,7 +876,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="horizontalBar" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=18 align="center" color="#444444" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render css=".canvasRenderEl {\nwidth: 100%;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="horizontalBar" label={formatnumber "0%"} \n  font={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=18 align="center" color="#444444" weight="bold" underline=false italic=false} valueColor="#45bdb0" valueWeight=15 barColor="#444444" barWeight=15\n| render css=".canvasRenderEl {\nwidth: 100%;\n}"',
           },
           {
             id: 'element-0ee8c529-4155-442f-8c7c-1df86be37051',
@@ -885,7 +889,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
           },
           {
             id: 'element-3fb61301-3dc2-411f-ac69-ad22bd37c77d',
@@ -898,7 +902,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Cras dapibus urna non feugiat imperdiet. \n\nDonec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Cras dapibus urna non feugiat imperdiet. \n\nDonec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render',
           },
         ],
         groups: [],
@@ -960,7 +964,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "##### CATEGORY 01"\n| render css=".canvasRenderEl h5 {\ncolor: #45bdb0;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "##### CATEGORY 01"\n| render css=".canvasRenderEl h5 {\ncolor: #45bdb0;\n}"',
           },
           {
             id: 'element-8b9d3e2b-1d7b-48f4-897c-bf48f0f363d4',
@@ -973,7 +977,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Title on a _dark_ background."\n| render css=".canvasRenderEl h2 {\ncolor: #FFFFFF;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Title on a _dark_ background."\n| render css=".canvasRenderEl h2 {\ncolor: #FFFFFF;\n}"',
           },
           {
             id: 'element-080c3153-45f7-4efc-8b23-ed7735da426f',
@@ -999,7 +1003,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dapibus urna non feugiat imperdiet. Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus."\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\n}"',
           },
         ],
         groups: [],
@@ -1021,7 +1025,8 @@ export const pitch: CanvasTemplate = {
               angle: 0,
               parent: null,
             },
-            expression: 'filters\n| demodata\n| markdown "## Bullet point layout style"\n| render',
+            expression:
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Bullet point layout style"\n| render',
           },
           {
             id: 'element-37dc903a-1c6d-4452-8fc0-38d4afa4631a',
@@ -1034,7 +1039,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "- Dolor sit amet, consectetur adipiscing elit\n- Cras dapibus urna non feugiat imperdiet\n- Donec vel sollicitudin mauris, ut scelerisque urna\n- Sed vel neque quis metus vulputate luctus\n- Dolor sit amet, consectetur adipiscing elit\n- Cras dapibus urna non feugiat imperdiet\n- Donec vel sollicitudin mauris, ut scelerisque urna\n- Sed vel neque quis metus vulputate luctus"\n| render css=".canvasRenderEl li {\nfont-size: 24px;\nline-height: 30px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "- Dolor sit amet, consectetur adipiscing elit\n- Cras dapibus urna non feugiat imperdiet\n- Donec vel sollicitudin mauris, ut scelerisque urna\n- Sed vel neque quis metus vulputate luctus\n- Dolor sit amet, consectetur adipiscing elit\n- Cras dapibus urna non feugiat imperdiet\n- Donec vel sollicitudin mauris, ut scelerisque urna\n- Sed vel neque quis metus vulputate luctus"\n| render css=".canvasRenderEl li {\nfont-size: 24px;\nline-height: 30px;\n}"',
           },
           {
             id: 'element-e506de9d-bda1-4018-89bf-f8d02ee5738e',
@@ -1047,7 +1052,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Vel sollicitudin mauris, ut scelerisque urna." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#000000" weight="normal" underline=false italic=true}\n| render css=".canvasRenderEl p {\nfont-size: 18px;\nopacity: .8;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Vel sollicitudin mauris, ut scelerisque urna." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#000000" weight="normal" underline=false italic=true}\n| render css=".canvasRenderEl p {\nfont-size: 18px;\nopacity: .8;\n}"',
           },
           {
             id: 'element-ea5319f5-d204-48c5-a9a0-0724676869a6',
@@ -1073,7 +1078,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "### Subtitle goes here"\n| render css=".canvasRenderEl h3 {\ncolor: #45bdb0;\ntext-transform: none;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "### Subtitle goes here"\n| render css=".canvasRenderEl h3 {\ncolor: #45bdb0;\ntext-transform: none;\n}"',
           },
         ],
         groups: [],
@@ -1095,7 +1100,8 @@ export const pitch: CanvasTemplate = {
               angle: 0,
               parent: null,
             },
-            expression: 'filters\n| demodata\n| markdown "## Paragraph layout style"\n| render',
+            expression:
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Paragraph layout style"\n| render',
           },
           {
             id: 'element-92b05ab1-c504-4110-a8ad-73d547136024',
@@ -1108,7 +1114,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Proin ipsum orci, consectetur a lacus vel, varius rutrum neque. Mauris quis gravida tellus. Integer quis tellus non lectus vestibulum fermentum. Quisque tortor justo, vulputate quis mollis eu, molestie eu ex. Nam eu arcu ac dui mattis facilisis aliquam venenatis est. Quisque tempor risus quis arcu viverra, quis consequat dolor molestie. Sed sed arcu dictum, sollicitudin dui id, iaculis elit. Nunc odio ex, placerat sed hendrerit vitae, finibus eu felis. Sed vulputate mi diam, at dictum mi tempus eu.\n\nClass aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vivamus malesuada tortor vel eleifend lobortis. Donec vestibulum neque vel neque vehicula auctor. Proin id felis a leo ultrices maximus."\n| render css=".canvasRenderEl p {\nfont-size: 24px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Proin ipsum orci, consectetur a lacus vel, varius rutrum neque. Mauris quis gravida tellus. Integer quis tellus non lectus vestibulum fermentum. Quisque tortor justo, vulputate quis mollis eu, molestie eu ex. Nam eu arcu ac dui mattis facilisis aliquam venenatis est. Quisque tempor risus quis arcu viverra, quis consequat dolor molestie. Sed sed arcu dictum, sollicitudin dui id, iaculis elit. Nunc odio ex, placerat sed hendrerit vitae, finibus eu felis. Sed vulputate mi diam, at dictum mi tempus eu.\n\nClass aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vivamus malesuada tortor vel eleifend lobortis. Donec vestibulum neque vel neque vehicula auctor. Proin id felis a leo ultrices maximus."\n| render css=".canvasRenderEl p {\nfont-size: 24px;\n}"',
           },
           {
             id: 'element-e49141ec-3034-4bec-88ca-f9606d12a60a',
@@ -1134,7 +1140,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "### Subtitle goes here"\n| render css=".canvasRenderEl h3 {\ncolor: #45bdb0;\ntext-transform: none;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "### Subtitle goes here"\n| render css=".canvasRenderEl h3 {\ncolor: #45bdb0;\ntext-transform: none;\n}"',
           },
         ],
         groups: [],
@@ -1170,7 +1176,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Title text can also go _here_ on multiple lines." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h2 {\ncolor: #FFFFFF;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Title text can also go _here_ on multiple lines." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h2 {\ncolor: #FFFFFF;\n}"',
           },
           {
             id: 'element-a8e0d4b3-864d-4dae-b0dc-64caad06c106',
@@ -1196,7 +1202,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Vivamus malesuada tortor vel eleifend lobortis. Donec vestibulum neque vel neque vehicula auctor. Proin id felis a leo ultrices maximus. Nam est nulla, venenatis at mi et, sodales convallis eros. Aliquam a convallis justo, eu viverra augue. Donec mollis ipsum sed orci posuere, vel posuere neque tempus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Vivamus malesuada tortor vel eleifend lobortis. Donec vestibulum neque vel neque vehicula auctor. Proin id felis a leo ultrices maximus. Nam est nulla, venenatis at mi et, sodales convallis eros. Aliquam a convallis justo, eu viverra augue. Donec mollis ipsum sed orci posuere, vel posuere neque tempus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\n}"',
           },
           {
             id: 'element-b54e2908-6908-4dd6-90f1-3ca489807016',
@@ -1222,7 +1228,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Vivamus malesuada tortor vel eleifend lobortis. Donec vestibulum neque vel neque vehicula auctor. Proin id felis a leo ultrices maximus. Nam est nulla, venenatis at mi et, sodales convallis eros. Aliquam a convallis justo, eu viverra augue. Donec mollis ipsum sed orci posuere, vel posuere neque tempus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Vivamus malesuada tortor vel eleifend lobortis. Donec vestibulum neque vel neque vehicula auctor. Proin id felis a leo ultrices maximus. Nam est nulla, venenatis at mi et, sodales convallis eros. Aliquam a convallis justo, eu viverra augue. Donec mollis ipsum sed orci posuere, vel posuere neque tempus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\n}"',
           },
           {
             id: 'element-aa54f47c-fecf-4bdb-ac1d-b815d4a8d71d',
@@ -1235,7 +1241,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## This title is a _centered_  layout." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h2 {\ncolor: #FFFFFF;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## This title is a _centered_  layout." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h2 {\ncolor: #FFFFFF;\n}"',
           },
           {
             id: 'element-6ae072e7-213c-4de9-af22-7fb3e254cf52',
@@ -1284,7 +1290,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "## \\"Aliquam mollis auctor nisl vitae varius. Donec nunc turpis, condimentum non sagittis tristique, sollicitudin blandit sem.\\"" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=true}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "## \\"Aliquam mollis auctor nisl vitae varius. Donec nunc turpis, condimentum non sagittis tristique, sollicitudin blandit sem.\\"" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=true}\n| render',
           },
           {
             id: 'element-989daff8-3571-4e02-b5fc-26657b2d9aaf',
@@ -1310,7 +1316,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "### Lorem Ipsum" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h3 {\ncolor: #45bdb0;\ntext-transform: none;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "### Lorem Ipsum" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl h3 {\ncolor: #45bdb0;\ntext-transform: none;\n}"',
           },
           {
             id: 'element-cf931bd0-e3b6-4ae3-9164-8fe9ba14873d',
@@ -1372,7 +1378,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "##### CATEGORY 01"\n| render css=".canvasRenderEl h5 {\ncolor: #FFFFFF;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "##### CATEGORY 01"\n| render css=".canvasRenderEl h5 {\ncolor: #FFFFFF;\n}"',
           },
           {
             id: 'element-dc4336d5-9752-421f-8196-9f4a6f8150f0',
@@ -1385,7 +1391,7 @@ export const pitch: CanvasTemplate = {
               parent: 'group-1303d0b2-057a-40bf-a0ff-4907b00a285c',
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\nfont-size: 18px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\nfont-size: 18px;\n}"',
           },
           {
             id: 'element-b8325cb3-2856-4fd6-8c5a-cba2430dda3e',
@@ -1411,7 +1417,7 @@ export const pitch: CanvasTemplate = {
               parent: 'group-1303d0b2-057a-40bf-a0ff-4907b00a285c',
             },
             expression:
-              'filters\n| demodata\n| math "unique(project)"\n| metric "Projects" \n  metricFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=72 align="center" color="#45bdb0" weight="bold" underline=false italic=false} \n  labelFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=24 align="center" color="#45bdb0" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl .canvasMetric__metric {\nmargin-bottom: 32px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| math "unique(project)"\n| metric "Projects" \n  metricFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=72 align="center" color="#45bdb0" weight="bold" underline=false italic=false} \n  labelFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=24 align="center" color="#45bdb0" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl .canvasMetric__metric {\nmargin-bottom: 32px;\n}"',
           },
           {
             id: 'element-07f73884-13e9-4a75-8a23-4eb137e75817',
@@ -1424,7 +1430,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Vel sollicitudin mauris, ut scelerisque urna." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#FFFFFF" weight="normal" underline=false italic=true}\n| render css=".canvasRenderEl p {\nfont-size: 16px;\nopacity: .7;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Vel sollicitudin mauris, ut scelerisque urna." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#FFFFFF" weight="normal" underline=false italic=true}\n| render css=".canvasRenderEl p {\nfont-size: 16px;\nopacity: .7;\n}"',
           },
           {
             id: 'element-201b8f78-045e-4457-9ada-5166965e64cf',
@@ -1437,7 +1443,7 @@ export const pitch: CanvasTemplate = {
               parent: 'group-1303d0b2-057a-40bf-a0ff-4907b00a285c',
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\nfont-size: 18px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\nfont-size: 18px;\n}"',
           },
           {
             id: 'element-9b667060-18ba-4f4d-84a2-48adff57efac',
@@ -1450,7 +1456,7 @@ export const pitch: CanvasTemplate = {
               parent: 'group-1303d0b2-057a-40bf-a0ff-4907b00a285c',
             },
             expression:
-              'filters\n| demodata\n| math "unique(country)"\n| metric "Countries" \n  metricFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=72 align="center" color="#45bdb0" weight="bold" underline=false italic=false} \n  labelFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=24 align="center" color="#45bdb0" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl .canvasMetric__metric {\nmargin-bottom: 32px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| math "unique(country)"\n| metric "Countries" \n  metricFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=72 align="center" color="#45bdb0" weight="bold" underline=false italic=false} \n  labelFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=24 align="center" color="#45bdb0" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl .canvasMetric__metric {\nmargin-bottom: 32px;\n}"',
           },
           {
             id: 'element-23fcecca-1f6a-44f6-b441-0f65e03d8210',
@@ -1463,7 +1469,7 @@ export const pitch: CanvasTemplate = {
               parent: 'group-1303d0b2-057a-40bf-a0ff-4907b00a285c',
             },
             expression:
-              'filters\n| demodata\n| math "unique(username)"\n| metric "Customers" \n  metricFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=72 align="center" color="#45bdb0" weight="bold" underline=false italic=false} \n  labelFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=24 align="center" color="#45bdb0" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl .canvasMetric__metric {\nmargin-bottom: 32px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| math "unique(username)"\n| metric "Customers" \n  metricFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=72 align="center" color="#45bdb0" weight="bold" underline=false italic=false} \n  labelFont={font family="Futura, Impact, Helvetica, Arial, sans-serif" size=24 align="center" color="#45bdb0" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl .canvasMetric__metric {\nmargin-bottom: 32px;\n}"',
           },
           {
             id: 'element-19f1db84-7a46-4ccb-a6b9-afd6ddd68523',
@@ -1476,7 +1482,7 @@ export const pitch: CanvasTemplate = {
               parent: 'group-1303d0b2-057a-40bf-a0ff-4907b00a285c',
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\nfont-size: 18px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "Donec vel sollicitudin mauris, ut scelerisque urna. Sed vel neque quis metus vulputate luctus." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render css=".canvasRenderEl p {\ncolor: #FFFFFF;\nopacity: .8;\nfont-size: 18px;\n}"',
           },
         ],
         groups: [],
@@ -1499,7 +1505,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## An alternative opening title slide."\n| render css=".canvasRenderEl h2 {\nfont-size: 64px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## An alternative opening title slide."\n| render css=".canvasRenderEl h2 {\nfont-size: 64px;\n}"',
           },
           {
             id: 'element-433586c1-4d44-40cf-988e-cf51871248fb',
@@ -1525,7 +1531,7 @@ export const pitch: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "### Subtitle goes here"\n| render css=".canvasRenderEl h3 {\ncolor: #45bdb0;\ntext-transform: none;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "### Subtitle goes here"\n| render css=".canvasRenderEl h3 {\ncolor: #45bdb0;\ntext-transform: none;\n}"',
           },
         ],
         groups: [],

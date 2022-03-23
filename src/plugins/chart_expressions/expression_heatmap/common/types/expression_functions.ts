@@ -38,6 +38,11 @@ export interface HeatmapLegendConfig {
    * Defines if the legend items should be truncated
    */
   shouldTruncate?: boolean;
+  /**
+   * Exact legend width (vertical) or height (horizontal)
+   * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
+   */
+  legendSize?: number;
 }
 
 export type HeatmapLegendConfigResult = HeatmapLegendConfig & {
@@ -52,8 +57,12 @@ export interface HeatmapGridConfig {
   isCellLabelVisible: boolean;
   // Y-axis
   isYAxisLabelVisible: boolean;
+  isYAxisTitleVisible: boolean;
+  yTitle?: string;
   // X-axis
   isXAxisLabelVisible: boolean;
+  isXAxisTitleVisible: boolean;
+  xTitle?: string;
 }
 
 export type HeatmapGridConfigResult = HeatmapGridConfig & {
@@ -73,6 +82,7 @@ export interface HeatmapArguments {
   splitColumnAccessor?: string | ExpressionValueVisDimension;
   legend: HeatmapLegendConfigResult;
   gridConfig: HeatmapGridConfigResult;
+  ariaLabel?: string;
 }
 
 export type HeatmapInput = Datatable;

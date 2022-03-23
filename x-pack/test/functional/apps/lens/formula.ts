@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const browser = getService('browser');
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToFormula();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
       // 4th item is the other bucket
@@ -145,7 +145,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
-      // Close immediately
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'formula',
@@ -175,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'formula',
       });
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getErrorCount()).to.eql(0);
     });
 
@@ -189,6 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsDatatable_rows > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
 
       await PageObjects.lens.configureDimension({
@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
       await PageObjects.lens.setTableDynamicColoring('text');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(1, 1);
       expect(styleObj['background-color']).to.be(undefined);
       expect(styleObj.color).not.to.be(undefined);
@@ -302,7 +302,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // check the numbers
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14,005');
 
       // add an advanced filter by filter
@@ -310,7 +310,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.setFilterBy('bytes > 4000');
 
       // check that numbers changed
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       await retry.try(async () => {
         expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('9,169');
       });
@@ -322,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await input.type(`bytes > 600000`);
       // the autocomplete will add quotes and closing brakets, so do not worry about that
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
     });
   });

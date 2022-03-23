@@ -8,10 +8,7 @@
 
 import { monaco } from '@kbn/monaco';
 
-import {
-  euiLightVars as lightTheme,
-  euiDarkVars as darkTheme,
-} from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 
 // NOTE: For talk around where this theme information will ultimately live,
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814

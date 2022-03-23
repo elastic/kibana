@@ -32,6 +32,7 @@
   &.lnsWorkspacePanelWrapper--fullscreen {
     margin-bottom: 0;
   }
+
 }
 
 .lnsWorkspacePanel__dragDrop {
@@ -80,6 +81,14 @@
 
 .lnsWorkspacePanelWrapper__toolbar {
   margin-bottom: 0;
+
+  &.lnsWorkspacePanelWrapper__toolbar--fullscreen {
+    padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+  }
+
+  & > .euiFlexItem {
+    min-height: $euiButtonHeightSmall;
+  }
 }
 
 .lnsDropIllustration__adjustFill {

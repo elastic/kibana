@@ -12,6 +12,7 @@ import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values
 import { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { getServiceColumns } from './';
 import * as stories from './service_list.stories';
+import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
 
 const { Example, EmptyState } = composeStories(stories);
 
@@ -20,6 +21,7 @@ const query = {
   rangeTo: 'now',
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
+  serviceGroup: '',
 };
 
 const service: any = {
@@ -42,6 +44,15 @@ const service: any = {
 };
 
 describe('ServiceList', () => {
+  beforeAll(() => {
+    jest.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => {
+      return {
+        currentPeriodColor: 'green',
+        previousPeriodColor: 'black',
+      };
+    });
+  });
+
   it('renders empty state', async () => {
     render(<EmptyState />);
 
@@ -82,7 +93,8 @@ describe('ServiceList', () => {
         expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
         expect(renderedColumns[4]).toMatchInlineSnapshot(`
           <ListMetric
-            color="euiColorVis1"
+            color="green"
+            comparisonSeriesColor="black"
             hideSeries={false}
             valueLabel="0 ms"
           />
@@ -107,7 +119,8 @@ describe('ServiceList', () => {
         expect(renderedColumns.length).toEqual(5);
         expect(renderedColumns[2]).toMatchInlineSnapshot(`
           <ListMetric
-            color="euiColorVis1"
+            color="green"
+            comparisonSeriesColor="black"
             hideSeries={true}
             valueLabel="0 ms"
           />
@@ -140,7 +153,8 @@ describe('ServiceList', () => {
           `);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
             <ListMetric
-              color="euiColorVis1"
+              color="green"
+              comparisonSeriesColor="black"
               hideSeries={false}
               valueLabel="0 ms"
             />
@@ -175,7 +189,8 @@ describe('ServiceList', () => {
           expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
           expect(renderedColumns[4]).toMatchInlineSnapshot(`
             <ListMetric
-              color="euiColorVis1"
+              color="green"
+              comparisonSeriesColor="black"
               hideSeries={false}
               valueLabel="0 ms"
             />

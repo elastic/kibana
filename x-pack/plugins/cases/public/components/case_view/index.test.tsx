@@ -18,6 +18,7 @@ import {
   alertComment,
   getAlertUserAction,
   basicCaseMetrics,
+  connectorsMock,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { SpacesApi } from '../../../../spaces/public';
@@ -27,7 +28,6 @@ import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { ConnectorTypes } from '../../../common/api';
 import { Case } from '../../../common/ui';
@@ -39,7 +39,7 @@ jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/use_get_case_metrics');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_action_tree/user_action_timestamp');
+jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
@@ -217,7 +217,8 @@ describe('CaseView', () => {
 
   it('should redirect case view when resolves to alias match', async () => {
     const resolveAliasId = `${defaultGetCase.data.id}_2`;
-    mockGetCase({ resolveOutcome: 'aliasMatch', resolveAliasId });
+    const resolveAliasPurpose = 'savedObjectConversion' as const;
+    mockGetCase({ resolveOutcome: 'aliasMatch', resolveAliasId, resolveAliasPurpose });
     const wrapper = mount(
       <TestProviders>
         <CaseView {...caseViewProps} />
@@ -226,10 +227,11 @@ describe('CaseView', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
       expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
-      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith(
-        `/cases/${resolveAliasId}`,
-        'case'
-      );
+      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith({
+        path: `/cases/${resolveAliasId}`,
+        aliasPurpose: resolveAliasPurpose,
+        objectNoun: 'case',
+      });
     });
   });
 
@@ -263,7 +265,7 @@ describe('CaseView', () => {
     );
     wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     await waitFor(() => {
-      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2', undefined);
+      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2');
       expect(fetchCaseMetrics).toBeCalled();
       expect(fetchCase).toBeCalled();
     });
@@ -303,7 +305,7 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2', undefined);
+        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2');
         expect(fetchCaseMetrics).toBeCalledWith(true);
         expect(fetchCase).toBeCalledWith(true);
       });

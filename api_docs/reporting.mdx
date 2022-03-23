@@ -4,11 +4,11 @@ slug: /kibana-dev-docs/api/reporting
 title: "reporting"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the reporting plugin
-date: 2020-11-16
+date: 2022-03-15
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'reporting']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import reportingObj from './reporting.json';
+import reportingObj from './reporting.devdocs.json';
 
 Reporting Services enables applications to feature reports that the user can automate with Watcher and download later.
 
@@ -18,21 +18,26 @@ Contact [Kibana Reporting Services](https://github.com/orgs/elastic/teams/kibana
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 27 | 0 | 27 | 0 |
+| 36 | 0 | 16 | 0 |
 
 ## Client
 
 ### Start
 <DocDefinitionList data={[reportingObj.client.start]}/>
 
+### Interfaces
+<DocDefinitionList data={reportingObj.client.interfaces}/>
+
 ## Server
 
 ### Start
 <DocDefinitionList data={[reportingObj.server.start]}/>
 
-### Classes
-<DocDefinitionList data={reportingObj.server.classes}/>
+## Common
 
 ### Interfaces
-<DocDefinitionList data={reportingObj.server.interfaces}/>
+<DocDefinitionList data={reportingObj.common.interfaces}/>
+
+### Consts, variables and types
+<DocDefinitionList data={reportingObj.common.misc}/>
 

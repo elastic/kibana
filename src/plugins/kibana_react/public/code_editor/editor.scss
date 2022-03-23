@@ -27,4 +27,21 @@
       display: none;
     }
   }
+
+  &__controls {
+    top: $euiSizeXS;
+    right: $euiSize;
+    position: absolute;
+    z-index: 1000
+  }
+
+  &__isFullScreen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    .kibanaCodeEditor__controls {
+      top: $euiSizeL;
+      right: $euiSizeL;
+    }
+  }
 }

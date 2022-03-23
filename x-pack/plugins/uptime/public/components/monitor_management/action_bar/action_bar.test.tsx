@@ -35,7 +35,7 @@ describe('<ActionBar />', () => {
   });
 
   it('only calls setMonitor when valid and after submission', () => {
-    render(<ActionBar monitor={monitor} isValid={true} />);
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={true} />);
 
     act(() => {
       userEvent.click(screen.getByText('Save monitor'));
@@ -45,7 +45,7 @@ describe('<ActionBar />', () => {
   });
 
   it('does not call setMonitor until submission', () => {
-    render(<ActionBar monitor={monitor} isValid={true} />);
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={true} />);
 
     expect(setMonitor).not.toBeCalled();
 
@@ -57,7 +57,7 @@ describe('<ActionBar />', () => {
   });
 
   it('does not call setMonitor if invalid', () => {
-    render(<ActionBar monitor={monitor} isValid={false} />);
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={false} />);
 
     expect(setMonitor).not.toBeCalled();
 
@@ -69,7 +69,7 @@ describe('<ActionBar />', () => {
   });
 
   it('disables button and displays help text when form is invalid after first submission', async () => {
-    render(<ActionBar monitor={monitor} isValid={false} />);
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={false} />);
 
     expect(
       screen.queryByText('Your monitor has errors. Please fix them before saving.')
@@ -90,7 +90,9 @@ describe('<ActionBar />', () => {
 
   it('calls option onSave when saving monitor', () => {
     const onSave = jest.fn();
-    render(<ActionBar monitor={monitor} isValid={false} onSave={onSave} />);
+    render(
+      <ActionBar monitor={monitor} isTestRunInProgress={false} isValid={false} onSave={onSave} />
+    );
 
     act(() => {
       userEvent.click(screen.getByText('Save monitor'));

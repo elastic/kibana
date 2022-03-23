@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiProgress,
 } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, {
   ComponentType,
@@ -47,7 +47,6 @@ import {
   TimelineTabs,
   SetEventsLoading,
   SetEventsDeleted,
-  CreateFieldComponentType,
 } from '../../../../common/types/timeline';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
@@ -63,10 +62,11 @@ import {
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
+import type { FieldBrowserOptions } from '../../../../common/types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../../components/stateful_event_context';
-import { StatefulFieldsBrowser } from '../../../components/t_grid/toolbar/fields_browser';
+import { StatefulFieldsBrowser } from '../toolbar/fields_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -88,10 +88,10 @@ interface OwnProps {
   appId?: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
-  createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
   disabledCellActions: string[];
+  fieldBrowserOptions?: FieldBrowserOptions;
   filters?: Filter[];
   filterQuery?: string;
   filterStatus?: AlertStatus;
@@ -149,8 +149,8 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
 const transformControlColumns = ({
   columnHeaders,
   controlColumns,
-  createFieldComponent,
   data,
+  fieldBrowserOptions,
   isEventViewer = false,
   loadingEventIds,
   onRowSelected,
@@ -171,9 +171,9 @@ const transformControlColumns = ({
 }: {
   columnHeaders: ColumnHeaderOptions[];
   controlColumns: ControlColumnProps[];
-  createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
   disabledCellActions: string[];
+  fieldBrowserOptions?: FieldBrowserOptions;
   isEventViewer?: boolean;
   loadingEventIds: string[];
   onRowSelected: OnRowSelected;
@@ -209,6 +209,7 @@ const transformControlColumns = ({
               <HeaderActions
                 width={width}
                 browserFields={browserFields}
+                fieldBrowserOptions={fieldBrowserOptions}
                 columnHeaders={columnHeaders}
                 isEventViewer={isEventViewer}
                 isSelectAllChecked={isSelectAllChecked}
@@ -218,7 +219,6 @@ const transformControlColumns = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
-                createFieldComponent={createFieldComponent}
               />
             )}
           </>
@@ -229,6 +229,7 @@ const transformControlColumns = ({
         isExpandable,
         isExpanded,
         rowIndex,
+        colIndex,
         setCellProps,
       }: EuiDataGridCellValueElementProps) => {
         const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
@@ -269,6 +270,7 @@ const transformControlColumns = ({
             onRowSelected={onRowSelected}
             onRuleChange={onRuleChange}
             rowIndex={rowIndex}
+            colIndex={colIndex}
             pageRowIndex={pageRowIndex}
             selectedEventIds={selectedEventIds}
             setCellProps={setCellProps}
@@ -301,10 +303,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     bulkActions = true,
     clearSelected,
     columnHeaders,
-    createFieldComponent,
     data,
     defaultCellActions,
     disabledCellActions,
+    fieldBrowserOptions,
     filterQuery,
     filters,
     filterStatus,
@@ -392,6 +394,20 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onSelectPage({ isSelected: true });
       }
     }, [isSelectAllChecked, onSelectPage, selectAll]);
+
+    // Clean any removed custom field that may still be present in stored columnHeaders
+    useEffect(() => {
+      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
+        columnHeaders.forEach(({ id: columnId }) => {
+          if (browserFields.base?.fields?.[columnId] == null) {
+            const [category] = columnId.split('.');
+            if (browserFields[category]?.fields?.[columnId] == null) {
+              dispatch(tGridActions.removeColumn({ id, columnId }));
+            }
+          }
+        });
+      }
+    }, [browserFields, columnHeaders, dispatch, id]);
 
     const onAlertStatusActionSuccess = useMemo(() => {
       if (bulkActions && bulkActions !== true) {
@@ -486,7 +502,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 <StatefulFieldsBrowser
                   data-test-subj="field-browser"
                   browserFields={browserFields}
-                  createFieldComponent={createFieldComponent}
+                  options={fieldBrowserOptions}
                   timelineId={id}
                   columnHeaders={columnHeaders}
                 />
@@ -513,6 +529,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         id,
         totalSelectAllAlerts,
         totalItems,
+        fieldBrowserOptions,
         filterStatus,
         filterQuery,
         indexNames,
@@ -523,7 +540,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         additionalControls,
         browserFields,
         columnHeaders,
-        createFieldComponent,
       ]
     );
 
@@ -613,9 +629,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         transformControlColumns({
           columnHeaders,
           controlColumns,
-          createFieldComponent,
           data,
           disabledCellActions,
+          fieldBrowserOptions,
           isEventViewer,
           loadingEventIds,
           onRowSelected,
@@ -640,9 +656,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       leadingControlColumns,
       trailingControlColumns,
       columnHeaders,
-      createFieldComponent,
       data,
       disabledCellActions,
+      fieldBrowserOptions,
       isEventViewer,
       id,
       loadingEventIds,
@@ -715,6 +731,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
         columnId,
         rowIndex,
+        colIndex,
         setCellProps,
         isDetails,
       }): React.ReactElement | null => {
@@ -753,6 +770,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           isExpanded: false,
           linkValues: getOr([], header.linkField ?? '', ecs),
           rowIndex,
+          colIndex,
           rowRenderers,
           setCellProps,
           timelineId: id,

@@ -8,7 +8,11 @@
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { TaskInstanceWithDeprecatedFields } from '../../../../plugins/task_manager/server/task';
+import {
+  ConcreteTaskInstance,
+  TaskInstanceWithDeprecatedFields,
+  TaskStatus,
+} from '../../../../plugins/task_manager/server/task';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects';
 
@@ -75,6 +79,62 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           ACTION_TASK_PARAMS_ID
         )}"}`
       );
+    });
+
+    it('8.2.0 migrates alerting tasks that has no schedule.interval', async () => {
+      const searchResult: TransportResult<
+        estypes.SearchResponse<{ task: ConcreteTaskInstance }>,
+        unknown
+      > = await es.search(
+        {
+          index: '.kibana_task_manager',
+          body: {
+            query: {
+              term: {
+                _id: 'task:d33d7590-8377-11ec-8c11-2dfe94229b95',
+              },
+            },
+          },
+        },
+        { meta: true }
+      );
+      expect(searchResult.statusCode).to.equal(200);
+      expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
+      const hit = searchResult.body.hits.hits[0];
+      expect(hit!._source!.task.attempts).to.be(0);
+      expect(hit!._source!.task.status).to.be(TaskStatus.Idle);
+    });
+
+    it('8.2.0 migrates tasks with unrecognized status to idle if task type is removed', async () => {
+      const response = await es.get<{ task: ConcreteTaskInstance }>(
+        {
+          index: '.kibana_task_manager',
+          id: 'task:ce7e1250-3322-11eb-94c1-db6995e84f6d',
+        },
+        {
+          meta: true,
+        }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.task.taskType).to.eql(
+        `alerting:0359d7fcc04da9878ee9aadbda38ba55`
+      );
+      expect(response.body._source?.task.status).to.eql(`idle`);
+    });
+
+    it('8.2.0 does not migrate tasks with unrecognized status if task type is valid', async () => {
+      const response = await es.get<{ task: ConcreteTaskInstance }>(
+        {
+          index: '.kibana_task_manager',
+          id: 'task:fe7e1250-3322-11eb-94c1-db6395e84f6e',
+        },
+        {
+          meta: true,
+        }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.task.taskType).to.eql(`sampleTaskRemovedType`);
+      expect(response.body._source?.task.status).to.eql(`unrecognized`);
     });
   });
 }

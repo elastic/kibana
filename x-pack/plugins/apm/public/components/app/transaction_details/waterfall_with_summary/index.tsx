@@ -17,14 +17,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
-import { TransactionActionMenu } from '../../../shared/transaction_action_menu/TransactionActionMenu';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
+import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
+import { TransactionSummary } from '../../../shared/summary/transaction_summary';
+import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';
-import { MaybeViewTraceLink } from './MaybeViewTraceLink';
-import { TransactionTabs } from './TransactionTabs';
-import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import { MaybeViewTraceLink } from './maybe_view_trace_link';
+import { TransactionTabs } from './transaction_tabs';
+import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {

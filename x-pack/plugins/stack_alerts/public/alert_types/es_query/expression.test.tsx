@@ -8,7 +8,7 @@
 import React from 'react';
 import 'brace';
 import { of } from 'rxjs';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import EsQueryAlertTypeExpression from './expression';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';

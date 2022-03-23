@@ -22,9 +22,9 @@ const StatusInfoRt = rt.type({
    */
   inProgressDuration: rt.number,
   /**
-   * The number of times the case was reopened after being closed.
+   * The ISO string representation of the dates the case was reopened
    */
-  numberOfReopens: rt.number,
+  reopenDates: rt.array(rt.string),
 });
 
 const AlertHostsMetricsRt = rt.type({

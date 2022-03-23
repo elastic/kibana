@@ -14,9 +14,16 @@ import { ResponseBodyIndexPolicy } from './types';
 describe('<ResponseBodyIndexField/>', () => {
   const defaultDefaultValue = ResponseBodyIndexPolicy.ON_ERROR;
   const onChange = jest.fn();
+  const onBlur = jest.fn();
   const WrappedComponent = ({ defaultValue = defaultDefaultValue }) => {
-    return <ResponseBodyIndexField defaultValue={defaultValue} onChange={onChange} />;
+    return (
+      <ResponseBodyIndexField defaultValue={defaultValue} onChange={onChange} onBlur={onBlur} />
+    );
   };
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('renders ResponseBodyIndexField', () => {
     const { getByText, getByTestId } = render(<WrappedComponent />);
@@ -39,6 +46,17 @@ describe('<ResponseBodyIndexField/>', () => {
       expect(getByText('Always')).toBeInTheDocument();
       expect(onChange).toBeCalledWith(newPolicy);
     });
+  });
+
+  it('calls onBlur', async () => {
+    const { getByTestId } = render(<WrappedComponent />);
+    const select = getByTestId('indexResponseBodyFieldSelect') as HTMLInputElement;
+    const newPolicy = ResponseBodyIndexPolicy.ALWAYS;
+
+    fireEvent.change(select, { target: { value: newPolicy } });
+    fireEvent.blur(select);
+
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 
   it('handles checkbox change', async () => {

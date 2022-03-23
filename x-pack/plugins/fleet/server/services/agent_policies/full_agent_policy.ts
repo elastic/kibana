@@ -21,12 +21,13 @@ import {
   storedPackagePoliciesToAgentPermissions,
   DEFAULT_CLUSTER_PERMISSIONS,
 } from '../package_policies_to_agent_permissions';
-import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
+import { dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
+import { storedPackagePoliciesToAgentInputs } from './';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
@@ -34,7 +35,7 @@ export async function getFullAgentPolicy(
   options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
   let agentPolicy;
-  const standalone = options?.standalone;
+  const standalone = options?.standalone ?? false;
 
   try {
     agentPolicy = await agentPolicyService.get(soClient, id);
@@ -86,7 +87,8 @@ export async function getFullAgentPolicy(
         return acc;
       }, {}),
     },
-    inputs: storedPackagePoliciesToAgentInputs(
+    inputs: await storedPackagePoliciesToAgentInputs(
+      soClient,
       agentPolicy.package_policies as PackagePolicy[],
       getOutputIdForAgentPolicy(dataOutput)
     ),
@@ -171,19 +173,18 @@ export function transformOutputToFullPolicyOutput(
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, api_key } = output;
+  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl } = output;
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
     type,
     hosts,
     ca_sha256,
-    api_key,
+    ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
 
-  if (standalone) {
-    delete newOutput.api_key;
+  if (output.type === outputType.Elasticsearch && standalone) {
     newOutput.username = '{ES_USERNAME}';
     newOutput.password = '{ES_PASSWORD}';
   }

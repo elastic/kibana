@@ -15,7 +15,7 @@ export function getAlertType(): RuleTypeModel<EsQueryAlertParams> {
   return {
     id: '.es-query',
     description: i18n.translate('xpack.stackAlerts.esQuery.ui.alertType.descriptionText', {
-      defaultMessage: 'Alert on matches against an Elasticsearch query.',
+      defaultMessage: 'Alert when matches are found during the latest query run.',
     }),
     iconClass: 'logoElastic',
     documentationUrl: (docLinks) => docLinks.links.alerting.esQuery,

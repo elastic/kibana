@@ -6,7 +6,7 @@
  */
 
 import { isLeft } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   BrowserFieldsCodec,
@@ -49,7 +49,7 @@ export function validateMonitor(monitorFields: MonitorFields): {
     return {
       valid: false,
       reason: `Monitor type is invalid`,
-      details: PathReporter.report(decodedType).join(' | '),
+      details: formatErrors(decodedType.left).join(' | '),
       payload: monitorFields,
     };
   }
@@ -72,7 +72,7 @@ export function validateMonitor(monitorFields: MonitorFields): {
     return {
       valid: false,
       reason: `Monitor is not a valid monitor of type ${monitorType}`,
-      details: PathReporter.report(decodedMonitor).join(' | '),
+      details: formatErrors(decodedMonitor.left).join(' | '),
       payload: monitorFields,
     };
   }

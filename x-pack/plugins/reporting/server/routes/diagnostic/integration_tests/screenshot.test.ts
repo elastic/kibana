@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../../../';
 import { generatePngObservable } from '../../../export_types/common';
 import {
   createMockConfigSchema,
-  createMockLevelLogger,
   createMockPluginSetup,
   createMockReportingCore,
 } from '../../../test_helpers';
@@ -38,7 +38,7 @@ describe('POST /diagnose/screenshot', () => {
   };
 
   const config = createMockConfigSchema({ queue: { timeout: 120000 } });
-  const mockLogger = createMockLevelLogger();
+  const mockLogger = loggingSystemMock.createLogger();
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));

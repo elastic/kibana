@@ -7,19 +7,36 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ENTERPRISE_SEARCH_PLUGIN = {
+export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.productName', {
+  NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
     defaultMessage: 'Enterprise Search',
   }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.navTitle', {
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.FeatureCatalogue.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
   URL: '/app/enterprise_search/overview',
   LOGO: 'logoEnterpriseSearch',
+};
+
+export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
+  ID: 'enterpriseSearchContent',
+  NAME: i18n.translate('xpack.enterpriseSearch.content.productName', {
+    defaultMessage: 'Enterprise Search',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
+    defaultMessage: 'Content',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.content.description', {
+    defaultMessage:
+      'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
+  }),
+  URL: '/app/enterprise_search/content',
+  LOGO: 'logoEnterpriseSearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
 export const APP_SEARCH_PLUGIN = {
@@ -72,4 +89,5 @@ export const READ_ONLY_MODE_HEADER = 'x-ent-search-read-only-mode';
 
 export const ENTERPRISE_SEARCH_KIBANA_COOKIE = '_enterprise_search';
 
-export const LOGS_SOURCE_ID = 'ent-search-logs';
+export const ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID = 'ent-search-logs';
+export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';

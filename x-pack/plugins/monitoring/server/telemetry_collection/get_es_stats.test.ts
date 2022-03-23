@@ -28,24 +28,26 @@ describe('get_es_stats', () => {
   const expectedClusters = body.hits.hits.map((hit) => hit._source);
   const clusterUuids = expectedClusters.map((cluster) => cluster.cluster_uuid);
   const maxBucketSize = 1;
+  const start = '2022-03-09T00:00:00.000Z';
+  const end = '2022-03-09T00:20:00.000Z';
 
   describe('getElasticsearchStats', () => {
     it('returns clusters', async () => {
-      searchMock.returns(Promise.resolve({ body }));
+      searchMock.returns(Promise.resolve(body));
 
-      expect(await getElasticsearchStats(client, clusterUuids, maxBucketSize)).toStrictEqual(
-        expectedClusters
-      );
+      expect(
+        await getElasticsearchStats(client, clusterUuids, start, end, maxBucketSize)
+      ).toStrictEqual(expectedClusters);
     });
   });
 
   describe('fetchElasticsearchStats', () => {
     it('searches for clusters', async () => {
-      searchMock.returns({ body });
+      searchMock.returns(body);
 
-      expect(await fetchElasticsearchStats(client, clusterUuids, maxBucketSize)).toStrictEqual(
-        body
-      );
+      expect(
+        await fetchElasticsearchStats(client, clusterUuids, start, end, maxBucketSize)
+      ).toStrictEqual(body);
     });
   });
 

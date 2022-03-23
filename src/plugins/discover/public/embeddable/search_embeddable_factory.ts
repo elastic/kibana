@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { getServices } from '../kibana_services';
 import {
   EmbeddableFactoryDefinition,
   Container,
@@ -25,6 +24,7 @@ import {
   getSavedSearchUrl,
   throwErrorOnSavedSearchUrlConflict,
 } from '../services/saved_searches';
+import { DiscoverServices } from '../build_services';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -43,7 +43,10 @@ export class SearchEmbeddableFactory
     getIconForSavedObject: () => 'discoverApp',
   };
 
-  constructor(private getStartServices: () => Promise<StartServices>) {}
+  constructor(
+    private getStartServices: () => Promise<StartServices>,
+    private getDiscoverServices: () => Promise<DiscoverServices>
+  ) {}
 
   public canCreateNew() {
     return false;
@@ -64,7 +67,7 @@ export class SearchEmbeddableFactory
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SavedSearchEmbeddable | ErrorEmbeddable> => {
-    const services = getServices();
+    const services = await this.getDiscoverServices();
     const filterManager = services.filterManager;
     const url = getSavedSearchUrl(savedObjectId);
     const editUrl = services.addBasePath(`/app/discover${url}`);
@@ -88,9 +91,9 @@ export class SearchEmbeddableFactory
           editUrl,
           editPath: url,
           filterManager,
-          editable: getServices().capabilities.discover.save as boolean,
+          editable: services.capabilities.discover.save as boolean,
           indexPatterns: indexPattern ? [indexPattern] : [],
-          services: getServices(),
+          services,
         },
         input,
         executeTriggerActions,

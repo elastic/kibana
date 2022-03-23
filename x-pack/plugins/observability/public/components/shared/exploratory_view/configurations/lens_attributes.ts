@@ -30,7 +30,7 @@ import {
   CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import {
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
@@ -91,7 +91,7 @@ export interface LayerConfig {
   operationType?: OperationType;
   reportDefinitions: URLReportDefinition;
   time: { to: string; from: string };
-  indexPattern: IndexPattern;
+  indexPattern: DataView; // TODO: Figure out if this can be renamed or if it's a Lens requirement
   selectedMetricField: string;
   color: string;
   name: string;
@@ -150,7 +150,7 @@ export class LensAttributes {
     sourceField: string;
     layerId: string;
     labels: Record<string, string>;
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
   }): TermsIndexPatternColumn {
     const fieldMeta = indexPattern.getFieldByName(sourceField);
 
@@ -280,6 +280,7 @@ export class LensAttributes {
       filter: columnFilter,
       params: {
         sortField: '@timestamp',
+        showArrayValues: false,
       },
     };
   }
@@ -783,7 +784,7 @@ export class LensAttributes {
     };
   }
 
-  getJSON(refresh?: number): TypedLensByValueInput['attributes'] {
+  getJSON(): TypedLensByValueInput['attributes'] {
     const uniqueIndexPatternsIds = Array.from(
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );
@@ -792,7 +793,7 @@ export class LensAttributes {
 
     return {
       title: 'Prefilled from exploratory view app',
-      description: String(refresh),
+      description: '',
       visualizationType: 'lnsXY',
       references: [
         ...uniqueIndexPatternsIds.map((patternId) => ({

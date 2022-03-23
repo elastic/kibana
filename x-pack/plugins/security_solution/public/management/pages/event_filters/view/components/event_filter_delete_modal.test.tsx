@@ -151,7 +151,7 @@ describe('When event filters delete modal is shown', () => {
     });
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      '"tic-tac-toe" has been removed from the Event Filters list.'
+      '"tic-tac-toe" has been removed from the event filters list.'
     );
   });
 
@@ -170,7 +170,7 @@ describe('When event filters delete modal is shown', () => {
     });
 
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Unable to remove "tic-tac-toe" from the Event Filters list. Reason: oh oh'
+      'Unable to remove "tic-tac-toe" from the event filters list. Reason: oh oh'
     );
     expect(showDeleteModal(getCurrentState())).toBe(true);
   });

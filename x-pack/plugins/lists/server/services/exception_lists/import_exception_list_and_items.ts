@@ -23,10 +23,7 @@ import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
 import { getTupleErrorsAndUniqueExceptionLists } from './utils/import/dedupe_incoming_lists';
 import { getTupleErrorsAndUniqueExceptionListItems } from './utils/import/dedupe_incoming_items';
-import {
-  createExceptionsStreamFromNdjson,
-  exceptionsChecksFromArray,
-} from './utils/import/create_exceptions_stream_logic';
+import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_logic';
 
 export interface PromiseFromStreams {
   lists: Array<ImportExceptionListSchemaDecoded | Error>;
@@ -63,15 +60,6 @@ interface ImportExceptionListAndItemsAsStreamOptions {
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
 }
-
-interface ImportExceptionListAndItemsAsArrayOptions {
-  exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
-  maxExceptionsImportSize: number;
-  overwrite: boolean;
-  savedObjectsClient: SavedObjectsClientContract;
-  user: string;
-}
-
 export type ExceptionsImport = Array<ImportExceptionListItemSchema | ImportExceptionsListSchema>;
 
 export const CHUNK_PARSED_OBJECT_SIZE = 100;
@@ -108,35 +96,7 @@ export const importExceptionsAsStream = async ({
   });
 };
 
-/**
- * Import exception lists parent containers and items as array. The shape of the list and items
- * will be validated here as well.
- * @params exceptionsToImport {array} lists and items to be imported
- * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
- * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
- * @params savedObjectsClient {object} SO client
- * @params user {string} user importing list and items
- * @return {ImportExceptionsResponseSchema} summary of imported count and errors
- */
-export const importExceptionsAsArray = async ({
-  exceptionsToImport,
-  maxExceptionsImportSize,
-  overwrite,
-  savedObjectsClient,
-  user,
-}: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
-  // validation of import and sorting of lists and items
-  const objectsToImport = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
-
-  return importExceptions({
-    exceptions: objectsToImport,
-    overwrite,
-    savedObjectsClient,
-    user,
-  });
-};
-
-const importExceptions = async ({
+export const importExceptions = async ({
   exceptions,
   overwrite,
   savedObjectsClient,

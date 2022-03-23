@@ -15,7 +15,7 @@ import type { IRuleDataService } from '../../rule_registry/server';
 
 import { AppClient } from './client';
 import { ConfigType } from './config';
-import { IRuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/types';
+import { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_execution_log';
 import { FrameworkRequest } from './lib/framework';
 import { EndpointAuthz } from '../common/endpoint/types/authz';
 
@@ -28,7 +28,7 @@ export interface SecuritySolutionApiRequestHandlerContext extends RequestHandler
   getAppClient: () => AppClient;
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
-  getExecutionLogClient: () => IRuleExecutionLogClient;
+  getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getExceptionListClient: () => ExceptionListClient | null;
 }
 

@@ -1,0 +1,114 @@
+{
+  "id": "expressionTagcloud",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionTagcloud",
+      "id": "def-public.ExpressionTagcloudPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionTagcloudPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/plugins/chart_expressions/expression_tagcloud/public/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.EXPRESSION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "EXPRESSION_NAME",
+        "description": [],
+        "signature": [
+          "\"tagcloud\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"expressionTagcloud\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"expressionTagcloud\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.Orientation",
+        "type": "Object",
+        "tags": [],
+        "label": "Orientation",
+        "description": [],
+        "signature": [
+          "{ readonly SINGLE: \"single\"; readonly RIGHT_ANGLED: \"right angled\"; readonly MULTIPLE: \"multiple\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionTagcloud",
+        "id": "def-common.ScaleOptions",
+        "type": "Object",
+        "tags": [],
+        "label": "ScaleOptions",
+        "description": [],
+        "signature": [
+          "{ readonly LINEAR: \"linear\"; readonly LOG: \"log\"; readonly SQUARE_ROOT: \"square root\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

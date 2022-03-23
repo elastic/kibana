@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import * as hasDataHook from '../../../../hooks/use_has_data';
-import * as pluginContext from '../../../../hooks/use_plugin_context';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { render } from '../../../../utils/test_helper';
+import { render, data as dataMock } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
-import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -36,36 +31,12 @@ describe('UXSection', () => {
         },
       },
     } as HasDataContextValue);
-    jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: {
-        uiSettings: { get: jest.fn() },
-        http: { basePath: { prepend: jest.fn() } },
-      } as unknown as CoreStart,
-      appMountParameters: {} as AppMountParameters,
-      config: {
-        unsafe: {
-          alertingExperience: { enabled: true },
-          cases: { enabled: true },
-          overviewNext: { enabled: false },
-        },
-      },
-      plugins: {
-        data: {
-          query: {
-            timefilter: {
-              timefilter: {
-                getTime: jest.fn().mockImplementation(() => ({
-                  from: '2020-10-08T06:00:00.000Z',
-                  to: '2020-10-08T07:00:00.000Z',
-                })),
-              },
-            },
-          },
-        },
-      } as unknown as ObservabilityPublicPluginsStart,
-      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      ObservabilityPageTemplate: KibanaPageTemplate,
-    }));
+
+    // @ts-expect-error `dataMock` is not properly propagating the mock types
+    dataMock.query.timefilter.timefilter.getTime.mockReturnValue({
+      from: '2020-10-08T06:00:00.000Z',
+      to: '2020-10-08T07:00:00.000Z',
+    });
   });
   it('renders with core web vitals', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -78,7 +49,7 @@ describe('UXSection', () => {
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();
-    expect(getByText('View in app')).toBeInTheDocument();
+    expect(getByText('Show dashboard')).toBeInTheDocument();
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
     expect(getByText('Largest contentful paint')).toBeInTheDocument();
     expect(getByText('1.94 s')).toBeInTheDocument();
@@ -113,7 +84,7 @@ describe('UXSection', () => {
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('--')).toHaveLength(3);
-    expect(queryAllByText('View in app')).toEqual([]);
+    expect(queryAllByText('Show dashboard')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
   it('shows empty state', () => {
@@ -128,7 +99,7 @@ describe('UXSection', () => {
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('No data is available.')).toHaveLength(3);
-    expect(queryAllByText('View in app')).toEqual([]);
+    expect(queryAllByText('Show dashboard')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
 });

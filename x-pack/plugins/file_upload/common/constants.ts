@@ -6,11 +6,9 @@
  */
 
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
-
 export const MB = Math.pow(2, 20);
 export const MAX_FILE_SIZE = '100MB';
 export const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
-
 export const ABSOLUTE_MAX_FILE_SIZE_BYTES = 1073741274; // 1GB
 export const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 

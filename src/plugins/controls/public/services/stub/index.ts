@@ -12,17 +12,22 @@ import {
   PluginServiceRegistry,
 } from '../../../../presentation_util/public';
 import { ControlsServices } from '..';
+import { httpServiceFactory } from './http';
 import { overlaysServiceFactory } from './overlays';
 import { controlsServiceFactory } from './controls';
 
 import { dataServiceFactory } from '../storybook/data';
 import { dataViewsServiceFactory } from '../storybook/data_views';
+import { optionsListServiceFactory } from '../storybook/options_list';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
+  http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
-  controls: new PluginServiceProvider(controlsServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
+
+  controls: new PluginServiceProvider(controlsServiceFactory),
+  optionsList: new PluginServiceProvider(optionsListServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<ControlsServices>(providers);

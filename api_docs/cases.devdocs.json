@@ -1,0 +1,1328 @@
+{
+  "id": "cases",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.CasesUiPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "CasesUiPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "cases",
+            "scope": "public",
+            "docId": "kibCasesPluginApi",
+            "section": "def-public.CasesUiPlugin",
+            "text": "CasesUiPlugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          "<void, ",
+          {
+            "pluginId": "cases",
+            "scope": "public",
+            "docId": "kibCasesPluginApi",
+            "section": "def-public.CasesUiStart",
+            "text": "CasesUiStart"
+          },
+          ", ",
+          "CasesPluginSetup",
+          ", ",
+          "CasesPluginStart",
+          ">"
+        ],
+        "path": "x-pack/plugins/cases/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.CasesUiPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/cases/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CasesUiPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<object>"
+                ],
+                "path": "x-pack/plugins/cases/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.CasesUiPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, plugins: ",
+              "CasesPluginSetup",
+              ") => {}"
+            ],
+            "path": "x-pack/plugins/cases/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CasesUiPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "x-pack/plugins/cases/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CasesUiPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "CasesPluginSetup"
+                ],
+                "path": "x-pack/plugins/cases/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.CasesUiPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: ",
+              "CasesPluginStart",
+              ") => ",
+              {
+                "pluginId": "cases",
+                "scope": "public",
+                "docId": "kibCasesPluginApi",
+                "section": "def-public.CasesUiStart",
+                "text": "CasesUiStart"
+              }
+            ],
+            "path": "x-pack/plugins/cases/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CasesUiPlugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CasesUiPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "CasesPluginStart"
+                ],
+                "path": "x-pack/plugins/cases/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.CasesUiPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/cases/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.generateCaseViewPath",
+        "type": "Function",
+        "tags": [],
+        "label": "generateCaseViewPath",
+        "description": [],
+        "signature": [
+          "(params: ",
+          "CaseViewPathParams",
+          ") => string"
+        ],
+        "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.generateCaseViewPath.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "CaseViewPathParams"
+            ],
+            "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.getCasesConfigurePath",
+        "type": "Function",
+        "tags": [],
+        "label": "getCasesConfigurePath",
+        "description": [],
+        "signature": [
+          "(casesBasePath: string) => string"
+        ],
+        "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.getCasesConfigurePath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "casesBasePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.getCasesDeepLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "getCasesDeepLinks",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          " = ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          ">({ basePath, extend, }: { basePath?: string | undefined; extend?: Partial<Record<",
+          {
+            "pluginId": "cases",
+            "scope": "public",
+            "docId": "kibCasesPluginApi",
+            "section": "def-public.ICasesDeepLinkId",
+            "text": "ICasesDeepLinkId"
+          },
+          ", Partial<T>>> | undefined; }) => { id: \"cases\"; path: string; deepLinks: ({ id: \"cases_create\"; path: string; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; } | { id: \"cases_configure\"; path: string; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; })[]; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
+        ],
+        "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.getCasesDeepLinks.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  basePath = DEFAULT_BASE_PATH,\n  extend = {},\n}",
+            "description": [],
+            "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.getCasesDeepLinks.$1.basePath",
+                "type": "string",
+                "tags": [],
+                "label": "basePath",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.getCasesDeepLinks.$1.extend",
+                "type": "Object",
+                "tags": [],
+                "label": "extend",
+                "description": [],
+                "signature": [
+                  "Partial<Record<",
+                  {
+                    "pluginId": "cases",
+                    "scope": "public",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-public.ICasesDeepLinkId",
+                    "text": "ICasesDeepLinkId"
+                  },
+                  ", Partial<T>>> | undefined"
+                ],
+                "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.getCaseViewPath",
+        "type": "Function",
+        "tags": [],
+        "label": "getCaseViewPath",
+        "description": [],
+        "signature": [
+          "(casesBasePath: string) => string"
+        ],
+        "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.getCaseViewPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "casesBasePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.getCreateCasePath",
+        "type": "Function",
+        "tags": [],
+        "label": "getCreateCasePath",
+        "description": [],
+        "signature": [
+          "(casesBasePath: string) => string"
+        ],
+        "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.getCreateCasePath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "casesBasePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.CaseAttachments",
+        "type": "Type",
+        "tags": [],
+        "label": "CaseAttachments",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "cases",
+            "scope": "public",
+            "docId": "kibCasesPluginApi",
+            "section": "def-public.SupportedCaseAttachment",
+            "text": "SupportedCaseAttachment"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/cases/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.DRAFT_COMMENT_STORAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DRAFT_COMMENT_STORAGE_ID",
+        "description": [],
+        "signature": [
+          "\"xpack.cases.commentDraft\""
+        ],
+        "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.GetAllCasesSelectorModalProps",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAllCasesSelectorModalProps",
+        "description": [],
+        "signature": [
+          "AllCasesSelectorModalProps",
+          " & ",
+          "CasesContextProps"
+        ],
+        "path": "x-pack/plugins/cases/public/client/ui/get_all_cases_selector_modal.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.GetCasesProps",
+        "type": "Type",
+        "tags": [],
+        "label": "GetCasesProps",
+        "description": [],
+        "signature": [
+          "CasesRoutesProps",
+          " & ",
+          "CasesContextProps"
+        ],
+        "path": "x-pack/plugins/cases/public/client/ui/get_cases.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.GetCreateCaseFlyoutProps",
+        "type": "Type",
+        "tags": [],
+        "label": "GetCreateCaseFlyoutProps",
+        "description": [],
+        "signature": [
+          "CreateCaseFlyoutProps",
+          " & ",
+          "CasesContextProps"
+        ],
+        "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.GetRecentCasesProps",
+        "type": "Type",
+        "tags": [],
+        "label": "GetRecentCasesProps",
+        "description": [],
+        "signature": [
+          "RecentCasesProps",
+          " & ",
+          "CasesContextProps"
+        ],
+        "path": "x-pack/plugins/cases/public/client/ui/get_recent_cases.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.ICasesDeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "ICasesDeepLinkId",
+        "description": [],
+        "signature": [
+          "\"cases\" | \"cases_create\" | \"cases_configure\""
+        ],
+        "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.SupportedCaseAttachment",
+        "type": "Type",
+        "tags": [],
+        "label": "SupportedCaseAttachment",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } | { comment: string; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".user; owner: string; }"
+        ],
+        "path": "x-pack/plugins/cases/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.CasesDeepLinkId",
+        "type": "Object",
+        "tags": [],
+        "label": "CasesDeepLinkId",
+        "description": [],
+        "signature": [
+          "{ readonly cases: \"cases\"; readonly casesCreate: \"cases_create\"; readonly casesConfigure: \"cases_configure\"; }"
+        ],
+        "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "start": {
+      "parentPluginId": "cases",
+      "id": "def-public.CasesUiStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CasesUiStart",
+      "description": [],
+      "path": "x-pack/plugins/cases/public/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.api",
+          "type": "Object",
+          "tags": [],
+          "label": "api",
+          "description": [],
+          "signature": [
+            "{ getRelatedCases: (alertId: string, query: { owner?: string | string[] | undefined; }) => Promise<{ id: string; title: string; }[]>; }"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.ui",
+          "type": "Object",
+          "tags": [],
+          "label": "ui",
+          "description": [],
+          "signature": [
+            "{ getCases: (props: ",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetCasesProps",
+              "text": "GetCasesProps"
+            },
+            ") => React.ReactElement<",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetCasesProps",
+              "text": "GetCasesProps"
+            },
+            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => (props: ",
+            "CasesContextProps",
+            " & { children: React.ReactNode; }) => React.ReactElement<",
+            "CasesContextProps",
+            ", string | React.JSXElementConstructor<any>>; getAllCasesSelectorModal: (props: ",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetAllCasesSelectorModalProps",
+              "text": "GetAllCasesSelectorModalProps"
+            },
+            ") => React.ReactElement<",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetAllCasesSelectorModalProps",
+              "text": "GetAllCasesSelectorModalProps"
+            },
+            ", string | React.JSXElementConstructor<any>>; getCreateCaseFlyout: (props: ",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetCreateCaseFlyoutProps",
+              "text": "GetCreateCaseFlyoutProps"
+            },
+            ") => React.ReactElement<",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetCreateCaseFlyoutProps",
+              "text": "GetCreateCaseFlyoutProps"
+            },
+            ", string | React.JSXElementConstructor<any>>; getRecentCases: (props: ",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetRecentCasesProps",
+              "text": "GetRecentCasesProps"
+            },
+            ") => React.ReactElement<",
+            {
+              "pluginId": "cases",
+              "scope": "public",
+              "docId": "kibCasesPluginApi",
+              "section": "def-public.GetRecentCasesProps",
+              "text": "GetRecentCasesProps"
+            },
+            ", string | React.JSXElementConstructor<any>>; }"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [],
+          "signature": [
+            "{ getUseCasesAddToNewCaseFlyout: (props: ",
+            "CreateCaseFlyoutProps",
+            ") => { open: () => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props: ",
+            "AllCasesSelectorModalProps",
+            ") => { open: () => void; close: () => void; }; }"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.helpers",
+          "type": "Object",
+          "tags": [],
+          "label": "helpers",
+          "description": [],
+          "signature": [
+            "{ canUseCases: (owners?: ",
+            "CasesOwners",
+            "[] | undefined) => { crud: boolean; read: boolean; }; getRuleIdFromEvent: (event: Event) => { id: string; name: string; }; }"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-server.CasesClient",
+        "type": "Class",
+        "tags": [],
+        "label": "CasesClient",
+        "description": [
+          "\nClient wrapper that contains accessor methods for individual entities within the cases system."
+        ],
+        "path": "x-pack/plugins/cases/server/client/client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/cases/server/client/client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "CasesClientArgs"
+                ],
+                "path": "x-pack/plugins/cases/server/client/client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [
+              "\nRetrieves an interface for interacting with cases entities."
+            ],
+            "signature": [
+              "CasesSubClient"
+            ],
+            "path": "x-pack/plugins/cases/server/client/client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.attachments",
+            "type": "Object",
+            "tags": [],
+            "label": "attachments",
+            "description": [
+              "\nRetrieves an interface for interacting with attachments (comments) entities."
+            ],
+            "signature": [
+              "AttachmentsSubClient"
+            ],
+            "path": "x-pack/plugins/cases/server/client/client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.userActions",
+            "type": "Object",
+            "tags": [],
+            "label": "userActions",
+            "description": [
+              "\nRetrieves an interface for interacting with the user actions associated with the plugin entities."
+            ],
+            "signature": [
+              "UserActionsSubClient"
+            ],
+            "path": "x-pack/plugins/cases/server/client/client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.configure",
+            "type": "Object",
+            "tags": [],
+            "label": "configure",
+            "description": [
+              "\nRetrieves an interface for interacting with the configuration of external connectors for the plugin entities."
+            ],
+            "signature": [
+              "ConfigureSubClient"
+            ],
+            "path": "x-pack/plugins/cases/server/client/client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [
+              "\nRetrieves an interface for retrieving metrics related to the cases entities."
+            ],
+            "signature": [
+              "MetricsSubClient"
+            ],
+            "path": "x-pack/plugins/cases/server/client/client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-server.PluginStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginStartContract",
+        "description": [
+          "\nCases server exposed contract for interacting with cases entities."
+        ],
+        "path": "x-pack/plugins/cases/server/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.PluginStartContract.getCasesClientWithRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "getCasesClientWithRequest",
+            "description": [
+              "\nReturns a client which can be used to interact with the cases backend entities.\n"
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => Promise<",
+              {
+                "pluginId": "cases",
+                "scope": "server",
+                "docId": "kibCasesPluginApi",
+                "section": "def-server.CasesClient",
+                "text": "CasesClient"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/cases/server/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.PluginStartContract.getCasesClientWithRequest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "a KibanaRequest"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/plugins/cases/server/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "a {@link CasesClient }"
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.getAllConnectorsUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAllConnectorsUrl",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "() => string"
+        ],
+        "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "All connectors endpoint"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.getCasesFromAlertsUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getCasesFromAlertsUrl",
+        "description": [],
+        "signature": [
+          "(alertId: string) => string"
+        ],
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.getCasesFromAlertsUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "alertId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.getCreateConnectorUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getCreateConnectorUrl",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "() => string"
+        ],
+        "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "Create connector endpoint"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.throwErrors",
+        "type": "Function",
+        "tags": [],
+        "label": "throwErrors",
+        "description": [],
+        "signature": [
+          "(createError: ErrorFactory) => (errors: ",
+          "Errors",
+          ") => never"
+        ],
+        "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.throwErrors.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "createError",
+            "description": [],
+            "signature": [
+              "ErrorFactory"
+            ],
+            "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.Case",
+        "type": "Interface",
+        "tags": [],
+        "label": "Case",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.Case",
+            "text": "Case"
+          },
+          " extends BasicCase"
+        ],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Case.connector",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              "{ id: string; } & (({ type: ",
+              "ConnectorTypes",
+              ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+              "ConnectorTypes",
+              ".none; fields: null; } & { name: string; }) | ({ type: ",
+              "ConnectorTypes",
+              ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; } & { name: string; }) | ({ type: ",
+              "ConnectorTypes",
+              ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+              "ConnectorTypes",
+              ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+              "ConnectorTypes",
+              ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }))"
+            ],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Case.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Case.externalService",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "externalService",
+            "description": [],
+            "signature": [
+              "{ connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; }; } | null"
+            ],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Case.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "{ syncAlerts: boolean; }"
+            ],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Case.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.Ecs",
+        "type": "Interface",
+        "tags": [],
+        "label": "Ecs",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Ecs._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Ecs._index",
+            "type": "string",
+            "tags": [],
+            "label": "_index",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Ecs.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "SignalEcs",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.Ecs.kibana",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              "{ alert: ",
+              "SignalEcsAAD",
+              "; } | undefined"
+            ],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CaseStatuses",
+        "type": "Enum",
+        "tags": [],
+        "label": "CaseStatuses",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CommentType",
+        "type": "Enum",
+        "tags": [],
+        "label": "CommentType",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CASES_URL",
+        "type": "string",
+        "tags": [],
+        "label": "CASES_URL",
+        "description": [
+          "\nCase routes"
+        ],
+        "signature": [
+          "\"/api/cases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CasesFeatures",
+        "type": "Type",
+        "tags": [],
+        "label": "CasesFeatures",
+        "description": [],
+        "signature": [
+          "{ alerts?: { sync: boolean; } | undefined; metrics?: ",
+          "CaseMetricsFeature",
+          "[] | undefined; }"
+        ],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CaseViewRefreshPropInterface",
+        "type": "Type",
+        "tags": [],
+        "label": "CaseViewRefreshPropInterface",
+        "description": [
+          "\nThe type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.\n"
+        ],
+        "signature": [
+          "{ refreshCase: () => Promise<void>; } | null"
+        ],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.SECURITY_SOLUTION_OWNER",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_OWNER",
+        "description": [],
+        "signature": [
+          "\"securitySolution\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.StatusAll",
+        "type": "string",
+        "tags": [],
+        "label": "StatusAll",
+        "description": [],
+        "signature": [
+          "\"all\""
+        ],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

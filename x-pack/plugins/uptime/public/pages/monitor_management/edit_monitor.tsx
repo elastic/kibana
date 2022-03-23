@@ -15,10 +15,12 @@ import { Loader } from '../../components/monitor_management/loader/loader';
 import { getMonitor } from '../../state/api';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
+import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
 export const EditMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
   useTrackPageview({ app: 'uptime', path: 'edit-monitor', delay: 15000 });
+  useMonitorManagementBreadcrumbs({ isEditMonitor: true });
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const { data, status } = useFetcher<Promise<SyntheticsMonitorSavedObject | undefined>>(() => {

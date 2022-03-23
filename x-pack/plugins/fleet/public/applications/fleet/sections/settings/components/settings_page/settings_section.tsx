@@ -64,7 +64,11 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
       <EuiSpacer size="m" />
       <EuiBasicTable columns={columns} items={fleetServerHosts} />
       <EuiSpacer size="s" />
-      <EuiButtonEmpty iconType="pencil" href={getHref('settings_edit_fleet_server_hosts')}>
+      <EuiButtonEmpty
+        iconType="pencil"
+        href={getHref('settings_edit_fleet_server_hosts')}
+        data-test-subj="editHostsBtn"
+      >
         <FormattedMessage
           id="xpack.fleet.settings.fleetServerHostEditButtonLabel"
           defaultMessage="Edit hosts"

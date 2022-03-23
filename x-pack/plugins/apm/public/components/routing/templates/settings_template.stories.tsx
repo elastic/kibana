@@ -71,5 +71,5 @@ export const Example: Story<Args> = (args) => {
 };
 Example.args = {
   children: <>test</>,
-  selectedTab: 'agent-configurations',
+  selectedTab: 'agent-configuration',
 };

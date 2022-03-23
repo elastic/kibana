@@ -34,24 +34,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should change the color of the metric when tweaking the values in the panel', async () => {
       await PageObjects.lens.openPalettePanel('lnsMetric');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_1', '21000', {
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_1', '21000', {
         clearWithKeyboard: true,
       });
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('mtrVis');
       const styleObj = await PageObjects.lens.getMetricStyle();
       expect(styleObj.color).to.be('rgb(32, 146, 128)');
     });
 
     it('should change the color when reverting the palette', async () => {
-      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverse');
-      await PageObjects.lens.waitForVisualization();
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
+      await PageObjects.lens.waitForVisualization('mtrVis');
       const styleObj = await PageObjects.lens.getMetricStyle();
       expect(styleObj.color).to.be('rgb(204, 86, 66)');
     });
 
     it('should reset the color stops when changing palette to a predefined one', async () => {
       await PageObjects.lens.changePaletteTo('temperature');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('mtrVis');
       const styleObj = await PageObjects.lens.getMetricStyle();
       expect(styleObj.color).to.be('rgb(235, 239, 245)');
     });

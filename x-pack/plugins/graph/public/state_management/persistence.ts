@@ -66,10 +66,20 @@ export const loadingSaga = ({
     }
 
     const selectedIndexPatternId = lookupIndexPatternId(savedWorkspace);
-    const indexPattern = (yield call(
-      indexPatternProvider.get,
-      selectedIndexPatternId
-    )) as IndexPattern;
+    let indexPattern;
+    try {
+      indexPattern = (yield call(indexPatternProvider.get, selectedIndexPatternId)) as IndexPattern;
+    } catch (e) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
+          values: {
+            name: selectedIndexPatternId,
+          },
+        })
+      );
+      return;
+    }
     const initialSettings = settingsSelector((yield select()) as GraphState);
 
     const createdWorkspace = createWorkspace(indexPattern.title, initialSettings);

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from 'kibana/server';
-import { coreMock } from 'src/core/server/mocks';
-import { ReportingInternalStart } from './core';
+import type { CoreSetup, CoreStart, Logger } from 'kibana/server';
+import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { ReportingCore, ReportingInternalStart } from './core';
 import { ReportingPlugin } from './plugin';
-import { createMockConfigSchema, createMockPluginSetup } from './test_helpers';
 import {
+  createMockConfigSchema,
+  createMockPluginSetup,
   createMockPluginStart,
-  createMockReportingCore,
-} from './test_helpers/create_mock_reportingplugin';
-import { ReportingSetupDeps } from './types';
+} from './test_helpers';
+import type { ReportingSetupDeps } from './types';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -25,32 +25,33 @@ describe('Reporting Plugin', () => {
   let coreStart: CoreStart;
   let pluginSetup: ReportingSetupDeps;
   let pluginStart: ReportingInternalStart;
+  let logger: jest.Mocked<Logger>;
+  let plugin: ReportingPlugin;
 
   beforeEach(async () => {
-    const reportingCore = await createMockReportingCore(createMockConfigSchema());
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
     coreSetup = coreMock.createSetup(configSchema);
     coreStart = coreMock.createStart();
     pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
-    pluginStart = createMockPluginStart(reportingCore, {});
+    pluginStart = await createMockPluginStart(coreStart, configSchema);
+
+    logger = loggingSystemMock.createLogger();
+    plugin = new ReportingPlugin(initContext);
+    (plugin as unknown as { logger: Logger }).logger = logger;
   });
 
   it('has a sync setup process', () => {
-    const plugin = new ReportingPlugin(initContext);
-
     expect(plugin.setup(coreSetup, pluginSetup)).not.toHaveProperty('then');
   });
 
   it('has a sync startup process', async () => {
-    const plugin = new ReportingPlugin(initContext);
     plugin.setup(coreSetup, pluginSetup);
     await sleep(5);
     expect(plugin.start(coreStart, pluginStart)).not.toHaveProperty('then');
   });
 
   it('registers an advanced setting for PDF logos', async () => {
-    const plugin = new ReportingPlugin(initContext);
     plugin.setup(coreSetup, pluginSetup);
     expect(coreSetup.uiSettings.register).toHaveBeenCalled();
     expect((coreSetup.uiSettings.register as jest.Mock).mock.calls[0][0]).toHaveProperty(
@@ -59,17 +60,24 @@ describe('Reporting Plugin', () => {
   });
 
   it('logs start issues', async () => {
-    const plugin = new ReportingPlugin(initContext);
-    (plugin as unknown as { logger: { error: jest.Mock } }).logger.error = jest.fn();
+    // wait for the setup phase background work
     plugin.setup(coreSetup, pluginSetup);
-    await sleep(5);
-    plugin.start(null as any, pluginStart);
-    await sleep(10);
-    // @ts-ignore overloading error logger
-    expect(plugin.logger.error.mock.calls[0][0]).toMatch(
-      /Error in Reporting start, reporting may not function properly/
-    );
-    // @ts-ignore overloading error logger
-    expect(plugin.logger.error).toHaveBeenCalledTimes(2);
+    await new Promise(setImmediate);
+
+    // create a way for an error to happen
+    const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
+    reportingCore.pluginStart = jest.fn().mockRejectedValueOnce('silly');
+
+    // wait for the startup phase background work
+    plugin.start(coreStart, pluginStart);
+    await new Promise(setImmediate);
+
+    expect(logger.error.mock.calls.map(([message]) => message)).toMatchInlineSnapshot(`
+      Array [
+        "Error in Reporting start, reporting may not function properly",
+        "silly",
+      ]
+    `);
+    expect(logger.error).toHaveBeenCalledTimes(2);
   });
 });

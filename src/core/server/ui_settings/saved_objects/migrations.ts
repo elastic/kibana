@@ -118,6 +118,16 @@ export const migrations = {
             ...acc,
             'format:defaultTypeMap': JSON.stringify(updated, null, 2),
           };
+        } else if (key === 'securitySolution:rulesTableRefresh') {
+          const initial = JSON.parse(doc.attributes[key]);
+          const updated = {
+            on: initial.on,
+            value: initial.value,
+          };
+          return {
+            ...acc,
+            [key]: JSON.stringify(updated, null, 2),
+          };
         } else {
           return {
             ...acc,

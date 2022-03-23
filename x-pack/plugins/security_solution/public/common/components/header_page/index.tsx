@@ -106,7 +106,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   subtitle2,
   title,
   titleNode,
-  ...rest
 }) => (
   <>
     <EuiPageHeader alignItems="center" bottomBorder={border}>

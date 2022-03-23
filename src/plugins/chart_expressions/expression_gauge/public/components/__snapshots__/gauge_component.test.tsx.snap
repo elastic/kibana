@@ -4,11 +4,21 @@ exports[`GaugeComponent renders the chart 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    ariaUseDefaultSummary={true}
     debugState={false}
-    theme={Object {}}
+    theme={
+      Array [
+        Object {
+          "background": Object {
+            "color": "transparent",
+          },
+        },
+        Object {},
+      ]
+    }
   />
-  <Connect(SpecInstance)
+  <Component
     actual={3}
     bandFillColor={[Function]}
     bands={
@@ -31,6 +41,7 @@ exports[`GaugeComponent renders the chart 1`] = `
         4,
       ]
     }
+    tooltipValueFormatter={[Function]}
   />
 </Chart>
 `;

@@ -1,0 +1,401 @@
+{
+  "id": "cloud",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "cloud",
+        "id": "def-public.Chat",
+        "type": "Function",
+        "tags": [],
+        "label": "Chat",
+        "description": [
+          "\nA lazily-loaded component that will display a trigger that will allow the user to chat with a\nhuman operator when the service is enabled; otherwise, it renders nothing."
+        ],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "x-pack/plugins/cloud/public/components/index.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "cloud",
+        "id": "def-public.CloudConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudConfigType",
+        "description": [],
+        "path": "x-pack/plugins/cloud/public/plugin.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.cname",
+            "type": "string",
+            "tags": [],
+            "label": "cname",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.base_url",
+            "type": "string",
+            "tags": [],
+            "label": "base_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.profile_url",
+            "type": "string",
+            "tags": [],
+            "label": "profile_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.deployment_url",
+            "type": "string",
+            "tags": [],
+            "label": "deployment_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.organization_url",
+            "type": "string",
+            "tags": [],
+            "label": "organization_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.full_story",
+            "type": "Object",
+            "tags": [],
+            "label": "full_story",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; org_id?: string | undefined; }"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.chat",
+            "type": "Object",
+            "tags": [],
+            "label": "chat",
+            "description": [
+              "Configuration to enable live chat in Cloud-enabled instances of Kibana."
+            ],
+            "signature": [
+              "{ enabled: boolean; chatURL: string; }"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloud",
+        "id": "def-public.CloudStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudStart",
+        "description": [],
+        "path": "x-pack/plugins/cloud/public/plugin.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.CloudContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "CloudContextProvider",
+            "description": [
+              "\nA React component that provides a pre-wired `React.Context` which connects components to Cloud services."
+            ],
+            "signature": [
+              "React.FunctionComponent<{}>"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "cloud",
+                "id": "def-public.CloudStart.CloudContextProvider.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "cloud",
+                "id": "def-public.CloudStart.CloudContextProvider.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloud",
+      "id": "def-public.CloudSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudSetup",
+      "description": [],
+      "path": "x-pack/plugins/cloud/public/plugin.tsx",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.cloudId",
+          "type": "string",
+          "tags": [],
+          "label": "cloudId",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.cname",
+          "type": "string",
+          "tags": [],
+          "label": "cname",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.baseUrl",
+          "type": "string",
+          "tags": [],
+          "label": "baseUrl",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.deploymentUrl",
+          "type": "string",
+          "tags": [],
+          "label": "deploymentUrl",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.profileUrl",
+          "type": "string",
+          "tags": [],
+          "label": "profileUrl",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.organizationUrl",
+          "type": "string",
+          "tags": [],
+          "label": "organizationUrl",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.snapshotsUrl",
+          "type": "string",
+          "tags": [],
+          "label": "snapshotsUrl",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.isCloudEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isCloudEnabled",
+          "description": [],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloud",
+      "id": "def-server.CloudSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudSetup",
+      "description": [],
+      "path": "x-pack/plugins/cloud/server/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.cloudId",
+          "type": "string",
+          "tags": [],
+          "label": "cloudId",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.deploymentId",
+          "type": "string",
+          "tags": [],
+          "label": "deploymentId",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.isCloudEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isCloudEnabled",
+          "description": [],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.apm",
+          "type": "Object",
+          "tags": [],
+          "label": "apm",
+          "description": [],
+          "signature": [
+            "{ url?: string | undefined; secretToken?: string | undefined; }"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

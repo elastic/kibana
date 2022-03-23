@@ -55,7 +55,10 @@ describe('when using EffectedPolicySelect component', () => {
   describe('and no policy entries exist', () => {
     it('should display no options available message', () => {
       const { getByTestId } = render({ isGlobal: false });
-      expect(getByTestId('test-policiesSelectable').textContent).toEqual('No options available');
+      const euiSelectableMessageElement =
+        getByTestId('test-policiesSelectable').getElementsByClassName('euiSelectableMessage')[0];
+      expect(euiSelectableMessageElement).not.toBeNull();
+      expect(euiSelectableMessageElement.textContent).toEqual('No options available');
     });
   });
 
@@ -148,6 +151,13 @@ describe('when using EffectedPolicySelect component', () => {
         isGlobal: true,
         selected: [componentProps.options[0]],
       });
+    });
+
+    it('should show loader only when by polocy selected', () => {
+      const { queryByTestId } = render({ isLoading: true });
+      expect(queryByTestId('loading-spinner')).toBeNull();
+      selectPerPolicy();
+      expect(queryByTestId('loading-spinner')).not.toBeNull();
     });
   });
 });

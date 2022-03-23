@@ -9,13 +9,18 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
+import {
+  isRumAgentName,
+  isIosAgentName,
+  isServerlessAgent,
+} from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
+import { TransactionColdstartRateChart } from '../../shared/charts/transaction_coldstart_rate_chart';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
@@ -26,7 +31,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { replace } from '../../shared/Links/url_helpers';
+import { replace } from '../../shared/links/url_helpers';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -35,8 +40,13 @@ import { replace } from '../../shared/Links/url_helpers';
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { agentName, serviceName, transactionType, fallbackToTransactions } =
-    useApmServiceContext();
+  const {
+    agentName,
+    serviceName,
+    transactionType,
+    fallbackToTransactions,
+    runtimeName,
+  } = useApmServiceContext();
   const {
     query,
     query: {
@@ -69,7 +79,7 @@ export function ServiceOverview() {
   const rowDirection = isSingleColumn ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
   const isIosAgent = isIosAgentName(agentName);
-
+  const isServerless = isServerlessAgent(runtimeName);
   const router = useApmRouter();
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
     path: {
@@ -118,6 +128,7 @@ export function ServiceOverview() {
                     isSingleColumn={isSingleColumn}
                     start={start}
                     end={end}
+                    showPerPageOptions={false}
                   />
                 </EuiPanel>
               </EuiFlexItem>
@@ -151,19 +162,30 @@ export function ServiceOverview() {
               gutterSize="s"
               responsive={false}
             >
-              <EuiFlexItem grow={3}>
-                <TransactionBreakdownChart
-                  showAnnotations={false}
-                  environment={environment}
-                  kuery={kuery}
-                />
-              </EuiFlexItem>
+              {isServerless ? (
+                <EuiFlexItem grow={3}>
+                  <TransactionColdstartRateChart
+                    showAnnotations={false}
+                    environment={environment}
+                    kuery={kuery}
+                  />
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow={3}>
+                  <TransactionBreakdownChart
+                    showAnnotations={false}
+                    environment={environment}
+                    kuery={kuery}
+                  />
+                </EuiFlexItem>
+              )}
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
                   <EuiPanel hasBorder={true}>
                     <ServiceOverviewDependenciesTable
                       fixedHeight={true}
                       isSingleColumn={isSingleColumn}
+                      showPerPageOptions={false}
                       link={
                         <EuiLink href={dependenciesLink}>
                           {i18n.translate(
@@ -178,7 +200,7 @@ export function ServiceOverview() {
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!isRumAgent && !isIosAgent && (
+          {!isRumAgent && !isIosAgent && !isServerless && (
             <EuiFlexItem>
               <EuiFlexGroup
                 direction="column"

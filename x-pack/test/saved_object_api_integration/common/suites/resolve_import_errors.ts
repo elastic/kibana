@@ -37,6 +37,7 @@ export type ResolveImportErrorsTestSuite = TestSuite<ResolveImportErrorsTestDefi
 export type FailureType = 'unsupported_type' | 'conflict';
 export interface ResolveImportErrorsTestCase extends Omit<TestCase, 'failure'> {
   originId?: string;
+  destinationId?: string;
   expectedNewId?: string;
   references?: SavedObjectReference[];
   replaceReferences?: SavedObjectsImportRetry['replaceReferences'];
@@ -61,34 +62,75 @@ export const TEST_CASES: Record<string, ResolveImportErrorsTestCase> = Object.fr
     type: 'sharedtype',
     id: `conflict_1a`,
     originId: `conflict_1`,
+    destinationId: 'some-random-id',
     expectedNewId: 'some-random-id',
   }),
   CONFLICT_1B_OBJ: Object.freeze({
     type: 'sharedtype',
     id: `conflict_1b`,
     originId: `conflict_1`,
+    destinationId: 'another-random-id',
     expectedNewId: 'another-random-id',
   }),
   CONFLICT_2C_OBJ: Object.freeze({
     type: 'sharedtype',
     id: `conflict_2c`,
     originId: `conflict_2`,
+    destinationId: `conflict_2a`,
     expectedNewId: `conflict_2a`,
+  }),
+  CONFLICT_2D_OBJ: Object.freeze({
+    type: 'sharedtype',
+    id: `conflict_2d`,
+    originId: `conflict_2`,
+    // destinationId is undefined on purpose
+    expectedNewId: `conflict_2b`, // since conflict_2c was matched with conflict_2a, this (conflict_2d) will result in a regular inexact match conflict with conflict_2b
   }),
   CONFLICT_3A_OBJ: Object.freeze({
     type: 'sharedtype',
     id: `conflict_3a`,
     originId: `conflict_3`,
+    destinationId: `conflict_3`,
     expectedNewId: `conflict_3`,
   }),
   CONFLICT_4_OBJ: Object.freeze({
     type: 'sharedtype',
     id: `conflict_4`,
+    destinationId: `conflict_4a`,
     expectedNewId: `conflict_4a`,
   }),
 });
 export const SPECIAL_TEST_CASES: Record<string, ResolveImportErrorsTestCase> = Object.freeze({
   HIDDEN,
+  OUTBOUND_MISSING_REFERENCE_CONFLICT_1_OBJ: Object.freeze({
+    // This object has an exact match that already exists, *and* it has a reference to an index pattern that doesn't exist.
+    // We are choosing to replace the reference here, so Kibana should detect if there is a conflict and respond appropriately.
+    type: 'sharedtype',
+    id: 'outbound-missing-reference-conflict-1',
+    references: [{ name: '1', type: 'index-pattern', id: 'missing' }],
+    replaceReferences: [
+      {
+        type: 'index-pattern',
+        from: 'missing',
+        to: 'inbound-reference-origin-match-2b', // specific ID doesn't matter, just needs to be an index pattern that exists in all spaces
+      },
+    ],
+  }),
+  OUTBOUND_MISSING_REFERENCE_CONFLICT_2_OBJ: Object.freeze({
+    // This object has an inexact match that already exists, *and* it has a reference to an index pattern that doesn't exist.
+    // We are choosing to replace the reference here, so Kibana should detect if there is a conflict and respond appropriately.
+    type: 'sharedtype',
+    id: 'outbound-missing-reference-conflict-2',
+    expectedNewId: `outbound-missing-reference-conflict-2a`,
+    references: [{ name: '1', type: 'index-pattern', id: 'missing' }],
+    replaceReferences: [
+      {
+        type: 'index-pattern',
+        from: 'missing',
+        to: 'inbound-reference-origin-match-2b', // specific ID doesn't matter, just needs to be an index pattern that exists in all spaces
+      },
+    ],
+  }),
   OUTBOUND_REFERENCE_ORIGIN_MATCH_1_OBJ: Object.freeze({
     // This object does not already exist, but it has a reference to the originId of an index pattern that does exist.
     // We use index patterns because they are one of the few reference types that are validated, so the import will fail if the reference
@@ -125,7 +167,7 @@ const createRequest = (
     type,
     id,
     originId,
-    expectedNewId,
+    destinationId,
     references,
     replaceReferences,
     successParam,
@@ -138,7 +180,7 @@ const createRequest = (
       type,
       id,
       overwrite,
-      ...(expectedNewId && { destinationId: expectedNewId }),
+      ...(destinationId && { destinationId }),
       ...(replaceReferences && { replaceReferences }),
       ...(successParam === 'createNewCopy' && { createNewCopy: true }),
     },

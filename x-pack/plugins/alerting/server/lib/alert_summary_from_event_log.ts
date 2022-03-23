@@ -15,13 +15,14 @@ const Millis2Nanos = 1000 * 1000;
 export interface AlertSummaryFromEventLogParams {
   rule: SanitizedAlert<{ bar: boolean }>;
   events: IEvent[];
+  executionEvents: IEvent[];
   dateStart: string;
   dateEnd: string;
 }
 
 export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams): AlertSummary {
   // initialize the  result
-  const { rule, events, dateStart, dateEnd } = params;
+  const { rule, events, executionEvents, dateStart, dateEnd } = params;
   const alertSummary: AlertSummary = {
     id: rule.id,
     name: rule.name,
@@ -57,6 +58,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     if (provider !== EVENT_LOG_PROVIDER) continue;
 
     const action = event?.event?.action;
+
     if (action === undefined) continue;
 
     if (action === EVENT_LOG_ACTIONS.execute) {
@@ -71,14 +73,6 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
         });
       } else {
         alertSummary.status = 'OK';
-      }
-
-      if (event?.event?.duration) {
-        const eventDirationMillis = event?.event?.duration / Millis2Nanos;
-        eventDurations.push(eventDirationMillis);
-        if (event?.['@timestamp']) {
-          eventDurationsWithTimestamp[event?.['@timestamp']] = eventDirationMillis;
-        }
       }
 
       continue;
@@ -103,6 +97,23 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;
         status.actionSubgroup = undefined;
+    }
+  }
+
+  for (const event of executionEvents.reverse()) {
+    const timeStamp = event?.['@timestamp'];
+    if (timeStamp === undefined) continue;
+    const action = event?.event?.action;
+
+    if (action === undefined) continue;
+    if (action !== EVENT_LOG_ACTIONS.execute) {
+      continue;
+    }
+
+    if (event?.event?.duration) {
+      const eventDirationMillis = event.event.duration / Millis2Nanos;
+      eventDurations.push(eventDirationMillis);
+      eventDurationsWithTimestamp[event['@timestamp']!] = eventDirationMillis;
     }
   }
 

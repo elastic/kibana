@@ -5,14 +5,16 @@
 ++++
 
 experimental[] Set a default data view ID. Kibana UI will use the default data view unless user picks a different one. 
-The API doesn't validate if given `index_pattern_id` is a valid id. 
+The API doesn't validate if given `data_view_id` is a valid id. 
+
 
 [[data-views-api-default-set-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/index_patterns/default`
+`POST <kibana host>:<port>/api/data_views/default`
 
-`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/default`
+`POST <kibana host>:<port>/s/<space_id>/api/data_views/default`
+
 
 [[data-views-api-default-set-params]]
 ==== Path parameters
@@ -20,12 +22,14 @@ The API doesn't validate if given `index_pattern_id` is a valid id.
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+
 [[data-views-api-default-set-body]]
 ==== Request body
 
-`index_pattern_id`:: (Required, `string` or `null`) Sets a default data view id. Use `null` to unset a default data view.
+`data_view_id`:: (Required, `string` or `null`) Sets a default data view id. Use `null` to unset a default data view.
 
 `force`:: (Optional, boolean) Updates existing default data view id. The default is `false`.
+
 
 
 [[data-views-api-default-set-codes]]
@@ -34,6 +38,7 @@ The API doesn't validate if given `index_pattern_id` is a valid id.
 `200`::
 Indicates a successful call.
 
+
 [[data-views-api-default-set-example]]
 ==== Example
 
@@ -41,9 +46,9 @@ Set the default data view id if none is set:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/index_patterns/default
+$ curl -X POST api/data_views/default
 {
-  "index_pattern_id": "..."
+  "data_view_id": "..."
 }
 --------------------------------------------------
 // KIBANA
@@ -53,9 +58,9 @@ Upsert the default data view:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/index_patterns/default
+$ curl -X POST api/data_views/default
 {
-  "index_pattern_id": "...",
+  "data_view_id": "...",
   "force": true
 }
 --------------------------------------------------
@@ -65,9 +70,9 @@ Unset the default data view:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/index_patterns/default
+$ curl -X POST api/data_views/default
 {
-  "index_pattern_id": null,
+  "data_view_id": null,
   "force": true
 }
 --------------------------------------------------
@@ -81,4 +86,3 @@ The API returns:
     "acknowledged": true
 }
 --------------------------------------------------
-

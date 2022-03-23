@@ -23,7 +23,7 @@ import { ProcessorsStats } from './expanded_row';
 export type IngestStatsResponse = Exclude<ModelItem['stats'], undefined>['ingest'];
 
 interface ModelPipelinesProps {
-  pipelines: Exclude<ModelItem['pipelines'], null | undefined>;
+  pipelines: ModelItem['pipelines'];
   ingestStats: IngestStatsResponse;
 }
 
@@ -32,11 +32,18 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
     services: { share },
   } = useMlKibana();
 
+  const pipelineNames = Object.keys(pipelines ?? ingestStats?.pipelines ?? {});
+
+  if (!pipelineNames.length) return null;
+
   return (
     <>
-      {Object.entries(pipelines).map(([pipelineName, pipelineDefinition], i) => {
+      {pipelineNames.map((pipelineName, i) => {
         // Expand first 3 pipelines by default
         const initialIsOpen = i <= 2;
+
+        const pipelineDefinition = pipelines?.[pipelineName];
+
         return (
           <>
             <EuiAccordion
@@ -48,31 +55,34 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                 </EuiTitle>
               }
               extraAction={
-                <EuiButtonEmpty
-                  onClick={() => {
-                    const locator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
-                    if (!locator) return;
-                    locator.navigate({
-                      page: 'pipeline_edit',
-                      pipelineId: pipelineName,
-                      absolute: true,
-                    });
-                  }}
-                  iconType={'documentEdit'}
-                  iconSide="left"
-                >
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
-                    defaultMessage="Edit"
-                  />
-                </EuiButtonEmpty>
+                pipelineDefinition ? (
+                  <EuiButtonEmpty
+                    data-test-subj={`mlTrainedModelPipelineEditButton_${pipelineName}`}
+                    onClick={() => {
+                      const locator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
+                      if (!locator) return;
+                      locator.navigate({
+                        page: 'pipeline_edit',
+                        pipelineId: pipelineName,
+                        absolute: true,
+                      });
+                    }}
+                    iconType={'documentEdit'}
+                    iconSide="left"
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
+                      defaultMessage="Edit"
+                    />
+                  </EuiButtonEmpty>
+                ) : undefined
               }
               paddingSize="l"
               initialIsOpen={initialIsOpen}
             >
               <EuiFlexGrid columns={2}>
                 {ingestStats?.pipelines ? (
-                  <EuiFlexItem>
+                  <EuiFlexItem data-test-subj={`mlTrainedModelPipelineIngestStats_${pipelineName}`}>
                     <EuiPanel>
                       <EuiTitle size={'xxs'}>
                         <h6>
@@ -88,27 +98,29 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                   </EuiFlexItem>
                 ) : null}
 
-                <EuiFlexItem>
-                  <EuiPanel>
-                    <EuiTitle size={'xxs'}>
-                      <h6>
-                        <FormattedMessage
-                          id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
-                          defaultMessage="Definition"
-                        />
-                      </h6>
-                    </EuiTitle>
-                    <EuiCodeBlock
-                      language="json"
-                      fontSize="m"
-                      paddingSize="m"
-                      overflowHeight={300}
-                      isCopyable
-                    >
-                      {JSON.stringify(pipelineDefinition, null, 2)}
-                    </EuiCodeBlock>
-                  </EuiPanel>
-                </EuiFlexItem>
+                {pipelineDefinition ? (
+                  <EuiFlexItem data-test-subj={`mlTrainedModelPipelineDefinition_${pipelineName}`}>
+                    <EuiPanel>
+                      <EuiTitle size={'xxs'}>
+                        <h6>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
+                            defaultMessage="Definition"
+                          />
+                        </h6>
+                      </EuiTitle>
+                      <EuiCodeBlock
+                        language="json"
+                        fontSize="m"
+                        paddingSize="m"
+                        overflowHeight={300}
+                        isCopyable
+                      >
+                        {JSON.stringify(pipelineDefinition, null, 2)}
+                      </EuiCodeBlock>
+                    </EuiPanel>
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGrid>
             </EuiAccordion>
           </>

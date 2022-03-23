@@ -18,7 +18,14 @@ export {
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
+  LAYER_WIZARD_CATEGORY,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
 } from './constants';
+
+export type { FieldFormatter } from './constants';
 
 export type {
   EMSFileSourceDescriptor,
@@ -27,4 +34,5 @@ export type {
   TooltipFeature,
   VectorLayerDescriptor,
   VectorStyleDescriptor,
+  VectorSourceRequestMeta,
 } from './descriptor_types';

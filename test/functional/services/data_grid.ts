@@ -72,7 +72,7 @@ export class DataGridService extends FtrService {
    * Returns an array of data grid headers names
    */
   public async getHeaders() {
-    const header = await this.testSubjects.find('dataGridWrapper > dataGridHeader');
+    const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
     const $ = await header.parseDomContent();
     return $('.euiDataGridHeaderCell__content')
       .toArray()
@@ -86,7 +86,7 @@ export class DataGridService extends FtrService {
    */
   public async getCellElement(rowIndex: number = 0, columnIndex: number = 0) {
     return await this.find.byCssSelector(
-      `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${columnIndex}"]`
+      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-row-index="${rowIndex}"]`
     );
   }
 

@@ -55,6 +55,7 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     '**/dist/**',
     '**/target/**',
     '**/vendor/**',
+    '**/build/**',
     '**/*.test.{js,jsx,ts,tsx}',
     '**/*.d.ts',
   ].concat(additionalIgnore);

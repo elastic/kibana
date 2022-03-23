@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { ConfigKey, Validation } from '../types';
@@ -15,16 +15,25 @@ import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const TCPSimpleFields = memo<Props>(({ validate }) => {
+export const TCPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields } = useTCPSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
-    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
-  };
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
 
   return (
-    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
+    <SimpleFieldsWrapper
+      fields={fields}
+      validate={validate}
+      onInputChange={handleInputChange}
+      onFieldBlur={onFieldBlur}
+    >
       <EuiFormRow
         label={
           <FormattedMessage
@@ -48,6 +57,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.HOSTS,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.HOSTS)}
           data-test-subj="syntheticsTCPHostField"
         />
       </EuiFormRow>
@@ -57,14 +67,14 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >
@@ -75,6 +85,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.SCHEDULE,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
           number={fields[ConfigKey.SCHEDULE].number}
           unit={fields[ConfigKey.SCHEDULE].unit}
         />

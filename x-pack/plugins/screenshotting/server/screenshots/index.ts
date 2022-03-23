@@ -11,22 +11,40 @@ import {
   catchError,
   concatMap,
   first,
-  mapTo,
+  map,
   mergeMap,
   take,
   takeUntil,
+  tap,
   toArray,
 } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
+import type { KibanaRequest, Logger } from 'src/core/server';
 import { LayoutParams } from '../../common';
+import type { ConfigType } from '../config';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import { createLayout } from '../layouts';
 import type { Layout } from '../layouts';
 import { ScreenshotObservableHandler } from './observable';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
+import { Semaphore } from './semaphore';
 
-export interface ScreenshotOptions extends ScreenshotObservableOptions {
+export type { UrlOrUrlWithContext } from './observable';
+export type { ScreenshotObservableResult } from './observable';
+
+export interface ScreenshotOptions<F extends 'pdf' | 'png' = 'png'>
+  extends ScreenshotObservableOptions {
+  /**
+   * Whether to format the output as a PDF or PNG. Defaults to requiring 'png'
+   * unless specified otherwise.
+   */
+  format: F;
+
   layout: LayoutParams;
+
+  /**
+   * Source Kibana request object from where the headers will be extracted.
+   */
+  request?: KibanaRequest;
 }
 
 export interface ScreenshotResult {
@@ -38,7 +56,7 @@ export interface ScreenshotResult {
   /**
    * Collected performance metrics during the screenshotting session.
    */
-  metrics$: Observable<PerformanceMetrics>;
+  metrics?: PerformanceMetrics;
 
   /**
    * Screenshotting results.
@@ -51,55 +69,83 @@ const DEFAULT_SETUP_RESULT = {
   timeRange: null,
 };
 
-export function getScreenshots(
-  browserDriverFactory: HeadlessChromiumDriverFactory,
-  logger: Logger,
-  options: ScreenshotOptions
-): Observable<ScreenshotResult> {
-  const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
-  const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
-  const layout = createLayout(options.layout);
-  logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
-  apmCreateLayout?.end();
+export class Screenshots {
+  private semaphore: Semaphore;
 
-  const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
-  const {
-    browserTimezone,
-    timeouts: { openUrl: openUrlTimeout },
-  } = options;
+  constructor(
+    private readonly browserDriverFactory: HeadlessChromiumDriverFactory,
+    private readonly logger: Logger,
+    { poolSize }: ConfigType
+  ) {
+    this.semaphore = new Semaphore(poolSize);
+  }
 
-  return browserDriverFactory.createPage({ browserTimezone, openUrlTimeout }, logger).pipe(
-    mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
-      apmCreatePage?.end();
-      metrics$.subscribe(({ cpu, memory }) => {
-        apmTrans?.setLabel('cpu', cpu, false);
-        apmTrans?.setLabel('memory', memory, false);
-      });
-      unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
+  getScreenshots<F extends 'pdf' | 'png'>(
+    options: ScreenshotOptions<F>
+  ): Observable<ScreenshotResult> {
+    const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
+    const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
+    const layout = createLayout(options.layout);
+    this.logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
+    apmCreateLayout?.end();
 
-      const screen = new ScreenshotObservableHandler(driver, logger, layout, options);
+    const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
+    const {
+      browserTimezone,
+      timeouts: { openUrl: openUrlTimeout },
+    } = options;
+    const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
 
-      return from(options.urls).pipe(
-        concatMap((url, index) =>
-          screen.setupPage(index, url, apmTrans).pipe(
-            catchError((error) => {
-              screen.checkPageIsOpen(); // this fails the job if the browser has closed
+    return this.browserDriverFactory
+      .createPage(
+        {
+          browserTimezone,
+          openUrlTimeout,
+          defaultViewport: { height: layout.height, width: layout.width },
+        },
+        this.logger
+      )
+      .pipe(
+        this.semaphore.acquire(),
+        mergeMap(({ driver, unexpectedExit$, close }) => {
+          apmCreatePage?.end();
+          unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
-              logger.error(error);
-              return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
-            }),
-            takeUntil(unexpectedExit$),
-            screen.getScreenshots()
-          )
-        ),
-        take(options.urls.length),
-        toArray(),
-        mergeMap((results) => {
-          // At this point we no longer need the page, close it.
-          return close().pipe(mapTo({ layout, metrics$, results }));
-        })
+          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, {
+            ...options,
+            headers,
+          });
+
+          return from(options.urls).pipe(
+            concatMap((url, index) =>
+              screen.setupPage(index, url, apmTrans).pipe(
+                catchError((error) => {
+                  screen.checkPageIsOpen(); // this fails the job if the browser has closed
+
+                  this.logger.error(error);
+                  return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
+                }),
+                takeUntil(unexpectedExit$),
+                screen.getScreenshots()
+              )
+            ),
+            take(options.urls.length),
+            toArray(),
+            mergeMap((results) =>
+              // At this point we no longer need the page, close it.
+              close().pipe(
+                tap(({ metrics }) => {
+                  if (metrics) {
+                    apmTrans?.setLabel('cpu', metrics.cpu, false);
+                    apmTrans?.setLabel('memory', metrics.memory, false);
+                  }
+                }),
+                map(({ metrics }) => ({ layout, metrics, results }))
+              )
+            )
+          );
+        }),
+        first()
       );
-    }),
-    first()
-  );
+  }
 }

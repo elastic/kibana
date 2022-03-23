@@ -10,6 +10,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
+
 import { Subtitle } from '../subtitle';
 
 interface HeaderProps {
@@ -39,36 +40,46 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
+  growLeftSplit?: boolean;
+  headerFilters?: string | React.ReactNode;
   height?: number;
+  hideSubtitle?: boolean;
   id?: string;
+  inspectMultiple?: boolean;
   isInspectDisabled?: boolean;
+  showInspectButton?: boolean;
   split?: boolean;
+  stackHeader?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
-  growLeftSplit?: boolean;
-  inspectMultiple?: boolean;
-  hideSubtitle?: boolean;
 }
 
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
+  growLeftSplit = true,
+  headerFilters,
   height,
+  hideSubtitle = false,
   id,
+  inspectMultiple = false,
   isInspectDisabled,
+  showInspectButton = true,
   split,
+  stackHeader,
   subtitle,
   title,
   titleSize = 'm',
   tooltip,
-  growLeftSplit = true,
-  inspectMultiple = false,
-  hideSubtitle = false,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup
+      alignItems={stackHeader ? undefined : 'center'}
+      direction={stackHeader ? 'column' : 'row'}
+      gutterSize="s"
+    >
       <EuiFlexItem grow={growLeftSplit}>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
@@ -89,7 +100,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
             )}
           </EuiFlexItem>
 
-          {id && (
+          {id && showInspectButton && (
             <EuiFlexItem grow={false}>
               <InspectButton
                 isDisabled={isInspectDisabled}
@@ -99,6 +110,8 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               />
             </EuiFlexItem>
           )}
+
+          {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
 

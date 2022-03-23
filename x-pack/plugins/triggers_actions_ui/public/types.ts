@@ -23,17 +23,17 @@ import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
   AlertActionParam,
-  SanitizedAlert as SanitizedRule,
+  SanitizedAlert,
   ResolvedSanitizedRule,
-  AlertAction,
+  AlertAction as RuleAction,
   AlertAggregations,
   RuleTaskState,
-  AlertSummary,
+  AlertSummary as RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType,
+  AlertNotifyWhenType as RuleNotifyWhenType,
   AlertTypeParams as RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
@@ -41,22 +41,34 @@ import {
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
-type Rule = SanitizedRule<RuleTypeParams>;
-type ResolvedRule = ResolvedSanitizedRule<RuleTypeParams>;
+type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
+  SanitizedAlert<Params>,
+  'alertTypeId'
+> & {
+  ruleTypeId: SanitizedAlert['alertTypeId'];
+};
+type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
+type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
+  ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+};
+type RuleAggregations = Omit<AlertAggregations, 'alertExecutionStatus'> & {
+  ruleExecutionStatus: AlertAggregations['alertExecutionStatus'];
+};
 
 export type {
   Rule,
-  AlertAction,
-  AlertAggregations,
+  RuleAction,
+  RuleAggregations,
   RuleTaskState,
-  AlertSummary,
+  RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedRule,
+  SanitizedRule,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -93,7 +105,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   isEdit: boolean;
 }
 
-export enum AlertFlyoutCloseReason {
+export enum RuleFlyoutCloseReason {
   SAVED,
   CANCELED,
 }
@@ -106,6 +118,9 @@ export interface ActionParamsProps<TParams> {
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   actionConnector?: ActionConnector;
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  showEmailSubjectAndMessage?: boolean;
 }
 
 export interface Pagination {
@@ -199,8 +214,9 @@ export type ActionConnectorTableItem = ActionConnector & {
 type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];
 };
-export const REQUIRED_ACTION_VARIABLES = ['state', 'params'] as const;
-export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
+export const REQUIRED_ACTION_VARIABLES = ['params'] as const;
+export const CONTEXT_ACTION_VARIABLES = ['context'] as const;
+export const OPTIONAL_ACTION_VARIABLES = [...CONTEXT_ACTION_VARIABLES, 'state'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
@@ -218,7 +234,7 @@ export interface RuleType<
     | 'defaultActionGroupId'
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
-    | 'minimumScheduleInterval'
+    | 'doesSetRecoveryContext'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
@@ -227,10 +243,10 @@ export interface RuleType<
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type AlertUpdates = Omit<Rule, 'id' | 'executionStatus'>;
+export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus'>;
 
-export interface AlertTableItem extends Rule {
-  alertType: RuleType['name'];
+export interface RuleTableItem extends Rule {
+  ruleType: RuleType['name'];
   index: number;
   actionsCount: number;
   isEditable: boolean;
@@ -245,7 +261,7 @@ export interface RuleTypeParamsExpressionProps<
   ruleParams: Params;
   ruleInterval: string;
   ruleThrottle: string;
-  alertNotifyWhen: AlertNotifyWhenType;
+  alertNotifyWhen: RuleNotifyWhenType;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setRuleProperty: <Prop extends keyof Rule>(
     key: Prop,
@@ -298,29 +314,43 @@ export interface ConnectorEditFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-export interface AlertEditProps<MetaData = Record<string, any>> {
-  initialAlert: Rule;
+export interface RuleEditProps<MetaData = Record<string, any>> {
+  initialRule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
+  reloadRules?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
 }
 
-export interface AlertAddProps<MetaData = Record<string, any>> {
+export interface RuleAddProps<MetaData = Record<string, any>> {
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
-  alertTypeId?: string;
+  onClose: (reason: RuleFlyoutCloseReason) => void;
+  ruleTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
+  reloadRules?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
+  filteredSolutions?: string[] | undefined;
+}
+
+export enum Percentiles {
+  P50 = 'P50',
+  P95 = 'P95',
+  P99 = 'P99',
+}
+
+export interface TriggersActionsUiConfig {
+  minimumScheduleInterval?: {
+    value: string;
+    enforce: boolean;
+  };
 }

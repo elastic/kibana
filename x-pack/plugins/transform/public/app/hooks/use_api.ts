@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { HttpFetchError } from 'kibana/public';
+import type { HttpFetchError } from 'kibana/public';
 
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
@@ -22,6 +22,10 @@ import type {
   FieldHistogramsRequestSchema,
   FieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/field_histograms';
+import type {
+  ResetTransformsRequestSchema,
+  ResetTransformsResponseSchema,
+} from '../../../common/api_schemas/reset_transforms';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
@@ -43,9 +47,10 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../common/api_schemas/update_transforms';
 import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
-import { TransformId } from '../../../common/types/transform';
+import type { TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
-import { EsIndex } from '../../../common/types/es_index';
+import type { EsIndex } from '../../../common/types/es_index';
+import type { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline';
 
 import { useAppDependencies } from '../app_dependencies';
 
@@ -157,6 +162,17 @@ export const useApi = () => {
           return e;
         }
       },
+      async resetTransforms(
+        reqBody: ResetTransformsRequestSchema
+      ): Promise<ResetTransformsResponseSchema | HttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}reset_transforms`, {
+            body: JSON.stringify(reqBody),
+          });
+        } catch (e) {
+          return e;
+        }
+      },
       async startTransforms(
         reqBody: StartTransformsRequestSchema
       ): Promise<StartTransformsResponseSchema | HttpFetchError> {
@@ -198,6 +214,13 @@ export const useApi = () => {
       async getEsIndices(): Promise<EsIndex[] | HttpFetchError> {
         try {
           return await http.get(`/api/index_management/indices`);
+        } catch (e) {
+          return e;
+        }
+      },
+      async getEsIngestPipelines(): Promise<EsIngestPipeline[] | HttpFetchError> {
+        try {
+          return await http.get('/api/ingest_pipelines');
         } catch (e) {
           return e;
         }

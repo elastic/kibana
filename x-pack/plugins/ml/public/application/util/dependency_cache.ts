@@ -21,7 +21,7 @@ import type {
   IBasePath,
 } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { SharePluginStart } from 'src/plugins/share/public';
+import type { DashboardStart } from 'src/plugins/dashboard/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
@@ -45,7 +45,7 @@ export interface DependencyCache {
   http: HttpStart | null;
   security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
-  urlGenerators: SharePluginStart['urlGenerators'] | null;
+  dashboard: DashboardStart | null;
   maps: MapsStartApi | null;
   dataVisualizer: DataVisualizerPluginStart | null;
   dataViews: DataViewsContract | null;
@@ -68,7 +68,7 @@ const cache: DependencyCache = {
   http: null,
   security: null,
   i18n: null,
-  urlGenerators: null,
+  dashboard: null,
   maps: null,
   dataVisualizer: null,
   dataViews: null,
@@ -91,7 +91,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.http = deps.http || null;
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
-  cache.urlGenerators = deps.urlGenerators || null;
+  cache.dashboard = deps.dashboard || null;
   cache.dataVisualizer = deps.dataVisualizer || null;
   cache.dataViews = deps.dataViews || null;
 }
@@ -214,11 +214,11 @@ export function getI18n() {
   return cache.i18n;
 }
 
-export function getGetUrlGenerator() {
-  if (cache.urlGenerators === null) {
-    throw new Error("urlGenerators hasn't been initialized");
+export function getDashboard() {
+  if (cache.dashboard === null) {
+    throw new Error("dashboard hasn't been initialized");
   }
-  return cache.urlGenerators.getUrlGenerator;
+  return cache.dashboard;
 }
 
 export function getDataViews() {

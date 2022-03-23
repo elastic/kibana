@@ -66,10 +66,10 @@ export default function (providerContext: FtrProviderContext) {
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
         .expect(200);
       const packageInfo = res.body.item;
-      // the uploaded version will have this description
-      expect(packageInfo.description).to.equal('Apache Uploaded Test Integration');
-      // download property should not exist on uploaded packages
-      expect(packageInfo.download).to.equal(undefined);
+      // Get package info always return data from the registry
+      expect(packageInfo.description).to.not.equal('Apache Uploaded Test Integration');
+      // download property exist on uploaded packages
+      expect(packageInfo.download).to.not.equal(undefined);
       await uninstallPackage(testPkgName, testPkgVersion);
     });
     it('returns correct package info from registry if a different version is installed by upload', async function () {
@@ -96,10 +96,22 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.get('/api/fleet/epm/packages/endpoint/0.1.0.1.2.3').expect(400);
     });
 
-    it('allows user with only read permission to access', async () => {
+    it('allows user with only fleet permission to access', async () => {
       await supertestWithoutAuth
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
-        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+        .expect(200);
+    });
+    it('allows user with only integrations permission to access', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
+        .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
+        .expect(200);
+    });
+    it('allows user with integrations read permission to access', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
+        .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
         .expect(200);
     });
 

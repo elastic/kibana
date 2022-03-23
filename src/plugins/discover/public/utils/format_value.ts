@@ -7,8 +7,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataView, DataViewField, KBN_FIELD_TYPES } from '../../../data/common';
-import { getServices } from '../kibana_services';
+import { FieldFormatsStart } from '../../../field_formats/public';
+import { KBN_FIELD_TYPES } from '../../../data/public';
+import { DataView, DataViewField } from '../../../data_views/public';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
@@ -23,14 +24,15 @@ import { getServices } from '../kibana_services';
 export function formatFieldValue(
   value: unknown,
   hit: estypes.SearchHit,
+  fieldFormats: FieldFormatsStart,
   dataView?: DataView,
   field?: DataViewField
 ): string {
   if (!dataView || !field) {
     // If either no field is available or no data view, we'll use the default
     // string formatter to format that field.
-    return getServices()
-      .fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
+    return fieldFormats
+      .getDefaultInstance(KBN_FIELD_TYPES.STRING)
       .convert(value, 'html', { hit, field });
   }
 

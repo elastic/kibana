@@ -40,11 +40,13 @@
 
 	- templateTimelineId: Specify an unique uuid e.g.: `2c7e0663-5a91-0004-aa15-26bf756d2c40`
 
-	- templateTimelineVersion: just start from `1`
+	- templateTimelineVersion: start from `1`, bump it on update
 
 	- timelineType: `template`
 
 	- status: `immutable`
+
+  - indexNames: []
 
 
 

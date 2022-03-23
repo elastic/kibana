@@ -23,7 +23,7 @@ export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.r
 
 export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
-export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
+export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
 export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
 
@@ -62,6 +62,7 @@ export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
+export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
 export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
 
 export const REASON = '[data-test-subj^=formatted-field][data-test-subj$=reason]';
@@ -84,4 +85,6 @@ export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu
 
 export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
-export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-existing-case-menu-item"]';
+export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
+
+export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';

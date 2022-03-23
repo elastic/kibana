@@ -17,13 +17,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { ColorMode } from '../../../../../src/plugins/charts/common';
 import type { PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import { isNumericFieldForDatatable, MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/types';
+import { isNumericFieldForDatatable } from '../../common/expressions';
 import {
   applyPaletteParams,
   CustomizablePalette,
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
-  getStopsForFixedMode,
   PalettePanelContainer,
 } from '../shared_components';
 import type { VisualizationDimensionEditorProps } from '../types';
@@ -165,14 +165,7 @@ export function MetricDimensionEditor(
             <EuiFlexItem>
               <EuiColorPaletteDisplay
                 data-test-subj="lnsMetric_dynamicColoring_palette"
-                palette={
-                  activePalette.params?.name === CUSTOM_PALETTE
-                    ? getStopsForFixedMode(
-                        activePalette.params.stops!,
-                        activePalette.params.colorStops
-                      )
-                    : displayStops.map(({ color }) => color)
-                }
+                palette={displayStops.map(({ color }) => color)}
                 type={FIXED_PROGRESSION}
                 onClick={togglePalette}
               />

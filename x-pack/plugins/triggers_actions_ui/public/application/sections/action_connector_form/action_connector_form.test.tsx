@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   UserConfiguredActionConnector,

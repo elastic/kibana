@@ -28,7 +28,7 @@ import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 
-export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats'> &
+export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats' | 'maps'> &
   MlStartDependencies;
 
 interface AppProps {
@@ -87,6 +87,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     dataVisualizer: deps.dataVisualizer,
     usageCollection: deps.usageCollection,
     fieldFormats: deps.fieldFormats,
+    dashboard: deps.dashboard,
+    charts: deps.charts,
     ...coreStart,
   };
 
@@ -133,7 +135,7 @@ export const renderApp = (
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
-    urlGenerators: deps.share.urlGenerators,
+    dashboard: deps.dashboard,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,

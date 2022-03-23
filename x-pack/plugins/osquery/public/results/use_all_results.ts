@@ -8,7 +8,12 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { createFilter } from '../common/helpers';
+import {
+  createFilter,
+  generateTablePaginationOptions,
+  getInspectResponse,
+  InspectResponse,
+} from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   ResultEdges,
@@ -20,7 +25,6 @@ import {
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
 
-import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ResultsArgs {
@@ -78,10 +82,14 @@ export const useAllResults = ({
 
       return {
         ...responseData,
+        columns: Object.keys(
+          (responseData.edges?.length && responseData.edges[0].fields) || {}
+        ).sort(),
         inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
     {
+      keepPreviousData: true,
       refetchInterval: isLive ? 5000 : false,
       enabled: !skip,
       onSuccess: () => setErrorToast(),

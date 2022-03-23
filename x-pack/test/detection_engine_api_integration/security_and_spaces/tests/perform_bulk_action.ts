@@ -79,15 +79,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should delete rules', async () => {
       const ruleId = 'ruleId';
-      await createRule(supertest, log, getSimpleRule(ruleId));
+      const testRule = getSimpleRule(ruleId);
+      await createRule(supertest, log, testRule);
 
       const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.delete })
         .expect(200);
 
-      expect(body).to.eql({ success: true, rules_count: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
-      await await fetchRule(ruleId).expect(404);
+      // Check that the deleted rule is returned with the response
+      expect(body.attributes.results.deleted[0].name).to.eql(testRule.name);
+
+      // Check that the updates have been persisted
+      await fetchRule(ruleId).expect(404);
     });
 
     it('should enable rules', async () => {
@@ -98,16 +103,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ query: '', action: BulkAction.enable })
         .expect(200);
 
-      expect(body).to.eql({ success: true, rules_count: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
+      // Check that the updated rule is returned with the response
+      expect(body.attributes.results.updated[0].enabled).to.eql(true);
+
+      // Check that the updates have been persisted
       const { body: ruleBody } = await fetchRule(ruleId).expect(200);
-
-      const referenceRule = getSimpleRuleOutput(ruleId);
-      referenceRule.enabled = true;
-
-      const storedRule = removeServerGeneratedProperties(ruleBody);
-
-      expect(storedRule).to.eql(referenceRule);
+      expect(ruleBody.enabled).to.eql(true);
     });
 
     it('should disable rules', async () => {
@@ -118,26 +121,31 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ query: '', action: BulkAction.disable })
         .expect(200);
 
-      expect(body).to.eql({ success: true, rules_count: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
+      // Check that the updated rule is returned with the response
+      expect(body.attributes.results.updated[0].enabled).to.eql(false);
+
+      // Check that the updates have been persisted
       const { body: ruleBody } = await fetchRule(ruleId).expect(200);
-
-      const referenceRule = getSimpleRuleOutput(ruleId);
-      const storedRule = removeServerGeneratedProperties(ruleBody);
-
-      expect(storedRule).to.eql(referenceRule);
+      expect(ruleBody.enabled).to.eql(false);
     });
 
     it('should duplicate rules', async () => {
       const ruleId = 'ruleId';
-      await createRule(supertest, log, getSimpleRule(ruleId));
+      const ruleToDuplicate = getSimpleRule(ruleId);
+      await createRule(supertest, log, ruleToDuplicate);
 
       const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.duplicate })
         .expect(200);
 
-      expect(body).to.eql({ success: true, rules_count: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
+      // Check that the duplicated rule is returned with the response
+      expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+
+      // Check that the updates have been persisted
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
@@ -165,8 +173,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(setTagsBody).to.eql({ success: true, rules_count: 1 });
+        expect(setTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
+        // Check that the updated rule is returned with the response
+        expect(setTagsBody.attributes.results.updated[0].tags).to.eql(['reset-tag']);
+
+        // Check that the updates have been persisted
         const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
 
         expect(setTagsRule.tags).to.eql(['reset-tag']);
@@ -184,8 +196,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(addTagsBody).to.eql({ success: true, rules_count: 1 });
+        expect(addTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
+        // Check that the updated rule is returned with the response
+        expect(addTagsBody.attributes.results.updated[0].tags).to.eql(['reset-tag', ...tags]);
+
+        // Check that the updates have been persisted
         const { body: addedTagsRule } = await fetchRule(ruleId).expect(200);
 
         expect(addedTagsRule.tags).to.eql(['reset-tag', ...tags]);
@@ -226,8 +242,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(setIndexBody).to.eql({ success: true, rules_count: 1 });
+        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
+        // Check that the updated rule is returned with the response
+        expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
+
+        // Check that the updates have been persisted
         const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
 
         expect(setIndexRule.index).to.eql(['initial-index-*']);
@@ -245,8 +265,15 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(addIndexBody).to.eql({ success: true, rules_count: 1 });
+        expect(addIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
+        // Check that the updated rule is returned with the response
+        expect(addIndexBody.attributes.results.updated[0].index).to.eql([
+          'initial-index-*',
+          ...indices,
+        ]);
+
+        // Check that the updates have been persisted
         const { body: addIndexRule } = await fetchRule(ruleId).expect(200);
 
         expect(addIndexRule.index).to.eql(['initial-index-*', ...indices]);
@@ -291,8 +318,13 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body).to.eql({ success: true, rules_count: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].timeline_id).to.eql(timelineId);
+        expect(body.attributes.results.updated[0].timeline_title).to.eql(timelineTitle);
+
+        // Check that the updates have been persisted
         const { body: rule } = await fetchRule(ruleId).expect(200);
 
         expect(rule.timeline_id).to.eql(timelineId);
@@ -325,6 +357,44 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       expect(responses.filter((r) => r.body.statusCode === 429).length).to.eql(5);
+    });
+
+    it('should bulk update rule by id', async () => {
+      const ruleId = 'ruleId';
+      const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
+      const timelineTitle = 'Test timeline';
+      await createRule(supertest, log, getSimpleRule(ruleId));
+      const {
+        body: { id },
+      } = await fetchRule(ruleId);
+
+      const { body } = await postBulkAction()
+        .send({
+          ids: [id],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_timeline,
+              value: {
+                timeline_id: timelineId,
+                timeline_title: timelineTitle,
+              },
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+      // Check that the updated rule is returned with the response
+      expect(body.attributes.results.updated[0].timeline_id).to.eql(timelineId);
+      expect(body.attributes.results.updated[0].timeline_title).to.eql(timelineTitle);
+
+      // Check that the updates have been persisted
+      const { body: rule } = await fetchRule(ruleId).expect(200);
+
+      expect(rule.timeline_id).to.eql(timelineId);
+      expect(rule.timeline_title).to.eql(timelineTitle);
     });
   });
 };

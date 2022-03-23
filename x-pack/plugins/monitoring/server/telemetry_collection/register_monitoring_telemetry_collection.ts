@@ -34,13 +34,9 @@ export function registerMonitoringTelemetryCollection(
   getClient: () => IClusterClient,
   maxBucketSize: number
 ) {
-  const monitoringStatsCollector = usageCollection.makeStatsCollector<
-    MonitoringTelemetryUsage,
-    true
-  >({
+  const monitoringStatsCollector = usageCollection.makeStatsCollector<MonitoringTelemetryUsage>({
     type: 'monitoringTelemetry',
     isReady: () => true,
-    extendFetchContext: { kibanaRequest: true },
     schema: {
       stats: {
         type: 'array',
@@ -137,16 +133,16 @@ export function registerMonitoringTelemetryCollection(
         },
       },
     },
-    fetch: async ({ kibanaRequest, esClient }) => {
+    fetch: async () => {
       const timestamp = Date.now(); // Collect the telemetry from the monitoring indices for this moment.
       // NOTE: Usually, the monitoring indices index stats for each product every 10s (by default).
       // However, some data may be delayed up-to 24h because monitoring only collects extended Kibana stats in that interval
       // to avoid overloading of the system when retrieving data from the collectors (that delay is dealt with in the Kibana Stats getter inside the `getAllStats` method).
       // By 8.x, we expect to stop collecting the Kibana extended stats and keep only the monitoring-related metrics.
-      const callCluster = kibanaRequest ? esClient : getClient().asInternalUser;
+      const callCluster = getClient().asInternalUser;
       const clusterDetails = await getClusterUuids(callCluster, timestamp, maxBucketSize);
       const [licenses, stats] = await Promise.all([
-        getLicenses(clusterDetails, callCluster, maxBucketSize),
+        getLicenses(clusterDetails, callCluster, timestamp, maxBucketSize),
         getAllStats(clusterDetails, callCluster, timestamp, maxBucketSize),
       ]);
 

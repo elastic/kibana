@@ -25,6 +25,7 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "execute-start"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleType,
         action: 'execute-start',
@@ -50,6 +51,13 @@ describe('createAlertEventLogRecordObject', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -76,6 +84,7 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "recovered-instance"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
@@ -109,6 +118,13 @@ describe('createAlertEventLogRecordObject', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'group 1',
           action_subgroup: 'subgroup value',
@@ -138,6 +154,7 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "execute-action"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
@@ -176,6 +193,13 @@ describe('createAlertEventLogRecordObject', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'group 1',
           action_subgroup: 'subgroup value',

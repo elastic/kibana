@@ -9,14 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { AlertType } from '../../../../../common/alert_types';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useTheme } from '../../../../hooks/use_theme';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
@@ -24,11 +19,12 @@ import {
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
-import * as urlHelpers from '../../../shared/Links/url_helpers';
+import * as urlHelpers from '../../../shared/links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   height?: number;
@@ -47,11 +43,17 @@ function filterNil<T>(value: T | null | undefined): value is T {
 
 export function LatencyChart({ height, kuery }: Props) {
   const history = useHistory();
-  const theme = useTheme();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
-  const { urlParams } = useLegacyUrlParams();
-  const { latencyAggregationType, comparisonEnabled } = urlParams;
+
+  const comparisonChartTheme = getComparisonChartTheme();
   const license = useLicenseContext();
+
+  const {
+    query: { comparisonEnabled, latencyAggregationType },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/overview',
+    '/services/{serviceName}/transactions',
+    '/services/{serviceName}/transactions/view'
+  );
 
   const { environment } = useEnvironmentsContext();
 
@@ -62,8 +64,6 @@ export function LatencyChart({ height, kuery }: Props) {
     });
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
-
-  const { alerts } = useApmServiceContext();
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     ApmMlDetectorType.txLatency
@@ -132,13 +132,6 @@ export function LatencyChart({ height, kuery }: Props) {
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={preferredAnomalyTimeseries}
-          alerts={alerts.filter(
-            (alert) =>
-              alert[ALERT_RULE_TYPE_ID]?.[0] ===
-                AlertType.TransactionDuration ||
-              alert[ALERT_RULE_TYPE_ID]?.[0] ===
-                AlertType.TransactionDurationAnomaly
-          )}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

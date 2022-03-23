@@ -5,133 +5,129 @@
  * 2.0.
  */
 
-import { ModelService, modelsProvider } from './models_provider';
+import { MemoryStatsResponse, ModelService, modelsProvider } from './models_provider';
 import { IScopedClusterClient } from 'kibana/server';
 import { MlClient } from '../../lib/ml_client';
 import mockResponse from './__mocks__/mock_deployment_response.json';
-import { MemoryOverviewService } from '../memory_overview/memory_overview_service';
 
 describe('Model service', () => {
   const client = {
-    asInternalUser: {
-      nodes: {
-        stats: jest.fn(() => {
-          return Promise.resolve({
-            body: {
-              _nodes: {
-                total: 3,
-                successful: 3,
-                failed: 0,
-              },
-              cluster_name: 'test_cluster',
-              nodes: {
-                '3qIoLFnbSi-DwVrYioUCdw': {
-                  timestamp: 1635167166946,
-                  name: 'node3',
-                  transport_address: '10.10.10.2:9353',
-                  host: '10.10.10.2',
-                  ip: '10.10.10.2:9353',
-                  roles: ['data', 'ingest', 'master', 'ml', 'transform'],
-                  attributes: {
-                    'ml.machine_memory': '15599742976',
-                    'xpack.installed': 'true',
-                    'ml.max_jvm_size': '1073741824',
-                  },
-                  os: {
-                    mem: {
-                      total_in_bytes: 15599742976,
-                      adjusted_total_in_bytes: 15599742976,
-                      free_in_bytes: 376324096,
-                      used_in_bytes: 15223418880,
-                      free_percent: 2,
-                      used_percent: 98,
-                    },
-                  },
-                },
-                'DpCy7SOBQla3pu0Dq-tnYw': {
-                  timestamp: 1635167166946,
-                  name: 'node2',
-                  transport_address: '10.10.10.2:9352',
-                  host: '10.10.10.2',
-                  ip: '10.10.10.2:9352',
-                  roles: ['data', 'master', 'ml', 'transform'],
-                  attributes: {
-                    'ml.machine_memory': '15599742976',
-                    'xpack.installed': 'true',
-                    'ml.max_jvm_size': '1073741824',
-                  },
-                  os: {
-                    timestamp: 1635167166959,
-                    mem: {
-                      total_in_bytes: 15599742976,
-                      adjusted_total_in_bytes: 15599742976,
-                      free_in_bytes: 376324096,
-                      used_in_bytes: 15223418880,
-                      free_percent: 2,
-                      used_percent: 98,
-                    },
-                  },
-                },
-                'pt7s6lKHQJaP4QHKtU-Q0Q': {
-                  timestamp: 1635167166945,
-                  name: 'node1',
-                  transport_address: '10.10.10.2:9351',
-                  host: '10.10.10.2',
-                  ip: '10.10.10.2:9351',
-                  roles: ['data', 'master', 'ml'],
-                  attributes: {
-                    'ml.machine_memory': '15599742976',
-                    'xpack.installed': 'true',
-                    'ml.max_jvm_size': '1073741824',
-                  },
-                  os: {
-                    timestamp: 1635167166959,
-                    mem: {
-                      total_in_bytes: 15599742976,
-                      adjusted_total_in_bytes: 15599742976,
-                      free_in_bytes: 376324096,
-                      used_in_bytes: 15223418880,
-                      free_percent: 2,
-                      used_percent: 98,
-                    },
-                  },
-                },
-              },
-            },
-          });
-        }),
-      },
-    },
+    asInternalUser: {},
   } as unknown as jest.Mocked<IScopedClusterClient>;
+
   const mlClient = {
     getTrainedModelsStats: jest.fn(() => {
       return Promise.resolve({
-        body: {
-          trained_model_stats: mockResponse,
-        },
+        trained_model_stats: mockResponse,
       });
     }),
+    getMemoryStats: jest.fn(() => {
+      return Promise.resolve({
+        _nodes: {
+          total: 3,
+          successful: 3,
+          failed: 0,
+        },
+        cluster_name: 'test_cluster',
+        nodes: {
+          '3qIoLFnbSi-DwVrYioUCdw': {
+            name: 'node3',
+            transport_address: '10.10.10.2:9353',
+            roles: ['data', 'ingest', 'master', 'ml', 'transform'],
+            attributes: {
+              'ml.machine_memory': '15599742976',
+              'ml.max_jvm_size': '1073741824',
+            },
+            jvm: {
+              heap_max_in_bytes: 1073741824,
+              java_inference_in_bytes: 0,
+              java_inference_max_in_bytes: 0,
+            },
+            mem: {
+              adjusted_total_in_bytes: 15599742976,
+              total_in_bytes: 15599742976,
+              ml: {
+                data_frame_analytics_in_bytes: 0,
+                native_code_overhead_in_bytes: 0,
+                max_in_bytes: 1073741824,
+                anomaly_detectors_in_bytes: 0,
+                native_inference_in_bytes: 1555161790,
+              },
+            },
+            ephemeral_id: '3qIoLFnbSi-DwVrYioUCdw',
+          },
+          'DpCy7SOBQla3pu0Dq-tnYw': {
+            name: 'node2',
+            transport_address: '10.10.10.2:9352',
+            roles: ['data', 'master', 'ml', 'transform'],
+            attributes: {
+              'ml.machine_memory': '15599742976',
+              'ml.max_jvm_size': '1073741824',
+            },
+            jvm: {
+              heap_max_in_bytes: 1073741824,
+              java_inference_in_bytes: 0,
+              java_inference_max_in_bytes: 0,
+            },
+            mem: {
+              adjusted_total_in_bytes: 15599742976,
+              total_in_bytes: 15599742976,
+              ml: {
+                data_frame_analytics_in_bytes: 0,
+                native_code_overhead_in_bytes: 0,
+                max_in_bytes: 1073741824,
+                anomaly_detectors_in_bytes: 0,
+                native_inference_in_bytes: 1555161790,
+              },
+            },
+            ephemeral_id: '3qIoLFnbSi-DwVrYioUCdw',
+          },
+          'pt7s6lKHQJaP4QHKtU-Q0Q': {
+            name: 'node1',
+            transport_address: '10.10.10.2:9351',
+            roles: ['data', 'master', 'ml'],
+            attributes: {
+              'ml.machine_memory': '15599742976',
+              'ml.max_jvm_size': '1073741824',
+            },
+            jvm: {
+              heap_max_in_bytes: 1073741824,
+              java_inference_in_bytes: 0,
+              java_inference_max_in_bytes: 0,
+            },
+            mem: {
+              adjusted_total_in_bytes: 15599742976,
+              total_in_bytes: 15599742976,
+              ml: {
+                data_frame_analytics_in_bytes: 0,
+                native_code_overhead_in_bytes: 0,
+                max_in_bytes: 1073741824,
+                anomaly_detectors_in_bytes: 0,
+                native_inference_in_bytes: 1555161790,
+              },
+            },
+            ephemeral_id: '3qIoLFnbSi-DwVrYioUCdw',
+          },
+        },
+      } as MemoryStatsResponse);
+    }),
   } as unknown as jest.Mocked<MlClient>;
-  const memoryOverviewService = {
-    getDFAMemoryOverview: jest.fn(() => {
-      return Promise.resolve([{ job_id: '', node_id: '', model_size: 32165465 }]);
-    }),
-    getAnomalyDetectionMemoryOverview: jest.fn(() => {
-      return Promise.resolve([{ job_id: '', node_id: '', model_size: 32165465 }]);
-    }),
-  } as unknown as jest.Mocked<MemoryOverviewService>;
 
   let service: ModelService;
 
   beforeEach(() => {
-    service = modelsProvider(client, mlClient, memoryOverviewService);
+    service = modelsProvider(client, mlClient);
   });
 
   afterEach(() => {});
 
   it('extract nodes list correctly', async () => {
     expect(await service.getNodesOverview()).toEqual({
-      count: 3,
+      _nodes: {
+        failed: 0,
+        successful: 3,
+        total: 3,
+      },
       nodes: [
         {
           name: 'node3',
@@ -223,6 +219,7 @@ describe('Model service', () => {
           },
           id: '3qIoLFnbSi-DwVrYioUCdw',
           memory_overview: {
+            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },
@@ -343,6 +340,7 @@ describe('Model service', () => {
           },
           id: 'DpCy7SOBQla3pu0Dq-tnYw',
           memory_overview: {
+            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },
@@ -466,6 +464,7 @@ describe('Model service', () => {
           },
           id: 'pt7s6lKHQJaP4QHKtU-Q0Q',
           memory_overview: {
+            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },

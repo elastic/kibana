@@ -1,0 +1,114 @@
+[[index-patterns-api-update]]
+=== Update index pattern API
+++++
+<titleabbrev>Update index pattern</titleabbrev>
+++++
+
+deprecated::[8.0.0,Use <<data-views-api-update>> instead.]
+
+experimental[] Update part of an index pattern. Only the specified fields are updated in the
+index pattern. Unspecified fields stay as they are persisted.
+
+[[index-patterns-api-update-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>`
+
+`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>`
+
+[[index-patterns-api-update-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+  (Required, string) The ID of the index pattern you want to update.
+
+[[index-patterns-api-update-request-body]]
+==== Request body
+
+`refresh_fields`:: (Optional, boolean) Reloads the index pattern fields after
+the index pattern is updated. The default is `false`.
+
+`index_pattern`::
+  (Required, object) The index patterns fields you want to update.
++
+
+You can partially update the following fields:
+
+* `title`
+* `timeFieldName`
+* `fields`
+* `sourceFilters`
+* `fieldFormatMap`
+* `type`
+* `typeMeta`
+
+[[index-patterns-api-update-errors-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[index-patterns-api-update-example]]
+==== Examples
+
+Update a title of the `<my-pattern>` index pattern:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/saved_objects/index-pattern/my-pattern
+{
+  "index_pattern": {
+    "title": "some-other-pattern-*"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Customize the update behavior:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/saved_objects/index-pattern/my-pattern
+{
+  "refresh_fields": true,
+  "index_pattern": {
+    "fields": {}
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+
+All update fields are optional, but you can specify the following fields:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/saved_objects/index-pattern/my-pattern
+{
+  "index_pattern": {
+    "title": "...",
+    "timeFieldName": "...",
+    "sourceFilters": [],
+    "fieldFormats": {},
+    "type": "...",
+    "typeMeta": {},
+    "fields": {},
+    "runtimeFieldMap": {}
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the updated index pattern object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern": {
+
+    }
+}
+--------------------------------------------------

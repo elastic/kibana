@@ -55,7 +55,6 @@ export function ViewActions({ onApply }: Props) {
           onClick={() => applyChanges(onApply)}
           isDisabled={noChanges}
           fill
-          size="s"
           data-test-subj={'seriesChangesApplyButton'}
         >
           {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {

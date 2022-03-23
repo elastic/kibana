@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import ConnectorAddFlyout from './connector_add_flyout';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';

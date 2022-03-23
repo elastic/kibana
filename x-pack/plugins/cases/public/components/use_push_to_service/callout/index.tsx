@@ -89,5 +89,6 @@ const CaseCallOutComponent = ({
     </>
   );
 };
+CaseCallOutComponent.displayName = 'CaseCallOut';
 
 export const CaseCallOut = memo(CaseCallOutComponent);

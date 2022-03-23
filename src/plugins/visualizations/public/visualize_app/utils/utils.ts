@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import type { History } from 'history';
 import type { ChromeStart, DocLinksStart } from 'kibana/public';
 import type { Filter } from '@kbn/es-query';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
@@ -92,5 +92,10 @@ export const redirectToSavedObjectPage = (
     onBeforeRedirect() {
       setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
     },
+    theme: services.theme,
   })(error);
 };
+
+export function getVizEditorOriginatingAppUrl(history: History) {
+  return `#/${history.location.pathname}${history.location.search}`;
+}

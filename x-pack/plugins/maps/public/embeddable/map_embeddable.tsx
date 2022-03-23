@@ -14,7 +14,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { type Filter, compareFilters } from '@kbn/es-query';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   Embeddable,
   IContainer,
@@ -27,7 +28,6 @@ import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/pu
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   APPLY_FILTER_TRIGGER,
-  esFilters,
   TimeRange,
   Query,
 } from '../../../../../src/plugins/data/public';
@@ -38,6 +38,7 @@ import {
   setQuery,
   disableScrollZoom,
   setReadOnly,
+  updateLayerById,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -72,6 +73,7 @@ import {
   getChartsPaletteServiceGetColor,
   getSpacesApi,
   getSearchService,
+  getTheme,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -282,7 +284,7 @@ export class MapEmbeddable
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
-      !esFilters.compareFilters(this._getFilters(), this._prevFilters) ||
+      !compareFilters(this._getFilters(), this._prevFilters) ||
       this._getSearchSessionId() !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
@@ -400,7 +402,9 @@ export class MapEmbeddable
     const I18nContext = getCoreI18n().Context;
     render(
       <Provider store={this._savedMap.getStore()}>
-        <I18nContext>{content}</I18nContext>
+        <I18nContext>
+          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
+        </I18nContext>
       </Provider>,
       this._domNode
     );
@@ -414,6 +418,10 @@ export class MapEmbeddable
         indexPatterns,
       });
     });
+  }
+
+  updateLayerById(layerDescriptor: LayerDescriptor) {
+    this._savedMap.getStore().dispatch<any>(updateLayerById(layerDescriptor));
   }
 
   private async _getIndexPatterns() {

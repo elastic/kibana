@@ -36,12 +36,14 @@ import {
   PreviewRulesSchema,
   ThreatMatchCreateSchema,
   RulePreviewLogs,
+  SavedQueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
+  RuleExecutionStatus,
   Status,
   SignalIds,
-} from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
+} from '../../plugins/security_solution/common/detection_engine/schemas/common';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import {
   DETECTION_ENGINE_INDEX_URL,
@@ -52,6 +54,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
+  SECURITY_TELEMETRY_URL,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
 import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
@@ -66,18 +69,10 @@ export const removeServerGeneratedProperties = (
 ): Partial<FullResponseSchema> => {
   const {
     /* eslint-disable @typescript-eslint/naming-convention */
+    id,
     created_at,
     updated_at,
-    id,
-    last_failure_at,
-    last_failure_message,
-    last_success_at,
-    last_success_message,
-    last_gap,
-    search_after_time_durations,
-    bulk_create_time_durations,
-    status,
-    status_date,
+    execution_summary,
     /* eslint-enable @typescript-eslint/naming-convention */
     ...removedProperties
   } = rule;
@@ -137,7 +132,7 @@ export const getSimplePreviewRule = (
 
 /**
  * This is a typical signal testing rule that is easy for most basic testing of output of signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is rule-1 by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -160,8 +155,25 @@ export const getRuleForSignalTesting = (
 });
 
 /**
+ * This is a typical signal testing rule that is easy for most basic testing of output of Saved Query signals.
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
+ * creation for SavedQuery and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is threshold-rule by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getSavedQueryRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'saved-query-rule',
+  enabled = true
+): SavedQueryCreateSchema => ({
+  ...getRuleForSignalTesting(index, ruleId, enabled),
+  type: 'saved_query',
+  saved_id: 'abcd',
+});
+
+/**
  * This is a typical signal testing rule that is easy for most basic testing of output of EQL signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation for EQL and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is eql-rule by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -178,8 +190,40 @@ export const getEqlRuleForSignalTesting = (
 });
 
 /**
+ * This is a typical signal testing rule that is easy for most basic testing of output of Threat Match signals.
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
+ * creation for Threat Match and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is threshold-rule by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getThreatMatchRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'threat-match-rule',
+  enabled = true
+): ThreatMatchCreateSchema => ({
+  ...getRuleForSignalTesting(index, ruleId, enabled),
+  type: 'threat_match',
+  language: 'kuery',
+  query: '*:*',
+  threat_query: '*:*',
+  threat_mapping: [
+    // We match host.name against host.name
+    {
+      entries: [
+        {
+          field: 'host.name',
+          value: 'host.name',
+          type: 'mapping',
+        },
+      ],
+    },
+  ],
+  threat_index: index, // match against same index for simplicity
+});
+
+/**
  * This is a typical signal testing rule that is easy for most basic testing of output of Threshold signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation for Threshold and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is threshold-rule by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -413,6 +457,7 @@ export const getSimpleRulePreviewOutput = (
 ) => ({
   logs,
   previewId,
+  isAborted: false,
 });
 
 export const resolveSimpleRuleOutput = (
@@ -538,18 +583,18 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
 };
 
 /**
- * Remove all rules statuses from the .kibana index
+ * Remove all rules execution info saved objects from the .kibana index
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  * @param log The tooling logger
  */
-export const deleteAllRulesStatuses = async (es: Client, log: ToolingLog): Promise<void> => {
+export const deleteAllRuleExecutionInfo = async (es: Client, log: ToolingLog): Promise<void> => {
   return countDownES(
     async () => {
       return es.deleteByQuery(
         {
           index: '.kibana',
-          q: 'type:siem-detection-engine-rule-status',
+          q: 'type:siem-detection-engine-rule-execution-info',
           wait_for_completion: true,
           refresh: true,
           body: {},
@@ -557,7 +602,7 @@ export const deleteAllRulesStatuses = async (es: Client, log: ToolingLog): Promi
         { meta: true }
       );
     },
-    'deleteAllRulesStatuses',
+    'deleteAllRuleExecutionInfo',
     log
   );
 };
@@ -880,7 +925,7 @@ export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
   log: ToolingLog,
-  maxTimeout: number = 800000,
+  maxTimeout: number = 400000,
   timeoutWait: number = 250
 ): Promise<void> => {
   let found = false;
@@ -999,8 +1044,8 @@ export const countDownTest = async (
  * and error about the race condition.
  * rule a second attempt. It only re-tries adding the rule if it encounters a conflict once.
  * @param supertest The supertest deps
- * @param rule The rule to create
  * @param log The tooling logger
+ * @param rule The rule to create
  */
 export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
@@ -1330,7 +1375,7 @@ export const waitForAlertToComplete = async (
     async () => {
       const response = await supertest.get(`/api/alerts/alert/${id}/state`).set('kbn-xsrf', 'true');
       if (response.status !== 200) {
-        log.error(
+        log.debug(
           `Did not get an expected 200 "ok" when waiting for an alert to complete (waitForAlertToComplete). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
             response.body
           )}, status: ${JSON.stringify(response.status)}`
@@ -1352,7 +1397,7 @@ export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded',
+  status: RuleExecutionStatus = RuleExecutionStatus.succeeded,
   afterDate?: Date
 ): Promise<void> => {
   await waitFor(
@@ -1363,15 +1408,19 @@ export const waitForRuleSuccessOrStatus = async (
           .set('kbn-xsrf', 'true')
           .query({ id });
         if (response.status !== 200) {
-          log.error(
+          log.debug(
             `Did not get an expected 200 "ok" when waiting for a rule success or status (waitForRuleSuccessOrStatus). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
               response.body
             )}, status: ${JSON.stringify(response.status)}`
           );
         }
-        const rule = response.body;
 
-        if (rule?.status !== status) {
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        const rule = response.body;
+        const ruleStatus = rule?.execution_summary?.last_execution.status;
+        const ruleStatusDate = rule?.execution_summary?.last_execution.date;
+
+        if (ruleStatus !== status) {
           log.debug(
             `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
               response.body
@@ -1380,8 +1429,8 @@ export const waitForRuleSuccessOrStatus = async (
         }
         return (
           rule != null &&
-          rule.status === status &&
-          (afterDate ? new Date(rule.status_date) > afterDate : true)
+          ruleStatus === status &&
+          (afterDate ? new Date(ruleStatusDate) > afterDate : true)
         );
       } catch (e) {
         if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
@@ -1413,9 +1462,7 @@ export const waitForSignalsToBePresent = async (
       return signalsOpen.hits.hits.length >= numberOfSignals;
     },
     'waitForSignalsToBePresent',
-    log,
-    20000,
-    250 // Wait 250ms between tries
+    log
   );
 };
 
@@ -1852,7 +1899,7 @@ export const getDetectionMetricsFromBody = (
 };
 
 /**
- * Gets the stats from the stats endpoint
+ * Gets the stats from the stats endpoint.
  * @param supertest The supertest agent.
  * @returns The detection metrics
  */
@@ -1872,6 +1919,30 @@ export const getStats = async (
     );
   }
   return getDetectionMetricsFromBody(response.body);
+};
+
+/**
+ * Gets the stats from the stats endpoint within specifically the security_solutions application.
+ * This is considered the "batch" telemetry.
+ * @param supertest The supertest agent.
+ * @returns The detection metrics
+ */
+export const getSecurityTelemetryStats = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
+): Promise<any> => {
+  const response = await supertest
+    .get(SECURITY_TELEMETRY_URL)
+    .set('kbn-xsrf', 'true')
+    .send({ unencrypted: true, refreshCache: true });
+  if (response.status !== 200) {
+    log.error(
+      `Did not get an expected 200 "ok" when getting the batch stats for security_solutions. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**

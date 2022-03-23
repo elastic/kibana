@@ -8,36 +8,18 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverField } from './discover_field';
-import { DataViewField } from '../../../../../../data/common';
-import { stubIndexPattern } from '../../../../../../data/common/stubs';
+import { DataViewField } from '../../../../../../data_views/public';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { stubDataView } from '../../../../../../data_views/common/data_view.stub';
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
     return {
       getTriggerCompatibleActions: jest.fn(() => []),
     };
-  }),
-  getServices: () => ({
-    history: () => ({
-      location: {
-        search: '',
-      },
-    }),
-    capabilities: {
-      visualize: {
-        show: true,
-      },
-    },
-    uiSettings: {
-      get: (key: string) => {
-        if (key === 'fields:popularLimit') {
-          return 5;
-        }
-      },
-    },
   }),
 }));
 
@@ -64,7 +46,7 @@ function getComponent({
     });
 
   const props = {
-    indexPattern: stubIndexPattern,
+    indexPattern: stubDataView,
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
     onAddFilter: jest.fn(),
@@ -73,7 +55,30 @@ function getComponent({
     showDetails,
     selected,
   };
-  const comp = mountWithIntl(<DiscoverField {...props} />);
+  const services = {
+    history: () => ({
+      location: {
+        search: '',
+      },
+    }),
+    capabilities: {
+      visualize: {
+        show: true,
+      },
+    },
+    uiSettings: {
+      get: (key: string) => {
+        if (key === 'fields:popularLimit') {
+          return 5;
+        }
+      },
+    },
+  };
+  const comp = mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverField {...props} />
+    </KibanaContextProvider>
+  );
   return { comp, props };
 }
 

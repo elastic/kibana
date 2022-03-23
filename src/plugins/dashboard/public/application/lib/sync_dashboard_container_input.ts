@@ -10,8 +10,9 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { DashboardContainer } from '../embeddable';
-import { esFilters, Filter, Query } from '../../services/data';
+import { Query } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';
 import {
   setControlGroupState,
@@ -19,6 +20,7 @@ import {
   setFullScreenMode,
   setPanels,
   setQuery,
+  setTimeRange,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
 import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
@@ -76,6 +78,11 @@ export const syncDashboardContainerInput = (
       )
       .subscribe(() => {
         applyStateChangesToContainer({ ...syncDashboardContainerProps, force: forceRefresh });
+
+        // If this dashboard has a control group, reload the control group when the refresh button is manually pressed.
+        if (forceRefresh && dashboardContainer.controlGroup) {
+          dashboardContainer.controlGroup.reload();
+        }
         forceRefresh = false;
       })
   );
@@ -96,13 +103,7 @@ export const applyContainerChangesToState = ({
     return;
   }
   const { filterManager } = query;
-  if (
-    !esFilters.compareFilters(
-      input.filters,
-      filterManager.getFilters(),
-      esFilters.COMPARE_ALL_OPTIONS
-    )
-  ) {
+  if (!compareFilters(input.filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
     // Add filters modifies the object passed to it, hence the clone deep.
     filterManager.addFilters(_.cloneDeep(input.filters));
     applyFilters(latestState.query, input.filters);
@@ -114,6 +115,10 @@ export const applyContainerChangesToState = ({
 
   if (!_.isEqual(input.query, latestState.query)) {
     dispatchDashboardStateChange(setQuery(input.query));
+  }
+
+  if (input.timeRestore && !_.isEqual(input.timeRange, latestState.timeRange)) {
+    dispatchDashboardStateChange(setTimeRange(input.timeRange));
   }
 
   if (!_.isEqual(input.expandedPanelId, latestState.expandedPanelId)) {

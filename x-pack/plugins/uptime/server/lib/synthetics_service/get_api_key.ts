@@ -22,7 +22,7 @@ export const getAPIKeyForSyntheticsService = async ({
   server: UptimeServerSetup;
   request?: KibanaRequest;
 }): Promise<SyntheticsServiceApiKey | undefined> => {
-  const { security, encryptedSavedObjects, savedObjectsClient } = server;
+  const { security, encryptedSavedObjects, authSavedObjectsClient } = server;
 
   const encryptedClient = encryptedSavedObjects.getClient({
     includedHiddenTypes: [syntheticsServiceApiKey.name],
@@ -37,17 +37,22 @@ export const getAPIKeyForSyntheticsService = async ({
     // TODO: figure out how to handle decryption errors
   }
 
-  return await generateAndSaveAPIKey({ request, security, savedObjectsClient });
+  return await generateAndSaveAPIKey({
+    request,
+    security,
+    authSavedObjectsClient,
+  });
 };
 
 export const generateAndSaveAPIKey = async ({
   security,
   request,
-  savedObjectsClient,
+  authSavedObjectsClient,
 }: {
   request?: KibanaRequest;
   security: SecurityPluginStart;
-  savedObjectsClient?: SavedObjectsClientContract;
+  // authSavedObject is needed for write operations
+  authSavedObjectsClient?: SavedObjectsClientContract;
 }) => {
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
@@ -81,9 +86,9 @@ export const generateAndSaveAPIKey = async ({
   if (apiKeyResult) {
     const { id, name, api_key: apiKey } = apiKeyResult;
     const apiKeyObject = { id, name, apiKey };
-    if (savedObjectsClient) {
+    if (authSavedObjectsClient) {
       // discard decoded key and rest of the keys
-      await setSyntheticsServiceApiKey(savedObjectsClient, apiKeyObject);
+      await setSyntheticsServiceApiKey(authSavedObjectsClient, apiKeyObject);
     }
     return apiKeyObject;
   }

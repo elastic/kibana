@@ -1,0 +1,105 @@
+[[index-patterns-api-create]]
+=== Create index pattern API
+++++
+<titleabbrev>Create index pattern</titleabbrev>
+++++
+
+deprecated::[8.0.0,Use <<data-views-api-create>> instead.]
+
+experimental[] Create {kib} index patterns.
+
+[[index-patterns-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/index_patterns/index_pattern`
+
+`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern`
+
+[[index-patterns-api-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[index-patterns-api-create-body-params]]
+==== Request body
+
+`override`:: (Optional, boolean) Overrides an existing index pattern if an
+index pattern with the provided title already exists. The default is `false`.
+
+`refresh_fields`:: (Optional, boolean) Reloads index pattern fields after
+the index pattern is stored. The default is `false`.
+
+`index_pattern`:: (Required, object) The index pattern object. All fields are optional.
+
+[[index-patterns-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[index-patterns-api-create-example]]
+==== Examples
+
+Create an index pattern with a custom title:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/index_patterns/index_pattern
+{
+  "index_pattern": {
+     "title": "hello"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Customize the creation behavior:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/index_patterns/index_pattern
+{
+  "override": false,
+  "refresh_fields": true,
+  "index_pattern": {
+     "title": "hello"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+At creation, all index pattern fields are optional:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/index_patterns/index_pattern
+{
+  "index_pattern": {
+      "id": "...",
+      "version": "...",
+      "title": "...",
+      "type": "...",
+      "timeFieldName": "...",
+      "sourceFilters": [],
+      "fields": {},
+      "typeMeta": {},
+      "fieldFormats": {},
+      "fieldAttrs": {},
+      "runtimeFieldMap": {}
+      "allowNoIndex": "..."
+    }
+}
+--------------------------------------------------
+// KIBANA
+
+
+The API returns the index pattern object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern": {...}
+}
+--------------------------------------------------
+

@@ -7,7 +7,7 @@
  */
 
 import { difference } from 'lodash';
-import { DataView, DataViewField } from 'src/plugins/data/common';
+import { DataView, DataViewField } from 'src/plugins/data_views/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
 export function getIndexPatternFieldList(

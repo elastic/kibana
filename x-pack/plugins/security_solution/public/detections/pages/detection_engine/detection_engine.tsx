@@ -42,7 +42,6 @@ import { AlertsHistogramPanel } from '../../components/alerts_kpis/alerts_histog
 import { useUserData } from '../../components/user_info';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
-import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
@@ -77,6 +76,7 @@ import {
   FILTER_OPEN,
 } from '../../components/alerts_table/alerts_filter_group';
 import { EmptyPage } from '../../../common/components/empty_page';
+import { HeaderPage } from '../../../common/components/header_page';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -123,13 +123,19 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       signalIndexName,
       hasIndexWrite = false,
       hasIndexMaintenance = false,
-      canUserCRUD = false,
       canUserREAD,
       hasIndexRead,
     },
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+
+  const {
+    indexPattern,
+    runtimeMappings,
+    loading: isLoadingIndexPattern,
+  } = useSourcererDataView(SourcererScopeName.detections);
+
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
@@ -212,8 +218,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-
   const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
@@ -253,7 +257,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   if (loading) {
     return (
       <SecuritySolutionPageWrapper>
-        <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} isLoading={loading} />
+        <HeaderPage border title={i18n.PAGE_TITLE} isLoading={loading} />
         <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiLoadingSpinner size="xl" />
         </EuiFlexGroup>
@@ -264,7 +268,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
       <SecuritySolutionPageWrapper>
-        <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
+        <HeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineUserUnauthenticated />
       </SecuritySolutionPageWrapper>
     );
@@ -273,7 +277,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   if ((!loading && signalIndexNeedsInit) || needsListsConfiguration) {
     return (
       <SecuritySolutionPageWrapper>
-        <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
+        <HeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineNoIndex
           needsSignalsIndex={signalIndexNeedsInit}
           needsListsIndex={needsListsConfiguration}
@@ -308,7 +312,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             data-test-subj="detectionsAlertsPage"
           >
             <Display show={!globalFullScreen}>
-              <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
+              <HeaderPage title={i18n.PAGE_TITLE}>
                 <LinkAnchor
                   onClick={goToRules}
                   href={formatUrl(getRulesUrl())}
@@ -316,7 +320,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                 >
                   {i18n.BUTTON_MANAGE_RULES}
                 </LinkAnchor>
-              </DetectionEngineHeaderPage>
+              </HeaderPage>
               <EuiHorizontalRule margin="m" />
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
@@ -336,22 +340,32 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="m" />
               <EuiFlexGroup wrap>
                 <EuiFlexItem grow={1}>
-                  <AlertsCountPanel
-                    filters={alertsHistogramDefaultFilters}
-                    query={query}
-                    signalIndexName={signalIndexName}
-                  />
+                  {isLoadingIndexPattern ? (
+                    <EuiLoadingSpinner size="xl" />
+                  ) : (
+                    <AlertsCountPanel
+                      filters={alertsHistogramDefaultFilters}
+                      query={query}
+                      signalIndexName={signalIndexName}
+                      runtimeMappings={runtimeMappings}
+                    />
+                  )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={2}>
-                  <AlertsHistogramPanel
-                    chartHeight={CHART_HEIGHT}
-                    filters={alertsHistogramDefaultFilters}
-                    query={query}
-                    showTotalAlertsCount={false}
-                    titleSize={'s'}
-                    signalIndexName={signalIndexName}
-                    updateDateRange={updateDateRangeCallback}
-                  />
+                  {isLoadingIndexPattern ? (
+                    <EuiLoadingSpinner size="xl" />
+                  ) : (
+                    <AlertsHistogramPanel
+                      chartHeight={CHART_HEIGHT}
+                      filters={alertsHistogramDefaultFilters}
+                      query={query}
+                      showTotalAlertsCount={false}
+                      titleSize={'s'}
+                      signalIndexName={signalIndexName}
+                      updateDateRange={updateDateRangeCallback}
+                      runtimeMappings={runtimeMappings}
+                    />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
 
@@ -361,8 +375,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <AlertsTable
               timelineId={TimelineId.detectionsPage}
               loading={loading}
-              hasIndexWrite={(hasIndexWrite ?? false) && (canUserCRUD ?? false)}
-              hasIndexMaintenance={(hasIndexMaintenance ?? false) && (canUserCRUD ?? false)}
+              hasIndexWrite={hasIndexWrite ?? false}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
@@ -376,7 +390,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         </StyledFullHeightContainer>
       ) : (
         <SecuritySolutionPageWrapper>
-          <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
+          <HeaderPage border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

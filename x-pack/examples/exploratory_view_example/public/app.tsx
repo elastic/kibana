@@ -80,6 +80,7 @@ export const App = (props: {
               attributes={seriesList}
               reportType="kpi-over-time"
               title={'Monitor response duration'}
+              withActions={['save', 'explore']}
             />
           </EuiPageContentBody>
         </EuiPageContent>

@@ -7,41 +7,42 @@
  */
 
 import { extendSearchParamsWithRuntimeFields } from './search_api';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataViewPluginMocks } from '../../../../data_views/public/mocks';
 
-import { getSearchParamsFromRequest, DataPublicPluginStart } from '../../../../data/public';
+import { getSearchParamsFromRequest } from '../../../../data/public';
+import type { DataViewsPublicPluginStart } from '../../../../data_views/public';
 
 const mockComputedFields = (
-  dataStart: DataPublicPluginStart,
+  dataViewsStart: DataViewsPublicPluginStart,
   index: string,
   runtimeFields: Record<string, unknown>
 ) => {
-  dataStart.indexPatterns.find = jest.fn().mockReturnValue([
+  dataViewsStart.find = jest.fn().mockReturnValue([
     {
       title: index,
       getComputedFields: () => ({
         runtimeFields,
       }),
+      getRuntimeMappings: () => runtimeFields,
     },
   ]);
 };
 
 describe('extendSearchParamsWithRuntimeFields', () => {
-  let dataStart: DataPublicPluginStart;
+  let dataViewsStart: DataViewsPublicPluginStart;
 
   beforeEach(() => {
-    dataStart = dataPluginMock.createStartContract();
+    dataViewsStart = dataViewPluginMocks.createStartContract();
   });
 
   test('should inject default runtime_mappings for known indexes', async () => {
     const requestParams = {};
     const runtimeFields = { foo: {} };
 
-    mockComputedFields(dataStart, 'index', runtimeFields);
+    mockComputedFields(dataViewsStart, 'index', runtimeFields);
 
-    expect(
-      await extendSearchParamsWithRuntimeFields(dataStart.indexPatterns, requestParams, 'index')
-    ).toMatchInlineSnapshot(`
+    expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
+      .toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "runtime_mappings": Object {
@@ -62,11 +63,10 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     } as unknown as ReturnType<typeof getSearchParamsFromRequest>;
     const runtimeFields = { foo: {} };
 
-    mockComputedFields(dataStart, 'index', runtimeFields);
+    mockComputedFields(dataViewsStart, 'index', runtimeFields);
 
-    expect(
-      await extendSearchParamsWithRuntimeFields(dataStart.indexPatterns, requestParams, 'index')
-    ).toMatchInlineSnapshot(`
+    expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
+      .toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "runtime_mappings": Object {

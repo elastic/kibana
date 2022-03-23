@@ -36,6 +36,8 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
+  maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
     schema.string({
       validate: (rawConfig) => {
@@ -246,6 +248,7 @@ const deprecations: ConfigDeprecationProvider = () => [
     if (es.logQueries === true) {
       addDeprecation({
         configPath: `${fromPath}.logQueries`,
+        level: 'warning',
         message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.query" context in "logging.loggers".`,
         correctiveActions: {
           manualSteps: [
@@ -295,6 +298,16 @@ export class ElasticsearchConfig {
    * Version of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to.
    */
   public readonly apiVersion: string;
+
+  /**
+   * The maximum number of sockets that can be used for communications with elasticsearch.
+   */
+  public readonly maxSockets: number;
+
+  /**
+   * Whether to use compression for communications with elasticsearch.
+   */
+  public readonly compression: boolean;
 
   /**
    * Hosts that the client will connect to. If sniffing is enabled, this list will
@@ -398,6 +411,8 @@ export class ElasticsearchConfig {
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
+    this.maxSockets = rawConfig.maxSockets;
+    this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;

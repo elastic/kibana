@@ -15,9 +15,10 @@ import { ResponseBodyIndexPolicy } from './types';
 interface Props {
   defaultValue: ResponseBodyIndexPolicy;
   onChange: (responseBodyIndexPolicy: ResponseBodyIndexPolicy) => void;
+  onBlur?: () => void;
 }
 
-export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
+export const ResponseBodyIndexField = ({ defaultValue, onChange, onBlur }: Props) => {
   const [policy, setPolicy] = useState<ResponseBodyIndexPolicy>(
     defaultValue !== ResponseBodyIndexPolicy.NEVER ? defaultValue : ResponseBodyIndexPolicy.ON_ERROR
   );
@@ -52,6 +53,7 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
             const checkedEvent = event.target.checked;
             setChecked(checkedEvent);
           }}
+          onBlur={() => onBlur?.()}
         />
       </EuiFlexItem>
       {checked && (
@@ -69,6 +71,7 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
             onChange={(event) => {
               setPolicy(event.target.value as ResponseBodyIndexPolicy);
             }}
+            onBlur={() => onBlur?.()}
           />
         </EuiFlexItem>
       )}

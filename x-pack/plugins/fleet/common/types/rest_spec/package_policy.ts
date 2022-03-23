@@ -11,6 +11,7 @@ import type {
   UpdatePackagePolicy,
   DryRunPackagePolicy,
   PackagePolicyPackage,
+  FullAgentPolicyInput,
 } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
@@ -56,6 +57,7 @@ export type DeletePackagePoliciesResponse = Array<{
   name?: string;
   success: boolean;
   package?: PackagePolicyPackage;
+  policy_id?: string;
 }>;
 
 export interface UpgradePackagePolicyBaseResponse {
@@ -71,6 +73,7 @@ export interface UpgradePackagePolicyBaseResponse {
 export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {
   hasErrors: boolean;
   diff?: [PackagePolicy, DryRunPackagePolicy];
+  agent_diff?: [FullAgentPolicyInput[]];
 }
 
 export type UpgradePackagePolicyDryRunResponse = UpgradePackagePolicyDryRunResponseItem[];

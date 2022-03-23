@@ -19,10 +19,15 @@ export const MonitorTags = ({ tags }: Props) => {
   const tagsToDisplay = tags.slice(0, toDisplay);
 
   return (
-    <EuiBadgeGroup>
+    <EuiBadgeGroup css={{ width: '100%' }}>
       {tagsToDisplay.map((tag) => (
         // filtering only makes sense in monitor list, where we have summary
-        <EuiBadge key={tag} color="hollow" className="eui-textTruncate" style={{ maxWidth: 120 }}>
+        <EuiBadge
+          key={tag}
+          color="hollow"
+          className="eui-textTruncate"
+          css={{ display: 'flex', maxWidth: 120 }}
+        >
           {tag}
         </EuiBadge>
       ))}

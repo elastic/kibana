@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / user_actions/client
+[Cases Client API Interface](../README.md) / user\_actions/client
 
 # Module: user\_actions/client
 
@@ -6,5 +6,5 @@
 
 ### Interfaces
 
-- [UserActionGet](../interfaces/user_actions_client.useractionget.md)
-- [UserActionsSubClient](../interfaces/user_actions_client.useractionssubclient.md)
+- [UserActionGet](../interfaces/user_actions_client.UserActionGet.md)
+- [UserActionsSubClient](../interfaces/user_actions_client.UserActionsSubClient.md)

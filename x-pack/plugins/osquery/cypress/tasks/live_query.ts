@@ -8,12 +8,13 @@
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 
 export const DEFAULT_QUERY = 'select * from processes;';
+export const BIG_QUERY = 'select * from processes, users;';
 
 export const selectAllAgents = () => {
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type('All agents');
   cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type(
-    '{downArrow}{enter}'
+    '{downArrow}{enter}{esc}'
   );
 };
 
@@ -22,10 +23,10 @@ export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(quer
 export const submitQuery = () => cy.contains('Submit').click();
 
 export const checkResults = () =>
-  cy.get('[data-test-subj="dataGridRowCell"]', { timeout: 60000 }).should('have.lengthOf.above', 0);
+  cy.getBySel('dataGridRowCell', { timeout: 60000 }).should('have.lengthOf.above', 0);
 
 export const typeInECSFieldInput = (text: string) =>
-  cy.get('[data-test-subj="ECS-field-input"]').click().type(text);
+  cy.getBySel('ECS-field-input').click().type(text);
 export const typeInOsqueryFieldInput = (text: string) =>
   cy.react('OsqueryColumnFieldComponent').first().react('ResultComboBox').click().type(text);
 

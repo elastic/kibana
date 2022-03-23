@@ -55,7 +55,8 @@ export default function (providerContext: FtrProviderContext) {
         `${templateName}@mappings`,
         `${templateName}@settings`,
         `${templateName}@custom`,
-        '.fleet_component_template-1',
+        '.fleet_globals-1',
+        '.fleet_agent_id_verification-1',
       ]);
 
       ({ body } = await es.transport.request(
@@ -63,7 +64,9 @@ export default function (providerContext: FtrProviderContext) {
           method: 'GET',
           path: `/_component_template/${templateName}@mappings`,
         },
-        { meta: true }
+        {
+          meta: true,
+        }
       ));
 
       // The mappings override provided in the package is set in the mappings component template
@@ -128,6 +131,8 @@ export default function (providerContext: FtrProviderContext) {
         },
         { meta: true }
       ));
+      // omit routings
+      delete body.template.settings.index.routing;
 
       expect(body).to.eql({
         template: {
@@ -147,6 +152,24 @@ export default function (providerContext: FtrProviderContext) {
           },
           mappings: {
             dynamic: 'false',
+            properties: {
+              '@timestamp': {
+                type: 'date',
+              },
+              data_stream: {
+                properties: {
+                  dataset: {
+                    type: 'constant_keyword',
+                  },
+                  namespace: {
+                    type: 'constant_keyword',
+                  },
+                  type: {
+                    type: 'constant_keyword',
+                  },
+                },
+              },
+            },
           },
           aliases: {},
         },

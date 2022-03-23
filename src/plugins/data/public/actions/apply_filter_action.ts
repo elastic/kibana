@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ThemeServiceSetup } from 'kibana/public';
 import { toMountPoint } from '../../../kibana_react/public';
 import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
@@ -32,7 +33,8 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 
 export function createFilterAction(
   filterManager: FilterManager,
-  timeFilter: TimefilterContract
+  timeFilter: TimefilterContract,
+  theme: ThemeServiceSetup
 ): Action {
   return createAction({
     type: ACTION_GLOBAL_APPLY_FILTER,
@@ -77,7 +79,8 @@ export function createFilterAction(
                   overlay.close();
                   resolve(filterSelection);
                 }
-              )
+              ),
+              { theme$: theme.theme$ }
             ),
             {
               'data-test-subj': 'test',

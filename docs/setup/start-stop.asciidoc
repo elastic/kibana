@@ -30,11 +30,3 @@ include::install/windows-running.asciidoc[]
 
 [float]
 include::install/systemd.asciidoc[]
-
-[float]
-=== Homebrew packages
-
-If you installed {kib} with the Elastic Homebrew formulae, you can start and stop {kib} from the command line using `brew services`.
-
-[float]
-include::install/brew-running.asciidoc[]

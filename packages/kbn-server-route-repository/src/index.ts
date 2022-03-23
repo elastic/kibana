@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { createServerRouteRepository } from './create_server_route_repository';
 export { createServerRouteFactory } from './create_server_route_factory';
 export { formatRequest } from './format_request';
 export { parseEndpoint } from './parse_endpoint';

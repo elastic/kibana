@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { FormattedScreenshotResult } from '../../../screenshotting/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
-export type { JobParamsPNG } from './export_types/png';
+export type { JobParamsPNGDeprecated } from './export_types/png';
 export type { JobParamsPNGV2 } from './export_types/png_v2';
-export type { JobAppParamsPDF, JobParamsPDF } from './export_types/printable_pdf';
+export type { JobAppParamsPDF, JobParamsPDFDeprecated } from './export_types/printable_pdf';
 export type { JobAppParamsPDFV2, JobParamsPDFV2 } from './export_types/printable_pdf_v2';
 export type {
   DownloadReportFn,
@@ -33,11 +35,43 @@ export interface ReportOutput extends TaskRunResult {
   size: number;
 }
 
+type ScreenshotMetrics = Required<FormattedScreenshotResult>['metrics'];
+
+export interface CsvMetrics {
+  rows: number;
+}
+
+export type PngMetrics = ScreenshotMetrics;
+
+export interface PdfMetrics extends Partial<ScreenshotMetrics> {
+  /**
+   * A number of emitted pages in the generated PDF report.
+   */
+  pages: number;
+}
+
+export interface TaskRunMetrics {
+  csv?: CsvMetrics;
+  png?: PngMetrics;
+  pdf?: PdfMetrics;
+}
+
 export interface TaskRunResult {
   content_type: string | null;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
+  metrics?: TaskRunMetrics;
+
+  /**
+   * When running a report task we may finish with warnings that were triggered
+   * by an error. We can pass the error code via the task run result to the
+   * task runner so that it can be recorded for telemetry.
+   *
+   * Alternatively, this field can be populated in the event that the task does
+   * not complete in the task runner's error handler.
+   */
+  error_code?: string;
 }
 
 export interface ReportSource {
@@ -75,6 +109,7 @@ export interface ReportSource {
   started_at?: string; // timestamp in UTC
   completed_at?: string; // timestamp in UTC
   process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
+  metrics?: TaskRunMetrics;
 }
 
 /*

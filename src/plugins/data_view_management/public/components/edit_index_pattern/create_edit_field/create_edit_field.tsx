@@ -11,7 +11,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
+import { DataView, DataViewField } from '../../../../../../plugins/data_views/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
@@ -20,7 +20,7 @@ import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS } from '../constants';
 import { FieldEditor } from '../../field_editor';
 
 interface CreateEditFieldProps extends RouteComponentProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   mode?: string;
   fieldName?: string;
 }
@@ -34,7 +34,7 @@ const newFieldPlaceholder = i18n.translate(
 
 export const CreateEditField = withRouter(
   ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
-    const { uiSettings, chrome, notifications, data } =
+    const { uiSettings, chrome, notifications, dataViews } =
       useKibana<IndexPatternManagmentContext>().services;
     const spec =
       mode === 'edit' && fieldName
@@ -43,7 +43,7 @@ export const CreateEditField = withRouter(
             scripted: true,
             type: 'number',
             name: undefined,
-          } as unknown as IndexPatternField);
+          } as unknown as DataViewField);
 
     const url = `/dataView/${indexPattern.id}`;
 
@@ -70,13 +70,17 @@ export const CreateEditField = withRouter(
     if (spec) {
       return (
         <>
-          <IndexHeader indexPattern={indexPattern} defaultIndex={uiSettings.get('defaultIndex')} />
+          <IndexHeader
+            indexPattern={indexPattern}
+            defaultIndex={uiSettings.get('defaultIndex')}
+            canSave={dataViews.getCanSaveSync()}
+          />
           <EuiSpacer size={'l'} />
           <FieldEditor
             indexPattern={indexPattern}
             spec={spec}
             services={{
-              indexPatternService: data.indexPatterns,
+              indexPatternService: dataViews,
               redirectAway,
             }}
           />

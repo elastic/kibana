@@ -15,7 +15,6 @@ import { useRefreshInterval } from './components/analytics_list/use_refresh_inte
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
-import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { JobMap } from '../job_map';
 import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
@@ -59,20 +58,19 @@ export const Page: FC = () => {
       <MlPageHeader>
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsList.title"
-          defaultMessage="Data frame analytics"
+          defaultMessage="Data Frame Analytics Jobs"
         />
       </MlPageHeader>
 
       <NodeAvailableWarning />
 
       <SavedObjectsWarning
-        jobType="data-frame-analytics"
+        mlSavedObjectType="data-frame-analytics"
         onCloseFlyout={refresh}
         forceRefresh={isLoading}
       />
       <UpgradeWarning />
 
-      <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={mapJobId} modelId={mapModelId} />
       {selectedTabId === 'map' && (mapJobId || mapModelId) && (
         <JobMap analyticsId={mapJobId} modelId={mapModelId} />
       )}

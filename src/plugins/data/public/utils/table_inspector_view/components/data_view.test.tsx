@@ -8,7 +8,7 @@
 
 import React, { Suspense } from 'react';
 import { getTableViewDescription } from '../index';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TablesAdapter } from '../../../../../expressions/common';
 
 jest.mock('../../../../../share/public', () => ({

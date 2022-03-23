@@ -1,7 +1,7 @@
 {
   "attributes": {
       "timeFieldName": "@timestamp",
-      "title": "epoch-millis"
+      "title": "epoch-millis*"
   },
   "coreMigrationVersion": "8.0.0",
   "id": "epoch-millis",

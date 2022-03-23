@@ -9,12 +9,12 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IndexPattern, Query } from 'src/plugins/data/public';
+import { DataView, Query } from 'src/plugins/data/common';
 import { APP_ID } from '../../../../../common/constants';
 import { getData } from '../../../../kibana_services';
 
 interface Props {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   onChange: (whereQuery?: Query) => void;
   whereQuery?: Query;
 }

@@ -19,6 +19,7 @@ import {
 } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
+import { DatePickerContextProvider } from '../context/date_picker_context';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
@@ -80,8 +81,6 @@ export const renderApp = ({
           value={{
             appMountParameters,
             config,
-            core,
-            plugins,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
           }}
@@ -90,9 +89,11 @@ export const renderApp = ({
             <EuiThemeProvider darkMode={isDarkMode}>
               <i18nCore.Context>
                 <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                  <HasDataContextProvider>
-                    <App />
-                  </HasDataContextProvider>
+                  <DatePickerContextProvider>
+                    <HasDataContextProvider>
+                      <App />
+                    </HasDataContextProvider>
+                  </DatePickerContextProvider>
                 </RedirectAppLinks>
               </i18nCore.Context>
             </EuiThemeProvider>

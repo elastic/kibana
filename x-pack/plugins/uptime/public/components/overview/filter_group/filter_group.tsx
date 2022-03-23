@@ -15,6 +15,7 @@ import { FieldValueSuggestions, useInspectorContext } from '../../../../../obser
 import { SelectedFilters } from './selected_filters';
 import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context';
 import { useGetUrlParams } from '../../../hooks';
+import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
@@ -56,7 +57,7 @@ export const FilterGroup = () => {
             <FieldValueSuggestions
               key={field}
               compressed={false}
-              indexPatternTitle={indexPattern.title}
+              dataViewTitle={indexPattern.title}
               sourceField={field}
               label={label}
               selectedValue={selectedItems}
@@ -67,7 +68,14 @@ export const FilterGroup = () => {
               asCombobox={false}
               asFilterButton={true}
               forceOpen={false}
-              filters={[]}
+              filters={[
+                {
+                  exists: {
+                    field: 'summary',
+                  },
+                },
+                EXCLUDE_RUN_ONCE_FILTER,
+              ]}
               cardinalityField="monitor.id"
               time={{ from: dateRangeStart, to: dateRangeEnd }}
               inspector={{

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { MetricSeries } from './series';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 const defaultProps = {
   disableAdd: false,

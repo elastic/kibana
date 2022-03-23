@@ -10,11 +10,13 @@ import { PerformBulkActionSchema } from './perform_bulk_action_schema';
 
 export const getPerformBulkActionSchemaMock = (): PerformBulkActionSchema => ({
   query: '',
+  ids: undefined,
   action: BulkAction.disable,
 });
 
 export const getPerformBulkActionEditSchemaMock = (): PerformBulkActionSchema => ({
   query: '',
+  ids: undefined,
   action: BulkAction.edit,
   [BulkAction.edit]: [{ type: BulkActionEditType.add_tags, value: ['tag1'] }],
 });

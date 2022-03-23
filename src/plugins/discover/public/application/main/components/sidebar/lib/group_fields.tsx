@@ -7,7 +7,7 @@
  */
 
 import { FieldFilterState, isFieldFiltered } from './field_filter';
-import { getFieldSubtypeMulti, DataViewField } from '../../../../../../../data/common';
+import { DataViewField, getFieldSubtypeMulti } from '../../../../../../../data_views/public';
 
 interface GroupedFields {
   selected: DataViewField[];
@@ -54,6 +54,7 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
       continue;
     }
+
     const subTypeMulti = getFieldSubtypeMulti(field?.spec);
     const isSubfield = useNewFieldsApi && subTypeMulti;
     if (columns.includes(field.name)) {

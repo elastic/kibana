@@ -28,6 +28,7 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
+import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -49,6 +50,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       missingPatterns: sourcererMissingPatterns,
     },
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+
+  const { pollForSignalIndex } = useSignalHelpers();
+
+  useEffect(() => {
+    if (pollForSignalIndex != null && (isTimelineSourcerer || isDetectionsSourcerer)) {
+      pollForSignalIndex();
+    }
+  }, [isDetectionsSourcerer, isTimelineSourcerer, pollForSignalIndex]);
 
   const { activePatterns, indicesExist, loading } = useSourcererDataView(scopeId);
   const [missingPatterns, setMissingPatterns] = useState<string[]>(

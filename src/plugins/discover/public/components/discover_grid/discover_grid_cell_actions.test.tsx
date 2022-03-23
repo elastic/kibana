@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { FilterInBtn, FilterOutBtn, buildCellActions } from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';
@@ -15,7 +15,7 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { esHits } from '../../__mocks__/es_hits';
 import { EuiButton } from '@elastic/eui';
-import { DataViewField } from 'src/plugins/data/common';
+import { DataViewField } from 'src/plugins/data_views/public';
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
@@ -40,7 +40,8 @@ describe('Discover cell actions ', function () {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
-          columnId={'extension'}
+          colIndex={1}
+          columnId="extension"
           isExpanded={false}
           closePopover={jest.fn()}
         />
@@ -68,7 +69,8 @@ describe('Discover cell actions ', function () {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
-          columnId={'extension'}
+          colIndex={1}
+          columnId="extension"
           isExpanded={false}
           closePopover={jest.fn()}
         />

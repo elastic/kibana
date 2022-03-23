@@ -10,12 +10,14 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    ".storybook/**/*",
     "../../../typings/**/*"
   ],
   "references": [
     {
       "path": "../../core/tsconfig.json"
     },
+    {
+      "path": "../data_view_editor/tsconfig.json"
+    }
   ]
 }

@@ -6,16 +6,12 @@
  */
 
 import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../..';
-import { JobParamsPDF, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
+import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 
@@ -43,7 +39,7 @@ const getMockResponseFactory = () =>
     unauthorized: (obj: unknown) => obj,
   } as unknown as KibanaResponseFactory);
 
-const mockLogger = createMockLevelLogger();
+const mockLogger = loggingSystemMock.createLogger();
 
 describe('Handle request to generate', () => {
   let reportingCore: ReportingCore;
@@ -52,7 +48,7 @@ describe('Handle request to generate', () => {
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
   let requestHandler: RequestHandler;
 
-  const mockJobParams: JobParamsPDF = {
+  const mockJobParams: JobParamsPDFDeprecated = {
     browserTimezone: 'UTC',
     objectType: 'cool_object_type',
     title: 'cool_title',
@@ -110,10 +106,11 @@ describe('Handle request to generate', () => {
           "kibana_name": undefined,
           "max_attempts": undefined,
           "meta": Object {
-            "isDeprecated": undefined,
+            "isDeprecated": true,
             "layout": "preserve_layout",
             "objectType": "cool_object_type",
           },
+          "metrics": undefined,
           "migration_version": "7.14.0",
           "output": null,
           "process_expiration": undefined,
@@ -127,6 +124,7 @@ describe('Handle request to generate', () => {
         Object {
           "browserTimezone": "UTC",
           "headers": "hello mock cypher text",
+          "isDeprecated": true,
           "layout": Object {
             "id": "preserve_layout",
           },
@@ -194,6 +192,7 @@ describe('Handle request to generate', () => {
           "layout": "preserve_layout",
           "objectType": "cool_object_type",
         },
+        "metrics": undefined,
         "migration_version": "7.14.0",
         "output": Object {},
         "payload": Object {

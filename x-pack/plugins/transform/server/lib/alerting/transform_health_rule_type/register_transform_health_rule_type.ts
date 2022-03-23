@@ -100,7 +100,7 @@ export function getTransformHealthRuleType(): RuleType<
     isExportable: true,
     async executor(options) {
       const {
-        services: { scopedClusterClient, alertInstanceFactory },
+        services: { scopedClusterClient, alertFactory },
         params,
       } = options;
 
@@ -112,7 +112,7 @@ export function getTransformHealthRuleType(): RuleType<
 
       if (executionResult.length > 0) {
         executionResult.forEach(({ name: alertInstanceName, context }) => {
-          const alertInstance = alertInstanceFactory(alertInstanceName);
+          const alertInstance = alertFactory.create(alertInstanceName);
           alertInstance.scheduleActions(TRANSFORM_ISSUE, context);
         });
       }

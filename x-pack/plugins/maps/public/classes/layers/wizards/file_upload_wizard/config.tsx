@@ -10,11 +10,14 @@ import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
 import { getFileUpload } from '../../../../kibana_services';
+import { WIZARD_ID } from '../../../../../common/constants';
 
 export const uploadLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.GEO_FILE,
+  order: 10,
   categories: [],
   description: i18n.translate('xpack.maps.fileUploadWizard.description', {
-    defaultMessage: 'Index GeoJSON data in Elasticsearch',
+    defaultMessage: 'Index GeoJSON and Shapefile data in Elasticsearch',
   }),
   disabledReason: i18n.translate('xpack.maps.fileUploadWizard.disabledDesc', {
     defaultMessage:
@@ -52,6 +55,6 @@ export const uploadLayerWizardConfig: LayerWizard = {
     return <ClientFileCreateSourceEditor {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.fileUploadWizard.title', {
-    defaultMessage: 'Upload GeoJSON',
+    defaultMessage: 'Upload file',
   }),
 };

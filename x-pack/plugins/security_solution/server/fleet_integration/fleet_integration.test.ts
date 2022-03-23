@@ -41,7 +41,8 @@ import { Manifest } from '../endpoint/lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
 import { DeletePackagePoliciesResponse } from '../../../fleet/common';
-import { ARTIFACT_LISTS_IDS_TO_REMOVE } from './handlers/remove_policy_from_artifacts';
+import { createMockPolicyData } from '../endpoint/services/feature_usage';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
@@ -61,11 +62,16 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
+
+    jest
+      .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
+      .mockResolvedValue(createMockPolicyData());
   });
 
   afterEach(() => {
     licenseService.stop();
     licenseEmitter.complete();
+    jest.clearAllMocks();
   });
 
   describe('package policy init callback (atifacts manifest initialisation tests)', () => {
@@ -248,7 +254,12 @@ describe('ingest_integration tests ', () => {
     it('returns an error if paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactory(); // defaults with paid features on
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
@@ -259,7 +270,12 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactoryWithoutPaidFeatures();
       mockPolicy.windows.malware.mode = ProtectionModes.detect;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
@@ -275,7 +291,12 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
@@ -313,11 +334,11 @@ describe('ingest_integration tests ', () => {
       await invokeDeleteCallback();
 
       expect(exceptionListClient.findExceptionListsItem).toHaveBeenCalledWith({
-        listId: ARTIFACT_LISTS_IDS_TO_REMOVE,
-        filter: ARTIFACT_LISTS_IDS_TO_REMOVE.map(
+        listId: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+        filter: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(
           () => `exception-list-agnostic.attributes.tags:"policy:${policyId}"`
         ),
-        namespaceType: ARTIFACT_LISTS_IDS_TO_REMOVE.map(() => 'agnostic'),
+        namespaceType: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(() => 'agnostic'),
         page: 1,
         perPage: 50,
         sortField: undefined,

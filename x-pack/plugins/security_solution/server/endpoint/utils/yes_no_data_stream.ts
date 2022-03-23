@@ -19,9 +19,12 @@ export const doLogsEndpointActionDsExists = async ({
 }): Promise<boolean> => {
   try {
     const esClient = context.core.elasticsearch.client.asInternalUser;
-    const doesIndexTemplateExist = await esClient.indices.existsIndexTemplate({
-      name: dataStreamName,
-    });
+    const doesIndexTemplateExist = await esClient.indices.existsIndexTemplate(
+      {
+        name: dataStreamName,
+      },
+      { meta: true }
+    );
     return doesIndexTemplateExist.statusCode === 404 ? false : true;
   } catch (error) {
     const errorType = error?.type ?? '';
@@ -44,9 +47,12 @@ export const doesLogsEndpointActionsIndexExist = async ({
 }): Promise<boolean> => {
   try {
     const esClient = context.core.elasticsearch.client.asInternalUser;
-    const doesIndexExist = await esClient.indices.exists({
-      index: indexName,
-    });
+    const doesIndexExist = await esClient.indices.exists(
+      {
+        index: indexName,
+      },
+      { meta: true }
+    );
     return doesIndexExist.statusCode === 404 ? false : true;
   } catch (error) {
     const errorType = error?.type ?? '';

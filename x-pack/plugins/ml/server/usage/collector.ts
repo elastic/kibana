@@ -115,7 +115,7 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         },
       });
 
-      const aggResponse = result.body.aggregations as {
+      const aggResponse = result.aggregations as {
         count_by_result_type: {
           buckets: Array<{
             key: AnomalyResultType;
@@ -151,7 +151,7 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         },
       });
 
-      const resultsByCheckType = jobsHealthRuleInstances.body.hits.hits.reduce(
+      const resultsByCheckType = jobsHealthRuleInstances.hits.hits.reduce(
         (acc, curr) => {
           const doc = curr._source;
           if (!doc) return acc;

@@ -74,17 +74,17 @@ export default ({ getService }: FtrProviderContext): void => {
         for (const scenario of [
           {
             user: globalRead,
-            expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
           },
           {
             user: superUser,
-            expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
           },
           { user: secOnlyRead, expectedReporters: [getUserInfo(secOnly)] },
           { user: obsOnlyRead, expectedReporters: [getUserInfo(obsOnly)] },
           {
             user: obsSecRead,
-            expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
           },
         ]) {
           const reporters = await getReporters({

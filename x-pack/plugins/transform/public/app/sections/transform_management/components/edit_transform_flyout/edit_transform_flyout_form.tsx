@@ -7,13 +7,24 @@
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
 
-import { EuiForm, EuiAccordion, EuiSpacer, EuiSelect, EuiFormRow } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiComboBox,
+  EuiForm,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { isEsIngestPipelines } from '../../../../../../common/api_schemas/type_guards';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { UseEditTransformFlyoutReturnType } from './use_edit_transform_flyout';
 import { useAppDependencies } from '../../../../app_dependencies';
+import { useApi } from '../../../../hooks/use_api';
+
 import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 
 interface EditTransformFlyoutFormProps {
@@ -25,11 +36,15 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   editTransformFlyout: [state, dispatch],
   indexPatternId,
 }) => {
-  const formFields = state.formFields;
+  const { formFields, formSections } = state;
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
+  const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
+
+  const isRetentionPolicyAvailable = dateFieldNames.length > 0;
 
   const appDeps = useAppDependencies();
   const indexPatternsClient = appDeps.data.indexPatterns;
+  const api = useApi();
 
   useEffect(
     function getDateFields() {
@@ -54,8 +69,29 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
     [indexPatternId, indexPatternsClient]
   );
 
+  useEffect(function fetchPipelinesOnMount() {
+    let unmounted = false;
+
+    async function getIngestPipelineNames() {
+      const ingestPipelines = await api.getEsIngestPipelines();
+
+      if (!unmounted && isEsIngestPipelines(ingestPipelines)) {
+        setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
+      }
+    }
+
+    getIngestPipelineNames();
+
+    return () => {
+      unmounted = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const retentionDateFieldOptions = useMemo(() => {
-    return Array.isArray(dateFieldNames) ? dateFieldNames.map((text: string) => ({ text })) : [];
+    return Array.isArray(dateFieldNames)
+      ? dateFieldNames.map((text: string) => ({ text, value: text }))
+      : [];
   }, [dateFieldNames]);
 
   return (
@@ -93,60 +129,27 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
 
       <EuiSpacer size="l" />
 
-      <EuiAccordion
-        data-test-subj="transformEditAccordionDestination"
-        id="transformEditAccordionDestination"
-        buttonContent={i18n.translate(
-          'xpack.transform.transformList.editFlyoutFormDestinationButtonContent',
-          {
-            defaultMessage: 'Destination configuration',
-          }
-        )}
-        paddingSize="s"
-      >
-        <div data-test-subj="transformEditAccordionDestinationContent">
-          <EditTransformFlyoutFormTextInput
-            dataTestSubj="transformEditFlyoutDestinationIndexInput"
-            errorMessages={formFields.destinationIndex.errorMessages}
-            label={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDestinationIndexLabel',
-              {
-                defaultMessage: 'Destination index',
-              }
-            )}
-            onChange={(value) => dispatch({ field: 'destinationIndex', value })}
-            value={formFields.destinationIndex.value}
-          />
-
-          <EditTransformFlyoutFormTextInput
-            dataTestSubj="transformEditFlyoutDestinationPipelineInput"
-            errorMessages={formFields.destinationPipeline.errorMessages}
-            label={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDestinationPipelineLabel',
-              {
-                defaultMessage: 'Pipeline',
-              }
-            )}
-            onChange={(value) => dispatch({ field: 'destinationPipeline', value })}
-            value={formFields.destinationPipeline.value}
-          />
-        </div>
-      </EuiAccordion>
-
-      <EuiSpacer size="l" />
-
-      <EuiAccordion
-        data-test-subj="transformEditAccordionRetentionPolicy"
-        id="transformEditAccordionRetentionPolicy"
-        buttonContent={i18n.translate(
-          'xpack.transform.transformList.editFlyoutFormRetentionPolicyButtonContent',
+      <EuiSwitch
+        name="transformEditRetentionPolicySwitch"
+        label={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
           {
             defaultMessage: 'Retention policy',
           }
         )}
-        paddingSize="s"
-      >
-        <div data-test-subj="transformEditAccordionRetentionPolicyContent">
+        checked={formSections.retentionPolicy.enabled}
+        onChange={(e) =>
+          dispatch({
+            section: 'retentionPolicy',
+            enabled: e.target.checked,
+          })
+        }
+        disabled={!isRetentionPolicyAvailable}
+        data-test-subj="transformEditRetentionPolicySwitch"
+      />
+      {formSections.retentionPolicy.enabled && (
+        <div data-test-subj="transformEditRetentionPolicyContent">
+          <EuiSpacer size="m" />
           {
             // If data view or date fields info not available
             // gracefully defaults to text input
@@ -181,6 +184,11 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
                   onChange={(e) =>
                     dispatch({ field: 'retentionPolicyField', value: e.target.value })
                   }
+                  hasNoInitialSelection={
+                    !retentionDateFieldOptions
+                      .map((d) => d.text)
+                      .includes(formFields.retentionPolicyField.value)
+                  }
                 />
               </EuiFormRow>
             ) : (
@@ -210,6 +218,91 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             onChange={(value) => dispatch({ field: 'retentionPolicyMaxAge', value })}
             value={formFields.retentionPolicyMaxAge.value}
           />
+        </div>
+      )}
+
+      <EuiSpacer size="l" />
+
+      <EuiAccordion
+        data-test-subj="transformEditAccordionDestination"
+        id="transformEditAccordionDestination"
+        buttonContent={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormDestinationButtonContent',
+          {
+            defaultMessage: 'Destination configuration',
+          }
+        )}
+        paddingSize="s"
+      >
+        <div data-test-subj="transformEditAccordionDestinationContent">
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutDestinationIndexInput"
+            errorMessages={formFields.destinationIndex.errorMessages}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormDestinationIndexLabel',
+              {
+                defaultMessage: 'Destination index',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'destinationIndex', value })}
+            value={formFields.destinationIndex.value}
+          />
+
+          <EuiSpacer size="m" />
+
+          <div data-test-subj="transformEditAccordionIngestPipelineContent">
+            {
+              // If the list of ingest pipelines is not available
+              // gracefully defaults to text input
+              ingestPipelineNames ? (
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
+                    {
+                      defaultMessage: 'Ingest Pipeline',
+                    }
+                  )}
+                  isInvalid={formFields.destinationIngestPipeline.errorMessages.length > 0}
+                  error={formFields.destinationIngestPipeline.errorMessages}
+                >
+                  <EuiComboBox
+                    data-test-subj="transformEditFlyoutDestinationIngestPipelineFieldSelect"
+                    aria-label={i18n.translate(
+                      'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectAriaLabel',
+                      {
+                        defaultMessage: 'Select an ingest pipeline',
+                      }
+                    )}
+                    placeholder={i18n.translate(
+                      'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectPlaceholder',
+                      {
+                        defaultMessage: 'Select an ingest pipeline',
+                      }
+                    )}
+                    singleSelection={{ asPlainText: true }}
+                    options={ingestPipelineNames.map((label: string) => ({ label }))}
+                    selectedOptions={[{ label: formFields.destinationIngestPipeline.value }]}
+                    onChange={(o) =>
+                      dispatch({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
+                    }
+                  />
+                </EuiFormRow>
+              ) : (
+                <EditTransformFlyoutFormTextInput
+                  dataTestSubj="transformEditFlyoutDestinationIngestPipelineInput"
+                  errorMessages={formFields.destinationIngestPipeline.errorMessages}
+                  label={i18n.translate(
+                    'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
+                    {
+                      defaultMessage: 'Ingest Pipeline',
+                    }
+                  )}
+                  onChange={(value) => dispatch({ field: 'destinationIngestPipeline', value })}
+                  value={formFields.destinationIngestPipeline.value}
+                />
+              )
+            }
+          </div>
         </div>
       </EuiAccordion>
 

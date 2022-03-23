@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { orderBy } from 'lodash';
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
@@ -177,7 +178,12 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
           await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id], 3);
@@ -192,7 +198,12 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
           await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id]);
@@ -209,7 +220,12 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
           await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
@@ -249,10 +265,37 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
           await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id]);
+          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+          expect(signalsOrderedByEventId.length).equal(2);
+        });
+
+        it('should generate 2 signals when timestamp override does not exist', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['myfa*']),
+            timestamp_override: 'event.fakeingestfield',
+          };
+          const { id } = await createRule(supertest, log, rule);
+
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await sleep(5000);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
           const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
@@ -299,7 +342,12 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
           await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 200, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id], 200);

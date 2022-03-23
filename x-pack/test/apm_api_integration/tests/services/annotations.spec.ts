@@ -204,13 +204,6 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
                 '@timestamp': {
                   type: 'date',
                 },
-                observer: {
-                  properties: {
-                    version_major: {
-                      type: 'long',
-                    },
-                  },
-                },
               },
             },
           },
@@ -227,9 +220,6 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
               name: serviceName,
               version: '1.1',
             },
-            observer: {
-              version_major: 8,
-            },
           },
           refresh: 'wait_for',
         });
@@ -245,9 +235,6 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
               name: serviceName,
               version: '1.2',
               environment: 'production',
-            },
-            observer: {
-              version_major: 8,
             },
           },
           refresh: 'wait_for',

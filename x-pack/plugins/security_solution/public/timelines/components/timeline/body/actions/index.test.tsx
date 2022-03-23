@@ -12,6 +12,11 @@ import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../
 import { Actions } from '.';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { mockCasesContract } from '../../../../../../../cases/public/mocks';
+
+jest.mock('../../../../../detections/components/user_info', () => ({
+  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+}));
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
@@ -39,6 +44,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
           siem: { crud_alerts: true, read_alerts: true },
         },
       },
+      cases: mockCasesContract(),
       uiSettings: {
         get: jest.fn(),
       },

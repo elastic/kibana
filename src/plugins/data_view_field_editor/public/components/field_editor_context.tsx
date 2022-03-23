@@ -8,6 +8,7 @@
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
 import { NotificationsStart, CoreStart } from 'src/core/public';
+import { FieldFormatsStart } from '../shared_imports';
 import type { DataView, DataPublicPluginStart } from '../shared_imports';
 import { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
@@ -25,7 +26,7 @@ export interface Context {
     notifications: NotificationsStart;
   };
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  fieldFormats: FieldFormatsStart;
   /**
    * An array of field names not allowed.
    * e.g we probably don't want a user to give a name of an existing

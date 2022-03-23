@@ -7,12 +7,10 @@
  */
 
 import { uniq } from 'lodash';
-// @ts-expect-error untyped library
+import type { AstWithMeta, AstArgumentWithMeta } from '@kbn/interpreter';
+import { isAstWithMeta } from '@kbn/interpreter';
 import { parse } from '@kbn/interpreter';
 import {
-  ExpressionAstExpression,
-  ExpressionAstFunction,
-  ExpressionAstArgument,
   ExpressionFunction,
   ExpressionFunctionParameter,
   getByAlias,
@@ -40,7 +38,7 @@ interface ValueSuggestion extends BaseSuggestion {
 }
 
 interface FnArgAtPosition {
-  ast: ExpressionASTWithMeta;
+  ast: AstWithMeta;
   fnIndex: number;
 
   argName?: string;
@@ -57,58 +55,12 @@ interface FnArgAtPosition {
   contextFn?: string | null;
 }
 
-// If you parse an expression with the "addMeta" option it completely
-// changes the type of returned object.  The following types
-// enhance the existing AST types with the appropriate meta information
-interface ASTMetaInformation<T> {
-  start: number;
-  end: number;
-  text: string;
-  node: T;
-}
-
-// Wraps ExpressionArg with meta or replace ExpressionAstExpression with ExpressionASTWithMeta
-type WrapExpressionArgWithMeta<T> = T extends ExpressionAstExpression
-  ? ExpressionASTWithMeta
-  : ASTMetaInformation<T>;
-
-type ExpressionArgASTWithMeta = WrapExpressionArgWithMeta<ExpressionAstArgument>;
-
-type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
-
-// Wrap ExpressionFunctionAST with meta and modify arguments to be wrapped with meta
-type ExpressionFunctionASTWithMeta = Modify<
-  ExpressionAstFunction,
-  {
-    arguments: {
-      [key: string]: ExpressionArgASTWithMeta[];
-    };
-  }
->;
-
-// Wrap ExpressionFunctionAST with meta and modify chain to be wrapped with meta
-type ExpressionASTWithMeta = ASTMetaInformation<
-  Modify<
-    ExpressionAstExpression,
-    {
-      chain: Array<ASTMetaInformation<ExpressionFunctionASTWithMeta>>;
-    }
-  >
->;
-
 export interface FunctionSuggestion extends BaseSuggestion {
   type: 'function';
   fnDef: ExpressionFunction;
 }
 
 export type AutocompleteSuggestion = FunctionSuggestion | ArgSuggestion | ValueSuggestion;
-
-// Typeguard for checking if ExpressionArg is a new expression
-function isExpression(
-  maybeExpression: ExpressionArgASTWithMeta
-): maybeExpression is ExpressionASTWithMeta {
-  return typeof maybeExpression.node === 'object';
-}
 
 /**
  * Generates the AST with the given expression and then returns the function and argument definitions
@@ -120,9 +72,9 @@ export function getFnArgDefAtPosition(
   position: number
 ) {
   try {
-    const ast: ExpressionASTWithMeta = parse(expression, {
+    const ast: AstWithMeta = parse(expression, {
       addMeta: true,
-    }) as ExpressionASTWithMeta;
+    }) as AstWithMeta;
 
     const { ast: newAst, fnIndex, argName, argStart, argEnd } = getFnArgAtPosition(ast, position);
     const fn = newAst.node.chain[fnIndex].node;
@@ -153,7 +105,7 @@ export function getAutocompleteSuggestions(
 ): AutocompleteSuggestion[] {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
-    const ast = parse(text, { addMeta: true }) as ExpressionASTWithMeta;
+    const ast = parse(text, { addMeta: true }) as AstWithMeta;
     const {
       ast: newAst,
       fnIndex,
@@ -206,7 +158,7 @@ export function getAutocompleteSuggestions(
     The context function for the first expression in the chain is `math`, since it's the parent's previous
     item. The context function for `formatnumber` is the return of `math "divide(value, 2)"`.
 */
-function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArgAtPosition {
+function getFnArgAtPosition(ast: AstWithMeta, position: number): FnArgAtPosition {
   const fnIndex = ast.node.chain.findIndex((fn) => fn.start <= position && position <= fn.end);
   const fn = ast.node.chain[fnIndex];
   for (const [argName, argValues] of Object.entries(fn.node.arguments)) {
@@ -222,7 +174,7 @@ function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArg
 
         // If the arg value is an expression, expand our start and end position
         // to include the opening and closing braces
-        if (value.node !== null && isExpression(value)) {
+        if (value.node !== null && isAstWithMeta(value)) {
           argStart--;
           argEnd++;
         }
@@ -233,7 +185,7 @@ function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArg
         // argument name (`font=` for example), recurse within the expression
         if (
           value.node !== null &&
-          isExpression(value) &&
+          isAstWithMeta(value) &&
           (argName === '_' || !(argStart <= position && position <= argStart + argName.length + 1))
         ) {
           const result = getFnArgAtPosition(value, position);
@@ -265,7 +217,7 @@ function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArg
 
 function getFnNameSuggestions(
   specs: ExpressionFunction[],
-  ast: ExpressionASTWithMeta,
+  ast: AstWithMeta,
   fnIndex: number
 ): FunctionSuggestion[] {
   // Filter the list of functions by the text at the marker
@@ -299,7 +251,7 @@ function getFnNameSuggestions(
 
 function getSubFnNameSuggestions(
   specs: ExpressionFunction[],
-  ast: ExpressionASTWithMeta,
+  ast: AstWithMeta,
   fnIndex: number,
   parentFn: string,
   parentFnArgName: string,
@@ -391,7 +343,7 @@ function getScore(
 
 function getArgNameSuggestions(
   specs: ExpressionFunction[],
-  ast: ExpressionASTWithMeta,
+  ast: AstWithMeta,
   fnIndex: number,
   argName: string,
   argIndex: number
@@ -407,7 +359,7 @@ function getArgNameSuggestions(
   const { start, end } = fn.arguments[argName][argIndex];
 
   // Filter the list of args by those which aren't already present (unless they allow multi)
-  const argEntries = Object.entries(fn.arguments).map<[string, ExpressionArgASTWithMeta[]]>(
+  const argEntries = Object.entries(fn.arguments).map<[string, AstArgumentWithMeta[]]>(
     ([name, values]) => {
       return [name, values.filter((value) => !value.text.includes(MARKER))];
     }
@@ -442,7 +394,7 @@ function getArgNameSuggestions(
 
 function getArgValueSuggestions(
   specs: ExpressionFunction[],
-  ast: ExpressionASTWithMeta,
+  ast: AstWithMeta,
   fnIndex: number,
   argName: string,
   argIndex: number

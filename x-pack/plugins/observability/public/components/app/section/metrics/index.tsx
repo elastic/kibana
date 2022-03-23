@@ -25,7 +25,7 @@ import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';
@@ -51,25 +51,31 @@ const bytesPerSecondFormatter = (value: NumberOrNull) =>
 
 export function MetricsSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
   const [sortedData, setSortedData] = useState<MetricsFetchDataResponse | null>(null);
 
-  const { data, status } = useFetcher(
-    () => {
-      if (bucketSize) {
-        return getDataHandler('infra_metrics')?.fetchData({
-          absoluteTime: { start: absoluteStart, end: absoluteEnd },
-          relativeTime: { start: relativeStart, end: relativeEnd },
-          ...bucketSize,
-        });
-      }
-    },
-    // Absolute times shouldn't be used here, since it would refetch on every render
+  const { data, status } = useFetcher(() => {
+    if (bucketSize && absoluteStart && absoluteEnd) {
+      return getDataHandler('infra_metrics')?.fetchData({
+        absoluteTime: { start: absoluteStart, end: absoluteEnd },
+        relativeTime: { start: relativeStart, end: relativeEnd },
+        ...bucketSize,
+      });
+    }
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, forceUpdate]
-  );
+  }, [
+    bucketSize,
+    relativeStart,
+    relativeEnd,
+    absoluteStart,
+    absoluteEnd,
+    forceUpdate,
+    lastUpdated,
+  ]);
 
   const handleTableChange = useCallback(
     ({ sort }: Criteria<MetricsFetchDataSeries>) => {
@@ -125,7 +131,7 @@ export function MetricsSection({ bucketSize }: Props) {
         <HostLink
           id={record.id}
           name={value}
-          timerange={{ from: absoluteStart, to: absoluteEnd }}
+          timerange={{ from: absoluteStart!, to: absoluteEnd! }}
         />
       ),
     },
@@ -202,12 +208,12 @@ export function MetricsSection({ bucketSize }: Props) {
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.metrics.title', {
-        defaultMessage: 'Metrics',
+        defaultMessage: 'Hosts',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.metrics.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show inventory',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}

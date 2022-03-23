@@ -26,6 +26,10 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 
 import { once } from 'lodash';
 
+import type { SpacesPluginStart } from '../../spaces/public';
+
+import type { CloudStart } from '../../cloud/public';
+
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
@@ -37,7 +41,7 @@ import type {
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
+import type { LicensingPluginStart } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import {
@@ -74,13 +78,12 @@ export interface FleetSetup {}
  */
 export interface FleetStart {
   /** Authorization for the current user */
-  authz: Promise<FleetAuthz>;
+  authz: FleetAuthz;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
 
 export interface FleetSetupDeps {
-  licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
@@ -90,16 +93,19 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
+  licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
+  cloud?: CloudStart;
 }
 
-export interface FleetStartServices extends CoreStart, FleetStartDeps {
+export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
-  cloud?: CloudSetup;
+  cloud?: CloudSetup & CloudStart;
+  spaces?: SpacesPluginStart;
   authz: FleetAuthz;
 }
 
@@ -126,9 +132,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // Set up http client
     setHttpClient(core.http);
 
-    // Set up license service
-    licenseService.start(deps.licensing.license$);
-
     // Register Integrations app
     core.application.register({
       id: INTEGRATIONS_PLUGIN_ID,
@@ -141,11 +144,16 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
+        const cloud =
+          deps.cloud && startDepsServices.cloud
+            ? { ...deps.cloud, ...startDepsServices.cloud }
+            : undefined;
+
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
-          cloud: deps.cloud,
+          cloud,
           authz: await fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
@@ -178,11 +186,15 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
+        const cloud =
+          deps.cloud && startDepsServices.cloud
+            ? { ...deps.cloud, ...startDepsServices.cloud }
+            : undefined;
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
-          cloud: deps.cloud,
+          cloud,
           authz: await fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
@@ -244,39 +256,29 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
     );
 
+    // Set up license service
+    licenseService.start(deps.licensing.license$);
+
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,
       view: 'package-detail-assets',
       Component: LazyCustomLogsAssetsExtension,
     });
+    const { capabilities } = core.application;
 
+    //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
-      // Temporarily rely on superuser check to calculate authz. Once Kibana RBAC is in place for Fleet this should
-      // switch to a sync calculation based on `core.application.capabilites` properties.
-      authz: getPermissions()
-        .catch((e) => {
-          // eslint-disable-next-line no-console
-          console.warn(`Could not load Fleet permissions due to error: ${e}`);
-          return { success: false };
-        })
-        .then((permissionsResponse) => {
-          if (permissionsResponse?.success) {
-            // If superuser, give access to everything
-            return calculateAuthz({
-              fleet: { all: true, setup: true },
-              integrations: { all: true, read: true },
-              isSuperuser: true,
-            });
-          } else {
-            // All other users only get access to read integrations if they have the read privilege
-            const { capabilities } = core.application;
-            return calculateAuthz({
-              fleet: { all: false, setup: false },
-              integrations: { all: false, read: capabilities.fleet.read as boolean },
-              isSuperuser: false,
-            });
-          }
-        }),
+      authz: calculateAuthz({
+        fleet: {
+          all: capabilities.fleetv2.all as boolean,
+          setup: false,
+        },
+        integrations: {
+          all: capabilities.fleet.all as boolean,
+          read: capabilities.fleet.read as boolean,
+        },
+        isSuperuser: false,
+      }),
 
       isInitialized: once(async () => {
         const permissionsResponse = await getPermissions();

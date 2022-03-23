@@ -8,9 +8,8 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 import { fieldFormatsMock } from '../../../../../field_formats/common/mocks';
-import { setServices } from '../../../kibana_services';
 import { DiscoverServices } from '../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '../../../../../data/common/stubs';
 
@@ -27,6 +26,7 @@ describe('Row formatter', () => {
       also: 'with "quotes" or \'single quotes\'',
     },
   };
+  let services: DiscoverServices;
 
   const createIndexPattern = () => {
     const id = 'my-index';
@@ -49,19 +49,17 @@ describe('Row formatter', () => {
   const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
 
   beforeEach(() => {
-    setServices({
-      uiSettings: {
-        get: () => 100,
-      },
+    services = {
       fieldFormats: {
         getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
         getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
       },
-    } as unknown as DiscoverServices);
+    } as unknown as DiscoverServices;
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, indexPattern, fieldsToShow)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, indexPattern, fieldsToShow, 100, services.fieldFormats))
+      .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -96,7 +94,7 @@ describe('Row formatter', () => {
   });
 
   it('limits number of rendered items', () => {
-    setServices({
+    services = {
       uiSettings: {
         get: () => 1,
       },
@@ -104,8 +102,8 @@ describe('Row formatter', () => {
         getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
         getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
       },
-    } as unknown as DiscoverServices);
-    expect(formatRow(hit, indexPattern, [])).toMatchInlineSnapshot(`
+    } as unknown as DiscoverServices;
+    expect(formatRow(hit, indexPattern, [], 1, services.fieldFormats)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -140,8 +138,15 @@ describe('Row formatter', () => {
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(formatRow({ ...hit, highlight: { number: ['42'] } }, indexPattern, fieldsToShow))
-      .toMatchInlineSnapshot(`
+    expect(
+      formatRow(
+        { ...hit, highlight: { number: ['42'] } },
+        indexPattern,
+        fieldsToShow,
+        100,
+        services.fieldFormats
+      )
+    ).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -193,7 +198,8 @@ describe('Row formatter', () => {
           'object.value': [5, 10],
           getByName: jest.fn(),
         },
-        indexPattern
+        indexPattern,
+        100
       )
     ).toMatchInlineSnapshot(`
       <TemplateComponent
@@ -220,7 +226,8 @@ describe('Row formatter', () => {
       formatTopLevelObject(
         { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
         { 'a.zzz': [100], 'a.ccc': [50], getByName: jest.fn() },
-        indexPattern
+        indexPattern,
+        100
       )
     );
     expect(formatted.indexOf('<dt>a.ccc:</dt>')).toBeLessThan(formatted.indexOf('<dt>a.zzz:</dt>'));
@@ -249,7 +256,8 @@ describe('Row formatter', () => {
           'object.keys': ['a', 'b'],
           getByName: jest.fn(),
         },
-        indexPattern
+        indexPattern,
+        100
       )
     ).toMatchInlineSnapshot(`
       <TemplateComponent
@@ -283,7 +291,8 @@ describe('Row formatter', () => {
           'object.value': [5, 10],
           getByName: jest.fn(),
         },
-        indexPattern
+        indexPattern,
+        100
       )
     ).toMatchInlineSnapshot(`
       <TemplateComponent

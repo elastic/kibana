@@ -39,6 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      // This fails and should be investigated or removed if it no longer applies
       it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest, log);
         const { body } = await supertest
@@ -106,6 +107,41 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('runtime fields', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        await createSignalsIndex(supertest, log);
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        await deleteSignalsIndex(supertest, log);
+      });
+
+      it('should be able to filter using a runtime field defined in the request', async () => {
+        const query = {
+          query: {
+            bool: {
+              should: [{ match_phrase: { signal_status_querytime: 'open' } }],
+            },
+          },
+          runtime_mappings: {
+            signal_status_querytime: {
+              type: 'keyword',
+              script: {
+                source: `emit(doc['signal.status'].value)`,
+              },
+            },
+          },
+        };
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(query)
+          .expect(200);
+        expect(body.hits.total.value).to.eql(3);
+      });
+    });
+
     describe('find_alerts_route', () => {
       describe('validation checks', () => {
         it('should not give errors when querying and the signals index does not exist yet', async () => {
@@ -125,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
+        // This fails and should be investigated or removed if it no longer applies
         it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
           await createSignalsIndex(supertest, log);
           const { body } = await supertest

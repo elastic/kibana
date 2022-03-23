@@ -37,9 +37,7 @@ describe('OIDCAuthenticationProvider', () => {
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockUser = mockAuthenticatedUser({ authentication_provider: { type: 'oidc', name: 'oidc' } });
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-      securityMock.createApiResponse({ body: mockUser })
-    );
+    mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(mockUser);
     mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
     provider = new OIDCAuthenticationProvider(mockOptions, { realm: 'oidc1' });
@@ -63,21 +61,17 @@ describe('OIDCAuthenticationProvider', () => {
     it('redirects third party initiated login attempts to the OpenId Connect Provider.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/api/security/oidc/callback' });
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirect:
-              'https://op-host/path/login?response_type=code' +
-              '&scope=openid%20profile%20email' +
-              '&client_id=s6BhdRkqt3' +
-              '&state=statevalue' +
-              '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
-              '&login_hint=loginhint',
-          },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        state: 'statevalue',
+        nonce: 'noncevalue',
+        redirect:
+          'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+          '&login_hint=loginhint',
+      });
 
       await expect(
         provider.login(request, {
@@ -115,21 +109,17 @@ describe('OIDCAuthenticationProvider', () => {
     it('redirects user initiated login attempts to the OpenId Connect Provider.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirect:
-              'https://op-host/path/login?response_type=code' +
-              '&scope=openid%20profile%20email' +
-              '&client_id=s6BhdRkqt3' +
-              '&state=statevalue' +
-              '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
-              '&login_hint=loginhint',
-          },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        state: 'statevalue',
+        nonce: 'noncevalue',
+        redirect:
+          'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+          '&login_hint=loginhint',
+      });
 
       await expect(
         provider.login(request, {
@@ -196,15 +186,11 @@ describe('OIDCAuthenticationProvider', () => {
       it('gets token and redirects user to requested URL if OIDC authentication response is valid.', async () => {
         const { request, attempt, expectedRedirectURI } = getMocks();
 
-        mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-          securityMock.createApiResponse({
-            body: {
-              authentication: mockUser,
-              access_token: 'some-token',
-              refresh_token: 'some-refresh-token',
-            },
-          })
-        );
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          authentication: mockUser,
+          access_token: 'some-token',
+          refresh_token: 'some-refresh-token',
+        });
 
         await expect(
           provider.login(request, attempt, {
@@ -401,21 +387,17 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('initiates OIDC handshake for non-AJAX request that can not be authenticated, but includes URL hash fragment.', async () => {
       mockOptions.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/s/foo/some-path');
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirect:
-              'https://op-host/path/login?response_type=code' +
-              '&scope=openid%20profile%20email' +
-              '&client_id=s6BhdRkqt3' +
-              '&state=statevalue' +
-              '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
-              '&login_hint=loginhint',
-          },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        state: 'statevalue',
+        nonce: 'noncevalue',
+        redirect:
+          'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+          '&login_hint=loginhint',
+      });
 
       const request = httpServerMock.createKibanaRequest({
         path: '/s/foo/some-path',
@@ -742,9 +724,7 @@ describe('OIDCAuthenticationProvider', () => {
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({ body: { redirect: null } })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({ redirect: null });
 
       await expect(
         provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
@@ -763,11 +743,9 @@ describe('OIDCAuthenticationProvider', () => {
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
 
-      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: { redirect: 'http://fake-idp/logout&id_token_hint=thehint' },
-        })
-      );
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        redirect: 'http://fake-idp/logout&id_token_hint=thehint',
+      });
 
       await expect(
         provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })

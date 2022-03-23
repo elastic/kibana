@@ -15,6 +15,9 @@ import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { inspectorPluginMock } from '../../../../../src/plugins/inspector/public/mocks';
 import { spacesPluginMock } from '../../../spaces/public/mocks';
 import { dashboardPluginMock } from '../../../../../src/plugins/dashboard/public/mocks';
+import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
+import { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
+
 import type {
   LensByValueInput,
   LensByReferenceInput,
@@ -40,7 +43,7 @@ export const defaultDoc = {
   visualizationType: 'testVis',
   state: {
     query: 'kuery',
-    filters: [{ query: { match_phrase: { src: 'test' } } }],
+    filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
     datasourceStates: {
       testDatasource: 'datasource',
     },
@@ -78,6 +81,13 @@ export function makeDefaultServices(
     })
   );
 
+  const dataViewsMock = dataViewPluginMocks.createStartContract();
+  dataViewsMock.get.mockImplementation(
+    jest.fn((id) =>
+      Promise.resolve({ id, isTimeBased: () => true })
+    ) as unknown as DataViewsPublicPluginStart['get']
+  );
+
   const navigationStartMock = navigationPluginMock.createStartContract();
 
   jest.spyOn(navigationStartMock.ui.TopNavMenu.prototype, 'constructor').mockImplementation(() => {
@@ -112,6 +122,7 @@ export function makeDefaultServices(
     chrome: core.chrome,
     overlays: core.overlays,
     uiSettings: core.uiSettings,
+    executionContext: core.executionContext,
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
@@ -135,6 +146,7 @@ export function makeDefaultServices(
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },
     data: mockDataPlugin(sessionIdSubject, sessionId),
+    dataViews: dataViewsMock,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     storage: {
       get: jest.fn(),

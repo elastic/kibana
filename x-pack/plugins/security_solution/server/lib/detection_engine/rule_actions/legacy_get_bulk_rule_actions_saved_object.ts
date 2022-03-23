@@ -62,7 +62,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
     throw new AggregateError(errors, 'Error fetching rule actions');
   }
 
-  const savedObjects = results.flatMap((result) => result.saved_objects);
+  const savedObjects = results.flatMap(({ result }) => result.saved_objects);
   return savedObjects.reduce(
     (acc: { [key: string]: LegacyRulesActionsSavedObject }, savedObject) => {
       const ruleAlertId = savedObject.references.find((reference) => {

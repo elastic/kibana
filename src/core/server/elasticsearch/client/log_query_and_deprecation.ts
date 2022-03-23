@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { IncomingHttpHeaders } from 'http';
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
 import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elasticsearch';
+import numeral from '@elastic/numeral';
 import type { ElasticsearchErrorDetails } from './types';
+import { getEcsResponseLog } from './get_ecs_response_log';
 import { Logger } from '../../logging';
 
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
@@ -38,6 +40,14 @@ export function getErrorMessage(error: errors.ElasticsearchClientError): string 
   return `[${error.name}]: ${error.message}`;
 }
 
+function getContentLength(headers?: IncomingHttpHeaders): number | undefined {
+  const contentLength = headers && headers['content-length'];
+  if (contentLength) {
+    const val = parseInt(contentLength, 10);
+    return !isNaN(val) ? val : undefined;
+  }
+}
+
 /**
  * returns a string in format:
  *
@@ -47,10 +57,10 @@ export function getErrorMessage(error: errors.ElasticsearchClientError): string 
  *
  * so it could be copy-pasted into the Dev console
  */
-function getResponseMessage(event: DiagnosticResult): string {
+function getResponseMessage(event: DiagnosticResult, bytesMsg: string): string {
   const errorMeta = getRequestDebugMeta(event);
   const body = errorMeta.body ? `\n${errorMeta.body}` : '';
-  return `${errorMeta.statusCode}\n${errorMeta.method} ${errorMeta.url}${body}`;
+  return `${errorMeta.statusCode}${bytesMsg}\n${errorMeta.method} ${errorMeta.url}${body}`;
 }
 
 /**
@@ -93,21 +103,19 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   const deprecationLogger = logger.get('deprecation');
   client.diagnostic.on('response', (error, event) => {
     if (event) {
-      const opaqueId = event.meta.request.options.opaqueId;
-      const meta = opaqueId
-        ? {
-            http: { request: { id: event.meta.request.options.opaqueId } },
-          }
-        : undefined; // do not clutter logs if opaqueId is not present
+      const bytes = getContentLength(event.headers);
+      const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
+      const meta = getEcsResponseLog(event, bytes);
+
       let queryMsg = '';
       if (error) {
         if (error instanceof errors.ResponseError) {
-          queryMsg = `${getResponseMessage(event)} ${getErrorMessage(error)}`;
+          queryMsg = `${getResponseMessage(event, bytesMsg)} ${getErrorMessage(error)}`;
         } else {
           queryMsg = getErrorMessage(error);
         }
       } else {
-        queryMsg = getResponseMessage(event);
+        queryMsg = getResponseMessage(event, bytesMsg);
       }
 
       queryLogger.debug(queryMsg, meta);
@@ -131,12 +139,9 @@ export const instrumentEsQueryAndDeprecationLogger = ({
         // Strip the first 5 stack trace lines as these are irrelavent to finding the call site
         const stackTrace = new Error().stack?.split('\n').slice(5).join('\n');
 
-        const deprecationMsg = `Elasticsearch deprecation: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMsg}`;
-        if (requestOrigin === 'kibana') {
-          deprecationLogger.info(deprecationMsg);
-        } else {
-          deprecationLogger.debug(deprecationMsg);
-        }
+        deprecationLogger.debug(
+          `Elasticsearch deprecation: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMsg}`
+        );
       }
     }
   });

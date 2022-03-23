@@ -17,8 +17,9 @@ import {
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
+  ThemeServiceStart,
 } from 'src/core/public';
-import type { ScreenshottingSetup } from '../../screenshotting/public';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -26,7 +27,7 @@ import {
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
@@ -42,7 +43,7 @@ import type {
   UiActionsStart,
 } from './shared_imports';
 import { AppNavLinkStatus } from './shared_imports';
-import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 
@@ -56,13 +57,18 @@ function getStored(): JobId[] {
   return sessionValue ? JSON.parse(sessionValue) : [];
 }
 
-function handleError(notifications: NotificationsSetup, err: Error): Rx.Observable<JobSummarySet> {
+function handleError(
+  notifications: NotificationsSetup,
+  err: Error,
+  theme: ThemeServiceStart
+): Rx.Observable<JobSummarySet> {
   notifications.toasts.addDanger(
     getGeneralErrorToast(
       i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
         defaultMessage: 'Reporting notifier error!',
       }),
-      err
+      err,
+      theme
     )
   );
   window.console.error(err);
@@ -72,9 +78,8 @@ function handleError(notifications: NotificationsSetup, err: Error): Rx.Observab
 export interface ReportingPublicPluginSetupDendencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
-  licensing: LicensingPluginSetup;
   uiActions: UiActionsSetup;
-  screenshotting: ScreenshottingSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
 }
 
@@ -147,14 +152,7 @@ export class ReportingPublicPlugin
     setupDeps: ReportingPublicPluginSetupDendencies
   ) {
     const { getStartServices, uiSettings } = core;
-    const {
-      home,
-      management,
-      licensing: { license$ }, // FIXME: 'license$' is deprecated
-      screenshotting,
-      share,
-      uiActions,
-    } = setupDeps;
+    const { home, management, screenshotMode, share, uiActions } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
@@ -181,14 +179,15 @@ export class ReportingPublicPlugin
       order: 1,
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
-        const [[start], { mountManagementSection }] = await Promise.all([
+        const [[start, startDeps], { mountManagementSection }] = await Promise.all([
           getStartServices(),
           import('./management/mount_management_section'),
         ]);
-        const {
-          chrome: { docTitle },
-        } = start;
+
+        const { docTitle } = start.chrome;
         docTitle.change(this.title);
+
+        const { license$ } = startDeps.licensing;
         const umountAppCallback = await mountManagementSection(
           core,
           start,
@@ -210,7 +209,7 @@ export class ReportingPublicPlugin
       id: 'reportingRedirect',
       mount: async (params) => {
         const { mountRedirectApp } = await import('./redirect');
-        return mountRedirectApp({ ...params, apiClient, screenshotting, share });
+        return mountRedirectApp({ ...params, apiClient, screenshotMode, share });
       },
       title: 'Reporting redirect app',
       searchable: false,
@@ -221,33 +220,39 @@ export class ReportingPublicPlugin
 
     uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, apiClient, startServices$, license$, usesUiCapabilities })
+      new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
 
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    share.register(
-      ReportingCsvShareProvider({
-        apiClient,
-        toasts,
-        license$,
-        startServices$,
-        uiSettings,
-        usesUiCapabilities,
-      })
-    );
+    startServices$.subscribe(([{ application }, { licensing }]) => {
+      licensing.license$.subscribe((license) => {
+        share.register(
+          reportingCsvShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
 
-    share.register(
-      reportingScreenshotShareProvider({
-        apiClient,
-        toasts,
-        license$,
-        startServices$,
-        uiSettings,
-        usesUiCapabilities,
-      })
-    );
+        share.register(
+          reportingScreenshotShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
+      });
+    });
 
     return reportingStart;
   }
@@ -255,7 +260,7 @@ export class ReportingPublicPlugin
   public start(core: CoreStart) {
     const { notifications } = core;
     const apiClient = this.getApiClient(core.http, core.uiSettings);
-    const streamHandler = new StreamHandler(notifications, apiClient);
+    const streamHandler = new StreamHandler(notifications, apiClient, core.theme);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
       .pipe(
@@ -264,7 +269,7 @@ export class ReportingPublicPlugin
         filter((storedJobs) => storedJobs.length > 0), // stop the pipeline here if there are none pending
         mergeMap((storedJobs) => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
-        catchError((err) => handleError(notifications, err))
+        catchError((err) => handleError(notifications, err, core.theme))
       )
       .subscribe();
 

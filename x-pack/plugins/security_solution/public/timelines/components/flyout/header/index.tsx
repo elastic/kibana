@@ -180,9 +180,9 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.CLOSE_TIMELINE}>
+                <EuiToolTip content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}>
                   <EuiButtonIcon
-                    aria-label={i18n.CLOSE_TIMELINE}
+                    aria-label={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}
                     data-test-subj="close-timeline"
                     iconType="cross"
                     onClick={handleClose}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EventActionOptions, SeverityActionOptions } from '.././types';
 import PagerDutyParamsFields from './pagerduty_params';
 

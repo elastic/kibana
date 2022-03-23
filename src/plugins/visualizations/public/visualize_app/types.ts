@@ -17,6 +17,7 @@ import type {
   ToastsStart,
   ScopedHistory,
   AppMountParameters,
+  ThemeServiceStart,
 } from 'kibana/public';
 
 import type {
@@ -36,6 +37,7 @@ import type {
 import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import type { Filter } from '@kbn/es-query';
 import type { Query, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
@@ -88,6 +90,7 @@ export interface VisualizeServices extends CoreStart {
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
@@ -105,6 +108,7 @@ export interface VisualizeServices extends CoreStart {
   usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
   visEditorsRegistry: VisEditorsRegistry;
 }
 

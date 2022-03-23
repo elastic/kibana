@@ -50,6 +50,7 @@ import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
+  unusedTypes: string[];
   taskStore: TaskStore;
   config: TaskManagerConfig;
   middleware: Middleware;
@@ -106,6 +107,7 @@ export class TaskPollingLifecycle {
     config,
     taskStore,
     definitions,
+    unusedTypes,
     executionContext,
     usageCounter,
   }: TaskPollingLifecycleOpts) {
@@ -134,6 +136,7 @@ export class TaskPollingLifecycle {
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
+      unusedTypes,
       logger: this.logger,
       getCapacity: (taskType?: string) =>
         taskType && this.definitions.get(taskType)?.maxConcurrency

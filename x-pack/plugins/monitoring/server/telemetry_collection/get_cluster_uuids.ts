@@ -57,8 +57,7 @@ export async function fetchClusterUuids(
     },
   };
 
-  const { body: response } = await callCluster.search(params);
-  return response;
+  return await callCluster.search(params);
 }
 
 /**

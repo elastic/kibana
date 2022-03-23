@@ -18,9 +18,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  // Re-enable these once they are passing
-  // https://github.com/elastic/kibana/issues/121100
-  describe.skip('long running rule', async () => {
+  describe('long running rule', async () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
@@ -33,13 +31,16 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
         pattern: [true, true, true, true, true],
       });
-      const statuses: Array<{ status: string; error: { message: string; reason: string } }> = [];
+      const errorStatuses: Array<{ status: string; error: { message: string; reason: string } }> =
+        [];
       // get the events we're expecting
       const events = await retry.try(async () => {
         const { body: rule } = await supertest.get(
           `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
         );
-        statuses.push(rule.execution_status);
+        if (rule.execution_status.status === 'error') {
+          errorStatuses.push(rule.execution_status);
+        }
         return await getEventLog({
           getService,
           spaceId: Spaces.space1.id,
@@ -70,17 +71,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
       expect(status).to.eql(200);
 
-      // We can't actually guarantee an execution didn't happen again and not timeout
-      // so we need to be a bit safe in how we detect this situation by looking at the last
-      // n instead of the last one
-      const lookBackCount = 5;
-      let lastErrorStatus = null;
-      for (let i = 0; i < lookBackCount; i++) {
-        lastErrorStatus = statuses.pop();
-        if (lastErrorStatus?.status === 'error') {
-          break;
-        }
-      }
+      expect(errorStatuses.length).to.be.greaterThan(0);
+      const lastErrorStatus = errorStatuses.pop();
       expect(lastErrorStatus?.status).to.eql('error');
       expect(lastErrorStatus?.error.message).to.eql(
         `test.patternLongRunning.cancelAlertsOnRuleTimeout:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`

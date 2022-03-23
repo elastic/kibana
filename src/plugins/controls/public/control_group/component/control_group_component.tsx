@@ -8,14 +8,7 @@
 
 import '../control_group.scss';
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
@@ -35,23 +28,13 @@ import {
   useSensors,
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
-
 import { ControlGroupInput } from '../types';
-import { pluginServices } from '../../services';
 import { ViewMode } from '../../../../embeddable/public';
-import { ControlGroupStrings } from '../control_group_strings';
-import { CreateControlButton } from '../editor/create_control';
-import { EditControlGroup } from '../editor/edit_control_group';
-import { forwardAllContext } from '../editor/forward_all_context';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useReduxContainerContext } from '../../../../presentation_util/public';
 
 export const ControlGroup = () => {
-  // Controls Services Context
-  const { overlays } = pluginServices.getHooks();
-  const { openFlyout } = overlays.useService();
-
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
     ControlGroupInput,
@@ -108,112 +91,75 @@ export const ControlGroup = () => {
     return null;
   }
 
-  let panelBg: 'subdued' | 'primary' | 'success' = 'subdued';
-  if (emptyState) panelBg = 'primary';
+  let panelBg: 'subdued' | 'plain' | 'success' = 'subdued';
+  if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
 
   return (
-    <EuiPanel
-      borderRadius="m"
-      color={panelBg}
-      paddingSize={emptyState ? 's' : 'none'}
-      className={classNames('controlsWrapper', {
-        'controlsWrapper--empty': emptyState,
-        'controlsWrapper--twoLine': controlStyle === 'twoLine',
-      })}
-    >
+    <>
       {idsInOrder.length > 0 ? (
-        <EuiFlexGroup
-          wrap={false}
-          gutterSize="m"
-          direction="row"
-          responsive={false}
-          alignItems="center"
-          data-test-subj="controls-group"
-          data-shared-items-count={idsInOrder.length}
+        <EuiPanel
+          borderRadius="m"
+          color={panelBg}
+          paddingSize={emptyState ? 's' : 'none'}
+          data-test-subj="controls-group-wrapper"
+          className={classNames('controlsWrapper', {
+            'controlsWrapper--empty': emptyState,
+            'controlsWrapper--twoLine': controlStyle === 'twoLine',
+          })}
         >
-          <EuiFlexItem>
-            <DndContext
-              onDragStart={({ active }) => setDraggingId(active.id)}
-              onDragEnd={onDragEnd}
-              onDragCancel={() => setDraggingId(null)}
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              layoutMeasuring={{
-                strategy: LayoutMeasuringStrategy.Always,
-              }}
-            >
-              <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
-                <EuiFlexGroup
-                  className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
-                  alignItems="center"
-                  gutterSize="s"
-                  wrap={true}
-                >
-                  {idsInOrder.map(
-                    (controlId, index) =>
-                      panels[controlId] && (
-                        <SortableControl
-                          isEditable={isEditable}
-                          dragInfo={{ index, draggingIndex }}
-                          embeddableId={controlId}
-                          key={controlId}
-                        />
-                      )
-                  )}
-                </EuiFlexGroup>
-              </SortableContext>
-              <DragOverlay>
-                {draggingId ? <ControlClone draggingId={draggingId} /> : null}
-              </DragOverlay>
-            </DndContext>
-          </EuiFlexItem>
-          {isEditable && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} className="groupEditActions" gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
-                    <EuiButtonIcon
-                      aria-label={ControlGroupStrings.management.getManageButtonTitle()}
-                      iconType="gear"
-                      color="text"
-                      data-test-subj="controls-sorting-button"
-                      onClick={() => {
-                        const flyoutInstance = openFlyout(
-                          forwardAllContext(
-                            <EditControlGroup closeFlyout={() => flyoutInstance.close()} />,
-                            reduxContainerContext
-                          )
-                        );
-                      }}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-                    <CreateControlButton isIconButton={true} />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ) : (
-        <>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="controls-empty">
-            <EuiFlexItem grow={1}>
-              <EuiText className="emptyStateText eui-textCenter" size="s">
-                <p>{ControlGroupStrings.emptyState.getCallToAction()}</p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div className="addControlButton">
-                <CreateControlButton isIconButton={false} />
-              </div>
+          <EuiFlexGroup
+            wrap={false}
+            gutterSize="m"
+            direction="row"
+            responsive={false}
+            alignItems="center"
+            data-test-subj="controls-group"
+            data-shared-items-count={idsInOrder.length}
+          >
+            <EuiFlexItem>
+              <DndContext
+                onDragStart={({ active }) => setDraggingId(active.id)}
+                onDragEnd={onDragEnd}
+                onDragCancel={() => setDraggingId(null)}
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                layoutMeasuring={{
+                  strategy: LayoutMeasuringStrategy.Always,
+                }}
+              >
+                <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
+                  <EuiFlexGroup
+                    className={classNames('controlGroup', {
+                      'controlGroup-isDragging': draggingId,
+                    })}
+                    alignItems="center"
+                    gutterSize="s"
+                    wrap={true}
+                  >
+                    {idsInOrder.map(
+                      (controlId, index) =>
+                        panels[controlId] && (
+                          <SortableControl
+                            isEditable={isEditable}
+                            dragInfo={{ index, draggingIndex }}
+                            embeddableId={controlId}
+                            key={controlId}
+                          />
+                        )
+                    )}
+                  </EuiFlexGroup>
+                </SortableContext>
+                <DragOverlay>
+                  {draggingId ? <ControlClone draggingId={draggingId} /> : null}
+                </DragOverlay>
+              </DndContext>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+        </EuiPanel>
+      ) : (
+        <></>
       )}
-    </EuiPanel>
+    </>
   );
 };

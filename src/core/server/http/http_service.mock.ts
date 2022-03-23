@@ -29,6 +29,7 @@ import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { configMock } from '../config/mocks';
 import { ExternalUrlConfig } from '../external_url';
+import type { IAuthHeadersStorage } from './auth_headers_storage';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
@@ -44,10 +45,11 @@ export type HttpServiceSetupMock = jest.Mocked<
   createRouter: jest.MockedFunction<() => RouterMock>;
 };
 export type InternalHttpServiceSetupMock = jest.Mocked<
-  Omit<InternalHttpServiceSetup, 'basePath' | 'createRouter'>
+  Omit<InternalHttpServiceSetup, 'basePath' | 'createRouter' | 'authRequestHeaders'>
 > & {
   basePath: BasePathMocked;
   createRouter: jest.MockedFunction<(path: string) => RouterMock>;
+  authRequestHeaders: jest.Mocked<IAuthHeadersStorage>;
 };
 export type HttpServiceStartMock = jest.Mocked<HttpServiceStart> & {
   basePath: BasePathMocked;
@@ -75,6 +77,14 @@ const createAuthMock = () => {
   };
   mock.get.mockReturnValue({ status: AuthStatus.authenticated, state: {} });
   mock.isAuthenticated.mockReturnValue(true);
+  return mock;
+};
+
+const createAuthHeaderStorageMock = () => {
+  const mock: jest.Mocked<IAuthHeadersStorage> = {
+    set: jest.fn(),
+    get: jest.fn(),
+  };
   return mock;
 };
 
@@ -138,14 +148,14 @@ const createInternalSetupContractMock = () => {
     csp: CspConfig.DEFAULT,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
-    getAuthHeaders: jest.fn(),
+    authRequestHeaders: createAuthHeaderStorageMock(),
     getServerInfo: jest.fn(),
     registerPrebootRoutes: jest.fn(),
     registerRouterAfterListening: jest.fn(),
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());
-  mock.getAuthHeaders.mockReturnValue({ authorization: 'authorization-header' });
+  mock.authRequestHeaders.get.mockReturnValue({ authorization: 'authorization-header' });
   mock.getServerInfo.mockReturnValue({
     hostname: 'localhost',
     name: 'kibana',
@@ -169,10 +179,6 @@ const createSetupContractMock = () => {
     csp: CspConfig.DEFAULT,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
-    auth: {
-      get: internalMock.auth.get,
-      isAuthenticated: internalMock.auth.isAuthenticated,
-    },
     getServerInfo: internalMock.getServerInfo,
   };
 
@@ -258,5 +264,6 @@ export const httpServiceMock = {
   createOnPreResponseToolkit: createOnPreResponseToolkitMock,
   createOnPreRoutingToolkit: createOnPreRoutingToolkitMock,
   createAuthToolkit: createAuthToolkitMock,
+  createAuthHeaderStorage: createAuthHeaderStorageMock,
   createRouter: mockRouter.create,
 };

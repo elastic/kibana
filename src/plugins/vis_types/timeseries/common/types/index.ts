@@ -7,20 +7,29 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { IndexPattern, Query } from '../../../../data/common';
+import { KBN_FIELD_TYPES, Query } from '../../../../data/common';
+import type { DataView } from '../../../../data_views/public';
 import { Panel } from './panel_model';
 
 export type { Metric, Series, Panel, MetricType } from './panel_model';
-export type { TimeseriesVisData, PanelData, SeriesData, TableData } from './vis_data';
+export type {
+  TimeseriesVisData,
+  PanelData,
+  SeriesData,
+  TableData,
+  DataResponseMeta,
+  TrackedEsSearches,
+  PanelSeries,
+} from './vis_data';
 
 export interface FetchedIndexPattern {
-  indexPattern: IndexPattern | undefined | null;
+  indexPattern: DataView | undefined | null;
   indexPatternString: string | undefined;
 }
 
 export interface SanitizedFieldType {
   name: string;
-  type: string;
+  type: KBN_FIELD_TYPES;
   label?: string;
 }
 

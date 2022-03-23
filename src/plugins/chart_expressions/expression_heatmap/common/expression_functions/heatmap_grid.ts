@@ -52,12 +52,38 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies whether or not the Y-axis labels are visible.',
       }),
     },
+    isYAxisTitleVisible: {
+      types: ['boolean'],
+      help: i18n.translate('expressionHeatmap.function.args.grid.isYAxisTitleVisible.help', {
+        defaultMessage: 'Specifies whether or not the Y-axis title is visible.',
+      }),
+    },
+    yTitle: {
+      types: ['string'],
+      help: i18n.translate('expressionHeatmap.function.args.grid.yTitle.help', {
+        defaultMessage: 'Specifies the title of the y axis',
+      }),
+      required: false,
+    },
     // X-axis
     isXAxisLabelVisible: {
       types: ['boolean'],
       help: i18n.translate('expressionHeatmap.function.args.grid.isXAxisLabelVisible.help', {
         defaultMessage: 'Specifies whether or not the X-axis labels are visible.',
       }),
+    },
+    isXAxisTitleVisible: {
+      types: ['boolean'],
+      help: i18n.translate('expressionHeatmap.function.args.grid.isXAxisTitleVisible.help', {
+        defaultMessage: 'Specifies whether or not the X-axis title is visible.',
+      }),
+    },
+    xTitle: {
+      types: ['string'],
+      help: i18n.translate('expressionHeatmap.function.args.grid.xTitle.help', {
+        defaultMessage: 'Specifies the title of the x axis',
+      }),
+      required: false,
     },
   },
   fn(input, args) {

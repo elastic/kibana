@@ -32,7 +32,9 @@ class DocLinks {
   public cloudIndexManagement: string;
   public enterpriseSearchConfig: string;
   public enterpriseSearchMailService: string;
+  public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
+  public kibanaSecurity: string;
   public licenseManagement: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
@@ -42,6 +44,7 @@ class DocLinks {
   public workplaceSearchCustomSourcePermissions: string;
   public workplaceSearchDocumentPermissions: string;
   public workplaceSearchDropbox: string;
+  public workplaceSearchExternalSharePointOnline: string;
   public workplaceSearchExternalIdentities: string;
   public workplaceSearchGettingStarted: string;
   public workplaceSearchGitHub: string;
@@ -56,6 +59,7 @@ class DocLinks {
   public workplaceSearchSecurity: string;
   public workplaceSearchServiceNow: string;
   public workplaceSearchSharePoint: string;
+  public workplaceSearchSharePointServer: string;
   public workplaceSearchSlack: string;
   public workplaceSearchSynch: string;
   public workplaceSearchZendesk: string;
@@ -85,7 +89,9 @@ class DocLinks {
     this.cloudIndexManagement = '';
     this.enterpriseSearchConfig = '';
     this.enterpriseSearchMailService = '';
+    this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
+    this.kibanaSecurity = '';
     this.licenseManagement = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
@@ -95,6 +101,7 @@ class DocLinks {
     this.workplaceSearchCustomSourcePermissions = '';
     this.workplaceSearchDocumentPermissions = '';
     this.workplaceSearchDropbox = '';
+    this.workplaceSearchExternalSharePointOnline = '';
     this.workplaceSearchExternalIdentities = '';
     this.workplaceSearchGettingStarted = '';
     this.workplaceSearchGitHub = '';
@@ -109,6 +116,7 @@ class DocLinks {
     this.workplaceSearchSecurity = '';
     this.workplaceSearchServiceNow = '';
     this.workplaceSearchSharePoint = '';
+    this.workplaceSearchSharePointServer = '';
     this.workplaceSearchSlack = '';
     this.workplaceSearchSynch = '';
     this.workplaceSearchZendesk = '';
@@ -139,7 +147,9 @@ class DocLinks {
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
+    this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
+    this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
@@ -150,6 +160,8 @@ class DocLinks {
       docLinks.links.workplaceSearch.customSourcePermissions;
     this.workplaceSearchDocumentPermissions = docLinks.links.workplaceSearch.documentPermissions;
     this.workplaceSearchDropbox = docLinks.links.workplaceSearch.dropbox;
+    this.workplaceSearchExternalSharePointOnline =
+      docLinks.links.workplaceSearch.externalSharePointOnline;
     this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
     this.workplaceSearchGettingStarted = docLinks.links.workplaceSearch.gettingStarted;
     this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
@@ -164,6 +176,7 @@ class DocLinks {
     this.workplaceSearchSecurity = docLinks.links.workplaceSearch.security;
     this.workplaceSearchServiceNow = docLinks.links.workplaceSearch.serviceNow;
     this.workplaceSearchSharePoint = docLinks.links.workplaceSearch.sharePoint;
+    this.workplaceSearchSharePointServer = docLinks.links.workplaceSearch.sharePointServer;
     this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
     this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
     this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;

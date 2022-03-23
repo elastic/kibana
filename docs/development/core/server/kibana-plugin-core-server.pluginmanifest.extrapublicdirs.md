@@ -6,6 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
+> To be deleted when https://github.com/elastic/kibana/issues/101948 is done.
 > 
 
 Specifies directory names that can be imported by other ui-plugins built using the same instance of the @<!-- -->kbn/optimizer. A temporary measure we plan to replace with better mechanisms for sharing static code between plugins

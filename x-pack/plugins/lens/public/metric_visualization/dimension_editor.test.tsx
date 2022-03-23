@@ -9,14 +9,14 @@ import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import { FramePublicAPI, VisualizationDimensionEditorProps } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { ColorMode, PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { act } from 'react-dom/test-utils';
 import { CustomizablePalette, PalettePanelContainer } from '../shared_components';
 import { CustomPaletteParams, layerTypes } from '../../common';
-import { MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

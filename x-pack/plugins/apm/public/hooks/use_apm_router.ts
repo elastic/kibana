@@ -14,8 +14,6 @@ export function useApmRouter() {
   const { core } = useApmPluginContext();
 
   const link = (...args: [any]) => {
-    // @ts-expect-error router.link() expects never type, because
-    // no routes are specified. that's okay.
     return core.http.basePath.prepend('/app/apm' + router.link(...args));
   };
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionConnectorFieldsSetCallbacks } from '../../../../types';

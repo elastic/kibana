@@ -6,19 +6,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLoadingContent,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../common/api';
+import { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/api';
 import { Case, UpdateKey, UpdateByKey } from '../../../common/ui';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
-import { UserActionTree } from '../user_action_tree';
+import { UserActions } from '../user_actions';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
@@ -37,26 +31,20 @@ import { useCaseViewNavigation } from '../../common/navigation';
 import { HeaderPage } from '../header_page';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { CaseViewMetrics } from './case_view_metrics';
+import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps, OnUpdateFields } from './types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 
 const useOnUpdateField = ({
   caseData,
   caseId,
-  subCaseId,
   handleUpdateField,
 }: {
   caseData: Case;
   caseId: string;
-  subCaseId?: string;
   handleUpdateField: (newCase: Case, updateKey: UpdateKey) => void;
 }) => {
-  const {
-    isLoading,
-    updateKey: loadingKey,
-    updateCaseProperty,
-  } = useUpdateCase({ caseId, subCaseId });
+  const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase({ caseId });
 
   const onUpdateField = useCallback(
     ({ key, value, onSuccess, onError }: OnUpdateFields) => {
@@ -123,7 +111,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
-    subCaseId,
     updateCase,
     useFetchAlertData,
     refreshRef,
@@ -144,11 +131,11 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       hasDataToPush,
       isLoading: isLoadingUserActions,
       participants,
-    } = useGetCaseUserActions(caseId, caseData.connector.id, subCaseId);
+    } = useGetCaseUserActions(caseId, caseData.connector.id);
 
     const refetchCaseUserActions = useCallback(() => {
-      fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
-    }, [caseId, fetchCaseUserActions, subCaseId, caseData]);
+      fetchCaseUserActions(caseId, caseData.connector.id);
+    }, [caseId, fetchCaseUserActions, caseData]);
 
     const {
       metrics,
@@ -165,24 +152,23 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const handleUpdateCase = useCallback(
       (newCase: Case) => {
         updateCase(newCase);
-        fetchCaseUserActions(caseId, newCase.connector.id, subCaseId);
+        fetchCaseUserActions(caseId, newCase.connector.id);
         fetchCaseMetrics();
       },
-      [updateCase, fetchCaseUserActions, caseId, subCaseId, fetchCaseMetrics]
+      [updateCase, fetchCaseUserActions, caseId, fetchCaseMetrics]
     );
 
     const handleUpdateField = useCallback(
       (newCase: Case, updateKey: UpdateKey) => {
         updateCase({ ...newCase, comments: caseData.comments });
-        fetchCaseUserActions(caseId, newCase.connector.id, subCaseId);
+        fetchCaseUserActions(caseId, newCase.connector.id);
         fetchCaseMetrics();
       },
-      [updateCase, caseData, fetchCaseUserActions, caseId, subCaseId, fetchCaseMetrics]
+      [updateCase, caseData, fetchCaseUserActions, caseId, fetchCaseMetrics]
     );
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
       caseId,
-      subCaseId,
       caseData,
       handleUpdateField,
     });
@@ -216,13 +202,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       updateCase,
     ]);
 
-    const {
-      loading: isLoadingConnectors,
-      connectors,
-      permissionsError,
-    } = useConnectors({
-      toastPermissionsErrors: false,
-    });
+    const { loading: isLoadingConnectors, connectors } = useConnectors();
 
     const [connectorName, isValidConnector] = useMemo(() => {
       const connector = connectors.find((c) => c.id === caseData.connector.id);
@@ -280,9 +260,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
-        body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseId, subCaseId })),
+        body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseId })),
       }),
-      [caseData.title, getCaseViewUrl, caseId, subCaseId]
+      [caseData.title, getCaseViewUrl, caseId]
     );
 
     useEffect(() => {
@@ -338,37 +318,31 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         <WhitePageWrapper>
           <ContentWrapper>
             <EuiFlexGroup>
+              <EuiFlexItem>
+                {!initLoadingData && metricsFeatures.length > 0 ? (
+                  <CaseViewMetrics
+                    data-test-subj="case-view-metrics"
+                    isLoading={isLoadingMetrics}
+                    metrics={metrics}
+                    features={metricsFeatures}
+                  />
+                ) : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && (
                   <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
                 )}
                 {!initLoadingData && (
                   <EuiFlexGroup direction="column" responsive={false}>
-                    {metricsFeatures.length > 0 && (
-                      <>
-                        <EuiFlexItem>
-                          <CaseViewMetrics
-                            data-test-subj="case-view-metrics"
-                            isLoading={isLoadingMetrics}
-                            metrics={metrics}
-                            features={metricsFeatures}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText>
-                            <h4>{i18n.ACTIVITY}</h4>
-                            <EuiHorizontalRule margin="xs" />
-                          </EuiText>
-                        </EuiFlexItem>
-                      </>
-                    )}
                     <EuiFlexItem>
-                      <UserActionTree
+                      <UserActions
                         getRuleDetailsHref={ruleDetailsNavigation?.href}
                         onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                         caseServices={caseServices}
                         caseUserActions={caseUserActions}
-                        connectors={connectors}
                         data={caseData}
                         actionsNavigation={actionsNavigation}
                         fetchUserActions={refetchCaseUserActions}
@@ -376,11 +350,8 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                         isLoadingUserActions={isLoadingUserActions}
                         onShowAlertDetails={onShowAlertDetails}
                         onUpdateField={onUpdateField}
-                        renderInvestigateInTimelineActionComponent={
-                          timelineUi?.renderInvestigateInTimelineActionComponent
-                        }
                         statusActionButton={
-                          caseData.type !== CaseType.collection && userCanCrud ? (
+                          userCanCrud ? (
                             <StatusActionButton
                               status={caseData.status}
                               onStatusChanged={changeStatus}
@@ -423,13 +394,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                   connectorName={connectorName}
                   connectors={connectors}
                   hasDataToPush={hasDataToPush && userCanCrud}
-                  hideConnectorServiceNowSir={
-                    subCaseId != null || caseData.type === CaseType.collection
-                  }
                   isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
                   isValidConnector={isLoadingConnectors ? true : isValidConnector}
                   onSubmit={onSubmitConnector}
-                  permissionsError={permissionsError}
                   updateCase={handleUpdateCase}
                   userActions={caseUserActions}
                   userCanCrud={userCanCrud}

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsOpenPointInTimeOptions,
+} from 'kibana/server';
 import type {
   CreateCommentsArray,
   Description,
@@ -19,6 +23,8 @@ import type {
   ExceptionListTypeOrUndefined,
   ExportExceptionDetails,
   FilterOrUndefined,
+  FoundExceptionListItemSchema,
+  FoundExceptionListSchema,
   Id,
   IdOrUndefined,
   Immutable,
@@ -28,6 +34,7 @@ import type {
   ItemIdOrUndefined,
   ListId,
   ListIdOrUndefined,
+  MaxSizeOrUndefined,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
@@ -36,6 +43,9 @@ import type {
   OsTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
+  PitId,
+  PitOrUndefined,
+  SearchAfterOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Tags,
@@ -43,14 +53,14 @@ import type {
   UpdateCommentsArray,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   EmptyStringArrayDecoded,
   NonEmptyStringArrayDecoded,
   Version,
   VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-types';
 
-import { ExtensionPointStorageClientInterface } from '../extension_points';
+import type { ExtensionPointStorageClientInterface } from '../extension_points';
 
 export interface ConstructorOptions {
   user: string;
@@ -58,6 +68,8 @@ export interface ConstructorOptions {
   serverExtensionsClient: ExtensionPointStorageClientInterface;
   /** Set to `false` if wanting to disable executing registered server extension points. Default is true. */
   enableServerExtensionPoints?: boolean;
+  /** Should be provided when creating an instance from an HTTP request handler */
+  request?: KibanaRequest;
 }
 
 export interface GetExceptionListOptions {
@@ -67,6 +79,7 @@ export interface GetExceptionListOptions {
 }
 
 export interface GetExceptionListSummaryOptions {
+  filter: FilterOrUndefined;
   listId: ListIdOrUndefined;
   id: IdOrUndefined;
   namespaceType: NamespaceType;
@@ -191,6 +204,8 @@ export interface FindExceptionListItemOptions {
   namespaceType: NamespaceType;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -199,6 +214,8 @@ export interface FindExceptionListItemOptions {
 export interface FindEndpointListItemOptions {
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -209,6 +226,8 @@ export interface FindExceptionListsItemOptions {
   namespaceType: NamespaceTypeArray;
   filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -217,6 +236,8 @@ export interface FindExceptionListsItemOptions {
 export interface FindValueListExceptionListsItems {
   valueListId: Id;
   perPage: PerPageOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -227,6 +248,8 @@ export interface FindExceptionListOptions {
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
 }
@@ -252,4 +275,54 @@ export interface ImportExceptionListAndItemsAsArrayOptions {
   exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
   maxExceptionsImportSize: number;
   overwrite: boolean;
+}
+
+export interface OpenPointInTimeOptions {
+  namespaceType: NamespaceType;
+  options: SavedObjectsOpenPointInTimeOptions | undefined;
+}
+
+export interface ClosePointInTimeOptions {
+  pit: PitId;
+}
+
+export interface FindExceptionListItemPointInTimeFinderOptions {
+  listId: ListId;
+  namespaceType: NamespaceType;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+  executeFunctionOnStream: (response: FoundExceptionListItemSchema) => void;
+  maxSize: MaxSizeOrUndefined;
+}
+
+export interface FindExceptionListPointInTimeFinderOptions {
+  maxSize: MaxSizeOrUndefined;
+  namespaceType: NamespaceTypeArray;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+  executeFunctionOnStream: (response: FoundExceptionListSchema) => void;
+}
+
+export interface FindExceptionListItemsPointInTimeFinderOptions {
+  listId: NonEmptyStringArrayDecoded;
+  namespaceType: NamespaceTypeArray;
+  filter: EmptyStringArrayDecoded;
+  perPage: PerPageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+  executeFunctionOnStream: (response: FoundExceptionListItemSchema) => void;
+  maxSize: MaxSizeOrUndefined;
+}
+
+export interface FindValueListExceptionListsItemsPointInTimeFinder {
+  valueListId: Id;
+  perPage: PerPageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+  executeFunctionOnStream: (response: FoundExceptionListItemSchema) => void;
+  maxSize: MaxSizeOrUndefined;
 }

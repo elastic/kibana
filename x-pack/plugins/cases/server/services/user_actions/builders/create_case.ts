@@ -11,7 +11,7 @@ import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class CreateCaseUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'create_case'>): BuilderReturnValue {
-    const { payload, caseId, subCaseId, owner, user } = args;
+    const { payload, caseId, owner, user } = args;
     const connectorWithoutId = this.extractConnectorId(payload.connector);
     return {
       attributes: {
@@ -21,7 +21,7 @@ export class CreateCaseUserActionBuilder extends UserActionBuilder {
         type: ActionTypes.create_case,
       },
       references: [
-        ...this.createCaseReferences(caseId, subCaseId),
+        ...this.createCaseReferences(caseId),
         ...this.createConnectorReference(payload.connector.id),
       ],
     };

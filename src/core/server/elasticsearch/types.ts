@@ -13,6 +13,7 @@ import { ElasticsearchConfig } from './elasticsearch_config';
 import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
+import type { UnauthorizedErrorHandler } from './client/retry_unauthorized';
 
 /**
  * @public
@@ -56,14 +57,36 @@ export interface ElasticsearchServicePreboot {
  */
 export interface ElasticsearchServiceSetup {
   /**
+   * Register a handler that will be called when unauthorized (401) errors are returned from any API
+   * call to elasticsearch performed on behalf of a user via a {@link IScopedClusterClient | scoped cluster client}.
+   *
+   * @example
+   * ```ts
+   * const handler: UnauthorizedErrorHandler = ({ request, error }, toolkit) => {
+   *   const reauthenticationResult = await authenticator.reauthenticate(request, error);
+   *   if (reauthenticationResult.succeeded()) {
+   *     return toolkit.retry({
+   *       authHeaders: reauthenticationResult.authHeaders,
+   *     });
+   *   }
+   *   return toolkit.notHandled();
+   * }
+   *
+   * coreSetup.elasticsearch.setUnauthorizedErrorHandler(handler);
+   * ```
+   *
+   * @remarks The handler will only be invoked for scoped client bound to real {@link KibanaRequest | request} instances.
+   */
+  setUnauthorizedErrorHandler: (handler: UnauthorizedErrorHandler) => void;
+
+  /**
    * @deprecated
-   * Use {@link ElasticsearchServiceStart.legacy} instead.
    */
   legacy: {
     /**
      * Provide direct access to the current elasticsearch configuration.
      *
-     * @deprecated this will be removed in a later version.
+     * @deprecated Can be removed when https://github.com/elastic/kibana/issues/119862 is done.
      */
     readonly config$: Observable<ElasticsearchConfig>;
   };
@@ -112,20 +135,6 @@ export interface ElasticsearchServiceStart {
     type: string,
     clientConfig?: Partial<ElasticsearchClientConfig>
   ) => ICustomClusterClient;
-
-  /**
-   * @deprecated
-   * Provided for the backward compatibility.
-   * Switch to the new elasticsearch client as soon as https://github.com/elastic/kibana/issues/35508 done.
-   * */
-  legacy: {
-    /**
-     * Provide direct access to the current elasticsearch configuration.
-     *
-     * @deprecated this will be removed in a later version.
-     */
-    readonly config$: Observable<ElasticsearchConfig>;
-  };
 }
 
 /**

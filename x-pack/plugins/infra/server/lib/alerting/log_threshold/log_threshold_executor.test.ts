@@ -422,7 +422,7 @@ describe('Log threshold executor', () => {
         processUngroupedResults(
           results,
           ruleParams,
-          alertsMock.createAlertInstanceFactory,
+          alertsMock.createAlertFactory.create,
           alertUpdaterMock
         );
         // First call, second argument
@@ -436,6 +436,7 @@ describe('Log threshold executor', () => {
               group: null,
               matchingDocuments: 10,
               isRatio: false,
+              reason: '10 log entries in the last 5 mins. Alert when > 5.',
             },
           },
         ]);
@@ -486,7 +487,7 @@ describe('Log threshold executor', () => {
         processGroupByResults(
           results,
           ruleParams,
-          alertsMock.createAlertInstanceFactory,
+          alertsMock.createAlertFactory.create,
           alertUpdaterMock
         );
         expect(alertUpdaterMock.mock.calls.length).toBe(2);
@@ -501,6 +502,8 @@ describe('Log threshold executor', () => {
               group: 'i-am-a-host-name-1, i-am-a-dataset-1',
               matchingDocuments: 10,
               isRatio: false,
+              reason:
+                '10 log entries in the last 5 mins for i-am-a-host-name-1, i-am-a-dataset-1. Alert when > 5.',
             },
           },
         ]);
@@ -516,6 +519,8 @@ describe('Log threshold executor', () => {
               group: 'i-am-a-host-name-3, i-am-a-dataset-3',
               matchingDocuments: 20,
               isRatio: false,
+              reason:
+                '20 log entries in the last 5 mins for i-am-a-host-name-3, i-am-a-dataset-3. Alert when > 5.',
             },
           },
         ]);

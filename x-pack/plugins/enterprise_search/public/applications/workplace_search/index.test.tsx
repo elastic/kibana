@@ -48,13 +48,24 @@ describe('WorkplaceSearch', () => {
     expect(wrapper.find(WorkplaceSearchConfigured)).toHaveLength(1);
   });
 
-  it('renders ErrorState', () => {
+  it('renders ErrorState when not on SetupGuide', () => {
+    mockUseRouteMatch.mockReturnValue(false);
     setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
 
     const wrapper = shallow(<WorkplaceSearch />);
 
     const errorState = wrapper.find(ErrorState);
     expect(errorState).toHaveLength(1);
+  });
+
+  it('does not render ErrorState when on SetupGuide', () => {
+    mockUseRouteMatch.mockReturnValue(true);
+    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
+
+    const wrapper = shallow(<WorkplaceSearch />);
+
+    const errorState = wrapper.find(ErrorState);
+    expect(errorState).toHaveLength(0);
   });
 });
 

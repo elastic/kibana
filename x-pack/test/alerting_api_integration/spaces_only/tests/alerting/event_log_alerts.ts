@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover, getEventLog } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { IValidatedEvent } from '../../../../../plugins/event_log/server';
 
@@ -31,7 +31,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             throttle: null,
@@ -68,6 +68,25 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
       const instanceEvents = events.filter(
         (event: IValidatedEvent) => event?.event?.action !== 'execute'
       );
+
+      // Verify unique executionId generated per `action:execute` grouping
+      const eventExecutionIdSet = new Set();
+      const totalUniqueExecutionIds = new Set();
+      let totalExecutionEventCount = 0;
+      events.forEach((event) => {
+        totalUniqueExecutionIds.add(event?.kibana?.alert?.rule?.execution?.uuid);
+        if (event?.event?.action === 'execute') {
+          totalExecutionEventCount += 1;
+          eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
+          expect(eventExecutionIdSet.size).to.equal(1);
+          eventExecutionIdSet.clear();
+        } else {
+          eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
+        }
+      });
+
+      // Ensure every execution actually had a unique id from the others
+      expect(totalUniqueExecutionIds.size).to.equal(totalExecutionEventCount);
 
       const currentAlertSpan: {
         alertId?: string;

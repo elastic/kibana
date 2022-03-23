@@ -22,10 +22,39 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.over
   defaultMessage: 'Overview',
 });
 
-export const DUCOMENT_SUMMARY = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.documentSummary',
+export const HIGHLIGHTED_FIELDS = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields',
   {
-    defaultMessage: 'Document Summary',
+    defaultMessage: 'Highlighted fields',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_FIELD = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.field',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.value',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
+  {
+    defaultMessage: 'Alert Prevalence',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip',
+  {
+    defaultMessage:
+      'The total count of alerts with the same value within the currently selected timerange. This value is not affected by additional filters.',
   }
 );
 
@@ -84,6 +113,10 @@ export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.al
   defaultMessage: 'Agent status',
 });
 
+export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
+  defaultMessage: 'Rule type',
+});
+
 export const MULTI_FIELD_TOOLTIP = i18n.translate(
   'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
   {
@@ -113,9 +146,6 @@ export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
   }
 );
 
-export const VIEW_ALL_DOCUMENT_FIELDS = i18n.translate(
-  'xpack.securitySolution.eventDetails.viewAllDocumentFields',
-  {
-    defaultMessage: 'View all document fields in table',
-  }
-);
+export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
+  defaultMessage: 'View all fields in table',
+});

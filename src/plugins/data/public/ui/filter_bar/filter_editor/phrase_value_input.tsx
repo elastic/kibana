@@ -43,7 +43,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
             })}
             value={this.props.value}
             onChange={this.props.onChange}
-            type={this.props.field ? this.props.field.type : 'string'}
+            field={this.props.field}
           />
         )}
       </EuiFormRow>

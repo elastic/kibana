@@ -12,6 +12,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Type
@@ -75,6 +76,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Open in a new tab
@@ -137,6 +139,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         aria-invalid="false"
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           URL template
@@ -168,7 +171,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <a
           class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
           rel="noopener"
           target="_blank"
         >
@@ -200,6 +203,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         aria-invalid="false"
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Label template
@@ -231,7 +235,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <a
           class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
           rel="noopener"
           target="_blank"
         >
@@ -262,6 +266,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Samples

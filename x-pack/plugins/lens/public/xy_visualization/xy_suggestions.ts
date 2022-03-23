@@ -17,9 +17,10 @@ import {
   TableChangeType,
 } from '../types';
 import { State, XYState, visualizationTypes } from './types';
-import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import type { SeriesType, XYDataLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
+import { getDataLayers, isDataLayer } from './visualization_helpers';
 
 const columnSortOrder = {
   document: 0,
@@ -44,6 +45,7 @@ export function getSuggestions({
   keptLayerIds,
   subVisualizationId,
   mainPalette,
+  isFromContext,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   const incompleteTable =
     !table.isMultiRow ||
@@ -71,7 +73,9 @@ export function getSuggestions({
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
-    table.columns.some((col) => col.operation.isStaticValue)
+    table.columns.some((col) => col.operation.isStaticValue && !isFromContext) ||
+    // do not use suggestions with non-numeric metrics
+    table.columns.some((col) => !col.operation.isBucketed && col.operation.dataType !== 'number')
   ) {
     // reject incomplete configurations if the sub visualization isn't specifically requested
     // this allows to switch chart types via switcher with incomplete configurations, but won't
@@ -156,7 +160,8 @@ function flipSeriesType(seriesType: SeriesType) {
 
 function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentLayer =
-    currentState && currentState.layers.find(({ layerId }) => layerId === table.layerId);
+    currentState &&
+    getDataLayers(currentState.layers).find(({ layerId }) => layerId === table.layerId);
 
   const buckets = table.columns.filter((col) => col.operation.isBucketed);
   // reverse the buckets before prioritization to always use the most inner
@@ -414,7 +419,7 @@ function getSeriesType(
   const defaultType = 'bar_stacked';
 
   const oldLayer = getExistingLayer(currentState, layerId);
-  const oldLayerSeriesType = oldLayer ? oldLayer.seriesType : false;
+  const oldLayerSeriesType = oldLayer && isDataLayer(oldLayer) ? oldLayer.seriesType : false;
 
   const closestSeriesType =
     oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultType;
@@ -494,7 +499,8 @@ function buildSuggestion({
     splitBy = xValue;
     xValue = undefined;
   }
-  const existingLayer: XYLayerConfig | {} = getExistingLayer(currentState, layerId) || {};
+  const existingLayer: XYDataLayerConfig | {} =
+    getExistingLayer(currentState, layerId) || ({} as XYDataLayerConfig);
   const accessors = yValues.map((col) => col.columnId);
   const newLayer = {
     ...existingLayer,

@@ -10,12 +10,229 @@
 
 Review important information about the {kib} 8.0.0 releases.
 
+* <<release-notes-8.0.0>>
+* <<release-notes-8.0.0-rc2>>
 * <<release-notes-8.0.0-rc1>>
 * <<release-notes-8.0.0-beta1>>
 * <<release-notes-8.0.0-alpha2>>
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.0.0]]
+== {kib} 8.0.0
+
+Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant] to complete the upgrade.
+
+[float]
+[[breaking-changes-8.0.0]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.0.0, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+
+[discrete]
+[[breaking-123754]]
+.Removes the `console.ssl` setting
+[%collapsible]
+====
+*Details* +
+The `console.ssl` setting has been removed. For more information, refer to {kibana-pull}123754[#123754].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
+====
+
+// end::notable-breaking-changes[]
+
+
+To review the breaking changes in previous versions, refer to the following: 
+
+<<breaking-changes-8.0.0-rc2,8.0.0-rc2>> | <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+
+[float]
+[[deprecations-8.0.0]]
+=== Deprecation
+
+The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.0.0.
+
+[discrete]
+[[deprecation-123229]]
+.Removes support for `monitoring.cluster_alerts.allowedSpaces`
+[%collapsible]
+====
+*Details* +
+The `monitoring.cluster_alerts.allowedSpaces` setting, which {kib} uses to create Stack Monitoring alerts, has been removed. For more information, refer to {kibana-pull}123229[#123229].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `monitoring.cluster_alerts.allowedSpaces` from kibana.yml.
+====
+
+To review the deprecations in previous versions, refer to the following:
+
+<<deprecations-8.0.0-rc1,8.0.0-rc1>> | <<deprecations-8.0.0-alpha1,8.0.0-alpha1>>
+
+[float]
+[[known-issue-8.0.0]]
+=== Known issue
+
+[discrete]
+[[known-issue-123550]]
+.Importing and copying saved objects causes weak links to break
+[%collapsible]
+====
+*Details* +
+{kib} supports weak links in some saved objects. For example, a dashboard may include a Markdown panel that contains a relative URL to
+another dashboard. Weak links are defined by free text, _not_ the saved object's relationships, and can break if **both** of the following
+conditions are true:
+
+* You are importing saved objects into multiple spaces, _OR_ you are copying saved objects into another space
+* Before you upgraded to 8.0.0, the saved objects did not already exist in the destinations
+
+In 8.0.0 and later, weak links break because <<saved-object-ids-impact-when-using-import-and-copy,saved object IDs can change during import or copy>>.
+This applies to both the UI and the API.
+This issue will be fixed 8.0.1 and 8.1.0. For more information, refer to {kibana-issue}123550[#123550].
+
+*Impact* +
+Saved objects in 7.x that are migrated during upgrade are **not** impacted.
+Only _new_ saved objects that are imported or copied _multiple times_ (causing object IDs to change) are impacted.
+If you are impacted, you can re-import or re-copy your saved objects after the fix is
+implemented to preserve the weak links.
+====
+
+[float]
+[[features-8.0.0]]
+=== Features
+For information about the features introduced in 8.0.0, refer to <<whats-new,What's new in 8.0>>.
+
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+To review the features in previous versions, refer to the following: 
+
+<<features-8.0.0-rc2,8.0.0-rc2>> | <<features-8.0.0-rc1,8.0.0-rc1>> | <<features-8.0.0-beta1,8.0.0-beta1>> | <<features-8.0.0-alpha2,8.0.0-alpha2>>
+
+[[enhancements-and-bug-fixes-v8.0.0]]
+=== Enhancements and bug fixes
+
+For detailed information about the 8.0.0 release, review the enhancements and bug fixes.
+
+[float]
+[[enhancement-v8.0.0]]
+==== Enhancements
+Dashboard::
+Clone ReferenceOrValueEmbeddables by value {kibana-pull}122199[#122199]
+
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.0.0]]
+==== Bug Fixes
+APM::
+Restrict aggregated transaction metrics search to date range {kibana-pull}123445[#123445]
+
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+Allow empty strings for required text fields in package policies {kibana-pull}123610[#123610]
+
+Maps::
+Fixes Label border color is not removed from legend when disabled {kibana-pull}122705[#122705]
+
+Monitoring::
+Ensure logstash getNodes always contains a uuid {kibana-pull}124201[#124201]
+
+Security::
+Long-running requests no longer cause sporadic logouts in certain cases, even when user sessions are active {kibana-pull}122155[#122155]
+
+[[release-notes-8.0.0-rc2]]
+== {kib} 8.0.0-rc2
+
+For information about the {kib} 8.0.0-rc2 release, review the following information.
+
+[float]
+[[breaking-changes-8.0.0-rc2]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+[discrete]
+[[breaking-122722]]
+.Removes the ability to use `elasticsearch.username: elastic` in production
+[%collapsible]
+====
+*Details* +
+In production, you are no longer able to use the `elastic` superuser to authenticate to {es}. For more information, refer to {kibana-pull}122722[#122722].
+
+*Impact* +
+When you configure `elasticsearch.username: elastic`, {kib} fails.
+====
+
+To review the breaking changes in previous versions, refer to the following: 
+
+<<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+
+[float]
+[[features-8.0.0-rc2]]
+=== Features
+{kib} 8.0.0-rc2 adds the following new and notable features.
+
+Dashboard::
+Dashboard Integration {kibana-pull}115991[#115991]
+Elastic Security::
+For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Monitoring::
+Enterprise Search Stack Monitoring {kibana-pull}114303[#114303]
+Observability::
+* Adds Agent Keys in APM settings - Create agent keys {kibana-pull}120373[#120373]
+* Adds Agent Keys in APM settings - Agent key table {kibana-pull}119543[#119543]
+* Allows users to set Download Speed, Upload Speed, and Latency for their synthetic monitors in Uptime {kibana-pull}118594[#118594]
+Platform::
+Changes saved objects management inspect view to a read-only JSON view of the whole saved object {kibana-pull}112034[#112034]
+
+[[enhancements-and-bug-fixes-v8.0.0-rc2]]
+=== Enhancements and bug fixes
+
+For detailed information about the 8.0.0-rc2 release, review the enhancements and bug fixes.
+
+[float]
+[[enhancement-v8.0.0-rc2]]
+==== Enhancements
+Elastic Security::
+For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Security::
+Adds session cleanup audit logging {kibana-pull}122419[#122419]
+Observability::
+Make a monitor's steps details page work on mobile resolutions in Uptime {kibana-pull}122171[#122171]
+
+[float]
+[[fixes-v8.0.0-rc2]]
+==== Bug Fixes
+Alerting::
+Fixes PagerDuty timestamp validation {kibana-pull}122321[#122321]
+Dashboard::
+* Creates Explicit Diffing System {kibana-pull}121241[#121241]
+* Fixes blank panel save and display issue {kibana-pull}120815[#120815]
+* Fixes full screen error when pressing back arrow on browser {kibana-pull}118113[#118113]
+Elastic Security::
+For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Maps::
+* Fixes Point to point and Tracks layers label properties not showing in the legend {kibana-pull}122993[#122993]
+* Fixes Color ramp UI for percent of a top term in join layer is broken {kibana-pull}122718[#122718]
+Observability::
+* Updates index pattern permission error in APM {kibana-pull}122680[#122680]
+* Honor time unit for Inventory Threshold in Metrics {kibana-pull}122294[#122294]
+* Adds locator to aid other plugins in linking properly to Uptime {kibana-pull}123004[#123004]
+* Fixes a bug in which headers would be incorrectly centered on desktop in Uptime {kibana-pull}122643[#122643]
+
 [[release-notes-8.0.0-rc1]]
 == {kib} 8.0.0-rc1
 
@@ -27,8 +244,6 @@ Review the {kib} 8.0.0-rc1 changes, then use the <<upgrade-assistant,Upgrade Ass
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking changes, then mitigate the impact to your application.
-
-// tag::notable-breaking-changes[]
 
 [discrete]
 [[breaking-118854]]
@@ -110,8 +325,6 @@ For more information, refer to {kibana-pull}116821[#116821] and {kibana-pull}115
 When you upgrade to 8.0.0, you are unable to use references to the deprecated fields.
 ====
 
-// end::notable-breaking-changes[]
-
 To review the breaking changes in previous versions, refer to the following: 
 
 <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
@@ -134,17 +347,19 @@ The `xpack.apm.autocreateApmIndexPattern` APM setting has been removed. For more
 *Impact* +
 To automatically create data views in APM, use `xpack.apm.autoCreateApmDataView`.
 ====
-      
+
 [discrete]
 [[deprecation-119494]]
-.Updates Fleet API responses for consistency
+.Updates Fleet API to improve consistency
 [%collapsible]
 ====
 *Details* +
-To make sure all Fleet API GET resposes return `items`, the following have been updated:
+The Fleet API has been updated to improve consistency:
 
-* `/api/fleet/enrollment-api-keys`
-* `/api/fleet/agents`
+* Hyphens are changed to underscores in some names.
+* The `pkgkey` path parameter in the packages endpoint is split.
+* The `response` and `list` properties are renamed to `items` or `item` in some
+responses.
 
 For more information, refer to {kibana-pull}119494[#119494].
 
@@ -157,24 +372,30 @@ When you upgrade to 8.0.0, use the following API changes:
 
 * Use `service_tokens` instead of `service-tokens`.
 
-* `check-permissions` is no longer supported.
-
 * Use `/epm/packages/{packageName}/{version}` instead of `/epm/packages/{pkgkey}`.
 
-* Use `items[]` or `item` instead of `response[]` in the following:
-
+* Use `items[]` instead of `response[]` in:
++
 [source,text]
 --
+/api/fleet/enrollment_api_keys
+/api/fleet/agents
 /epm/packages/
-/epm/packages/{pkgkey}
 /epm/categories
 /epm/packages/_bulk
 /epm/packages/limited
+/epm/packages/{packageName}/{version} <1>
 --
+<1> Use `items[]` when the verb is `POST` or `DELETE`. Use `item` when the verb
+is `GET` or `PUT`.
+
+For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
+
 ====
 
-To review the depcrecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
-      
+To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+
+
 [float]
 [[features-8.0.0-rc1]]
 === Features
@@ -1213,7 +1434,7 @@ Use the `xpack.monitoring.clusterAlertsEmail` in kibana.yml.
 ====
 
 [float]
-[[enhancements-and-bug-fixes-v8.0.0]]
+[[enhancements-and-bug-fixes-v8.0.0-alpha1]]
 === Bug fix
 
 The 8.0.0-alpha1 release includes the following bug fix.

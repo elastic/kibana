@@ -6,30 +6,34 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiSwitch } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
+import { OperationDefinition, ParamEditorProps } from './index';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
   combineErrorMessages,
+  isColumnOfType,
 } from './helpers';
-import {
-  FormattedIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-} from './column_types';
+import { FieldBasedIndexPatternColumn, BaseIndexPatternColumn, FormatParams } from './column_types';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { updateColumnParam } from '../layer_helpers';
 
-type MetricColumn<T> = FormattedIndexPatternColumn &
-  FieldBasedIndexPatternColumn & {
-    operationType: T;
+type MetricColumn<T> = FieldBasedIndexPatternColumn & {
+  operationType: T;
+  params?: {
+    emptyAsNull?: boolean;
+    format?: FormatParams;
   };
+};
 
 const typeToFn: Record<string, string> = {
   min: 'aggMin',
@@ -48,6 +52,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   ofName,
   priority,
   optionalTimeScaling,
+  supportsDate,
+  hideZeroOption,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -55,6 +61,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   priority?: number;
   optionalTimeScaling?: boolean;
   description?: string;
+  supportsDate?: boolean;
+  hideZeroOption?: boolean;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -76,12 +84,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
-        supportedTypes.includes(fieldType) &&
+        (supportedTypes.includes(fieldType) || (supportsDate && fieldType === 'date')) &&
         aggregatable &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
         return {
-          dataType: 'number',
+          dataType: fieldType === 'date' ? 'date' : 'number',
           isBucketed: false,
           scale: 'ratio',
         };
@@ -105,7 +113,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
         label: labelLookup(field.displayName, previousColumn),
-        dataType: 'number',
+        dataType: supportsDate && field.type === 'date' ? 'date' : 'number',
         operationType: type,
         sourceField: field.name,
         isBucketed: false,
@@ -113,15 +121,60 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
-        params: getFormatFromPreviousColumn(previousColumn),
+        params: {
+          ...getFormatFromPreviousColumn(previousColumn),
+          emptyAsNull:
+            hideZeroOption && previousColumn && isColumnOfType<T>(type, previousColumn)
+              ? previousColumn.params?.emptyAsNull
+              : !columnParams?.usedInMath,
+        },
       } as T;
     },
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
         label: labelLookup(field.displayName, oldColumn),
+        dataType: field.type,
         sourceField: field.name,
       };
+    },
+    getAdvancedOptions: ({ layer, columnId, currentColumn, updateLayer }: ParamEditorProps<T>) => {
+      if (!hideZeroOption) return [];
+      return [
+        {
+          dataTestSubj: 'hide-zero-values',
+          optionElement: (
+            <>
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+                  defaultMessage: 'Hide zero values',
+                })}
+                labelProps={{
+                  style: {
+                    fontWeight: euiThemeVars.euiFontWeightMedium,
+                  },
+                }}
+                checked={Boolean(currentColumn.params?.emptyAsNull)}
+                onChange={() => {
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'emptyAsNull',
+                      value: !currentColumn.params?.emptyAsNull,
+                    })
+                  );
+                }}
+                compressed
+              />
+            </>
+          ),
+          title: '',
+          showInPopover: true,
+          inlineElement: null,
+          onClick: () => {},
+        },
+      ];
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
@@ -131,6 +184,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         field: column.sourceField,
         // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
+        emptyAsNull: hideZeroOption ? column.params?.emptyAsNull : undefined,
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
@@ -186,6 +240,7 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
   }),
+  supportsDate: true,
 });
 
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
@@ -202,6 +257,7 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
   }),
+  supportsDate: true,
 });
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
@@ -237,6 +293,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that sums up numeric values that are extracted from the aggregated documents.',
   }),
+  hideZeroOption: true,
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({

@@ -54,7 +54,10 @@ export function getTimelionRequestHandler({
   uiSettings,
   http,
   timefilter,
-}: TimelionVisDependencies) {
+  expressionAbortSignal,
+}: TimelionVisDependencies & {
+  expressionAbortSignal: AbortSignal;
+}) {
   const timezone = getTimezone(uiSettings);
 
   return async function ({
@@ -74,6 +77,12 @@ export function getTimelionRequestHandler({
   }): Promise<TimelionSuccessResponse> {
     const dataSearch = getDataSearch();
     const expression = visParams.expression;
+    const abortController = new AbortController();
+    const expressionAbortHandler = function () {
+      abortController.abort();
+    };
+
+    expressionAbortSignal.addEventListener('abort', expressionAbortHandler);
 
     if (!expression) {
       throw new Error(
@@ -98,9 +107,7 @@ export function getTimelionRequestHandler({
     const untrackSearch =
       dataSearch.session.isCurrentSession(searchSessionId) &&
       dataSearch.session.trackSearch({
-        abort: () => {
-          // TODO: support search cancellations
-        },
+        abort: () => abortController.abort(),
       });
 
     try {
@@ -124,6 +131,7 @@ export function getTimelionRequestHandler({
           }),
         }),
         context: executionContext,
+        signal: abortController.signal,
       });
     } catch (e) {
       if (e && e.body) {
@@ -142,6 +150,7 @@ export function getTimelionRequestHandler({
         // call `untrack` if this search still belongs to current session
         untrackSearch();
       }
+      expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
     }
   };
 }

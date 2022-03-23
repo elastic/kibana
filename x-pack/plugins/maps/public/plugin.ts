@@ -12,6 +12,7 @@ import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public'
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import type { DashboardStart } from 'src/plugins/dashboard/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -46,7 +47,7 @@ import {
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
-import { registerLayerWizard } from './classes/layers';
+import { registerLayerWizardExternal } from './classes/layers';
 import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
@@ -73,11 +74,15 @@ import {
 } from './legacy_visualizations';
 import type { SecurityPluginStart } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import type { LensPublicSetup } from '../../lens/public';
+
+import { setupLensChoroplethChart } from './lens';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
+  lens: LensPublicSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
@@ -89,6 +94,7 @@ export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
   inspector: InspectorStartContract;
   licensing: LicensingPluginStart;
@@ -103,6 +109,7 @@ export interface MapsPluginStartDependencies {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 /**
@@ -129,7 +136,10 @@ export class MapsPlugin
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
+  public setup(
+    core: CoreSetup<MapsPluginStartDependencies, MapsPluginStart>,
+    plugins: MapsPluginSetupDependencies
+  ): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -173,6 +183,8 @@ export class MapsPlugin
       },
     });
 
+    setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
+
     // register wrapper around legacy tile_map and region_map visualizations
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
@@ -182,7 +194,7 @@ export class MapsPlugin
     plugins.visualizations.createBaseVisualization(tileMapVisType);
 
     return {
-      registerLayerWizard,
+      registerLayerWizard: registerLayerWizardExternal,
       registerSource,
     };
   }

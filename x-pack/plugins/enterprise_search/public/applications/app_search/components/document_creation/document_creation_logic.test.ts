@@ -9,7 +9,7 @@ import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import dedent from 'dedent';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
@@ -31,7 +31,8 @@ describe('DocumentCreationLogic', () => {
 
   const DEFAULT_VALUES = {
     isDocumentCreationOpen: false,
-    creationMode: 'text',
+    creationMode: 'api',
+    activeJsonTab: 'uploadTab',
     creationStep: DocumentCreationStep.AddDocuments,
     textInput: dedent(DOCUMENTS_API_JSON_EXAMPLE),
     fileInput: null,
@@ -120,6 +121,24 @@ describe('DocumentCreationLogic', () => {
             ...EXPECTED_VALUES,
             creationMode: 'api',
           });
+        });
+      });
+    });
+
+    describe('setActiveJsonTab', () => {
+      beforeAll(() => {
+        mount();
+        DocumentCreationLogic.actions.setActiveJsonTab('pasteTab');
+      });
+
+      const EXPECTED_VALUES = {
+        ...DEFAULT_VALUES,
+        activeJsonTab: 'pasteTab',
+      };
+
+      describe('isDocumentCreationOpen', () => {
+        it('should be set to "pasteTab"', () => {
+          expect(DocumentCreationLogic.values).toEqual(EXPECTED_VALUES);
         });
       });
     });

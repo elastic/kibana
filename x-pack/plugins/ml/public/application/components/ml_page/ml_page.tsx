@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, FC, useCallback, useMemo, useReducer } from 'react';
-import { EuiPageContentBody } from '@elastic/eui';
+import { EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route } from 'react-router-dom';
 import type { AppMountParameters } from 'kibana/public';
@@ -21,6 +21,7 @@ import {
   KibanaPageTemplate,
   RedirectAppLinks,
 } from '../../../../../../../src/plugins/kibana_react/public';
+import { useDocTitle } from '../../routing/use_doc_title';
 
 export const MlPageControlsContext = createContext<{
   setPageTitle: (v?: React.ReactNode | undefined) => void;
@@ -55,7 +56,7 @@ function pageStateReducer(state: MlPageUIState, action: PageAction): MlPageUISta
  * Main page component of the ML App
  * @constructor
  */
-export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps, children }) => {
+export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps }) => {
   const navigateToPath = useNavigateToPath();
   const {
     services: {
@@ -79,6 +80,12 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
 
   const activeRoute = useActiveRoute(routeList);
 
+  const rightSideItems = useMemo(() => {
+    return [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])];
+  }, [activeRoute.enableDatePicker]);
+
+  useDocTitle(activeRoute);
+
   return (
     <KibanaPageTemplate
       className={'ml-app'}
@@ -94,17 +101,11 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
           defaultMessage: 'Machine Learning',
         }),
         icon: 'machineLearningApp',
-        items: [
-          {
-            id: '',
-            name: '',
-            items: useSideNavItems(activeRoute.id),
-          },
-        ],
+        items: useSideNavItems(activeRoute),
       }}
       pageHeader={{
-        pageTitle: pageState.pageHeader,
-        rightSideItems: [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])],
+        pageTitle: pageState.pageHeader ?? <EuiLoadingContent lines={1} />,
+        rightSideItems,
         restrictWidth: false,
       }}
       pageBodyProps={{

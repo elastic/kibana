@@ -32,3 +32,5 @@ export * from './streams';
 export * from './babel';
 export * from './extract';
 export * from './vscode_config';
+export * from './sort_package_json';
+export * from './diff_strings';

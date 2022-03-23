@@ -9,29 +9,31 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
-import classnames from 'classnames';
 
 import {
   Case,
   CaseStatusWithAllStatus,
   FilterOptions,
   SortFieldCase,
-  SubCase,
 } from '../../../common/ui/types';
-import { CaseStatuses, CaseType, CommentRequestAlertType, caseStatuses } from '../../../common/api';
-import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
+import {
+  CaseStatuses,
+  CommentRequestAlertType,
+  caseStatuses,
+  CommentType,
+} from '../../../common/api';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './columns';
-import { getExpandedRowMap } from './expanded_row';
 import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { CaseAttachments } from '../../types';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -50,17 +52,22 @@ const getSortField = (field: string): SortFieldCase =>
   field === SortFieldCase.closedAt ? SortFieldCase.closedAt : SortFieldCase.createdAt;
 
 export interface AllCasesListProps {
+  /**
+   * @deprecated Use the attachments prop instead
+   */
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
-  onRowClick?: (theCase?: Case | SubCase) => void;
+  onRowClick?: (theCase?: Case) => void;
   updateCase?: (newCase: Case) => void;
   doRefresh?: () => void;
+  attachments?: CaseAttachments;
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({
     alertData,
+    attachments,
     hiddenStatuses = [],
     isSelectorView = false,
     onRowClick,
@@ -92,7 +99,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
-    const { connectors } = useConnectors({ toastPermissionsErrors: false });
+    const { connectors } = useConnectors();
 
     const sorting = useMemo(
       () => ({
@@ -102,7 +109,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     );
 
     const filterRefetch = useRef<() => void>();
-    const tableRef = useRef<EuiBasicTable>();
+    const tableRef = useRef<EuiBasicTable | null>(null);
     const [isLoading, handleIsLoading] = useState<boolean>(false);
 
     const setFilterRefetch = useCallback(
@@ -174,6 +181,19 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const showActions = userCanCrud && !isSelectorView;
 
+    // TODO remove the deprecated alertData field when cleaning up
+    // code https://github.com/elastic/kibana/issues/123183
+    // This code is to support the deprecated alertData prop
+    const toAttach = useMemo((): CaseAttachments | undefined => {
+      if (attachments !== undefined || alertData !== undefined) {
+        const _toAttach = attachments ?? [];
+        if (alertData !== undefined) {
+          _toAttach.push({ ...alertData, type: CommentType.alert });
+        }
+        return _toAttach;
+      }
+    }, [alertData, attachments]);
+
     const columns = useCasesColumns({
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
@@ -184,21 +204,11 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       userCanCrud,
       connectors,
       onRowClick,
-      alertData,
+      attachments: toAttach,
       postComment,
       updateCase,
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
     });
-
-    const itemIdToExpandedRowMap = useMemo(
-      () =>
-        getExpandedRowMap({
-          columns,
-          data: data.cases,
-          onSubCaseClick: onRowClick,
-        }),
-      [data.cases, columns, onRowClick]
-    );
 
     const pagination = useMemo(
       () => ({
@@ -213,7 +223,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({
         onSelectionChange: setSelectedCases,
-        selectableMessage: (selectable) => (!selectable ? SELECTABLE_MESSAGE_COLLECTIONS : ''),
         initialSelected: selectedCases,
       }),
       [selectedCases, setSelectedCases]
@@ -224,7 +233,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const tableRowProps = useCallback(
       (theCase: Case) => ({
         'data-test-subj': `cases-table-row-${theCase.id}`,
-        className: classnames({ isDisabled: theCase.type === CaseType.collection }),
       }),
       []
     );
@@ -263,7 +271,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           isCommentUpdating={isCommentUpdating}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           onChange={tableOnChangeCallback}
           pagination={pagination}
           refreshCases={refreshCases}

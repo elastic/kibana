@@ -9,15 +9,15 @@
     "public/**/*.tsx",
     "server/**/*.ts",
     "common/**/*.ts",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
   "exclude": [],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
     { "path": "../../../examples/developer_examples/tsconfig.json" },
-    { "path": "../../plugins/reporting/tsconfig.json" },
+    { "path": "../../plugins/reporting/tsconfig.json" }
   ]
 }
-

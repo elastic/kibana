@@ -24,7 +24,7 @@ export async function getFailedTransactionRatePeriods({
   environment: string;
   kuery: string;
   serviceName: string;
-  transactionType?: string;
+  transactionType: string;
   transactionName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
@@ -37,7 +37,7 @@ export async function getFailedTransactionRatePeriods({
     environment,
     kuery,
     serviceName,
-    transactionType,
+    transactionTypes: [transactionType],
     transactionName,
     setup,
     searchAggregatedTransactions,

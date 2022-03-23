@@ -87,8 +87,7 @@ describe('Index Fields', () => {
             esTypes: [],
           },
           {
-            description:
-              'Deprecated - use agent.name or agent.id to identify an agent. Hostname of the agent. ',
+            description: 'Deprecated - use agent.name or agent.id to identify an agent. ',
             name: 'agent.hostname',
             searchable: true,
             type: 'string',
@@ -126,7 +125,7 @@ describe('Index Fields', () => {
           },
           {
             description:
-              'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+              'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
             example: 'filebeat',
             name: 'agent.type',
             type: 'string',
@@ -252,7 +251,7 @@ describe('Index Fields', () => {
         {
           category: 'agent',
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -337,8 +336,7 @@ describe('Index Fields', () => {
         },
         {
           category: 'agent',
-          description:
-            'Deprecated - use agent.name or agent.id to identify an agent. Hostname of the agent. ',
+          description: 'Deprecated - use agent.name or agent.id to identify an agent. ',
           name: 'agent.hostname',
           type: 'string',
           searchable: true,
@@ -426,7 +424,7 @@ describe('Index Fields', () => {
         {
           category: 'agent',
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -504,7 +502,7 @@ describe('Index Fields', () => {
         },
         {
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -641,7 +639,7 @@ describe('Index Fields', () => {
         },
         {
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -714,7 +712,7 @@ describe('Index Fields', () => {
         },
         {
           description:
-            'Type of the agent. The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+            'Type of the agent. The agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
           example: 'filebeat',
           name: 'agent.type',
           type: 'string',
@@ -832,12 +830,8 @@ describe('Fields Provider', () => {
     beforeAll(() => {
       getFieldsForWildcardMock.mockResolvedValue([]);
 
-      esClientSearchMock.mockResolvedValue({
-        body: { hits: { total: { value: 123 } } },
-      });
-      esClientFieldCapsMock.mockResolvedValue({
-        body: { indices: ['value'] },
-      });
+      esClientSearchMock.mockResolvedValue({ hits: { total: { value: 123 } } });
+      esClientFieldCapsMock.mockResolvedValue({ indices: ['value'] });
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 
@@ -927,9 +921,7 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValue({
-        body: { hits: { total: { value: 1 } } },
-      });
+      esClientSearchMock.mockResolvedValue({ hits: { total: { value: 1 } } });
       const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({

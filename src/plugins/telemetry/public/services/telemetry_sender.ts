@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Subscription } from 'rxjs';
+import { fromEvent, interval, merge } from 'rxjs';
+import { exhaustMap } from 'rxjs/operators';
 import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
 import { Storage } from '../../../kibana_utils/public';
@@ -13,18 +16,19 @@ import type { EncryptedTelemetryPayload } from '../../common/types';
 import { isReportIntervalExpired } from '../../common/is_report_interval_expired';
 
 export class TelemetrySender {
-  private readonly telemetryService: TelemetryService;
   private lastReported?: number;
   private readonly storage: Storage;
-  private intervalId: number = 0; // setInterval returns a positive integer, 0 means no interval is set
+  private sendIfDue$?: Subscription;
   private retryCount: number = 0;
 
   static getRetryDelay(retryCount: number) {
     return 60 * (1000 * Math.min(Math.pow(2, retryCount), 64)); // 120s, 240s, 480s, 960s, 1920s, 3840s, 3840s, 3840s
   }
 
-  constructor(telemetryService: TelemetryService) {
-    this.telemetryService = telemetryService;
+  constructor(
+    private readonly telemetryService: TelemetryService,
+    private readonly refreshConfig: () => Promise<void>
+  ) {
     this.storage = new Storage(window.localStorage);
 
     const attributes = this.storage.get(LOCALSTORAGE_KEY);
@@ -62,12 +66,38 @@ export class TelemetrySender {
   };
 
   /**
-   * Using configuration and the lastReported dates, it decides whether a new telemetry report should be sent.
+   * Returns `true` when the page is visible and active in the browser.
+   */
+  private isActiveWindow = () => {
+    // Using `document.hasFocus()` instead of `document.visibilityState` because the latter may return "visible"
+    // if 2 windows are open side-by-side because they are "technically" visible.
+    return document.hasFocus();
+  };
+
+  /**
+   * Using configuration, page visibility state and the lastReported dates,
+   * it decides whether a new telemetry report should be sent.
    * @returns `true` if a new report should be sent. `false` otherwise.
    */
   private shouldSendReport = async (): Promise<boolean> => {
-    if (this.telemetryService.canSendTelemetry()) {
-      return await this.isReportDue();
+    if (this.isActiveWindow() && this.telemetryService.canSendTelemetry()) {
+      if (await this.isReportDue()) {
+        /*
+         * If we think it should send telemetry (local optIn config is `true` and the last report is expired),
+         * let's refresh the config and make sure optIn is still true.
+         *
+         * This change is to ensure that if the user opts-out of telemetry, background tabs realize about it without needing to refresh the page or navigate to another app.
+         *
+         * We are checking twice to avoid making too many requests to fetch the SO:
+         * `sendIfDue` is triggered every minute or when the page regains focus.
+         * If the previously fetched config already dismisses the telemetry, there's no need to fetch the telemetry config.
+         *
+         * The edge case is: if previously opted-out and the user opts-in, background tabs won't realize about that until they navigate to another app.
+         * We are fine with that compromise for now.
+         */
+        await this.refreshConfig();
+        return this.telemetryService.canSendTelemetry();
+      }
     }
 
     return false;
@@ -122,8 +152,20 @@ export class TelemetrySender {
   };
 
   public startChecking = () => {
-    if (this.intervalId === 0) {
-      this.intervalId = window.setInterval(this.sendIfDue, 60000);
+    if (!this.sendIfDue$) {
+      // Trigger sendIfDue...
+      this.sendIfDue$ = merge(
+        // ... periodically
+        interval(60000),
+        // ... when it regains `focus`
+        fromEvent(window, 'focus') // Using `window` instead of `document` because Chrome only emits on the first one.
+      )
+        .pipe(exhaustMap(this.sendIfDue))
+        .subscribe();
     }
+  };
+
+  public stop = () => {
+    this.sendIfDue$?.unsubscribe();
   };
 }

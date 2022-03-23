@@ -86,7 +86,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
@@ -139,7 +139,7 @@ export const updatePackagePolicyHandler: RequestHandler<
     throw Boom.notFound('Package policy not found');
   }
 
-  const body = { ...request.body };
+  const { force, ...body } = request.body;
   // removed fields not recognized by schema
   const packagePolicyInputs = packagePolicy.inputs.map((input) => {
     const newInput = {
@@ -180,7 +180,7 @@ export const updatePackagePolicyHandler: RequestHandler<
       esClient,
       request.params.packagePolicyId,
       newData,
-      { user },
+      { user, force },
       packagePolicy.package?.version
     );
     return response.ok({

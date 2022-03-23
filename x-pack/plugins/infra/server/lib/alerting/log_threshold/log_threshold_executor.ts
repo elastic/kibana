@@ -16,7 +16,7 @@ import { ElasticsearchClient } from 'kibana/server';
 import {
   ActionGroup,
   ActionGroupIdsOf,
-  AlertInstance as Alert,
+  Alert,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   AlertTypeState as RuleTypeState,
@@ -250,20 +250,15 @@ export const processUngroupedResults = (
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
-
+  const reasonMessage = getReasonMessageForUngroupedCountAlert(
+    documentCount,
+    count.value,
+    count.comparator,
+    timeSize,
+    timeUnit
+  );
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
-    const alert = alertFactory(
-      UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedCountAlert(
-        documentCount,
-        count.value,
-        count.comparator,
-        timeSize,
-        timeUnit
-      ),
-      documentCount,
-      count.value
-    );
+    const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value);
     alertUpdater(alert, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -272,6 +267,7 @@ export const processUngroupedResults = (
           conditions: createConditionsMessageForCriteria(criteria),
           group: null,
           isRatio: false,
+          reason: reasonMessage,
         },
       },
     ]);
@@ -292,18 +288,14 @@ export const processUngroupedRatioResults = (
   const ratio = getRatio(numeratorCount, denominatorCount);
 
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
-    const alert = alertFactory(
-      UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedRatioAlert(
-        ratio,
-        count.value,
-        count.comparator,
-        timeSize,
-        timeUnit
-      ),
+    const reasonMessage = getReasonMessageForUngroupedRatioAlert(
       ratio,
-      count.value
+      count.value,
+      count.comparator,
+      timeSize,
+      timeUnit
     );
+    const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value);
     alertUpdater(alert, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -313,6 +305,7 @@ export const processUngroupedRatioResults = (
           denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
           group: null,
           isRatio: true,
+          reason: reasonMessage,
         },
       },
     ]);
@@ -340,22 +333,22 @@ const getReducedGroupByResults = (
     key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
   ) => Object.values(key).join(', ');
 
+  const reducedGroupByResults: ReducedGroupByResults = [];
   if (isOptimizedGroupedSearchQueryResponse(results)) {
-    return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
+    for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const groupResult = { name: groupName, documentCount: groupBucket.doc_count };
-      return [...acc, groupResult];
-    }, []);
+      reducedGroupByResults.push({ name: groupName, documentCount: groupBucket.doc_count });
+    }
   } else {
-    return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
+    for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const groupResult = {
+      reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
-      };
-      return [...acc, groupResult];
-    }, []);
+      });
+    }
   }
+  return reducedGroupByResults;
 };
 
 export const processGroupByResults = (
@@ -372,19 +365,15 @@ export const processGroupByResults = (
     const documentCount = group.documentCount;
 
     if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
-      const alert = alertFactory(
-        group.name,
-        getReasonMessageForGroupedCountAlert(
-          documentCount,
-          count.value,
-          count.comparator,
-          group.name,
-          timeSize,
-          timeUnit
-        ),
+      const reasonMessage = getReasonMessageForGroupedCountAlert(
         documentCount,
-        count.value
+        count.value,
+        count.comparator,
+        group.name,
+        timeSize,
+        timeUnit
       );
+      const alert = alertFactory(group.name, reasonMessage, documentCount, count.value);
       alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -393,6 +382,7 @@ export const processGroupByResults = (
             conditions: createConditionsMessageForCriteria(criteria),
             group: group.name,
             isRatio: false,
+            reason: reasonMessage,
           },
         },
       ]);
@@ -425,19 +415,15 @@ export const processGroupByRatioResults = (
       ratio !== undefined &&
       checkValueAgainstComparatorMap[count.comparator](ratio, count.value)
     ) {
-      const alert = alertFactory(
-        numeratorGroup.name,
-        getReasonMessageForGroupedRatioAlert(
-          ratio,
-          count.value,
-          count.comparator,
-          numeratorGroup.name,
-          timeSize,
-          timeUnit
-        ),
+      const reasonMessage = getReasonMessageForGroupedRatioAlert(
         ratio,
-        count.value
+        count.value,
+        count.comparator,
+        numeratorGroup.name,
+        timeSize,
+        timeUnit
       );
+      const alert = alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value);
       alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -447,6 +433,7 @@ export const processGroupByRatioResults = (
             denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
             isRatio: true,
+            reason: reasonMessage,
           },
         },
       ]);
@@ -772,7 +759,7 @@ const getQueryMappingForComparator = (comparator: Comparator) => {
 };
 
 const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
-  return decodeOrThrow(UngroupedSearchQueryResponseRT)((await esClient.search(query)).body);
+  return decodeOrThrow(UngroupedSearchQueryResponseRT)(await esClient.search(query));
 };
 
 const getGroupedResults = async (query: object, esClient: ElasticsearchClient) => {
@@ -783,7 +770,7 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
     const queryWithAfterKey: any = { ...query };
     queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
     const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
-      (await esClient.search(queryWithAfterKey)).body
+      await esClient.search(queryWithAfterKey)
     );
     compositeGroupBuckets = [
       ...compositeGroupBuckets,

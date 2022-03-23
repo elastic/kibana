@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -15,6 +16,7 @@ import {
   BasicOptions,
   SwitchOption,
   LongLegendOptions,
+  LegendSizeSettings,
 } from '../../../../../../../vis_default_editor/public';
 import { BUCKET_TYPES } from '../../../../../../../data/public';
 
@@ -39,6 +41,8 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
     [stateParams.seriesParams, aggs.aggs]
   );
 
+  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
+
   return (
     <>
       <EuiPanel paddingSize="s">
@@ -58,6 +62,14 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
           truncateLegend={stateParams.truncateLegend ?? true}
           maxLegendLines={stateParams.maxLegendLines ?? 1}
           setValue={setValue}
+        />
+        <LegendSizeSettings
+          legendSize={stateParams.legendSize}
+          onLegendSizeChange={handleLegendSizeChange}
+          isVerticalLegend={
+            stateParams.legendPosition === Position.Left ||
+            stateParams.legendPosition === Position.Right
+          }
         />
 
         {vis.data.aggs!.aggs.some(

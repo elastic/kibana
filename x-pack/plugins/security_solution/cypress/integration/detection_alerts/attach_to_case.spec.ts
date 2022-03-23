@@ -8,19 +8,15 @@
 import { getNewRule } from '../../objects/rule';
 import { ROLES } from '../../../common/test';
 
-import {
-  expandFirstAlertActions,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { expandFirstAlertActions } from '../../tasks/alerts';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, loginAndWaitForPage, waitForPageWithoutDateRange } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { ATTACH_ALERT_TO_CASE_BUTTON } from '../../screens/alerts';
+import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../screens/alerts';
 
 const loadDetectionsPage = (role: ROLES) => {
   waitForPageWithoutDateRange(ALERTS_URL, role);
@@ -32,9 +28,7 @@ describe('Alerts timeline', () => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL, ROLES.platform_engineer);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(getNewRule());
+    createCustomRuleEnabled(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);
 
@@ -48,8 +42,8 @@ describe('Alerts timeline', () => {
     });
 
     it('should not allow user with read only privileges to attach alerts to cases', () => {
-      expandFirstAlertActions();
-      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).should('not.exist');
+      // Disabled actions for read only users are hidden, so actions button should not show
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
     });
   });
 

@@ -25,10 +25,27 @@ export { runTests, startServers } from './functional_tests/tasks';
 // @internal
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
-export type { CreateTestEsClusterOptions, EsTestCluster, ICluster } from './es';
-export { esTestConfig, createTestEsCluster, convertToKibanaClient } from './es';
+export type {
+  CreateTestEsClusterOptions,
+  EsTestCluster,
+  ICluster,
+  EsClientForTestingOptions,
+} from './es';
+export {
+  esTestConfig,
+  createTestEsCluster,
+  createEsClientForTesting,
+  createEsClientForFtrConfig,
+  createRemoteEsClientForFtrConfig,
+} from './es';
 
-export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
+export {
+  kbnTestConfig,
+  kibanaServerTestUser,
+  kibanaTestUser,
+  adminTestUser,
+  systemIndicesSuperuser,
+} from './kbn';
 
 export { readConfigFile } from './functional_test_runner/lib/config/read_config_file';
 
@@ -43,7 +60,7 @@ export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
 export * from './functional_test_runner';
 
-export { getUrl } from './jest/utils/get_url';
+export { getUrl } from './jest/get_url';
 
 export { runCheckJestConfigsCli } from './jest/run_check_jest_configs_cli';
 

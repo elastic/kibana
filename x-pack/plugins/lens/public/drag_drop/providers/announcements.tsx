@@ -140,6 +140,58 @@ const reorderAnnouncement = {
     }),
 };
 
+const combineAnnouncement = {
+  selectedTarget: (
+    { label, groupLabel, position }: HumanData,
+    {
+      label: dropLabel,
+      groupLabel: dropGroupLabel,
+      position: dropPosition,
+      canSwap,
+      canDuplicate,
+      canCombine,
+    }: HumanData,
+    announceModifierKeys?: boolean
+  ) => {
+    if (announceModifierKeys && (canSwap || canDuplicate || canCombine)) {
+      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.combineMain', {
+        defaultMessage: `You're dragging {label} from {groupLabel} at position {position} over {dropLabel} from {dropGroupLabel} group at position {dropPosition}. Press space or enter to combine {dropLabel} with {label}.{duplicateCopy}{swapCopy}{combineCopy}`,
+        values: {
+          label,
+          groupLabel,
+          position,
+          dropLabel,
+          dropGroupLabel,
+          dropPosition,
+          duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
+          swapCopy: canSwap ? SWAP_SHORT : '',
+          combineCopy: canCombine ? COMBINE_SHORT : '',
+        },
+      });
+    }
+
+    return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.combine', {
+      defaultMessage: `Combine {dropLabel} in {dropGroupLabel} group at position {dropPosition} with {label}. Press space or enter to combine.`,
+      values: {
+        label,
+        dropLabel,
+        dropGroupLabel,
+        dropPosition,
+      },
+    });
+  },
+  dropped: ({ label }: HumanData, { label: dropLabel, groupLabel, position }: HumanData) =>
+    i18n.translate('xpack.lens.dragDrop.announce.duplicated.combine', {
+      defaultMessage: 'Combine {dropLabel} with {label} in {groupLabel} at position {position}',
+      values: {
+        label,
+        dropLabel,
+        groupLabel,
+        position,
+      },
+    }),
+};
+
 const DUPLICATE_SHORT = i18n.translate('xpack.lens.dragDrop.announce.duplicate.short', {
   defaultMessage: ' Hold alt or option to duplicate.',
 });
@@ -148,11 +200,16 @@ const SWAP_SHORT = i18n.translate('xpack.lens.dragDrop.announce.swap.short', {
   defaultMessage: ' Hold shift to swap.',
 });
 
+const COMBINE_SHORT = i18n.translate('xpack.lens.dragDrop.announce.combine.short', {
+  defaultMessage: ' Hold control to combine',
+});
+
 export const announcements: CustomAnnouncementsType = {
   selectedTarget: {
     reorder: reorderAnnouncement.selectedTarget,
     duplicate_compatible: duplicateAnnouncement.selectedTarget,
     field_replace: replaceAnnouncement.selectedTarget,
+    field_combine: combineAnnouncement.selectedTarget,
     replace_compatible: replaceAnnouncement.selectedTarget,
     replace_incompatible: (
       { label, groupLabel, position }: HumanData,
@@ -337,11 +394,45 @@ export const announcements: CustomAnnouncementsType = {
           nextLabel,
         },
       }),
+    combine_compatible: (
+      { label, groupLabel, position }: HumanData,
+      { label: dropLabel, groupLabel: dropGroupLabel, position: dropPosition, nextLabel }: HumanData
+    ) =>
+      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.combineCompatible', {
+        defaultMessage:
+          'Combine {label} in {groupLabel} group at position {position} with {dropLabel} in {dropGroupLabel} group at position {dropPosition}. Hold Control and press space or enter to combine',
+        values: {
+          label,
+          groupLabel,
+          position,
+          dropLabel,
+          dropGroupLabel,
+          dropPosition,
+        },
+      }),
+    combine_incompatible: (
+      { label, groupLabel, position }: HumanData,
+      { label: dropLabel, groupLabel: dropGroupLabel, position: dropPosition, nextLabel }: HumanData
+    ) =>
+      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.combineIncompatible', {
+        defaultMessage:
+          'Convert {label} to {nextLabel} in {groupLabel} group at position {position} and combine with {dropLabel} in {dropGroupLabel} group at position {dropPosition}. Hold Control and press space or enter to combine',
+        values: {
+          label,
+          groupLabel,
+          position,
+          dropLabel,
+          dropGroupLabel,
+          dropPosition,
+          nextLabel,
+        },
+      }),
   },
   dropped: {
     reorder: reorderAnnouncement.dropped,
     duplicate_compatible: duplicateAnnouncement.dropped,
     field_replace: replaceAnnouncement.dropped,
+    field_combine: combineAnnouncement.dropped,
     replace_compatible: replaceAnnouncement.dropped,
     replace_incompatible: (
       { label }: HumanData,
@@ -447,6 +538,39 @@ export const announcements: CustomAnnouncementsType = {
       i18n.translate('xpack.lens.dragDrop.announce.dropped.swapIncompatible', {
         defaultMessage:
           'Converted {label} to {nextLabel} in {groupLabel} group at position {position} and swapped with {dropLabel} in {dropGroupLabel} group at position {dropPosition}',
+        values: {
+          label,
+          groupLabel,
+          position,
+          dropGroupLabel,
+          dropLabel,
+          dropPosition,
+          nextLabel,
+        },
+      }),
+    combine_compatible: (
+      { label, groupLabel, position }: HumanData,
+      { label: dropLabel, groupLabel: dropGroupLabel, position: dropPosition }: HumanData
+    ) =>
+      i18n.translate('xpack.lens.dragDrop.announce.dropped.combineCompatible', {
+        defaultMessage:
+          'Combined {label} to {dropGroupLabel} at position {dropPosition} and {dropLabel} to {groupLabel} group at position {position}',
+        values: {
+          label,
+          groupLabel,
+          position,
+          dropLabel,
+          dropGroupLabel,
+          dropPosition,
+        },
+      }),
+    combine_incompatible: (
+      { label, groupLabel, position }: HumanData,
+      { label: dropLabel, groupLabel: dropGroupLabel, position: dropPosition, nextLabel }: HumanData
+    ) =>
+      i18n.translate('xpack.lens.dragDrop.announce.dropped.combineIncompatible', {
+        defaultMessage:
+          'Converted {label} to {nextLabel} in {groupLabel} group at position {position} and combined with {dropLabel} in {dropGroupLabel} group at position {dropPosition}',
         values: {
           label,
           groupLabel,

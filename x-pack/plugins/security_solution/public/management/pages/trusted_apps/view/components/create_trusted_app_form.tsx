@@ -18,19 +18,24 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
+  hasSimpleExecutableName,
+  isPathValid,
   ConditionEntryField,
+  OperatingSystem,
+} from '@kbn/securitysolution-utils';
+import { EuiFormProps } from '@elastic/eui/src/components/form/form';
+
+import {
+  TrustedAppConditionEntry,
   EffectScope,
   MacosLinuxConditionEntry,
   MaybeImmutable,
   NewTrustedApp,
-  OperatingSystem,
 } from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
-  isPathValid,
-  hasSimpleExecutableName,
+  getDuplicateFields,
 } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
 import {
@@ -40,7 +45,7 @@ import {
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
 import { defaultConditionEntry } from '../../store/builders';
-import { OS_TITLES } from '../translations';
+import { CONDITION_FIELD_TITLE, OS_TITLES } from '../translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
 import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
@@ -135,6 +140,21 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
       })
     );
   } else {
+    const duplicated = getDuplicateFields(values.entries as TrustedAppConditionEntry[]);
+    if (duplicated.length) {
+      isValid = false;
+      duplicated.forEach((field) => {
+        addResultToValidation(
+          validation,
+          'entries',
+          'errors',
+          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldDuplicatedMsg', {
+            defaultMessage: '{field} cannot be added more than once',
+            values: { field: CONDITION_FIELD_TITLE[field] },
+          })
+        );
+      });
+    }
     values.entries.forEach((entry, index) => {
       const isValidPathEntry = isPathValid({
         os: values.os,

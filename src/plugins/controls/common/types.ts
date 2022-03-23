@@ -17,6 +17,7 @@ export interface ParentIgnoreSettings {
   ignoreFilters?: boolean;
   ignoreQuery?: boolean;
   ignoreTimerange?: boolean;
+  ignoreValidations?: boolean;
 }
 
 export type ControlInput = EmbeddableInput & {

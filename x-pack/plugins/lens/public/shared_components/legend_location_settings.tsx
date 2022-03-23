@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonGroup, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
-import { useDebouncedValue } from './debounced_value';
 import { TooltipWrapper } from './tooltip_wrapper';
 
 export interface LegendLocationSettingsProps {
@@ -42,20 +41,10 @@ export interface LegendLocationSettingsProps {
    */
   onAlignmentChange?: (id: string) => void;
   /**
-   * Sets the number of columns for legend inside chart
-   */
-  floatingColumns?: number;
-  /**
-   * Callback on horizontal alignment option change
-   */
-  onFloatingColumnsChange?: (value: number) => void;
-  /**
    * Flag to disable the location settings
    */
   isDisabled?: boolean;
 }
-
-const DEFAULT_FLOATING_COLUMNS = 1;
 
 const toggleButtonsIcons = [
   {
@@ -149,31 +138,6 @@ const locationAlignmentButtonsIcons: Array<{
   },
 ];
 
-const FloatingColumnsInput = ({
-  value,
-  setValue,
-  isDisabled,
-}: {
-  value: number;
-  setValue: (value: number) => void;
-  isDisabled: boolean;
-}) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
-  return (
-    <EuiFieldNumber
-      data-test-subj="lens-legend-location-columns-input"
-      value={inputValue}
-      min={1}
-      max={5}
-      compressed
-      disabled={isDisabled}
-      onChange={(e) => {
-        handleInputChange(Number(e.target.value));
-      }}
-    />
-  );
-};
-
 export const LegendLocationSettings: React.FunctionComponent<LegendLocationSettingsProps> = ({
   location,
   onLocationChange = () => {},
@@ -182,8 +146,6 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
   verticalAlignment,
   horizontalAlignment,
   onAlignmentChange = () => {},
-  floatingColumns,
-  onFloatingColumnsChange = () => {},
   isDisabled = false,
 }) => {
   const alignment = `${verticalAlignment || VerticalAlignment.Top}_${
@@ -293,37 +255,6 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
           )}
         </>
       </EuiFormRow>
-      {location && (
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.shared.legendInsideColumnsLabel', {
-            defaultMessage: 'Number of columns',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <TooltipWrapper
-            tooltipContent={
-              isDisabled
-                ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                    defaultMessage: 'Requires legend to be shown',
-                  })
-                : i18n.translate('xpack.lens.shared.legendInsideTooltip', {
-                    defaultMessage: 'Requires legend to be located inside visualization',
-                  })
-            }
-            condition={isDisabled || location === 'outside'}
-            position="top"
-            delay="regular"
-            display="block"
-          >
-            <FloatingColumnsInput
-              value={floatingColumns ?? DEFAULT_FLOATING_COLUMNS}
-              setValue={onFloatingColumnsChange}
-              isDisabled={isDisabled || location === 'outside'}
-            />
-          </TooltipWrapper>
-        </EuiFormRow>
-      )}
     </>
   );
 };

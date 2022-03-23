@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [typedoc_interfaces](../modules/typedoc_interfaces.md) / ICaseResponse
+[Cases Client API Interface](../README.md) / [typedoc\_interfaces](../modules/typedoc_interfaces.md) / ICaseResponse
 
 # Interface: ICaseResponse
 
@@ -6,223 +6,234 @@
 
 ## Hierarchy
 
-- *CaseResponse*
+- [`CaseResponse`](../modules/typedoc_interfaces._internal_namespace.md#caseresponse)
 
-  ↳ **ICaseResponse**
+  ↳ **`ICaseResponse`**
 
 ## Table of contents
 
 ### Properties
 
-- [closed\_at](typedoc_interfaces.icaseresponse.md#closed_at)
-- [closed\_by](typedoc_interfaces.icaseresponse.md#closed_by)
-- [comments](typedoc_interfaces.icaseresponse.md#comments)
-- [connector](typedoc_interfaces.icaseresponse.md#connector)
-- [created\_at](typedoc_interfaces.icaseresponse.md#created_at)
-- [created\_by](typedoc_interfaces.icaseresponse.md#created_by)
-- [description](typedoc_interfaces.icaseresponse.md#description)
-- [external\_service](typedoc_interfaces.icaseresponse.md#external_service)
-- [id](typedoc_interfaces.icaseresponse.md#id)
-- [owner](typedoc_interfaces.icaseresponse.md#owner)
-- [settings](typedoc_interfaces.icaseresponse.md#settings)
-- [status](typedoc_interfaces.icaseresponse.md#status)
-- [subCaseIds](typedoc_interfaces.icaseresponse.md#subcaseids)
-- [subCases](typedoc_interfaces.icaseresponse.md#subcases)
-- [tags](typedoc_interfaces.icaseresponse.md#tags)
-- [title](typedoc_interfaces.icaseresponse.md#title)
-- [totalAlerts](typedoc_interfaces.icaseresponse.md#totalalerts)
-- [totalComment](typedoc_interfaces.icaseresponse.md#totalcomment)
-- [type](typedoc_interfaces.icaseresponse.md#type)
-- [updated\_at](typedoc_interfaces.icaseresponse.md#updated_at)
-- [updated\_by](typedoc_interfaces.icaseresponse.md#updated_by)
-- [version](typedoc_interfaces.icaseresponse.md#version)
+- [closed\_at](typedoc_interfaces.ICaseResponse.md#closed_at)
+- [closed\_by](typedoc_interfaces.ICaseResponse.md#closed_by)
+- [comments](typedoc_interfaces.ICaseResponse.md#comments)
+- [connector](typedoc_interfaces.ICaseResponse.md#connector)
+- [created\_at](typedoc_interfaces.ICaseResponse.md#created_at)
+- [created\_by](typedoc_interfaces.ICaseResponse.md#created_by)
+- [description](typedoc_interfaces.ICaseResponse.md#description)
+- [external\_service](typedoc_interfaces.ICaseResponse.md#external_service)
+- [id](typedoc_interfaces.ICaseResponse.md#id)
+- [owner](typedoc_interfaces.ICaseResponse.md#owner)
+- [settings](typedoc_interfaces.ICaseResponse.md#settings)
+- [status](typedoc_interfaces.ICaseResponse.md#status)
+- [tags](typedoc_interfaces.ICaseResponse.md#tags)
+- [title](typedoc_interfaces.ICaseResponse.md#title)
+- [totalAlerts](typedoc_interfaces.ICaseResponse.md#totalalerts)
+- [totalComment](typedoc_interfaces.ICaseResponse.md#totalcomment)
+- [updated\_at](typedoc_interfaces.ICaseResponse.md#updated_at)
+- [updated\_by](typedoc_interfaces.ICaseResponse.md#updated_by)
+- [version](typedoc_interfaces.ICaseResponse.md#version)
 
 ## Properties
 
 ### closed\_at
 
-• **closed\_at**: ``null`` \| *string*
+• **closed\_at**: ``null`` \| `string`
 
-Inherited from: CaseResponse.closed\_at
+#### Inherited from
+
+CaseResponse.closed\_at
 
 ___
 
 ### closed\_by
 
-• **closed\_by**: ``null`` \| { `email`: *undefined* \| ``null`` \| *string* ; `full_name`: *undefined* \| ``null`` \| *string* ; `username`: *undefined* \| ``null`` \| *string*  }
+• **closed\_by**: ``null`` \| { `email`: `undefined` \| ``null`` \| `string` ; `full_name`: `undefined` \| ``null`` \| `string` ; `username`: `undefined` \| ``null`` \| `string`  }
 
-Inherited from: CaseResponse.closed\_by
+#### Inherited from
+
+CaseResponse.closed\_by
 
 ___
 
 ### comments
 
-• **comments**: *undefined* \| { `comment`: *string* ; `owner`: *string* ; `type`: user  } & { `associationType`: AssociationType ; `created_at`: *string* ; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `pushed_at`: ``null`` \| *string* ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `version`: *string*  } & { `alertId`: *string* \| *string*[] ; `index`: *string* \| *string*[] ; `owner`: *string* ; `rule`: { id: string \| null; name: string \| null; } ; `type`: alert \| generatedAlert  } & { `associationType`: AssociationType ; `created_at`: *string* ; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `pushed_at`: ``null`` \| *string* ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `version`: *string*  } & { `actions`: { targets: { hostname: string; endpointId: string; }[]; type: string; } ; `comment`: *string* ; `owner`: *string* ; `type`: actions  } & { `associationType`: AssociationType ; `created_at`: *string* ; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `pushed_at`: ``null`` \| *string* ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `version`: *string*  }[]
+• **comments**: `undefined` \| { `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`user`](../modules/client._internal_namespace.md#user)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `alertId`: `string` \| `string`[] ; `index`: `string` \| `string`[] ; `owner`: `string` = rt.string; `rule`: { id: string \| null; name: string \| null; } ; `type`: [`alert`](../modules/client._internal_namespace.md#alert)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `actions`: { targets: { hostname: string; endpointId: string; }[]; type: string; } ; `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`actions`](../modules/client._internal_namespace.md#actions)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string }[]
 
-Inherited from: CaseResponse.comments
+#### Inherited from
+
+CaseResponse.comments
 
 ___
 
 ### connector
 
-• **connector**: { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { issueType: string \| null; priority: string \| null; parent: string \| null; } ; `type`: jira  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` ; `type`: none  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { incidentTypes: string[] \| null; severityCode: string \| null; } ; `type`: resilient  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { impact: string \| null; severity: string \| null; urgency: string \| null; category: string \| null; subcategory: string \| null; } ; `type`: serviceNowITSM  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { category: string \| null; destIp: boolean \| null; malwareHash: boolean \| null; malwareUrl: boolean \| null; priority: string \| null; sourceIp: boolean \| null; subcategory: string \| null; } ; `type`: serviceNowSIR  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { caseId: string \| null; } ; `type`: swimlane  }
+• **connector**: { `id`: `string` = rt.string } & { `fields`: ``null`` \| { issueType: string \| null; priority: string \| null; parent: string \| null; } ; `type`: [`jira`](../modules/client._internal_namespace.md#jira)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` = rt.null; `type`: [`none`](../modules/client._internal_namespace.md#none)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` \| { incidentTypes: string[] \| null; severityCode: string \| null; } ; `type`: [`resilient`](../modules/client._internal_namespace.md#resilient)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` \| { impact: string \| null; severity: string \| null; urgency: string \| null; category: string \| null; subcategory: string \| null; } ; `type`: [`serviceNowITSM`](../modules/client._internal_namespace.md#servicenowitsm)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` \| { category: string \| null; destIp: boolean \| null; malwareHash: boolean \| null; malwareUrl: boolean \| null; priority: string \| null; sourceIp: boolean \| null; subcategory: string \| null; } ; `type`: [`serviceNowSIR`](../modules/client._internal_namespace.md#servicenowsir)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` \| { caseId: string \| null; } ; `type`: [`swimlane`](../modules/client._internal_namespace.md#swimlane)  } & { `name`: `string` = rt.string } = `CaseConnectorRt`
 
-Inherited from: CaseResponse.connector
+#### Inherited from
+
+CaseResponse.connector
 
 ___
 
 ### created\_at
 
-• **created\_at**: *string*
+• **created\_at**: `string` = `rt.string`
 
-Inherited from: CaseResponse.created\_at
+#### Inherited from
+
+CaseResponse.created\_at
 
 ___
 
 ### created\_by
 
-• **created\_by**: *object*
+• **created\_by**: `Object` = `UserRT`
 
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `email` | *undefined* \| ``null`` \| *string* |
-| `full_name` | *undefined* \| ``null`` \| *string* |
-| `username` | *undefined* \| ``null`` \| *string* |
+| `email` | `undefined` \| ``null`` \| `string` |
+| `full_name` | `undefined` \| ``null`` \| `string` |
+| `username` | `undefined` \| ``null`` \| `string` |
 
-Inherited from: CaseResponse.created\_by
+#### Inherited from
+
+CaseResponse.created\_by
 
 ___
 
 ### description
 
-• **description**: *string*
+• **description**: `string` = `rt.string`
 
-Inherited from: CaseResponse.description
+#### Inherited from
+
+CaseResponse.description
 
 ___
 
 ### external\_service
 
-• **external\_service**: ``null`` \| { `connector_id`: *string* ; `connector_name`: *string* ; `external_id`: *string* ; `external_title`: *string* ; `external_url`: *string*  } & { `pushed_at`: *string* ; `pushed_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  }
+• **external\_service**: ``null`` \| { `connector_id`: `string` = rt.string } & { `connector_name`: `string` = rt.string; `external_id`: `string` = rt.string; `external_title`: `string` = rt.string; `external_url`: `string` = rt.string; `pushed_at`: `string` = rt.string; `pushed_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT } = `CaseFullExternalServiceRt`
 
-Inherited from: CaseResponse.external\_service
+#### Inherited from
+
+CaseResponse.external\_service
 
 ___
 
 ### id
 
-• **id**: *string*
+• **id**: `string` = `rt.string`
 
-Inherited from: CaseResponse.id
+#### Inherited from
+
+CaseResponse.id
 
 ___
 
 ### owner
 
-• **owner**: *string*
+• **owner**: `string` = `rt.string`
 
-Inherited from: CaseResponse.owner
+#### Inherited from
+
+CaseResponse.owner
 
 ___
 
 ### settings
 
-• **settings**: *object*
+• **settings**: `Object` = `SettingsRt`
 
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `syncAlerts` | *boolean* |
+| `syncAlerts` | `boolean` |
 
-Inherited from: CaseResponse.settings
+#### Inherited from
+
+CaseResponse.settings
 
 ___
 
 ### status
 
-• **status**: CaseStatuses
+• **status**: `CaseStatuses` = `CaseStatusRt`
 
-Inherited from: CaseResponse.status
+#### Inherited from
 
-___
-
-### subCaseIds
-
-• **subCaseIds**: *undefined* \| *string*[]
-
-Inherited from: CaseResponse.subCaseIds
-
-___
-
-### subCases
-
-• **subCases**: *undefined* \| { `status`: CaseStatuses  } & { `closed_at`: ``null`` \| *string* ; `closed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `created_at`: *string* ; `created_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `totalAlerts`: *number* ; `totalComment`: *number* ; `version`: *string*  } & { `comments`: *undefined* \| { `comment`: *string* ; `owner`: *string* ; `type`: user  } & { `associationType`: AssociationType ; `created_at`: *string* ; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `pushed_at`: ``null`` \| *string* ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `version`: *string*  } & { `alertId`: *string* \| *string*[] ; `index`: *string* \| *string*[] ; `owner`: *string* ; `rule`: { id: string \| null; name: string \| null; } ; `type`: alert \| generatedAlert  } & { `associationType`: AssociationType ; `created_at`: *string* ; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `pushed_at`: ``null`` \| *string* ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `version`: *string*  } & { `actions`: { targets: { hostname: string; endpointId: string; }[]; type: string; } ; `comment`: *string* ; `owner`: *string* ; `type`: actions  } & { `associationType`: AssociationType ; `created_at`: *string* ; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `pushed_at`: ``null`` \| *string* ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `version`: *string*  }[]  }[]
-
-Inherited from: CaseResponse.subCases
+CaseResponse.status
 
 ___
 
 ### tags
 
-• **tags**: *string*[]
+• **tags**: `string`[]
 
-Inherited from: CaseResponse.tags
+#### Inherited from
+
+CaseResponse.tags
 
 ___
 
 ### title
 
-• **title**: *string*
+• **title**: `string` = `rt.string`
 
-Inherited from: CaseResponse.title
+#### Inherited from
+
+CaseResponse.title
 
 ___
 
 ### totalAlerts
 
-• **totalAlerts**: *number*
+• **totalAlerts**: `number` = `rt.number`
 
-Inherited from: CaseResponse.totalAlerts
+#### Inherited from
+
+CaseResponse.totalAlerts
 
 ___
 
 ### totalComment
 
-• **totalComment**: *number*
+• **totalComment**: `number` = `rt.number`
 
-Inherited from: CaseResponse.totalComment
+#### Inherited from
 
-___
-
-### type
-
-• **type**: CaseType
-
-Inherited from: CaseResponse.type
+CaseResponse.totalComment
 
 ___
 
 ### updated\_at
 
-• **updated\_at**: ``null`` \| *string*
+• **updated\_at**: ``null`` \| `string`
 
-Inherited from: CaseResponse.updated\_at
+#### Inherited from
+
+CaseResponse.updated\_at
 
 ___
 
 ### updated\_by
 
-• **updated\_by**: ``null`` \| { `email`: *undefined* \| ``null`` \| *string* ; `full_name`: *undefined* \| ``null`` \| *string* ; `username`: *undefined* \| ``null`` \| *string*  }
+• **updated\_by**: ``null`` \| { `email`: `undefined` \| ``null`` \| `string` ; `full_name`: `undefined` \| ``null`` \| `string` ; `username`: `undefined` \| ``null`` \| `string`  }
 
-Inherited from: CaseResponse.updated\_by
+#### Inherited from
+
+CaseResponse.updated\_by
 
 ___
 
 ### version
 
-• **version**: *string*
+• **version**: `string` = `rt.string`
 
-Inherited from: CaseResponse.version
+#### Inherited from
+
+CaseResponse.version

@@ -13,18 +13,20 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 
+import { observabilityFeatureId } from '../../../../../common';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
-import { callObservabilityApi } from '../../../../services/call_observability_api';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
 import { LoadingObservability } from '../../../overview/loading_observability';
 import { AlertsTableTGrid } from '../alerts_table_t_grid';
@@ -35,6 +37,7 @@ import {
 } from '../state_container';
 import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 interface RuleStatsState {
   total: number;
@@ -42,6 +45,7 @@ interface RuleStatsState {
   muted: number;
   error: number;
 }
+
 export interface TopAlert {
   fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
@@ -56,7 +60,6 @@ const Divider = euiStyled.div`
 `;
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-const NO_INDEX_NAMES: string[] = [];
 const NO_INDEX_PATTERNS: DataViewBase[] = [];
 const BASE_ALERT_REGEX = new RegExp(`\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*"(.*?|\\*?)"`);
 const ALERT_STATUS_REGEX = new RegExp(
@@ -67,17 +70,20 @@ const ALERT_STATUS_REGEX = new RegExp(
 );
 
 function AlertsPage() {
-  const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, config } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
-  const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
   const {
+    cases,
+    dataViews,
+    docLinks,
     http,
     notifications: { toasts },
-  } = core;
+  } = useKibana<ObservabilityAppServices>().services;
+
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -97,6 +103,7 @@ function AlertsPage() {
       }),
     },
   ]);
+  const indexNames = useAlertIndexNames();
 
   async function loadRuleStats() {
     setRuleStatsLoading(true);
@@ -104,13 +111,12 @@ function AlertsPage() {
       const response = await loadRuleAggregations({
         http,
       });
-      // Note that the API uses the semantics of 'alerts' instead of 'rules'
-      const { alertExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
-      if (alertExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
-        const total = Object.values(alertExecutionStatus).reduce((acc, value) => acc + value, 0);
+      const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
+      if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
+        const total = Object.values(ruleExecutionStatus).reduce((acc, value) => acc + value, 0);
         const { disabled } = ruleEnabledStatus;
         const { muted } = ruleMutedStatus;
-        const { error } = alertExecutionStatus;
+        const { error } = ruleExecutionStatus;
         setRuleStats({
           ...ruleStats,
           total,
@@ -135,27 +141,9 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // In a future milestone we'll have a page dedicated to rule management in
-  // observability. For now link to the settings page.
-  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
-
-  const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
-    return callObservabilityApi({
-      signal,
-      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
-      params: {
-        query: {
-          namespace: 'default',
-          registrationContexts: [
-            'observability.apm',
-            'observability.logs',
-            'observability.metrics',
-            'observability.uptime',
-          ],
-        },
-      },
-    });
-  }, []);
+  const manageRulesHref = config.unsafe.rules.enabled
+    ? http.basePath.prepend('/app/observability/rules')
+    : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
@@ -166,7 +154,7 @@ function AlertsPage() {
       {
         id: 'dynamic-observability-alerts-table-index-pattern',
         title: indexNames.join(','),
-        fields: await plugins.data.indexPatterns.getFieldsForWildcard({
+        fields: await dataViews.getFieldsForWildcard({
           pattern: indexNames.join(','),
           allowNoIndex: true,
         }),
@@ -229,14 +217,17 @@ function AlertsPage() {
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
+  const CasesContext = cases.ui.getCasesContext();
+  const userPermissions = useGetUserCasesPermissions();
+
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
 
   const noDataConfig = getNoDataConfig({
     hasData,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
   return (
@@ -323,13 +314,19 @@ function AlertsPage() {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <AlertsTableTGrid
-            indexNames={indexNames}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            kuery={kuery}
-            setRefetch={setRefetch}
-          />
+          <CasesContext
+            owner={[observabilityFeatureId]}
+            userCanCrud={userPermissions?.crud ?? false}
+            features={{ alerts: { sync: false } }}
+          >
+            <AlertsTableTGrid
+              indexNames={indexNames}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              kuery={kuery}
+              setRefetch={setRefetch}
+            />
+          </CasesContext>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>

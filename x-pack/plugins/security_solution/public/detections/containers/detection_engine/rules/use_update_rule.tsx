@@ -14,6 +14,7 @@ import { transformOutput } from './transforms';
 
 import { updateRule } from './api';
 import * as i18n from './translations';
+import { useInvalidateRules } from './use_find_rules_query';
 
 interface UpdateRuleReturn {
   isLoading: boolean;
@@ -27,6 +28,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
+  const invalidateRules = useInvalidateRules();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -37,6 +39,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
         try {
           setIsLoading(true);
           await updateRule({ rule: transformOutput(rule), signal: abortCtrl.signal });
+          invalidateRules();
           if (isSubscribed) {
             setIsSaved(true);
           }
@@ -56,7 +59,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError]);
+  }, [rule, addError, invalidateRules]);
 
   return [{ isLoading, isSaved }, setRule];
 };

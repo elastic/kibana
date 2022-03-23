@@ -293,6 +293,7 @@ describe('PluginsService', () => {
         );
         expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
       }
+
       async function expectSuccess() {
         await expect(pluginsService.discover({ environment: environmentPreboot })).resolves.toEqual(
           expect.anything()
@@ -1099,7 +1100,9 @@ describe('PluginsService', () => {
             renamed: schema.string(), // Mandatory string to make sure that the field is actually renamed by deprecations
           }),
           deprecations: ({ renameFromRoot }) => [
-            renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed'),
+            renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed', {
+              level: 'critical',
+            }),
           ],
         },
       }),

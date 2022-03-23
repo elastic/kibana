@@ -8,10 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import {
-  CASES_URL,
-  SUB_CASES_PATCH_DEL_URL,
-} from '../../../../../../plugins/cases/common/constants';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   postCaseReq,
   postCommentUserReq,
@@ -20,18 +17,17 @@ import {
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
-  createSubCase,
-  setStatus,
-  CreateSubCaseResp,
-  createCaseAction,
-  deleteCaseAction,
   ensureSavedObjectIsAuthorized,
   findCases,
   createCase,
   updateCase,
   createComment,
 } from '../../../../common/lib/utils';
-import { CaseResponse, CaseStatuses, CaseType } from '../../../../../../plugins/cases/common/api';
+import {
+  CaseResponse,
+  CaseStatuses,
+  CommentType,
+} from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,
@@ -55,6 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
 
   describe('find_cases', () => {
     describe('basic tests', () => {
@@ -201,191 +198,62 @@ export default ({ getService }: FtrProviderContext): void => {
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
       });
+    });
 
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      describe.skip('stats with sub cases', () => {
-        let collection: CreateSubCaseResp;
-        let actionID: string;
-        before(async () => {
-          actionID = await createCaseAction(supertest);
-        });
-        after(async () => {
-          await deleteCaseAction(supertest, actionID);
-        });
-        beforeEach(async () => {
-          // create a collection with a sub case that is marked as open
-          collection = await createSubCase({ supertest, actionID });
+    describe('alerts', () => {
+      const defaultSignalsIndex = '.siem-signals-default-000001';
+      const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
+      const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
-          const [, , { body: toCloseCase }] = await Promise.all([
-            // set the sub case to in-progress
-            setStatus({
-              supertest,
-              cases: [
-                {
-                  id: collection.newSubCaseInfo.subCases![0].id,
-                  version: collection.newSubCaseInfo.subCases![0].version,
-                  status: CaseStatuses['in-progress'],
-                },
-              ],
-              type: 'sub_case',
-            }),
-            // create two cases that are both open
-            supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq),
-            supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq),
-          ]);
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+      });
 
-          // set the third case to closed
-          await setStatus({
+      afterEach(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+        await deleteAllCaseItems(es);
+      });
+
+      it('correctly counts alerts ignoring duplicates', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        /**
+         * Adds three comments of type alerts.
+         * The first two have the same alertId.
+         * The third has different alertId.
+         */
+        for (const alertId of [signalID, signalID, signalID2]) {
+          await createComment({
             supertest,
-            cases: [
-              {
-                id: toCloseCase.id,
-                version: toCloseCase.version,
-                status: CaseStatuses.closed,
-              },
-            ],
-            type: 'case',
-          });
-        });
-        it('correctly counts stats without using a filter', async () => {
-          const cases = await findCases({ supertest });
-
-          expect(cases.total).to.eql(3);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(1);
-        });
-
-        it('correctly counts stats with a filter for open cases', async () => {
-          const cases = await findCases({ supertest, query: { status: CaseStatuses.open } });
-
-          expect(cases.cases.length).to.eql(1);
-
-          // since we're filtering on status and the collection only has an in-progress case, it should only return the
-          // individual case that has the open status and no collections
-          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes a collection
-          // that does not have an open case. This is a known issue and will need to be resolved
-          // when this issue is addressed: https://github.com/elastic/kibana/issues/94115
-          expect(cases.total).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(1);
-        });
-
-        it('correctly counts stats with a filter for individual cases', async () => {
-          const cases = await findCases({ supertest, query: { type: CaseType.individual } });
-
-          expect(cases.total).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
-        });
-
-        it('correctly counts stats with a filter for collection cases with multiple sub cases', async () => {
-          // this will force the first sub case attached to the collection to be closed
-          // so we'll have one closed sub case and one open sub case
-          await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
-          const cases = await findCases({ supertest, query: { type: CaseType.collection } });
-
-          expect(cases.total).to.eql(1);
-          expect(cases.cases[0].subCases?.length).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
-        });
-
-        it('correctly counts stats with a filter for collection and open cases with multiple sub cases', async () => {
-          // this will force the first sub case attached to the collection to be closed
-          // so we'll have one closed sub case and one open sub case
-          await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
-          const cases = await findCases({
-            supertest,
-            query: {
-              type: CaseType.collection,
-              status: CaseStatuses.open,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
             },
           });
+        }
 
-          expect(cases.total).to.eql(1);
-          expect(cases.cases[0].subCases?.length).to.eql(1);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
         });
 
-        it('correctly counts stats including a collection without sub cases when not filtering on status', async () => {
-          // delete the sub case on the collection so that it doesn't have any sub cases
-          await supertest
-            .delete(
-              `${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`
-            )
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
-
-          const cases = await findCases({ supertest, query: { type: CaseType.collection } });
-
-          // it should include the collection without sub cases because we did not pass in a filter on status
-          expect(cases.total).to.eql(3);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
-        });
-
-        it('correctly counts stats including a collection without sub cases when filtering on tags', async () => {
-          // delete the sub case on the collection so that it doesn't have any sub cases
-          await supertest
-            .delete(
-              `${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`
-            )
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
-
-          const cases = await findCases({ supertest, query: { tags: ['defacement'] } });
-
-          // it should include the collection without sub cases because we did not pass in a filter on status
-          expect(cases.total).to.eql(3);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
-        });
-
-        it('does not return collections without sub cases matching the requested status', async () => {
-          const cases = await findCases({ supertest, query: { status: CaseStatuses.closed } });
-
-          expect(cases.cases.length).to.eql(1);
-          // it should not include the collection that has a sub case as in-progress
-          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes collections. This short term
-          // fix for when sub cases are not enabled. When the feature is completed the _find API
-          // will need to be fixed as explained in this ticket: https://github.com/elastic/kibana/issues/94115
-          expect(cases.total).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(1);
-        });
-
-        it('does not return empty collections when filtering on status', async () => {
-          // delete the sub case on the collection so that it doesn't have any sub cases
-          await supertest
-            .delete(
-              `${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`
-            )
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
-
-          const cases = await findCases({ supertest, query: { status: CaseStatuses.closed } });
-
-          expect(cases.cases.length).to.eql(1);
-
-          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes collections. This short term
-          // fix for when sub cases are not enabled. When the feature is completed the _find API
-          // will need to be fixed as explained in this ticket: https://github.com/elastic/kibana/issues/94115
-          expect(cases.total).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
+        const cases = await findCases({ supertest });
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [
+            {
+              ...patchedCase,
+              comments: [],
+              totalAlerts: 2,
+              totalComment: 1,
+            },
+          ],
+          count_open_cases: 1,
         });
       });
     });

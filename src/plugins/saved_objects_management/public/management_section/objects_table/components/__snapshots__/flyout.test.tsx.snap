@@ -32,7 +32,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         iconType="help"
         title={
           <FormattedMessage
-            defaultMessage="Index Pattern Conflicts"
+            defaultMessage="Data Views Conflicts"
             id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
             values={Object {}}
           />
@@ -40,7 +40,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+            defaultMessage="The following saved objects use data views that do not exist. Please select the data views you'd like re-associated with them. You can {indexPatternLink} if necessary."
             id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
@@ -48,7 +48,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
                   href=""
                 >
                   <FormattedMessage
-                    defaultMessage="create a new index pattern"
+                    defaultMessage="create a new data view"
                     id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
@@ -63,7 +63,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       columns={
         Array [
           Object {
-            "description": "ID of the index pattern",
+            "description": "ID of the data view",
             "field": "existingIndexPatternId",
             "name": "ID",
             "sortable": true,
@@ -82,7 +82,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
           Object {
             "field": "existingIndexPatternId",
-            "name": "New index pattern",
+            "name": "New data view",
             "render": [Function],
           },
         ]
@@ -182,6 +182,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           },
           "delete": [MockFunction],
           "externalUrl": Object {
+            "isInternalUrl": [MockFunction],
             "validateUrl": [MockFunction],
           },
           "fetch": [MockFunction],
@@ -377,6 +378,7 @@ exports[`Flyout should render import step 1`] = `
         <EuiButton
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
+          isDisabled={true}
           isLoading={false}
           onClick={[Function]}
           size="s"

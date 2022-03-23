@@ -33,7 +33,7 @@ const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle',
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
 export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
-  const [coreStart, { data, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
+  const [coreStart, { data, dataViews, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
     await core.getStartServices();
   const { capabilities } = coreStart.application;
   const { element, history, setBreadcrumbs } = mountParams;
@@ -79,6 +79,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
                     taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
                     spacesApi={spacesApi}
                     dataStart={data}
+                    dataViewsApi={dataViews}
                     actionRegistry={pluginStart.actions}
                     columnRegistry={pluginStart.columns}
                     allowedTypes={allowedObjectTypes}

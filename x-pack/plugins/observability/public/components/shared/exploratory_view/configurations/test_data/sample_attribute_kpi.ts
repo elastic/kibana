@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RECORDS_FIELD } from '../constants';
+
 export const sampleAttributeKpi = {
-  description: 'undefined',
+  description: '',
   references: [
     {
       id: 'apm-*',
@@ -46,7 +48,7 @@ export const sampleAttributeKpi = {
                 label: 'Page views',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
             },
             incompleteColumns: {},

@@ -23,12 +23,12 @@ describe('Super User - Metrics', () => {
   });
 
   it('should be able to run the query', () => {
-    cy.get('[data-test-subj="toggleNavButton"]').click();
+    cy.getBySel('toggleNavButton').click();
     cy.contains('Metrics').click();
 
     cy.wait(1000);
 
-    cy.get('[data-test-subj="nodeContainer"]').click();
+    cy.getBySel('nodeContainer').click();
     cy.contains('Osquery').click();
     inputQuery('select * from uptime;');
 
@@ -36,17 +36,16 @@ describe('Super User - Metrics', () => {
     checkResults();
   });
   it('should be able to run the previously saved query', () => {
-    cy.get('[data-test-subj="toggleNavButton"]').click();
-    cy.get('[data-test-subj="collapsibleNavAppLink"').contains('Metrics').click();
+    cy.getBySel('toggleNavButton').click();
+    cy.getBySel('collapsibleNavAppLink').contains('Metrics').click();
 
     cy.wait(500);
-    cy.get('[data-test-subj="nodeContainer"]').click();
+    cy.getBySel('nodeContainer').click();
     cy.contains('Osquery').click();
 
-    cy.get('[data-test-subj="comboBoxInput"]').first().click();
+    cy.getBySel('comboBoxInput').first().click();
     cy.wait(500);
-    cy.get('div[role=listBox]').should('have.lengthOf.above', 0);
-    cy.get('[data-test-subj="comboBoxInput"]').first().type('{downArrow}{enter}');
+    cy.getBySel('comboBoxInput').first().type('{downArrow}{enter}');
 
     submitQuery();
     checkResults();

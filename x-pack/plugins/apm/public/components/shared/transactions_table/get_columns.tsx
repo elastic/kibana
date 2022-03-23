@@ -6,9 +6,10 @@
  */
 
 import {
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,12 +22,17 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { ImpactBar } from '../ImpactBar';
-import { TransactionDetailLink } from '../Links/apm/transaction_detail_link';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { ImpactBar } from '../impact_bar';
+import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
+import { ITableColumn } from '../managed_table';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { getLatencyColumnLabel } from './get_latency_column_label';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../charts/helper/get_timeseries_color';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -51,7 +57,7 @@ export function getColumns({
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
   comparisonType?: TimeRangeComparisonType;
-}): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
+}): Array<ITableColumn<ServiceTransactionGroupItem>> {
   return [
     {
       field: 'name',
@@ -90,9 +96,14 @@ export function getColumns({
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.LATENCY_AVG
+        );
+
         return (
           <ListMetric
-            color="euiColorVis1"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
@@ -100,6 +111,7 @@ export function getColumns({
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asMillisecondDuration(latency)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -118,9 +130,14 @@ export function getColumns({
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]
             ?.throughput;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.THROUGHPUT
+        );
+
         return (
           <ListMetric
-            color="euiColorVis0"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
@@ -128,6 +145,7 @@ export function getColumns({
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asTransactionRate(throughput)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -135,9 +153,32 @@ export function getColumns({
     {
       field: 'errorRate',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        { defaultMessage: 'Failed transaction rate' }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
+            {
+              defaultMessage:
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
+              {
+                defaultMessage: 'Failed transaction rate',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { errorRate, name }) => {
@@ -145,9 +186,14 @@ export function getColumns({
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
+
         return (
           <ListMetric
-            color="euiColorVis7"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
@@ -155,6 +201,7 @@ export function getColumns({
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asPercent(errorRate, 1)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -162,9 +209,32 @@ export function getColumns({
     {
       field: 'impact',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnImpact',
-        { defaultMessage: 'Impact' }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.transactionsTableColumnImpactTip',
+            {
+              defaultMessage:
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnImpact',
+              {
+                defaultMessage: 'Impact',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {

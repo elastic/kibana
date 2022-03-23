@@ -47,6 +47,7 @@ if (showHelp) {
         --skip-node-download    {dim Reuse existing downloads of node.js}
         --verbose,-v            {dim Turn on verbose logging}
         --no-debug              {dim Turn off debug logging}
+        --epr-registry          {dim Specify the EPR registry to use for Fleet packages, 'production' or 'snapshot'}
     `) + '\n'
   );
   process.exit(1);

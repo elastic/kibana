@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { ConfigKey } from './config_key';
-import { ServiceLocationsCodec } from './locations';
+import { LocationsCodec } from './locations';
 import {
   DataStreamCodec,
   ModeCodec,
@@ -48,17 +48,22 @@ export const ZipUrlTLSFieldsCodec = t.partial({
 export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
 
 // CommonFields
-export const CommonFieldsCodec = t.interface({
-  [ConfigKey.NAME]: t.string,
-  [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
-  [ConfigKey.ENABLED]: t.boolean,
-  [ConfigKey.SCHEDULE]: Schedule,
-  [ConfigKey.LOCATIONS]: t.array(t.string),
-  [ConfigKey.APM_SERVICE_NAME]: t.string,
-  [ConfigKey.TIMEOUT]: t.string,
-  [ConfigKey.TAGS]: t.array(t.string),
-  [ConfigKey.LOCATIONS]: ServiceLocationsCodec,
-});
+export const CommonFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.NAME]: t.string,
+    [ConfigKey.NAMESPACE]: t.string,
+    [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
+    [ConfigKey.ENABLED]: t.boolean,
+    [ConfigKey.SCHEDULE]: Schedule,
+    [ConfigKey.APM_SERVICE_NAME]: t.string,
+    [ConfigKey.TAGS]: t.array(t.string),
+    [ConfigKey.LOCATIONS]: LocationsCodec,
+  }),
+  t.partial({
+    [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
+    [ConfigKey.REVISION]: t.number,
+  }),
+]);
 
 export type CommonFields = t.TypeOf<typeof CommonFieldsCodec>;
 
@@ -161,6 +166,8 @@ export const BrowserSimpleFieldsCodec = t.intersection([
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
     [ConfigKey.PARAMS]: t.string,
+    [ConfigKey.URLS]: t.union([t.string, t.undefined]),
+    [ConfigKey.PORT]: t.union([t.number, t.undefined]),
   }),
   ZipUrlTLSFieldsCodec,
   CommonFieldsCodec,

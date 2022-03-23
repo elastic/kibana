@@ -68,6 +68,7 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
         defaultActions,
         monitorId,
         selectedMonitor,
+        defaultEmail: settings?.defaultEmail,
       })
     );
     setIsLoading(true);

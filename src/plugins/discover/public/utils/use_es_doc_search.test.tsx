@@ -9,31 +9,31 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Observable } from 'rxjs';
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from 'src/plugins/data_views/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
+import { KibanaContextProvider } from '../../../kibana_react/public';
+import React from 'react';
 
 const mockSearchResult = new Observable();
 
-jest.mock('../kibana_services', () => ({
-  getServices: () => ({
-    data: {
-      search: {
-        search: jest.fn(() => {
-          return mockSearchResult;
-        }),
-      },
+const services = {
+  data: {
+    search: {
+      search: jest.fn(() => {
+        return mockSearchResult;
+      }),
     },
-    uiSettings: {
-      get: (key: string) => {
-        if (key === mockSearchFieldsFromSource) {
-          return false;
-        }
-      },
+  },
+  uiSettings: {
+    get: (key: string) => {
+      if (key === mockSearchFieldsFromSource) {
+        return false;
+      }
     },
-  }),
-}));
+  },
+};
 
 describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody given useNewFieldsApi is false', () => {
@@ -181,7 +181,12 @@ describe('Test of <Doc /> helper / hook', () => {
       indexPattern,
     } as unknown as DocProps;
 
-    const { result } = renderHook((p: DocProps) => useEsDocSearch(p), { initialProps: props });
+    const { result } = renderHook((p: DocProps) => useEsDocSearch(p), {
+      initialProps: props,
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      ),
+    });
 
     expect(result.current.slice(0, 2)).toEqual([ElasticRequestState.Loading, null]);
   });

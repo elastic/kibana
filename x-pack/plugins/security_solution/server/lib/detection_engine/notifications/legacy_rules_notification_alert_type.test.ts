@@ -19,9 +19,8 @@ import {
   sampleEmptyDocSearchResults,
 } from '../signals/__mocks__/es_results';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+
 jest.mock('./build_signals_query');
 
 /**
@@ -39,6 +38,7 @@ describe('legacyRules_notification_alert_type', () => {
 
     payload = {
       alertId: '1111',
+      executionId: 'b33f65d7-b33f-4aae-8d20-c93613dec9f9',
       services: alertServices,
       params: { ruleAlertId: '2222' },
       state: {},
@@ -100,10 +100,8 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          sampleDocSearchResultsWithSortId()
-        )
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResponse(
+        sampleDocSearchResultsWithSortId()
       );
 
       await alert.executor(payload);
@@ -128,16 +126,14 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          sampleDocSearchResultsWithSortId()
-        )
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResponse(
+        sampleDocSearchResultsWithSortId()
       );
 
       await alert.executor(payload);
-      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).toHaveBeenCalled();
 
-      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      const [{ value: alertInstanceMock }] = alertServices.alertFactory.create.mock.results;
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',
         expect.objectContaining({
@@ -156,15 +152,13 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          sampleDocSearchResultsWithSortId()
-        )
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResponse(
+        sampleDocSearchResultsWithSortId()
       );
       await alert.executor(payload);
-      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).toHaveBeenCalled();
 
-      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      const [{ value: alertInstanceMock }] = alertServices.alertFactory.create.mock.results;
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',
         expect.objectContaining({
@@ -185,15 +179,13 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          sampleDocSearchResultsWithSortId()
-        )
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResponse(
+        sampleDocSearchResultsWithSortId()
       );
       await alert.executor(payload);
-      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).toHaveBeenCalled();
 
-      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      const [{ value: alertInstanceMock }] = alertServices.alertFactory.create.mock.results;
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',
         expect.objectContaining({
@@ -203,7 +195,7 @@ describe('legacyRules_notification_alert_type', () => {
       );
     });
 
-    it('should not call alertInstanceFactory if signalsCount was 0', async () => {
+    it('should not call alertFactory.create if signalsCount was 0', async () => {
       const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
@@ -211,13 +203,13 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResponse(
+        sampleEmptyDocSearchResults()
       );
 
       await alert.executor(payload);
 
-      expect(alertServices.alertInstanceFactory).not.toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).not.toHaveBeenCalled();
     });
 
     it('should call scheduleActions if signalsCount was greater than 0', async () => {
@@ -228,17 +220,15 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          sampleDocSearchResultsNoSortIdNoVersion()
-        )
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResponse(
+        sampleDocSearchResultsNoSortIdNoVersion()
       );
 
       await alert.executor(payload);
 
-      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).toHaveBeenCalled();
 
-      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      const [{ value: alertInstanceMock }] = alertServices.alertFactory.create.mock.results;
       expect(alertInstanceMock.replaceState).toHaveBeenCalledWith(
         expect.objectContaining({ signals_count: 100 })
       );

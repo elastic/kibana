@@ -295,7 +295,20 @@ export class DynamicStyleProperty<T>
   }
 
   getFieldMetaOptions() {
-    return _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+    const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+
+    // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported
+    // Saved objects created prior to 8.0 may have a configuration where
+    // fieldMetaOptions.isEnabled is false and the field does not support fieldMeta from local.
+    // In these cases, force isEnabled to true
+    // The exact case that spawned this fix is with ES_SEARCH sources and 8.0 where vector tiles switched
+    // from vector tiles generated via Kibana server to vector tiles generated via Elasticsearch.
+    // Kibana vector tiles supported fieldMeta from local while Elasticsearch vector tiles do not support fieldMeta from local.
+    if (this._field && !this._field.supportsFieldMetaFromLocalData()) {
+      fieldMetaOptions.isEnabled = true;
+    }
+
+    return fieldMetaOptions;
   }
 
   getDataMappingFunction() {

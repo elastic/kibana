@@ -13,11 +13,6 @@ import { render, screen } from '@testing-library/react';
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
-import { useKibana } from '../../common/lib/kibana';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
-
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -29,10 +24,7 @@ describe('ConnectorsDropdown', () => {
     selectedConnector: 'none',
   };
 
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
   beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -243,27 +235,6 @@ describe('ConnectorsDropdown', () => {
         .text()
         .includes('My Connector, is selected')
     ).toBeTruthy();
-  });
-
-  test('if the props hideConnectorServiceNowSir is true, the connector should not be part of the list of options  ', () => {
-    const newWrapper = mount(
-      <ConnectorsDropdown
-        {...props}
-        selectedConnector={'servicenow-1'}
-        hideConnectorServiceNowSir={true}
-      />,
-      {
-        wrappingComponent: TestProviders,
-      }
-    );
-    const selectProps = newWrapper.find(EuiSuperSelect).props();
-    const options = selectProps.options as Array<{ 'data-test-subj': string }>;
-    expect(
-      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-1')
-    ).toBeTruthy();
-    expect(
-      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-sir')
-    ).toBeFalsy();
   });
 
   test('it does not throw when accessing the icon if the connector type is not registered', () => {

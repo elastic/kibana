@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -59,7 +59,14 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
             </NameFlexItemWithMaxWidth>
             {output.is_preconfigured && (
               <EuiFlexItem grow={false}>
-                <EuiIcon type="lock" />
+                <EuiIconTip
+                  content={i18n.translate('xpack.fleet.settings.outputsTable.managedTooltip', {
+                    defaultMessage: 'This outputs is managed outside of Fleet.',
+                  })}
+                  type="lock"
+                  size="m"
+                  color="subdued"
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -128,6 +135,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                   title={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
                     defaultMessage: 'Edit',
                   })}
+                  data-test-subj="editOutputBtn"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

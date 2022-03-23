@@ -49,7 +49,7 @@ export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
             name: request.params.name,
             body: request.body,
           });
-        return response.ok({ body: saveResponse.body });
+        return response.ok({ body: saveResponse });
       } catch (error) {
         const wrappedError = wrapError(error);
         return response.customError({

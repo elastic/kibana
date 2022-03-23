@@ -205,7 +205,7 @@ function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnP
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                  defaultMessage="No packages found"
+                  defaultMessage="No integrations found"
                 />
               )}
             </p>

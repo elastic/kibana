@@ -24,12 +24,16 @@ import { mockSourcererScope } from '../../../../common/containers/sourcerer/mock
 import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../timelines/public/components';
+import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
 }));
 jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
+}));
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
 }));
 jest.mock('../body/events/index', () => ({
   Events: () => <></>,
@@ -50,6 +54,11 @@ jest.mock('../../../../common/lib/kibana', () => {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
+        },
+        cases: {
+          ui: {
+            getCasesContext: () => mockCasesContext,
+          },
         },
         uiSettings: {
           get: jest.fn(),

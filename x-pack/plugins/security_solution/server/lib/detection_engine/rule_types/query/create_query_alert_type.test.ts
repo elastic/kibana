@@ -14,6 +14,7 @@ import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
 import { createMockConfig } from '../../routes/__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
+import { ruleExecutionLogMock } from '../../rule_execution_log/__mocks__';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
@@ -29,8 +30,6 @@ jest.mock('../utils/get_list_client', () => ({
   }),
 }));
 
-jest.mock('../../rule_execution_log/rule_execution_log_client');
-
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
   const { dependencies, executor, services } = mocks;
@@ -41,6 +40,7 @@ describe('Custom Query Alerts', () => {
     config: createMockConfig(),
     ruleDataClient,
     eventLogService,
+    ruleExecutionLoggerFactory: () => ruleExecutionLogMock.forExecutors.create(),
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 
@@ -60,7 +60,7 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.search.asCurrentUser.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [],
@@ -104,7 +104,7 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.search.asCurrentUser.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [sampleDocNoSortId()],

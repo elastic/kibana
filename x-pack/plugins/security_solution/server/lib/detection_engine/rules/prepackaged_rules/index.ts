@@ -522,30 +522,30 @@ import rule509 from './persistence_periodic_tasks_file_mdofiy.json';
 import rule510 from './persistence_via_atom_init_file_modification.json';
 import rule511 from './privilege_escalation_lsa_auth_package.json';
 import rule512 from './privilege_escalation_port_monitor_print_pocessor_abuse.json';
-import rule513 from './credential_access_dumping_hashes_bi_cmds.json';
-import rule514 from './lateral_movement_mounting_smb_share.json';
-import rule515 from './privilege_escalation_echo_nopasswd_sudoers.json';
-import rule516 from './privilege_escalation_ld_preload_shared_object_modif.json';
-import rule517 from './privilege_escalation_root_crontab_filemod.json';
-import rule518 from './defense_evasion_create_mod_root_certificate.json';
-import rule519 from './privilege_escalation_sudo_buffer_overflow.json';
-import rule520 from './execution_installer_spawned_network_event.json';
-import rule521 from './initial_access_suspicious_ms_exchange_files.json';
-import rule522 from './initial_access_suspicious_ms_exchange_process.json';
-import rule523 from './initial_access_suspicious_ms_exchange_worker_child_process.json';
-import rule524 from './persistence_evasion_registry_startup_shell_folder_modified.json';
-import rule525 from './persistence_local_scheduled_job_creation.json';
-import rule526 from './persistence_via_wmi_stdregprov_run_services.json';
-import rule527 from './credential_access_persistence_network_logon_provider_modification.json';
-import rule528 from './lateral_movement_defense_evasion_lanman_nullsessionpipe_modification.json';
-import rule529 from './collection_microsoft_365_new_inbox_rule.json';
-import rule530 from './ml_high_count_network_denies.json';
-import rule531 from './ml_high_count_network_events.json';
-import rule532 from './ml_rare_destination_country.json';
-import rule533 from './ml_spike_in_traffic_to_a_country.json';
-import rule534 from './command_and_control_tunneling_via_earthworm.json';
-import rule535 from './lateral_movement_evasion_rdp_shadowing.json';
-import rule536 from './threat_intel_filebeat7x.json';
+import rule513 from './credential_access_posh_request_ticket.json';
+import rule514 from './credential_access_dumping_hashes_bi_cmds.json';
+import rule515 from './lateral_movement_mounting_smb_share.json';
+import rule516 from './privilege_escalation_echo_nopasswd_sudoers.json';
+import rule517 from './privilege_escalation_ld_preload_shared_object_modif.json';
+import rule518 from './privilege_escalation_root_crontab_filemod.json';
+import rule519 from './defense_evasion_create_mod_root_certificate.json';
+import rule520 from './privilege_escalation_sudo_buffer_overflow.json';
+import rule521 from './execution_installer_spawned_network_event.json';
+import rule522 from './initial_access_suspicious_ms_exchange_files.json';
+import rule523 from './initial_access_suspicious_ms_exchange_process.json';
+import rule524 from './initial_access_suspicious_ms_exchange_worker_child_process.json';
+import rule525 from './persistence_evasion_registry_startup_shell_folder_modified.json';
+import rule526 from './persistence_local_scheduled_job_creation.json';
+import rule527 from './persistence_via_wmi_stdregprov_run_services.json';
+import rule528 from './credential_access_persistence_network_logon_provider_modification.json';
+import rule529 from './lateral_movement_defense_evasion_lanman_nullsessionpipe_modification.json';
+import rule530 from './collection_microsoft_365_new_inbox_rule.json';
+import rule531 from './ml_high_count_network_denies.json';
+import rule532 from './ml_high_count_network_events.json';
+import rule533 from './ml_rare_destination_country.json';
+import rule534 from './ml_spike_in_traffic_to_a_country.json';
+import rule535 from './command_and_control_tunneling_via_earthworm.json';
+import rule536 from './lateral_movement_evasion_rdp_shadowing.json';
 import rule537 from './threat_intel_fleet_integrations.json';
 import rule538 from './exfiltration_ec2_vm_export_failure.json';
 import rule539 from './exfiltration_ec2_full_network_packet_capture_detected.json';
@@ -604,37 +604,66 @@ import rule591 from './defense_evasion_whitespace_padding_in_command_line.json';
 import rule592 from './defense_evasion_frontdoor_firewall_policy_deletion.json';
 import rule593 from './credential_access_azure_full_network_packet_capture_detected.json';
 import rule594 from './persistence_webshell_detection.json';
-import rule595 from './impact_efs_filesystem_or_mount_deleted.json';
-import rule596 from './defense_evasion_execution_control_panel_suspicious_args.json';
-import rule597 from './defense_evasion_azure_blob_permissions_modified.json';
-import rule598 from './privilege_escalation_aws_suspicious_saml_activity.json';
-import rule599 from './credential_access_potential_lsa_memdump_via_mirrordump.json';
-import rule600 from './discovery_virtual_machine_fingerprinting_grep.json';
-import rule601 from './impact_backup_file_deletion.json';
-import rule602 from './credential_access_posh_minidump.json';
-import rule603 from './persistence_screensaver_engine_unexpected_child_process.json';
-import rule604 from './persistence_screensaver_plist_file_modification.json';
-import rule605 from './credential_access_suspicious_lsass_access_memdump.json';
-import rule606 from './defense_evasion_suspicious_process_access_direct_syscall.json';
-import rule607 from './discovery_posh_suspicious_api_functions.json';
-import rule608 from './privilege_escalation_via_rogue_named_pipe.json';
-import rule609 from './credential_access_suspicious_lsass_access_via_snapshot.json';
-import rule610 from './defense_evasion_posh_process_injection.json';
-import rule611 from './collection_posh_keylogger.json';
-import rule612 from './defense_evasion_posh_assembly_load.json';
-import rule613 from './defense_evasion_powershell_windows_firewall_disabled.json';
-import rule614 from './execution_posh_portable_executable.json';
-import rule615 from './credential_access_suspicious_comsvcs_imageload.json';
-import rule616 from './impact_aws_eventbridge_rule_disabled_or_deleted.json';
-import rule617 from './initial_access_azure_active_directory_high_risk_signin_atrisk_or_confirmed.json';
-import rule618 from './persistence_remote_password_reset.json';
-import rule619 from './privilege_escalation_azure_kubernetes_rolebinding_created.json';
-import rule620 from './collection_posh_audio_capture.json';
-import rule621 from './defense_evasion_suspicious_process_creation_calltrace.json';
-import rule622 from './defense_evasion_clearing_windows_console_history.json';
-import rule623 from './threat_intel_filebeat8x.json';
-import rule624 from './credential_access_via_snapshot_lsass_clone_creation.json';
-import rule625 from './persistence_via_bits_job_notify_command.json';
+import rule595 from './defense_evasion_suppression_rule_created.json';
+import rule596 from './impact_efs_filesystem_or_mount_deleted.json';
+import rule597 from './defense_evasion_execution_control_panel_suspicious_args.json';
+import rule598 from './defense_evasion_azure_blob_permissions_modified.json';
+import rule599 from './privilege_escalation_aws_suspicious_saml_activity.json';
+import rule600 from './credential_access_potential_lsa_memdump_via_mirrordump.json';
+import rule601 from './discovery_virtual_machine_fingerprinting_grep.json';
+import rule602 from './impact_backup_file_deletion.json';
+import rule603 from './credential_access_posh_minidump.json';
+import rule604 from './persistence_screensaver_engine_unexpected_child_process.json';
+import rule605 from './persistence_screensaver_plist_file_modification.json';
+import rule606 from './credential_access_suspicious_lsass_access_memdump.json';
+import rule607 from './defense_evasion_suspicious_process_access_direct_syscall.json';
+import rule608 from './discovery_posh_suspicious_api_functions.json';
+import rule609 from './privilege_escalation_via_rogue_named_pipe.json';
+import rule610 from './credential_access_suspicious_lsass_access_via_snapshot.json';
+import rule611 from './defense_evasion_posh_process_injection.json';
+import rule612 from './collection_posh_keylogger.json';
+import rule613 from './defense_evasion_posh_assembly_load.json';
+import rule614 from './defense_evasion_powershell_windows_firewall_disabled.json';
+import rule615 from './execution_posh_portable_executable.json';
+import rule616 from './execution_posh_psreflect.json';
+import rule617 from './credential_access_suspicious_comsvcs_imageload.json';
+import rule618 from './impact_aws_eventbridge_rule_disabled_or_deleted.json';
+import rule619 from './defense_evasion_microsoft_defender_tampering.json';
+import rule620 from './initial_access_azure_active_directory_high_risk_signin_atrisk_or_confirmed.json';
+import rule621 from './persistence_remote_password_reset.json';
+import rule622 from './privilege_escalation_azure_kubernetes_rolebinding_created.json';
+import rule623 from './collection_posh_audio_capture.json';
+import rule624 from './collection_posh_screen_grabber.json';
+import rule625 from './defense_evasion_posh_compressed.json';
+import rule626 from './defense_evasion_suspicious_process_creation_calltrace.json';
+import rule627 from './privilege_escalation_group_policy_iniscript.json';
+import rule628 from './privilege_escalation_group_policy_privileged_groups.json';
+import rule629 from './privilege_escalation_group_policy_scheduled_task.json';
+import rule630 from './defense_evasion_clearing_windows_console_history.json';
+import rule631 from './threat_intel_filebeat8x.json';
+import rule632 from './privilege_escalation_installertakeover.json';
+import rule633 from './credential_access_via_snapshot_lsass_clone_creation.json';
+import rule634 from './persistence_via_bits_job_notify_command.json';
+import rule635 from './execution_suspicious_java_netcon_childproc.json';
+import rule636 from './privilege_escalation_samaccountname_spoofing_attack.json';
+import rule637 from './credential_access_symbolic_link_to_shadow_copy_createdcredential_access_symbolic_link_to_shadow_copy_created.json';
+import rule638 from './credential_access_mfa_push_brute_force.json';
+import rule639 from './persistence_azure_global_administrator_role_assigned.json';
+import rule640 from './persistence_microsoft_365_global_administrator_role_assign.json';
+import rule641 from './lateral_movement_malware_uploaded_onedrive.json';
+import rule642 from './lateral_movement_malware_uploaded_sharepoint.json';
+import rule643 from './defense_evasion_ms_office_suspicious_regmod.json';
+import rule644 from './initial_access_o365_user_reported_phish_malware.json';
+import rule645 from './defense_evasion_microsoft_365_mailboxauditbypassassociation.json';
+import rule646 from './credential_access_disable_kerberos_preauth.json';
+import rule647 from './credential_access_shadow_credentials.json';
+import rule648 from './privilege_escalation_pkexec_envar_hijack.json';
+import rule649 from './credential_access_seenabledelegationprivilege_assigned_to_user.json';
+import rule650 from './persistence_msds_alloweddelegateto_krbtgt.json';
+import rule651 from './defense_evasion_disable_posh_scriptblocklogging.json';
+import rule652 from './persistence_ad_adminsdholder.json';
+import rule653 from './privilege_escalation_windows_service_via_unusual_client.json';
+import rule654 from './credential_access_dcsync_replication_rights.json';
 
 export const rawRules = [
   rule1,
@@ -1262,4 +1291,33 @@ export const rawRules = [
   rule623,
   rule624,
   rule625,
+  rule626,
+  rule627,
+  rule628,
+  rule629,
+  rule630,
+  rule631,
+  rule632,
+  rule633,
+  rule634,
+  rule635,
+  rule636,
+  rule637,
+  rule638,
+  rule639,
+  rule640,
+  rule641,
+  rule642,
+  rule643,
+  rule644,
+  rule645,
+  rule646,
+  rule647,
+  rule648,
+  rule649,
+  rule650,
+  rule651,
+  rule652,
+  rule653,
+  rule654,
 ];

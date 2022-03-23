@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../types';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../hooks/use_app_data_view';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
 
 interface Props {
@@ -35,7 +35,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const metricOptions = seriesConfig?.metricOptions;
 
-  const { indexPatterns, indexPatternErrors, loading } = useAppIndexPatternContext();
+  const { dataViews, dataViewErrors, loading } = useAppDataViewContext();
 
   const onChange = (value?: string) => {
     setSeries(seriesId, {
@@ -52,14 +52,14 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     return null;
   }
 
-  const indexPattern = indexPatterns?.[series.dataType];
-  const indexPatternError = indexPatternErrors?.[series.dataType];
+  const dataView = dataViews?.[series.dataType];
+  const dataViewError = dataViewErrors?.[series.dataType];
 
   const options = (metricOptions ?? []).map(({ label, field, id }) => {
     let disabled = false;
 
     if (field !== RECORDS_FIELD && field !== RECORDS_PERCENTAGE_FIELD && field) {
-      disabled = !Boolean(indexPattern?.getFieldByName(field));
+      disabled = !Boolean(dataView?.getFieldByName(field));
     }
     return {
       disabled,
@@ -85,18 +85,19 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     };
   });
 
-  if (indexPatternError && !indexPattern && !loading) {
+  if (dataViewError && !dataView && !loading) {
     // TODO: Add a link to docs to explain how to add index patterns
     return (
       <EuiText color="danger" className="eui-textNoWrap">
-        {indexPatternError.body.error === 'Forbidden'
+        {dataViewError.body?.error === 'Forbidden' ||
+        dataViewError.name === 'DataViewInsufficientAccessError'
           ? NO_PERMISSIONS
-          : indexPatternError.body.message}
+          : dataViewError.body.message}
       </EuiText>
     );
   }
 
-  if (!indexPattern && !loading) {
+  if (!dataView && !loading) {
     return <EuiText>{NO_DATA_AVAILABLE}</EuiText>;
   }
 
@@ -110,7 +111,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
-              isLoading={!indexPattern && loading}
+              isLoading={!dataView && loading}
               buttonRef={focusButton}
             >
               {SELECT_REPORT_METRIC_LABEL}
@@ -132,7 +133,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         </EuiPopover>
       )}
       {series.selectedMetricField &&
-        (indexPattern ? (
+        (dataView ? (
           <EuiToolTip position="top" content={REPORT_METRIC_TOOLTIP}>
             <EuiBadge
               iconType="cross"

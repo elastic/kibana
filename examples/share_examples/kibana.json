@@ -1,0 +1,14 @@
+{
+  "id": "shareExamples",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "server": false,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Small demos of share plugin usage",
+  "requiredPlugins": ["share"],
+  "optionalPlugins": []
+}

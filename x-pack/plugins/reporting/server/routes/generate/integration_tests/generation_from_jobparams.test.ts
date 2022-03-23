@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ElasticsearchClient } from 'kibana/server';
 import rison from 'rison-node';
-import { of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../../../';
+import { licensingMock } from '../../../../../licensing/server/mocks';
+import { ReportingStore } from '../../../lib';
 import { ExportTypesRegistry } from '../../../lib/export_types_registry';
-import { createMockLevelLogger, createMockReportingCore } from '../../../test_helpers';
+import { Report } from '../../../lib/store';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
-} from '../../../test_helpers/create_mock_reportingplugin';
+  createMockPluginStart,
+  createMockReportingCore,
+} from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobGenerationRoutes } from '../generate_from_jobparams';
 
@@ -28,18 +31,14 @@ describe('POST /api/reporting/generate', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let mockExportTypesRegistry: ExportTypesRegistry;
-  let core: ReportingCore;
-  let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let mockReportingCore: ReportingCore;
+  let store: ReportingStore;
 
-  const config = createMockConfigSchema({
-    queue: {
-      indexInterval: 'year',
-      timeout: 10000,
-      pollEnabled: true,
-    },
+  const mockConfigSchema = createMockConfigSchema({
+    queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
   });
 
-  const mockLogger = createMockLevelLogger();
+  const mockLogger = loggingSystemMock.createLogger();
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
@@ -52,15 +51,30 @@ describe('POST /api/reporting/generate', () => {
     const mockSetupDeps = createMockPluginSetup({
       security: {
         license: { isEnabled: () => true },
-        authc: {
-          getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
-        },
       },
       router: httpSetup.createRouter(''),
-      licensing: { license$: of({ isActive: true, isAvailable: true, type: 'gold' }) },
     });
 
-    core = await createMockReportingCore(config, mockSetupDeps);
+    const mockStartDeps = await createMockPluginStart(
+      {
+        licensing: {
+          ...licensingMock.createStart(),
+          license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
+        },
+        security: {
+          authc: {
+            getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+          },
+        },
+      },
+      mockConfigSchema
+    );
+
+    mockReportingCore = await createMockReportingCore(
+      mockConfigSchema,
+      mockSetupDeps,
+      mockStartDeps
+    );
 
     mockExportTypesRegistry = new ExportTypesRegistry();
     mockExportTypesRegistry.register({
@@ -73,10 +87,16 @@ describe('POST /api/reporting/generate', () => {
       createJobFnFactory: () => async () => ({ createJobTest: { test1: 'yes' } } as any),
       runTaskFnFactory: () => async () => ({ runParamsTest: { test2: 'yes' } } as any),
     });
-    core.getExportTypesRegistry = () => mockExportTypesRegistry;
+    mockReportingCore.getExportTypesRegistry = () => mockExportTypesRegistry;
 
-    mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
-    mockEsClient.index.mockResolvedValue({ body: {} } as any);
+    store = await mockReportingCore.getStore();
+    store.addReport = jest.fn().mockImplementation(async (opts) => {
+      return new Report({
+        ...opts,
+        _id: 'foo',
+        _index: 'foo-index',
+      });
+    });
   });
 
   afterEach(async () => {
@@ -84,7 +104,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerJobGenerationRoutes(core, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -99,7 +119,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params query is invalid', async () => {
-    registerJobGenerationRoutes(core, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -110,7 +130,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params body is invalid', async () => {
-    registerJobGenerationRoutes(core, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -122,7 +142,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerJobGenerationRoutes(core, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -136,9 +156,9 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 500 if job handler throws an error', async () => {
-    mockEsClient.index.mockRejectedValueOnce('silly');
+    store.addReport = jest.fn().mockRejectedValue('silly');
 
-    registerJobGenerationRoutes(core, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -149,8 +169,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it(`returns 200 if job handler doesn't error`, async () => {
-    mockEsClient.index.mockResolvedValueOnce({ body: { _id: 'foo', _index: 'foo-index' } } as any);
-    registerJobGenerationRoutes(core, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 

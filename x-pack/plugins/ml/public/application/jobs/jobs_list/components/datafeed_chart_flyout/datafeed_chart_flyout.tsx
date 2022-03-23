@@ -323,6 +323,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                         <Settings
                           showLegend
                           legendPosition={Position.Bottom}
+                          // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                           theme={{
                             lineSeriesStyle: {
                               point: {

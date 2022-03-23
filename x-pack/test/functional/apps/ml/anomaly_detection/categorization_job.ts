@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const detectorTypeIdentifier = 'Rare';
   const categorizationFieldIdentifier = 'field1';
   const categorizationExampleCount = 5;
-  const bucketSpan = '15m';
+  const bucketSpan = '1d';
   const memoryLimit = '15mb';
 
   function getExpectedRow(expectedJobId: string, expectedJobGroups: string[]) {
@@ -29,32 +29,32 @@ export default function ({ getService }: FtrProviderContext) {
       id: expectedJobId,
       description: jobDescription,
       jobGroups: [...new Set(expectedJobGroups)].sort(),
-      recordCount: '1,501',
+      recordCount: '1,000',
       memoryStatus: 'ok',
       jobState: 'closed',
       datafeedState: 'stopped',
-      latestTimestamp: '2019-11-21 06:01:13',
+      latestTimestamp: '2019-11-21 00:01:13',
     };
   }
 
   function getExpectedCounts(expectedJobId: string) {
     return {
       job_id: expectedJobId,
-      processed_record_count: '1,501',
-      processed_field_count: '1,501',
-      input_bytes: '335.4 KB',
-      input_field_count: '1,501',
+      processed_record_count: '1,000',
+      processed_field_count: '1,000',
+      input_bytes: '148.8 KB',
+      input_field_count: '1,000',
       invalid_date_count: '0',
       missing_field_count: '0',
       out_of_order_timestamp_count: '0',
-      empty_bucket_count: '21,428',
+      empty_bucket_count: '23',
       sparse_bucket_count: '0',
-      bucket_count: '22,059',
+      bucket_count: '230',
       earliest_record_timestamp: '2019-04-05 11:25:35',
-      latest_record_timestamp: '2019-11-21 06:01:13',
-      input_record_count: '1,501',
-      latest_bucket_timestamp: '2019-11-21 06:00:00',
-      latest_empty_bucket_timestamp: '2019-11-21 05:45:00',
+      latest_record_timestamp: '2019-11-21 00:01:13',
+      input_record_count: '1,000',
+      latest_bucket_timestamp: '2019-11-21 00:00:00',
+      latest_empty_bucket_timestamp: '2019-11-17 00:00:00',
     };
   }
 
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
       total_partition_field_count: '2',
       bucket_allocation_failures_count: '0',
       memory_status: 'ok',
-      timestamp: '2019-11-21 05:45:00',
+      timestamp: '2019-11-20 00:00:00',
     };
   }
 
@@ -77,8 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('categorization', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization');
-      await ml.testResources.createIndexPatternIfNeeded('ft_categorization', '@timestamp');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
+      await ml.testResources.createIndexPatternIfNeeded('ft_categorization_small', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_categorization');
+      await ml.testResources.deleteIndexPatternByTitle('ft_categorization_small');
     });
 
     it('job creation loads the categorization wizard for the source data', async () => {
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobManagement.navigateToNewJobSourceSelection();
 
       await ml.testExecution.logTestStep('job creation loads the job type selection page');
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_categorization');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_categorization_small');
 
       await ml.testExecution.logTestStep('job creation loads the categorization job wizard page');
       await ml.jobTypeSelection.selectCategorizationJob();
@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Apr 5, 2019 @ 11:25:35.770',
-        'Nov 21, 2019 @ 06:01:13.914'
+        'Nov 21, 2019 @ 00:01:13.923'
       );
 
       await ml.testExecution.logTestStep('job creation displays the event rate chart');
@@ -202,7 +202,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobId, 1);
 
       await ml.testExecution.logTestStep(
@@ -235,7 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job cloning sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Apr 5, 2019 @ 11:25:35.770',
-        'Nov 21, 2019 @ 06:01:13.914'
+        'Nov 21, 2019 @ 00:01:13.923'
       );
 
       await ml.testExecution.logTestStep('job cloning displays the event rate chart');
@@ -318,7 +317,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobIdClone, 1);
 
       await ml.testExecution.logTestStep(
@@ -350,7 +348,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         'job deletion does not display the deleted job in the job list any more'
       );
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobIdClone, 0);
 
       await ml.testExecution.logTestStep(

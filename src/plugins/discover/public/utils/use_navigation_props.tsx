@@ -8,11 +8,13 @@
 
 import { useMemo, useRef } from 'react';
 import { useHistory, matchPath } from 'react-router-dom';
+import type { Location } from 'history';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-import { esFilters, FilterManager } from '../../../data/public';
+import { disableFilter } from '@kbn/es-query';
+import { FilterManager } from '../../../data/public';
 import { url } from '../../../kibana_utils/common';
-import { getServices } from '../kibana_services';
+import { useDiscoverServices } from './use_discover_services';
 
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
 
@@ -38,7 +40,7 @@ export const getContextHash = (columns: string[], filterManager: FilterManager) 
       }),
       _a: rison.encode({
         columns,
-        filters: (appFilters || []).map(esFilters.disableFilter),
+        filters: (appFilters || []).map(disableFilter),
       }),
     }),
     { encode: false, sort: false }
@@ -53,12 +55,13 @@ export const getContextHash = (columns: string[], filterManager: FilterManager) 
  * Current history object should be used in callback, since url state might be changed
  * after expanded document opened.
  */
-const getCurrentBreadcrumbs = (isContextRoute: boolean, prevBreadcrumb?: string) => {
-  const { history: getHistory } = getServices();
-  const currentHistory = getHistory();
-  return isContextRoute
-    ? prevBreadcrumb
-    : '#' + currentHistory?.location.pathname + currentHistory?.location.search;
+
+const getCurrentBreadcrumbs = (
+  isContextRoute: boolean,
+  currentLocation: Location,
+  prevBreadcrumb?: string
+) => {
+  return isContextRoute ? prevBreadcrumb : '#' + currentLocation.pathname + currentLocation.search;
 };
 
 export const useMainRouteBreadcrumb = () => {
@@ -75,6 +78,8 @@ export const useNavigationProps = ({
   addBasePath,
 }: UseNavigationProps) => {
   const history = useHistory<HistoryState>();
+  const currentLocation = useDiscoverServices().history().location;
+
   const prevBreadcrumb = useRef(history?.location.state?.breadcrumb).current;
   const contextSearchHash = useMemo(
     () => getContextHash(columns, filterManager),
@@ -95,7 +100,9 @@ export const useNavigationProps = ({
       history.push({
         pathname: `/doc/${indexPatternId}/${rowIndex}`,
         search: `?id=${encodeURIComponent(rowId)}`,
-        state: { breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, prevBreadcrumb) },
+        state: {
+          breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
+        },
       });
     };
 
@@ -105,7 +112,9 @@ export const useNavigationProps = ({
           String(rowId)
         )}`,
         search: `?${contextSearchHash}`,
-        state: { breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, prevBreadcrumb) },
+        state: {
+          breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
+        },
       });
 
     return {

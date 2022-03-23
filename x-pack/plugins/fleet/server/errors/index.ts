@@ -32,6 +32,7 @@ export class PackageNotFoundError extends IngestManagerError {}
 export class PackageKeyInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
 export class AgentPolicyError extends IngestManagerError {}
+export class AgentPolicyNotFoundError extends IngestManagerError {}
 export class AgentNotFoundError extends IngestManagerError {}
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class PackageUnsupportedMediaTypeError extends IngestManagerError {}
@@ -42,6 +43,7 @@ export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
 export class PackagePolicyIneligibleForUpgradeError extends IngestManagerError {}
 export class PackagePolicyValidationError extends IngestManagerError {}
+export class BundledPackageNotFoundError extends IngestManagerError {}
 export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError {
   constructor(message = 'Cannot perform that action') {
     super(
@@ -55,6 +57,8 @@ export class GenerateServiceTokenError extends IngestManagerError {}
 export class FleetUnauthorizedError extends IngestManagerError {}
 
 export class OutputUnauthorizedError extends IngestManagerError {}
+export class OutputInvalidError extends IngestManagerError {}
+export class OutputLicenceError extends IngestManagerError {}
 
 export class ArtifactsClientError extends IngestManagerError {}
 export class ArtifactsClientAccessDeniedError extends IngestManagerError {

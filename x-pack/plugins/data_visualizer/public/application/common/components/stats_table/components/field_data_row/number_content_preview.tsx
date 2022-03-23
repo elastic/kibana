@@ -7,7 +7,6 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import classNames from 'classnames';
 import {
   MetricDistributionChart,
   MetricDistributionChartData,
@@ -46,7 +45,7 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
   }, []);
 
   return (
-    <div data-test-subj={dataTestSubj}>
+    <div data-test-subj={dataTestSubj} style={{ width: '100%' }}>
       <div className="dataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
         <MetricDistributionChart
           width={METRIC_DISTRIBUTION_CHART_WIDTH}
@@ -63,13 +62,15 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
               direction={'row'}
               data-test-subj={`${dataTestSubj}-legend`}
               responsive={false}
+              gutterSize="m"
             >
-              <EuiFlexItem className={'dataGridChart__legend'}>
+              <EuiFlexItem
+                className={'dataGridChart__legend'}
+                style={{ maxWidth: METRIC_DISTRIBUTION_CHART_WIDTH * 0.75 }}
+              >
                 {kibanaFieldFormat(legendText.min, fieldFormat)}
               </EuiFlexItem>
-              <EuiFlexItem
-                className={classNames('dataGridChart__legend', 'dataGridChart__legend--numeric')}
-              >
+              <EuiFlexItem className={'dataGridChart__legend'}>
                 {kibanaFieldFormat(legendText.max, fieldFormat)}
               </EuiFlexItem>
             </EuiFlexGroup>

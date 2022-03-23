@@ -41,9 +41,21 @@ export const heatmapGrid = () => ({
       argType: 'toggle',
     },
     {
+      name: 'isYAxisTitleVisible',
+      displayName: strings.getIsYAxisTitleVisibleDisplayName(),
+      help: strings.getIsYAxisTitleVisibleHelp(),
+      argType: 'toggle',
+    },
+    {
       name: 'isXAxisLabelVisible',
       displayName: strings.getIsXAxisLabelVisibleDisplayName(),
       help: strings.getIsXAxisLabelVisibleHelp(),
+      argType: 'toggle',
+    },
+    {
+      name: 'isXAxisTitleVisible',
+      displayName: strings.getIsXAxisTitleVisibleDisplayName(),
+      help: strings.getIsXAxisTitleVisibleHelp(),
       argType: 'toggle',
     },
   ],

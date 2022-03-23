@@ -14,14 +14,14 @@
 
 import { CloudSetup } from '../../../../cloud/server';
 import { decodeCloudId } from '../../../../fleet/common';
-import { UptimeConfig } from '../../../common/config';
+import { ServiceConfig } from '../../../common/config';
 
 export function getEsHosts({
   cloud,
   config,
 }: {
   cloud?: CloudSetup;
-  config: UptimeConfig;
+  config: ServiceConfig;
 }): string[] {
   const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
   const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
@@ -30,7 +30,7 @@ export function getEsHosts({
     return cloudHosts;
   }
 
-  const flagHosts = config?.unsafe?.service?.hosts;
+  const flagHosts = config.hosts;
 
   if (flagHosts && flagHosts.length > 0) {
     return flagHosts;

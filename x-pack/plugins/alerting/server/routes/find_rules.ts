@@ -12,7 +12,12 @@ import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
-import { AlertTypeParams, AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import {
+  AlertTypeParams,
+  AlertingRequestHandlerContext,
+  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
+} from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
 // query definition
@@ -79,6 +84,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         executionStatus,
         actions,
         scheduledTaskId,
+        snoozeEndTime,
         ...rest
       }) => ({
         ...rest,
@@ -92,6 +98,8 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         mute_all: muteAll,
         muted_alert_ids: mutedInstanceIds,
         scheduled_task_id: scheduledTaskId,
+        // Remove this object spread boolean check after snoozeEndTime is added to the public API
+        ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
         execution_status: executionStatus && {
           ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
           last_execution_date: executionStatus.lastExecutionDate,
@@ -108,14 +116,24 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
   };
 };
 
-export const findRulesRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState,
-  usageCounter?: UsageCounter
-) => {
+interface BuildFindRulesRouteParams {
+  licenseState: ILicenseState;
+  path: string;
+  router: IRouter<AlertingRequestHandlerContext>;
+  excludeFromPublicApi?: boolean;
+  usageCounter?: UsageCounter;
+}
+
+const buildFindRulesRoute = ({
+  licenseState,
+  path,
+  router,
+  excludeFromPublicApi = false,
+  usageCounter,
+}: BuildFindRulesRouteParams) => {
   router.get(
     {
-      path: `${BASE_ALERTING_API_PATH}/rules/_find`,
+      path,
       validate: {
         query: querySchema,
       },
@@ -145,13 +163,41 @@ export const findRulesRoute = (
           });
         }
 
-        const findResult = await rulesClient.find({ options });
+        const findResult = await rulesClient.find({ options, excludeFromPublicApi });
         return res.ok({
           body: rewriteBodyRes(findResult),
         });
       })
     )
   );
+};
+
+export const findRulesRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
+  buildFindRulesRoute({
+    excludeFromPublicApi: true,
+    licenseState,
+    path: `${BASE_ALERTING_API_PATH}/rules/_find`,
+    router,
+    usageCounter,
+  });
+};
+
+export const findInternalRulesRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
+  buildFindRulesRoute({
+    excludeFromPublicApi: false,
+    licenseState,
+    path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`,
+    router,
+    usageCounter,
+  });
 };
 
 function searchFieldsAsArray(searchFields: string | string[] | undefined): string[] | undefined {

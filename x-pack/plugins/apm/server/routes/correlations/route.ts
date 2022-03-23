@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
 import { isActivePlatinumLicense } from '../../../common/license_check';
 
@@ -26,8 +26,14 @@ import { fetchFieldsStats } from './queries/field_stats/get_fields_stats';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { LatencyCorrelation } from './../../../common/correlations/latency_correlations/types';
+import {
+  FieldStats,
+  TopValuesStats,
+} from './../../../common/correlations/field_stats_types';
+import { FieldValuePair } from './../../../common/correlations/types';
+import { FailedTransactionsCorrelation } from './../../../common/correlations/failed_transactions_correlations/types';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
@@ -49,7 +55,7 @@ const fieldCandidatesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ fieldCandidates: string[] }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -60,7 +66,7 @@ const fieldCandidatesRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_correlations_field_candidates',
-      async () =>
+      async (): Promise<{ fieldCandidates: string[] }> =>
         await fetchTransactionDurationFieldCandidates(esClient, {
           ...resources.params.query,
           index: indices.transaction,
@@ -87,7 +93,14 @@ const fieldStatsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    stats: Array<
+      import('./../../../common/correlations/field_stats_types').FieldStats
+    >;
+    errors: any[];
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -100,7 +113,7 @@ const fieldStatsRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_correlations_field_stats',
-      async () =>
+      async (): Promise<{ stats: FieldStats[]; errors: any[] }> =>
         await fetchFieldsStats(
           esClient,
           {
@@ -132,7 +145,11 @@ const fieldValueStatsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<
+    import('./../../../common/correlations/field_stats_types').TopValuesStats
+  > => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -145,7 +162,7 @@ const fieldValueStatsRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_correlations_field_value_stats',
-      async () =>
+      async (): Promise<TopValuesStats> =>
         await fetchFieldValueFieldStats(
           esClient,
           {
@@ -176,7 +193,14 @@ const fieldValuePairsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    fieldValuePairs: Array<
+      import('./../../../common/correlations/types').FieldValuePair
+    >;
+    errors: any[];
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -189,7 +213,7 @@ const fieldValuePairsRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_correlations_field_value_pairs',
-      async () =>
+      async (): Promise<{ errors: any[]; fieldValuePairs: FieldValuePair[] }> =>
         await fetchTransactionDurationFieldValuePairs(
           esClient,
           {
@@ -225,7 +249,16 @@ const significantCorrelationsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    latencyCorrelations: Array<
+      import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation
+    >;
+    ccsWarning: boolean;
+    totalDocCount: number;
+    fallbackResult?: import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation;
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -243,7 +276,11 @@ const significantCorrelationsRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_significant_correlations',
-      async () =>
+      async (): Promise<{
+        latencyCorrelations: LatencyCorrelation[];
+        ccsWarning: boolean;
+        totalDocCount: number;
+      }> =>
         await fetchSignificantCorrelations(
           esClient,
           paramsWithIndex,
@@ -271,7 +308,15 @@ const pValuesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    failedTransactionsCorrelations: Array<
+      import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation
+    >;
+    ccsWarning: boolean;
+    fallbackResult?: import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation;
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -289,15 +334,19 @@ const pValuesRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_p_values',
-      async () => await fetchPValues(esClient, paramsWithIndex, fieldCandidates)
+      async (): Promise<{
+        failedTransactionsCorrelations: FailedTransactionsCorrelation[];
+        ccsWarning: boolean;
+      }> => await fetchPValues(esClient, paramsWithIndex, fieldCandidates)
     );
   },
 });
 
-export const correlationsRouteRepository = createApmServerRouteRepository()
-  .add(pValuesRoute)
-  .add(fieldCandidatesRoute)
-  .add(fieldStatsRoute)
-  .add(fieldValueStatsRoute)
-  .add(fieldValuePairsRoute)
-  .add(significantCorrelationsRoute);
+export const correlationsRouteRepository = {
+  ...pValuesRoute,
+  ...fieldCandidatesRoute,
+  ...fieldStatsRoute,
+  ...fieldValueStatsRoute,
+  ...fieldValuePairsRoute,
+  ...significantCorrelationsRoute,
+};

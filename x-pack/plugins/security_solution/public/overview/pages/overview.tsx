@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiShowFor } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
-import styled from 'styled-components';
 
 import { AlertsByCategory } from '../components/alerts_by_category';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -31,19 +30,10 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
-import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
-const SidebarFlexItem = styled(EuiFlexItem)`
-  margin-right: 24px;
-`;
-
-const StyledSecuritySolutionPageWrapper = styled(SecuritySolutionPageWrapper)`
-  overflow-x: auto;
-`;
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -76,10 +66,7 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const { tiDataSources: allTiDataSources, isInitiallyLoaded: allTiDataSourcesLoaded } =
-    useAllTiDataSources();
-  const tiIntegrationStatus = useTiIntegrations();
-  const isTiLoaded = tiIntegrationStatus && allTiDataSourcesLoaded;
+  const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
@@ -91,20 +78,22 @@ const OverviewComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <StyledSecuritySolutionPageWrapper>
+          <SecuritySolutionPageWrapper>
             {!dismissMessage && !metadataIndexExists && canAccessFleet && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
                 <EuiSpacer size="l" />
               </>
             )}
-            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-              <SidebarFlexItem grow={false}>
-                <StatefulSidebar />
-              </SidebarFlexItem>
+            <EuiFlexGroup>
+              <EuiShowFor sizes={['xl']}>
+                <EuiFlexItem grow={1}>
+                  <StatefulSidebar />
+                </EuiFlexItem>
+              </EuiShowFor>
 
-              <EuiFlexItem grow={true}>
-                <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={3}>
+                <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
                   {hasIndexRead && hasKibanaREAD && (
                     <>
                       <EuiFlexItem grow={false}>
@@ -156,7 +145,6 @@ const OverviewComponent = () => {
                       <EuiFlexItem grow={1}>
                         {isTiLoaded && (
                           <ThreatIntelLinkPanel
-                            allIntegrationsInstalled={tiIntegrationStatus?.allIntegrationsInstalled}
                             allTiDataSources={allTiDataSources}
                             deleteQuery={deleteQuery}
                             from={from}
@@ -168,6 +156,8 @@ const OverviewComponent = () => {
                       <EuiFlexItem grow={1}>
                         {riskyHostsEnabled && (
                           <RiskyHostLinks
+                            deleteQuery={deleteQuery}
+                            setQuery={setQuery}
                             timerange={{
                               from,
                               to,
@@ -180,7 +170,7 @@ const OverviewComponent = () => {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </StyledSecuritySolutionPageWrapper>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
         <OverviewEmpty />

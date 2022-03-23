@@ -152,7 +152,7 @@ describe('Initializing the store', () => {
     it('starts new searchSessionId', async () => {
       const { store } = await makeLensStore({ preloadedState });
       await act(async () => {
-        await store.dispatch(loadInitial(defaultProps));
+        await store.dispatch(loadInitial({ ...defaultProps, initialInput: undefined }));
       });
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
@@ -224,7 +224,7 @@ describe('Initializing the store', () => {
       });
 
       expect(deps.lensServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
-        { query: { match_phrase: { src: 'test' } } },
+        { query: { match_phrase: { src: 'test' } }, meta: { index: 'injected!' } },
       ]);
 
       expect(store.getState()).toEqual({
@@ -290,6 +290,7 @@ describe('Initializing the store', () => {
           sharingSavedObjectProps: {
             outcome: 'aliasMatch',
             aliasTargetId: 'id2',
+            aliasPurpose: 'savedObjectConversion',
           },
         },
       });
@@ -301,10 +302,11 @@ describe('Initializing the store', () => {
       expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
         savedObjectId: defaultSavedObjectId,
       });
-      expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-        '#/edit/id2?search',
-        'Lens visualization'
-      );
+      expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+        path: '#/edit/id2?search',
+        aliasPurpose: 'savedObjectConversion',
+        objectNoun: 'Lens visualization',
+      });
     });
 
     it('adds to the recently accessed list on load', async () => {

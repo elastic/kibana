@@ -21,7 +21,7 @@ import type {
   FailedTransactionsCorrelationsResponse,
 } from '../../../../common/correlations/failed_transactions_correlations/types';
 
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 import {
   getInitialResponse,
@@ -77,13 +77,13 @@ export function useFailedTransactionsCorrelations() {
       // and histogram data for statistically significant results.
       const responseUpdate: FailedTransactionsCorrelationsResponse = {
         ccsWarning: false,
+        fallbackResult: undefined,
       };
 
       const [overallHistogramResponse, errorHistogramRespone] =
         await Promise.all([
           // Initial call to fetch the overall distribution for the log-log plot.
-          callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
+          callApmApi('POST /internal/apm/latency/overall_distribution', {
             signal: abortCtrl.current.signal,
             params: {
               body: {
@@ -92,8 +92,7 @@ export function useFailedTransactionsCorrelations() {
               },
             },
           }),
-          callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
+          callApmApi('POST /internal/apm/latency/overall_distribution', {
             signal: abortCtrl.current.signal,
             params: {
               body: {
@@ -128,13 +127,15 @@ export function useFailedTransactionsCorrelations() {
       });
       setResponse.flush();
 
-      const { fieldCandidates: candidates } = await callApmApi({
-        endpoint: 'GET /internal/apm/correlations/field_candidates',
-        signal: abortCtrl.current.signal,
-        params: {
-          query: fetchParams,
-        },
-      });
+      const { fieldCandidates: candidates } = await callApmApi(
+        'GET /internal/apm/correlations/field_candidates',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            query: fetchParams,
+          },
+        }
+      );
 
       if (abortCtrl.current.signal.aborted) {
         return;
@@ -149,6 +150,7 @@ export function useFailedTransactionsCorrelations() {
 
       const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
         [];
+      let fallbackResult: FailedTransactionsCorrelation | undefined;
       const fieldsToSample = new Set<string>();
       const chunkSize = 10;
       let chunkLoadCounter = 0;
@@ -156,13 +158,15 @@ export function useFailedTransactionsCorrelations() {
       const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-        const pValues = await callApmApi({
-          endpoint: 'POST /internal/apm/correlations/p_values',
-          signal: abortCtrl.current.signal,
-          params: {
-            body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },
-          },
-        });
+        const pValues = await callApmApi(
+          'POST /internal/apm/correlations/p_values',
+          {
+            signal: abortCtrl.current.signal,
+            params: {
+              body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },
+            },
+          }
+        );
 
         if (pValues.failedTransactionsCorrelations.length > 0) {
           pValues.failedTransactionsCorrelations.forEach((d) => {
@@ -175,6 +179,21 @@ export function useFailedTransactionsCorrelations() {
             getFailedTransactionsCorrelationsSortedByScore([
               ...failedTransactionsCorrelations,
             ]);
+        } else {
+          // If there's no significant correlations found and there's a fallback result
+          // Update the highest ranked/scored fall back result
+          if (pValues.fallbackResult) {
+            if (!fallbackResult) {
+              fallbackResult = pValues.fallbackResult;
+            } else {
+              if (
+                pValues.fallbackResult.normalizedScore >
+                fallbackResult.normalizedScore
+              ) {
+                fallbackResult = pValues.fallbackResult;
+              }
+            }
+          }
         }
 
         chunkLoadCounter++;
@@ -193,19 +212,26 @@ export function useFailedTransactionsCorrelations() {
 
       setResponse.flush();
 
-      const { stats } = await callApmApi({
-        endpoint: 'POST /internal/apm/correlations/field_stats',
-        signal: abortCtrl.current.signal,
-        params: {
-          body: {
-            ...fetchParams,
-            fieldsToSample: [...fieldsToSample],
+      const { stats } = await callApmApi(
+        'POST /internal/apm/correlations/field_stats',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              fieldsToSample: [...fieldsToSample],
+            },
           },
-        },
-      });
+        }
+      );
 
       responseUpdate.fieldStats = stats;
-      setResponse({ ...responseUpdate, loaded: LOADED_DONE, isRunning: false });
+      setResponse({
+        ...responseUpdate,
+        fallbackResult,
+        loaded: LOADED_DONE,
+        isRunning: false,
+      });
       setResponse.flush();
     } catch (e) {
       if (!abortCtrl.current.signal.aborted) {

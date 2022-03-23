@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LogIndexPatternReference } from '../../../../common/log_sources';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../observability/public';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
@@ -44,15 +44,6 @@ export const IndexPatternConfigurationPanel: React.FC<{
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.infra.logSourceConfiguration.dataViewSectionTitle"
-            defaultMessage="Data view"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
       <DataViewsInlineHelpMessage />
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
@@ -105,7 +96,7 @@ const DataViewsInlineHelpMessage = React.memo(() => {
   return (
     <FormattedMessage
       id="xpack.infra.logSourceConfiguration.logDataViewHelpText"
-      defaultMessage="Data views are shared among apps in the Kibana space and can be managed via the {dataViewsManagementLink}."
+      defaultMessage="Data views are shared among apps in the Kibana space and can be managed via the {dataViewsManagementLink}. A single data view can target multiple indices."
       values={{
         dataViewsManagementLink: (
           <EuiLink {...dataViewsManagementLinkProps}>

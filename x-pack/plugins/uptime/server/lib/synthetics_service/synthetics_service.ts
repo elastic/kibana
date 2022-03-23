@@ -7,12 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import {
-  CoreStart,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClient,
-} from '../../../../../../src/core/server';
+import { KibanaRequest, Logger } from '../../../../../../src/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -25,15 +20,19 @@ import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetic
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
-import { UptimeConfig } from '../../../common/config';
+import { ServiceConfig } from '../../../common/config';
 import { ServiceAPIClient } from './service_api_client';
 import { formatMonitorConfig } from './formatters/format_configs';
 import {
   ConfigKey,
   MonitorFields,
+  ServiceLocations,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
+import { getServiceLocations } from './get_service_locations';
+import { hydrateSavedObjects } from './hydrate_saved_object';
+import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -45,56 +44,73 @@ export class SyntheticsService {
   private readonly server: UptimeServerSetup;
   private apiClient: ServiceAPIClient;
 
-  private readonly config: UptimeConfig;
+  private readonly config: ServiceConfig;
   private readonly esHosts: string[];
 
   private apiKey: SyntheticsServiceApiKey | undefined;
 
-  constructor(logger: Logger, server: UptimeServerSetup) {
+  public locations: ServiceLocations;
+
+  private indexTemplateExists?: boolean;
+  private indexTemplateInstalling?: boolean;
+
+  constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
-    this.config = server.config;
+    this.config = config;
 
-    const { manifestUrl, username, password } = this.config.unsafe.service;
-
-    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger);
+    this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
+
+    this.locations = [];
+
+    this.registerServiceLocations();
   }
 
-  public init(coreStart: CoreStart) {
+  public init() {
     // TODO: Figure out fake kibana requests to handle API keys on start up
     // getAPIKeyForSyntheticsService({ server: this.server }).then((apiKey) => {
     //   if (apiKey) {
     //     this.apiKey = apiKey;
     //   }
     // });
-
-    this.setupIndexTemplates(coreStart);
+    this.setupIndexTemplates();
   }
 
-  private setupIndexTemplates(coreStart: CoreStart) {
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const savedObjectsClient = new SavedObjectsClient(
-      coreStart.savedObjects.createInternalRepository()
-    );
+  private setupIndexTemplates() {
+    if (this.indexTemplateExists) {
+      // if already installed, don't need to reinstall
+      return;
+    }
 
-    installSyntheticsIndexTemplates({
-      esClient,
-      server: this.server,
-      savedObjectsClient,
-    }).then(
-      (result) => {
-        if (result.name === 'synthetics' && result.install_status === 'installed') {
-          this.logger.info('Installed synthetics index templates');
-        } else if (result.name === 'synthetics' && result.install_status === 'install_failed') {
+    if (!this.indexTemplateInstalling) {
+      installSyntheticsIndexTemplates(this.server).then(
+        (result) => {
+          this.indexTemplateInstalling = false;
+          if (result.name === 'synthetics' && result.install_status === 'installed') {
+            this.logger.info('Installed synthetics index templates');
+            this.indexTemplateExists = true;
+          } else if (result.name === 'synthetics' && result.install_status === 'install_failed') {
+            this.logger.warn(new IndexTemplateInstallationError());
+            this.indexTemplateExists = false;
+          }
+        },
+        () => {
+          this.indexTemplateInstalling = false;
           this.logger.warn(new IndexTemplateInstallationError());
         }
-      },
-      () => {
-        this.logger.warn(new IndexTemplateInstallationError());
-      }
-    );
+      );
+      this.indexTemplateInstalling = true;
+    }
+  }
+
+  public registerServiceLocations() {
+    const service = this;
+    getServiceLocations(service.server).then((result) => {
+      service.locations = result.locations;
+      service.apiClient.locations = result.locations;
+    });
   }
 
   public registerSyncTask(taskManager: TaskManagerSetupContract) {
@@ -114,6 +130,9 @@ export class SyntheticsService {
             async run() {
               const { state } = taskInstance;
 
+              service.setupIndexTemplates();
+              service.registerServiceLocations();
+
               await service.pushConfigs();
 
               return { state };
@@ -130,8 +149,7 @@ export class SyntheticsService {
   public async scheduleSyncTask(
     taskManager: TaskManagerStartContract
   ): Promise<TaskInstance | null> {
-    const interval =
-      this.config.unsafe.service.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
+    const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     try {
       await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
@@ -166,6 +184,7 @@ export class SyntheticsService {
       try {
         this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
       } catch (err) {
+        this.logger.error(err);
         throw err;
       }
     }
@@ -176,13 +195,52 @@ export class SyntheticsService {
       throw error;
     }
 
+    this.logger.debug('Found api key and esHosts for service.');
+
     return {
       hosts: this.esHosts,
       api_key: `${this.apiKey.id}:${this.apiKey.apiKey}`,
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+  async pushConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { config_id: string };
+      }
+    >
+  ) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      this.logger.debug('No monitor found which can be pushed to service.');
+      return;
+    }
+    const data = {
+      monitors,
+      output: await this.getOutput(request),
+    };
+
+    this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+
+    try {
+      return await this.apiClient.post(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async runOnceConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { run_once: boolean; config_id: string };
+      }
+    >
+  ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -193,7 +251,33 @@ export class SyntheticsService {
     };
 
     try {
-      return await this.apiClient.post(data);
+      return await this.apiClient.runOnce(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async triggerConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { config_id: string; test_run_id: string };
+      }
+    >
+  ) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
+    const data = {
+      monitors,
+      output: await this.getOutput(request),
+    };
+
+    try {
+      return await this.apiClient.runOnce(data);
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -217,11 +301,23 @@ export class SyntheticsService {
 
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
+      namespaces: ['*'],
+      perPage: 10000,
     });
+
+    if (this.indexTemplateExists) {
+      // without mapping, querying won't make sense
+      hydrateSavedObjects({
+        monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
+        server: this.server,
+      });
+    }
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
       ...attributes,
       id,
+      fields_under_root: true,
+      fields: { config_id: id },
     })) as SyntheticsMonitorWithId[];
   }
 

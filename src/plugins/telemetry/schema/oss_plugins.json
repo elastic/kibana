@@ -6248,13 +6248,13 @@
                       "docsCount": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of documents in the index, including hidden nested documents."
+                          "description": "The number of lucene documents in the index, including hidden nested documents."
                         }
                       },
                       "docsDeleted": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of deleted documents in the index, including hidden nested documents."
+                          "description": "The number of deleted lucene documents in the index, including hidden nested documents."
                         }
                       },
                       "alias": {
@@ -6273,6 +6273,12 @@
                         "type": "long",
                         "_meta": {
                           "description": "The size in bytes of the index, for primaries and replicas."
+                        }
+                      },
+                      "savedObjectsDocsCount": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "The number of saved objects documents in the index."
                         }
                       }
                     }
@@ -7331,6 +7337,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enableCcsWarning": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "search:includeFrozen": {
           "type": "boolean",
           "_meta": {
@@ -7736,6 +7748,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "bfetch:disable": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "visualization:visualize:legacyPieChartsLibrary": {
           "type": "boolean",
           "_meta": {
@@ -7785,6 +7803,18 @@
           }
         },
         "observability:enableComparisonByDefault": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableInfrastructureView": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableServiceGroups": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -8851,7 +8881,7 @@
             }
           }
         },
-        "securitySolution:overview": {
+        "securitySolutionUI": {
           "type": "array",
           "items": {
             "properties": {
@@ -8870,7 +8900,7 @@
             }
           }
         },
-        "securitySolution:detections": {
+        "securitySolutionUI:overview": {
           "type": "array",
           "items": {
             "properties": {
@@ -8889,7 +8919,7 @@
             }
           }
         },
-        "securitySolution:hosts": {
+        "securitySolutionUI:detections": {
           "type": "array",
           "items": {
             "properties": {
@@ -8908,7 +8938,7 @@
             }
           }
         },
-        "securitySolution:network": {
+        "securitySolutionUI:hosts": {
           "type": "array",
           "items": {
             "properties": {
@@ -8927,7 +8957,7 @@
             }
           }
         },
-        "securitySolution:timelines": {
+        "securitySolutionUI:network": {
           "type": "array",
           "items": {
             "properties": {
@@ -8946,7 +8976,7 @@
             }
           }
         },
-        "securitySolution:case": {
+        "securitySolutionUI:timelines": {
           "type": "array",
           "items": {
             "properties": {
@@ -8965,7 +8995,26 @@
             }
           }
         },
-        "securitySolution:administration": {
+        "securitySolutionUI:case": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
+              }
+            }
+          }
+        },
+        "securitySolutionUI:administration": {
           "type": "array",
           "items": {
             "properties": {

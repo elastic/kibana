@@ -9,6 +9,7 @@ import {
   Logger,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsClientContract,
   SavedObjectsUpdateOptions,
 } from 'kibana/server';
 
@@ -62,6 +63,11 @@ interface BulkUpdateAttachmentArgs extends ClientArgs {
   comments: UpdateArgs[];
 }
 
+interface CommentStats {
+  nonAlerts: number;
+  alerts: number;
+}
+
 export class AttachmentService {
   constructor(private readonly log: Logger) {}
 
@@ -73,7 +79,7 @@ export class AttachmentService {
     try {
       this.log.debug(`Attempting to count alerts for case id ${caseId}`);
       const alertsFilter = buildFilter({
-        filters: [CommentType.alert, CommentType.generatedAlert],
+        filters: [CommentType.alert],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -122,7 +128,7 @@ export class AttachmentService {
     try {
       this.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
       const alertsFilter = buildFilter({
-        filters: [CommentType.alert, CommentType.generatedAlert],
+        filters: [CommentType.alert],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -278,5 +284,93 @@ export class AttachmentService {
       );
       throw error;
     }
+  }
+
+  public async getCaseCommentStats({
+    unsecuredSavedObjectsClient,
+    caseIds,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    caseIds: string[];
+  }): Promise<Map<string, CommentStats>> {
+    if (caseIds.length <= 0) {
+      return new Map();
+    }
+
+    interface AggsResult {
+      references: {
+        caseIds: {
+          buckets: Array<{
+            key: string;
+            doc_count: number;
+            reverse: {
+              alerts: {
+                value: number;
+              };
+              comments: {
+                doc_count: number;
+              };
+            };
+          }>;
+        };
+      };
+    }
+
+    const res = await unsecuredSavedObjectsClient.find<unknown, AggsResult>({
+      hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
+      hasReferenceOperator: 'OR',
+      type: CASE_COMMENT_SAVED_OBJECT,
+      perPage: 0,
+      aggs: AttachmentService.buildCommentStatsAggs(caseIds),
+    });
+
+    return (
+      res.aggregations?.references.caseIds.buckets.reduce((acc, idBucket) => {
+        acc.set(idBucket.key, {
+          nonAlerts: idBucket.reverse.comments.doc_count,
+          alerts: idBucket.reverse.alerts.value,
+        });
+        return acc;
+      }, new Map<string, CommentStats>()) ?? new Map()
+    );
+  }
+
+  private static buildCommentStatsAggs(
+    ids: string[]
+  ): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      references: {
+        nested: {
+          path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+        },
+        aggregations: {
+          caseIds: {
+            terms: {
+              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+              size: ids.length,
+            },
+            aggregations: {
+              reverse: {
+                reverse_nested: {},
+                aggregations: {
+                  alerts: {
+                    cardinality: {
+                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+                    },
+                  },
+                  comments: {
+                    filter: {
+                      term: {
+                        [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.user,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
   }
 }

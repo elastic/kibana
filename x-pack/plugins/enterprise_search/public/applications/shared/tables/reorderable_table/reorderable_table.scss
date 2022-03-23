@@ -27,4 +27,8 @@
   .euiDraggable .euiDraggable__item.euiDraggable__item--isDisabled {
     cursor: unset;
   }
+
+  .unorderableRows .reorderableTableRow {
+    background-color: $euiColorLightestShade;
+  }
 }

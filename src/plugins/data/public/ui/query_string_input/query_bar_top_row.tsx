@@ -24,7 +24,6 @@ import {
   EuiSuperUpdateButton,
   OnRefreshProps,
 } from '@elastic/eui';
-
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
@@ -285,7 +284,6 @@ export const QueryBarTopRow = React.memo(
       }
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'kbnQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
       });
 

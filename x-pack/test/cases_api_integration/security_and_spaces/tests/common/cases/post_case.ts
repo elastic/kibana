@@ -12,7 +12,6 @@ import {
   ConnectorTypes,
   ConnectorJiraTypeFields,
   CaseStatuses,
-  CaseType,
 } from '../../../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
@@ -114,10 +113,8 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: defaultUser,
           case_id: postedCase.id,
           comment_id: null,
-          sub_case_id: '',
           owner: 'securitySolutionFixture',
           payload: {
-            type: postedCase.type,
             description: postedCase.description,
             title: postedCase.title,
             tags: postedCase.tags,
@@ -138,10 +135,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy path', () => {
-      it('should not allow creating a collection style case', async () => {
-        await createCase(supertest, getPostCaseRequest({ type: CaseType.collection }), 400);
-      });
-
       it('400s when bad query supplied', async () => {
         await supertest
           .post(CASES_URL)
@@ -229,6 +222,20 @@ export default ({ getService }: FtrProviderContext): void => {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
 
         await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
+      });
+
+      describe('tags', async () => {
+        it('400s if the a tag is a whitespace', async () => {
+          const tags = ['test', ' '];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+
+        it('400s if the a tag is an empty string', async () => {
+          const tags = ['test', ''];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
       });
     });
 

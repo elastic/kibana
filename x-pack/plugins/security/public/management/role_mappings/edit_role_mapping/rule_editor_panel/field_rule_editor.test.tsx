@@ -8,7 +8,7 @@
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FieldRule } from '../../model';
 import { FieldRuleEditor } from './field_rule_editor';

@@ -10,11 +10,11 @@ import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from './saved_search_utils';
-import type { SavedSearchSavedObject } from '../../../../common';
+import type { SavedSearchSavedObject } from '../../../../common/types';
 import type { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import type { Filter, FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data_views/common/data_view.stub';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { fieldFormatsMock } from '../../../../../../../src/plugins/field_formats/common/mocks';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 
@@ -26,7 +26,7 @@ function createMockDataView(id: string) {
     attributes: { timeFieldName, fields, title },
   } = stubbedSavedObjectIndexPattern(id);
 
-  return new IndexPattern({
+  return new DataView({
     spec: {
       id,
       type,
@@ -212,7 +212,7 @@ describe('getEsQueryFromSavedSearch()', () => {
   it('return undefined if saved search is not provided', () => {
     expect(
       getEsQueryFromSavedSearch({
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         savedSearch: undefined,
         uiSettings: mockUiSettings,
       })
@@ -221,7 +221,7 @@ describe('getEsQueryFromSavedSearch()', () => {
   it('return search data from saved search if neither query nor filter is provided ', () => {
     expect(
       getEsQueryFromSavedSearch({
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         savedSearch: luceneSavedSearchObj,
         uiSettings: mockUiSettings,
       })
@@ -241,7 +241,7 @@ describe('getEsQueryFromSavedSearch()', () => {
   it('should override original saved search with the provided query ', () => {
     expect(
       getEsQueryFromSavedSearch({
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         savedSearch: luceneSavedSearchObj,
         uiSettings: mockUiSettings,
         query: {
@@ -266,7 +266,7 @@ describe('getEsQueryFromSavedSearch()', () => {
   it('should override original saved search with the provided filters ', () => {
     expect(
       getEsQueryFromSavedSearch({
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         savedSearch: luceneSavedSearchObj,
         uiSettings: mockUiSettings,
         query: {

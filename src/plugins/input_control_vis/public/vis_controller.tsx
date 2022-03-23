@@ -13,8 +13,9 @@ import { Subscription } from 'rxjs';
 
 import { I18nStart } from 'kibana/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { Filter } from '@kbn/es-query';
 import { VisualizationContainer } from '../../visualizations/public';
-import { FilterManager, Filter } from '../../data/public';
+import { FilterManager } from '../../data/public';
 
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';

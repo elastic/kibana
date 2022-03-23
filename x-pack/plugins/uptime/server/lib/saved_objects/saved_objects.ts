@@ -22,11 +22,11 @@ import { syntheticsServiceApiKey } from './service_api_key';
 export const registerUptimeSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  config: UptimeConfig
+  isServiceEnabled: boolean
 ) => {
   savedObjectsService.registerType(umDynamicSettings);
 
-  if (config?.unsafe?.service.enabled) {
+  if (isServiceEnabled) {
     savedObjectsService.registerType(syntheticsMonitor);
     savedObjectsService.registerType(syntheticsServiceApiKey);
 
@@ -38,7 +38,7 @@ export const registerUptimeSavedObjects = (
 };
 
 export interface UMSavedObjectsAdapter {
-  config: UptimeConfig;
+  config: UptimeConfig | null;
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
   setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
 }

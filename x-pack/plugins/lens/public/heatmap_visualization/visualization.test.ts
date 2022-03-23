@@ -20,7 +20,7 @@ import {
 } from './constants';
 import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
-import type { DatasourcePublicAPI, Operation } from '../types';
+import type { DatasourcePublicAPI, OperationDescriptor } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { layerTypes } from '../../common';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
@@ -41,6 +41,8 @@ function exampleState(): HeatmapVisualizationState {
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: true,
+      isXAxisTitleVisible: true,
     },
     shape: CHART_SHAPES.HEATMAP,
   };
@@ -74,6 +76,8 @@ describe('heatmap', () => {
           isCellLabelVisible: false,
           isYAxisLabelVisible: true,
           isXAxisLabelVisible: true,
+          isYAxisTitleVisible: true,
+          isXAxisTitleVisible: true,
         },
       });
     });
@@ -95,7 +99,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -153,10 +157,7 @@ describe('heatmap', () => {
               {
                 columnId: 'v-accessor',
                 triggerIcon: 'colorBy',
-                palette: [
-                  { color: 'blue', stop: 100 },
-                  { color: 'yellow', stop: 350 },
-                ],
+                palette: ['blue', 'yellow'],
               },
             ],
             filterOperations: isCellValueSupported,
@@ -362,7 +363,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -406,6 +407,7 @@ describe('heatmap', () => {
                   ],
                 },
               ],
+              lastRangeIsRightOpen: [true],
               legend: [
                 {
                   type: 'expression',
@@ -416,6 +418,7 @@ describe('heatmap', () => {
                       arguments: {
                         isVisible: [true],
                         position: [Position.Right],
+                        legendSize: [],
                       },
                     },
                   ],
@@ -432,12 +435,16 @@ describe('heatmap', () => {
                         // grid
                         strokeWidth: [],
                         strokeColor: [],
+                        xTitle: [],
+                        yTitle: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [true],
+                        isYAxisTitleVisible: [true],
                         // X-axis
                         isXAxisLabelVisible: [true],
+                        isXAxisTitleVisible: [true],
                       },
                     },
                   ],
@@ -477,7 +484,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -549,8 +556,12 @@ describe('heatmap', () => {
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [false],
+                        isYAxisTitleVisible: [true],
                         // X-axis
                         isXAxisLabelVisible: [false],
+                        isXAxisTitleVisible: [true],
+                        xTitle: [''],
+                        yTitle: [''],
                       },
                     },
                   ],
@@ -602,7 +613,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,

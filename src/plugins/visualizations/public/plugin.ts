@@ -36,6 +36,7 @@ import {
   setDocLinks,
   setSpaces,
   setTheme,
+  setExecutionContext,
 } from './services';
 import {
   createVisEmbeddableFromObject,
@@ -57,8 +58,8 @@ import {
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { showNewVisModal } from './wizard';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
-import { esFilters } from '../../../plugins/data/public';
 import { FeatureCatalogueCategory } from '../../home/public';
+import { visualizeEditorTrigger } from './triggers';
 
 import type { VisualizeServices } from './visualize_app/types';
 import type {
@@ -70,7 +71,7 @@ import type {
   SavedObjectsClientContract,
 } from '../../../core/public';
 import type { UsageCollectionSetup } from '../../usage_collection/public';
-import type { UiActionsStart } from '../../ui_actions/public';
+import type { UiActionsStart, UiActionsSetup } from '../../ui_actions/public';
 import type { SavedObjectsStart } from '../../saved_objects/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type {
@@ -78,6 +79,7 @@ import type {
   Start as InspectorStart,
 } from '../../../plugins/inspector/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../plugins/data_views/public';
 import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
@@ -86,6 +88,7 @@ import type { SharePluginSetup, SharePluginStart } from '../../share/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import type { PresentationUtilPluginStart } from '../../presentation_util/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
+import type { ScreenshotModePluginStart } from '../../screenshot_mode/public';
 import type { HomePublicPluginSetup } from '../../home/public';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
@@ -106,6 +109,7 @@ export interface VisualizationsSetupDeps {
   embeddable: EmbeddableSetup;
   expressions: ExpressionsSetup;
   inspector: InspectorSetup;
+  uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
@@ -114,6 +118,7 @@ export interface VisualizationsSetupDeps {
 
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
@@ -129,6 +134,7 @@ export interface VisualizationsStartDeps {
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 /**
@@ -166,6 +172,7 @@ export class VisualizationsPlugin
       home,
       urlForwarding,
       share,
+      uiActions,
     }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     const {
@@ -189,7 +196,7 @@ export class VisualizationsPlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: data.query.filterManager.getGlobalFilters(),
             }))
           ),
         },
@@ -232,10 +239,10 @@ export class VisualizationsPlugin
         };
 
         // make sure the index pattern list is up to date
-        pluginsStart.data.indexPatterns.clearCache();
+        pluginsStart.dataViews.clearCache();
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.data.indexPatterns.ensureDefaultDataView();
+        await pluginsStart.dataViews.ensureDefaultDataView();
 
         appMounted();
 
@@ -263,6 +270,7 @@ export class VisualizationsPlugin
           pluginInitializerContext: this.initializerContext,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
           share: pluginsStart.share,
@@ -287,6 +295,11 @@ export class VisualizationsPlugin
 
         params.element.classList.add('visAppWrapper');
         const { renderApp } = await import('./visualize_app');
+        if (pluginsStart.screenshotMode.isScreenshotMode()) {
+          params.element.classList.add('visEditorScreenshotModeActive');
+          // @ts-expect-error TS error, cannot find type declaration for scss
+          await import('./visualize_screenshot_mode.scss');
+        }
         const unmount = renderApp(params, services);
         return () => {
           data.search.session.clear();
@@ -326,6 +339,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
+    uiActions.registerTrigger(visualizeEditorTrigger);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
@@ -362,6 +376,7 @@ export class VisualizationsPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
+    setExecutionContext(core.executionContext);
     setChrome(core.chrome);
 
     if (spaces) {

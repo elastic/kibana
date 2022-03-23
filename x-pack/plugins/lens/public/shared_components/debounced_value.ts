@@ -21,9 +21,11 @@ export const useDebouncedValue = <T>(
   {
     onChange,
     value,
+    defaultValue,
   }: {
     onChange: (val: T) => void;
     value: T;
+    defaultValue?: T;
   },
   { allowFalsyValue }: { allowFalsyValue?: boolean } = {}
 ) => {
@@ -32,7 +34,7 @@ export const useDebouncedValue = <T>(
   const shouldUpdateWithFalsyValue = Boolean(allowFalsyValue);
 
   // Save the initial value
-  const initialValue = useRef(value);
+  const initialValue = useRef(defaultValue ?? value);
 
   const flushChangesTimeout = useRef<NodeJS.Timeout | undefined>();
 

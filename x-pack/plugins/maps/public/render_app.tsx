@@ -27,6 +27,7 @@ import {
 import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
+import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -75,6 +76,7 @@ export async function renderApp(
 
   const stateTransfer = getEmbeddableService().getStateTransfer();
 
+  registerLayerWizards();
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {

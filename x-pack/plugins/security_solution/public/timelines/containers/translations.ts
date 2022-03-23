@@ -13,10 +13,3 @@ export const ERROR_TIMELINE_EVENTS = i18n.translate(
     defaultMessage: `An error has occurred on timeline events search`,
   }
 );
-
-export const FAIL_TIMELINE_EVENTS = i18n.translate(
-  'xpack.securitySolution.timelineEvents.failSearchDescription',
-  {
-    defaultMessage: `Failed to run search on timeline events`,
-  }
-);

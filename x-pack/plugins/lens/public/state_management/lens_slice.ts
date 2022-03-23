@@ -12,16 +12,14 @@ import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
+import type { VisualizeEditorContext, Suggestion } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import { LensAppState, LensStoreDeps, VisualizationState } from './types';
 import { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
 import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
-import {
-  getVisualizeFieldSuggestions,
-  Suggestion,
-} from '../editor_frame_service/editor_frame/suggestion_helpers';
+import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 
 export const initialState: LensAppState = {
@@ -85,6 +83,10 @@ export const getPreloadedState = ({
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
+export const enableAutoApply = createAction<void>('lens/enableAutoApply');
+export const disableAutoApply = createAction<void>('lens/disableAutoApply');
+export const applyChanges = createAction<void>('lens/applyChanges');
+export const setChangesApplied = createAction<boolean>('lens/setChangesApplied');
 export const updateState = createAction<{
   updater: (prevState: LensAppState) => LensAppState;
 }>('lens/updateState');
@@ -131,7 +133,7 @@ export const initEmpty = createAction(
     initialContext,
   }: {
     newState: Partial<LensAppState>;
-    initialContext?: VisualizeFieldContext;
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   }) {
     return { payload: { layerId: generateId(), newState, initialContext } };
   }
@@ -164,6 +166,10 @@ export const lensActions = {
   setState,
   onActiveDataChange,
   setSaveable,
+  enableAutoApply,
+  disableAutoApply,
+  applyChanges,
+  setChangesApplied,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -203,6 +209,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...state,
         isSaveable: payload,
       };
+    },
+    [enableAutoApply.type]: (state) => {
+      state.autoApplyDisabled = false;
+    },
+    [disableAutoApply.type]: (state) => {
+      state.autoApplyDisabled = true;
+      state.changesApplied = true;
+    },
+    [applyChanges.type]: (state) => {
+      if (typeof state.applyChangesCounter === 'undefined') {
+        state.applyChangesCounter = 0;
+      }
+      state.applyChangesCounter!++;
+    },
+    [setChangesApplied.type]: (state, { payload: applied }) => {
+      state.changesApplied = applied;
     },
     [updateState.type]: (
       state,
@@ -411,7 +433,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }: {
         payload: {
           newState: Partial<LensAppState>;
-          initialContext: VisualizeFieldContext | undefined;
+          initialContext: VisualizeFieldContext | VisualizeEditorContext | undefined;
           layerId: string;
         };
       }

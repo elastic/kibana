@@ -59,6 +59,7 @@ export default function () {
         '--logging.appenders.deprecation.type=console',
         '--logging.appenders.deprecation.layout.type=json',
         '--logging.loggers[0].name=elasticsearch.deprecation',
+        '--logging.loggers[0].level=all',
         '--logging.loggers[0].appenders[0]=deprecation',
       ],
     },

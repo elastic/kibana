@@ -11,6 +11,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
+  isJobWithGeoData,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
@@ -29,14 +30,12 @@ import {
   Job,
 } from '../../../common/types/anomaly_detection_jobs';
 import {
-  MlJobsResponse,
-  MlJobsStatsResponse,
   JobsExistResponse,
   BulkCreateResults,
   ResetJobsResponse,
 } from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
+import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
 import { CalendarManager } from '../calendar';
@@ -157,10 +156,8 @@ export function jobsProvider(
     const results: ResetJobsResponse = {};
     for (const jobId of jobIds) {
       try {
-        const {
-          // @ts-expect-error @elastic-elasticsearch resetJob response incorrect, missing task
-          body: { task },
-        } = await mlClient.resetJob({
+        // @ts-expect-error @elastic-elasticsearch resetJob response incorrect, missing task
+        const { task } = await mlClient.resetJob({
           job_id: jobId,
           wait_for_completion: false,
         });
@@ -183,7 +180,7 @@ export function jobsProvider(
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const { body } = await mlClient.stopDatafeed({
+    const body = await mlClient.stopDatafeed({
       datafeed_id: datafeedId,
       body: { force: true },
     });
@@ -220,6 +217,7 @@ export function jobsProvider(
       const tempJob: MlSummaryJob = {
         id: job.job_id,
         description: job.description || '',
+        customSettings: job.custom_settings,
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         processed_record_count: job.data_counts?.processed_record_count,
         earliestStartTimestampMs: getEarliestDatafeedStartTime(
@@ -271,6 +269,11 @@ export function jobsProvider(
     return jobs;
   }
 
+  async function getJobIdsWithGeo(): Promise<string[]> {
+    const body = await mlClient.getJobs();
+    return body.jobs.filter(isJobWithGeoData).map((job) => job.job_id);
+  }
+
   async function jobsWithTimerange() {
     const fullJobsList = await createFullJobsList();
     const jobsMap: { [id: string]: string[] } = {};
@@ -307,8 +310,8 @@ export function jobsProvider(
   }
 
   async function getJobForCloning(jobId: string) {
-    const [{ body: jobResults }, datafeedResult] = await Promise.all([
-      mlClient.getJobs<MlJobsResponse>({ job_id: jobId, exclude_generated: true }),
+    const [jobResults, datafeedResult] = await Promise.all([
+      mlClient.getJobs({ job_id: jobId, exclude_generated: true }),
       getDatafeedByJobId(jobId, true),
     ]);
     const result: { datafeed?: Datafeed; job?: Job } = { job: undefined, datafeed: undefined };
@@ -319,10 +322,17 @@ export function jobsProvider(
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
       if (job) {
+        removeUnClonableCustomSettings(job);
         result.job = job;
       }
     }
     return result;
+  }
+
+  function removeUnClonableCustomSettings(job: Job) {
+    if (isPopulatedObject(job.custom_settings)) {
+      delete job.custom_settings.managed;
+    }
   }
 
   async function createFullJobsList(jobIds: string[] = []) {
@@ -335,19 +345,17 @@ export function jobsProvider(
     const jobIdsString = jobIds.join();
 
     const [
-      { body: jobResults },
-      { body: jobStatsResults },
-      { body: datafeedResults },
-      { body: datafeedStatsResults },
+      jobResults,
+      jobStatsResults,
+      datafeedResults,
+      datafeedStatsResults,
       calendarResults,
       latestBucketTimestampByJob,
     ] = await Promise.all([
-      mlClient.getJobs<MlJobsResponse>(jobIds.length > 0 ? { job_id: jobIdsString } : undefined),
-      mlClient.getJobStats<MlJobsStatsResponse>(
-        jobIds.length > 0 ? { job_id: jobIdsString } : undefined
-      ),
-      mlClient.getDatafeeds<MlDatafeedsResponse>(),
-      mlClient.getDatafeedStats<MlDatafeedsStatsResponse>(),
+      mlClient.getJobs(jobIds.length > 0 ? { job_id: jobIdsString } : undefined),
+      mlClient.getJobStats(jobIds.length > 0 ? { job_id: jobIdsString } : undefined),
+      mlClient.getDatafeeds(),
+      mlClient.getDatafeedStats(),
       calMngr.getAllCalendars(),
       getLatestBucketTimestampByJob(),
     ]);
@@ -491,7 +499,7 @@ export function jobsProvider(
   async function blockingJobTasks() {
     const jobs: Array<Record<string, JobAction>> = [];
     try {
-      const { body } = await asInternalUser.tasks.list({
+      const body = await asInternalUser.tasks.list({
         actions: JOB_ACTION_TASKS,
         detailed: true,
       });
@@ -513,9 +521,7 @@ export function jobsProvider(
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
-      const {
-        body: { jobs: tempJobs },
-      } = await mlClient.getJobs();
+      const { jobs: tempJobs } = await mlClient.getJobs();
 
       jobs.push(
         ...tempJobs
@@ -541,11 +547,11 @@ export function jobsProvider(
           continue;
         }
 
-        const { body } = allSpaces
-          ? await client.asInternalUser.ml.getJobs<MlJobsResponse>({
+        const body = allSpaces
+          ? await client.asInternalUser.ml.getJobs({
               job_id: jobId,
             })
-          : await mlClient.getJobs<MlJobsResponse>({
+          : await mlClient.getJobs({
               job_id: jobId,
             });
 
@@ -564,7 +570,7 @@ export function jobsProvider(
 
   async function getAllJobAndGroupIds() {
     const { getAllGroups } = groupsProvider(mlClient);
-    const { body } = await mlClient.getJobs<MlJobsResponse>();
+    const body = await mlClient.getJobs();
     const jobIds = body.jobs.map((job) => job.job_id);
     const groups = await getAllGroups();
     const groupIds = groups.map((group) => group.id);
@@ -577,14 +583,14 @@ export function jobsProvider(
 
   async function getLookBackProgress(jobId: string, start: number, end: number) {
     const datafeedId = `datafeed-${jobId}`;
-    const [{ body }, isRunning] = await Promise.all([
-      mlClient.getJobStats<MlJobsStatsResponse>({ job_id: jobId }),
+    const [body, isRunning] = await Promise.all([
+      mlClient.getJobStats({ job_id: jobId }),
       isDatafeedRunning(datafeedId),
     ]);
 
     if (body.jobs.length) {
       const statsForJob = body.jobs[0];
-      const time = statsForJob.data_counts.latest_record_timestamp;
+      const time = statsForJob.data_counts.latest_record_timestamp!;
       const progress = (time - start) / (end - start);
       const isJobClosed = statsForJob.state === JOB_STATE.CLOSED;
       return {
@@ -597,7 +603,7 @@ export function jobsProvider(
   }
 
   async function isDatafeedRunning(datafeedId: string) {
-    const { body } = await mlClient.getDatafeedStats<MlDatafeedsStatsResponse>({
+    const body = await mlClient.getDatafeedStats({
       datafeed_id: datafeedId,
     });
     if (body.datafeeds.length) {
@@ -625,6 +631,7 @@ export function jobsProvider(
         results[job.job_id] = { job: { success: false }, datafeed: { success: false } };
 
         try {
+          // @ts-expect-error type mismatch on MlPutJobRequest.body
           await mlClient.putJob({ job_id: job.job_id, body: job });
           results[job.job_id].job = { success: true };
         } catch (error) {
@@ -661,5 +668,6 @@ export function jobsProvider(
     getAllJobAndGroupIds,
     getLookBackProgress,
     bulkCreate,
+    getJobIdsWithGeo,
   };
 }

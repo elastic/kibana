@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 import { licensingMock } from '../../../../../licensing/public/mocks';
 import { setupEnvironment } from '../../helpers';

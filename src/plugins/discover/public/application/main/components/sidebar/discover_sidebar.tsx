@@ -25,6 +25,7 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -38,7 +39,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-import { DataViewField } from '../../../../../../data_views/common';
+import { DataViewField } from '../../../../../../data_views/public';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -68,6 +69,8 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
 
   editField: (fieldName?: string) => void;
 
+  createNewDataView: () => void;
+
   /**
    * a statistics of the distribution of fields in the given hits
    */
@@ -93,7 +96,6 @@ export function DiscoverSidebarComponent({
   onAddFilter,
   onRemoveField,
   selectedIndexPattern,
-  services,
   setFieldFilter,
   trackUiMetric,
   useNewFieldsApi = false,
@@ -104,10 +106,11 @@ export function DiscoverSidebarComponent({
   closeFlyout,
   editField,
   viewMode,
+  createNewDataView,
 }: DiscoverSidebarProps) {
+  const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
 
-  const { dataViewFieldEditor } = services;
   const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditDataViewField = !!dataViewFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
@@ -138,10 +141,7 @@ export function DiscoverSidebarComponent({
     [documents, columns, selectedIndexPattern]
   );
 
-  const popularLimit = useMemo(
-    () => services.uiSettings.get(FIELDS_LIMIT_SETTING),
-    [services.uiSettings]
-  );
+  const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
 
   const {
     selected: selectedFields,
@@ -299,10 +299,10 @@ export function DiscoverSidebarComponent({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DiscoverIndexPatternManagement
-              services={services}
               selectedIndexPattern={selectedIndexPattern}
               editField={editField}
               useNewFieldsApi={useNewFieldsApi}
+              createNewDataView={createNewDataView}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -337,10 +337,10 @@ export function DiscoverSidebarComponent({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DiscoverIndexPatternManagement
-                services={services}
                 selectedIndexPattern={selectedIndexPattern}
                 useNewFieldsApi={useNewFieldsApi}
                 editField={editField}
+                createNewDataView={createNewDataView}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

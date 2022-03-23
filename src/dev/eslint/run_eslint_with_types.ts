@@ -109,9 +109,9 @@ export function runEslintWithTypes() {
               return undefined;
             } else {
               log.error(`${project.name} failed`);
-              log.indent(4);
-              log.write(proc.all);
-              log.indent(-4);
+              log.indent(4, () => {
+                log.write(proc.all);
+              });
               return project;
             }
           }, concurrency),

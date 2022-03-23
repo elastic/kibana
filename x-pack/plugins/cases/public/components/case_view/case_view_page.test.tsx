@@ -17,16 +17,16 @@ import {
   basicCaseMetrics,
   caseUserActions,
   getAlertUserAction,
+  connectorsMock,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { CaseType, ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/api';
 import { caseViewProps, caseData } from './index.test';
 
 jest.mock('../../containers/use_update_case');
@@ -35,7 +35,7 @@ jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_action_tree/user_action_timestamp');
+jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
@@ -139,10 +139,6 @@ describe('CaseViewPage', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-    ).toEqual(data.createdAt);
-
-    expect(
       wrapper
         .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
         .first()
@@ -178,9 +174,6 @@ describe('CaseViewPage', () => {
     );
 
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-      ).toEqual(basicCaseClosed.closedAt);
       expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
         'Closed'
       );
@@ -506,7 +499,7 @@ describe('CaseViewPage', () => {
       expect(
         wrapper
           .find(
-            '[data-test-subj="comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
+            '[data-test-subj="user-action-alert-comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
           )
           .first()
           .text()
@@ -580,70 +573,6 @@ describe('CaseViewPage', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeFalsy();
-      });
-    });
-  });
-
-  describe('Collections', () => {
-    it('it does not allow the user to update the status', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <CaseViewPage
-            {...caseProps}
-            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="case-action-bar-wrapper"]').exists()).toBe(true);
-        expect(wrapper.find('button[data-test-subj="case-view-status"]').exists()).toBe(false);
-        expect(wrapper.find('[data-test-subj="user-actions"]').exists()).toBe(true);
-        expect(
-          wrapper.find('button[data-test-subj="case-view-status-action-button"]').exists()
-        ).toBe(false);
-      });
-    });
-
-    it('it shows the push button when has data to push', async () => {
-      useGetCaseUserActionsMock.mockImplementation(() => ({
-        ...defaultUseGetCaseUserActions,
-        hasDataToPush: true,
-      }));
-
-      const wrapper = mount(
-        <TestProviders>
-          <CaseViewPage
-            {...caseProps}
-            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="has-data-to-push-button"]').exists()).toBe(true);
-      });
-    });
-
-    it('it does not show the horizontal rule when does NOT has data to push', async () => {
-      useGetCaseUserActionsMock.mockImplementation(() => ({
-        ...defaultUseGetCaseUserActions,
-        hasDataToPush: false,
-      }));
-
-      const wrapper = mount(
-        <TestProviders>
-          <CaseViewPage
-            {...caseProps}
-            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(
-          wrapper.find('[data-test-subj="case-view-bottom-actions-horizontal-rule"]').exists()
-        ).toBe(false);
       });
     });
   });

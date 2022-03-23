@@ -7,191 +7,242 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
-import { ML_APP_NAME } from '../../../../common/constants/app';
-
-export type TabId =
-  | 'access-denied'
-  | 'anomaly_detection'
-  | 'data_frame_analytics'
-  | 'trained_models'
-  | 'datavisualizer'
-  | 'overview'
-  | 'settings';
+import type { MlRoute } from '../../routing';
+import { ML_PAGES } from '../../../../common/constants/locator';
+import { checkPermission } from '../../capabilities/check_capabilities';
 
 export interface Tab {
-  id: TabId;
-  name: any;
-  disabled: boolean;
-  betaTag?: JSX.Element;
-  items?: Tab[];
-}
-
-function getTabs(disableLinks: boolean): Tab[] {
-  return [
-    {
-      id: 'overview',
-      name: i18n.translate('xpack.ml.navMenu.overviewTabLinkText', {
-        defaultMessage: 'Overview',
-      }),
-      disabled: disableLinks,
-    },
-    {
-      id: 'anomaly_detection',
-      name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
-        defaultMessage: 'Anomaly Detection',
-      }),
-      disabled: disableLinks,
-      items: [
-        {
-          id: 'settings',
-          name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
-            defaultMessage: 'Settings',
-          }),
-          disabled: disableLinks,
-        },
-      ],
-    },
-    {
-      id: 'data_frame_analytics',
-      name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
-        defaultMessage: 'Data Frame Analytics',
-      }),
-      disabled: disableLinks,
-    },
-    {
-      id: 'trained_models',
-      name: i18n.translate('xpack.ml.navMenu.trainedModelsTabLinkText', {
-        defaultMessage: 'Model Management',
-      }),
-      disabled: disableLinks,
-    },
-    {
-      id: 'datavisualizer',
-      name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
-        defaultMessage: 'Data Visualizer',
-      }),
-      disabled: false,
-    },
-  ];
-}
-
-interface TabData {
-  testSubject: string;
-  pathId?: MlLocatorParams['page'];
+  id: string;
   name: string;
+  disabled?: boolean;
+  items?: Tab[];
+  testSubj?: string;
+  pathId?: MlLocatorParams['page'];
+  onClick?: () => Promise<void>;
+  /** Indicates if item should be marked as active with nested routes */
+  highlightNestedRoutes?: boolean;
 }
 
-export const TAB_DATA: Record<TabId, TabData> = {
-  overview: {
-    testSubject: 'mlMainTab overview',
-    name: i18n.translate('xpack.ml.overviewTabLabel', {
-      defaultMessage: 'Overview',
-    }),
-  },
-  // Note that anomaly detection jobs list is mapped to ml#/jobs.
-  anomaly_detection: {
-    testSubject: 'mlMainTab anomalyDetection',
-    name: i18n.translate('xpack.ml.anomalyDetectionTabLabel', {
-      defaultMessage: 'Anomaly Detection',
-    }),
-    pathId: 'jobs',
-  },
-  data_frame_analytics: {
-    testSubject: 'mlMainTab dataFrameAnalytics',
-    name: i18n.translate('xpack.ml.dataFrameAnalyticsTabLabel', {
-      defaultMessage: 'Data Frame Analytics',
-    }),
-  },
-  trained_models: {
-    testSubject: 'mlMainTab modelManagement',
-    name: i18n.translate('xpack.ml.trainedModelsTabLabel', {
-      defaultMessage: 'Trained Models',
-    }),
-  },
-  datavisualizer: {
-    testSubject: 'mlMainTab dataVisualizer',
-    name: i18n.translate('xpack.ml.dataVisualizerTabLabel', {
-      defaultMessage: 'Data Visualizer',
-    }),
-  },
-  settings: {
-    testSubject: 'mlMainTab settings',
-    name: i18n.translate('xpack.ml.settingsTabLabel', {
-      defaultMessage: 'Settings',
-    }),
-  },
-  'access-denied': {
-    testSubject: 'mlMainTab overview',
-    name: i18n.translate('xpack.ml.accessDeniedTabLabel', {
-      defaultMessage: 'Access Denied',
-    }),
-  },
-};
-
-export function useSideNavItems(activeRouteId: string | undefined) {
-  const {
-    services: {
-      chrome: { docTitle },
-    },
-  } = useMlKibana();
+export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
 
-  useEffect(() => {
-    const title = TAB_DATA[activeRouteId as TabId]?.name;
-    if (title) {
-      docTitle.change([title, ML_APP_NAME]);
-    }
-  }, [activeRouteId]);
+  const mlFeaturesDisabled = !isFullLicense();
+  const canViewMlNodes = checkPermission('canViewMlNodes');
 
   const [globalState] = useUrlState('_g');
 
-  const redirectToTab = async (defaultPathId: MlLocatorParams['page']) => {
-    const pageState =
-      globalState?.refreshInterval !== undefined
-        ? {
-            globalState: {
-              refreshInterval: globalState.refreshInterval,
-            },
-          }
-        : undefined;
-    // TODO - Fix ts so passing pageState won't default to MlGenericUrlState when pageState is passed in
-    // @ts-ignore
-    const path = await mlLocator.getUrl({
-      page: defaultPathId,
-      // only retain the refreshInterval part of globalState
-      // appState will not be considered.
-      pageState,
-    });
+  const pageState = useMemo(() => {
+    return globalState?.refreshInterval !== undefined
+      ? {
+          globalState: {
+            refreshInterval: globalState.refreshInterval,
+          },
+        }
+      : undefined;
+  }, [globalState?.refreshInterval]);
 
-    await navigateToPath(path, false);
-  };
+  const redirectToTab = useCallback(
+    async (defaultPathId: MlLocatorParams['page']) => {
+      const path = await mlLocator!.getUrl({
+        page: defaultPathId,
+        // only retain the refreshInterval part of globalState
+        // appState will not be considered.
+        pageState,
+      });
 
-  const tabs = getTabs(!isFullLicense());
+      await navigateToPath(path, false);
+    },
+    [pageState]
+  );
 
-  function getTabItem(tab: Tab): EuiSideNavItemType<any> {
-    const { id, disabled, items } = tab;
-    const testSubject = TAB_DATA[id].testSubject;
-    const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
+  const tabsDefinition: Tab[] = useMemo((): Tab[] => {
+    const disableLinks = mlFeaturesDisabled;
 
-    return {
-      id,
-      name: tab.name,
-      isSelected: id === activeRouteId,
-      disabled,
-      onClick: () => {
-        redirectToTab(defaultPathId);
+    return [
+      {
+        id: 'main_section',
+        name: '',
+        items: [
+          {
+            id: 'overview',
+            pathId: ML_PAGES.OVERVIEW,
+            name: i18n.translate('xpack.ml.navMenu.overviewTabLinkText', {
+              defaultMessage: 'Overview',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab overview',
+          },
+        ],
       },
-      'data-test-subj': testSubject + (id === activeRouteId ? ' selected' : ''),
-      items: items ? items.map(getTabItem) : undefined,
-      forceOpen: true,
-    };
-  }
+      {
+        id: 'anomaly_detection_section',
+        name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
+          defaultMessage: 'Anomaly Detection',
+        }),
+        items: [
+          {
+            id: 'anomaly_detection',
+            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.jobsManagementText', {
+              defaultMessage: 'Jobs',
+            }),
+            disabled: disableLinks,
+            pathId: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+            testSubj: 'mlMainTab anomalyDetection',
+          },
+          {
+            id: 'anomaly_explorer',
+            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.anomalyExplorerText', {
+              defaultMessage: 'Anomaly Explorer',
+            }),
+            disabled: disableLinks,
+            pathId: ML_PAGES.ANOMALY_EXPLORER,
+            testSubj: 'mlMainTab anomalyExplorer',
+          },
+          {
+            id: 'single_metric_viewer',
+            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.singleMetricViewerText', {
+              defaultMessage: 'Single Metric Viewer',
+            }),
+            pathId: ML_PAGES.SINGLE_METRIC_VIEWER,
+            disabled: disableLinks,
+            testSubj: 'mlMainTab singleMetricViewer',
+          },
+          {
+            id: 'settings',
+            pathId: ML_PAGES.SETTINGS,
+            name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
+              defaultMessage: 'Settings',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab settings',
+            highlightNestedRoutes: true,
+          },
+        ],
+      },
+      {
+        id: 'data_frame_analytics_section',
+        name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
+          defaultMessage: 'Data Frame Analytics',
+        }),
+        disabled: disableLinks,
+        items: [
+          {
+            id: 'data_frame_analytics_jobs',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.jobsManagementText', {
+              defaultMessage: 'Jobs',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalytics',
+          },
+          {
+            id: 'data_frame_analytics_results_explorer',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
+              defaultMessage: 'Results Explorer',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
+          },
+          {
+            id: 'data_frame_analytics_job_map',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
+              defaultMessage: 'Analytics Map',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsMap',
+          },
+        ],
+      },
+      {
+        id: 'model_management',
+        name: i18n.translate('xpack.ml.navMenu.modelManagementText', {
+          defaultMessage: 'Model Management',
+        }),
+        disabled: disableLinks,
+        items: [
+          {
+            id: 'trained_models',
+            pathId: ML_PAGES.TRAINED_MODELS_MANAGE,
+            name: i18n.translate('xpack.ml.navMenu.trainedModelsText', {
+              defaultMessage: 'Trained Models',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab trainedModels',
+          },
+          {
+            id: 'nodes_overview',
+            pathId: ML_PAGES.TRAINED_MODELS_NODES,
+            name: i18n.translate('xpack.ml.navMenu.nodesOverviewText', {
+              defaultMessage: 'Nodes',
+            }),
+            disabled: disableLinks || !canViewMlNodes,
+            testSubj: 'mlMainTab nodesOverview',
+          },
+        ],
+      },
+      {
+        id: 'datavisualizer',
+        name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
+          defaultMessage: 'Data Visualizer',
+        }),
+        disabled: false,
+        pathId: ML_PAGES.DATA_VISUALIZER,
+        testSubj: 'mlMainTab dataVisualizer',
+        items: [
+          {
+            id: 'filedatavisualizer',
+            pathId: ML_PAGES.DATA_VISUALIZER_FILE,
+            name: i18n.translate('xpack.ml.navMenu.fileDataVisualizerLinkText', {
+              defaultMessage: 'File',
+            }),
+            disabled: false,
+            testSubj: 'mlMainTab fileDataVisualizer',
+          },
+          {
+            id: 'data_view_datavisualizer',
+            pathId: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.dataViewDataVisualizerLinkText', {
+              defaultMessage: 'Data View',
+            }),
+            disabled: false,
+            testSubj: 'mlMainTab indexDataVisualizer',
+          },
+        ],
+      },
+    ];
+  }, [mlFeaturesDisabled, canViewMlNodes]);
 
-  return tabs.map(getTabItem);
+  const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
+    (tab: Tab) => {
+      const { id, disabled, items, onClick, pathId, name, testSubj, highlightNestedRoutes } = tab;
+
+      const onClickCallback = onClick ?? (pathId ? redirectToTab.bind(null, pathId) : undefined);
+
+      const isSelected =
+        `/${pathId}` === activeRoute?.path ||
+        (!!highlightNestedRoutes && activeRoute?.path.includes(`${pathId}/`));
+
+      return {
+        id,
+        name,
+        isSelected,
+        disabled,
+        ...(onClickCallback ? { onClick: onClickCallback } : {}),
+        'data-test-subj': testSubj + (isSelected ? ' selected' : ''),
+        items: items ? items.map(getTabItem) : undefined,
+        forceOpen: true,
+      };
+    },
+    [activeRoute?.path, redirectToTab]
+  );
+
+  return useMemo(() => tabsDefinition.map(getTabItem), [tabsDefinition, getTabItem]);
 }

@@ -8,9 +8,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { DataView, flattenHit } from '../../../data/common';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../common';
-import { getServices } from '../kibana_services';
+import { FieldFormatsStart } from '../../../field_formats/public';
+import { flattenHit } from '../../../data/public';
+import { DataView } from '../../../data_views/public';
 import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
@@ -28,7 +28,9 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
 export function formatHit(
   hit: estypes.SearchHit,
   dataView: DataView,
-  fieldsToShow: string[]
+  fieldsToShow: string[],
+  maxEntries: number,
+  fieldFormats: FieldFormatsStart
 ): FormattedHit {
   const cached = formattedHitCache.get(hit);
   if (cached) {
@@ -50,7 +52,13 @@ export function formatHit(
     const displayKey = dataView.fields.getByName(key)?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     // Format the raw value using the regular field formatters for that field
-    const formattedValue = formatFieldValue(val, hit, dataView, dataView.fields.getByName(key));
+    const formattedValue = formatFieldValue(
+      val,
+      hit,
+      fieldFormats,
+      dataView,
+      dataView.fields.getByName(key)
+    );
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.
     if (displayKey) {
@@ -61,7 +69,6 @@ export function formatHit(
       pairs.push([key, formattedValue]);
     }
   });
-  const maxEntries = getServices().uiSettings.get<number>(MAX_DOC_FIELDS_DISPLAYED);
   const pairs = [...highlightPairs, ...sourcePairs];
   const formatted =
     // If document has more formatted fields than configured via MAX_DOC_FIELDS_DISPLAYED we cut

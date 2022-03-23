@@ -6,18 +6,21 @@
  */
 
 import { Logger } from 'src/core/server';
-import { TelemetryEventsSender } from '../sender';
+import { ITelemetryEventsSender } from '../sender';
 import type {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,
+  EndpointMetadataAggregation,
+  EndpointMetadataDocument,
   ESClusterInfo,
   ESLicense,
 } from '../types';
-import { TelemetryReceiver } from '../receiver';
+import { ITelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 import {
   batchTelemetryRecords,
+  extractEndpointPolicyConfig,
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
 } from '../helpers';
@@ -46,8 +49,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: TelemetryReceiver,
-      sender: TelemetryEventsSender,
+      receiver: ITelemetryReceiver,
+      sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       if (!taskExecutionPeriod.last) {
@@ -145,11 +148,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             packagePolicies
               .map((pPolicy) => pPolicy as PolicyData)
               .forEach((pPolicy) => {
-                if (pPolicy.inputs[0].config !== undefined) {
+                if (pPolicy.inputs[0]?.config !== undefined && pPolicy.inputs[0]?.config !== null) {
                   pPolicy.inputs.forEach((input) => {
                     if (
                       input.type === FLEET_ENDPOINT_PACKAGE &&
-                      input.config !== undefined &&
+                      input?.config !== undefined &&
                       policyInfo !== undefined
                     ) {
                       endpointPolicyCache.set(policyInfo, pPolicy);
@@ -187,7 +190,36 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           )
         : new Map<string, EndpointPolicyResponseDocument>();
 
-      /** STAGE 4 - Create the telemetry log records
+      /** STAGE 4 - Fetch Endpoint Agent Metadata
+       *
+       * Reads Endpoint Agent metadata out of the `.ds-metrics-endpoint.metadata` data stream
+       * and buckets them by Endpoint Agent id and sorts by the top hit. The EP agent will
+       * report its metadata once per day OR every time a policy change has occured. If
+       * a metadata document(s) exists for an EP agent we map to fleet agent and policy
+       */
+      if (endpointData.endpointMetadata === undefined) {
+        logger.debug(`no endpoint metadata to report`);
+      }
+
+      const { body: endpointMetadataResponse } = endpointData.endpointMetadata as unknown as {
+        body: EndpointMetadataAggregation;
+      };
+
+      if (endpointMetadataResponse.aggregations === undefined) {
+        logger.debug(`no endpoint metadata to report`);
+      }
+
+      const endpointMetadata =
+        endpointMetadataResponse.aggregations.endpoint_metadata.buckets.reduce(
+          (cache, endpointAgentId) => {
+            const doc = endpointAgentId.latest_metadata.hits.hits[0];
+            cache.set(endpointAgentId.key, doc);
+            return cache;
+          },
+          new Map<string, EndpointMetadataDocument>()
+        );
+
+      /** STAGE 5 - Create the telemetry log records
        *
        * Iterates through the endpoint metrics documents at STAGE 1 and joins them together
        * to form the telemetry log that is sent back to Elastic Security developers to
@@ -198,6 +230,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         const telemetryPayloads = endpointMetrics.map((endpoint) => {
           let policyConfig = null;
           let failedPolicy = null;
+          let endpointMetadataById = null;
 
           const fleetAgentId = endpoint.endpoint_metrics.elastic.agent.id;
           const endpointAgentId = endpoint.endpoint_agent;
@@ -211,7 +244,20 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             }
           }
 
-          const { cpu, memory, uptime } = endpoint.endpoint_metrics.Endpoint.metrics;
+          if (endpointMetadata) {
+            endpointMetadataById = endpointMetadata.get(endpointAgentId);
+          }
+
+          const {
+            cpu,
+            memory,
+            uptime,
+            documents_volume: documentsVolume,
+            malicious_behavior_rules: maliciousBehaviorRules,
+            system_impact: systemImpact,
+            threads,
+          } = endpoint.endpoint_metrics.Endpoint.metrics;
+          const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
 
           return {
             '@timestamp': taskExecutionPeriod.current,
@@ -225,11 +271,19 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               cpu: cpu.endpoint,
               memory: memory.endpoint.private,
               uptime,
+              documentsVolume,
+              maliciousBehaviorRules,
+              systemImpact,
+              threads,
             },
             endpoint_meta: {
               os: endpoint.endpoint_metrics.host.os,
+              capabilities:
+                endpointMetadataById !== null && endpointMetadataById !== undefined
+                  ? endpointMetadataById._source.Endpoint.capabilities
+                  : [],
             },
-            policy_config: policyConfig !== null ? policyConfig?.inputs[0].config.policy : {},
+            policy_config: endpointPolicyDetail !== null ? endpointPolicyDetail : {},
             policy_response:
               failedPolicy !== null && failedPolicy !== undefined
                 ? {
@@ -240,6 +294,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
                     actions: failedPolicy._source.Endpoint.policy.applied.actions
                       .map((action) => (action.status !== 'success' ? action : null))
                       .filter((action) => action !== null),
+                    configuration: failedPolicy._source.Endpoint.configuration,
+                    state: failedPolicy._source.Endpoint.state,
                   }
                 : {},
             telemetry_meta: {
@@ -249,13 +305,14 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         });
 
         /**
-         * STAGE 5 - Send the documents
+         * STAGE 6 - Send the documents
          *
          * Send the documents in a batches of maxTelemetryBatch
          */
-        batchTelemetryRecords(telemetryPayloads, maxTelemetryBatch).forEach((telemetryBatch) =>
-          sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, telemetryBatch)
-        );
+        const batches = batchTelemetryRecords(telemetryPayloads, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, batch);
+        }
         return telemetryPayloads.length;
       } catch (err) {
         logger.warn('could not complete endpoint alert telemetry task');
@@ -266,15 +323,17 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 }
 
 async function fetchEndpointData(
-  receiver: TelemetryReceiver,
+  receiver: ITelemetryReceiver,
   executeFrom: string,
   executeTo: string
 ) {
-  const [fleetAgentsResponse, epMetricsResponse, policyResponse] = await Promise.allSettled([
-    receiver.fetchFleetAgents(),
-    receiver.fetchEndpointMetrics(executeFrom, executeTo),
-    receiver.fetchEndpointPolicyResponses(executeFrom, executeTo),
-  ]);
+  const [fleetAgentsResponse, epMetricsResponse, policyResponse, endpointMetadata] =
+    await Promise.allSettled([
+      receiver.fetchFleetAgents(),
+      receiver.fetchEndpointMetrics(executeFrom, executeTo),
+      receiver.fetchEndpointPolicyResponses(executeFrom, executeTo),
+      receiver.fetchEndpointMetadata(executeFrom, executeTo),
+    ]);
 
   return {
     fleetAgentsResponse:
@@ -283,5 +342,6 @@ async function fetchEndpointData(
         : EmptyFleetAgentResponse,
     endpointMetrics: epMetricsResponse.status === 'fulfilled' ? epMetricsResponse.value : undefined,
     epPolicyResponse: policyResponse.status === 'fulfilled' ? policyResponse.value : undefined,
+    endpointMetadata: endpointMetadata.status === 'fulfilled' ? endpointMetadata.value : undefined,
   };
 }

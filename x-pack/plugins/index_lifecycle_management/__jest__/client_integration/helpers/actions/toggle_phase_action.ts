@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
 import { Phase } from '../../../../common/types';

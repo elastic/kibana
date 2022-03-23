@@ -7,7 +7,7 @@
 
 import { upperFirst } from 'lodash/fp';
 import React from 'react';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
 

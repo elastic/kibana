@@ -36,6 +36,7 @@ import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migra
 import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 import { migrateInstallationToV7160, migratePackagePolicyToV7160 } from './migrations/to_v7_16_0';
 import { migrateInstallationToV800, migrateOutputToV800 } from './migrations/to_v8_0_0';
+import { migratePackagePolicyToV820 } from './migrations/to_v8_2_0';
 
 /*
  * Saved object types and mappings
@@ -77,9 +78,9 @@ const getSavedObjectTypes = (
         name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
+        is_managed: { type: 'boolean' },
         is_default: { type: 'boolean' },
         is_default_fleet_server: { type: 'boolean' },
-        is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
         unenroll_timeout: { type: 'integer' },
@@ -117,6 +118,7 @@ const getSavedObjectTypes = (
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
+        ssl: { type: 'flattened', index: false },
       },
     },
     migrations: {
@@ -205,6 +207,7 @@ const getSavedObjectTypes = (
       '7.14.0': migratePackagePolicyToV7140,
       '7.15.0': migratePackagePolicyToV7150,
       '7.16.0': migratePackagePolicyToV7160,
+      '8.2.0': migratePackagePolicyToV820,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

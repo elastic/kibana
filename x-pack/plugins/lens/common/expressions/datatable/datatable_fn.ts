@@ -15,6 +15,7 @@ import type {
   ExecutionContext,
 } from '../../../../../../src/plugins/expressions';
 import type { DatatableExpressionFunction } from './types';
+import { logDataTable } from '../expressions_utils';
 
 function isRange(meta: { params?: { id?: string } } | undefined) {
   return meta?.params?.id === 'range';
@@ -25,6 +26,10 @@ export const datatableFn =
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
   ): DatatableExpressionFunction['fn'] =>
   async (data, args, context) => {
+    if (context?.inspectorAdapters?.tables) {
+      logDataTable(context.inspectorAdapters.tables, data.tables);
+    }
+
     let untransposedData: LensMultiTable | undefined;
     // do the sorting at this level to propagate it also at CSV download
     const [firstTable] = Object.values(data.tables);
@@ -64,11 +69,13 @@ export const datatableFn =
     }
 
     if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
+      const sortingHint = args.columns.find((col) => col.columnId === sortBy)?.sortingHint;
       // Sort on raw values for these types, while use the formatted value for the rest
       const sortingCriteria = getSortingCriteria(
-        isRange(columnsReverseLookup[sortBy]?.meta)
-          ? 'range'
-          : columnsReverseLookup[sortBy]?.meta?.type,
+        sortingHint ??
+          (isRange(columnsReverseLookup[sortBy]?.meta)
+            ? 'range'
+            : columnsReverseLookup[sortBy]?.meta?.type),
         sortBy,
         formatters[sortBy],
         sortDirection

@@ -11,7 +11,7 @@ import https from 'https';
 import net from 'net';
 import stream from 'stream';
 import Boom from '@hapi/boom';
-import { URL } from 'url';
+import { URL, URLSearchParams } from 'url';
 
 interface Args {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
@@ -30,6 +30,20 @@ interface Args {
 const sanitizeHostname = (hostName: string): string =>
   hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
 
+/**
+ * Node URL percent-encodes any invalid characters in the pathname which results a 400 bad request error.
+ * We need to decode the percent-encoded pathname, and encode it correctly with encodeURIComponent
+ */
+
+const encodePathname = (pathname: string) => {
+  const decodedPath = new URLSearchParams(`path=${pathname}`).get('path') ?? '';
+
+  return decodedPath
+    .split('/')
+    .map((str) => encodeURIComponent(str))
+    .join('/');
+};
+
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
 // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
 // diverged too much from current behaviour.
@@ -44,6 +58,7 @@ export const proxyRequest = ({
 }: Args) => {
   const { hostname, port, protocol, pathname, search } = uri;
   const client = uri.protocol === 'https:' ? https : http;
+  const encodedPath = encodePathname(pathname);
   let resolved = false;
 
   let resolve: (res: http.IncomingMessage) => void;
@@ -66,7 +81,7 @@ export const proxyRequest = ({
     host: sanitizeHostname(hostname),
     port: port === '' ? undefined : parseInt(port, 10),
     protocol,
-    path: `${pathname}${search || ''}`,
+    path: `${encodedPath}${search || ''}`,
     headers: {
       ...finalUserHeaders,
       'content-type': 'application/json',

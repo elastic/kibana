@@ -126,7 +126,7 @@ into a single string.  This configuration can be used for environments where
 the files cannot be made available.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.xmatters`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
@@ -190,7 +190,20 @@ Specifies the default timeout for the all rule types tasks. The time is formatte
 +
 `<count>[ms,s,m,h,d,w,M,Y]` 
 +
-For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
+For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
 `xpack.alerting.cancelAlertsOnRuleTimeout`::
 Specifies whether to skip writing alerts and scheduling actions if rule execution is cancelled due to timeout. Default: `true`. This setting can be overridden by individual rule types.
+
+`xpack.alerting.rules.minimumScheduleInterval.value`::
+Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value. The time is formatted as:
++
+`<count>[s,m,h,d]` 
++
+For example, `20m`, `24h`, `7d`. Default: `1m`.
+
+`xpack.alerting.rules.minimumScheduleInterval.enforce`::
+Specifies the behavior when a new or changed rule has a schedule interval less than the value defined in `xpack.alerting.rules.minimumScheduleInterval.value`. If `false`, rules with schedules less than the interval will be created but warnings will be logged. If `true`, rules with schedules less than the interval cannot be created. Default: `false`.
+
+`xpack.alerting.rules.execution.actions.max`::
+Specifies the maximum number of actions that a rule can trigger each time detection checks run.

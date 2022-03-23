@@ -13,14 +13,15 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { hasSimpleExecutableName, OperatingSystem } from '@kbn/securitysolution-utils';
 
 import {
+  ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { OperatingSystem } from '../../../../common/endpoint/types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   InternalArtifactCompleteSchema,
@@ -40,7 +41,6 @@ import {
   WrappedTranslatedExceptionList,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
-import { hasSimpleExecutableName } from '../../../../common/endpoint/service/trusted_apps/validations';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
@@ -64,22 +64,30 @@ export async function buildArtifact(
   };
 }
 
-export async function getFilteredEndpointExceptionList(
-  eClient: ExceptionListClient,
-  schemaVersion: string,
-  filter: string,
-  listId:
-    | typeof ENDPOINT_LIST_ID
-    | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
-    | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
-    | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
-): Promise<WrappedTranslatedExceptionList> {
+export type ArtifactListId =
+  | typeof ENDPOINT_LIST_ID
+  | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
+  | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
+  | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
+  | typeof ENDPOINT_BLOCKLISTS_LIST_ID;
+
+export async function getFilteredEndpointExceptionList({
+  elClient,
+  filter,
+  listId,
+  schemaVersion,
+}: {
+  elClient: ExceptionListClient;
+  filter: string;
+  listId: ArtifactListId;
+  schemaVersion: string;
+}): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let page = 1;
   let paging = true;
 
   while (paging) {
-    const response = await eClient.findExceptionListItem({
+    const response = await elClient.findExceptionListItem({
       listId,
       namespaceType: 'agnostic',
       filter,
@@ -108,72 +116,42 @@ export async function getFilteredEndpointExceptionList(
   return validated as WrappedTranslatedExceptionList;
 }
 
-export async function getEndpointExceptionList(
-  eClient: ExceptionListClient,
-  schemaVersion: string,
-  os: string
-): Promise<WrappedTranslatedExceptionList> {
-  const filter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
-
-  return getFilteredEndpointExceptionList(eClient, schemaVersion, filter, ENDPOINT_LIST_ID);
-}
-
-export async function getEndpointTrustedAppsList(
-  eClient: ExceptionListClient,
-  schemaVersion: string,
-  os: string,
-  policyId?: string
-): Promise<WrappedTranslatedExceptionList> {
+export async function getEndpointExceptionList({
+  elClient,
+  listId,
+  os,
+  policyId,
+  schemaVersion,
+}: {
+  elClient: ExceptionListClient;
+  listId?: ArtifactListId;
+  os: string;
+  policyId?: string;
+  schemaVersion: string;
+}): Promise<WrappedTranslatedExceptionList> {
   const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
   const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
     policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
   })`;
 
-  return getFilteredEndpointExceptionList(
-    eClient,
+  // for endpoint list
+  if (!listId || listId === ENDPOINT_LIST_ID) {
+    return getFilteredEndpointExceptionList({
+      elClient,
+      schemaVersion,
+      filter: `${osFilter}`,
+      listId: ENDPOINT_LIST_ID,
+    });
+  }
+  // for TAs, EFs, Host IEs and Blocklists
+  return getFilteredEndpointExceptionList({
+    elClient,
     schemaVersion,
-    `${osFilter} and ${policyFilter}`,
-    ENDPOINT_TRUSTED_APPS_LIST_ID
-  );
+    filter: `${osFilter} and ${policyFilter}`,
+    listId,
+  });
 }
 
-export async function getEndpointEventFiltersList(
-  eClient: ExceptionListClient,
-  schemaVersion: string,
-  os: string,
-  policyId?: string
-): Promise<WrappedTranslatedExceptionList> {
-  const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
-  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
-    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
-  })`;
-
-  return getFilteredEndpointExceptionList(
-    eClient,
-    schemaVersion,
-    `${osFilter} and ${policyFilter}`,
-    ENDPOINT_EVENT_FILTERS_LIST_ID
-  );
-}
-
-export async function getHostIsolationExceptionsList(
-  eClient: ExceptionListClient,
-  schemaVersion: string,
-  os: string,
-  policyId?: string
-): Promise<WrappedTranslatedExceptionList> {
-  const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
-  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
-    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
-  })`;
-
-  return getFilteredEndpointExceptionList(
-    eClient,
-    schemaVersion,
-    `${osFilter} and ${policyFilter}`,
-    ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
-  );
-}
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exceptions
@@ -210,7 +188,7 @@ function getMatcherFunction({
   os: ExceptionListItemSchema['os_types'][number];
 }): TranslatedEntryMatcher {
   return matchAny
-    ? field.endsWith('.caseless')
+    ? field.endsWith('.caseless') && os !== 'linux'
       ? 'exact_caseless_any'
       : 'exact_cased_any'
     : field.endsWith('.caseless')
@@ -227,7 +205,7 @@ function getMatcherWildcardFunction({
   field: string;
   os: ExceptionListItemSchema['os_types'][number];
 }): TranslatedEntryMatchWildcardMatcher {
-  return field.endsWith('.caseless')
+  return field.endsWith('.caseless') || field.endsWith('.text')
     ? os === 'linux'
       ? 'wildcard_cased'
       : 'wildcard_caseless'
