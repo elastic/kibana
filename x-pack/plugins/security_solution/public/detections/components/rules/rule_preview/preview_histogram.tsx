@@ -234,6 +234,7 @@ export const PreviewHistogram = ({
           isFlyoutView
           runtimeMappings={runtimeMappings}
           timelineId={TimelineId.detectionsPage}
+          isReadOnly
         />
       </CasesContext>
     </>
