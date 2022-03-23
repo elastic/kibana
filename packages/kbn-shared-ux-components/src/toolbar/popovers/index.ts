@@ -5,7 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { ToolbarButton } from './buttons/primary/primary';
-export { IconButtonGroup } from './buttons/icon_button_group/icon_button_group';
-export { AddFromLibraryButton } from './buttons/add_from_library/add_from_library';
-export { ToolbarPopover, PrimaryActionPopover } from './popovers/index';
+export { ToolbarPopover } from './popover/popover';
+export { PrimaryActionPopover } from './primary/primary_popover';
