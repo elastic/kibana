@@ -99,7 +99,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // FLAKY: https://github.com/elastic/kibana/issues/100968
     it.skip('a11y test for space selection page', async () => {
       await PageObjects.spaceSelector.confirmDeletingSpace();
-      await a11y.testAppSnapshot();
+      await retry.try(async () => {
+        await a11y.testAppSnapshot();
+      });
       await PageObjects.spaceSelector.clickSpaceCard('default');
     });
   });
