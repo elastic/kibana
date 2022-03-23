@@ -390,12 +390,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'lens',
           },
           {
-            id: 'sample_security_rule',
-            type: 'security-rule',
-          },
-          {
             id: 'sample_osquery_pack_asset',
             type: 'osquery-pack-asset',
+          },
+          {
+            id: 'sample_security_rule',
+            type: 'security-rule',
           },
           {
             id: 'sample_ml_module',
