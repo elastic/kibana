@@ -61,6 +61,7 @@ export enum ConfigKey {
   UPLOAD_SPEED = 'throttling.upload_speed',
   LATENCY = 'throttling.latency',
   URLS = 'urls',
+  PORT = 'url.port',
   USERNAME = 'username',
   WAIT = 'wait',
   ZIP_URL_TLS_CERTIFICATE_AUTHORITIES = 'source.zip_url.ssl.certificate_authorities',

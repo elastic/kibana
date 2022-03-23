@@ -43,6 +43,8 @@ export const initialValues: BrowserSimpleFields = {
   [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
   [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
   [ConfigKey.ZIP_URL_TLS_VERSION]: undefined,
+  [ConfigKey.URLS]: undefined,
+  [ConfigKey.PORT]: undefined,
 };
 
 const defaultContext: BrowserSimpleFieldsContext = {

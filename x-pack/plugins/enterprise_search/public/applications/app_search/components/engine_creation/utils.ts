@@ -7,7 +7,10 @@
 
 import { generatePath } from 'react-router-dom';
 
+import { ElasticsearchIndex } from '../../../../../common/types';
 import { ENGINE_CRAWLER_PATH, ENGINE_PATH } from '../../routes';
+
+import { HealthStrings, SearchIndexSelectableOption } from './search_index_selectable';
 
 export const getRedirectToAfterEngineCreation = ({
   ingestionMethod,
@@ -26,4 +29,17 @@ export const getRedirectToAfterEngineCreation = ({
   }
 
   return enginePath;
+};
+
+export const formatIndicesToSelectable = (
+  indices: ElasticsearchIndex[],
+  selectedIndexName: string
+): SearchIndexSelectableOption[] => {
+  return indices.map((index) => ({
+    ...(selectedIndexName === index.name ? { checked: 'on' } : {}),
+    label: index.name,
+    health: (index.health as HealthStrings) ?? 'unavailable',
+    status: index.status,
+    total: index.total,
+  }));
 };
