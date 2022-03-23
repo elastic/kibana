@@ -81,6 +81,149 @@ describe('getTopNavConfig', () => {
     },
     share,
   };
+  test('returns correct links if the save visualize capabilities are set to false', () => {
+    const vis = {
+      savedVis: {
+        id: 'test',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'alias_id',
+        },
+      },
+      vis: {
+        type: {
+          title: 'TSVB',
+        },
+      },
+    } as VisualizeEditorVisInstance;
+    const novizSaveServices = {
+      ...services,
+      visualizeCapabilities: {
+        save: false,
+      },
+    };
+    const topNavLinks = getTopNavConfig(
+      {
+        hasUnsavedChanges: false,
+        setHasUnsavedChanges: jest.fn(),
+        hasUnappliedChanges: false,
+        onOpenInspector: jest.fn(),
+        originatingApp: 'dashboards',
+        setOriginatingApp: jest.fn(),
+        visInstance: vis,
+        stateContainer,
+        visualizationIdFromUrl: undefined,
+        stateTransfer: createEmbeddableStateTransferMock(),
+      } as unknown as TopNavConfigParams,
+      novizSaveServices as unknown as VisualizeServices
+    );
+
+    expect(topNavLinks).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": "Open Inspector for visualization",
+          "disableButton": [Function],
+          "id": "inspector",
+          "label": "inspect",
+          "run": undefined,
+          "testId": "openInspectorButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Share Visualization",
+          "disableButton": false,
+          "id": "share",
+          "label": "share",
+          "run": [Function],
+          "testId": "shareTopNavButton",
+        },
+        Object {
+          "description": "Return to the last app without saving changes",
+          "emphasize": false,
+          "id": "cancel",
+          "label": "Cancel",
+          "run": [Function],
+          "testId": "visualizeCancelAndReturnButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Finish editing visualization and return to the last app",
+          "disableButton": false,
+          "emphasize": true,
+          "iconType": "checkInCircleFilled",
+          "id": "saveAndReturn",
+          "label": "Save and return",
+          "run": [Function],
+          "testId": "visualizesaveAndReturnButton",
+          "tooltip": [Function],
+        },
+      ]
+    `);
+  });
+  test('returns correct links if the originating app is undefined', () => {
+    const vis = {
+      savedVis: {
+        id: 'test',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'alias_id',
+        },
+      },
+      vis: {
+        type: {
+          title: 'TSVB',
+        },
+      },
+    } as VisualizeEditorVisInstance;
+    const topNavLinks = getTopNavConfig(
+      {
+        hasUnsavedChanges: false,
+        setHasUnsavedChanges: jest.fn(),
+        hasUnappliedChanges: false,
+        onOpenInspector: jest.fn(),
+        originatingApp: undefined,
+        setOriginatingApp: jest.fn(),
+        visInstance: vis,
+        stateContainer,
+        visualizationIdFromUrl: undefined,
+        stateTransfer: createEmbeddableStateTransferMock(),
+      } as unknown as TopNavConfigParams,
+      services as unknown as VisualizeServices
+    );
+
+    expect(topNavLinks).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": "Open Inspector for visualization",
+          "disableButton": [Function],
+          "id": "inspector",
+          "label": "inspect",
+          "run": undefined,
+          "testId": "openInspectorButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Share Visualization",
+          "disableButton": false,
+          "id": "share",
+          "label": "share",
+          "run": [Function],
+          "testId": "shareTopNavButton",
+        },
+        Object {
+          "description": "Save Visualization",
+          "disableButton": false,
+          "emphasize": true,
+          "iconType": "save",
+          "id": "save",
+          "label": "Save",
+          "run": [Function],
+          "testId": "visualizeSaveButton",
+          "tooltip": [Function],
+        },
+      ]
+    `);
+  });
   test('returns correct links for by reference visualization', () => {
     const vis = {
       savedVis: {

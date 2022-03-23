@@ -7,12 +7,12 @@
 
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from 'kibana/server';
-import type { JobObject, JobSavedObjectService, TrainedModelObject } from './service';
+import type { JobObject, MLSavedObjectService, TrainedModelObject } from './service';
 import type {
   JobType,
-  TrainedModelType,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
+  MlSavedObjectType,
 } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
@@ -26,9 +26,9 @@ export interface JobSpaceOverrides {
 
 export function syncSavedObjectsFactory(
   client: IScopedClusterClient,
-  jobSavedObjectService: JobSavedObjectService
+  mlSavedObjectService: MLSavedObjectService
 ) {
-  const { checkStatus } = checksFactory(client, jobSavedObjectService);
+  const { checkStatus } = checksFactory(client, mlSavedObjectService);
 
   async function syncSavedObjects(simulate: boolean = false) {
     const results: SyncSavedObjectResponse = {
@@ -65,7 +65,7 @@ export function syncSavedObjectsFactory(
           const datafeedId = job.datafeedId;
           tasks.push(async () => {
             try {
-              await jobSavedObjectService.createAnomalyDetectionJob(jobId, datafeedId ?? undefined);
+              await mlSavedObjectService.createAnomalyDetectionJob(jobId, datafeedId ?? undefined);
               results.savedObjectsCreated[type]![job.jobId] = { success: true };
             } catch (error) {
               results.savedObjectsCreated[type]![job.jobId] = {
@@ -91,7 +91,7 @@ export function syncSavedObjectsFactory(
           const jobId = job.jobId;
           tasks.push(async () => {
             try {
-              await jobSavedObjectService.createDataFrameAnalyticsJob(jobId);
+              await mlSavedObjectService.createDataFrameAnalyticsJob(jobId);
               results.savedObjectsCreated[type]![job.jobId] = {
                 success: true,
               };
@@ -129,7 +129,7 @@ export function syncSavedObjectsFactory(
                 return;
               }
               const job = getJobDetailsFromTrainedModel(mod);
-              await jobSavedObjectService.createTrainedModel(modelId, job);
+              await mlSavedObjectService.createTrainedModel(modelId, job);
               results.savedObjectsCreated[type]![modelId] = {
                 success: true,
               };
@@ -159,9 +159,9 @@ export function syncSavedObjectsFactory(
           tasks.push(async () => {
             try {
               if (namespaces !== undefined && namespaces.length) {
-                await jobSavedObjectService.forceDeleteAnomalyDetectionJob(jobId, namespaces[0]);
+                await mlSavedObjectService.forceDeleteAnomalyDetectionJob(jobId, namespaces[0]);
               } else {
-                await jobSavedObjectService.deleteAnomalyDetectionJob(jobId);
+                await mlSavedObjectService.deleteAnomalyDetectionJob(jobId);
               }
               results.savedObjectsDeleted[type]![job.jobId] = { success: true };
             } catch (error) {
@@ -189,9 +189,9 @@ export function syncSavedObjectsFactory(
           tasks.push(async () => {
             try {
               if (namespaces !== undefined && namespaces.length) {
-                await jobSavedObjectService.forceDeleteDataFrameAnalyticsJob(jobId, namespaces[0]);
+                await mlSavedObjectService.forceDeleteDataFrameAnalyticsJob(jobId, namespaces[0]);
               } else {
-                await jobSavedObjectService.deleteDataFrameAnalyticsJob(jobId);
+                await mlSavedObjectService.deleteDataFrameAnalyticsJob(jobId);
               }
               results.savedObjectsDeleted[type]![job.jobId] = {
                 success: true,
@@ -223,9 +223,9 @@ export function syncSavedObjectsFactory(
           tasks.push(async () => {
             try {
               if (namespaces !== undefined && namespaces.length) {
-                await jobSavedObjectService.forceDeleteTrainedModel(modelId, namespaces[0]);
+                await mlSavedObjectService.forceDeleteTrainedModel(modelId, namespaces[0]);
               } else {
-                await jobSavedObjectService.deleteTrainedModel(modelId);
+                await mlSavedObjectService.deleteTrainedModel(modelId);
               }
               results.savedObjectsDeleted[type]![modelId] = {
                 success: true,
@@ -266,7 +266,7 @@ export function syncSavedObjectsFactory(
           tasks.push(async () => {
             try {
               if (datafeedId !== undefined) {
-                await jobSavedObjectService.addDatafeed(datafeedId, jobId);
+                await mlSavedObjectService.addDatafeed(datafeedId, jobId);
               }
               results.datafeedsAdded[type]![job.jobId] = { success: true };
             } catch (error) {
@@ -294,7 +294,7 @@ export function syncSavedObjectsFactory(
           const datafeedId = job.datafeedId;
           tasks.push(async () => {
             try {
-              await jobSavedObjectService.deleteDatafeed(datafeedId);
+              await mlSavedObjectService.deleteDatafeed(datafeedId);
               results.datafeedsRemoved[type]![job.jobId] = { success: true };
             } catch (error) {
               results.datafeedsRemoved[type]![job.jobId] = {
@@ -408,7 +408,7 @@ export function syncSavedObjectsFactory(
 
     try {
       // create missing job saved objects
-      const createJobsResults = await jobSavedObjectService.bulkCreateJobs(jobObjects);
+      const createJobsResults = await mlSavedObjectService.bulkCreateJobs(jobObjects);
       createJobsResults.saved_objects.forEach(({ attributes }) => {
         results.jobs.push({
           id: attributes.job_id,
@@ -418,7 +418,7 @@ export function syncSavedObjectsFactory(
 
       //  create missing datafeed ids
       for (const { jobId, datafeedId } of datafeeds) {
-        await jobSavedObjectService.addDatafeed(datafeedId, jobId);
+        await mlSavedObjectService.addDatafeed(datafeedId, jobId);
         results.datafeeds.push({
           id: datafeedId,
           type: 'anomaly-detector',
@@ -426,7 +426,7 @@ export function syncSavedObjectsFactory(
       }
 
       // use * space if no spaces for related jobs can be found.
-      const createModelsResults = await jobSavedObjectService.bulkCreateTrainedModel(
+      const createModelsResults = await mlSavedObjectService.bulkCreateTrainedModel(
         modelObjects,
         '*'
       );
@@ -443,15 +443,17 @@ export function syncSavedObjectsFactory(
     return results;
   }
 
-  async function isSyncNeeded(jobType?: JobType | TrainedModelType) {
+  async function isSyncNeeded(mlSavedObjectType?: MlSavedObjectType) {
     const { jobs, datafeeds, trainedModels } = await initSavedObjects(true);
     const missingJobs =
-      jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
+      jobs.length > 0 &&
+      (mlSavedObjectType === undefined || jobs.some(({ type }) => type === mlSavedObjectType));
 
     const missingModels =
-      trainedModels.length > 0 && (jobType === undefined || jobType === 'trained-model');
+      trainedModels.length > 0 &&
+      (mlSavedObjectType === undefined || mlSavedObjectType === 'trained-model');
 
-    const missingDatafeeds = datafeeds.length > 0 && jobType !== 'data-frame-analytics';
+    const missingDatafeeds = datafeeds.length > 0 && mlSavedObjectType !== 'data-frame-analytics';
 
     return missingJobs || missingModels || missingDatafeeds;
   }

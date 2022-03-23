@@ -23,9 +23,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type {
-  JobType,
   CanDeleteMLSpaceAwareItemsResponse,
-  TrainedModelType,
+  MlSavedObjectType,
 } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
@@ -75,7 +74,7 @@ function getRespSummary(
 
 function getModalContent(
   ids: string[],
-  jobType: JobType | TrainedModelType,
+  mlSavedObjectType: MlSavedObjectType,
   respSummary: CanDeleteMLSpaceAwareItemsSummary,
   hasManagedJob?: boolean
 ): ModalContentReturnType {
@@ -96,7 +95,7 @@ function getModalContent(
             defaultMessage="{ids} have different space permissions. "
             values={{ ids: ids.join(', ') }}
           />
-          {jobType === 'trained-model' ? (
+          {mlSavedObjectType === 'trained-model' ? (
             <FormattedMessage
               id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextNoAction.model"
               defaultMessage="When you delete multiple models, they must have the same permissions. Deselect the models and try deleting each model individually."
@@ -126,7 +125,7 @@ function getModalContent(
           defaultMessage="{ids} cannot be deleted and cannot be removed from the current space. "
           values={{ ids: ids.join(', ') }}
         />
-        {jobType === 'trained-model' ? (
+        {mlSavedObjectType === 'trained-model' ? (
           <FormattedMessage
             id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTextClose.model"
             defaultMessage="This model is assigned to the * space and you do not have access to all spaces."
@@ -144,7 +143,7 @@ function getModalContent(
   if (canDelete) {
     return {
       buttonText:
-        jobType === 'trained-model' ? (
+        mlSavedObjectType === 'trained-model' ? (
           <FormattedMessage
             id="xpack.ml.deleteSpaceAwareItemCheckModal.buttonTextCanDelete.model"
             defaultMessage="Continue to delete {length, plural, one {# model} other {# models}}"
@@ -225,7 +224,7 @@ interface Props {
   canDeleteCallback: () => void;
   onCloseCallback: () => void;
   refreshJobsCallback?: () => void;
-  jobType: JobType | TrainedModelType;
+  mlSavedObjectType: MlSavedObjectType;
   ids: string[];
   setDidUntag?: React.Dispatch<React.SetStateAction<boolean>>;
   hasManagedJob?: boolean;
@@ -235,7 +234,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   canDeleteCallback,
   onCloseCallback,
   refreshJobsCallback,
-  jobType,
+  mlSavedObjectType,
   ids,
   setDidUntag,
   hasManagedJob,
@@ -257,7 +256,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   useEffect(() => {
     setIsLoading(true);
     // Do the spaces check and set the content for the modal and buttons depending on results
-    canDeleteMLSpaceAwareItems(jobType, ids).then((resp) => {
+    canDeleteMLSpaceAwareItems(mlSavedObjectType, ids).then((resp) => {
       const respSummary = getRespSummary(resp);
       const { canDelete, canRemoveFromSpace, canTakeAnyAction } = respSummary;
       if (canTakeAnyAction && canDelete && !canRemoveFromSpace) {
@@ -266,7 +265,12 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
         return;
       }
       setItemCheckRespSummary(respSummary);
-      const { buttonText, modalText } = getModalContent(ids, jobType, respSummary, hasManagedJob);
+      const { buttonText, modalText } = getModalContent(
+        ids,
+        mlSavedObjectType,
+        respSummary,
+        hasManagedJob
+      );
       setButtonContent(buttonText);
       setModalContent(modalText);
     });
@@ -278,7 +282,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
 
   const onUntagClick = async () => {
     setIsUntagging(true);
-    const resp = await removeItemFromCurrentSpace(jobType, ids);
+    const resp = await removeItemFromCurrentSpace(mlSavedObjectType, ids);
     setIsUntagging(false);
     if (typeof setDidUntag === 'function') {
       setDidUntag(true);
@@ -356,7 +360,9 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
                       size="s"
                       onClick={onUntagClick}
                     >
-                      {jobType === 'trained-model' ? shouldUnTagModelLabel : shouldUnTagJobLabel}
+                      {mlSavedObjectType === 'trained-model'
+                        ? shouldUnTagModelLabel
+                        : shouldUnTagJobLabel}
                     </EuiButtonEmpty>
                   )}
               </EuiFlexItem>
