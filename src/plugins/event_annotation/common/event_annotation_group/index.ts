@@ -30,13 +30,13 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     aliases: [],
     type: 'event_annotation_group',
     inputTypes: ['null'],
-    help: i18n.translate('event_annotation.event_annotation_group.description', {
+    help: i18n.translate('eventAnnotation.group.description', {
       defaultMessage: 'Event annotation group',
     }),
     args: {
       annotations: {
         types: ['manual_event_annotation'],
-        help: i18n.translate('event_annotation.event_annotation_group.args.annotationConfigs', {
+        help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
           defaultMessage: 'Annotation configs',
         }),
         multi: true,
