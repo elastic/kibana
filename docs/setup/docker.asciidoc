@@ -184,7 +184,7 @@ Some example translations are shown here:
 `SERVER_BASEPATH`:: `server.basePath`
 `ELASTICSEARCH_HOSTS`:: `elasticsearch.hosts`
 
-In general, any setting listed in <<settings>> can be configured with this technique.
+In general, any setting listed in <<settings>> can be configured with this technique. If you are looking to configure settings not listed there, please refer to using <<bind-mount-config,a bind mounted `kibana.yml`>>.
 
 Supplying array options can be tricky. The following example shows the syntax for providing an array to `ELASTICSEARCH_HOSTS`.
 
