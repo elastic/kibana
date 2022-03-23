@@ -104,14 +104,23 @@ Object {
                   "isHistogram": Array [
                     false,
                   ],
-                  "layerId": Array [
-                    "first",
-                  ],
                   "seriesType": Array [
                     "area",
                   ],
                   "splitAccessor": Array [
                     "d",
+                  ],
+                  "table": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {},
+                          "function": "kibana",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
                   ],
                   "xAccessor": Array [
                     "a",
@@ -124,7 +133,7 @@ Object {
                     "linear",
                   ],
                 },
-                "function": "dataLayer",
+                "function": "extendedDataLayer",
                 "type": "function",
               },
             ],
@@ -241,7 +250,7 @@ Object {
           "",
         ],
       },
-      "function": "xyVis",
+      "function": "layeredXyVis",
       "type": "function",
     },
   ],
