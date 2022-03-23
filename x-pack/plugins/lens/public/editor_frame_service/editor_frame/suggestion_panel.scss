@@ -89,6 +89,12 @@
   flex-grow: 0;
 }
 
-.lnsSuggestionPanel__applyChangesPrompt {
+.lnsSuggestionPanel__applyChangesPrompt.euiPanel {
   height: $lnsSuggestionHeight;
+  background-color: $euiColorLightestShade;
+
+  .lnsSuggestionPanel__applyChangesMessage {
+    margin-top: 10px;
+    margin-bottom: -10px;
+  }
 }
