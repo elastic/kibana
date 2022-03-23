@@ -17,15 +17,13 @@ import {
 } from '../../common/constants';
 import { UptimeApp, UptimeAppProps } from './uptime_app';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
-import { UptimeUiConfig } from '../../common/config';
 import { uptimeOverviewNavigatorParams } from './locators/overview';
 
 export function renderApp(
   core: CoreStart,
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
-  appMountParameters: AppMountParameters,
-  config: UptimeUiConfig
+  appMountParameters: AppMountParameters
 ) {
   const {
     application: { capabilities },
@@ -75,7 +73,6 @@ export function renderApp(
     setBadge,
     appMountParameters,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
-    config,
   };
 
   ReactDOM.render(<UptimeApp {...props} />, appMountParameters.element);

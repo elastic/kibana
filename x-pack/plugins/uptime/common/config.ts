@@ -25,15 +25,8 @@ const uptimeConfig = schema.object({
 });
 
 export const config: PluginConfigDescriptor = {
-  exposeToBrowser: {
-    ui: true,
-  },
   schema: uptimeConfig,
 };
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
 export type ServiceConfig = TypeOf<typeof serviceConfig>;
-
-export interface UptimeUiConfig {
-  ui?: TypeOf<typeof config.schema>['ui'];
-}

@@ -26,22 +26,9 @@ describe('PageRouter', () => {
     (page) => {
       const history = createMemoryHistory();
       history.push(page);
-      render(<PageRouter config={{}} />, { history });
+      render(<PageRouter />, { history });
 
       expect(screen.getByText(/Page not found/i)).toBeInTheDocument();
     }
   );
-
-  it.each([
-    [MONITOR_ADD_ROUTE, 'Add Monitor'],
-    [MONITOR_EDIT_ROUTE, 'Edit Monitor'],
-  ])('hides ui monitor management pages when feature flag is not enabled', (page, heading) => {
-    const history = createMemoryHistory();
-    history.push(page);
-    render(<PageRouter config={{ ui: { monitorManagement: { enabled: true } } }} />, {
-      history,
-    });
-
-    expect(screen.getByText(heading)).toBeInTheDocument();
-  });
 });

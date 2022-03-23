@@ -50,6 +50,9 @@ describe('<MonitorManagementList />', () => {
         monitorList: true,
         serviceLocations: false,
       },
+      syntheticsService: {
+        loading: false,
+      },
     } as MonitorManagementListState,
   };
 

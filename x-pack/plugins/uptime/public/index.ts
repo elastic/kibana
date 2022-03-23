@@ -8,5 +8,4 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { UptimePlugin } from './apps/plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UptimePlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext) => new UptimePlugin();

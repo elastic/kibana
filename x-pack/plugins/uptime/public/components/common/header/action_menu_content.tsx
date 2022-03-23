@@ -24,7 +24,6 @@ import {
 import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
-import { UptimeConfig } from '../../../../common/config';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -39,7 +38,7 @@ const ANALYZE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.mess
     'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
-export function ActionMenuContent({ config }: { config: UptimeConfig }): React.ReactElement {
+export function ActionMenuContent(): React.ReactElement {
   const kibana = useKibana();
   const { basePath } = useUptimeSettingsContext();
   const params = useGetUrlParams();

@@ -10,7 +10,6 @@ import { UptimeAppProps } from '../apps/uptime_app';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { useGetUrlParams } from '../hooks';
-import { UptimeUiConfig } from '../../common/config';
 
 export interface UptimeSettingsContextValues {
   basePath: string;
@@ -19,7 +18,6 @@ export interface UptimeSettingsContextValues {
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  config: UptimeUiConfig;
   commonlyUsedRanges?: CommonlyUsedRange[];
 }
 
@@ -38,19 +36,11 @@ const defaultContext: UptimeSettingsContextValues = {
   isApmAvailable: true,
   isInfraAvailable: true,
   isLogsAvailable: true,
-  config: {},
 };
 export const UptimeSettingsContext = createContext(defaultContext);
 
 export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ children, ...props }) => {
-  const {
-    basePath,
-    isApmAvailable,
-    isInfraAvailable,
-    isLogsAvailable,
-    commonlyUsedRanges,
-    config,
-  } = props;
+  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges } = props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
@@ -61,7 +51,6 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
       isInfraAvailable,
       isLogsAvailable,
       commonlyUsedRanges,
-      config,
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
     };
@@ -73,7 +62,6 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
     dateRangeStart,
     dateRangeEnd,
     commonlyUsedRanges,
-    config,
   ]);
 
   return <UptimeSettingsContext.Provider value={value} children={children} />;

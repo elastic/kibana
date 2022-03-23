@@ -55,15 +55,10 @@ import {
 import { UptimePageTemplateComponent } from './apps/uptime_page_template';
 import { apiService } from './state/api/utils';
 import { useInspectorContext } from '../../observability/public';
-import { UptimeConfig } from '../common/config';
 import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
 import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
 import { ServiceEnabledWrapper } from './pages/monitor_management/service_enabled_wrapper';
-
-interface PageRouterProps {
-  config: UptimeConfig;
-}
 
 type RouteProps = {
   path: string;
@@ -86,7 +81,7 @@ export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.h
   defaultMessage: 'Monitors',
 });
 
-const getRoutes = (config: UptimeConfig, canSave: boolean): RouteProps[] => {
+const getRoutes = (canSave: boolean): RouteProps[] => {
   return [
     {
       title: i18n.translate('xpack.uptime.monitorRoute.title', {
@@ -277,10 +272,10 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
   return null;
 };
 
-export const PageRouter: FC<PageRouterProps> = ({ config = {} }) => {
+export const PageRouter: FC = () => {
   const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
-  const routes = getRoutes(config, canSave);
+  const routes = getRoutes(canSave);
   const { addInspectorRequest } = useInspectorContext();
 
   apiService.addInspectorRequest = addInspectorRequest;
