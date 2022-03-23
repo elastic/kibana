@@ -17,6 +17,7 @@ export interface ObservabilityStatusContent {
   learnMoreLink: string;
   goToAppTitle: string;
   goToAppLink: string;
+  weight: number;
 }
 
 export const getContent = (
@@ -42,6 +43,7 @@ export const getContent = (
         defaultMessage: 'Show log stream',
       }),
       goToAppLink: http.basePath.prepend('/app/logs/stream'),
+      weight: 1,
     },
     {
       id: 'apm',
@@ -61,6 +63,7 @@ export const getContent = (
         defaultMessage: 'Show services inventory',
       }),
       goToAppLink: http.basePath.prepend('/app/apm/services'),
+      weight: 3,
     },
     {
       id: 'infra_metrics',
@@ -79,6 +82,7 @@ export const getContent = (
         defaultMessage: 'Show inventory',
       }),
       goToAppLink: http.basePath.prepend('/app/metrics/inventory'),
+      weight: 2,
     },
     {
       id: 'synthetics',
@@ -97,6 +101,7 @@ export const getContent = (
         defaultMessage: 'Show monitors ',
       }),
       goToAppLink: http.basePath.prepend('/app/uptime'),
+      weight: 4,
     },
     {
       id: 'ux',
@@ -116,6 +121,7 @@ export const getContent = (
         defaultMessage: 'Show dashboard',
       }),
       goToAppLink: http.basePath.prepend('/app/ux'),
+      weight: 5,
     },
     {
       id: 'alert',
@@ -135,6 +141,7 @@ export const getContent = (
         defaultMessage: 'Show alerts',
       }),
       goToAppLink: http.basePath.prepend('/app/observability/alerts'),
+      weight: 6,
     },
   ];
 };
