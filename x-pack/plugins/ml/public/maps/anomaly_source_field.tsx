@@ -11,7 +11,7 @@ import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { IField, IVectorSource } from '../../../maps/public';
-import { FIELD_ORIGIN } from '../../../maps/common';
+import { FIELD_ORIGIN, DECIMAL_DEGREES_PRECISION } from '../../../maps/common';
 import { TileMetaFeature } from '../../../maps/common/descriptor_types';
 import { AnomalySource } from './anomaly_source';
 import { ITooltipProperty } from '../../../maps/public';
@@ -53,15 +53,11 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
     }),
     type: 'string',
   },
-  // this value is only used to place the point on the map
-  actual: {},
-  actualDisplay: {
+  actual: {
     label: ACTUAL_LABEL,
     type: 'string',
   },
-  // this value is only used to place the point on the map
-  typical: {},
-  typicalDisplay: {
+  typical: {
     label: TYPICAL_LABEL,
     type: 'string',
   },
@@ -109,6 +105,11 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
   },
 };
 
+const ROUND_POWER = Math.pow(10, DECIMAL_DEGREES_PRECISION);
+function roundCoordinate(coordinate: number) {
+  return Math.round(Number(coordinate) * ROUND_POWER) / ROUND_POWER;
+}
+
 export class AnomalySourceTooltipProperty implements ITooltipProperty {
   constructor(private readonly _field: string, private readonly _value: string) {}
 
@@ -131,7 +132,14 @@ export class AnomalySourceTooltipProperty implements ITooltipProperty {
           </ul>
         );
       } catch (error) {
-        return this._value.toString();
+        // ignore error and display unformated value
+      }
+    } else if (this._field === 'actual' || this._field === 'typical') {
+      try {
+        const point = JSON.parse(this._value) as number[];
+        return `[${roundCoordinate(point[0])}, ${roundCoordinate(point[1])}]`;
+      } catch (error) {
+        // ignore error and display unformated value
       }
     }
 

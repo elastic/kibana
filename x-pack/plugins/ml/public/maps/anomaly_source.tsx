@@ -251,9 +251,7 @@ export class AnomalySource implements IVectorSource {
         continue;
       }
       if (properties.hasOwnProperty(key)) {
-        if (!ANOMALY_SOURCE_FIELDS[key] || ANOMALY_SOURCE_FIELDS[key].label) {
-          tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
-        }
+        tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
       }
     }
     return tooltipProperties;
