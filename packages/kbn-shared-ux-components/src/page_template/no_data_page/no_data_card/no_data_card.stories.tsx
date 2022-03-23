@@ -11,7 +11,7 @@ import { NoDataCard } from './no_data_card';
 import type { NoDataCardProps } from './types';
 
 export default {
-  title: 'No Data Card',
+  title: 'Page Template/No Data Page/No Data Card',
   description: 'A wrapper around EuiCard, to be used on NoData page',
 };
 
