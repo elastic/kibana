@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
+export { KibanaSolutionAvatar } from './solution_avatar';

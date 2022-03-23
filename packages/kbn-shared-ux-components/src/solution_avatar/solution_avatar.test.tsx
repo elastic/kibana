@@ -8,13 +8,11 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
+import { KibanaSolutionAvatar } from './solution_avatar';
 
-describe('KibanaPageTemplateSolutionNavAvatar', () => {
+describe('KibanaSolutionAvatar', () => {
   test('renders', () => {
-    const component = shallow(
-      <KibanaPageTemplateSolutionNavAvatar name="Solution" iconType="logoElastic" />
-    );
+    const component = shallow(<KibanaSolutionAvatar name="Solution" iconType="logoElastic" />);
     expect(component).toMatchSnapshot();
   });
 });
