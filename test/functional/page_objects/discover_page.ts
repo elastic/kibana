@@ -23,6 +23,8 @@ export class DiscoverPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly queryBar = this.ctx.getService('queryBar');
+
   private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -557,10 +559,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickSavedQueriesPopOver() {
-    await this.testSubjects.click('saved-query-management-popover-button');
+    await this.testSubjects.click('showQueryBarMenu');
   }
 
   public async clickCurrentSavedQuery() {
+    await this.queryBar.setQuery('Cancelled : true');
+    await this.queryBar.clickQuerySubmitButton();
+    await this.testSubjects.click('showQueryBarMenu');
     await this.testSubjects.click('saved-query-management-save-button');
   }
 
