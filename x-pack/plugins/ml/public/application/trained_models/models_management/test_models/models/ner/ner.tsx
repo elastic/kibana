@@ -17,7 +17,7 @@ import type { FormattedNerResp } from './ner_inference';
 import { NerOutput } from './ner_output';
 import { MLJobEditor } from '../../../../../jobs/jobs_list/components/ml_job_editor';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
-import { ErrorMessage } from '../../error';
+import { ErrorMessage } from '../../inference_error';
 import { OutputLoadingContent } from '../../output_loading';
 
 interface Props {
@@ -84,7 +84,7 @@ export const NerModel: FC<Props> = ({ model }) => {
           fullWidth={false}
         >
           <FormattedMessage
-            id="xpack.ml.trainedModels.testSavedObjectsFlyout.ner.runButton"
+            id="xpack.ml.trainedModels.testModelsFlyout.ner.runButton"
             defaultMessage="Run inference"
           />
         </EuiButton>
@@ -95,13 +95,13 @@ export const NerModel: FC<Props> = ({ model }) => {
           <EuiTabs size={'s'}>
             <EuiTab isSelected={selectedTab === TAB.TEXT} onClick={() => setSelectedTab(TAB.TEXT)}>
               <FormattedMessage
-                id="xpack.ml.trainedModels.testSavedObjectsFlyout.ner.markupTab"
+                id="xpack.ml.trainedModels.testModelsFlyout.ner.markupTab"
                 defaultMessage="Output"
               />
             </EuiTab>
             <EuiTab isSelected={selectedTab === TAB.RAW} onClick={() => setSelectedTab(TAB.RAW)}>
               <FormattedMessage
-                id="xpack.ml.trainedModels.testSavedObjectsFlyout.ner.rawOutput"
+                id="xpack.ml.trainedModels.testModelsFlyout.ner.rawOutput"
                 defaultMessage="Raw output"
               />
             </EuiTab>

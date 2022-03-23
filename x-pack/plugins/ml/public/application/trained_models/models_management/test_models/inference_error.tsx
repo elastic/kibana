@@ -17,7 +17,7 @@ export const ErrorMessage: FC<Props> = ({ errorText }) => {
   return errorText === null ? null : (
     <>
       <EuiCallOut
-        title={i18n.translate('xpack.ml.dataframe.analytics.exploration.querySyntaxError', {
+        title={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.inferenceError', {
           defaultMessage: 'An error occurred',
         })}
         color="danger"

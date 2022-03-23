@@ -20,12 +20,12 @@ interface Props {
 export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => {
   return (
     <>
-      <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestSavedObjectsFlyout">
+      <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
               <FormattedMessage
-                id="xpack.ml.trainedModels.testSavedObjectsFlyout.headerLabel"
+                id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
                 defaultMessage="Test trained model"
               />
             </h2>

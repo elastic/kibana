@@ -10,6 +10,7 @@ import React, { FC } from 'react';
 
 import { NerModel } from './models/ner';
 import { LangIdentModel } from './models/lang_ident';
+import { TRAINED_MODEL_TYPE } from '../../../../../common/constants/trained_models';
 
 interface Props {
   model: estypes.MlTrainedModelConfig | null;
@@ -20,12 +21,12 @@ export const SelectedModel: FC<Props> = ({ model }) => {
     return null;
   }
 
-  if (model.model_type === 'pytorch') {
+  if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
     return <NerModel model={model} />;
   }
-  if (model.model_type === 'lang_ident') {
+  if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
     return <LangIdentModel model={model} />;
   }
 
-  return <></>;
+  return null;
 };

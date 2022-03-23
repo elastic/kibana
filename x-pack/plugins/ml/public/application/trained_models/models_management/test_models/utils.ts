@@ -6,10 +6,13 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TRAINED_MODEL_TYPE } from '../../../../../common/constants/trained_models';
+
+const TESTABLE_MODEL_TYPES: estypes.MlTrainedModelType[] = [
+  TRAINED_MODEL_TYPE.PYTORCH,
+  TRAINED_MODEL_TYPE.LANG_IDENT,
+];
 
 export function isTestable(model: estypes.MlTrainedModelConfig) {
-  if (model.model_type === 'pytorch' || model.model_type === 'lang_ident') {
-    return true;
-  }
-  return false;
+  return model.model_type && TESTABLE_MODEL_TYPES.includes(model.model_type);
 }

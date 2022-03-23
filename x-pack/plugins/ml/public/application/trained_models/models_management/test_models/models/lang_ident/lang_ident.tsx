@@ -18,7 +18,7 @@ import type { FormattedLangIdentResp } from './lang_ident_inference';
 import { LangIdentOutput } from './lang_ident_output';
 import { MLJobEditor } from '../../../../../jobs/jobs_list/components/ml_job_editor';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
-import { ErrorMessage } from '../../error';
+import { ErrorMessage } from '../../inference_error';
 import { OutputLoadingContent } from '../../output_loading';
 
 interface Props {
@@ -85,7 +85,7 @@ export const LangIdentModel: FC<Props> = ({ model }) => {
           fullWidth={false}
         >
           <FormattedMessage
-            id="xpack.ml.trainedModels.testSavedObjectsFlyout.ner.runButton"
+            id="xpack.ml.trainedModels.testModelsFlyout.lang_ident.runButton"
             defaultMessage="Run inference"
           />
         </EuiButton>
@@ -96,13 +96,13 @@ export const LangIdentModel: FC<Props> = ({ model }) => {
           <EuiTabs size={'s'}>
             <EuiTab isSelected={selectedTab === TAB.TEXT} onClick={() => setSelectedTab(TAB.TEXT)}>
               <FormattedMessage
-                id="xpack.ml.trainedModels.testSavedObjectsFlyout.ner.markupTab"
+                id="xpack.ml.trainedModels.testModelsFlyout.lang_ident.markupTab"
                 defaultMessage="Output"
               />
             </EuiTab>
             <EuiTab isSelected={selectedTab === TAB.RAW} onClick={() => setSelectedTab(TAB.RAW)}>
               <FormattedMessage
-                id="xpack.ml.trainedModels.testSavedObjectsFlyout.ner.rawOutput"
+                id="xpack.ml.trainedModels.testModelsFlyout.lang_ident.rawOutput"
                 defaultMessage="Raw output"
               />
             </EuiTab>

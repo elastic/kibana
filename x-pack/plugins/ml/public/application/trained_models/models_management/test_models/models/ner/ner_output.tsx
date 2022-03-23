@@ -7,6 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, ReactNode } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiHorizontalRule,
   EuiBadge,
@@ -43,8 +44,20 @@ export const NerOutput: FC<{ result: FormattedNerResp }> = ({ result }) => {
               </div>
               <EuiHorizontalRule margin="none" />
               <div style={{ fontSize: '12px', marginTop: '2px' }}>
-                <div>Type: {getClassLabel(entity.class_name)}</div>
-                <div>Probability: {entity.class_probability}</div>
+                <div>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.testModelsFlyout.ner.output.typeTitle"
+                    defaultMessage="Type"
+                  />
+                  : {getClassLabel(entity.class_name)}
+                </div>
+                <div>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.testModelsFlyout.ner.output.probabilityTitle"
+                    defaultMessage="Probability"
+                  />
+                  : {entity.class_probability}
+                </div>
               </div>
             </div>
           }
