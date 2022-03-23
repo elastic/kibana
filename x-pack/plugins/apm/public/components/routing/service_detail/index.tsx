@@ -86,10 +86,6 @@ export const serviceDetail = {
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
             refreshInterval: t.string,
-            page: toNumberRt,
-            pageSize: toNumberRt,
-            sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
           }),
         ]),
       }),
@@ -103,17 +99,27 @@ export const serviceDetail = {
       },
     },
     children: {
-      '/services/{serviceName}/overview': page({
-        element: <ServiceOverview />,
-        tab: 'overview',
-        title: i18n.translate('xpack.apm.views.overview.title', {
-          defaultMessage: 'Overview',
+      '/services/{serviceName}/overview': {
+        ...page({
+          element: <ServiceOverview />,
+          tab: 'overview',
+          title: i18n.translate('xpack.apm.views.overview.title', {
+            defaultMessage: 'Overview',
+          }),
+          searchBarOptions: {
+            showTransactionTypeSelector: true,
+            showTimeComparison: true,
+          },
         }),
-        searchBarOptions: {
-          showTransactionTypeSelector: true,
-          showTimeComparison: true,
-        },
-      }),
+        params: t.partial({
+          query: t.partial({
+            page: toNumberRt,
+            pageSize: toNumberRt,
+            sortField: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+          }),
+        }),
+      },
       '/services/{serviceName}/transactions': {
         ...page({
           tab: 'transactions',
@@ -125,6 +131,14 @@ export const serviceDetail = {
             showTransactionTypeSelector: true,
             showTimeComparison: true,
           },
+        }),
+        params: t.partial({
+          query: t.partial({
+            page: toNumberRt,
+            pageSize: toNumberRt,
+            sortField: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+          }),
         }),
         children: {
           '/services/{serviceName}/transactions/view': {
@@ -171,10 +185,10 @@ export const serviceDetail = {
         }),
         params: t.partial({
           query: t.partial({
-            sortDirection: t.string,
+            page: toNumberRt,
+            pageSize: toNumberRt,
             sortField: t.string,
-            pageSize: t.string,
-            page: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
           }),
         }),
         children: {
