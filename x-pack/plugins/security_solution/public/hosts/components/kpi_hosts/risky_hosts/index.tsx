@@ -37,7 +37,7 @@ import { KpiRiskScoreStrategyResponse, RiskSeverity } from '../../../../../commo
 import { RiskScore } from '../../../../common/components/severity/common';
 
 const KpiBaseComponentLoader: React.FC = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="hostsKpiLoader">
+  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="KpiLoader">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />
     </EuiFlexItem>

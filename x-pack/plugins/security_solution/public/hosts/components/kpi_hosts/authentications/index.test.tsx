@@ -15,7 +15,7 @@ import { HostsKpiAuthentications } from './index';
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../containers/kpi_hosts/authentications');
 jest.mock('../common', () => ({
-  HostsKpiBaseComponentManage: () => <span data-test-subj="HostsKpiBaseComponentManage" />,
+  KpiBaseComponentManage: () => <span data-test-subj="KpiBaseComponentManage" />,
 }));
 
 describe('Authentications KPI', () => {

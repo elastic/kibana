@@ -15,7 +15,7 @@ import { HostsKpiHosts } from './index';
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../containers/kpi_hosts/hosts');
 jest.mock('../common', () => ({
-  HostsKpiBaseComponentManage: () => <span data-test-subj="HostsKpiBaseComponentManage" />,
+  KpiBaseComponentManage: () => <span data-test-subj="KpiBaseComponentManage" />,
 }));
 
 describe('Hosts KPI', () => {

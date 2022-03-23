@@ -15,7 +15,7 @@ import { HostsKpiUniqueIps } from './index';
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../containers/kpi_hosts/unique_ips');
 jest.mock('../common', () => ({
-  HostsKpiBaseComponentManage: () => <span data-test-subj="HostsKpiBaseComponentManage" />,
+  KpiBaseComponentManage: () => <span data-test-subj="KpiBaseComponentManage" />,
 }));
 
 describe('Unique IPs KPI', () => {
