@@ -46,7 +46,7 @@ import {
   fieldValidators,
   ValidationFunc,
 } from '../shared_imports';
-import { useFetchStatus } from './useFetchStatus';
+import { useFetchStatus } from './use_fetch_status';
 
 // https://github.com/elastic/beats/blob/master/x-pack/osquerybeat/internal/osqd/args.go#L57
 const RESTRICTED_CONFIG_OPTIONS = [
