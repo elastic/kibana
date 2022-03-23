@@ -132,10 +132,17 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
 
 export const getDropProps = (
   layerDatasource: Datasource<unknown, unknown>,
-  layerDatasourceDropProps: GetDropProps
-) => {
+  dropProps: GetDropProps,
+  isNew?: boolean
+): { dropTypes: DropType[]; nextLabel?: string } | undefined => {
   if (layerDatasource) {
-    return layerDatasource.getDropProps(layerDatasourceDropProps);
+    return layerDatasource.getDropProps(dropProps);
+  } else {
+    if (dropProps.dragging) {
+      if (isNew) {
+        return { dropTypes: ['duplicate_compatible'], nextLabel: '' };
+      }
+    }
   }
   return;
 };
