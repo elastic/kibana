@@ -16,12 +16,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('DELETE trained_models', () => {
     before(async () => {
+      await ml.api.initSavedObjects();
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.api.createTestTrainedModels('regression', 2);
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('deletes trained model by id', async () => {

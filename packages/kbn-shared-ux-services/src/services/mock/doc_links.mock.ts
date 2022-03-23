@@ -12,11 +12,11 @@ import type { SharedUxDocLinksService } from '../doc_links';
 /**
  * A factory function for creating a Jest implementation of `SharedUxDocLinksService`.
  */
-export type MockDockLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>;
+export type MockDocLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>;
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUxDocLinksService`.
  */
-export const docLinksServiceFactory: MockDockLinksServiceFactory = () => ({
+export const docLinksServiceFactory: MockDocLinksServiceFactory = () => ({
   dataViewsDocLink: 'dummy link',
 });
