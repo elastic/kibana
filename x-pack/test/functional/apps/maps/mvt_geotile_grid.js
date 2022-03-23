@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }) {
         geometryFieldName: 'geo.coordinates',
         index: 'logstash-*',
         gridPrecision: 8,
-        requestType: 'grid',
+        renderAs: 'grid',
         requestBody: `(_source:(excludes:!()),aggs:(max_of_bytes:(max:(field:bytes))),fields:!((field:'@timestamp',format:date_time),(field:'relatedContent.article:modified_time',format:date_time),(field:'relatedContent.article:published_time',format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z')))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:'doc[!'@timestamp!'].value.getHour()'))),size:0,stored_fields:!('*'))`,
       });
 

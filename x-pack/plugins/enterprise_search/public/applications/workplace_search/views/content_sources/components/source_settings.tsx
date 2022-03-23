@@ -105,7 +105,15 @@ export const SourceSettings: React.FC = () => {
   const showOauthConfig = !isGithubApp && isOrganization && !isEmpty(configuredFields);
   const showGithubAppConfig = isGithubApp;
 
-  const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
+  const {
+    clientId,
+    clientSecret,
+    publicKey,
+    consumerKey,
+    baseUrl,
+    externalConnectorUrl,
+    externalConnectorApiKey,
+  } = configuredFields || {};
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -190,6 +198,8 @@ export const SourceSettings: React.FC = () => {
             publicKey={publicKey}
             consumerKey={consumerKey}
             baseUrl={baseUrl}
+            externalConnectorUrl={externalConnectorUrl}
+            externalConnectorApiKey={externalConnectorApiKey}
           />
           <EuiFormRow>
             <EuiButtonEmptyTo to={editPath as string} flush="left">
