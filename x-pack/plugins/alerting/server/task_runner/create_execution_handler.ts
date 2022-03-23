@@ -111,6 +111,8 @@ export function createExecutionHandler<
         }),
       }));
 
+    alertExecutionStore.numberOfScheduledActions += actions.length;
+
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
