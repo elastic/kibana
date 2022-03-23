@@ -16,7 +16,6 @@ import {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-  ValidLayer,
 } from './types';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
@@ -80,7 +79,7 @@ export const getColumnToLabelMap = (
 };
 
 export function hasHistogramSeries(
-  layers: ValidLayer[] = [],
+  layers: XYDataLayerConfig[] = [],
   datasourceLayers?: FramePublicAPI['datasourceLayers']
 ) {
   if (!datasourceLayers) {
@@ -88,7 +87,11 @@ export function hasHistogramSeries(
   }
   const validLayers = layers.filter(({ accessors }) => accessors.length);
 
-  return validLayers.some(({ layerId, xAccessor }: ValidLayer) => {
+  return validLayers.some(({ layerId, xAccessor }: XYDataLayerConfig) => {
+    if (!xAccessor) {
+      return false;
+    }
+
     const xAxisOperation = datasourceLayers[layerId].getOperationForColumnId(xAccessor);
     return (
       xAxisOperation &&

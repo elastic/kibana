@@ -11,7 +11,7 @@ import { ToolbarPopover, TooltipWrapper, ValueLabelsSettings } from '../../../sh
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
-import { XYState, ValidLayer } from '../../types';
+import { XYState } from '../../types';
 import { hasHistogramSeries } from '../../state_helpers';
 import type { FramePublicAPI } from '../../../types';
 import { getDataLayers } from '../../visualization_helpers';
@@ -66,9 +66,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
     ['area_stacked', 'area', 'area_percentage_stacked'].includes(seriesType)
   );
 
-  const isHistogramSeries = Boolean(
-    hasHistogramSeries(dataLayers as ValidLayer[], datasourceLayers)
-  );
+  const isHistogramSeries = Boolean(hasHistogramSeries(dataLayers, datasourceLayers));
 
   const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
   const isFittingEnabled = hasNonBarSeries;
