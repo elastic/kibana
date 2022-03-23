@@ -1687,7 +1687,7 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.SNOOZE,
+          action: RuleAuditAction.UNSNOOZE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -1697,7 +1697,7 @@ export class RulesClient {
 
     this.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.SNOOZE,
+        action: RuleAuditAction.UNSNOOZE,
         outcome: 'unknown',
         savedObject: { type: 'alert', id },
       })
