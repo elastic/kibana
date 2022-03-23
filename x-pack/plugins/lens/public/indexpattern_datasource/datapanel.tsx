@@ -45,9 +45,11 @@ import { Loader } from '../loader';
 import { getEsQueryConfig } from '../../../../../src/plugins/data/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   changeIndexPattern: (
     id: string,
@@ -121,6 +123,7 @@ export function IndexPatternDataPanel({
   dragDropContext,
   core,
   data,
+  dataViews,
   fieldFormats,
   query,
   filters,
@@ -235,6 +238,7 @@ export function IndexPatternDataPanel({
           dragDropContext={dragDropContext}
           core={core}
           data={data}
+          dataViews={dataViews}
           fieldFormats={fieldFormats}
           charts={charts}
           indexPatternFieldEditor={indexPatternFieldEditor}
@@ -294,6 +298,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onUpdateIndexPattern,
   core,
   data,
+  dataViews,
   fieldFormats,
   indexPatternFieldEditor,
   existingFields,
@@ -303,6 +308,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   uiActions,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
@@ -514,21 +520,21 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const refreshFieldList = useCallback(async () => {
     const newlyMappedIndexPattern = await loadIndexPatterns({
-      indexPatternsService: data.indexPatterns,
+      indexPatternsService: dataViews,
       cache: {},
       patterns: [currentIndexPattern.id],
     });
     onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
     // start a new session so all charts are refreshed
     data.search.session.start();
-  }, [data, currentIndexPattern, onUpdateIndexPattern]);
+  }, [data, dataViews, currentIndexPattern, onUpdateIndexPattern]);
 
   const editField = useMemo(
     () =>
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             trackUiEvent(`open_field_editor_${uiAction}`);
-            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+            const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
                 dataView: indexPatternInstance,
@@ -541,7 +547,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             });
           }
         : undefined,
-    [data, indexPatternFieldEditor, currentIndexPattern, editPermission, refreshFieldList]
+    [editPermission, dataViews, currentIndexPattern.id, indexPatternFieldEditor, refreshFieldList]
   );
 
   const removeField = useMemo(
@@ -549,7 +555,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       editPermission
         ? async (fieldName: string) => {
             trackUiEvent('open_field_delete_modal');
-            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+            const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
                 dataView: indexPatternInstance,
@@ -562,13 +568,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             });
           }
         : undefined,
-    [
-      currentIndexPattern.id,
-      data.indexPatterns,
-      editPermission,
-      indexPatternFieldEditor,
-      refreshFieldList,
-    ]
+    [currentIndexPattern.id, dataViews, editPermission, indexPatternFieldEditor, refreshFieldList]
   );
 
   const addField = useMemo(

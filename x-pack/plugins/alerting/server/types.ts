@@ -42,7 +42,7 @@ import {
   AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { RulesConfig } from './config';
+import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -170,7 +170,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  config?: RulesConfig;
+  config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,
@@ -251,7 +251,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string;
+  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
 }
 
 export type AlertInfoParams = Pick<

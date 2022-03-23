@@ -755,6 +755,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         if (rowData == null || header == null || eventId == null || ecs === null) {
           return null;
         }
+        console.log(rowData);
 
         return renderCellValue({
           browserFields,

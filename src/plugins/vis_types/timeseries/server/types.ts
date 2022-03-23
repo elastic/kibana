@@ -10,7 +10,8 @@ import { Observable } from 'rxjs';
 import { EsQueryConfig } from '@kbn/es-query';
 import { SharedGlobalConfig } from 'kibana/server';
 import type { IRouter, IUiSettingsClient, KibanaRequest } from 'src/core/server';
-import type { DataRequestHandlerContext, IndexPatternsService } from '../../../data/server';
+import type { DataViewsService } from '../../../data_views/common';
+import type { DataRequestHandlerContext } from '../../../data/server';
 import type { FieldFormatsRegistry } from '../../../field_formats/common';
 import type { Series, VisPayload } from '../common/types';
 import type { SearchStrategyRegistry } from './lib/search_strategies';
@@ -31,7 +32,7 @@ export interface VisTypeTimeseriesRequestServices {
   esShardTimeout: number;
   esQueryConfig: EsQueryConfig;
   uiSettings: IUiSettingsClient;
-  indexPatternsService: IndexPatternsService;
+  indexPatternsService: DataViewsService;
   searchStrategyRegistry: SearchStrategyRegistry;
   cachedIndexPatternFetcher: CachedIndexPatternFetcher;
   fieldFormatService: FieldFormatsRegistry;

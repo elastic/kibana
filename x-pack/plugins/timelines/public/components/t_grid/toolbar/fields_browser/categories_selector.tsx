@@ -23,6 +23,7 @@ import { BrowserFields } from '../../../../../common';
 import * as i18n from './translations';
 import { getFieldCount } from './helpers';
 import { isEscape } from '../../../../../common/utils/accessibility';
+
 interface CategoriesSelectorProps {
   /**
    * A map of categoryId -> metadata about the fields in that category,
