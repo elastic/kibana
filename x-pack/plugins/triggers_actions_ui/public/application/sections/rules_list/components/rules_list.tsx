@@ -624,7 +624,7 @@ export const RulesList: React.FunctionComponent = () => {
           return (
             <>
               <EuiFlexGroup direction="row" gutterSize="xs">
-                <EuiFlexItem grow={true}>{durationString}</EuiFlexItem>
+                <EuiFlexItem grow={false}>{durationString}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {item.showIntervalWarning && (
                     <EuiToolTip
@@ -659,7 +659,7 @@ export const RulesList: React.FunctionComponent = () => {
                             onRuleEdit(item);
                           }
                         }}
-                        iconType="iInCircle"
+                        iconType="flag"
                         aria-label={i18n.translate(
                           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalIconAriaLabel',
                           { defaultMessage: 'Below configured minimum interval' }
