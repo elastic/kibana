@@ -13,7 +13,7 @@ import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/comp
 import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_metric_success';
 import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentication_metric_failure';
 import { useHostsKpiAuthentications } from '../../../containers/kpi_hosts/authentications';
-import { HostsKpiBaseComponentManage } from '../common';
+import { KpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 
@@ -66,7 +66,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   });
 
   return (
-    <HostsKpiBaseComponentManage
+    <KpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}
