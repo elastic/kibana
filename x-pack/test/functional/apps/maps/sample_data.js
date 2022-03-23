@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
-export default function ({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
@@ -130,7 +130,10 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should load layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('ecommerce_map', true);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'ecommerce_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.02);
       });
     });
@@ -151,7 +154,10 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('flights_map', true);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'flights_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.02);
       });
     });
@@ -173,7 +179,10 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('web_logs_map', true);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'web_logs_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.02);
       });
     });
