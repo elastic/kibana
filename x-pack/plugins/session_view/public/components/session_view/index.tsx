@@ -135,8 +135,8 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
               <EuiResizablePanel
-                initialSize={isDetailOpen ? 70 : 100}
-                minSize="600px"
+                initialSize={isDetailOpen ? 75 : 100}
+                minSize="60%"
                 paddingSize="none"
               >
                 {renderIsLoading && (
@@ -198,7 +198,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
                   <EuiResizableButton />
                   <EuiResizablePanel
                     id="session-detail-panel"
-                    initialSize={30}
+                    initialSize={25}
                     minSize="320px"
                     paddingSize="none"
                     css={styles.detailPanel}
