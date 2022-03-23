@@ -36,10 +36,10 @@ export class AnomalyChartsStateService extends StateService {
     this._init();
   }
 
-  protected _initSubscribtions(): Subscription {
-    const subscribtions = new Subscription();
+  protected _initSubscriptions(): Subscription {
+    const subscription = new Subscription();
 
-    subscribtions.add(
+    subscription.add(
       this._anomalyExplorerUrlStateService
         .getPageUrlState$()
         .pipe(
@@ -49,9 +49,9 @@ export class AnomalyChartsStateService extends StateService {
         .subscribe(this._showCharts$)
     );
 
-    subscribtions.add(this.initChartDataSubscribtion());
+    subscription.add(this.initChartDataSubscribtion());
 
-    return subscribtions;
+    return subscription;
   }
 
   private initChartDataSubscribtion() {

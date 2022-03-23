@@ -46,7 +46,7 @@ export class AnomalyExplorerCommonStateService extends StateService {
     this._init();
   }
 
-  protected _initSubscribtions(): Subscription {
+  protected _initSubscriptions(): Subscription {
     return this.anomalyExplorerUrlStateService
       .getPageUrlState$()
       .pipe(

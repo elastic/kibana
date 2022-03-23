@@ -8,19 +8,19 @@
 import { Subscription } from 'rxjs';
 
 export abstract class StateService {
-  private subscribtions$: Subscription = new Subscription();
+  private subscriptions$: Subscription = new Subscription();
 
   protected _init() {
-    this.subscribtions$ = this._initSubscribtions();
+    this.subscriptions$ = this._initSubscriptions();
   }
 
   /**
-   * Should return all active subscribtions.
+   * Should return all active subscriptions.
    * @protected
    */
-  protected abstract _initSubscribtions(): Subscription;
+  protected abstract _initSubscriptions(): Subscription;
 
   public destroy() {
-    this.subscribtions$.unsubscribe();
+    this.subscriptions$.unsubscribe();
   }
 }

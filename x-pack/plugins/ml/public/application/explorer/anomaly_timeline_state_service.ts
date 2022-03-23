@@ -100,12 +100,12 @@ export class AnomalyTimelineStateService extends StateService {
    * Initializes required subscriptions for fetching swim lanes data.
    * @private
    */
-  protected _initSubscribtions(): Subscription {
-    const subscribtions = new Subscription();
+  protected _initSubscriptions(): Subscription {
+    const subscription = new Subscription();
 
-    subscribtions.add(this._initViewByData());
+    subscription.add(this._initViewByData());
 
-    subscribtions.add(
+    subscription.add(
       this._swimLaneUrlState$
         .pipe(
           map((v) => v?.severity ?? 0),
@@ -114,12 +114,12 @@ export class AnomalyTimelineStateService extends StateService {
         .subscribe(this._swimLaneSeverity$)
     );
 
-    subscribtions.add(this._initSwimLanePagination());
-    subscribtions.add(this._initOverallSwimLaneData());
-    subscribtions.add(this._initTopFieldValues());
-    subscribtions.add(this._initViewBySwimLaneData());
+    subscription.add(this._initSwimLanePagination());
+    subscription.add(this._initOverallSwimLaneData());
+    subscription.add(this._initTopFieldValues());
+    subscription.add(this._initViewBySwimLaneData());
 
-    subscribtions.add(
+    subscription.add(
       combineLatest([
         this.anomalyExplorerCommonStateService.getSelectedJobs$(),
         this.getContainerWidth$(),
@@ -130,9 +130,9 @@ export class AnomalyTimelineStateService extends StateService {
       })
     );
 
-    subscribtions.add(this._initSelectedCells());
+    subscription.add(this._initSelectedCells());
 
-    return subscribtions;
+    return subscription;
   }
 
   private _initViewByData(): Subscription {
