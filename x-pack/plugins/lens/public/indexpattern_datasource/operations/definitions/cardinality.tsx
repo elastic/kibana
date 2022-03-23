@@ -6,10 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiSwitch } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import { OperationDefinition, ParamEditorProps } from './index';
+import { FieldBasedIndexPatternColumn, FormatParams } from './column_types';
 
 import {
   getFormatFromPreviousColumn,
@@ -17,9 +20,11 @@ import {
   getSafeName,
   getFilter,
   combineErrorMessages,
+  isColumnOfType,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { updateColumnParam } from '../layer_helpers';
 
 const supportedTypes = new Set([
   'string',
@@ -51,10 +56,12 @@ function ofName(name: string, timeShift: string | undefined) {
   );
 }
 
-export interface CardinalityIndexPatternColumn
-  extends FormattedIndexPatternColumn,
-    FieldBasedIndexPatternColumn {
+export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: typeof OPERATION_TYPE;
+  params?: {
+    emptyAsNull?: boolean;
+    format?: FormatParams;
+  };
 }
 
 export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
@@ -101,8 +108,57 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      params: getFormatFromPreviousColumn(previousColumn),
+      params: {
+        ...getFormatFromPreviousColumn(previousColumn),
+        emptyAsNull:
+          previousColumn &&
+          isColumnOfType<CardinalityIndexPatternColumn>('unique_count', previousColumn)
+            ? previousColumn.params?.emptyAsNull
+            : !columnParams?.usedInMath,
+      },
     };
+  },
+  getAdvancedOptions: ({
+    layer,
+    columnId,
+    currentColumn,
+    updateLayer,
+  }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
+    return [
+      {
+        dataTestSubj: 'hide-zero-values',
+        optionElement: (
+          <>
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+                defaultMessage: 'Hide zero values',
+              })}
+              labelProps={{
+                style: {
+                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                },
+              }}
+              checked={Boolean(currentColumn.params?.emptyAsNull)}
+              onChange={() => {
+                updateLayer(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'emptyAsNull',
+                    value: !currentColumn.params?.emptyAsNull,
+                  })
+                );
+              }}
+              compressed
+            />
+          </>
+        ),
+        title: '',
+        showInPopover: true,
+        inlineElement: null,
+        onClick: () => {},
+      },
+    ];
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
@@ -112,6 +168,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       field: column.sourceField,
       // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
+      emptyAsNull: column.params?.emptyAsNull,
     }).toAst();
   },
   onFieldChange: (oldColumn, field) => {

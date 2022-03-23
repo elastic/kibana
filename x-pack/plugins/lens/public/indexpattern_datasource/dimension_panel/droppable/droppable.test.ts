@@ -2306,7 +2306,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     sourceField: 'src',
                     timeShift: undefined,
                     dataType: 'number',
-                    params: undefined,
+                    params: {
+                      emptyAsNull: true,
+                    },
                     scale: 'ratio',
                   },
                 },

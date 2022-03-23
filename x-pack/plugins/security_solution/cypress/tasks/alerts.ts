@@ -72,8 +72,8 @@ export const expandFirstAlert = () => {
 
   cy.get(EXPAND_ALERT_BTN)
     .first()
-    .pipe(($el) => $el.trigger('click'))
-    .should('exist');
+    .should('exist')
+    .pipe(($el) => $el.trigger('click'));
 };
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
