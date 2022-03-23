@@ -25,6 +25,7 @@ export {
 export type {
   XYArgs,
   YConfig,
+  EndValue,
   XYRender,
   LayerType,
   YAxisMode,

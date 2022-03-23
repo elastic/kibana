@@ -32,6 +32,7 @@ import type {
   YConfig,
   XScaleType,
   YScaleType,
+  EndValue,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type { ValueLabelConfig } from '../../common/types';
@@ -61,6 +62,8 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
+  emphasizeFitting?: boolean;
+  endValue?: EndValue;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];

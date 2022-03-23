@@ -33,8 +33,10 @@ import {
   LEGEND_CONFIG,
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
+  EndValues,
 } from '../constants';
 
+export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type LineStyle = $Values<typeof LineStyles>;
@@ -164,6 +166,8 @@ export interface XYArgs {
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
   layers: XYLayerConfigResult[];
+  endValue?: EndValue;
+  emphasizeFitting?: boolean;
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;

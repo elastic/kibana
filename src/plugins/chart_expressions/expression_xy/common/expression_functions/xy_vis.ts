@@ -28,6 +28,7 @@ import {
   REFERENCE_LINE_LAYER,
   LABELS_ORIENTATION_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
+  EndValues,
 } from '../constants';
 
 export const logDataTable = (
@@ -100,6 +101,18 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
       }),
+    },
+    endValue: {
+      types: ['string'],
+      options: [...Object.values(EndValues)],
+      help: i18n.translate('expressionXY.xyVis.endValue.help', {
+        defaultMessage: 'End value',
+      }),
+    },
+    emphasizeFitting: {
+      types: ['boolean'],
+      default: false,
+      help: '',
     },
     valueLabels: {
       types: ['string'],

@@ -138,6 +138,7 @@ exports[`XYChart component it renders area 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -198,6 +199,7 @@ exports[`XYChart component it renders area 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -862,6 +864,7 @@ exports[`XYChart component it renders line 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -922,6 +925,7 @@ exports[`XYChart component it renders line 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -1094,6 +1098,7 @@ exports[`XYChart component it renders stacked area 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -1158,6 +1163,7 @@ exports[`XYChart component it renders stacked area 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
