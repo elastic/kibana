@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+export interface AlertStatusEventEntityIdMap {
+  [alertUuid: string]: {
+    status: string;
+    processEntityId: string;
+  };
+}
+
 export const enum EventKind {
   event = 'event',
   signal = 'signal',
@@ -150,6 +157,7 @@ export interface Process {
   hasOutput(): boolean;
   hasAlerts(): boolean;
   getAlerts(): ProcessEvent[];
+  updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap): void;
   hasExec(): boolean;
   getOutput(): string;
   getDetails(): ProcessEvent;
