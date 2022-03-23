@@ -63,10 +63,12 @@ export async function getPaginatedNodes(
   const nodes: Node[] = await getNodeIds(req, { clusterUuid }, size);
 
   // Add `isOnline` and shards from the cluster state and shard stats
-  const clusterState = clusterStats?.cluster_state ??
-    clusterStats?.elasticsearch?.cluster?.stats?.state ?? { nodes: {} };
+  const clusterStateNodes =
+    clusterStats?.cluster_state?.nodes ??
+    clusterStats?.elasticsearch?.cluster?.stats?.state?.nodes ??
+    {};
   for (const node of nodes) {
-    node.isOnline = !isUndefined(clusterState?.nodes && clusterState?.nodes[node.uuid]);
+    node.isOnline = !isUndefined(clusterStateNodes && clusterStateNodes[node.uuid]);
     node.shardCount = nodesShardCount?.nodes[node.uuid]?.shardCount ?? 0;
   }
 
