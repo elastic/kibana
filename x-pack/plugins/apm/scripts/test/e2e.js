@@ -7,7 +7,6 @@
 
 /* eslint-disable no-console */
 
-const { times } = require('lodash');
 const path = require('path');
 const yargs = require('yargs');
 const childProcess = require('child_process');
