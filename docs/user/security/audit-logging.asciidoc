@@ -217,6 +217,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed execution log for a rule.
 | `failure` | User is not authorized to access execution log for a rule.
 
+.2+| `rule_get_execution_errors`
+| `success` | User has accessed execution errors for a rule.
+| `failure` | User is not authorized to access execution errors for a rule.
+
 .2+| `rule_find`
 | `success` | User has accessed a rule as part of a search operation.
 | `failure` | User is not authorized to search for rules.

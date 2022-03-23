@@ -644,6 +644,7 @@ When a user is granted the `read` role in the Alerting Framework, they will be a
 - `getRuleState`
 - `getAlertSummary`
 - `getExecutionLog`
+- `getExecutionErrors`
 - `find`
 
 When a user is granted the `all` role in the Alerting Framework, they will be able to execute all of the `read` privileged api calls, but in addition they'll be granted the following calls:

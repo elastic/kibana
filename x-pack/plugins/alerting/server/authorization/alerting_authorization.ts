@@ -31,6 +31,7 @@ export enum ReadOperations {
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',
   GetExecutionLog = 'getExecutionLog',
+  GetExecutionErrors = 'getExecutionErrors',
   Find = 'find',
 }
 
