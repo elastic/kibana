@@ -179,9 +179,9 @@ export class SyntheticsService {
     }
   }
 
-  async getOutput(request?: KibanaRequest) {
+  async getOutput() {
     try {
-      this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
+      this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server });
     } catch (err) {
       this.logger.error(err);
       throw err;
@@ -202,7 +202,6 @@ export class SyntheticsService {
   }
 
   async pushConfigs(
-    request?: KibanaRequest,
     configs?: Array<
       SyntheticsMonitorWithId & {
         fields_under_root?: boolean;
@@ -217,7 +216,7 @@ export class SyntheticsService {
     }
     const data = {
       monitors,
-      output: await this.getOutput(request),
+      output: await this.getOutput(),
     };
 
     this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
@@ -231,7 +230,6 @@ export class SyntheticsService {
   }
 
   async runOnceConfigs(
-    request?: KibanaRequest,
     configs?: Array<
       SyntheticsMonitorWithId & {
         fields_under_root?: boolean;
@@ -245,7 +243,7 @@ export class SyntheticsService {
     }
     const data = {
       monitors,
-      output: await this.getOutput(request),
+      output: await this.getOutput(),
     };
 
     try {
@@ -271,7 +269,7 @@ export class SyntheticsService {
     }
     const data = {
       monitors,
-      output: await this.getOutput(request),
+      output: await this.getOutput(),
     };
 
     try {
@@ -282,12 +280,17 @@ export class SyntheticsService {
     }
   }
 
-  async deleteConfigs(request: KibanaRequest, configs: SyntheticsMonitorWithId[]) {
+  async deleteConfigs(configs: SyntheticsMonitorWithId[]) {
     const data = {
       monitors: this.formatConfigs(configs),
-      output: await this.getOutput(request),
+      output: await this.getOutput(),
     };
     return await this.apiClient.delete(data);
+  }
+
+  async deleteAllConfigs() {
+    const configs = await this.getMonitorConfigs();
+    return await this.deleteConfigs(configs);
   }
 
   async getMonitorConfigs() {

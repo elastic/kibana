@@ -42,7 +42,7 @@ import {
   getSyntheticsEnablementRoute,
   disableSyntheticsRoute,
   enableSyntheticsRoute,
-} from './synthetics_service/api_key';
+} from './synthetics_service/enablement';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';

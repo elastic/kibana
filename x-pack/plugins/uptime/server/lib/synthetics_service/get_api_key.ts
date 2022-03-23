@@ -35,11 +35,9 @@ export const serviceApiKeyPrivileges = {
 };
 
 export const getAPIKeyForSyntheticsService = async ({
-  request,
   server,
 }: {
   server: UptimeServerSetup;
-  request?: KibanaRequest;
 }): Promise<SyntheticsServiceApiKey | undefined> => {
   const { encryptedSavedObjects } = server;
 

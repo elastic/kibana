@@ -77,6 +77,8 @@ export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
   const getSwitchToolTipContent = () => {
     if (!isEnabled) {
       return SYNTHETICS_ENABLE_TOOL_TIP_MESSAGE;
+    } else if (isEnabled) {
+      return SYNTHETICS_DISABLE_TOOL_TIP_MESSAGE;
     } else if (!areApiKeysEnabled) {
       return API_KEYS_DISABLED_TOOL_TIP_MESSAGE;
     } else {
@@ -108,7 +110,7 @@ export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
         grow={false}
         data-test-subj="addMonitorButton"
       >
-        <EuiToolTip content={isEnabled ? '' : SYNTHETICS_DISABLED_MESSAGE}>
+        <EuiToolTip content={!isEnabled && !canEnable ? SYNTHETICS_DISABLED_MESSAGE : ''}>
           <EuiButton
             isLoading={loading}
             fill
@@ -179,6 +181,14 @@ const SYNTHETICS_ENABLE_TOOL_TIP_MESSAGE = i18n.translate(
   {
     defaultMessage:
       'Enable Monitor Management to create lightweight and real-browser monitors from locations around the world.',
+  }
+);
+
+const SYNTHETICS_DISABLE_TOOL_TIP_MESSAGE = i18n.translate(
+  'xpack.uptime.monitorManagement.syntheticsToolTip',
+  {
+    defaultMessage:
+      'Disabling Monitor Management with immediately stop the execution of monitors in all test locations and prevent the creation of new monitors.',
   }
 );
 

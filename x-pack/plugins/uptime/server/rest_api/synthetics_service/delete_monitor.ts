@@ -36,7 +36,7 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       );
 
       await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
-      const errors = await syntheticsService.deleteConfigs(request, [
+      const errors = await syntheticsService.deleteConfigs([
         { ...monitor.attributes, id: monitorId },
       ]);
 

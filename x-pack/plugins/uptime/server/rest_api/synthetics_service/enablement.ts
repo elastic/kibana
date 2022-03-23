@@ -32,7 +32,9 @@ export const disableSyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
   handler: async ({ response, request, server, savedObjectsClient }): Promise<any> => {
+    const { syntheticsService } = server;
     try {
+      await syntheticsService.deleteAllConfigs();
       await libs.requests.deleteServiceApiKey({
         request,
         server,
