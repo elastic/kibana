@@ -9,13 +9,13 @@ import { shallow, mount } from 'enzyme';
 import React from 'react';
 
 import {
-  deleteRulesAction,
-  duplicateRulesAction,
-  editRuleAction,
+  goToRuleEditPage,
+  executeRulesBulkAction,
 } from '../../../pages/detection_engine/rules/all/actions';
 import { RuleActionsOverflow } from './index';
 import { mockRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 
+jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');
   return {
@@ -29,25 +29,9 @@ jest.mock('../../../../common/lib/kibana', () => {
     }),
   };
 });
+jest.mock('../../../pages/detection_engine/rules/all/actions');
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    push: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../pages/detection_engine/rules/all/actions', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
-  return {
-    ...actual,
-    exportRulesAction: jest.fn(),
-    deleteRulesAction: jest.fn(),
-    duplicateRulesAction: jest.fn(),
-    editRuleAction: jest.fn(),
-  };
-});
-
-const duplicateRulesActionMock = duplicateRulesAction as jest.Mock;
+const executeRulesBulkActionMock = executeRulesBulkAction as jest.Mock;
 const flushPromises = () => new Promise(setImmediate);
 
 describe('RuleActionsOverflow', () => {
@@ -206,7 +190,9 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       wrapper.find('[data-test-subj="rules-details-duplicate-rule"] button').simulate('click');
       wrapper.update();
-      expect(duplicateRulesAction).toHaveBeenCalled();
+      expect(executeRulesBulkAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'duplicate' })
+      );
     });
 
     test('it calls duplicateRulesAction with the rule and rule.id when rules-details-duplicate-rule is clicked', () => {
@@ -218,11 +204,8 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       wrapper.find('[data-test-subj="rules-details-duplicate-rule"] button').simulate('click');
       wrapper.update();
-      expect(duplicateRulesAction).toHaveBeenCalledWith(
-        [rule],
-        [rule.id],
-        expect.anything(),
-        expect.anything()
+      expect(executeRulesBulkAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'duplicate', search: { ids: ['id'] } })
       );
     });
   });
@@ -230,7 +213,9 @@ describe('RuleActionsOverflow', () => {
   test('it calls editRuleAction after the rule is duplicated', async () => {
     const rule = mockRule('id');
     const ruleDuplicate = mockRule('newRule');
-    duplicateRulesActionMock.mockImplementation(() => Promise.resolve([ruleDuplicate]));
+    executeRulesBulkActionMock.mockImplementation(() =>
+      Promise.resolve({ attributes: { results: { created: [ruleDuplicate] } } })
+    );
     const wrapper = mount(
       <RuleActionsOverflow rule={rule} userHasPermissions canDuplicateRuleWithActions={true} />
     );
@@ -240,8 +225,10 @@ describe('RuleActionsOverflow', () => {
     wrapper.update();
     await flushPromises();
 
-    expect(duplicateRulesAction).toHaveBeenCalled();
-    expect(editRuleAction).toHaveBeenCalledWith(ruleDuplicate.id, expect.anything());
+    expect(executeRulesBulkAction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'duplicate' })
+    );
+    expect(goToRuleEditPage).toHaveBeenCalledWith(ruleDuplicate.id, expect.anything());
   });
 
   describe('rules details export rule', () => {
@@ -340,7 +327,9 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       wrapper.find('[data-test-subj="rules-details-delete-rule"] button').simulate('click');
       wrapper.update();
-      expect(deleteRulesAction).toHaveBeenCalled();
+      expect(executeRulesBulkAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'delete' })
+      );
     });
 
     test('it calls deleteRulesAction with the rule.id when rules-details-delete-rule is clicked', () => {
@@ -352,11 +341,8 @@ describe('RuleActionsOverflow', () => {
       wrapper.update();
       wrapper.find('[data-test-subj="rules-details-delete-rule"] button').simulate('click');
       wrapper.update();
-      expect(deleteRulesAction).toHaveBeenCalledWith(
-        [rule.id],
-        expect.anything(),
-        expect.anything(),
-        expect.anything()
+      expect(executeRulesBulkAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'delete', search: { ids: ['id'] } })
       );
     });
   });
