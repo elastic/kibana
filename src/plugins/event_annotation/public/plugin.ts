@@ -34,6 +34,6 @@ export class EventAnnotationPlugin
   }
 
   public start(): EventAnnotationPluginStart {
-    return this.eventAnnotationService!;
+    return this.eventAnnotationService;
   }
 }

@@ -7,7 +7,7 @@
  */
 
 import { EventAnnotationServiceType } from './types';
-import { defaultAnnotationColor } from '..';
+import { defaultAnnotationColor } from './helpers';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
