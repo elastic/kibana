@@ -258,7 +258,7 @@ export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appro
 export const CASE_SUCCESS_TOAST = (title: string) =>
   i18n.translate('xpack.cases.actions.caseSuccessToast', {
     values: { title },
-    defaultMessage: 'A case has been updated: "{title}"',
+    defaultMessage: '{title} has been updated',
   });
 
 export const CASE_ALERT_SUCCESS_TOAST = (title: string) =>
