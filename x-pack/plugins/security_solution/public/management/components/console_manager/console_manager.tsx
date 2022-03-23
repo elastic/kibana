@@ -21,7 +21,7 @@ interface ConsoleRegistrationInterface {
   id: string;
   title: ReactNode;
   consoleProps: Record<string, unknown>; // FIXME:PT Use console props here once merged
-  onBeforeClose?: () => Promise<void>;
+  onBeforeClose?: () => void;
 }
 
 interface RegisteredConsoleClient extends Pick<ConsoleRegistrationInterface, 'id' | 'title'> {
@@ -108,11 +108,49 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       });
     };
 
-    const terminate: ConsoleManagerClient['terminate'] = () => {};
+    const terminate: ConsoleManagerClient['terminate'] = (id) => {
+      setConsoleStorage((prevState) => {
+        if (!prevState[id]) {
+          throw new Error(`Unable to terminate console id ${id}. Not found`);
+        }
 
-    const getOne: ConsoleManagerClient['getOne'] = () => {};
+        const { onBeforeClose } = prevState[id];
 
-    const getList: ConsoleManagerClient['getList'] = () => {};
+        if (onBeforeClose) {
+          onBeforeClose();
+        }
+
+        const newState = { ...prevState };
+        delete newState[id];
+
+        return newState;
+      });
+    };
+
+    const getOne: ConsoleManagerClient['getOne'] = (id) => {
+      let registeredConsoleClient: RegisteredConsoleClient | undefined;
+
+      setConsoleStorage((prevState) => {
+        if (prevState[id]) {
+          registeredConsoleClient = prevState[id].client;
+        }
+
+        return prevState;
+      });
+
+      return registeredConsoleClient;
+    };
+
+    const getList: ConsoleManagerClient['getList'] = () => {
+      let list: RegisteredConsoleClient[] = [];
+
+      setConsoleStorage((prevState) => {
+        list = Object.values(prevState).map((managedConsole) => managedConsole.client);
+        return prevState;
+      });
+
+      return list;
+    };
 
     const register: ConsoleManagerClient['register'] = ({ id, title, ...otherRegisterProps }) => {
       const managedConsole: ManagedConsole = {
@@ -150,7 +188,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       getOne,
       getList,
     };
-  }, []);
+  }, []); // << Try to keep this as an empty array for efficiency purposes
 
   const visibleConsole = useMemo(() => {
     return Object.values(consoleStorage).find((managedConsole) => managedConsole.isOpen);
