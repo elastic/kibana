@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { mount as enzymeMount } from 'enzyme';
 import React from 'react';
+import { ToolbarPopover } from './popover';
 
-import { ToolbarPopover, Props as ToolbarPopoverProps } from '../popover/popover';
+describe('<ToolbarPopover />', () => {
+  test('is rendered', () => {
+    const isOpen = false;
+    const component = enzymeMount(<ToolbarPopover label="test" children={() => !isOpen} />);
 
-export type Props = Omit<ToolbarPopoverProps, 'primary'>;
-
-export const PrimaryActionPopover = (props: Omit<ToolbarPopoverProps, 'primary'>) => (
-  <ToolbarPopover {...props} />
-);
+    expect(component).toMatchSnapshot();
+  });
+});

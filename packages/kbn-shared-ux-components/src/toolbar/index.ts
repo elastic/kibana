@@ -8,4 +8,4 @@
 export { ToolbarButton } from './buttons/primary/primary';
 export { IconButtonGroup } from './buttons/icon_button_group/icon_button_group';
 export { AddFromLibraryButton } from './buttons/add_from_library/add_from_library';
-export { ToolbarPopover, PrimaryActionPopover } from './popovers/index';
+export { ToolbarPopover } from './popovers/popover';

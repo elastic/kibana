@@ -44,7 +44,7 @@ export const ToolbarButton = withSuspense(LazyToolbarButton);
 /**
  * An example of the solution toolbar button
  */
-export { AddFromLibraryButton } from './toolbar';
+export { AddFromLibraryButton, ToolbarPopover } from './toolbar';
 
 /**
  * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspense` or the
@@ -94,5 +94,3 @@ export const LazyIconButtonGroup = React.lazy(() =>
  * The IconButtonGroup component that is wrapped by the `withSuspence` HOC.
  */
 export const IconButtonGroup = withSuspense(LazyIconButtonGroup);
-
-export { PrimaryActionPopover, ToolbarPopover } from './toolbar/popovers/index';

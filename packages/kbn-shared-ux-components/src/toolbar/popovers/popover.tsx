@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
 
-import { ToolbarButton, Props as ButtonProps } from '../../buttons/primary/primary';
+import { ToolbarButton, Props as ButtonProps } from '../buttons/primary/primary';
 
 type AllowedButtonProps = Omit<ButtonProps, 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<
@@ -29,13 +29,7 @@ export const ToolbarPopover = ({ label, iconType, children, ...popover }: Props)
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
-  const button = (
-    <ToolbarButton
-      {...{ label, iconType }}
-      onClick={onButtonClick}
-      data-test-subj={popover['data-test-subj']}
-    />
-  );
+  const button = <ToolbarButton onClick={onButtonClick} {...{ label }} />;
 
   return (
     <EuiPopover {...{ isOpen, button, closePopover }} {...popover}>
