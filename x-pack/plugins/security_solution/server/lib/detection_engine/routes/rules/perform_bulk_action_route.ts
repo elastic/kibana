@@ -95,13 +95,19 @@ const buildBulkResponse = (
     total: bulkActionOutcome.results.length + errors.length,
   };
 
+  // Whether rules will be updated, created or deleted depends on the bulk
+  // action type being processed. However, in order to avoid doing a switch-case
+  // by the action type, we can figure it out indirectly.
   const results = {
+    // We had a rule, now there's a rule with the same id - the existing rule was modified
     updated: bulkActionOutcome.results
       .filter(({ item, result }) => item.id === result?.id)
       .map(({ result }) => result && internalRuleToAPIResponse(result)),
+    // We had a rule, now there's a rule with a different id - a new rule was created
     created: bulkActionOutcome.results
       .filter(({ item, result }) => result != null && result.id !== item.id)
       .map(({ result }) => result && internalRuleToAPIResponse(result)),
+    // We had a rule, now it's null - the rule was deleted
     deleted: bulkActionOutcome.results
       .filter(({ result }) => result == null)
       .map(({ item }) => internalRuleToAPIResponse(item)),

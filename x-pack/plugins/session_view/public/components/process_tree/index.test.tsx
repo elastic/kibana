@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mockData } from '../../../common/mocks/constants/session_view_process.mock';
+import { mockData, mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { Process } from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessImpl } from './hooks';
@@ -21,6 +21,7 @@ describe('ProcessTree component', () => {
   const props: ProcessTreeDeps = {
     sessionEntityId: sessionLeader.process.entity_id,
     data: mockData,
+    alerts: mockAlerts,
     isFetching: false,
     fetchNextPage: jest.fn(),
     hasNextPage: false,
@@ -28,7 +29,7 @@ describe('ProcessTree component', () => {
     hasPreviousPage: false,
     onProcessSelected: jest.fn(),
     updatedAlertsStatus: {},
-    handleOnAlertDetailsClosed: jest.fn(),
+    onShowAlertDetails: jest.fn(),
   };
 
   beforeEach(() => {
