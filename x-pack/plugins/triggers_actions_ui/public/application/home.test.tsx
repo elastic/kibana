@@ -12,6 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import TriggersActionsUIHome, { MatchParams } from './home';
 import { useKibana } from '../common/lib/kibana';
 jest.mock('../common/lib/kibana');
+jest.mock('../common/get_experimental_features');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('home', () => {
