@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
-import { sampleThresholdSignalHistory } from '../__mocks__/threshold_signal_history.mock';
 import { calculateThresholdSignalUuid } from '../utils';
 import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
 
