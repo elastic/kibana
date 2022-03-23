@@ -21,7 +21,8 @@ export async function getLatestApmPackage({
     APM_PACKAGE_NAME
   );
   const registryPackage = await packageClient.getRegistryPackage(name, version);
-  const { title, policy_templates } = registryPackage.packageInfo;
-  const policyTemplateInputVars = policy_templates?.[0].inputs?.[0].vars ?? [];
+  const { title, policy_templates: policyTemplates } =
+    registryPackage.packageInfo;
+  const policyTemplateInputVars = policyTemplates?.[0].inputs?.[0].vars ?? [];
   return { package: { name, version, title }, policyTemplateInputVars };
 }
