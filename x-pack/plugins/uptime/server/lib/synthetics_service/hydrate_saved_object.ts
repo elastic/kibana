@@ -9,7 +9,7 @@ import moment from 'moment';
 import { UptimeESClient } from '../lib';
 import { UptimeServerSetup } from '../adapters';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
-import { MonitorFields, Ping } from '../../../common/runtime_types';
+import { SyntheticsMonitor, MonitorFields, Ping } from '../../../common/runtime_types';
 
 export const hydrateSavedObjects = async ({
   monitors,
@@ -19,38 +19,55 @@ export const hydrateSavedObjects = async ({
   server: UptimeServerSetup;
 }) => {
   try {
-    const missingUrlInfoIds: string[] = [];
+    const missingInfoIds: string[] = monitors
+      .filter((monitor) => {
+        const isBrowserMonitor = monitor.attributes.type === 'browser';
+        const isHTTPMonitor = monitor.attributes.type === 'http';
+        const isTCPMonitor = monitor.attributes.type === 'tcp';
 
-    monitors
-      .filter((monitor) => monitor.attributes.type === 'browser')
-      .forEach(({ attributes, id }) => {
-        const monitor = attributes as MonitorFields;
-        if (!monitor || !monitor.urls) {
-          missingUrlInfoIds.push(id);
-        }
-      });
+        const monitorAttributes = monitor.attributes as MonitorFields;
+        const isMissingUrls = !monitorAttributes || !monitorAttributes.urls;
+        const isMissingPort = !monitorAttributes || !monitorAttributes['url.port'];
 
-    if (missingUrlInfoIds.length > 0 && server.uptimeEsClient) {
+        const isEnrichableBrowserMonitor = isBrowserMonitor && (isMissingUrls || isMissingPort);
+        const isEnrichableHttpMonitor = isHTTPMonitor && isMissingPort;
+        const isEnrichableTcpMonitor = isTCPMonitor && isMissingPort;
+
+        return isEnrichableBrowserMonitor || isEnrichableHttpMonitor || isEnrichableTcpMonitor;
+      })
+      .map(({ id }) => id);
+
+    if (missingInfoIds.length > 0 && server.uptimeEsClient) {
       const esDocs: Ping[] = await fetchSampleMonitorDocuments(
         server.uptimeEsClient,
-        missingUrlInfoIds
+        missingInfoIds
       );
+
       const updatedObjects = monitors
-        .filter((monitor) => missingUrlInfoIds.includes(monitor.id))
+        .filter((monitor) => missingInfoIds.includes(monitor.id))
         .map((monitor) => {
-          let url = '';
+          let resultAttributes: Partial<SyntheticsMonitor> = monitor.attributes;
+
           esDocs.forEach((doc) => {
             // to make sure the document is ingested after the latest update of the monitor
-            const diff = moment(monitor.updated_at).diff(moment(doc.timestamp), 'minutes');
-            if (doc.config_id === monitor.id && doc.url?.full && diff > 1) {
-              url = doc.url?.full;
+            const documentIsAfterLatestUpdate = moment(monitor.updated_at).isBefore(
+              moment(doc.timestamp)
+            );
+            if (!documentIsAfterLatestUpdate) return monitor;
+            if (doc.config_id !== monitor.id) return monitor;
+
+            if (doc.url?.full) {
+              resultAttributes = { ...resultAttributes, urls: doc.url?.full };
+            }
+
+            if (doc.url?.port) {
+              resultAttributes = { ...resultAttributes, ['url.port']: doc.url?.port };
             }
           });
-          if (url) {
-            return { ...monitor, attributes: { ...monitor.attributes, urls: url } };
-          }
-          return monitor;
+
+          return { ...monitor, attributes: resultAttributes };
         });
+
       await server.authSavedObjectsClient?.bulkUpdate(updatedObjects);
     }
   } catch (e) {
@@ -78,18 +95,14 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
               },
             },
             {
-              term: {
-                'monitor.type': 'browser',
-              },
-            },
-            {
               exists: {
                 field: 'summary',
               },
             },
             {
-              exists: {
-                field: 'url.full',
+              bool: {
+                minimum_should_match: 1,
+                should: [{ exists: { field: 'url.full' } }, { exists: { field: 'url.port' } }],
               },
             },
           ],
