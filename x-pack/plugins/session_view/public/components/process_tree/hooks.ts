@@ -21,12 +21,14 @@ import {
   processNewEvents,
   searchProcessTree,
   autoExpandProcessTree,
+  updateProcessMap,
 } from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
+  alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
 }
@@ -196,6 +198,7 @@ export class ProcessImpl implements Process {
 export const useProcessTree = ({
   sessionEntityId,
   data,
+  alerts,
   searchQuery,
   updatedAlertsStatus,
 }: UseProcessTreeDeps) => {
@@ -221,6 +224,7 @@ export const useProcessTree = ({
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
   const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
+  const [alertsProcessed, setAlertsProcessed] = useState(false);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
@@ -256,6 +260,15 @@ export const useProcessTree = ({
       setOrphans(newOrphans);
     }
   }, [data, processMap, orphans, processedPages, sessionEntityId]);
+
+  useEffect(() => {
+    // currently we are loading a single page of alerts, with no pagination
+    // so we only need to add these alert events to processMap once.
+    if (!alertsProcessed) {
+      updateProcessMap(processMap, alerts);
+      setAlertsProcessed(true);
+    }
+  }, [processMap, alerts, alertsProcessed]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
