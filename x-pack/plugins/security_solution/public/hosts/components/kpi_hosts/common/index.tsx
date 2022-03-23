@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -42,10 +42,11 @@ interface KpiBaseComponentProps {
   from: string;
   to: string;
   narrowDateRange: UpdateDateRange;
+  setQuerySkip: (skip: boolean) => void;
 }
 
 export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
-  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
+  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange, setQuerySkip }) => {
     const { cases } = useKibana().services;
     const CasesContext = cases.ui.getCasesContext();
     const userPermissions = useGetUserCasesPermissions();
@@ -57,12 +58,10 @@ export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
       id,
       from,
       to,
-      narrowDateRange
+      narrowDateRange,
+      setQuerySkip,
+      loading
     );
-
-    if (loading) {
-      return <KpiBaseComponentLoader />;
-    }
 
     return (
       <EuiFlexGroup wrap>
@@ -87,11 +86,3 @@ export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
 KpiBaseComponent.displayName = 'KpiBaseComponent';
 
 export const KpiBaseComponentManage = manageQuery(KpiBaseComponent);
-
-export const KpiBaseComponentLoader: React.FC = () => (
-  <FlexGroup justifyContent="center" alignItems="center" data-test-subj="KpiLoader">
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="xl" />
-    </EuiFlexItem>
-  </FlexGroup>
-);
