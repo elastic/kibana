@@ -106,8 +106,8 @@ export const KibanaPageTemplateSolutionNavAvatarLazy = React.lazy(() =>
 );
 
 /**
- * A `KibanaPageTemplateSolutionNavAvata` component that is wrapped by the `withSuspense` HOC.  This component can
- * be used directly by consumers and will load the `LazyNoDataViews` component lazily with
+ * A `KibanaPageTemplateSolutionNavAvatar` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `KibanaPageTemplateSolutionNavAvatarLazy` component lazily with
  * a predefined fallback and error boundary.
  */
 export const KibanaPageTemplateSolutionNavAvatar = withSuspense(
