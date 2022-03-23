@@ -74,7 +74,7 @@ export const LastResponseFilter: React.FunctionComponent<StatusFilterProps> = ({
                   }
                 }}
                 checked={selectedValues.includes(item) ? 'on' : undefined}
-                data-test-subj={`ruleStatus${item}FilerOption`}
+                data-test-subj={`ruleLastResponse${item}FilterOption`}
               >
                 <EuiHealth color={healthColor}>{rulesStatusesTranslationsMapping[item]}</EuiHealth>
               </EuiFilterSelectItem>

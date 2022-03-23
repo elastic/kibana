@@ -9,10 +9,12 @@ export const mapFiltersToKql = ({
   typesFilter,
   actionTypesFilter,
   ruleStatusesFilter,
+  ruleStatusFilter,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
   ruleStatusesFilter?: string[];
+  ruleStatusFilter?: boolean[];
 }): string[] => {
   const filters = [];
   if (typesFilter && typesFilter.length) {
@@ -29,8 +31,12 @@ export const mapFiltersToKql = ({
       ].join('')
     );
   }
+  // TODO rename ruleStatusesFilter to ruleLastResponseFilter in both triggers_actions_ui and observability plugins
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     filters.push(`alert.attributes.executionStatus.status:(${ruleStatusesFilter.join(' or ')})`);
+  }
+  if (ruleStatusFilter && ruleStatusFilter.length) {
+    filters.push(`alert.attributes.enabled:(${ruleStatusFilter.join(' or ')})`);
   }
   return filters;
 };

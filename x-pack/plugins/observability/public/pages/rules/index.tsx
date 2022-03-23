@@ -27,6 +27,8 @@ import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { RulesTable } from './components/rules_table';
 import { Name } from './components/name';
 import { LastResponseFilter } from './components/last_response_filter';
+import { StatusFilter } from './components/filters/status_filter';
+
 import { StatusContext } from './components/status_context';
 import { ExecutionStatus } from './components/execution_status';
 import { LastRun } from './components/last_run';
@@ -92,6 +94,7 @@ export function RulesPage() {
   const [searchText, setSearchText] = useState<string | undefined>();
   const [refreshInterval, setRefreshInterval] = useState(60000);
   const [isPaused, setIsPaused] = useState(false);
+  const [ruleStatusFilter, setRuleStatusFilter] = useState<string[]>([]);
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -115,6 +118,7 @@ export function RulesPage() {
   const { rulesState, setRulesState, reload } = useFetchRules({
     searchText,
     ruleLastResponseFilter,
+    ruleStatusFilter,
     page,
     sort,
   });
@@ -284,6 +288,13 @@ export function RulesPage() {
               key="rule-lastResponse-filter"
               selectedStatuses={ruleLastResponseFilter}
               onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StatusFilter
+              key="rule-status-filter"
+              selectedStatuses={ruleStatusFilter}
+              onChange={(ids: string[]) => setRuleStatusFilter(ids)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

@@ -68,6 +68,7 @@ export interface Pagination {
 export interface FetchRulesProps {
   searchText: string | undefined;
   ruleLastResponseFilter: string[];
+  ruleStatusFilter: boolean[];
   page: Pagination;
   sort: EuiTableSortingType<RuleTableItem>['sort'];
 }
