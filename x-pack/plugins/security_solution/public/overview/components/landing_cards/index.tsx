@@ -98,7 +98,11 @@ export const LandingCards = memo(() => {
               description={i18n.SIEM_DESCRIPTION}
               textAlign="left"
               title={i18n.SIEM_TITLE}
-              footer={<EuiButton href={href}>{i18n.SIEM_CTA}</EuiButton>}
+              footer={
+                <EuiButton data-test-subj="add-integrations-header" href={href}>
+                  {i18n.SIEM_CTA}
+                </EuiButton>
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -139,7 +143,11 @@ export const LandingCards = memo(() => {
           paddingSize="l"
           textAlign="center"
           title={i18n.UNIFY_TITLE}
-          footer={<EuiButton href={href}>{i18n.SIEM_CTA}</EuiButton>}
+          footer={
+            <EuiButton data-test-subj="add-integrations-footer" href={href}>
+              {i18n.SIEM_CTA}
+            </EuiButton>
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>
