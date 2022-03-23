@@ -36,7 +36,7 @@ import * as i18n from './translations';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'hostsAuthenticationsQuery';
+export const ID = 'hostsAuthenticationsQuery';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
@@ -214,6 +214,14 @@ export const useAuthentications = ({
       abortCtrl.current.abort();
     };
   }, [authenticationsRequest, authenticationsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, authenticationsResponse];
 };

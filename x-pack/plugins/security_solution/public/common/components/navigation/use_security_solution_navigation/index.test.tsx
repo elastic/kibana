@@ -125,6 +125,16 @@ describe('useSecuritySolutionNavigation', () => {
                 "name": "Overview",
                 "onClick": [Function],
               },
+              Object {
+                "data-href": "securitySolutionUI/get_started?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "data-test-subj": "navigation-get_started",
+                "disabled": false,
+                "href": "securitySolutionUI/get_started?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "id": "get_started",
+                "isSelected": false,
+                "name": "Getting started",
+                "onClick": [Function],
+              },
             ],
             "name": "",
           },
@@ -286,8 +296,7 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-
-    expect(result?.current?.items?.[0].items?.[1].id).toEqual(
+    expect(result?.current?.items?.[0].items?.[2].id).toEqual(
       SecurityPageName.detectionAndResponse
     );
   });

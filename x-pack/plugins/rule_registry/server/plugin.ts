@@ -29,7 +29,7 @@ import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import { AlertsClient } from './alert_data_client/alerts_client';
 import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
-import { ruleRegistrySearchStrategyProvider } from './search_strategy';
+import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from './search_strategy';
 
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
@@ -115,7 +115,7 @@ export class RuleRegistryPlugin
       );
 
       plugins.data.search.registerSearchStrategy(
-        'ruleRegistryAlertsSearchStrategy',
+        RULE_SEARCH_STRATEGY_NAME,
         ruleRegistrySearchStrategy
       );
     });

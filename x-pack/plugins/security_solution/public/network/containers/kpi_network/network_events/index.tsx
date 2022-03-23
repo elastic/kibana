@@ -30,7 +30,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiNetworkEventsQuery';
+export const ID = 'networkKpiNetworkEventsQuery';
 
 export interface NetworkKpiNetworkEventsArgs {
   networkEvents: number;
@@ -162,6 +162,14 @@ export const useNetworkKpiNetworkEvents = ({
       abortCtrl.current.abort();
     };
   }, [networkKpiNetworkEventsRequest, networkKpiNetworkEventsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkKpiNetworkEventsResponse];
 };
