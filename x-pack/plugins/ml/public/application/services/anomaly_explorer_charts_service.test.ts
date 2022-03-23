@@ -81,7 +81,7 @@ describe('AnomalyExplorerChartsService', () => {
       undefined
     );
     expect(result).toEqual({
-      chartsPerRow: 1,
+      chartsPerRow: 2,
       errorMessages: undefined,
       seriesToPlot: [],
       // default values, will update on every re-render

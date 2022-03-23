@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { chartLimits } from './get_anomaly_charts_data';
-import { ChartPoint } from '../../../common/types/results';
+import { chartLimits } from './anomaly_charts';
+import type { ChartPoint } from '../../../common/types/results';
 
 describe('chartLimits', () => {
   test('returns NaN when called without data', () => {

@@ -10,8 +10,6 @@ import { mount, shallow } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { chartLimits } from '../../util/chart_utils';
-
 import { getDefaultChartsData } from './explorer_charts_container_service';
 import { ExplorerChartsContainer } from './explorer_charts_container';
 
@@ -79,7 +77,7 @@ describe('ExplorerChartsContainer', () => {
         {
           ...seriesConfig,
           chartData,
-          chartLimits: chartLimits(chartData),
+          chartLimits: { min: 201039318, max: 625736376 },
         },
       ],
       chartsPerRow: 1,
@@ -107,7 +105,7 @@ describe('ExplorerChartsContainer', () => {
         {
           ...seriesConfigRare,
           chartData,
-          chartLimits: chartLimits(chartData),
+          // chartLimits: chartLimits(chartData),
         },
       ],
       chartsPerRow: 1,
