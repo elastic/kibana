@@ -151,6 +151,7 @@ const HostsComponent = () => {
   );
 
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
@@ -214,7 +215,11 @@ const HostsComponent = () => {
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
-                navTabs={navTabsHosts(hasMlUserPermissions(capabilities), riskyHostsFeatureEnabled)}
+                navTabs={navTabsHosts({
+                  hasMlUserPermissions: hasMlUserPermissions(capabilities),
+                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isUsersEnabled: usersEnabled,
+                })}
               />
 
               <EuiSpacer />

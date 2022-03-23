@@ -452,6 +452,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.kibanaIndex!,
+      DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
       exceptionListClient
     );
