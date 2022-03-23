@@ -524,16 +524,16 @@ const expectAssetsInstalled = ({
           type: 'ml-module',
         },
         {
+          id: 'sample_osquery_pack_asset',
+          type: 'osquery-pack-asset',
+        },
+        {
           id: 'sample_search',
           type: 'search',
         },
         {
           id: 'sample_security_rule',
           type: 'security-rule',
-        },
-        {
-          id: 'sample_osquery_pack_asset',
-          type: 'osquery-pack-asset',
         },
         {
           id: 'sample_tag',
