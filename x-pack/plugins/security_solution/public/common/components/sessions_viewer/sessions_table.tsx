@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
+import { ESBoolQuery } from '../../../../common/typed_json';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { sessionsDefaultModel } from './default_headers';
@@ -17,42 +18,34 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import type { EntityType } from '../../../../../timelines/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 
-export interface OwnProps {
-  end: string;
-  id: string;
-  start: string;
-}
-
-const defaultSessionsFilters: Filter[] = [
-  {
-    query: {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  match: {
-                    'process.is_entry_leader': true,
-                  },
+const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
+  query: {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [
+              {
+                match: {
+                  'process.is_entry_leader': true,
                 },
-              ],
-              minimum_should_match: 1,
-            },
+              },
+            ],
+            minimum_should_match: 1,
           },
-        ],
-      },
-    },
-    meta: {
-      alias: null,
-      disabled: false,
-      key: 'process.is_entry_leader',
-      negate: false,
-      params: {},
-      type: 'boolean',
+        },
+      ],
     },
   },
-];
+  meta: {
+    alias: null,
+    disabled: false,
+    key: 'process.is_entry_leader',
+    negate: false,
+    params: {},
+    type: 'boolean',
+  },
+};
 
 interface Props {
   timelineId: TimelineIdLiteral;
@@ -60,6 +53,7 @@ interface Props {
   entityType?: EntityType;
   startDate: string;
   pageFilters?: Filter[];
+  filterQuery?: string;
 }
 
 const SessionsTableComponent: React.FC<Props> = ({
@@ -68,10 +62,34 @@ const SessionsTableComponent: React.FC<Props> = ({
   entityType = 'sessions',
   startDate,
   pageFilters = [],
+  filterQuery = '',
 }) => {
-  const sessionsFilter = useMemo(() => [...defaultSessionsFilters, ...pageFilters], [pageFilters]);
-  const ACTION_BUTTON_COUNT = 5;
+  // TODO: Check for a better way to handle filterQuery
+  const parsedFilterQuery = useMemo(() => {
+    if (filterQuery && filterQuery !== '') {
+      return JSON.parse(filterQuery) as unknown as ESBoolQuery;
+    }
+    return {};
+  }, [filterQuery]);
 
+  const sessionsFilter = useMemo(
+    () => [
+      {
+        ...defaultSessionsFilter,
+        query: {
+          ...defaultSessionsFilter.query,
+          bool: {
+            ...defaultSessionsFilter.query.bool,
+            filter: defaultSessionsFilter.query.bool.filter.concat(parsedFilterQuery),
+          },
+        },
+      },
+      ...pageFilters,
+    ],
+    [pageFilters, parsedFilterQuery]
+  );
+
+  const ACTION_BUTTON_COUNT = 5;
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   const unit = (c: number) =>

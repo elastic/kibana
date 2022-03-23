@@ -16,6 +16,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   entityType,
   pageFilters,
   startDate,
+  filterQuery,
 }) => {
   return (
     <SessionsTable
@@ -24,6 +25,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
       entityType={entityType}
       startDate={startDate}
       pageFilters={pageFilters}
+      filterQuery={filterQuery}
     />
   );
 };

@@ -14,4 +14,5 @@ export interface SessionsComponentsProps extends Pick<QueryTabBodyProps, 'endDat
   pageFilters: Filter[];
   defaultFilters?: Filter[];
   entityType?: EntityType;
+  filterQuery?: string;
 }
