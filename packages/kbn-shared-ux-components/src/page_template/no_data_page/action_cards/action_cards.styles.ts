@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-export const ActionCardsStyles = (euiSize: number, isWithinBreakpoints: boolean) => {
+export const ActionCardsStyles = (euiSize: number, isMobile: boolean) => {
   return {
     '&:only-child': {
-      minWidth: isWithinBreakpoints ? 'auto' : `${euiSize * 22.5} px`,
+      minWidth: isMobile ? 'auto' : euiSize * 22.5,
     },
+  };
+};
+
+export const ActionCardsGridStyles = () => {
+  return {
+    justifyContent: 'space-around',
   };
 };

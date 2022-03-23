@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import React, { ReactElement } from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { ElasticAgentCard, NoDataCard } from '../no_data_card';
-import { ActionCardsStyles } from './action_cards.styles';
+import { ActionCardsGridStyles, ActionCardsStyles } from './action_cards.styles';
 
 interface ActionCardsProps {
   actionCards: Array<ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard>>;
 }
 export const ActionCards = ({ actionCards }: ActionCardsProps) => {
-  const isWithinBreakpoints = useIsWithinBreakpoints(['xs', 's']);
-  const { euiTheme } = useEuiTheme();
-  const actionCardsStyle = ActionCardsStyles(euiTheme.base, isWithinBreakpoints);
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const euiSize = 16;
+  const actionCardsStyle = ActionCardsStyles(euiSize, isMobile);
 
   const cards = actionCards.map((card) => (
     <EuiFlexItem key={card.key || ''} css={actionCardsStyle}>
@@ -26,7 +26,7 @@ export const ActionCards = ({ actionCards }: ActionCardsProps) => {
     </EuiFlexItem>
   ));
   return (
-    <EuiFlexGrid columns={2} style={{ justifyContent: 'space-around' }}>
+    <EuiFlexGrid columns={2} style={ActionCardsGridStyles()}>
       {cards}
     </EuiFlexGrid>
   );

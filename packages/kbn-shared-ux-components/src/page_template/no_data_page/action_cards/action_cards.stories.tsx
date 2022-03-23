@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { applicationServiceFactory } from '@kbn/shared-ux-storybook';
 import React from 'react';
 import { NoDataCard } from '../no_data_card';
 import { ActionCards } from './action_cards';
+import { ElasticAgentCardComponent } from '../no_data_card/elastic_agent_card.component';
 
 export default {
-  title: 'Elastic Action Cards',
+  title: 'Page Template/No Data Page/Elastic Action Cards',
   description: 'A group of ElasticAgentCards or NoDataCards, to be used on NoData page',
 };
 
@@ -21,7 +23,17 @@ export const PureComponent = () => {
     button: 'Button',
     onClick: () => {},
   };
-  const card1 = <NoDataCard key={'card1'} title={'Card 1'} {...action} />;
-  const card2 = <NoDataCard key={'card2'} title={'Card 2'} {...action} />;
+  const { currentAppId$, navigateToUrl } = applicationServiceFactory();
+  const card1 = <NoDataCard key={'card1'} title={'No Data Card'} {...action} />;
+  const card2 = (
+    <ElasticAgentCardComponent
+      canAccessFleet={true}
+      key={'card2'}
+      title={'Elastic Agent Card'}
+      navigateToUrl={navigateToUrl}
+      currentAppId$={currentAppId$}
+      {...action}
+    />
+  );
   return <ActionCards actionCards={[card1, card2]} />;
 };
