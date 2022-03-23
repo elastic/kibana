@@ -1092,7 +1092,7 @@ export const RULES_BULK_DISABLE_FAILURE_DESCRIPTION = (rulesCount: number) =>
 export const RULES_BULK_EDIT_SUCCESS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastTitle',
   {
-    defaultMessage: 'Rules changes updated',
+    defaultMessage: 'Rules updated',
   }
 );
 
@@ -1118,6 +1118,6 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastDescription',
     {
       values: { rulesCount },
-      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to update.',
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
     }
   );
