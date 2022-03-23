@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["visualizations", "data", "expressions", "charts", "dataViews"],
+  "requiredPlugins": ["visualizations", "data", "expressions", "charts", "dataViews", "fieldFormats"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
   "owner": {
     "name": "Vis Editors",
