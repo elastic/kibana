@@ -48,13 +48,6 @@ import { HapiReadableStream } from '../../rules/types';
 import { PartialFilter } from '../../types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
-import {
-  importRules as importRulesHelper,
-  RuleExceptionsPromiseFromStreams,
-} from './utils/import_rules_utils';
-import { getReferencedExceptionLists } from './utils/gather_referenced_exceptions';
-import { importRuleExceptions } from './utils/import_rule_exceptions';
-import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -132,7 +125,7 @@ export const importRulesRoute = (
         const actualRules = parsedObjects.filter(
           (rule): rule is ImportRulesSchemaDecoded => !(rule instanceof Error)
         );
-        
+
         if (actualRules.some((rule) => rule.actions.length > 0)) {
           const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
             parsedObjectsWithoutDuplicateErrors,
