@@ -148,7 +148,7 @@ const SYNTHETICS_ENABLE_FAILURE = i18n.translate(
 );
 
 const SYNTHETICS_DISABLE_FAILURE = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsDisabled',
+  'xpack.uptime.monitorManagement.syntheticsDisabledFailure',
   {
     defaultMessage: 'Monitor Management was not able to be disabled. Please contact support.',
   }
@@ -162,7 +162,7 @@ const SYNTHETICS_ENABLE_SUCCESS = i18n.translate(
 );
 
 const SYNTHETICS_DISABLE_SUCCESS = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsDisableDusccess',
+  'xpack.uptime.monitorManagement.syntheticsDisabledSuccess',
   {
     defaultMessage: 'Monitor Management disabled successfully.',
   }
@@ -177,7 +177,7 @@ const SYNTHETICS_DISABLED_MESSAGE = i18n.translate(
 );
 
 const SYNTHETICS_ENABLE_TOOL_TIP_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsToolTip',
+  'xpack.uptime.monitorManagement.syntheticsEnableToolTip',
   {
     defaultMessage:
       'Enable Monitor Management to create lightweight and real-browser monitors from locations around the world.',
@@ -185,7 +185,7 @@ const SYNTHETICS_ENABLE_TOOL_TIP_MESSAGE = i18n.translate(
 );
 
 const SYNTHETICS_DISABLE_TOOL_TIP_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsToolTip',
+  'xpack.uptime.monitorManagement.syntheticsDisableToolTip',
   {
     defaultMessage:
       'Disabling Monitor Management with immediately stop the execution of monitors in all test locations and prevent the creation of new monitors.',
