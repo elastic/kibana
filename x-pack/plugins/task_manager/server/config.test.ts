@@ -18,6 +18,10 @@ describe('config validation', () => {
           "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
+        },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -77,6 +81,10 @@ describe('config validation', () => {
           "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
+        },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -123,6 +131,10 @@ describe('config validation', () => {
           "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
+        },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
