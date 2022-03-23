@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { navigateTo } from '../../tasks/navigation';
-import { RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { RESULTS_TABLE_BUTTON } from '../screens/live_query';
 import {
   checkResults,
   BIG_QUERY,
@@ -15,7 +14,7 @@ import {
   inputQuery,
   selectAllAgents,
   submitQuery,
-} from '../tasks/live_query';
+} from './live_query';
 
 export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescription: string) =>
   it(
