@@ -99,7 +99,7 @@ export const ExportModal: FC<ExportModalProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onCancel}>
+                <EuiButtonEmpty onClick={onCancel} data-test-subj="cancelAllExports">
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
                     defaultMessage="Cancel"
