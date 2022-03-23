@@ -23,9 +23,14 @@ import { CRAWLER_TITLE } from '../../crawler';
 
 import { LogRetentionLogic, LogRetentionOptions, renderLogRetentionDate } from '../index';
 
+export const AUDIT_LOGS_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.audit.title', {
+  defaultMessage: 'Audit',
+});
+
 const TITLE_MAP = {
   [LogRetentionOptions.Analytics]: ANALYTICS_TITLE,
   [LogRetentionOptions.API]: API_LOGS_TITLE,
+  [LogRetentionOptions.Audit]: AUDIT_LOGS_TITLE,
   [LogRetentionOptions.Crawler]: CRAWLER_TITLE,
 };
 

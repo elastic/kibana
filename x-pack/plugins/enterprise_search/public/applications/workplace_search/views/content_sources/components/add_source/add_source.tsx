@@ -109,6 +109,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
           advanceStep={goToConnectInstance}
           privateSourcesEnabled={privateSourcesEnabled}
           header={header}
+          showFeedbackLink={serviceType === 'external'}
         />
       )}
       {addSourceCurrentStep === AddSourceSteps.ConnectInstanceStep && (

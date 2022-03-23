@@ -225,6 +225,20 @@ export const commonEnhanceTableRowHeight = (
   return newAttributes;
 };
 
+export const commonSetIncludeEmptyRowsDateHistogram = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (column.operationType === 'date_histogram') {
+        column.params.includeEmptyRows = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
 const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
   return (savedObject: { attributes: LensDocShape }) => {
     if (savedObject.attributes.visualizationType !== id) return savedObject;
