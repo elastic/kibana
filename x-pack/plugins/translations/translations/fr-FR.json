@@ -553,7 +553,6 @@
     "xpack.lens.indexPattern.terms.otherBucketDescription": "Regrouper les autres valeurs sous \"Autre\"",
     "xpack.lens.indexPattern.terms.otherLabel": "Autre",
     "xpack.lens.indexPattern.terms.size": "Nombre de valeurs",
-    "xpack.lens.indexPattern.termsOf": "Valeurs les plus élevées de {name}",
     "xpack.lens.indexPattern.termsWithMultipleShifts": "Dans un seul calque, il est impossible de combiner des indicateurs avec des décalages temporels différents et des valeurs dynamiques les plus élevées. Utilisez la même valeur de décalage pour tous les indicateurs, ou utilisez des filtres à la place des valeurs les plus élevées.",
     "xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel": "Utiliser des filtres",
     "xpack.lens.indexPattern.timeScale.enableTimeScale": "Normaliser par unité",
