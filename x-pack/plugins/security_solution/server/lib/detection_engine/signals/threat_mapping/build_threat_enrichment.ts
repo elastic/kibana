@@ -7,7 +7,6 @@
 
 import { SignalSearchResponse, SignalsEnrichment } from '../types';
 import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
-import { getThreatList } from './get_threat_list';
 import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 
 export const buildThreatEnrichment = ({
@@ -20,6 +19,7 @@ export const buildThreatEnrichment = ({
   threatIndicatorPath,
   threatLanguage,
   threatQuery,
+  getThreatList,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
     const matchedThreatsFilter = {

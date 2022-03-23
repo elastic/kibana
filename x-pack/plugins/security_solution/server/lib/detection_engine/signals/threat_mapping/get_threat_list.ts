@@ -12,57 +12,66 @@ import { GetThreatListOptions, ThreatListCountOptions, ThreatListDoc } from './t
 /**
  * This should not exceed 10000 (10k)
  */
-export const MAX_PER_PAGE = 9000;
+export const INDICATOR_PER_PAGE = 1000;
 
-export const getThreatList = async ({
-  esClient,
-  query,
-  language,
-  index,
-  perPage,
-  searchAfter,
-  exceptionItems,
-  threatFilters,
-  buildRuleMessage,
-  logger,
-  threatListConfig,
-}: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
-  const calculatedPerPage = perPage ?? MAX_PER_PAGE;
-  if (calculatedPerPage > 10000) {
-    throw new TypeError('perPage cannot exceed the size of 10000');
-  }
-  const queryFilter = getQueryFilter(
+export const getThreatListFunc = (initialPitId: string) => {
+  let pitId = initialPitId;
+
+  const getThreatList = async ({
+    esClient,
     query,
-    language ?? 'kuery',
+    language,
+    index,
+    searchAfter,
+    exceptionItems,
     threatFilters,
-    index,
-    exceptionItems
-  );
+    buildRuleMessage,
+    logger,
+    threatListConfig,
+  }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
+    const queryFilter = getQueryFilter(
+      query,
+      language ?? 'kuery',
+      threatFilters,
+      index,
+      exceptionItems
+    );
 
-  logger.debug(
-    buildRuleMessage(
-      `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
-    )
-  );
+    logger.debug(
+      buildRuleMessage(
+        `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${INDICATOR_PER_PAGE} indicator items`
+      )
+    );
 
-  const response = await esClient.search<
-    ThreatListDoc,
-    Record<string, estypes.AggregationsAggregate>
-  >({
-    body: {
-      ...threatListConfig,
-      query: queryFilter,
-      search_after: searchAfter,
-      sort: ['_doc', { '@timestamp': 'asc' }],
-    },
-    track_total_hits: false,
-    ignore_unavailable: true,
-    index,
-    size: calculatedPerPage,
-  });
+    const response = await esClient.search<
+      ThreatListDoc,
+      Record<string, estypes.AggregationsAggregate>
+    >({
+      body: {
+        ...threatListConfig,
+        query: queryFilter,
+        search_after: searchAfter,
+        sort: ['_shard_doc', { '@timestamp': 'asc' }],
+      },
+      track_total_hits: false,
+      size: INDICATOR_PER_PAGE,
+      pit: { id: pitId },
+    });
 
-  logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
-  return response;
+    logger.debug(
+      buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`)
+    );
+
+    if (response.pit_id) {
+      // there are no concurrent getThreatList requests, so this should be OK
+      // eslint-disable-next-line require-atomic-updates
+      pitId = response.pit_id;
+    }
+
+    return response;
+  };
+
+  return getThreatList;
 };
 
 export const getThreatListCount = async ({

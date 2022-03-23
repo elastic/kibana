@@ -6,8 +6,9 @@
  */
 
 import chunk from 'lodash/fp/chunk';
-import { getThreatList, getThreatListCount } from './get_threat_list';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { getThreatListFunc, getThreatListCount } from './get_threat_list';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
@@ -15,13 +16,13 @@ import { buildExecutionIntervalValidator, combineConcurrentResults } from './uti
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
+import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
 
 export const createThreatSignals = async ({
   alertId,
   buildRuleMessage,
   bulkCreate,
   completeRule,
-  concurrentSearches,
   eventsTelemetry,
   exceptionItems,
   filters,
@@ -47,7 +48,6 @@ export const createThreatSignals = async ({
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
-  const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
   );
@@ -85,6 +85,15 @@ export const createThreatSignals = async ({
     return results;
   }
 
+  const pitId: OpenPointInTimeResponse['id'] = (
+    await services.scopedClusterClient.asCurrentUser.openPointInTime({
+      index: threatIndex,
+      keep_alive: THREAT_PIT_KEEP_ALIVE,
+    })
+  ).id;
+
+  const getThreatList = getThreatListFunc(pitId);
+
   let threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
@@ -111,7 +120,6 @@ export const createThreatSignals = async ({
     searchAfter: undefined,
     logger,
     buildRuleMessage,
-    perPage,
     threatListConfig,
   });
 
@@ -125,6 +133,7 @@ export const createThreatSignals = async ({
     threatIndicatorPath,
     threatLanguage,
     threatQuery,
+    getThreatList,
   });
 
   while (threatList.hits.hits.length !== 0) {
@@ -190,9 +199,17 @@ export const createThreatSignals = async ({
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
       buildRuleMessage,
       logger,
-      perPage,
       threatListConfig,
     });
+  }
+
+  try {
+    await services.scopedClusterClient.asCurrentUser.closePointInTime({ id: pitId });
+  } catch (error) {
+    // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
+    logger.warn(
+      `Error trying to close point in time: "${pitId}", it will expire within "${THREAT_PIT_KEEP_ALIVE}". Error is: "${error}"`
+    );
   }
 
   logger.debug(buildRuleMessage('Indicator matching rule has completed'));

@@ -197,6 +197,7 @@ export interface BuildThreatEnrichmentOptions {
   threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
+  getThreatList: (options: GetThreatListOptions) => Promise<estypes.SearchResponse<ThreatListDoc>>;
 }
 
 export interface EventCountOptions {
