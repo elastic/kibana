@@ -180,7 +180,7 @@ export function RulesPage() {
         render: (_enabled: boolean, item: RuleTableItem) => {
           return (
             <StatusContext
-              disabled={!item.isEditable}
+              disabled={!item.isEditable || !item.enabledInLicense}
               item={item}
               onStatusChanged={() => reload()}
               enableRule={async () => await enableRule({ http, id: item.id })}
