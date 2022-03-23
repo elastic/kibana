@@ -114,6 +114,9 @@ describe('Terms Agg', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {
+                          "emptyAsNull": Array [
+                            false,
+                          ],
                           "enabled": Array [
                             true,
                           ],

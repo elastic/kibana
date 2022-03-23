@@ -76,7 +76,9 @@ describe('test fetchCharts', () => {
         Object {
           "enabled": true,
           "id": "1",
-          "params": Object {},
+          "params": Object {
+            "emptyAsNull": false,
+          },
           "schema": "metric",
           "type": "count",
         },
@@ -85,6 +87,7 @@ describe('test fetchCharts', () => {
           "id": "2",
           "params": Object {
             "drop_partials": false,
+            "extendToTimeRange": false,
             "extended_bounds": Object {},
             "field": "timestamp",
             "interval": "auto",

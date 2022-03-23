@@ -37,4 +37,4 @@ export enum SORT_ORDERS {
 
 export const DEFAULT_SEARCH_PAGE_SIZE: number = 10;
 
-export const DEFAULT_ALERT_INTERVAL = '1m';
+export const DEFAULT_RULE_INTERVAL = '1m';

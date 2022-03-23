@@ -26,6 +26,7 @@ export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = AlertTy
       AlertInstanceContext,
       TActionGroupIds
     >;
+    getAlertStartedDate: (alertId: string) => string | null;
   }
 >;
 

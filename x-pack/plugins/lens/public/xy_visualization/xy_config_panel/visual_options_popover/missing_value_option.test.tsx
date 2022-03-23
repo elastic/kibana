@@ -13,10 +13,15 @@ import { MissingValuesOptions } from './missing_values_option';
 describe('Missing values option', () => {
   it('should show currently selected fitting function', () => {
     const component = shallow(
-      <MissingValuesOptions onFittingFnChange={jest.fn()} fittingFunction={'Carry'} />
+      <MissingValuesOptions
+        onFittingFnChange={jest.fn()}
+        fittingFunction={'Carry'}
+        onEmphasizeFittingChange={jest.fn()}
+        onEndValueChange={jest.fn()}
+      />
     );
 
-    expect(component.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('Carry');
+    expect(component.find(EuiSuperSelect).first().prop('valueOfSelected')).toEqual('Carry');
   });
 
   it('should show the fitting option when enabled', () => {
@@ -25,6 +30,8 @@ describe('Missing values option', () => {
         onFittingFnChange={jest.fn()}
         fittingFunction={'Carry'}
         isFittingEnabled={true}
+        onEmphasizeFittingChange={jest.fn()}
+        onEndValueChange={jest.fn()}
       />
     );
 
@@ -37,6 +44,8 @@ describe('Missing values option', () => {
         onFittingFnChange={jest.fn()}
         fittingFunction={'Carry'}
         isFittingEnabled={false}
+        onEmphasizeFittingChange={jest.fn()}
+        onEndValueChange={jest.fn()}
       />
     );
 
