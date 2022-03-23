@@ -98,7 +98,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             conflictingEntries.saved_objects,
             (packSO) =>
               packSO.id !== currentPackSO.id && packSO.attributes.name.length === name.length
-          )
+          ).length
         ) {
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
@@ -125,6 +125,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         (reference) => reference.type !== AGENT_POLICY_SAVED_OBJECT_TYPE
       );
 
+      const getUpdatedReferences = () => {
+        if (policy_ids) {
+          return [
+            ...nonAgentPolicyReferences,
+            ...policy_ids.map((id) => ({
+              id,
+              name: agentPolicies[id].name,
+              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            })),
+          ];
+        }
+
+        return currentPackSO.references;
+      };
+
       await savedObjectsClient.update(
         packSavedObjectType,
         request.params.id,
@@ -136,22 +151,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           updated_at: moment().toISOString(),
           updated_by: currentUser,
         },
-        policy_ids
-          ? {
-              refresh: 'wait_for',
-              references: [
-                ...nonAgentPolicyReferences,
-                ...policy_ids.map((id) => ({
-                  id,
-                  name: agentPolicies[id].name,
-                  type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-                })),
-              ],
-            }
-          : {
-              refresh: 'wait_for',
-              references: nonAgentPolicyReferences,
-            }
+        {
+          refresh: 'wait_for',
+          references: getUpdatedReferences(),
+        }
       );
 
       const currentAgentPolicyIds = map(
