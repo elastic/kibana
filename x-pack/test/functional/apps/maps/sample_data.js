@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
-export default function ({ getPageObjects, getService, updateBaselines }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
@@ -90,6 +90,13 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       await kibanaServer.uiSettings.update({
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
+      //running the rest of the tests with limited roles
+      await security.testUser.setRoles(
+        ['global_maps_all', 'geoall_data_writer', 'kibana_sample_read'],
+        {
+          skipBrowserRefresh: true,
+        }
+      );
     });
 
     after(async () => {
@@ -123,10 +130,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline(
-          'ecommerce_map',
-          updateBaselines
-        );
+        const percentDifference = await screenshot.compareAgainstBaseline('ecommerce_map', true);
         expect(percentDifference).to.be.lessThan(0.02);
       });
     });
@@ -147,10 +151,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline(
-          'flights_map',
-          updateBaselines
-        );
+        const percentDifference = await screenshot.compareAgainstBaseline('flights_map', true);
         expect(percentDifference).to.be.lessThan(0.02);
       });
     });
@@ -172,10 +173,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline(
-          'web_logs_map',
-          updateBaselines
-        );
+        const percentDifference = await screenshot.compareAgainstBaseline('web_logs_map', true);
         expect(percentDifference).to.be.lessThan(0.02);
       });
     });
