@@ -13,7 +13,7 @@ import { Teletype } from '../../../common/types/process_tree';
  * @param  {String[][]} executable
  * @return {String} serialized string with data of each executable
  */
-export const getProcessExecutableCopyText = (executable: string[][]) => {
+export const getProcessExecutableCopyText = (executable: string[][]): string => {
   try {
     return executable
       .map((execTuple) => {
@@ -35,7 +35,7 @@ export const getProcessExecutableCopyText = (executable: string[][]) => {
  * @param  {String[]} args
  * @return {String} formatted string of process args
  */
-export const formatProcessArgs = (args: string[]) =>
+export const formatProcessArgs = (args: string[]): string =>
   args.length ? `[${args.map((arg) => `'${arg}'`).join(', ')}]` : '-';
 
 /**
@@ -44,4 +44,5 @@ export const formatProcessArgs = (args: string[]) =>
  * @param  {Teletype | undefined} tty
  * @return {String} returns 'True' if tty exists, 'False' otherwise.
  */
-export const getIsInterativeString = (tty: Teletype | undefined) => (!!tty ? 'True' : 'False');
+export const getIsInterativeString = (tty: Teletype | undefined): string =>
+  !!tty ? 'True' : 'False';

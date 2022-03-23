@@ -59,6 +59,7 @@ export interface DetailPanelProcessLeader {
   id: string;
   name: string;
   start: string;
+  end?: string;
   exit_code?: number;
   userName: string;
   groupName: string;

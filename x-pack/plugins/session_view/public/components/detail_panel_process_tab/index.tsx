@@ -71,6 +71,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
     const {
       id,
       start,
+      end,
       exit_code: exitCode,
       entryMetaType,
       tty,
@@ -95,38 +96,13 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         ),
       },
       {
-        title: <DetailPanelListItem>start</DetailPanelListItem>,
+        title: <DetailPanelListItem>args</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={start}>
-            <span css={styles.description}>{start}</span>
+          <DetailPanelCopy textToCopy={leaderArgs}>
+            <span css={styles.description}>{leaderArgs}</span>
           </DetailPanelCopy>
         ),
       },
-      {
-        title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={exitCode ?? ''}>
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {dataOrDash(exitCode)}
-            </EuiTextColor>
-          </DetailPanelCopy>
-        ),
-      },
-    ];
-    // Only include entry_meta.type for entry leader
-    if (idx === 0) {
-      listItems.push({
-        title: <DetailPanelListItem>entry_meta.type</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={entryMetaType}>
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {dataOrDash(entryMetaType)}
-            </EuiTextColor>
-          </DetailPanelCopy>
-        ),
-      });
-    }
-    listItems.push(
       {
         title: <DetailPanelListItem>interactive</DetailPanelListItem>,
         description: (
@@ -148,19 +124,37 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         ),
       },
       {
-        title: <DetailPanelListItem>args</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={leaderArgs}>
-            <span css={styles.description}>{leaderArgs}</span>
-          </DetailPanelCopy>
-        ),
-      },
-      {
         title: <DetailPanelListItem>pid</DetailPanelListItem>,
         description: (
           <DetailPanelCopy textToCopy={pid}>
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
               {dataOrDash(pid)}
+            </EuiTextColor>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>start</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy textToCopy={start}>
+            <span css={styles.description}>{dataOrDash(start)}</span>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>end</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy textToCopy={end ?? ''}>
+            <span css={styles.description}>{dataOrDash(end)}</span>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy textToCopy={exitCode ?? ''}>
+            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+              {dataOrDash(exitCode)}
             </EuiTextColor>
           </DetailPanelCopy>
         ),
@@ -180,19 +174,32 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             <span css={styles.description}>{dataOrDash(groupName)}</span>
           </DetailPanelCopy>
         ),
-      }
-    );
-    // Only include entry_meta.source.ip for entry leader
+      },
+    ];
+    // Only include entry_meta.type and entry_meta.source.ip for entry leader
     if (idx === 0) {
-      listItems.push({
-        title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={entryMetaSourceIp}>
-            <span css={styles.description}>{dataOrDash(entryMetaSourceIp)}</span>
-          </DetailPanelCopy>
-        ),
-      });
+      listItems.push(
+        {
+          title: <DetailPanelListItem>entry_meta.type</DetailPanelListItem>,
+          description: (
+            <DetailPanelCopy textToCopy={entryMetaType}>
+              <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                {dataOrDash(entryMetaType)}
+              </EuiTextColor>
+            </DetailPanelCopy>
+          ),
+        },
+        {
+          title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
+          description: (
+            <DetailPanelCopy textToCopy={entryMetaSourceIp}>
+              <span css={styles.description}>{dataOrDash(entryMetaSourceIp)}</span>
+            </DetailPanelCopy>
+          ),
+        }
+      );
     }
+
     return {
       ...leaderDescriptionListInfo[idx],
       name: leader.name,
@@ -232,6 +239,67 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             ),
           },
           {
+            title: <DetailPanelListItem>args</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={processArgs}>
+                <span css={styles.description}>{processArgs}</span>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>executable</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={getProcessExecutableCopyText(executable)}
+                display="block"
+              >
+                {executable.map((execTuple, idx) => {
+                  const [exec, eventAction] = execTuple;
+                  return (
+                    <div key={`executable-${idx}`} css={styles.description}>
+                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                        {exec}
+                      </EuiTextColor>
+                      <EuiTextColor color="subdued" css={styles.executableAction}>
+                        {eventAction}
+                      </EuiTextColor>
+                    </div>
+                  );
+                })}
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>interactive</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={isInteractive}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {isInteractive}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>working_directory</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={workingDirectory}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(workingDirectory)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>pid</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={pid}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(pid)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
             title: <DetailPanelListItem>start</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={start}>
@@ -258,44 +326,6 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             ),
           },
           {
-            title: <DetailPanelListItem>interactive</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={isInteractive}>
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {isInteractive}
-                </EuiTextColor>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>working_directory</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={workingDirectory}>
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(workingDirectory)}
-                </EuiTextColor>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>args</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={processArgs}>
-                <span css={styles.description}>{processArgs}</span>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>pid</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={pid}>
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(pid)}
-                </EuiTextColor>
-              </DetailPanelCopy>
-            ),
-          },
-          {
             title: <DetailPanelListItem>user.name</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={userName}>
@@ -308,29 +338,6 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             description: (
               <DetailPanelCopy textToCopy={groupName}>
                 <span css={styles.description}>{dataOrDash(groupName)}</span>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>executable</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy
-                textToCopy={getProcessExecutableCopyText(executable)}
-                display="block"
-              >
-                {executable.map((execTuple, idx) => {
-                  const [exec, eventAction] = execTuple;
-                  return (
-                    <div key={`executable-${idx}`} css={styles.description}>
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {exec}
-                      </EuiTextColor>
-                      <EuiTextColor color="subdued" css={styles.executableAction}>
-                        {eventAction}
-                      </EuiTextColor>
-                    </div>
-                  );
-                })}
               </DetailPanelCopy>
             ),
           },

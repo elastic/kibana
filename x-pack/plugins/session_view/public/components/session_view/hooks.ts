@@ -109,7 +109,7 @@ export const useFetchAlertStatus = (
       return {
         ...updatedAlertsStatus,
         [alertUuid]: {
-          status: events[0]?.kibana?.alert.workflow_status ?? '',
+          status: events[0]?.kibana?.alert.workflow_status + '123' ?? '',
           processEntityId: events[0]?.process?.entity_id ?? '',
         },
       };
