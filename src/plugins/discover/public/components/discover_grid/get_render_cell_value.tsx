@@ -103,7 +103,7 @@ export const getRenderCellValueFn =
 
       const appendWbr = (value: string) => {
         const wbr = '<wbr/>';
-        return value + wbr;
+        return `${value}<wbr>`;
       };
 
       return (
