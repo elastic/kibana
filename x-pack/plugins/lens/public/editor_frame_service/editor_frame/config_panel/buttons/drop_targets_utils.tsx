@@ -9,6 +9,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DraggingIdentifier } from '../../../../drag_drop';
 import { Datasource, DropType, GetDropProps } from '../../../../types';
 
 function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {
@@ -130,6 +131,22 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
   }
 };
 
+const isOperationFromTheSameGroup = (
+  op1?: DraggingIdentifier,
+  op2?: { layerId: string; groupId: string; columnId: string }
+) => {
+  return (
+    op1 &&
+    op2 &&
+    'columnId' in op1 &&
+    op1.columnId !== op2.columnId &&
+    'groupId' in op1 &&
+    op1.groupId === op2.groupId &&
+    'layerId' in op1 &&
+    op1.layerId === op2.layerId
+  );
+};
+
 export const getDropProps = (
   layerDatasource: Datasource<unknown, unknown>,
   dropProps: GetDropProps,
@@ -138,10 +155,9 @@ export const getDropProps = (
   if (layerDatasource) {
     return layerDatasource.getDropProps(dropProps);
   } else {
-    if (dropProps.dragging) {
-      if (isNew) {
-        return { dropTypes: ['duplicate_compatible'], nextLabel: '' };
-      }
+    // todo: allow moving operations between layers for annotations
+    if (isOperationFromTheSameGroup(dropProps.dragging, dropProps)) {
+      return { dropTypes: [isNew ? 'duplicate_compatible' : 'reorder'], nextLabel: '' };
     }
   }
   return;

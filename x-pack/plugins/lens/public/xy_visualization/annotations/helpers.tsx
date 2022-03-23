@@ -114,32 +114,42 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   if (!foundLayer || !isAnnotationsLayer(foundLayer)) {
     return prevState;
   }
-  const dataLayers = getDataLayers(prevState.layers);
-  const newLayer = { ...foundLayer } as XYAnnotationLayerConfig;
+  let annotations = [...foundLayer.annotations] as XYAnnotationLayerConfig['annotations'];
+  const currentConfigIndex = annotations?.findIndex(({ id }) => id === columnId);
+  const previousConfigIndex = previousColumn
+    ? annotations?.findIndex(({ id }) => id === previousColumn)
+    : -1;
+  const previousConfig =
+    previousConfigIndex >= 0 ? { ...annotations[previousConfigIndex] } : undefined;
 
-  const hasConfig = newLayer.annotations?.some(({ id }) => id === columnId);
-  const previousConfig = previousColumn
-    ? newLayer.annotations?.find(({ id }) => id === previousColumn)
-    : false;
-  if (!hasConfig) {
-    const newTimestamp = getStaticDate(dataLayers, frame?.activeData);
-    newLayer.annotations = [
-      ...(newLayer.annotations || []),
-      {
-        label: defaultAnnotationLabel,
-        key: {
-          type: 'point_in_time',
-          timestamp: newTimestamp,
-        },
-        icon: 'triangle',
-        ...previousConfig,
-        id: columnId,
+  if (currentConfigIndex === -1) {
+    annotations.push({
+      label: defaultAnnotationLabel,
+      key: {
+        type: 'point_in_time',
+        timestamp: getStaticDate(getDataLayers(prevState.layers), frame?.activeData),
       },
-    ];
+      icon: 'triangle',
+      ...previousConfig,
+      id: columnId,
+    });
+  } else if (currentConfigIndex >= 0 && previousConfig) {
+    annotations = foundLayer.annotations.filter((c) => c.id !== previousColumn);
+    const targetIndex = foundLayer.annotations.findIndex((c) => c.id === previousColumn);
+    const sourceIndex = foundLayer.annotations.findIndex((c) => c.id === columnId);
+    const targetPosition = annotations.findIndex((c) => c.id === columnId);
+    annotations.splice(
+      targetIndex < sourceIndex ? targetPosition + 1 : targetPosition,
+      0,
+      foundLayer.annotations.find((c) => c.id === previousColumn)!
+    );
   }
+
   return {
     ...prevState,
-    layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+    layers: prevState.layers.map((l) =>
+      l.layerId === layerId ? { ...foundLayer, annotations } : l
+    ),
   };
 };
 

@@ -233,7 +233,7 @@ export function LayerPanel(
           }
         }
       } else {
-        if (dropType === 'duplicate_compatible') {
+        if (dropType === 'duplicate_compatible' || dropType === 'reorder') {
           const newVisState = setDimension({
             columnId,
             groupId,

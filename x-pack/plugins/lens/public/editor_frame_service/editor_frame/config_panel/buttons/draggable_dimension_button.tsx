@@ -153,9 +153,7 @@ export function DraggableDimensionButton({
         draggable
         dragType={isDraggedOperation(dragging) ? 'move' : 'copy'}
         dropTypes={dropTypes}
-        reorderableGroup={
-          reorderableGroup.length > 1 ? layerDatasource && reorderableGroup : undefined // TODO: this is temporary excluding reorder for annotations
-        }
+        reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
         onDrop={handleOnDrop}
         onDragStart={() => onDragStart()}
