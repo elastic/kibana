@@ -28,7 +28,7 @@ import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
 import { annotationServiceProvider } from '../annotation_service';
 import { showActualForFunction, showTypicalForFunction } from '../../../common/util/anomaly_utils';
-import { anomalyChartsDataProvider } from './get_anomaly_charts_data';
+import { anomalyChartsDataProvider } from './anomaly_charts';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
