@@ -104,15 +104,6 @@ export class Plugin
         },
       ],
     },
-    // {
-    //   id: 'rules',
-    //   title: i18n.translate('xpack.observability.rulesLinkTitle', {
-    //     defaultMessage: 'Rules',
-    //   }),
-    //   order: 8002,
-    //   path: '/rules',
-    //   navLinkStatus: AppNavLinkStatus.hidden,
-    // },
     getCasesDeepLinks({
       basePath: casesPath,
       extend: {
