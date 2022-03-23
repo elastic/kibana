@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Map as MbMap,
-  LayerSpecification,
-  VectorTileSource,
-} from '@kbn/mapbox-gl';
+import type { Map as MbMap, LayerSpecification, VectorTileSource } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { VectorStyle } from '../../../styles/vector/vector_style';

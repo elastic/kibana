@@ -19,7 +19,11 @@ export interface TimesliceMaskConfig {
   timeslice: Timeslice;
 }
 
-export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true] as FilterSpecification;
+export const EXCLUDE_CENTROID_FEATURES = [
+  '!=',
+  ['get', KBN_IS_CENTROID_FEATURE],
+  true,
+] as FilterSpecification;
 
 function getFilterExpression(
   filters: FilterSpecification[],

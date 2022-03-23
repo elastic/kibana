@@ -72,7 +72,11 @@ function moveMapLayer(
     });
 }
 
-function getBottomMbLayerId(mbLayers: LayerSpecification[], mapLayer: ILayer, layerClass: LAYER_CLASS) {
+function getBottomMbLayerId(
+  mbLayers: LayerSpecification[],
+  mapLayer: ILayer,
+  layerClass: LAYER_CLASS
+) {
   const bottomMbLayer = mbLayers.find((mbLayer) => {
     return doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayer, layerClass);
   });
