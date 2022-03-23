@@ -116,17 +116,14 @@ describe('Timelines', (): void => {
 describe('Create a timeline from a template', () => {
   before(() => {
     cy.intercept('/api/timeline*').as('timeline');
-    login();
     deleteTimelines();
     createTimelineTemplate(getTimeline());
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
   });
   it('Should have the same query and open the timeline modal', () => {
     selectCustomTemplates();
-    cy.wait('@timeline', { timeout: 100000 });
     expandEventAction();
     clickingOnCreateTimelineFormTemplateBtn();
-    cy.wait('@timeline', { timeout: 100000 });
 
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
     cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
