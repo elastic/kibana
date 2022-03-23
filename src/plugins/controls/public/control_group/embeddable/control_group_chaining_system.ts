@@ -8,6 +8,7 @@
 
 import { Filter } from '@kbn/es-query';
 
+import { Subject } from 'rxjs';
 import { ControlEmbeddable } from '../../types';
 import { ChildEmbeddableOrderCache } from './control_group_container';
 import { EmbeddableContainerSettings, isErrorEmbeddable } from '../../../../embeddable/public';
@@ -19,11 +20,19 @@ interface GetPrecedingFiltersProps {
   getChild: (id: string) => ControlEmbeddable;
 }
 
+interface OnChildChangedProps {
+  childOutputChangedId: string;
+  recalculateFilters$: Subject<null>;
+  childOrder: ChildEmbeddableOrderCache;
+  getChild: (id: string) => ControlEmbeddable;
+}
+
 interface ChainingSystem {
   getContainerSettings: (
     initialInput: ControlGroupInput
   ) => EmbeddableContainerSettings | undefined;
   getPrecedingFilters: (props: GetPrecedingFiltersProps) => Filter[] | undefined;
+  onChildChange: (props: OnChildChangedProps) => void;
 }
 
 export const ControlGroupChainingSystems: {
@@ -47,9 +56,25 @@ export const ControlGroupChainingSystems: {
       }
       return filters;
     },
+    onChildChange: ({ childOutputChangedId, childOrder, recalculateFilters$, getChild }) => {
+      if (childOutputChangedId === childOrder.lastChildId) {
+        // the last control's output has updated, recalculate filters
+        recalculateFilters$.next();
+        return;
+      }
+
+      // when output changes on a child which isn't the last - make the next embeddable updateInputFromParent
+      const nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
+      if (nextOrder >= childOrder.idsInOrder.length) return;
+      setTimeout(
+        () => getChild(childOrder.idsInOrder[nextOrder]).refreshInputFromParent(),
+        1 // run on next tick
+      );
+    },
   },
   NONE: {
     getContainerSettings: () => undefined,
     getPrecedingFilters: () => undefined,
+    onChildChange: ({ recalculateFilters$ }) => recalculateFilters$.next(),
   },
 };

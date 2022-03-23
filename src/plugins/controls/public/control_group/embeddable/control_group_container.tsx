@@ -207,20 +207,12 @@ export class ControlGroupContainer extends Container<
         .pipe(anyChildChangePipe)
         .subscribe((childOutputChangedId) => {
           this.recalculateDataViews();
-          if (childOutputChangedId === this.childOrderCache.lastChildId) {
-            // the last control's output has updated, recalculate filters
-            this.recalculateFilters$.next();
-            return;
-          }
-
-          // when output changes on a child which isn't the last - make the next embeddable updateInputFromParent
-          const nextOrder = this.childOrderCache.IdsToOrder[childOutputChangedId] + 1;
-          if (nextOrder >= Object.keys(this.children).length) return;
-          setTimeout(
-            () =>
-              this.getChild(this.childOrderCache.idsInOrder[nextOrder]).refreshInputFromParent(),
-            1 // run on next tick
-          );
+          ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
+            childOutputChangedId,
+            childOrder: this.childOrderCache,
+            getChild: (id) => this.getChild(id),
+            recalculateFilters$: this.recalculateFilters$,
+          });
         })
     );
 
