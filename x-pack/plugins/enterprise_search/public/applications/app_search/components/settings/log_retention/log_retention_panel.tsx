@@ -32,6 +32,7 @@ export const LogRetentionPanel: React.FC = () => {
   const hasILM = logRetention !== null;
   const analyticsLogRetentionSettings = logRetention?.[LogRetentionOptions.Analytics];
   const apiLogRetentionSettings = logRetention?.[LogRetentionOptions.API];
+  const auditLogRetentionSettings = logRetention?.[LogRetentionOptions.Audit];
   const crawlerLogRetentionSettings = logRetention?.[LogRetentionOptions.Crawler];
 
   useEffect(() => {
@@ -126,6 +127,33 @@ export const LogRetentionPanel: React.FC = () => {
           onChange={() => toggleLogRetention(LogRetentionOptions.Crawler)}
           disabled={isLogRetentionUpdating}
           data-test-subj="LogRetentionPanelCrawlerSwitch"
+        />
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <EuiSwitch
+          label={
+            <>
+              <strong>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.audit.label',
+                  {
+                    defaultMessage: 'Log audit events',
+                  }
+                )}
+              </strong>
+              {': '}
+              {hasILM && (
+                <EuiTextColor color="subdued">
+                  <LogRetentionMessage type={LogRetentionOptions.Audit} />
+                </EuiTextColor>
+              )}
+            </>
+          }
+          checked={!!auditLogRetentionSettings?.enabled}
+          onChange={() => toggleLogRetention(LogRetentionOptions.Audit)}
+          disabled={isLogRetentionUpdating}
+          data-test-subj="LogRetentionPanelAuditSwitch"
         />
       </EuiText>
       <EuiSpacer size="l" />

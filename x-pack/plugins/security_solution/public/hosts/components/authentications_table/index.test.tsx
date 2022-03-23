@@ -45,6 +45,7 @@ describe('Authentication Table Component', () => {
             isInspect={false}
             loading={false}
             loadPage={loadPage}
+            setQuerySkip={jest.fn()}
             showMorePagesIndicator={getOr(
               false,
               'showMorePagesIndicator',

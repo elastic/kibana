@@ -82,6 +82,12 @@ export const esRawResponse: EsRawResponseExpressionTypeDefinition = {
         meta: {
           type: 'esdsl',
           source: '*',
+          statistics: {
+            totalCount:
+              typeof context.body.hits.total === 'number'
+                ? context.body.hits.total
+                : context.body.hits.total?.value,
+          },
         },
         columns,
         rows,
