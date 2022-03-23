@@ -71,6 +71,18 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     });
   }
 
+  if (isInternalAlertsTableEnabled) {
+    tabs.push({
+      id: 'alerts',
+      name: (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.home.rulesTabTitle"
+          defaultMessage="Alerts (Internal use only)"
+        />
+      ),
+    });
+  }
+
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
   };

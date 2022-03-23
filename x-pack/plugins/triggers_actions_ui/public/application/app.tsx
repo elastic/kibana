@@ -59,7 +59,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { savedObjects, uiSettings, theme$ } = deps;
-  const sections: Section[] = ['rules', 'connectors', '_internal'];
+  const sections: Section[] = ['rules', 'connectors', 'alerts'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');

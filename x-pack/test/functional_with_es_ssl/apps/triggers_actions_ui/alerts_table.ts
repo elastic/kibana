@@ -24,10 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load the table', async () => {
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'triggersActions',
-        '/_internal/alerts'
-      );
+      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
       const headingText = await PageObjects.triggersActionsUI.getSectionHeadingText();
       expect(headingText).to.be('Rules and Connectors');
 
@@ -64,10 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should sort properly', async () => {
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'triggersActions',
-        '/_internal/alerts'
-      );
+      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
       const headingText = await PageObjects.triggersActionsUI.getSectionHeadingText();
       expect(headingText).to.be('Rules and Connectors');
 
@@ -113,10 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should paginate properly', async () => {
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'triggersActions',
-        '/_internal/alerts'
-      );
+      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
       const headingText = await PageObjects.triggersActionsUI.getSectionHeadingText();
       expect(headingText).to.be('Rules and Connectors');
 
