@@ -21,16 +21,17 @@ import { DOCUMENTS_TITLE } from './constants';
 import { SearchExperience } from './search_experience';
 
 export const Documents: React.FC = () => {
-  const { isMetaEngine, hasNoDocuments } = useValues(EngineLogic);
+  const { isMetaEngine, isElasticsearchEngine, hasNoDocuments } = useValues(EngineLogic);
   const { myRole } = useValues(AppLogic);
+  const showDocumentCreationButton =
+    myRole.canManageEngineDocuments && !isMetaEngine && !isElasticsearchEngine;
 
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([DOCUMENTS_TITLE])}
       pageHeader={{
         pageTitle: DOCUMENTS_TITLE,
-        rightSideItems:
-          myRole.canManageEngineDocuments && !isMetaEngine ? [<DocumentCreationButton />] : [],
+        rightSideItems: showDocumentCreationButton ? [<DocumentCreationButton />] : [],
       }}
       isEmptyState={hasNoDocuments}
       emptyState={<EmptyState />}

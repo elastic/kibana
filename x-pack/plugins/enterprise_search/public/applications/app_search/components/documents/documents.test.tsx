@@ -66,6 +66,17 @@ describe('Documents', () => {
       const wrapper = shallow(<Documents />);
       expect(getPageHeaderActions(wrapper).find(DocumentCreationButton).exists()).toBe(false);
     });
+
+    it('does not render a DocumentCreationButton for elasticsearch engines even if the user can manage engine documents', () => {
+      setMockValues({
+        ...values,
+        myRole: { canManageEngineDocuments: true },
+        isElasticsearchEngine: true,
+      });
+
+      const wrapper = shallow(<Documents />);
+      expect(getPageHeaderActions(wrapper).find(DocumentCreationButton).exists()).toBe(false);
+    });
   });
 
   describe('Meta Engines', () => {
