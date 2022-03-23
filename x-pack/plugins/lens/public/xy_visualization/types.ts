@@ -27,6 +27,7 @@ import type {
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
+  EndValue,
 } from '../../common/expressions';
 import type { ValueLabelConfig } from '../../common/types';
 
@@ -36,6 +37,8 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
+  emphasizeFitting?: boolean;
+  endValue?: EndValue;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];
