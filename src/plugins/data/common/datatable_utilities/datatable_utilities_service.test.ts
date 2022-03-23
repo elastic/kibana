@@ -8,7 +8,7 @@
 
 import { createStubDataView } from 'src/plugins/data_views/common/mocks';
 import type { DataViewsContract } from 'src/plugins/data_views/common';
-import type { DatatableColumn } from 'src/plugins/expressions/common';
+import type { Datatable, DatatableColumn } from 'src/plugins/expressions/common';
 import { FieldFormat } from 'src/plugins/field_formats/common';
 import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
 import type { AggsCommonStart } from '../search';
@@ -103,6 +103,16 @@ describe('DatatableUtilitiesService', () => {
       } as unknown as DatatableColumn;
 
       expect(datatableUtilitiesService.getInterval(column)).toBe('1d');
+    });
+  });
+
+  describe('getTotalCount', () => {
+    it('should return a total hits count', () => {
+      const table = {
+        meta: { statistics: { totalCount: 100 } },
+      } as unknown as Datatable;
+
+      expect(datatableUtilitiesService.getTotalCount(table)).toBe(100);
     });
   });
 

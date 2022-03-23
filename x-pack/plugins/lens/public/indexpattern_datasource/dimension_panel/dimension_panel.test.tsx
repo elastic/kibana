@@ -602,7 +602,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             col1: expect.objectContaining({
               operationType: 'min',
               sourceField: 'bytes',
-              params: { format: { id: 'bytes' } },
+              params: { format: { id: 'bytes' }, emptyAsNull: true },
               // Other parts of this don't matter for this test
             }),
           },

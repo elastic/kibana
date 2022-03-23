@@ -191,6 +191,10 @@ export function ServiceInventory() {
             isLoading={isLoading}
             isFailure={isFailure}
             items={items}
+            comparisonDataLoading={
+              comparisonFetch.status === FETCH_STATUS.LOADING ||
+              comparisonFetch.status === FETCH_STATUS.NOT_INITIATED
+            }
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
           />
