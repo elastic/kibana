@@ -78,7 +78,7 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
-  sizes: sizesSchema,
+  output_size: sizesSchema,
   app: appCountsSchema,
 };
 

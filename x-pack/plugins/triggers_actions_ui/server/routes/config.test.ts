@@ -13,7 +13,7 @@ describe('createConfigRoute', () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
     createConfigRoute(logger, router, `/api/triggers_actions_ui`, {
-      minimumScheduleInterval: '1m',
+      minimumScheduleInterval: { value: '1m', enforce: false },
     });
 
     const [config, handler] = router.get.mock.calls[0];
@@ -24,7 +24,7 @@ describe('createConfigRoute', () => {
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
-      body: { minimumScheduleInterval: '1m' },
+      body: { minimumScheduleInterval: { value: '1m', enforce: false } },
     });
   });
 });
