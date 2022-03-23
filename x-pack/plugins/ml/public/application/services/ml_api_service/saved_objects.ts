@@ -15,7 +15,7 @@ import { HttpService } from '../http_service';
 import { basePath } from './index';
 import type {
   JobType,
-  TrainedModelType,
+  MlSavedObjectType,
   CanDeleteMLSpaceAwareItemsResponse,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
@@ -45,8 +45,8 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
-  removeItemFromCurrentSpace(jobType: JobType | TrainedModelType, ids: string[]) {
-    const body = JSON.stringify({ jobType, ids });
+  removeItemFromCurrentSpace(mlSavedObjectType: MlSavedObjectType, ids: string[]) {
+    const body = JSON.stringify({ mlSavedObjectType, ids });
     return httpService.http<SavedObjectResult>({
       path: `${basePath()}/saved_objects/remove_item_from_current_space`,
       method: 'POST',
@@ -67,18 +67,18 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       query: { simulate },
     });
   },
-  syncCheck(jobType?: JobType | TrainedModelType) {
-    const body = JSON.stringify({ jobType });
+  syncCheck(mlSavedObjectType?: MlSavedObjectType) {
+    const body = JSON.stringify({ mlSavedObjectType });
     return httpService.http<SyncCheckResponse>({
       path: `${basePath()}/saved_objects/sync_check`,
       method: 'POST',
       body,
     });
   },
-  canDeleteMLSpaceAwareItems(jobType: JobType | TrainedModelType, ids: string[]) {
+  canDeleteMLSpaceAwareItems(mlSavedObjectType: MlSavedObjectType, ids: string[]) {
     const body = JSON.stringify({ ids });
     return httpService.http<CanDeleteMLSpaceAwareItemsResponse>({
-      path: `${basePath()}/saved_objects/can_delete_ml_space_aware_item/${jobType}`,
+      path: `${basePath()}/saved_objects/can_delete_ml_space_aware_item/${mlSavedObjectType}`,
       method: 'POST',
       body,
     });

@@ -19,15 +19,17 @@ export interface BaseIndexPatternColumn extends Operation {
   timeShift?: string;
 }
 
+export interface FormatParams {
+  id: string;
+  params?: {
+    decimals: number;
+  };
+}
+
 // Formatting can optionally be added to any column
 export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
   params?: {
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
+    format?: FormatParams;
   };
 }
 
