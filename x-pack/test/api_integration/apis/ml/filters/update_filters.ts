@@ -31,8 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/127678
-  describe.skip('update_filters', function () {
+  describe('update_filters', function () {
     const updateFilterRequestBody = {
       description: 'Updated filter #1',
       removeItems: items,

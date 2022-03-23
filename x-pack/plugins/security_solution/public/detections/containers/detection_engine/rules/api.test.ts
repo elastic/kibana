@@ -12,9 +12,6 @@ import {
   patchRule,
   fetchRules,
   fetchRuleById,
-  enableRules,
-  deleteRules,
-  duplicateRules,
   createPrepackagedRules,
   importRules,
   exportRules,
@@ -392,86 +389,6 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const ruleResp = await fetchRuleById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
       expect(ruleResp).toEqual(getRulesSchemaMock());
-    });
-  });
-
-  describe('enableRules', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(rulesMock);
-    });
-
-    test('check parameter url, body when enabling rules', async () => {
-      await enableRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'], enabled: true });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_update', {
-        body: '[{"id":"mySuperRuleId","enabled":true},{"id":"mySuperRuleId_II","enabled":true}]',
-        method: 'PATCH',
-      });
-    });
-    test('check parameter url, body when disabling rules', async () => {
-      await enableRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'], enabled: false });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_update', {
-        body: '[{"id":"mySuperRuleId","enabled":false},{"id":"mySuperRuleId_II","enabled":false}]',
-        method: 'PATCH',
-      });
-    });
-    test('happy path', async () => {
-      const ruleResp = await enableRules({
-        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
-        enabled: true,
-      });
-      expect(ruleResp).toEqual(rulesMock);
-    });
-  });
-
-  describe('deleteRules', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(rulesMock);
-    });
-
-    test('check parameter url, body when deleting rules', async () => {
-      await deleteRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'] });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_delete', {
-        body: '[{"id":"mySuperRuleId"},{"id":"mySuperRuleId_II"}]',
-        method: 'POST',
-      });
-    });
-
-    test('happy path', async () => {
-      const ruleResp = await deleteRules({
-        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
-      });
-      expect(ruleResp).toEqual(rulesMock);
-    });
-  });
-
-  describe('duplicateRules', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(rulesMock);
-    });
-
-    test('check parameter url, body when duplicating rules', async () => {
-      await duplicateRules({ rules: rulesMock.data });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_create', {
-        body: '[{"actions":[],"author":[],"description":"Elastic Endpoint detected Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":73,"risk_score_mapping":[],"name":"Credential Dumping - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection","filters":[],"references":[],"severity":"high","severity_mapping":[],"tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1},{"actions":[],"author":[],"description":"Elastic Endpoint detected an Adversary Behavior. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":47,"risk_score_mapping":[],"name":"Adversary Behavior - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:rules_engine_event","filters":[],"references":[],"severity":"medium","severity_mapping":[],"tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1}]',
-        method: 'POST',
-      });
-    });
-
-    test('check duplicated rules are disabled by default', async () => {
-      await duplicateRules({ rules: rulesMock.data.map((rule) => ({ ...rule, enabled: true })) });
-      expect(fetchMock).toHaveBeenCalledTimes(1);
-      const [path, options] = fetchMock.mock.calls[0];
-      expect(path).toBe('/api/detection_engine/rules/_bulk_create');
-      const rules = JSON.parse(options.body);
-      expect(rules).toMatchObject([{ enabled: false }, { enabled: false }]);
-    });
-
-    test('happy path', async () => {
-      const ruleResp = await duplicateRules({ rules: rulesMock.data });
-      expect(ruleResp).toEqual(rulesMock);
     });
   });
 

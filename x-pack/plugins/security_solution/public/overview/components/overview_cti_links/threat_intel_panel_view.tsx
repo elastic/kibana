@@ -25,7 +25,7 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     render: shortenCountIntoString,
     sortable: true,
     truncateText: true,
-    width: '20%',
+    width: '70px',
     align: 'right',
   },
   {

@@ -7,6 +7,7 @@
 
 export * from './axis_config';
 export * from './fitting_function';
+export * from './end_value';
 export * from './grid_lines_config';
 export * from './layer_config';
 export * from './legend_config';
