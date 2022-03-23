@@ -58,7 +58,7 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.tooltip',
       {
         defaultMessage:
-          'Session data enables Session View which is a tool for introspecting process activity and understanding user and service behavior in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.',
+          'Capture the extended process event data required for Session View. Session View helps you investigate process, user, and service activity on your Linux infrastructure by showing you time-ordered series of process executions, organized in a tree according to the Linux process model. NOTE: Capturing extended process events substantially increases data usage.',
       }
     ),
     beta: true,

@@ -15,6 +15,8 @@ import {
   EuiSwitch,
   EuiIconTip,
   EuiBetaBadge,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { PolicyOperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
@@ -114,19 +116,30 @@ export const EventsForm = <T extends OperatingSystem>({
     {supplementalOptions &&
       supplementalOptions.map(({ name, protectionField, tooltipText, beta }) => {
         return (
-          <>
-            <EuiSpacer size="s" />
-            <EuiSwitch
-              key={String(protectionField)}
-              id={htmlIdGenerator()()}
-              label={name}
-              data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
-              checked={selection[protectionField]}
-              onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-            />
-            {tooltipText && <EuiIconTip position="right" content={tooltipText} />}
-            {beta && <EuiBetaBadge label="beta" size="s" />}
-          </>
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                key={String(protectionField)}
+                id={htmlIdGenerator()()}
+                label={name}
+                data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
+                checked={selection[protectionField]}
+                onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+              />
+            </EuiFlexItem>
+            {tooltipText && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip position="right" content={tooltipText} />
+              </EuiFlexItem>
+            )}
+            {beta && (
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="s" />
+                <EuiBetaBadge label="beta" size="s" />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         );
       })}
   </ConfigForm>
