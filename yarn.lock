@@ -12786,10 +12786,10 @@ ejs@^3.1.6:
   dependencies:
     jake "^10.6.1"
 
-elastic-apm-http-client@11.0.0:
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.0.tgz#a38a85eae078e3f7f09edda86db6d6419a8ecfea"
-  integrity sha512-HB6+O0C4GGj9k5bd6yL3QK5prGKh+Rf8Tc5iW0T7FCdh2HliICfGmB6wmdQ2XkClblLtISh7tKYgVr9YgdXl3Q==
+elastic-apm-http-client@11.0.1:
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.1.tgz#15dbe99d56d62b3f732d1bd2b51bef6094b78801"
+  integrity sha512-5AOWlhs2WlZpI+DfgGqY/8Rk7KF8WeevaO8R961eBylavU6GWhLRNiJncohn5jsvrqhmeT19azBvy/oYRN7bJw==
   dependencies:
     agentkeepalive "^4.2.1"
     breadth-filter "^2.0.0"
@@ -12802,10 +12802,9 @@ elastic-apm-http-client@11.0.0:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.30.0:
+"elastic-apm-node@https://github.com/elastic/apm-agent-nodejs.git#19e3ae30077337a6660328b578360b8ecec0fc79":
   version "3.30.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.30.0.tgz#4df7110324535089f66f7a3a96bf37d2fe47f38b"
-  integrity sha512-KumRBDGIE+MGgJfteAi9BDqeGxpAYpbovWjNdB5x8T3/zpnQRJkDMSblliEsMwD6uKf2+Nkxzmyq9UZdh5MbGQ==
+  resolved "https://github.com/elastic/apm-agent-nodejs.git#19e3ae30077337a6660328b578360b8ecec0fc79"
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -12814,7 +12813,7 @@ elastic-apm-node@^3.30.0:
     basic-auth "^2.0.1"
     cookie "^0.4.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "11.0.0"
+    elastic-apm-http-client "11.0.1"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
