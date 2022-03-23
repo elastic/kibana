@@ -77,7 +77,6 @@ import {
   deleteRuleFromDetailsPage,
   deleteSelectedRules,
   editFirstRule,
-  filterByCustomRules,
   goToRuleDetails,
   selectNumberOfRules,
   waitForRulesTableToBeRefreshed,
@@ -98,7 +97,7 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
-import { saveEditedRule, waitForKibana } from '../../tasks/edit_rule';
+import { saveEditedRule } from '../../tasks/edit_rule';
 import { login, visit } from '../../tasks/login';
 import { enablesRule, getDetails } from '../../tasks/rule_details';
 
@@ -152,10 +151,6 @@ describe('Custom query rules', () => {
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
       cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
-
-      filterByCustomRules();
-
-      cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', 1);
       cy.get(RULE_NAME).should('have.text', this.rule.name);
       cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
       cy.get(SEVERITY).should('have.text', this.rule.severity);
@@ -306,9 +301,11 @@ describe('Custom query rules', () => {
           ? getEditedRule().index
           : getIndexPatterns();
 
-      beforeEach(() => {
+      before(() => {
         deleteAlertsAndRules();
         createCustomRuleEnabled(getExistingRule(), 'rule1');
+      });
+      beforeEach(() => {
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
@@ -329,7 +326,6 @@ describe('Custom query rules', () => {
 
       it('Allows a rule to be edited', () => {
         editFirstRule();
-        waitForKibana();
 
         // expect define step to populate
         cy.get(CUSTOM_QUERY_INPUT).should('have.value', getExistingRule().customQuery);

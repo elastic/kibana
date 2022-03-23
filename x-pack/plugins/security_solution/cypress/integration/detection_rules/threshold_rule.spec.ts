@@ -53,7 +53,6 @@ import {
 import { getDetails } from '../../tasks/rule_details';
 import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
-  filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
@@ -111,11 +110,6 @@ describe('Detection rules, threshold', () => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
 
-    filterByCustomRules();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-    });
     cy.get(RULE_NAME).should('have.text', rule.name);
     cy.get(RISK_SCORE).should('have.text', rule.riskScore);
     cy.get(SEVERITY).should('have.text', rule.severity);

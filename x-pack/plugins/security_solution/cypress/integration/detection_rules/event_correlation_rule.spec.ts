@@ -43,7 +43,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { filterByCustomRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
@@ -100,11 +100,6 @@ describe('EQL rules', () => {
         cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
       });
 
-      filterByCustomRules();
-
-      cy.get(RULES_TABLE).then(($table) => {
-        cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-      });
       cy.get(RULE_NAME).should('have.text', this.rule.name);
       cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
       cy.get(SEVERITY).should('have.text', this.rule.severity);
@@ -196,7 +191,6 @@ describe('EQL rules', () => {
         cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
       });
 
-      filterByCustomRules();
       goToRuleDetails();
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

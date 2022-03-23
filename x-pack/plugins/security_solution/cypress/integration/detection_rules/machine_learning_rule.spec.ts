@@ -40,7 +40,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { filterByCustomRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -79,11 +79,6 @@ describe('Detection rules, machine learning', () => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
 
-    filterByCustomRules();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-    });
     cy.get(RULE_NAME).should('have.text', getMachineLearningRule().name);
     cy.get(RISK_SCORE).should('have.text', getMachineLearningRule().riskScore);
     cy.get(SEVERITY).should('have.text', getMachineLearningRule().severity);

@@ -60,7 +60,6 @@ import {
   duplicateFirstRule,
   duplicateSelectedRules,
   duplicateRuleFromMenu,
-  filterByCustomRules,
   goToRuleDetails,
   selectNumberOfRules,
   checkDuplicatedRule,
@@ -432,11 +431,6 @@ describe('indicator match', () => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
         });
 
-        filterByCustomRules();
-
-        cy.get(RULES_TABLE).then(($table) => {
-          cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-        });
         cy.get(RULE_NAME).should('have.text', getNewThreatIndicatorRule().name);
         cy.get(RISK_SCORE).should('have.text', getNewThreatIndicatorRule().riskScore);
         cy.get(SEVERITY).should('have.text', getNewThreatIndicatorRule().severity);
