@@ -24,6 +24,7 @@ describe('ObservabilityStatusBoxes', () => {
         learnMoreLink: 'http://example.com',
         goToAppTitle: 'go to app title',
         goToAppLink: 'go to app link',
+        weight: 2,
       },
       {
         id: 'metrics',
@@ -36,6 +37,7 @@ describe('ObservabilityStatusBoxes', () => {
         learnMoreLink: 'http://example.com',
         goToAppTitle: 'go to app title',
         goToAppLink: 'go to app link',
+        weight: 1,
       },
     ];
 
@@ -47,5 +49,46 @@ describe('ObservabilityStatusBoxes', () => {
 
     expect(screen.getByText('Logs')).toBeInTheDocument();
     expect(screen.getByText('Metrics')).toBeInTheDocument();
+  });
+
+  it('should render elements by order', () => {
+    const boxes = [
+      {
+        id: 'logs',
+        title: 'Logs',
+        hasData: true,
+        description: 'This is the description for logs',
+        modules: [],
+        addTitle: 'logs add title',
+        addLink: 'http://example.com',
+        learnMoreLink: 'http://example.com',
+        goToAppTitle: 'go to app title',
+        goToAppLink: 'go to app link',
+        weight: 2,
+      },
+      {
+        id: 'metrics',
+        title: 'Metrics',
+        hasData: true,
+        description: 'This is the description for metrics',
+        modules: [],
+        addTitle: 'metrics add title',
+        addLink: 'http://example.com',
+        learnMoreLink: 'http://example.com',
+        goToAppTitle: 'go to app title',
+        goToAppLink: 'go to app link',
+        weight: 1,
+      },
+    ];
+
+    render(
+      <I18nProvider>
+        <ObservabilityStatusBoxes boxes={boxes} />
+      </I18nProvider>
+    );
+
+    const content = screen.getAllByTestId(/box-*/);
+    expect(content[0]).toHaveTextContent('Metrics');
+    expect(content[1]).toHaveTextContent('Logs');
   });
 });

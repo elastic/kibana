@@ -129,4 +129,22 @@ describe('useQueryAlerts', () => {
       });
     });
   });
+
+  test('skip', async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+    await act(async () => {
+      const localProps = { query: mockAlertsQuery, indexName, skip: false };
+      const { rerender, waitForNextUpdate } = renderHook<
+        [object, string],
+        ReturnQueryAlerts<unknown, unknown>
+      >(() => useQueryAlerts<unknown, unknown>(localProps));
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      localProps.skip = true;
+      act(() => rerender());
+      act(() => rerender());
+      expect(abortSpy).toHaveBeenCalledTimes(2);
+    });
+  });
 });

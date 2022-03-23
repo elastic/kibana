@@ -39,7 +39,8 @@
     "lists",
     "home",
     "telemetry",
-    "dataViewFieldEditor"
+    "dataViewFieldEditor",
+    "osquery"
   ],
   "server": true,
   "ui": true,
